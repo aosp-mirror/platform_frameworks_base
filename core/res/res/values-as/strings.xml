@@ -191,8 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"প্ৰশাসকে ডিভাইচটো ব্যক্তিগত ব্যৱহাৰৰ বাবে বাজেয়প্ত কৰিছে"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"পৰিচালিত ডিভাইচ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"আপোনাৰ প্ৰতিষ্ঠানটোৱে এই ডিভাইচটো পৰিচালনা কৰে আৰু ই নেটৱৰ্কৰ ট্ৰেফিক পৰ্যবেক্ষণ কৰিব পাৰে। সবিশেষ জানিবলৈ টিপক।"</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"আপোনাৰ প্ৰশাসকে অৱস্থানৰ ছেটিংসমূহ সলনি কৰিছে"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"আপোনাৰ অৱস্থানৰ ছেটিংসমূহ চাবলৈ টিপক।"</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"দেশ চিনাক্তকাৰী"</string>
     <string name="location_service" msgid="2439187616018455546">"অৱস্থান সেৱা"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"ছেন্সৰ জাননী সেৱা"</string>
@@ -447,8 +449,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"কোনো এপ্লিকেশ্বন অথবা সেৱাক কেমেৰা ডিভাইচসমূহ খোলা অথবা বন্ধ কৰাৰ বিষয়ে কলবেকসমূহ গ্ৰহণ কৰিবলৈ অনুমতি দিয়ক।"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"যিকোনো কেমেৰা ডিভাইচ খুলি থকা অথবা বন্ধ কৰি থকাৰ সময়ত (কোনো এপ্লিকেশ্বনৰ দ্বাৰা) এই এপ্‌টোৱে কলবেক গ্ৰহণ কৰিব পাৰে।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"কম্পন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ভাইব্ৰেটৰ নিয়ন্ত্ৰণ কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"এপ্‌টোক কম্পন স্থিতিটো এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
@@ -803,7 +804,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"অন্যান্য"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"নিজৰ উপযোগিতা অনুযায়ী"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"নিজৰ উপযোগিতা অনুযায়ী"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"সহায়ক"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ভাতৃ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"শিশু"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"সংগী"</string>
@@ -2073,33 +2074,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"কৰ্মস্থান"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ব্যক্তিগত ভিউ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"কৰ্মস্থানৰ ভিউ"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"কৰ্মস্থানৰ এপ্‌সমূহৰ সৈতে এইটো শ্বেয়াৰ কৰিব নোৱাৰি"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"আপোনাৰ আইটি প্ৰশাসকে আপোনাক আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলত থকা এপ্‌সমূহৰ সৈতে এই সমলটো শ্বেয়াৰ কৰিবলৈ নিদিয়ে"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"কৰ্মস্থানৰ এপ্‌সমূহৰ জৰিয়তে এইটো খুলিব কৰিব নোৱাৰি"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"আপোনাৰ আইটি প্ৰশাসকে আপোনাক আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলত থকা এপ্‌সমূহৰ জৰিয়তে এই সমলটো খুলিবলৈ নিদিয়ে"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ব্যক্তিগত এপ্‌সমূহৰ সৈতে এইটো শ্বেয়াৰ কৰিব নোৱাৰি"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"আপোনাৰ আইটি প্ৰশাসকে আপোনাক আপোনাৰ ব্যক্তিগত প্ৰ\'ফাইলত থকা এপ্‌সমূহৰ সৈতে এই সমলটো শ্বেয়াৰ কৰিবলৈ নিদিয়ে"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"ব্যক্তিগত এপ্‌সমূহৰ জৰিয়তে এইটো খুলিব কৰিব নোৱাৰি"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"আপোনাৰ আইটি প্ৰশাসকে আপোনাক আপোনাৰ ব্যক্তিগত প্ৰ\'ফাইলত থকা এপ্‌সমূহৰ জৰিয়তে এই সমলটো খুলিবলৈ নিদিয়ে"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"কৰ্মস্থানৰ প্ৰ\'ফাইলটো পজ কৰা আছে"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"অন কৰক"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"কোনো কর্মস্থানৰ এপে এই সমলটো সমর্থন কৰিব নোৱাৰে"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"কোনো কর্মস্থানৰ এপে এই সমলটো খুলিব নোৱাৰে"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"কোনো ব্যক্তিগত এপে এই সমলটো সমর্থন কৰিব নোৱাৰে"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"কোনো ব্যক্তিগত এপে এই সমলটো খুলিব নোৱাৰে"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"টেলিফ’নী কলসমূহত অডিঅ’ ৰেকৰ্ড অথবা প্লে’ কৰক"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ডিফ’ল্ট ডায়েলাৰ এপ্লিকেশ্বন হিচাপে আবণ্টন কৰিলে, এই এপ্‌টোক টেলিফ’নী কলসমূহত অডিঅ’ ৰেকৰ্ড অথবা প্লে’ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

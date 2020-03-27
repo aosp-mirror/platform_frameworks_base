@@ -191,8 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਨਿੱਜੀ ਵਰਤੋਂ ਲਈ ਡੀਵਾਈਸ ਤਿਆਗਿਆ"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ ਅਧੀਨ ਹੈ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡਾ ਸੰਗਠਨ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਟਿਕਾਣਾ ਸੈਟਿੰਗਾਂ ਨੂੰ ਬਦਲ ਦਿੱਤਾ ਹੈ"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"ਆਪਣੀਆਂ ਟਿਕਾਣਾ ਸੈਟਿੰਗਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"ਦੇਸ਼ ਦਾ ਪਤਾ ਲਗਾਉਣ ਦੀ ਸੁਵਿਧਾ"</string>
     <string name="location_service" msgid="2439187616018455546">"ਟਿਕਾਣਾ ਸੇਵਾ"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"ਸੈਂਸਰ ਸੂਚਨਾ ਸੇਵਾ"</string>
@@ -2072,33 +2074,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"ਕੰਮ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ਵਿਅਕਤੀਗਤ ਦ੍ਰਿਸ਼"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ਕਾਰਜ ਦ੍ਰਿਸ਼"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"ਇਹ ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਨਾਲ ਸਾਂਝਾ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"ਤੁਹਾਡਾ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਤੁਹਾਨੂੰ ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ ਐਪਾਂ ਨਾਲ ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦਾ"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਨਾਲ ਇਸ ਨੂੰ ਖੋਲ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"ਤੁਹਾਡਾ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਤੁਹਾਨੂੰ ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ ਐਪਾਂ ਨਾਲ ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਖੋਲ੍ਹਣ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦਾ"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ਇਸ ਨੂੰ ਨਿੱਜੀ ਐਪਾਂ ਨਾਲ ਸਾਂਝਾ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"ਤੁਹਾਡਾ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਤੁਹਾਨੂੰ ਤੁਹਾਡੀ ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ ਐਪਾਂ ਨਾਲ ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦਾ"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"ਨਿੱਜੀ ਐਪਾਂ ਨਾਲ ਇਸ ਨੂੰ ਖੋਲ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"ਤੁਹਾਡਾ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਤੁਹਾਨੂੰ ਤੁਹਾਡੀ ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ ਐਪਾਂ ਨਾਲ ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਖੋਲ੍ਹਣ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦਾ"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਰੋਕਿਆ ਗਿਆ ਹੈ"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ਚਾਲੂ ਕਰੋ"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"ਕੋਈ ਕੰਮ ਸੰਬੰਧੀ ਐਪ ਇਸ ਸਮੱਗਰੀ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰ ਸਕਦੀ"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ਕੋਈ ਕੰਮ ਸੰਬੰਧੀ ਐਪ ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਨਹੀਂ ਖੋਲ੍ਹ ਸਕਦੀ"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"ਕੋਈ ਨਿੱਜੀ ਐਪ ਇਸ ਸਮੱਗਰੀ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰ ਸਕਦੀ"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"ਕੋਈ ਨਿੱਜੀ ਐਪ ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਨਹੀਂ ਖੋਲ੍ਹ ਸਕਦੀ"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ਟੈਲੀਫ਼ੋਨੀ ਕਾਲਾਂ ਵਿੱਚ ਰਿਕਾਰਡ ਕਰੋ ਜਾਂ ਆਡੀਓ ਚਲਾਓ"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ਇਹ ਇਸ ਐਪ ਨੂੰ, ਪੂਰਵ-ਨਿਰਧਾਰਤ ਡਾਇਲਰ ਐਪਲੀਕੇਸ਼ਨ ਵਜੋਂ ਜਿੰਮੇ ਲਾਏ ਜਾਣ \'ਤੇ, ਟੈਲੀਫ਼ੋਨੀ ਕਾਲਾਂ ਵਿੱਚ ਰਿਕਾਰਡ ਕਰਨ ਜਾਂ ਆਡੀਓ ਚਲਾਉਣ ਦਿੰਦਾ ਹੈ।"</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

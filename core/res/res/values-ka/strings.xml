@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ადმინისტრატორმა გაათავისუფლა მოწყობილობა პირადი გამოყენებისთვის"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"მოწყობილობა მართულია"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ამ მოწყობილობას თქვენი ორგანიზაცია მართავს და მას ქსელის ტრაფიკის მონიტორინგი შეუძლია. შეეხეთ დამატებითი დეტალებისთვის."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"მდებარეობის პარამეტრები თქვენმა ადმინისტრატორმა შეცვალა"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"შეეხეთ თქვენი მდებარეობის პარამეტრების სანახავად."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"აპებს შეუძლია თქვენს მდებარეობაზე წვდომა"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"მეტის შესატყობად დაუკავშირდით თქვენს IT ადმინისტრატორს"</string>
     <string name="country_detector" msgid="7023275114706088854">"ქვეყნის დეტექტორი"</string>
     <string name="location_service" msgid="2439187616018455546">"მდებარეობის სერვისი"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"სენსორის შეტყობინების სერვისი"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"თქვენი მოწყობილობა წაიშლება"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"ადმინისტრატორის აპის გამოყენება ვერ მოხერხდება. თქვენი მოწყობილობა ახლა ამოიშლება.\n\nთუ შეკითხვები გაქვთ, დაუკავშირდით თქვენი ორგანიზაციის ადმინისტრატორს."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ბეჭდვა გათიშულია <xliff:g id="OWNER_APP">%s</xliff:g>-ის მიერ."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"განბლოკეთ თქვენი პირადი აპები"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"აპები ხვალ დაიბლოკება"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"თქვენი IT ადმინისტრატორი არ აძლევს უფლებას თქვენს სამსახურის პროფილს, დაპაუზებული იყოს <xliff:g id="DAYS">%1$d</xliff:g> დღეზე ხანგრძლივად."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"სამსახურის პროფილის ჩართვა"</string>
     <string name="me" msgid="6207584824693813140">"მე"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ტაბლეტის პარამეტრები"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ვარიანტები"</string>
@@ -241,10 +237,8 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"ტელეფონის პარამეტრები"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"ეკრანის დაბლოკვა"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"გამორთვ."</string>
-    <!-- no translation found for global_action_power_options (1185286119330160073) -->
-    <skip />
-    <!-- no translation found for global_action_restart (4678451019561687074) -->
-    <skip />
+    <string name="global_action_power_options" msgid="1185286119330160073">"ძალა"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"გადატვირთვა"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"საგანგებო სამსახურები"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ხარვეზის შესახებ ანგარიში"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"სესიის დასრულება"</string>
@@ -444,11 +438,9 @@
     <string name="permlab_camera" msgid="6320282492904119413">"სურათებისა და ვიდეოების გადაღება"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ამ აპს ნებისმიერ დროს შეუძლია კამერით სურათების გადაღება და ვიდეოების ჩაწერა."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ნება დაერთოს აპლიკაციას ან სერვისს, ჰქონდეს წვდომა სისტემის კამერებზე სურათების და ვიდეოების გადასაღებად"</string>
-    <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
-    <skip />
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"ამ პრივილეგირებულ ან სისტემის აპს შეუძლია ფოტოების გადაღება და ვიდეოების ჩაწერა ნებისმიერ დროს სისტემის კამერის გამოყენებით. საჭიროა, რომ აპს ჰქოდეს android.permission.CAMERA ნებართვაც"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ნება დაერთოს აპლიკაციას ან სერვისს, მიიღოს გადმორეკვები კამერის მოწყობილობის გახსნის ან დახურვისას."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ამ აპს შეუძლია მიიღოს გადმორეკვები, როდესაც რომელიმე კამერის მოწყობილობა იხსნება (რომელიმე აპლიკაციით) ან იხურება."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ვიბრაციის კონტროლი"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"აპს შეეძლება, მართოს ვიბრირება."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ნებას რთავს აპს, ჰქონდეს წვდომა ვიბრაციის მდგომარეობაზე."</string>
@@ -1624,24 +1616,15 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"გსურთ ხმის რეკომენდებულ დონეზე მაღლა აწევა?\n\nხანგრძლივად ხმამაღლა მოსმენით შესაძლოა სმენადობა დაიზიანოთ."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"გსურთ მარტივი წვდომის მალსახმობის გამოყენება?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"თუ მალსახმობი ჩართულია, ხმის ორივე ღილაკზე 3 წამის განმავლობაში დაჭერით მარტივი წვდომის ფუნქცია ჩაირთვება."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (8417489297036013065) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning (3740723309483706911) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (6935581470716541531) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning_title (3410100187167382427) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning (8412954203626349109) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (2819109500943271385) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning (6363127705112844257) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_on (5463618449556111344) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"გსურთ, ჩართოთ მარტივი წვდომის ფუნქციები?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ხმის ორივე ღილაკზე ხანგრძლივად დაჭერა რამდენიმე წამის განმავლობაში ჩართავს მარტივი წვდომის ფუნქციებს. ამ ქმედებამ შეიძლება შეცვალოს თქვენი მოწყობილობის მუშაობის პრინციპი.\n\nამჟამინდელი ფუნქციები:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nარჩეული ფუნქციების შეცვლა შესაძლებელია აქ: პარამეტრები &gt; მარტივი წვდომა."</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"ჩაირთოს TalkBack?"</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"ხმის ორივე ღილაკზე რამდენიმე წამის განმავლობაში დაჭერით ჩაირთვება TalkBack, ეკრანის წამკითხველი, რომელიც ეხმარება მხედველობის პრობლემების მქონე ან უსინათლო ადამიანებს. TalkBack მთლიანად ცვლის თქვენი მოწყობილობის მუშაობის პრინციპს.\n\nამ მალსახმობის სხვა ფუნქციით შეცვლა შეგიძლიათ აქ: პარამეტრები &gt; მარტივი წვდომა."</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"ჩაირთოს <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ხმის ორივე ღილაკზე რამდენიმე წამის განმავლობაში დაჭერით ჩაირთვება <xliff:g id="SERVICE">%1$s</xliff:g>, რომელიც მარტივი წვდომის ფუნქციაა. ამან შეიძლება შეცვალოს თქვენი მოწყობილობის მუშაობის პრინციპი.\n\nამ მალსახმობის შეცვლა სხვა ფუნქციით შეგიძლიათ აქ: პარამეტრები &gt; აპები."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ჩართვა"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"არ ჩაირთოს"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"დართავთ ნებას <xliff:g id="SERVICE">%1$s</xliff:g>-ს, სრულად მართოს თქვენი მოწყობილობა?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g>-ს თუ ჩართავთ, მონაცემთა დაშიფვრის გასაძლიერებლად თქვენი მოწყობილობა ეკრანის დაბლოკვას არ გამოიყენებს."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"სრული კონტროლი გამოსადეგია აპებისთვის, რომლებიც მარტივი წვდომის საჭიროებისას გეხმარებათ, მაგრამ არა აპების უმრავლესობისთვის."</string>
@@ -1652,10 +1635,8 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"დაშვება"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"უარყოფა"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"შეეხეთ ფუნქციას მისი გამოყენების დასაწყებად:"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"აირჩიეთ ფუნქციები, რომელთა გამოყენებაც გსურთ მარტივი წვდომის ღილაკით"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"აირჩიეთ ფუნქციები, რომელთა გამოყენებაც გსურთ ხმის ღილაკის მალსახმობით"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> გამორთულია"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"მალსახმობების რედაქტირება"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"მზადაა"</string>
@@ -1663,23 +1644,15 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"მალსახმობის გამოყენება"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ფერთა ინვერსია"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ფერთა კორექცია"</string>
-    <!-- no translation found for accessibility_shortcut_enabling_service (5473495203759847687) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_disabling_service (8675244165062700619) -->
-    <skip />
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ხანგრძლივად დააჭირეთ ხმის ღილაკებს. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ჩართულია."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ხანგრძლივად დააჭირეთ ხმის ღილაკებს. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> გამორთულია."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> რომ გამოიყენოთ, დააჭირეთ ხმის ორივე ღილაკზე 3 წამის განმავლობაში"</string>
-    <!-- no translation found for accessibility_button_prompt_text (8343213623338605305) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (8742535972130563952) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (5211827854510660203) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8853928358872550500) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (9196230728837090497) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3425123684990193765) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"აირჩიეთ მარტივი წვდომის ღილაკზე შეხებისას გამოსაყენებელი ფუნქცია:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"აირჩიეთ მარტივი წვდომის ჟესტთან (ორი თითით გადაფურცვლა ეკრანის ქვედა კიდიდან ზემოთ) გამოსაყენებელი ფუნქცია:"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"აირჩიეთ მარტივი წვდომის ჟესტთან (სამი თითით გადაფურცვლა ეკრანის ქვედა კიდიდან ზემოთ) გამოსაყენებელი ფუნქცია:"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"სერვისების გადასართავად, ხანგრძლივად შეეხეთ მარტივი წვდომის ღილაკს."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ფუნქციების გადასართავად, ორი თითით გადაფურცლეთ ზემოთ და დააყოვნეთ."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ფუნქციების გადასართავად, სამი თითით გადაფურცლეთ ზემოთ და დააყოვნეთ."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"გადიდება"</string>
     <string name="user_switched" msgid="7249833311585228097">"ამჟამინდელი მომხმარებელი <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>-ზე გადართვა…"</string>
@@ -2050,8 +2023,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ფაილი</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ფაილი</item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (1511722103987329028) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ვერ იძებნება რეკომენდებული ადამიანები, რომლებთანაც გაზიარება შეიძლება"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"აპების სია"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ამ აპს არ აქვს მინიჭებული ჩაწერის ნებართვა, მაგრამ შეუძლია ჩაიწეროს აუდიო ამ USB მოწყობილობის მეშვეობით."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"მთავარი"</string>
@@ -2089,220 +2061,112 @@
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"ამ კონტენტს პერსონალური აპები ვერ გახსნის"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"სატელეფონო ზარებში აუდიოს ჩაწერა ან დაკვრა"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ნაგულისხმევ დასარეკ აპლიკაციად არჩევის შემთხვევაში, ნებას რთავს აპს ჩაიწეროს ან დაუკრას აუდიო სატელეფონო ზარებში."</string>
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ENTRY (4447629474818217364) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY (973059024670737358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ENTRY (4487435301206073787) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY (768060297218652809) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY (7129527319490548930) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY (2876126640607573252) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY (8952595089930109282) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ENTRY (3013902515773728996) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ENTRY (2974411408893410289) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ENTRY (687618528751880721) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ENTRY (6810596579655575381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ENTRY (2715929642540980259) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY (8557791623303951590) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ENTRY (7382468767274580323) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY (6730880791104286987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY (6432126539782267026) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY (1730510161529488920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY (3369885925003346830) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY (9129139686191167829) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY (2869929685874615358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ENTRY (1238663472392741771) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY (3988705848553894358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ENTRY (6186770686690993200) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ENTRY (7043865376145617024) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ENTRY (6144227308185112176) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS (4233355366318061180) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS (6742563947637715645) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS (2033399698172403560) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS (4795977251920732254) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS (1090425878157254446) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS (6476898876518094438) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS (6006806734293747731) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (6546680489620881893) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS (3506845511000727015) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_IN_PROGRESS (6709169861932992750) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS (4013870911606478520) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS (9032651188219523434) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS (6584576506344491207) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS (830981927724888114) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS (7851790973098894802) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_IN_PROGRESS (1149560739586960121) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS (5708964693522116025) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS (7288103122966483455) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS (4036752174056147753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS (5089536274515338566) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS (6737197986936251958) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS (5658767775619998623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS (665978313257653727) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS (3857142652251836850) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS (2695664012344346788) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (2695678959963807782) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS (1230605365926493599) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ERROR (1924844017037151535) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR (3372797822292089708) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR (1878443146720411381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ERROR (7664778312218023192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ERROR (2472944311643350302) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ERROR (828089694480999120) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ERROR (17619001007092511) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ERROR (807214229604353614) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ERROR (8644184447744175747) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR (3801002648649640407) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ERROR (707397021218680753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR (894358680773257820) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR (352466878146726991) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR (7353389721907138671) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR (2655263155490857920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ERROR (6903740900892931310) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR (5165901670447518687) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR (2856763216589267623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR (817542684437829139) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR (5178635064113393143) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR (5391587926974531008) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR (4895494864493315868) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ERROR (9017576601595353649) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR (1116993930995545742) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ERROR (7559167306794441462) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ERROR (2782926139511136588) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ERROR (1890493954453456758) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUCCESS (4886243367747126325) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS (4053809277733513987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS (8249342930499801740) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_SUCCESS (2339794542560381270) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_SUCCESS (6975608174152828954) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS (2846699261330463192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS (5335414726057102801) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_SUCCESS (8868100318474971969) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS (6020936629725666932) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS (6944873647584595489) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_SUCCESS (2526483514124121988) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS (7662200333621664621) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS (2861223407953766632) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS (5345648571175243272) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS (3725278343103422466) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS (6998502547560297983) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS (8555433771162560361) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS (3555767296933606232) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS (6778051818199974237) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS (4080108758498911429) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS (7873675303000794343) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS (1763198215069819523) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_SUCCESS (2053891977727320532) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS (8146602361895007345) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_SUCCESS (8058678548991999545) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_SUCCESS (2545608067978550571) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_SUCCESS (4352382949744625007) -->
-    <skip />
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ქსელის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM ქსელის ქვედანაყოფის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM-ის კორპორატიული განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"SIM სერვისის მომწოდებლის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"SIM-ის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIM ქსელი 1-ს განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIM ქსელი 2-ს განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"RUIM HRPD-ის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"RUIM-ის კორპორატიული განბლოკვის PIN"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"RUIM-სერვისის მომწოდებლის განბლოკვის PIN-კოდი."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"RUIM-ის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"შეიყვანეთ PUK-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPN-ის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"SP-ის ეკვივალენტური სახლის PLMN-ის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCID-ის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPI-ის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"ქსელის ქვედანაყოფის სერვისის მომწოდებლის განბლოკვის PIN-კოდი"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"მიმდინარეობს SIM ქსელის განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"მიმდინარეობს SIM ქსელის ქვედანაყოფის განბლოკვა …"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"მიმდინარეობს SIM სერვისის მომწოდებლის განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"მიმდინარეობს SIM-ის კორპორატიული განბლოკვა…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"მიმდინარეობს SIM-ის განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"მიმდინარეობს RUIM ქსელი 1-ს განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"მიმდინარეობს RUIM ქსელი 2-ს განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"მიმდინარეობს RUIM HRPD-ის განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"მიმდინარეობს RUIM-სერვისის მომწოდებლის განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"მიმდინარეობს RUIM-ის კორპორატიული განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"მიმდინარეობს SPN-ის განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"მიმდინარეობს SP-ის ეკვივალენტური სახლის PLMN-ის განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"მიმდინარეობს ICCID-ის განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"მიმდინარეობს IMPI-ის განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"მიმდინარეობს ქსელის ქვედანაყოფის სერვისის მომწოდებლის განბლოკვა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"მიმდინარეობს RUIM-ის განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"მიმდინარეობს PUK-კოდით განბლოკვის მოთხოვნა…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"SIM ქსელის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"SIM ქსელის ქვედანაყოფის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"SIM სერვისის მომწოდებლის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"SIM-ის კორპორატიული განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"SIM-ის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"RUIM ქსელი 1-ს განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"RUIM ქსელი 2-ს განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"RUIM HRPD-ის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"RUIM-ის კორპორატიული განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"RUIM-სერვისის მომწოდებლის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"RUIM-ის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK-კოდით განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"SPN-ის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"SP-ის ეკვივალენტური სახლის PLMN-ის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"ICCID განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"IMPI-ის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"ქსელის ქვედანაყოფის სერვისის მომწოდებლის განბლოკვის მოთხოვნა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"SIM ქსელის განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"SIM ქსელის ქვედანაყოფის განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"SIM სერვისის მომწოდებლის განბლოკვა წარმატებით შესრულდა ."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"SIM-ის კორპორატიული განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"SIM-ს განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM ქსელი 1-ს განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM ქსელი 2-ს განბლოკვა წარუმატებლად დასრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM HRPD-ის განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM-სერვისის მომწოდებლის განბლოკვის მოთხოვნა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"RUIM-ის კორპორატიული განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"RUIM-ის განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK-კოდით განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"SPN-ის განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"SP-ის ეკვივალენტური სახლის PLMN-ის განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID- წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI-ის განბლოკვა წარმატებით შესრულდა."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"ქსელის ყვედანაყოფის სერვისის მომწოდებლის განბლოკვა წარმატებით შესრულდა."</string>
 </resources>

@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"एडमिन ने निजी इस्तेमाल के लिए डिवाइस दे दिया है"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"डिवाइस प्रबंधित है"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"आपका संगठन इस डिवाइस का प्रबंधन करता है और वह नेटवर्क ट्रैफ़िक की निगरानी भी कर सकता है. विवरण के लिए टैप करें."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"आपके एडमिन ने जगह की सेटिंग बदली है"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"जगह की सेटिंग देखने के लिए टैप करें."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"ऐप्लिकेशन आपकी जगह की जानकारी ऐक्सेस कर सकते हैं"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"ज़्यादा जानने के लिए अपने आईटी एडमिन से संपर्क करें"</string>
     <string name="country_detector" msgid="7023275114706088854">"देश की पहचान करने वाली सुविधा"</string>
     <string name="location_service" msgid="2439187616018455546">"जगह की जानकारी"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"सेंसर से जुड़ी सूचना सेवा"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"आपके डिवाइस को मिटा दिया जाएगा"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"एडमिन ऐप्लिकेशन का इस्तेमाल नहीं किया जा सकता. आपके डिवाइस पर मौजूद डेटा अब मिटा दिया जाएगा.\n\nअगर आप कुछ पूछना चाहते हैं तो, अपने संगठन के एडमिन से संपर्क करें."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ने प्रिंटिंग सुविधा बंद कर दी है."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"अपने निजी ऐप अनब्लॉक करें"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"ऐप कल ब्लॉक कर दिए जाएंगे"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"आपका आईटी एडमिन आपकी वर्क प्रोफ़ाइल को <xliff:g id="DAYS">%1$d</xliff:g> दिनों से ज़्यादा रोकने की अनुमति नहीं देता"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"वर्क प्रोफ़ाइल चालू करें"</string>
     <string name="me" msgid="6207584824693813140">"मैं"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"टैबलेट विकल्‍प"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV डिवाइस में फ़ोन से जुड़े विकल्प"</string>
@@ -233,7 +229,7 @@
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"आपका फ़ोन शट डाउन हो जाएगा."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"क्‍या आप शट डाउन करना चाहते हैं?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"सुरक्षित मोड में रीबूट करें"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"क्या आप सुरक्षित मोड में रीबूट करना चाहते हैं? इससे आपके इंस्टॉल किए हुए सभी तृतीय पक्ष ऐप्स  अक्षम हो जाएंगे. जब आप फिर से रीबूट करेंगे तो वे पुनर्स्थापित हो जाएंगे."</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"क्या आप सुरक्षित मोड में रीबूट करना चाहते हैं? इससे तीसरे पक्ष के सभी ऐप्लिकेशन बंद हो जाएंगे जो आपने इंस्टॉल किए थे. जब आप फिर से रीबूट करेंगे, तब वे वापस आ जाएंगे."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"हाल के"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"कोई हाल ही के ऐप्स  नहीं."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"टैबलेट विकल्‍प"</string>
@@ -446,10 +442,8 @@
     <string name="permlab_systemCamera" msgid="3642917457796210580">"तस्वीरें और वीडियो लेने के लिए ऐप्लिकेशन या सेवा को सिस्टम के कैमरे का ऐक्सेस दें"</string>
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
-    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"डिवाइस का कैमरे चालू या बंद होने पर, किसी ऐप्लिकेशन या सेवा को कॉलबैक पाने की मंज़ूरी दें."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"यह ऐप्लिकेशन, किसी भी कैमरा डिवाइस को खोलते या बंद करते समय (किसी ऐप्लिकेशन से) कॉलबैक पा सकता है."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"कंपन (वाइब्रेशन) को नियंत्रित करें"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ऐप्स को कंपनकर्ता नियंत्रित करने देता है."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"इससे ऐप्लिकेशन, डिवाइस का वाइब्रेटर ऐक्सेस कर पाएगा."</string>
@@ -804,7 +798,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"अन्य"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"कस्टम"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"कस्टम"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"सहायक"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"असिस्टेंट"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"भाई"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"बच्चा"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"हमसफ़र"</string>
@@ -1558,7 +1552,7 @@
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"डॉक स्‍पीकर"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"हेडफ़ोन"</string>
-    <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
+    <string name="default_audio_route_name_usb" msgid="895668743163316932">"यूएसबी"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"सिस्‍टम"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ब्लूटूथ ऑडियो"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"वायरलेस डिसप्ले"</string>
@@ -1643,10 +1637,8 @@
     <skip />
     <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
     <skip />
-    <!-- no translation found for accessibility_enable_service_title (3931558336268541484) -->
-    <skip />
-    <!-- no translation found for accessibility_enable_service_encryption_warning (8603532708618236909) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> को अपना डिवाइस पूरी तरह कंट्रोल करने की मंज़ूरी दें?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"अगर आप <xliff:g id="SERVICE">%1$s</xliff:g> को चालू करते हैं, तो डेटा को एन्क्रिप्ट (सुरक्षित) करने के तरीके को बेहतर बनाने के लिए आपका डिवाइस सेट किए गए स्क्रीन लॉक का इस्तेमाल नहीं करेगा."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"पूरी तरह नियंत्रित करने की अनुमति उन ऐप्लिकेशन के लिए ठीक है जो सुलभता से जुड़ी ज़रूरतों के लिए बने हैं, लेकिन ज़्यादातर ऐप्लिकेशन के लिए यह ठीक नहीं है."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन को देखें और नियंत्रित करें"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यह स्क्रीन पर दिखने वाली हर तरह की सामग्री को पढ़ सकता है और उसे दूसरे ऐप्लिकेशन पर दिखा सकता है."</string>
@@ -1654,17 +1646,14 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यह आपके और किसी ऐप्लिकेशन या हार्डवेयर सेंसर के बीच होने वाले इंटरैक्शन को ट्रैक कर सकता है और आपकी तरफ़ से ऐप्लिकेशन के साथ इंटरैक्ट कर सकता है."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दें"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"इंकार करें"</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (6002726538854613272) -->
-    <skip />
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"किसी सुविधा का इस्तेमाल करने के लिए, उसपर टैप करें:"</string>
     <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
     <skip />
     <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
     <skip />
-    <!-- no translation found for accessibility_uncheck_legacy_item_warning (8047830891064817447) -->
-    <skip />
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> को बंद कर दिया गया है"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"शॉर्टकट में बदलाव करें"</string>
-    <!-- no translation found for done_accessibility_shortcut_menu_button (3668407723770815708) -->
-    <skip />
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"हो गया"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"शॉर्टकट बंद करें"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट का उपयोग करें"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंग बदलने की सुविधा"</string>
@@ -2091,7 +2080,7 @@
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"चालू करें"</string>
     <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"इस सामग्री का इस्तेमाल, ऑफ़िस के काम से जुड़े किसी भी ऐप्लिकेशन पर नहीं किया जा सकता"</string>
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ऑफ़िस के काम से जुड़े किसी भी ऐप्लिकेशन का इस्तेमाल करके, इस सामग्री को खोला नहीं जा सकता"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"इस सामग्री का इस्तेमाल किसी भी निजी ऐप्लिकेशन पर नहीं किया जा सकता"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"इस सामग्री का इस्तेमाल, किसी भी निजी ऐप्लिकेशन पर नहीं किया जा सकता"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"किसी भी निजी ऐप्लिकेशन का इस्तेमाल करके, इस सामग्री को खोला नहीं जा सकता"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"फ़ोन कॉल के दौरान, ऑडियो रिकॉर्ड करने या उसे चलाने की अनुमति"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"डिफ़ॉल्ट डायलर ऐप्लिकेशन के तौर पर असाइन होने पर, इस ऐप्लिकेशन को फ़ोन कॉल के दौरान ऑडियो रिकॉर्ड करने और उसे चलाने की मंज़ूरी मिल जाती है."</string>

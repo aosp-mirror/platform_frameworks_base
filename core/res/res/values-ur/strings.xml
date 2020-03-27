@@ -191,8 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"منتظم نے ذاتی استعمال کے لیے آلہ کو دستبردار کیا ہے"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"آلہ زیر انتظام ہے"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"آپ کی تنظیم اس آلے کا نظم کرتی ہے اور وہ نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے۔ تفاصیل کیلئے تھپتھپائیں۔"</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"آپ کے منتظم نے مقام کی ترتیبات تبدیل کر دیں"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"اپنے مقام کی ترتیبات دیکھنے کے لیے تھپتھپائیں۔"</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"ملک کا ڈیٹیکٹر"</string>
     <string name="location_service" msgid="2439187616018455546">"مقام کی سروس"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"سینسر نوٹیفکیشن سروس"</string>
@@ -2072,33 +2074,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"دفتر"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ذاتی ملاحظہ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"دفتری ملاحظہ"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"ورک ایپس کے ساتھ اس کا اشتراک نہیں کر سکتے"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"‏آپ کا IT منتظم آپ کو اپنے دفتری پروفائل میں ایپس کے ساتھ اس مواد کا اشتراک کرنے کی اجازت نہیں دیتا ہے"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"اس کو ورک ایپس کے ساتھ نہیں کھول سکتے"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"‏آپ کا IT منتظم آپ کو اپنے دفتری پروفائل میں ایپس کے ساتھ اس مواد کو کھولنے کی اجازت نہیں دیتا ہے"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ذاتی ایپس کے ساتھ اس کا اشتراک نہیں کر سکتے"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"‏آپ کا IT منتظم آپ کو اپنے ذاتی پروفائل میں ایپس کے ساتھ اس مواد کا اشتراک کرنے کی اجازت نہیں دیتا ہے"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"اس کو ذاتی ایپس کے ساتھ نہیں کھول سکتے"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"‏آپ کا IT منتظم آپ کو اپنے ذاتی پروفائل میں ایپس کے ساتھ اس مواد کو کھولنے کی اجازت نہیں دیتا ہے"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"دفتری پروفائل روک دی گئی ہے"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"آن کریں"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"کوئی ورک ایپس اس مواد کا سپورٹ نہیں کر سکتی ہیں"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"کوئی ورک ایپس اس مواد کو نہیں کھول سکتی ہیں"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"کوئی ذاتی ایپس اس مواد کا سپورٹ نہیں کر سکتی ہیں"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"کوئی ذاتی ایپس اس مواد کو نہیں کھول سکتی ہیں"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ٹیلیفون کالز میں آڈیو ریکارڈ کریں یا چلائیں"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"اس ایپ کو، جب ڈیفالٹ ڈائلر ایپلیکیشن کے بطور تفویض کیا جاتا ہے، تو ٹیلیفون کالز میں آڈیو ریکارڈ کرنے یا چلانے کی اجازت دیتا ہے۔"</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

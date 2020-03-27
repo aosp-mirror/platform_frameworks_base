@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"អ្នកគ្រប់គ្រង​បានបោះបង់​ឧបករណ៍​ចោល​ដោយសារ​ការប្រើប្រាស់​ផ្ទាល់ខ្លួន"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ឧបករណ៍ស្ថិតក្រោមការគ្រប់គ្រង"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ស្ថាប័នរបស់អ្នកគ្រប់គ្រងឧបករណ៍នេះ ហើយអាចនឹងតាមដានចរាចរណ៍បណ្តាញ។ ចុចដើម្បីទទួលបានព័ត៌មានលម្អិត។"</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"ការកំណត់​ទីតាំង​ត្រូវបានប្ដូរដោយ​អ្នកគ្រប់គ្រង​របស់អ្នក"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"ចុច​ដើម្បី​មើល​ការកំណត់​ទីតាំង​របស់អ្នក។"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"កម្មវិធី​អាច​ចូលប្រើ​ទីតាំង​របស់អ្នក​បាន"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"សូម​ទាក់ទង​អ្នក​គ្រប់គ្រងផ្នែក​ព័ត៌មានវិទ្យា​របស់អ្នក ដើម្បីស្វែងយល់​បន្ថែម"</string>
     <string name="country_detector" msgid="7023275114706088854">"ឧបករណ៍​សម្គាល់​ប្រទេស"</string>
     <string name="location_service" msgid="2439187616018455546">"សេវាកម្ម​ទីតាំង"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"សេវាកម្ម​ជូនដំណឹង​ឧបករណ៍​ចាប់សញ្ញា"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"មិនអាច​ប្រើ​កម្មវិធី​អ្នកគ្រប់គ្រង​បានទេ។ ឧបករណ៍​របស់អ្នក​នឹងលុប​ឥឡូវនេះ។\n\nប្រសិនបើ​អ្នកមាន​សំណួរផ្សេងៗ​ សូមទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​ស្ថាប័ន​របស់​អ្នក។"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ការបោះពុម្ព​ត្រូវបាន​បិទ​ដោយ <xliff:g id="OWNER_APP">%s</xliff:g> ។"</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"ឈប់ទប់ស្កាត់កម្មវិធីផ្ទាល់ខ្លួនរបស់អ្នក"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"កម្មវិធីនឹងត្រូវទប់ស្កាត់ថ្ងៃស្អែក"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​មិន​អនុញ្ញាតឱ្យ​ផ្អាក​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​លើសពី <xliff:g id="DAYS">%1$d</xliff:g> ថ្ងៃ​ទេ"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"បើក​កម្រង​ព័ត៌មាន​ការងារ"</string>
     <string name="me" msgid="6207584824693813140">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ជម្រើស Android TV"</string>
@@ -447,8 +443,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ទទួលការហៅត្រឡប់វិញអំពី​កាមេរ៉ាដែលកំពុងបិទ ឬបើក។"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"កម្មវិធី​នេះ​អាច​ទទួល​ការហៅត្រឡប់វិញ​បាន នៅពេល​កំពុងបិទ ឬ​បើក​កាមេរ៉ា (ដោយ​កម្មវិធី)​។"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ពិនិត្យ​ការ​ញ័រ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​កម្មវិធី​ញ័រ។"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"អនុញ្ញាតឱ្យ​កម្មវិធី​ចូលប្រើ​ស្ថានភាពកម្មវិធី​ញ័រ។"</string>
