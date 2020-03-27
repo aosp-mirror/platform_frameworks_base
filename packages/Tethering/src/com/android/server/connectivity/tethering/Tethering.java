@@ -307,28 +307,22 @@ public class Tethering {
                 userManager, this, mNotificationUpdater);
         mExecutor = new TetheringThreadExecutor(mHandler);
         mActiveDataSubIdListener = new ActiveDataSubIdListener(mExecutor);
+        mNetdCallback = new NetdCallback();
 
         // Load tethering configuration.
         updateConfiguration();
-        // NetdCallback should be registered after updateConfiguration() to ensure
-        // TetheringConfiguration is created.
-        mNetdCallback = new NetdCallback();
+    }
+
+    /**
+     * Start to register callbacks.
+     * Call this function when tethering is ready to handle callback events.
+     */
+    public void startStateMachineUpdaters() {
         try {
             mNetd.registerUnsolicitedEventListener(mNetdCallback);
         } catch (RemoteException e) {
             mLog.e("Unable to register netd UnsolicitedEventListener");
         }
-
-        startStateMachineUpdaters(mHandler);
-        startTrackDefaultNetwork();
-
-        final WifiManager wifiManager = getWifiManager();
-        if (wifiManager != null) {
-            wifiManager.registerSoftApCallback(mExecutor, new TetheringSoftApCallback());
-        }
-    }
-
-    private void startStateMachineUpdaters(Handler handler) {
         mCarrierConfigChange.startListening();
         mContext.getSystemService(TelephonyManager.class).listen(mActiveDataSubIdListener,
                 PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
@@ -341,7 +335,14 @@ public class Tethering {
         filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         filter.addAction(UserManager.ACTION_USER_RESTRICTIONS_CHANGED);
         filter.addAction(ACTION_RESTRICT_BACKGROUND_CHANGED);
-        mContext.registerReceiver(mStateReceiver, filter, null, handler);
+        mContext.registerReceiver(mStateReceiver, filter, null, mHandler);
+
+        final WifiManager wifiManager = getWifiManager();
+        if (wifiManager != null) {
+            wifiManager.registerSoftApCallback(mExecutor, new TetheringSoftApCallback());
+        }
+
+        startTrackDefaultNetwork();
     }
 
     private class TetheringThreadExecutor implements Executor {
