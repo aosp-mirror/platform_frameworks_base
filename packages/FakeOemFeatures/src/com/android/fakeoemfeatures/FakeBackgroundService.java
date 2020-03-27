@@ -19,21 +19,21 @@ package com.android.fakeoemfeatures;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 import android.app.Dialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Size;
 import android.view.Display;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class FakeBackgroundService extends Service {
     final ArrayList<int[]> mAllocs = new ArrayList<int[]>();
@@ -99,8 +99,8 @@ public class FakeBackgroundService extends Service {
         // Create an instance of WindowManager that is adjusted to the area of the display dedicated
         // for windows with type TYPE_APPLICATION_OVERLAY.
         final WindowManager wm = windowContext.getSystemService(WindowManager.class);
-        Size maxWindowSize = wm.getMaximumWindowMetrics().getSize();
-        int maxSize = Math.max(maxWindowSize.getWidth(), maxWindowSize.getHeight());
+        Rect maxWindowBounds = wm.getMaximumWindowMetrics().getBounds();
+        int maxSize = Math.max(maxWindowBounds.width(), maxWindowBounds.height());
         maxSize *= 2;
         lp.x = maxSize;
         lp.y = maxSize;
