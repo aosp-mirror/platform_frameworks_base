@@ -3010,64 +3010,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Network Class Definitions.
-     * Do not change this order, it is used for sorting during emergency calling in
-     * {@link TelephonyConnectionService#getFirstPhoneForEmergencyCall()}. Any newer technologies
-     * should be added after the current definitions.
-     */
-    /** Unknown network class. {@hide} */
-    public static final int NETWORK_CLASS_UNKNOWN = 0;
-    /** Class of broadly defined "2G" networks. {@hide} */
-    @UnsupportedAppUsage
-    public static final int NETWORK_CLASS_2_G = 1;
-    /** Class of broadly defined "3G" networks. {@hide} */
-    @UnsupportedAppUsage
-    public static final int NETWORK_CLASS_3_G = 2;
-    /** Class of broadly defined "4G" networks. {@hide} */
-    @UnsupportedAppUsage
-    public static final int NETWORK_CLASS_4_G = 3;
-    /** Class of broadly defined "5G" networks. {@hide} */
-    public static final int NETWORK_CLASS_5_G = 4;
-
-    /**
-     * Return general class of network type, such as "3G" or "4G". In cases
-     * where classification is contentious, this method is conservative.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static int getNetworkClass(int networkType) {
-        switch (networkType) {
-            case NETWORK_TYPE_GPRS:
-            case NETWORK_TYPE_GSM:
-            case NETWORK_TYPE_EDGE:
-            case NETWORK_TYPE_CDMA:
-            case NETWORK_TYPE_1xRTT:
-            case NETWORK_TYPE_IDEN:
-                return NETWORK_CLASS_2_G;
-            case NETWORK_TYPE_UMTS:
-            case NETWORK_TYPE_EVDO_0:
-            case NETWORK_TYPE_EVDO_A:
-            case NETWORK_TYPE_HSDPA:
-            case NETWORK_TYPE_HSUPA:
-            case NETWORK_TYPE_HSPA:
-            case NETWORK_TYPE_EVDO_B:
-            case NETWORK_TYPE_EHRPD:
-            case NETWORK_TYPE_HSPAP:
-            case NETWORK_TYPE_TD_SCDMA:
-                return NETWORK_CLASS_3_G;
-            case NETWORK_TYPE_LTE:
-            case NETWORK_TYPE_IWLAN:
-            case NETWORK_TYPE_LTE_CA:
-                return NETWORK_CLASS_4_G;
-            case NETWORK_TYPE_NR:
-                return NETWORK_CLASS_5_G;
-            default:
-                return NETWORK_CLASS_UNKNOWN;
-        }
-    }
-
-    /**
      * Returns a string representation of the radio technology (network type)
      * currently in use on the device.
      * @return the name of the radio technology
@@ -11471,6 +11413,55 @@ public class TelephonyManager {
      */
     @SystemApi
     public static final long NETWORK_TYPE_BITMASK_IWLAN = (1 << (NETWORK_TYPE_IWLAN -1));
+
+    /** @hide */
+    public static final long NETWORK_CLASS_BITMASK_2G = NETWORK_TYPE_BITMASK_GSM
+                | NETWORK_TYPE_BITMASK_GPRS
+                | NETWORK_TYPE_BITMASK_EDGE
+                | NETWORK_TYPE_BITMASK_CDMA
+                | NETWORK_TYPE_BITMASK_1xRTT;
+
+    /** @hide */
+    public static final long NETWORK_CLASS_BITMASK_3G = NETWORK_TYPE_BITMASK_EVDO_0
+            | NETWORK_TYPE_BITMASK_EVDO_A
+            | NETWORK_TYPE_BITMASK_EVDO_B
+            | NETWORK_TYPE_BITMASK_EHRPD
+            | NETWORK_TYPE_BITMASK_HSUPA
+            | NETWORK_TYPE_BITMASK_HSDPA
+            | NETWORK_TYPE_BITMASK_HSPA
+            | NETWORK_TYPE_BITMASK_HSPAP
+            | NETWORK_TYPE_BITMASK_UMTS
+            | NETWORK_TYPE_BITMASK_TD_SCDMA;
+
+    /** @hide */
+    public static final long NETWORK_CLASS_BITMASK_4G = NETWORK_TYPE_BITMASK_LTE
+            | NETWORK_TYPE_BITMASK_LTE_CA
+            | NETWORK_TYPE_BITMASK_IWLAN;
+
+    /** @hide */
+    public static final long NETWORK_CLASS_BITMASK_5G = NETWORK_TYPE_BITMASK_NR;
+
+    /** @hide */
+    public static final long NETWORK_STANDARDS_FAMILY_BITMASK_3GPP = NETWORK_TYPE_BITMASK_GSM
+            | NETWORK_TYPE_BITMASK_GPRS
+            | NETWORK_TYPE_BITMASK_EDGE
+            | NETWORK_TYPE_BITMASK_HSUPA
+            | NETWORK_TYPE_BITMASK_HSDPA
+            | NETWORK_TYPE_BITMASK_HSPA
+            | NETWORK_TYPE_BITMASK_HSPAP
+            | NETWORK_TYPE_BITMASK_UMTS
+            | NETWORK_TYPE_BITMASK_TD_SCDMA
+            | NETWORK_TYPE_BITMASK_LTE
+            | NETWORK_TYPE_BITMASK_LTE_CA
+            | NETWORK_TYPE_BITMASK_NR;
+
+    /** @hide */
+    public static final long NETWORK_STANDARDS_FAMILY_BITMASK_3GPP2 = NETWORK_TYPE_BITMASK_CDMA
+            | NETWORK_TYPE_BITMASK_1xRTT
+            | NETWORK_TYPE_BITMASK_EVDO_0
+            | NETWORK_TYPE_BITMASK_EVDO_A
+            | NETWORK_TYPE_BITMASK_EVDO_B
+            | NETWORK_TYPE_BITMASK_EHRPD;
 
     /**
      * @return Modem supported radio access family bitmask
