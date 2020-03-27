@@ -3209,7 +3209,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                 performLayout(true /*initial*/, updateInputWindows);
             } else if (mode == UPDATE_FOCUS_REMOVING_FOCUS) {
-                mWmService.mRoot.performSurfacePlacement(false);
+                mWmService.mRoot.performSurfacePlacement();
             }
         }
 
@@ -3846,7 +3846,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     // TODO: Super crazy long method that should be broken down...
-    void applySurfaceChangesTransaction(boolean recoveringMemory) {
+    void applySurfaceChangesTransaction() {
         final WindowSurfacePlacer surfacePlacer = mWmService.mWindowPlacerLocked;
 
         mTmpUpdateAllDrawn.clear();
