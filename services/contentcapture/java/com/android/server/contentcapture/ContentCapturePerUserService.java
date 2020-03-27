@@ -17,7 +17,7 @@
 package com.android.server.contentcapture;
 
 import static android.service.contentcapture.ContentCaptureService.setClientState;
-import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
+import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DUPLICATED_ID;
 import static android.view.contentcapture.ContentCaptureSession.STATE_INTERNAL_ERROR;
