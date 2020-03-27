@@ -1827,6 +1827,9 @@
 
         <attr name="gwpAsanMode" />
 
+        <!-- @hide no longer used, kept to preserve padding -->
+        <attr name="allowAutoRevokePermissionsExemption" format="boolean" />
+
         <attr name="autoRevokePermissions">
             <enum name="allowed" value="0" />
             <enum name="discouraged" value="1" />
