@@ -1045,12 +1045,12 @@ public class VoiceInteractionManagerService extends SystemService {
                     return null;
                 }
 
-                for (SoundTrigger.Keyphrase phrase : model.keyphrases) {
-                    if (keyphrase.equals(phrase.text)) {
+                for (SoundTrigger.Keyphrase phrase : model.getKeyphrases()) {
+                    if (keyphrase.equals(phrase.getText())) {
                         ArraySet<Locale> locales = new ArraySet<>();
-                        locales.add(phrase.locale);
-                        return new KeyphraseMetadata(phrase.id, phrase.text, locales,
-                                phrase.recognitionModes);
+                        locales.add(phrase.getLocale());
+                        return new KeyphraseMetadata(phrase.getId(), phrase.getText(), locales,
+                                phrase.getRecognitionModes());
                     }
                 }
             } finally {
@@ -1093,8 +1093,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 KeyphraseSoundModel soundModel =
                         mDbHelper.getKeyphraseSoundModel(keyphraseId, callingUid, bcp47Locale);
                 if (soundModel == null
-                        || soundModel.uuid == null
-                        || soundModel.keyphrases == null) {
+                        || soundModel.getUuid() == null
+                        || soundModel.getKeyphrases() == null) {
                     Slog.w(TAG, "No matching sound model found in startRecognition");
                     return SoundTriggerInternal.STATUS_ERROR;
                 } else {
