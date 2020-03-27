@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"tage billeder og optage video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Med denne app kan du tage billeder og optage video med kameraet når som helst."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillad, at en app eller tjeneste modtager tilbagekald om kameraenheder, der åbnes eller lukkes."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Denne app kan modtage tilbagekald, når en kameraenhed åbnes (via appen) eller lukkes."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"administrere vibration"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillader, at appen kan administrere vibratoren."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ringe direkte op til telefonnumre"</string>

@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"լուսանկարել և տեսանկարել"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Այս հավելվածը կարող է ցանկացած պահի լուսանկարել և տեսագրել՝ օգտագործելով տեսախցիկը:"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Թույլատրել հավելվածին կամ ծառայությանը հետզանգեր ստանալ՝ տեսախցիկների բացվելու և փակվելու դեպքում։"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Այս հավելվածը կարող է հետզանգեր ստանալ՝ ցանկացած տեսախցիկի բացվելու (կնշվի բացող հավելվածը) և փակվելու դեպքում։"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"կառավարել թրթռումը"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Թույլ է տալիս հավելվածին կառավարել թրթռոցը:"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ուղղակիորեն զանգել հեռախոսահամարներին"</string>

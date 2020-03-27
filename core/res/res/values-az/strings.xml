@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"şəkil və video çəkmək"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Bu tətbiq istədiyiniz zaman kameranı istifadə edərək şəkil çəkə və video qeydə ala bilər."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tətbiqə və ya xidmətə kamera cihazlarının açılması və ya bağlanması haqqında geri zənglər qəbul etməyə icazə verin."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Hansısa kamera cihazı açıldıqda və ya bağlandıqda (hansısa tətbiq tərəfindən) bu tətbiq geri çağırışlar qəbul edə bilər."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"vibrasiyaya nəzarət edir"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tətbiqə vibratoru idarə etmə icazəsi verir."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon nömrələrinə birbaşa zəng edir"</string>

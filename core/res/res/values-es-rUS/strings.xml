@@ -1260,7 +1260,7 @@
       <item quantity="other">Abrir redes de Wi-Fi disponibles</item>
       <item quantity="one">Abrir red de Wi-Fi disponible</item>
     </plurals>
-    <string name="wifi_available_title" msgid="722493260955778406">"Conectarse a una red Wi-Fi abierta"</string>
+    <string name="wifi_available_title" msgid="722493260955778406">"Conéctate a una red Wi-Fi abierta"</string>
     <string name="wifi_available_carrier_network_title" msgid="7740328884692643968">"Conectarse a la red Wi-Fi del proveedor"</string>
     <string name="wifi_available_title_connecting" msgid="5249247039230566878">"Estableciendo conexión con la red Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="5892203664604121475">"Se conectó a la red Wi-Fi"</string>
@@ -1489,7 +1489,7 @@
     <string name="submit" msgid="862795280643405865">"Enviar"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Se está ejecutando la app de conducción"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Presiona para salir de la app de conducción."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Anclaje a red o zona activa conectados"</string>
+    <string name="tethered_notification_title" msgid="2700523927485687353">"Conexión a red o hotspot conectados"</string>
     <string name="tethered_notification_message" msgid="6228080755828019453">"Presiona para configurar."</string>
     <string name="disable_tether_notification_title" msgid="7158047514545848391">"Se inhabilitó la conexión mediante dispositivo móvil"</string>
     <string name="disable_tether_notification_message" msgid="98281313984014775">"Para obtener más información, comunícate con el administrador"</string>

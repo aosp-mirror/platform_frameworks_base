@@ -438,8 +438,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"realizarea de fotografii și videoclipuri"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Această aplicație poate să facă fotografii și să înregistreze videoclipuri folosind camera foto în orice moment."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permiteți unei aplicații sau unui serviciu să primească apeluri inverse atunci când sunt deschise sau închise dispozitive cu cameră."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Această aplicație poate primi apeluri inverse atunci când este deschis (de aplicație) sau închis orice dispozitiv cu cameră."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlează vibrarea"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite aplicației să controleze mecanismul de vibrare."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"apelare directă numere de telefon"</string>

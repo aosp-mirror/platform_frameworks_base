@@ -218,7 +218,7 @@
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"आपका फ़ोन शट डाउन हो जाएगा."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"क्‍या आप शट डाउन करना चाहते हैं?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"सुरक्षित मोड में रीबूट करें"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"क्या आप सुरक्षित मोड में रीबूट करना चाहते हैं? इससे आपके इंस्टॉल किए हुए सभी तृतीय पक्ष ऐप्स  अक्षम हो जाएंगे. जब आप फिर से रीबूट करेंगे तो वे पुनर्स्थापित हो जाएंगे."</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"क्या आप सुरक्षित मोड में रीबूट करना चाहते हैं? इससे तीसरे पक्ष के सभी ऐप्लिकेशन बंद हो जाएंगे जो आपने इंस्टॉल किए थे. जब आप फिर से रीबूट करेंगे, तब वे वापस आ जाएंगे."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"हाल के"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"कोई हाल ही के ऐप्स  नहीं."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"टैबलेट विकल्‍प"</string>
@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"यह ऐप्लिकेशन आपके शरीर की गतिविधि को पहचान सकता है."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"चित्र और वीडियो लें"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"यह ऐप्लिकेशन किसी भी समय कैमरे का उपयोग करके चित्र ले सकता है और वीडियो रिकॉर्ड कर सकता है."</string>
-    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"डिवाइस का कैमरे चालू या बंद होने पर, किसी ऐप्लिकेशन या सेवा को कॉलबैक पाने की मंज़ूरी दें."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"यह ऐप्लिकेशन, किसी भी कैमरा डिवाइस को खोलते या बंद करते समय (किसी ऐप्लिकेशन से) कॉलबैक पा सकता है."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"कंपन (वाइब्रेशन) को नियंत्रित करें"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ऐप्स को कंपनकर्ता नियंत्रित करने देता है."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फ़ोन नंबर पर सीधे कॉल करें"</string>
@@ -785,7 +783,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"अन्य"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"कस्टम"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"कस्टम"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"सहायक"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"असिस्टेंट"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"भाई"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"बच्चा"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"हमसफ़र"</string>
@@ -1611,7 +1609,7 @@
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"डॉक स्‍पीकर"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"हेडफ़ोन"</string>
-    <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
+    <string name="default_audio_route_name_usb" msgid="895668743163316932">"यूएसबी"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"सिस्‍टम"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ब्लूटूथ ऑडियो"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"वायरलेस डिसप्ले"</string>

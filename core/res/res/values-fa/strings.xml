@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"عکسبرداری و فیلمبرداری"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"این برنامه می‌تواند در هرزمانی با استفاده از دوربین عکس و فیلم بگیرد."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"مجاز کردن برنامه یا سرویس برای دریافت پاسخ تماس درباره دستگاه‌های دوربینی که باز یا بسته می‌شوند."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"این برنامه می‌تواند هروقت دستگاه دوربین باز (براساس برنامه) یا بسته می‌شود، پاسخ تماس دریافت کند."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"کنترل لرزش"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"‏به برنامه اجازه می‎دهد تا لرزاننده را کنترل کند."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"تماس مستقیم با شماره تلفن‌ها"</string>

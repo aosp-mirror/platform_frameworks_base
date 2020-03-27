@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"фотосурет жасау және бейне жазу"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Бұл қолданба кез келген уақытта камерамен суретке түсіруі және бейнелерді жазуы мүмкін."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Қолданбаға не қызметке ашылып не жабылып жатқан камера құрылғылары туралы кері шақыру алуға рұқсат ету"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Кез келген камера ашылып (көрсетілген қолданба арқылы) не жабылып жатқанда, бұл қолданба кері шақыру алады."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"тербелісті басқару"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Қолданбаға вибраторды басқаруға рұқсат береді."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"нөмірлерге тікелей телефон шалу"</string>
