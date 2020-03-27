@@ -98,6 +98,8 @@ public class BadgedImageView extends ImageView {
         Path iconPath = PathParser.createPathFromPathData(
                 getResources().getString(com.android.internal.R.string.config_icon_mask));
         mDotRenderer = new DotRenderer(mBubbleBitmapSize, iconPath, DEFAULT_PATH_SIZE);
+
+        setFocusable(true);
     }
 
     /**
