@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.gnss;
 
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
@@ -78,8 +78,9 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.location.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
-import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
+import com.android.server.location.AbstractLocationProvider;
+import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
+import com.android.server.location.gnss.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
