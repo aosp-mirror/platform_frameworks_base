@@ -258,7 +258,7 @@ class Task extends WindowContainer<WindowContainer> {
     boolean autoRemoveRecents;  // If true, we should automatically remove the task from
                                 // recents when activity finishes
     boolean askedCompatMode;// Have asked the user about compat mode for this task.
-    boolean hasBeenVisible; // Set if any activities in the task have been visible to the user.
+    private boolean mHasBeenVisible; // Set if any activities in the task have been visible
 
     String stringName;      // caching of toString() result.
     boolean mUserSetupComplete; // The user set-up is complete as of the last time the task activity
@@ -483,6 +483,10 @@ class Task extends WindowContainer<WindowContainer> {
      */
     ITaskOrganizer mTaskOrganizer;
     private int mLastTaskOrganizerWindowingMode = -1;
+    /**
+     * Prevent duplicate calls to onTaskAppeared.
+     */
+    boolean mTaskAppearedSent;
 
     /**
      * Last Picture-in-Picture params applicable to the task. Updated when the app
@@ -1517,7 +1521,7 @@ class Task extends WindowContainer<WindowContainer> {
         // We will automatically remove the task either if it has explicitly asked for
         // this, or it is empty and has never contained an activity that got shown to
         // the user.
-        return autoRemoveRecents || (!hasChild() && !hasBeenVisible);
+        return autoRemoveRecents || (!hasChild() && !getHasBeenVisible());
     }
 
     /**
@@ -2030,7 +2034,7 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private void saveLaunchingStateIfNeeded(DisplayContent display) {
-        if (!hasBeenVisible) {
+        if (!getHasBeenVisible()) {
             // Not ever visible to user.
             return;
         }
@@ -3558,7 +3562,7 @@ class Task extends WindowContainer<WindowContainer> {
             pw.print(prefix); pw.print("mRootProcess="); pw.println(mRootProcess);
         }
         pw.print(prefix); pw.print("taskId=" + mTaskId); pw.println(" stackId=" + getRootTaskId());
-        pw.print(prefix + "hasBeenVisible=" + hasBeenVisible);
+        pw.print(prefix + "mHasBeenVisible=" + getHasBeenVisible());
         pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
         pw.print(" mSupportsPictureInPicture=" + mSupportsPictureInPicture);
         pw.print(" isResizeable=" + isResizeable());
@@ -4087,14 +4091,42 @@ class Task extends WindowContainer<WindowContainer> {
         super.reparentSurfaceControl(t, newParent);
     }
 
+    void setHasBeenVisible(boolean hasBeenVisible) {
+        mHasBeenVisible = hasBeenVisible;
+        if (hasBeenVisible) {
+            sendTaskAppeared();
+            if (!isRootTask()) {
+                getRootTask().setHasBeenVisible(true);
+            }
+        }
+    }
+
+    boolean getHasBeenVisible() {
+        return mHasBeenVisible;
+    }
+
+    /** In the case that these three conditions are true, we want to send the Task to
+     * the organizer:
+     *     1. We have a SurfaceControl
+     *     2. An organizer has been set
+     *     3. We have finished drawing
+     * Any time any of these conditions are updated, the updating code should call
+     * sendTaskAppeared.
+     */
+    private boolean taskAppearedReady() {
+        return mSurfaceControl != null && mTaskOrganizer != null && getHasBeenVisible();
+    }
+
     private void sendTaskAppeared() {
-        if (mSurfaceControl != null && mTaskOrganizer != null) {
+        if (taskAppearedReady() && !mTaskAppearedSent) {
+            mTaskAppearedSent = true;
             mAtmService.mTaskOrganizerController.onTaskAppeared(mTaskOrganizer, this);
         }
     }
 
     private void sendTaskVanished() {
-        if (mTaskOrganizer != null) {
+        if (mTaskOrganizer != null && mTaskAppearedSent) {
+            mTaskAppearedSent = false;
             mAtmService.mTaskOrganizerController.onTaskVanished(mTaskOrganizer, this);
         }
    }
@@ -4113,6 +4145,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     void taskOrganizerUnregistered() {
         mTaskOrganizer = null;
+        mTaskAppearedSent = false;
         mLastTaskOrganizerWindowingMode = -1;
         onTaskOrganizerChanged();
         if (mCreatedByOrganizer) {
