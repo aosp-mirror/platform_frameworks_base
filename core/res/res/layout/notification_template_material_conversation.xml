@@ -64,11 +64,12 @@
                 android:layout_marginLeft="@dimen/conversation_badge_side_margin"
                 android:layout_marginTop="@dimen/conversation_badge_side_margin"
             >
-                <ImageView
+                <com.android.internal.widget.CachingIconView
                     android:id="@+id/conversation_icon_badge_bg"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/conversation_badge_background"
+                    android:forceHasOverlappingRendering="false"
                 />
                 <com.android.internal.widget.CachingIconView
                     android:id="@+id/icon"
@@ -76,13 +77,15 @@
                     android:layout_height="match_parent"
                     android:layout_margin="4dp"
                     android:layout_gravity="center"
+                    android:forceHasOverlappingRendering="false"
                 />
-                <ImageView
+                <com.android.internal.widget.CachingIconView
                     android:id="@+id/conversation_icon_badge_ring"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/conversation_badge_ring"
                     android:visibility="gone"
+                    android:forceHasOverlappingRendering="false"
                 />
             </FrameLayout>
         </FrameLayout>

@@ -136,7 +136,12 @@ class NotificationConversationTemplateViewWrapper constructor(
 
     override fun setShelfIconVisible(visible: Boolean) {
         if (conversationLayout.isImportantConversation) {
-            conversationIcon.setForceHidden(visible);
+            if (conversationIcon.visibility != GONE) {
+                conversationIcon.setForceHidden(visible);
+                // We don't want the small icon to be hidden by the extended wrapper, as force
+                // hiding the conversationIcon will already do that via its listener.
+                return;
+            }
         }
         super.setShelfIconVisible(visible)
     }
