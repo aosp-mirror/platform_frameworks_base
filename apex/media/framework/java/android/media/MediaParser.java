@@ -45,6 +45,7 @@ import com.google.android.exoplayer2.extractor.ogg.OggExtractor;
 import com.google.android.exoplayer2.extractor.ts.Ac3Extractor;
 import com.google.android.exoplayer2.extractor.ts.Ac4Extractor;
 import com.google.android.exoplayer2.extractor.ts.AdtsExtractor;
+import com.google.android.exoplayer2.extractor.ts.DefaultTsPayloadReaderFactory;
 import com.google.android.exoplayer2.extractor.ts.PsExtractor;
 import com.google.android.exoplayer2.extractor.ts.TsExtractor;
 import com.google.android.exoplayer2.extractor.wav.WavExtractor;
@@ -646,6 +647,9 @@ public final class MediaParser {
 
     private static final Map<String, ExtractorFactory> EXTRACTOR_FACTORIES_BY_NAME;
     private static final Map<String, Class> EXPECTED_TYPE_BY_PARAMETER_NAME;
+    private static final String TS_MODE_SINGLE_PMT = "single_pmt";
+    private static final String TS_MODE_MULTI_PMT = "multi_pmt";
+    private static final String TS_MODE_HLS = "hls";
 
     // Instance creation methods.
 
@@ -819,6 +823,12 @@ public final class MediaParser {
                             + value.getClass().getSimpleName()
                             + " was passed.");
         }
+        if (PARAMETER_TS_MODE.equals(parameterName)
+                && !TS_MODE_SINGLE_PMT.equals(value)
+                && !TS_MODE_HLS.equals(value)
+                && !TS_MODE_MULTI_PMT.equals(value)) {
+            throw new IllegalArgumentException(PARAMETER_TS_MODE + " does not accept: " + value);
+        }
         mParserParameters.put(parameterName, value);
         return this;
     }
@@ -887,8 +897,7 @@ public final class MediaParser {
                 mExtractor.init(new ExtractorOutputAdapter());
             } else {
                 for (String parserName : mParserNamesPool) {
-                    Extractor extractor =
-                            EXTRACTOR_FACTORIES_BY_NAME.get(parserName).createInstance();
+                    Extractor extractor = createExtractor(parserName);
                     try {
                         if (extractor.sniff(mExtractorInput)) {
                             mExtractorName = parserName;
@@ -991,6 +1000,124 @@ public final class MediaParser {
     private void removePendingSeek() {
         mPendingSeekPosition = -1;
         mPendingSeekTimeMicros = -1;
+    }
+
+    private Extractor createExtractor(String parserName) {
+        int flags = 0;
+        switch (parserName) {
+            case PARSER_NAME_MATROSKA:
+                flags =
+                        getBooleanParameter(PARAMETER_MATROSKA_DISABLE_CUES_SEEKING)
+                                ? MatroskaExtractor.FLAG_DISABLE_SEEK_FOR_CUES
+                                : 0;
+                return new MatroskaExtractor(flags);
+            case PARSER_NAME_FMP4:
+                flags |=
+                        getBooleanParameter(PARAMETER_MP4_IGNORE_EDIT_LISTS)
+                                ? FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS
+                                : 0;
+                flags |=
+                        getBooleanParameter(PARAMETER_MP4_IGNORE_TFDT_BOX)
+                                ? FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX
+                                : 0;
+                flags |=
+                        getBooleanParameter(PARAMETER_MP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES)
+                                ? FragmentedMp4Extractor
+                                        .FLAG_WORKAROUND_EVERY_VIDEO_FRAME_IS_SYNC_FRAME
+                                : 0;
+                return new FragmentedMp4Extractor(flags);
+            case PARSER_NAME_MP4:
+                flags |=
+                        getBooleanParameter(PARAMETER_MP4_IGNORE_EDIT_LISTS)
+                                ? Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS
+                                : 0;
+                return new Mp4Extractor();
+            case PARSER_NAME_MP3:
+                flags |=
+                        getBooleanParameter(PARAMETER_MP3_DISABLE_ID3)
+                                ? Mp3Extractor.FLAG_DISABLE_ID3_METADATA
+                                : 0;
+                flags |=
+                        getBooleanParameter(PARAMETER_MP3_ENABLE_CBR_SEEKING)
+                                ? Mp3Extractor.FLAG_ENABLE_CONSTANT_BITRATE_SEEKING
+                                : 0;
+                // TODO: Add index seeking once we update the ExoPlayer version.
+                return new Mp3Extractor(flags);
+            case PARSER_NAME_ADTS:
+                flags |=
+                        getBooleanParameter(PARAMETER_ADTS_ENABLE_CBR_SEEKING)
+                                ? AdtsExtractor.FLAG_ENABLE_CONSTANT_BITRATE_SEEKING
+                                : 0;
+                return new AdtsExtractor(flags);
+            case PARSER_NAME_AC3:
+                return new Ac3Extractor();
+            case PARSER_NAME_TS:
+                flags |=
+                        getBooleanParameter(PARAMETER_TS_ALLOW_NON_IDR_AVC_KEYFRAMES)
+                                ? DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES
+                                : 0;
+                flags |=
+                        getBooleanParameter(PARAMETER_TS_DETECT_ACCESS_UNITS)
+                                ? DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS
+                                : 0;
+                flags |=
+                        getBooleanParameter(PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS)
+                                ? DefaultTsPayloadReaderFactory.FLAG_ENABLE_HDMV_DTS_AUDIO_STREAMS
+                                : 0;
+                flags |=
+                        getBooleanParameter(PARAMETER_TS_IGNORE_AAC_STREAM)
+                                ? DefaultTsPayloadReaderFactory.FLAG_IGNORE_AAC_STREAM
+                                : 0;
+                flags |=
+                        getBooleanParameter(PARAMETER_TS_IGNORE_AVC_STREAM)
+                                ? DefaultTsPayloadReaderFactory.FLAG_IGNORE_H264_STREAM
+                                : 0;
+                flags |=
+                        getBooleanParameter(PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM)
+                                ? DefaultTsPayloadReaderFactory.FLAG_IGNORE_SPLICE_INFO_STREAM
+                                : 0;
+                String tsMode = getStringParameter(PARAMETER_TS_MODE, TS_MODE_SINGLE_PMT);
+                int hlsMode =
+                        TS_MODE_SINGLE_PMT.equals(tsMode)
+                                ? TsExtractor.MODE_SINGLE_PMT
+                                : TS_MODE_HLS.equals(tsMode)
+                                        ? TsExtractor.MODE_HLS
+                                        : TsExtractor.MODE_MULTI_PMT;
+                return new TsExtractor(hlsMode, flags);
+            case PARSER_NAME_FLV:
+                return new FlvExtractor();
+            case PARSER_NAME_OGG:
+                return new OggExtractor();
+            case PARSER_NAME_PS:
+                return new PsExtractor();
+            case PARSER_NAME_WAV:
+                return new WavExtractor();
+            case PARSER_NAME_AMR:
+                flags |=
+                        getBooleanParameter(PARAMETER_AMR_ENABLE_CBR_SEEKING)
+                                ? AmrExtractor.FLAG_ENABLE_CONSTANT_BITRATE_SEEKING
+                                : 0;
+                return new AmrExtractor(flags);
+            case PARSER_NAME_AC4:
+                return new Ac4Extractor();
+            case PARSER_NAME_FLAC:
+                flags |=
+                        getBooleanParameter(PARAMETER_FLAC_DISABLE_ID3)
+                                ? FlacExtractor.FLAG_DISABLE_ID3_METADATA
+                                : 0;
+                return new FlacExtractor(flags);
+            default:
+                // Should never happen.
+                throw new IllegalStateException("Unexpected attempt to create: " + parserName);
+        }
+    }
+
+    private boolean getBooleanParameter(String name) {
+        return (boolean) mParserParameters.getOrDefault(name, false);
+    }
+
+    private String getStringParameter(String name, String defaultValue) {
+        return (String) mParserParameters.getOrDefault(name, defaultValue);
     }
 
     // Private classes.
