@@ -605,15 +605,16 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     @Override // Binder call
-    public boolean[] areEffectsSupported(int[] effectIds) {
-        // Return null to indicate that the HAL doesn't actually tell us what effects are
-        // supported.
+    public int[] areEffectsSupported(int[] effectIds) {
+        int[] supported = new int[effectIds.length];
         if (mSupportedEffects == null) {
-            return null;
-        }
-        boolean[] supported = new boolean[effectIds.length];
-        for (int i = 0; i < effectIds.length; i++) {
-            supported[i] = mSupportedEffects.contains(effectIds[i]);
+            Arrays.fill(supported, Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN);
+        } else {
+            for (int i = 0; i < effectIds.length; i++) {
+                supported[i] = mSupportedEffects.contains(effectIds[i])
+                        ? Vibrator.VIBRATION_EFFECT_SUPPORT_YES
+                        : Vibrator.VIBRATION_EFFECT_SUPPORT_NO;
+            }
         }
         return supported;
     }
