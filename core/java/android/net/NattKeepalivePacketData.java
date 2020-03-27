@@ -94,10 +94,10 @@ public final class NattKeepalivePacketData extends KeepalivePacketData implement
 
     /** Write to parcel */
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        out.writeString(srcAddress.getHostAddress());
-        out.writeString(dstAddress.getHostAddress());
-        out.writeInt(srcPort);
-        out.writeInt(dstPort);
+        out.writeString(getSrcAddress().getHostAddress());
+        out.writeString(getDstAddress().getHostAddress());
+        out.writeInt(getSrcPort());
+        out.writeInt(getDstPort());
     }
 
     /** Parcelable Creator */
@@ -115,7 +115,7 @@ public final class NattKeepalivePacketData extends KeepalivePacketData implement
                                     dstAddress, dstPort);
                     } catch (InvalidPacketException e) {
                         throw new IllegalArgumentException(
-                                "Invalid NAT-T keepalive data: " + e.error);
+                                "Invalid NAT-T keepalive data: " + e.getError());
                     }
                 }
 
@@ -128,14 +128,16 @@ public final class NattKeepalivePacketData extends KeepalivePacketData implement
     public boolean equals(@Nullable final Object o) {
         if (!(o instanceof NattKeepalivePacketData)) return false;
         final NattKeepalivePacketData other = (NattKeepalivePacketData) o;
-        return this.srcAddress.equals(other.srcAddress)
-            && this.dstAddress.equals(other.dstAddress)
-            && this.srcPort == other.srcPort
-            && this.dstPort == other.dstPort;
+        final InetAddress srcAddress = getSrcAddress();
+        final InetAddress dstAddress = getDstAddress();
+        return srcAddress.equals(other.getSrcAddress())
+            && dstAddress.equals(other.getDstAddress())
+            && getSrcPort() == other.getSrcPort()
+            && getDstPort() == other.getDstPort();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(srcAddress, dstAddress, srcPort, dstPort);
+        return Objects.hash(getSrcAddress(), getDstAddress(), getSrcPort(), getDstPort());
     }
 }
