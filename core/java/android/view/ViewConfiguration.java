@@ -16,8 +16,11 @@
 
 package android.view;
 
+import static android.os.StrictMode.vmIncorrectContextUseEnabled;
+
 import android.annotation.FloatRange;
 import android.annotation.TestApi;
+import android.app.Activity;
 import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -25,9 +28,12 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 
@@ -35,6 +41,8 @@ import android.util.TypedValue;
  * Contains methods to standard constants used in the UI for timeouts, sizes, and distances.
  */
 public class ViewConfiguration {
+    private static final String TAG = "ViewConfiguration";
+
     /**
      * Defines the width of the horizontal scrollbar and the height of the vertical scrollbar in
      * dips
@@ -372,11 +380,13 @@ public class ViewConfiguration {
     }
 
     /**
-     * Creates a new configuration for the specified context. The configuration depends on
-     * various parameters of the context, like the dimension of the display or the density
-     * of the display.
+     * Creates a new configuration for the specified visual {@link Context}. The configuration
+     * depends on various parameters of the {@link Context}, like the dimension of the display or
+     * the density of the display.
      *
-     * @param context The application context used to initialize this view configuration.
+     * @param context A visual {@link Context} used to initialize the view configuration. It must
+     *                be {@link Activity} or other {@link Context} created with
+     *                {@link Context#createWindowContext(int, Bundle)}.
      *
      * @see #get(android.content.Context)
      * @see android.util.DisplayMetrics
@@ -480,13 +490,27 @@ public class ViewConfiguration {
     }
 
     /**
-     * Returns a configuration for the specified context. The configuration depends on
-     * various parameters of the context, like the dimension of the display or the
+     * Returns a configuration for the specified visual {@link Context}. The configuration depends
+     * on various parameters of the {@link Context}, like the dimension of the display or the
      * density of the display.
      *
-     * @param context The application context used to initialize the view configuration.
+     * @param context A visual {@link Context} used to initialize the view configuration. It must
+     *                be {@link Activity} or other {@link Context} created with
+     *                {@link Context#createWindowContext(int, Bundle)}.
      */
     public static ViewConfiguration get(Context context) {
+        if (!context.isUiContext() && vmIncorrectContextUseEnabled()) {
+            final String errorMessage = "Tried to access UI constants from a non-visual Context.";
+            final String message = "UI constants, such as display metrics or window metrics, "
+                    + "must be accessed from Activity or other visual Context. "
+                    + "Use an Activity or a Context created with "
+                    + "Context#createWindowContext(int, Bundle), which are adjusted to the "
+                    + "configuration and visual bounds of an area on screen.";
+            final Exception exception = new IllegalArgumentException(errorMessage);
+            StrictMode.onIncorrectContextUsed(message, exception);
+            Log.e(TAG, errorMessage + message, exception);
+        }
+
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         final int density = (int) (100.0f * metrics.density);
 
