@@ -504,12 +504,12 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
     typeInfo = readNextValue<uint8_t>();
     if (getTypeId(typeInfo) != INT64_TYPE) mValid = false;
     mElapsedTimestampNs = readNextValue<int64_t>();
-    parseAnnotations(getNumAnnotations(typeInfo)); // atom-level annotations
     numElements--;
 
     typeInfo = readNextValue<uint8_t>();
     if (getTypeId(typeInfo) != INT32_TYPE) mValid = false;
     mTagId = readNextValue<int32_t>();
+    parseAnnotations(getNumAnnotations(typeInfo)); // atom-level annotations
     numElements--;
 
 
