@@ -183,7 +183,7 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
     public void onBindViewHolder(ViewHolder vh, int index) {
         Bubble b = mBubbles.get(index);
 
-        vh.iconView.update(b);
+        vh.iconView.setRenderedBubble(b);
         vh.iconView.setOnClickListener(view -> {
             mBubbles.remove(b);
             notifyDataSetChanged();
