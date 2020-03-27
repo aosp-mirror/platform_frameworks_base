@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"ፎቶዎች እና ቪዲዮዎች ያንሱ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ይህ መተግበሪያ በማናቸውም ጊዜ ካሜራውን በመጠቀም ፎቶ ሊያነሳ እና ቪዲዮዎችን ሊቀርጽ ይችላል።"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"አንድ መተግበሪያ ወይም አገልግሎት እየተከፈቱ ወይም እየተዘጉ ስላሉ የካሜራ መሣሪያዎች መልሶ ጥሪዎችን እንዲቀበል ይፍቀዱ።"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ማንኛውም የካሜራ መሣሪያ እየተከፈተ (በምን መተግበሪያ) ወይም እየተዘጋ ባለበት ጊዜ ይህ መተግበሪያ መልሶ ጥሪዎችን መቀበል ይችላል።"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ነዛሪ ተቆጣጠር"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ነዛሪውን ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"በቀጥታ ስልክ ቁጥሮች ደውል"</string>

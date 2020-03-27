@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"снимај слики и видеа"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Апликацијава може да фотографира и да снима видеа со камерата во секое време."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволете апликацијатa или услугата да прима повратни повици за отворањето или затворањето на уредите со камера."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Оваа апликација може да прима повратни повици кога кој било уред со камера се отвора (од некоја апликација) или затвора."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролирај вибрации"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволува апликацијата да ги контролира вибрациите."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно избирај телефонски броеви"</string>

@@ -438,8 +438,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"uzņemt attēlus un videoklipus"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Šī lietotne jebkurā brīdī var uzņemt attēlus un ierakstīt videoklipus, izmantojot kameru."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Atļaut lietojumprogrammai vai pakalpojumam saņemt atzvanus par kameras ierīču atvēršanu vai aizvēršanu"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Šajā lietotnē var saņemt atzvanus, ja tiek atvērta vai aizvērta jebkāda kameras ierīce (atkarībā no lietojumprogrammas)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolēt vibrosignālu"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ļauj lietotnei kontrolēt vibrosignālu."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"tieši zvanīt uz tālruņa numuriem"</string>

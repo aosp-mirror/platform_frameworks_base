@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"kumuha ng mga larawan at video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Makakakuha ng mga larawan at makakapag-record ng mga video ang app na ito gamit ang camera anumang oras."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Payagan ang isang application o serbisyo na makatanggap ng mga callback tungkol sa pagbubukas o pagsasara ng mga camera device."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Puwedeng makatanggap ang app na ito ng mga callback kapag binubuksan (kung anong application) o isinasara ang anumang camera device."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolin ang pag-vibrate"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Pinapayagan ang app na kontrolin ang vibrator."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"direktang tawagan ang mga numero ng telepono"</string>
@@ -1248,8 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Hindi makakonekta sa <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"I-tap para baguhin ang mga setting ng privacy at subukan ulit"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Baguhin ang setting ng privacy?"</string>
-    <!-- no translation found for wifi_disable_mac_randomization_dialog_message (7074701420311731349) -->
-    <skip />
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Para kumonekta, kailangan ng <xliff:g id="SSID">%1$s</xliff:g> ang MAC address ng iyong device, na isang natatanging identifier. Sa kasalukuyan, gumagamit ng naka-randomize na identifier ang mga setting mo sa privacy para sa network na ito. \n\nDahil sa pagbabagong ito, baka mapahintulutan ang mga kalapit na device na subaybayan ang lokasyon ng iyong device."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Baguhin ang setting"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Na-update ang setting. Subukang kumonekta ulit."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Hindi puwedeng baguhin ang setting ng privacy"</string>

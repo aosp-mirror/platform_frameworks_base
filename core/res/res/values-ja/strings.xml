@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"カメラデバイスが起動または終了したときにコールバックを受け取ることを、アプリまたはサービスに許可してください。"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"このアプリは、カメラデバイスが（なんらかのアプリによって）起動するとき、または終了するときにコールバックを受け取ることができます。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"電話番号発信"</string>

@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"ଫଟୋ ଓ ଭିଡିଓଗୁଡ଼ିକୁ ନିଅନ୍ତୁ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ଏହି ଆପ୍‍ ଯେକୌଣସି ସମୟରେ କ୍ୟାମେରା ବ୍ୟବହାର କରି ଫଟୋ ଉଠାଇପାରେ ଏବଂ ଭିଡିଓ ରେକର୍ଡ କରିପାରେ।"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"କ୍ୟାମେରା ଡିଭାଇସଗୁଡ଼ିକ ଖୋଲିବା କିମ୍ବା ବନ୍ଦ କରିବା ବିଷୟରେ କଲବ୍ୟାକଗୁଡ଼ିକ ପାଇବାକୁ ଏକ ଆପ୍ଲିକେସନ୍ କିମ୍ବା ସେବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ଯେ କୌଣସି କ୍ୟାମେରା ଡିଭାଇସ୍ ଖୋଲାଗଲେ (କେଉଁ ଆପ୍ଲିକେସନ୍ ଦ୍ୱାରା) କିମ୍ବା ବନ୍ଦ କରାଗଲେ ଏହି ଆପ୍ କଲବ୍ୟାକ୍ ପାଇପାରିବ।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"କମ୍ପନ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ଆପ୍‍କୁ, ଭାଇବ୍ରେଟର୍‍ ନିୟନ୍ତ୍ରଣ କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ସିଧାସଳଖ ଫୋନ୍ ନମ୍ବରଗୁଡ଼ିକୁ କଲ୍ କରନ୍ତୁ"</string>
@@ -751,7 +750,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"ୱାର୍କ ମୋବାଇଲ୍"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"ୱାର୍କ ପେଜର୍"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"ସହାୟକ"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"କଷ୍ଟମ୍‌"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"ଜନ୍ମଦିନ"</string>
@@ -784,7 +783,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"ଅନ୍ୟାନ୍ୟ"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"କଷ୍ଟମ୍‌"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"କଷ୍ଟମ୍‌"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"ସହାୟକ"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ଭାଇ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"ଶିଶୁ"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"ଡୋମେଷ୍ଟିକ୍‌ ପାର୍ଟନର୍‌"</string>

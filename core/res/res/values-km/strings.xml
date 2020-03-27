@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"ថត​រូប និងវីដេអូ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"កម្មវិធី​នេះ​អាច​ថត​រូប​ និង​ថត​វីដេអូ​ ដោយ​ប្រើ​កាមេរ៉ា​បាន​គ្រប់​ពេល​។"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ទទួលការហៅត្រឡប់វិញអំពី​កាមេរ៉ាដែលកំពុងបិទ ឬបើក។"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"កម្មវិធី​នេះ​អាច​ទទួល​ការហៅត្រឡប់វិញ​បាន នៅពេល​កំពុងបិទ ឬ​បើក​កាមេរ៉ា (ដោយ​កម្មវិធី)​។"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ពិនិត្យ​ការ​ញ័រ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​កម្មវិធី​ញ័រ។"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​ផ្ទាល់"</string>

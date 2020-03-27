@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"foto\'s en video\'s maken"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Deze app kan op elk moment foto\'s maken en video\'s opnemen met de camera."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Een app of service toestaan callbacks te ontvangen over camera-apparaten die worden geopend of gesloten."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Deze app kan callbacks ontvangen als een camera-apparaat wordt geopend (en door welke app) of gesloten."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"trilling beheren"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Hiermee kan de app de trilstand beheren."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefoonnummers rechtstreeks bellen"</string>

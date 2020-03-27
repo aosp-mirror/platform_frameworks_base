@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"taka myndir og myndskeið"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Þetta forrit getur tekið myndir og tekið upp myndskeið með myndavélinni hvenær sem er."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Leyfa forriti eða þjónustu að taka við svörum um myndavélar sem verið er að opna eða loka."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Þetta forrit getur tekið við svörum þegar verið er að opna eða loka myndavél í hvaða forriti sem er."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"stjórna titringi"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Leyfir forriti að stjórna titraranum."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"hringja beint í símanúmer"</string>

@@ -441,8 +441,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"צלם תמונות וסרטונים"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"אפליקציה זו יכולה להשתמש במצלמה כדי לצלם תמונות ולהקליט סרטונים בכל עת."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"‏אפליקציה או שירות יוכלו לקבל קריאות חוזרות (callback) כשמכשירי מצלמה ייפתחו או ייסגרו."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"‏האפליקציה הזו יכולה לקבל קריאות חוזרות (callback) כשמכשיר מצלמה כלשהו נפתח (באמצעות אפליקציה) או נסגר."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"שליטה ברטט"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"מאפשר לאפליקציה לשלוט ברטט."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"התקשר ישירות למספרי טלפון"</string>

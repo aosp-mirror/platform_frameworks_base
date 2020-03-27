@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"κάνει λήψη φωτογραφιών και βίντεο"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Αυτή η εφαρμογή μπορεί να τραβήξει φωτογραφίες και βίντεο χρησιμοποιώντας την κάμερα, ανά πάσα στιγμή."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Επιτρέψτε σε μια εφαρμογή ή μια υπηρεσία να λαμβάνει επανάκλησεις σχετικά με το άνοιγμα ή το κλείσιμο συσκευών κάμερας."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Αυτή η εφαρμογή μπορεί να λαμβάνει επανακλήσεις κατά το άνοιγμα οποιασδήποτε συσκευής κάμερας (από οποιαδήποτε εφαρμογή) ή κατά το κλείσιμο."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ελέγχει τη δόνηση"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Επιτρέπει στην εφαρμογή τον έλεγχο της δόνησης."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"πραγματοποιεί απευθείας κλήση τηλεφωνικών αριθμών"</string>

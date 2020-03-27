@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Cette application peut utiliser l\'appareil photo pour prendre des photos et enregistrer des vidéos à tout moment."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Autoriser une application ou un service à recevoir des rappels liés à l\'ouverture ou à la fermeture de caméras"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Cette application peut recevoir des rappels lors de la fermeture ou de l\'ouverture d\'une caméra (par une application)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"contrôler le vibreur"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet à l\'application de contrôler le vibreur."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"appeler directement les numéros de téléphone"</string>

@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Apl ini boleh mengambil gambar dan merakam video menggunakan kamera pada bila-bila masa."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Benarkan aplikasi atau perkhidmatan menerima panggilan balik tentang peranti kamera yang dibuka atau ditutup."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Apl ini boleh menerima panggilan balik apabila mana-mana peranti kamera dibuka (oleh aplikasi) atau ditutup."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kawal getaran"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Membenarkan apl mengawal penggetar."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"panggil terus nombor telefon"</string>

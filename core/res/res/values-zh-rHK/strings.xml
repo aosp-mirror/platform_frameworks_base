@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"拍照和拍攝影片"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"此應用程式可以隨時使用相機拍照和攝錄。"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"允許應用程式或服務接收相機裝置開啟或關閉的相關回電。"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"當任何相機裝置在開啟 (由應用程式) 或關閉時，此應用程式就能接收回電。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"控制震動"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允許應用程式控制震動。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"直接撥打電話號碼"</string>

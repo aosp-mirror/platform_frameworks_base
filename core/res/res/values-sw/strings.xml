@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"Kupiga picha na kurekodi video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Programu hii inaweza kupiga picha na kurekodi video kwa kutumia kamera wakati wowote."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Ruhusu programu au huduma ipokee simu zinazopigwa tena kuhusu vifaa vya kamera kufunguliwa au kufungwa."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Programu hii inaweza kupokea simu zinazopigwa tena wakati kifaa chochote cha kamera kinafunguliwa (kulingana na programu) au kufungwa."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"Kudhibiti mtetemo"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Inaruhusu programu kudhibiti kitingishi."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"piga simu moja kwa moja kwa nambari za simu"</string>

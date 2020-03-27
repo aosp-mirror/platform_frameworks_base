@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"neem foto\'s en video\'s"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Hierdie program kan enige tyd met die kamera foto\'s neem en video\'s opneem."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Laat \'n program of diens toe om terugbeloproepe te ontvang oor kameratoestelle wat oopgemaak of toegemaak word."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Hierdie program kan terugbeloproepe ontvang wanneer enige kameratoestel oopgemaak (deur watter program) of toegemaak word."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"beheer vibrasie"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Laat die program toe om die vibrator te beheer."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"skakel foonnommers direk"</string>

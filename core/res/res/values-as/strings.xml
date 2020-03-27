@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"ফট\' তোলা আৰু ভিডিঅ\' ৰেকৰ্ড কৰা"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"এই এপে যিকোনো সময়তে কেমেৰা ব্যৱহাৰ কৰি ফট\' তুলিব আৰু ভিডিঅ\' ৰেকর্ড কৰিব পাৰে।"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"কোনো এপ্লিকেশ্বন অথবা সেৱাক কেমেৰা ডিভাইচসমূহ খোলা অথবা বন্ধ কৰাৰ বিষয়ে কলবেকসমূহ গ্ৰহণ কৰিবলৈ অনুমতি দিয়ক।"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"যিকোনো কেমেৰা ডিভাইচ খুলি থকা অথবা বন্ধ কৰি থকাৰ সময়ত (কোনো এপ্লিকেশ্বনৰ দ্বাৰা) এই এপ্‌টোৱে কলবেক গ্ৰহণ কৰিব পাৰে।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"কম্পন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ভাইব্ৰেটৰ নিয়ন্ত্ৰণ কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"পোনপটীয়াকৈ ফ\'ন নম্বৰলৈ কল কৰক"</string>
@@ -784,7 +783,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"অন্যান্য"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"নিজৰ উপযোগিতা অনুযায়ী"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"নিজৰ উপযোগিতা অনুযায়ী"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"সহায়ক"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ভাতৃ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"শিশু"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"সংগী"</string>
@@ -1248,8 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g>ৰ সৈতে সংযোগ কৰিব নোৱাৰি"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"গোপনীয়তাৰ ছেটিংসমূহ সলনি কৰিবলৈ আৰু পুনৰ চেষ্টা কৰিবলৈ টিপক"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"গোপনীয়তাৰ ছেটিংটো সলনি কৰিবনে?"</string>
-    <!-- no translation found for wifi_disable_mac_randomization_dialog_message (7074701420311731349) -->
-    <skip />
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"সংযোগ কৰিবলৈ <xliff:g id="SSID">%1$s</xliff:g>এ আপোনাৰ ডিভাইচৰ MAC ঠিকনাটো, যিটো এটা অদ্বৈত চিনাক্তকাৰী, সেইটো ব্যৱহাৰ কৰিব লাগে। বৰ্তমানে, এই নেটৱৰ্কটোৰ বাবে আপোনাৰ গোপনীয়তাৰ ছেটিঙে এটা যাদৃচ্ছিক চিনাক্তকাৰী ব্যৱহাৰ কৰিছে। \n\nএই সালসলনিয়ে নিকটৱৰ্তী ডিভাইচসমূহক আপোনাৰ ডিভাইচটোৰ অৱস্থান ট্ৰেক কৰাৰ অনুমতি দিব পাৰে।"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ছেটিংটো সলনি কৰক"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ছেটিংটো আপডে’ট হ’ল। পুনৰ সংযোগ কৰিবলৈ চেষ্টা কৰক।"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"গোপনীয়তাৰ ছেটিংটো সলনি কৰিব নোৱাৰি"</string>

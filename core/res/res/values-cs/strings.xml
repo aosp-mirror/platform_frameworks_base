@@ -441,8 +441,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"pořizování fotografií a videí"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Tato aplikace může pomocí fotoaparátu kdykoli pořídit snímek nebo nahrát video."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Povolte aplikaci nebo službě přijímat zpětná volání o otevření nebo zavření zařízení s fotoaparátem."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Tato aplikace může přijímat zpětná volání při otevírání nebo zavírání libovolného fotoaparátu (s informacemi o tom, která aplikace tuto akci provádí)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ovládání vibrací"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Umožňuje aplikaci ovládat vibrace."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"přímé volání na telefonní čísla"</string>
