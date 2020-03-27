@@ -3430,6 +3430,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                         11       PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK
      *                        1         PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS
      *                       1          PFLAG4_AUTOFILL_HIDE_HIGHLIGHT
+     *                      1           PFLAG4_ALLOW_CLICK_WHEN_DISABLED
      * |-------|-------|-------|-------|
      */
 
@@ -3476,6 +3477,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Flag indicating the field should not have yellow highlight when autofilled.
      */
     private static final int PFLAG4_AUTOFILL_HIDE_HIGHLIGHT = 0x200;
+
+    /**
+     * Indicates if the view can receive click events when disabled.
+     */
+    private static final int PFLAG4_ALLOW_CLICK_WHEN_DISABLED = 0x000000400;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -12131,6 +12137,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Enables or disables click events for this view when disabled.
+     *
+     * @param clickableWhenDisabled true to make the view clickable, false otherwise
+     */
+    public void setAllowClickWhenDisabled(boolean clickableWhenDisabled) {
+        if (clickableWhenDisabled) {
+            mPrivateFlags4 |= PFLAG4_ALLOW_CLICK_WHEN_DISABLED;
+        } else {
+            mPrivateFlags4 &= ~PFLAG4_ALLOW_CLICK_WHEN_DISABLED;
+        }
+    }
+
+    /**
      * Indicates whether this view reacts to long click events or not.
      *
      * @return true if the view is long clickable, false otherwise
@@ -15559,7 +15578,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)
                 || (viewFlags & CONTEXT_CLICKABLE) == CONTEXT_CLICKABLE;
 
-        if ((viewFlags & ENABLED_MASK) == DISABLED) {
+        if ((viewFlags & ENABLED_MASK) == DISABLED
+                && (mPrivateFlags4 & PFLAG4_ALLOW_CLICK_WHEN_DISABLED) == 0) {
             if (action == MotionEvent.ACTION_UP && (mPrivateFlags & PFLAG_PRESSED) != 0) {
                 setPressed(false);
             }
