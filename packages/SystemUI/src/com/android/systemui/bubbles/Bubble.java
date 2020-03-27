@@ -76,7 +76,6 @@ class Bubble implements BubbleViewProvider {
     private BadgedImageView mIconView;
     private BubbleExpandedView mExpandedView;
 
-    private boolean mInflated;
     private BubbleViewInfoTask mInflationTask;
     private boolean mInflateSynchronously;
 
@@ -166,10 +165,16 @@ class Bubble implements BubbleViewProvider {
         return mExpandedView;
     }
 
-    void cleanupExpandedState() {
+    /**
+     * Call when the views should be removed, ensure this is called to clean up ActivityView
+     * content.
+     */
+    void cleanupViews() {
         if (mExpandedView != null) {
             mExpandedView.cleanUpExpandedState();
+            mExpandedView = null;
         }
+        mIconView = null;
     }
 
     /**
@@ -213,17 +218,15 @@ class Bubble implements BubbleViewProvider {
     }
 
     boolean isInflated() {
-        return mInflated;
+        return mIconView != null && mExpandedView != null;
     }
 
     void stopInflation() {
         if (mInflationTask == null) {
             return;
         }
-        mInflationTask.cancel(/* mayInterruptIfRunning */ true);
-        mIconView = null;
-        mExpandedView = null;
-        mInflated = false;
+        mInflationTask.cancel(true /* mayInterruptIfRunning */);
+        cleanupViews();
     }
 
     void setViewInfo(BubbleViewInfoTask.BubbleViewInfo info) {
@@ -240,19 +243,12 @@ class Bubble implements BubbleViewProvider {
         mDotColor = info.dotColor;
         mDotPath = info.dotPath;
 
-        if (mExpandedView != null && mIconView != null) {
-            mInflated = true;
-        }
         if (mExpandedView != null) {
             mExpandedView.update(/* bubble */ this);
         }
         if (mIconView != null) {
             mIconView.setRenderedBubble(/* bubble */ this);
         }
-    }
-
-    void setInflated(boolean inflated) {
-        mInflated = inflated;
     }
 
     /**
