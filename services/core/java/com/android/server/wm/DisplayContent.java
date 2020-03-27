@@ -5613,6 +5613,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void onDisplayChanged() {
+        mDisplay.getRealSize(mTmpDisplaySize);
+        setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
+        updateDisplayInfo();
+
         // The window policy is responsible for stopping activities on the default display.
         final int displayId = mDisplay.getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
@@ -5624,10 +5628,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mOffToken = null;
             }
         }
-
-        mDisplay.getRealSize(mTmpDisplaySize);
-        setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
-        updateDisplayInfo();
         mWmService.requestTraversal();
     }
 
