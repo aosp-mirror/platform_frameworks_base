@@ -25,8 +25,6 @@ import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -575,7 +573,7 @@ public class IpSecService extends IIpSecService.Stub {
         }
 
         void put(int key, RefcountedResource<T> obj) {
-            checkNotNull(obj, "Null resources cannot be added");
+            Objects.requireNonNull(obj, "Null resources cannot be added");
             mArray.put(key, obj);
         }
 
@@ -1114,7 +1112,7 @@ public class IpSecService extends IIpSecService.Stub {
         if (requestedSpi > 0 && requestedSpi < 256) {
             throw new IllegalArgumentException("ESP SPI must not be in the range of 0-255.");
         }
-        checkNotNull(binder, "Null Binder passed to allocateSecurityParameterIndex");
+        Objects.requireNonNull(binder, "Null Binder passed to allocateSecurityParameterIndex");
 
         int callingUid = Binder.getCallingUid();
         UserRecord userRecord = mUserResourceTracker.getUserRecord(callingUid);
@@ -1231,7 +1229,7 @@ public class IpSecService extends IIpSecService.Stub {
             throw new IllegalArgumentException(
                     "Specified port number must be a valid non-reserved UDP port");
         }
-        checkNotNull(binder, "Null Binder passed to openUdpEncapsulationSocket");
+        Objects.requireNonNull(binder, "Null Binder passed to openUdpEncapsulationSocket");
 
         int callingUid = Binder.getCallingUid();
         UserRecord userRecord = mUserResourceTracker.getUserRecord(callingUid);
@@ -1291,8 +1289,8 @@ public class IpSecService extends IIpSecService.Stub {
             String localAddr, String remoteAddr, Network underlyingNetwork, IBinder binder,
             String callingPackage) {
         enforceTunnelFeatureAndPermissions(callingPackage);
-        checkNotNull(binder, "Null Binder passed to createTunnelInterface");
-        checkNotNull(underlyingNetwork, "No underlying network was specified");
+        Objects.requireNonNull(binder, "Null Binder passed to createTunnelInterface");
+        Objects.requireNonNull(underlyingNetwork, "No underlying network was specified");
         checkInetAddress(localAddr);
         checkInetAddress(remoteAddr);
 
@@ -1573,7 +1571,7 @@ public class IpSecService extends IIpSecService.Stub {
                     "IPsec Tunnel Mode requires PackageManager.FEATURE_IPSEC_TUNNELS");
         }
 
-        checkNotNull(callingPackage, "Null calling package cannot create IpSec tunnels");
+        Objects.requireNonNull(callingPackage, "Null calling package cannot create IpSec tunnels");
 
         // OP_MANAGE_IPSEC_TUNNELS will return MODE_ERRORED by default, including for the system
         // server. If the appop is not granted, require that the caller has the MANAGE_IPSEC_TUNNELS
@@ -1642,12 +1640,12 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized IpSecTransformResponse createTransform(
             IpSecConfig c, IBinder binder, String callingPackage) throws RemoteException {
-        checkNotNull(c);
+        Objects.requireNonNull(c);
         if (c.getMode() == IpSecTransform.MODE_TUNNEL) {
             enforceTunnelFeatureAndPermissions(callingPackage);
         }
         checkIpSecConfig(c);
-        checkNotNull(binder, "Null Binder passed to createTransform");
+        Objects.requireNonNull(binder, "Null Binder passed to createTransform");
         final int resourceId = mNextResourceId++;
 
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
