@@ -918,7 +918,29 @@ public class AudioTrack extends PlayerBase
         private final int mContentId;
         private final int mSyncId;
 
-        private TunerConfiguration(int contentId, int syncId) {
+        /**
+         * Constructs a TunerConfiguration instance for use in {@link AudioTrack.Builder}
+         *
+         * @param contentId selects the audio stream to use.
+         *     The contentId may be obtained from
+         *     {@link android.media.tv.tuner.filter.Filter#getId()}.
+         *     This is always a positive number.
+         * @param syncId selects the clock to use for synchronization
+         *     of audio with other streams such as video.
+         *     The syncId may be obtained from
+         *     {@link android.media.tv.tuner.Tuner#getAvSyncHwId()}.
+         *     This is always a positive number.
+         */
+        @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        public TunerConfiguration(
+                @IntRange(from = 1) int contentId, @IntRange(from = 1)int syncId) {
+            if (contentId < 1) {
+                throw new IllegalArgumentException(
+                        "contentId " + contentId + " must be positive");
+            }
+            if (syncId < 1) {
+                throw new IllegalArgumentException("syncId " + syncId + " must be positive");
+            }
             mContentId = contentId;
             mSyncId = syncId;
         }
@@ -937,73 +959,6 @@ public class AudioTrack extends PlayerBase
         @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
         public @IntRange(from = 1) int getSyncId() {
             return mSyncId;  // The Builder ensures this is > 0.
-        }
-
-        /**
-         * Builder class for {@link AudioTrack.TunerConfiguration} objects.
-         */
-        public static class Builder {
-            private int mContentId;
-            private int mSyncId;
-
-            /**
-             * Sets the contentId from the Tuner filter.
-             *
-             * @param contentId selects the audio stream to use.
-             *     The contentId may be obtained from
-             *     {@link android.media.tv.tuner.filter.Filter#getId()}.
-             *     This is always a positive number.
-             *
-             * @return the same Builder instance.
-             */
-            @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-            public @NonNull Builder setContentId(@IntRange(from = 1) int contentId) {
-                if (contentId < 1) {
-                    throw new IllegalArgumentException(
-                            "contentId " + contentId + " must be positive");
-                }
-                mContentId = contentId;
-                return this;
-            }
-
-            /**
-             * Sets the syncId from the Tuner filter.
-             *
-             * @param syncId selects the clock to use for synchronization
-             *     of audio with other streams such as video.
-             *     The syncId may be obtained from
-             *     {@link android.media.tv.tuner.Tuner#getAvSyncHwId()}.
-             *     This is always a positive number.
-             *
-             * @return the same Builder instance.
-             */
-            @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-            public @NonNull Builder setSyncId(@IntRange(from = 1) int syncId) {
-                if (syncId < 1) {
-                    throw new IllegalArgumentException("syncId " + syncId + " must be positive");
-                }
-                mSyncId = syncId;
-                return this;
-            }
-
-            /**
-             * Builds a {@link AudioTrack.TunerConfiguration} instance initialized with
-             * the parameters set on this {@code Builder}.
-             *
-             * @return a new successfully initialized {@link AudioTrack.TunerConfiguration}.
-             * @throws UnsupportedOperationException if the parameters set on the
-             *     {@code Builder} are incompatible.
-             */
-            @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-            public @NonNull TunerConfiguration build() {
-                if (mContentId < 1 || mSyncId < 1) {
-                    throw new UnsupportedOperationException(
-                            "mContentId " + mContentId
-                            + " mSyncId " + mSyncId
-                            + " must be set");
-                }
-                return new TunerConfiguration(mContentId, mSyncId);
-            }
         }
     }
 
@@ -3673,7 +3628,7 @@ public class AudioTrack extends PlayerBase
     // OnCodecFormatChangedListener notifications uses an instance
     // of ListenerList to manage its listeners.
 
-    private final Utils.ListenerList<AudioMetadata.ReadMap> mCodecFormatChangedListeners =
+    private final Utils.ListenerList<AudioMetadataReadMap> mCodecFormatChangedListeners =
             new Utils.ListenerList();
 
     /**
@@ -3684,13 +3639,13 @@ public class AudioTrack extends PlayerBase
          * Called when the compressed codec format changes.
          *
          * @param audioTrack is the {@code AudioTrack} instance associated with the codec.
-         * @param info is a {@link AudioMetadata.ReadMap} of values which contains decoded format
+         * @param info is a {@link AudioMetadataReadMap} of values which contains decoded format
          *     changes reported by the codec.  Not all hardware
          *     codecs indicate codec format changes. Acceptable keys are taken from
          *     {@code AudioMetadata.Format.KEY_*} range, with the associated value type.
          */
         void onCodecFormatChanged(
-                @NonNull AudioTrack audioTrack, @Nullable AudioMetadata.ReadMap info);
+                @NonNull AudioTrack audioTrack, @Nullable AudioMetadataReadMap info);
     }
 
     /**
@@ -3708,7 +3663,7 @@ public class AudioTrack extends PlayerBase
         mCodecFormatChangedListeners.add(
                 listener, /* key for removal */
                 executor,
-                (int eventCode, AudioMetadata.ReadMap readMap) -> {
+                (int eventCode, AudioMetadataReadMap readMap) -> {
                     // eventCode is unused by this implementation.
                     listener.onCodecFormatChanged(this, readMap);
                 }
@@ -4067,7 +4022,7 @@ public class AudioTrack extends PlayerBase
             ByteBuffer buffer = (ByteBuffer) obj;
             buffer.order(ByteOrder.nativeOrder());
             buffer.rewind();
-            AudioMetadata.ReadMap audioMetaData = AudioMetadata.fromByteBuffer(buffer);
+            AudioMetadataReadMap audioMetaData = AudioMetadata.fromByteBuffer(buffer);
             if (audioMetaData == null) {
                 Log.e(TAG, "Unable to get audio metadata from byte buffer");
                 return;
