@@ -6103,4 +6103,13 @@ public abstract class Context {
                     + "get a UI context from ActivityThread#getSystemUiContext()");
         }
     }
+
+    /**
+     * Indicates if this context is a visual context such as {@link android.app.Activity} or
+     * a context created from {@link #createWindowContext(int, Bundle)}.
+     * @hide
+     */
+    public boolean isUiContext() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 }

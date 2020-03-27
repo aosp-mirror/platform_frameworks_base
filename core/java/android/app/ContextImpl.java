@@ -1920,7 +1920,9 @@ class ContextImpl extends Context {
         return SystemServiceRegistry.getSystemServiceName(serviceClass);
     }
 
-    private boolean isUiContext() {
+    /** @hide */
+    @Override
+    public boolean isUiContext() {
         return mIsSystemOrSystemUiContext || mIsUiContext || isSystemOrSystemUI();
     }
 
