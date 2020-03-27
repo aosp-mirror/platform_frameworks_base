@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa IP și portul"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scanați codul QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Asociați dispozitivul prin Wi-Fi scanând un cod QR"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Conectați-vă la o rețea Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, remedierea erorilor, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Comandă rapidă pentru raportul de erori"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Afișați un buton în meniul de pornire pentru a realiza un raport de erori"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (roșu-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (albastru-galben)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corecția culorii"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Cu corecția culorii, puteți ajusta modul în care se afișează culorile pe dispozitiv"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Valoare înlocuită de <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Timp aproximativ rămas: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Ar trebui să reziste până la <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ar trebui să reziste până la <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Până la <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateria se poate descărca până la <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"a mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"A mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"A mai rămas mai mult de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -513,26 +510,34 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Difuzorul telefonului"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problemă la conectare. Opriți și reporniți dispozitivul."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispozitiv audio cu fir"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"Ajutor și feedback"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Stocare"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Date la care se permite accesul"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Vedeți și modificați datele la care se permite accesul"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"ID-ul datelor la care se permite accesul: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Expiră pe <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Aplicații care permit accesul la date"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Aplicația nu oferă nicio descriere."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Închirierea expiră pe <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Ștergeți datele la care se permite accesul"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Sigur ștergeți aceste date la care se permite accesul?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Utilizatorii dețin aplicații și materiale proprii"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Puteți restricționa accesul la aplicații și la conținut din contul dvs."</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Utilizator"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profil limitat"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Adăugați un utilizator nou?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puteți să permiteți accesul la acest dispozitiv altor persoane creând utilizatori suplimentari. Fiecare utilizator are propriul spațiu, pe care îl poate personaliza cu aplicații, imagini de fundal etc. De asemenea, utilizatorii pot ajusta setările dispozitivului, cum ar fi setările pentru Wi-Fi, care îi afectează pe toți ceilalți utilizatori.\n\nDupă ce adăugați un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOricare dintre utilizatori poate actualiza aplicațiile pentru toți ceilalți utilizatori. Este posibil ca setările de accesibilitate și serviciile să nu se transfere la noul utilizator."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Când adăugați un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOrice utilizator poate actualiza aplicațiile pentru toți ceilalți utilizatori."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurați utilizatorul acum?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Asigurați-vă că utilizatorul are posibilitatea de a prelua dispozitivul și de a-și configura spațiul"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurați profilul acum?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Configurați acum"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Nu acum"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Adăugați"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Utilizator nou"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Profil nou"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Info. utilizator"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Informații de profil"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Înainte de a putea crea un profil cu permisiuni limitate, va trebui să configurați blocarea ecranului pentru a vă proteja aplicațiile și datele personale."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Configurați blocarea"</string>
 </resources>

@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP հասցե և միացք"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR կոդի սկանավորում"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Զուգակցեք սարքը՝ Wi‑Fi-ի օգնությամբ սկանավորելով QR կոդը"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Միացեք Wi-Fi ցանցի"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, վրիպազերծում, ծրագրավորող"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Սխալի հաղորդման դյուրանցում"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Գործարկման ցանկում ցույց տալ կոճակը՝ վրիպակների հաղորդման համար"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Պրոտանոմալիա (կարմիր-կանաչ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Տրիտանոմալիա (կապույտ-դեղին)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Գունաշտկում"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Գունաշտկումը թույլ է տալիս կարգավորել գույների ցուցադրումն այս սարքում"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Գերազանցված է <xliff:g id="TITLE">%1$s</xliff:g>-ից"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Լիցքը կբավարարի մոտ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Լիցքը պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Մարտկոցի լիցքը կարող է սպառվել մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Մնացել է <xliff:g id="THRESHOLD">%1$s</xliff:g>-ից պակաս"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Մնացել է <xliff:g id="THRESHOLD">%1$s</xliff:g>-ից պակաս (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Մնացել է ավելի քան <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,34 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Հեռախոսի բարձրախոս"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Կապի խնդիր կա: Սարքն անջատեք և նորից միացրեք:"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Լարով աուդիո սարք"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"Օգնություն և հետադարձ կապ"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Տարածք"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Հասանելի դարձված տվյալներ"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Դիտեք և փոփոխեք հասանելի դարձված տվյալները"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Հասանելի դարձված տվյալների ID՝ <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Ժամկետը լրանում է՝ <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Տվյալներով կիսվող հավելվածներ"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Հավելվածի կողմից տրամադրված նկարագրություն չկա։"</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Վարձակալության ժակետն ավարտվում է՝ <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Ջնջել հասանելի դարձված տվյալները"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Իսկապե՞ս ուզում եք ջնջել հասանելի դարձված այս տվյալները։"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Օգտվողներն իրենց անձնական հավելվածներն ու բովանդակությունն ունեն"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Դուք կարող եք սահմանափակել մուտքի իրավունքը ծրագրեր և ձեր հաշվի բովանդակություն:"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Օգտատեր"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Սահմանափակված պրոֆիլ"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Ավելացնե՞լ նոր օգտատեր"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Այս սարքից կարող եք օգտվել մի քանի հոգով: Դրա համար անհրաժեշտ է ստեղծել լրացուցիչ պրոֆիլներ: Յուրաքանչյուր օգտատեր կարող է կարգավորել իր պրոֆիլը ըստ իր հայեցողության և ճաշակի (օր.՝ ընտրել իր ուզած պաստառը, տեղադրել անհրաժեշտ հավելվածները և այլն): Բացի այդ, օգտատերերը կարող են կարգավորել սարքի որոշ պարամետրեր (օր.՝ Wi-Fi-ը), որոնք կգործեն նաև մյուս պրոֆիլների համար:\n\nԵրբ նոր պրոֆիլ ավելացնեք, տվյալ օգտատերը պետք է կարգավորի այն:\n\nՅուրաքանչյուր օգտատեր կարող է թարմացնել մյուս օգտատերերի հավելվածները: Հատուկ գործառույթների և ծառայությունների կարգավորումները կարող են չփոխանցվել նոր օգտատերերին:"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Երբ նոր օգտատեր եք ավելացնում, նա պետք է կարգավորի իր պրոֆիլը:\n\nՑանկացած օգտատեր կարող է թարմացնել հավելվածները մյուս բոլոր հաշիվների համար:"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Կարգավորե՞լ պրոֆիլը"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Համոզվեք, որ անձը կարող է վերցնել սարքը և կարգավորել իր տարածքը"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Կարգավորե՞լ պրոֆիլը հիմա:"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Կարգավորել"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Ոչ հիմա"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Ավելացնել"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Նոր օգտատեր"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Նոր պրոֆիլ"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Օգտատիրոջ տեղեկություններ"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Պրոֆիլի տեղեկություններ"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Նախքան դուք կկարողանաք ստեղծել սահմանափակ պրոֆիլ, դուք պետք է կարգավորեք էկրանի կողպումը` ձեր ծրագրերը և անձնական տվյալները պաշտպանելու համար:"</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Կարգավորել կողպումը"</string>
 </resources>

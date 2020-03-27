@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adres en -poort"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skandeer QR-kode"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Bind toestel oor Wi-Fi saam deur \'n QR-kode te skandeer"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Koppel asseblief aan \'n Wi-Fi-netwerk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Kortpad na foutverslag"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Wys \'n knoppie in die kragkieslys om \'n foutverslag te doen"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (rooi-groen)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (blou-geel)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Kleurregstelling"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Kleurregstelling stel jou in staat om te verstel hoe kleure op jou toestel vertoon word"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Geneutraliseer deur <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ongeveer <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Sal waarskynlik hou tot omtrent <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Sal waarskynlik hou tot omtrent <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Tot <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Battery kan teen <xliff:g id="TIME">%1$s</xliff:g> afloop"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Minder as <xliff:g id="THRESHOLD">%1$s</xliff:g> oor"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Minder as <xliff:g id="THRESHOLD">%1$s</xliff:g> oor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Meer as <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,34 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Foonluidspreker"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kan nie koppel nie. Skakel toestel af en weer aan"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedrade oudiotoestel"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"Hulp en terugvoer"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Berging"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Gedeelde data"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Bekyk en wysig gedeelde data"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Gedeelde data-ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Verval op <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Programme wat data deel"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Geen beskrywing is deur die program voorsien nie."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Huurkontrak verval op <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Vee gedeelde data uit?"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Is jy seker jy wil hierdie gedeelde data uitvee?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Gebruikers het hul eie programme en inhoud"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Jy kan toegang tot programme en inhoud op jou rekening beperk"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Gebruiker"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Beperkte profiel"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Voeg nuwe gebruiker by?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Jy kan hierdie toestel met ander mense deel deur bykomende gebruikers te skep. Elke gebruiker het sy eie spasie wat hulle kan pasmaak met programme, muurpapier en so meer. Gebruikers kan ook toestelinstellings wat almal raak, soos Wi-Fi, aanpas.\n\nWanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul eie spasie opstel.\n\nEnige gebruiker kan programme vir alle ander gebruikers opdateer. Toeganklikheidinstellings en -dienste sal dalk nie na die nuwe gebruiker oorgedra word nie."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel.\n\nEnige gebruiker kan programme vir al die ander gebruikers opdateer."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Moet die gebruiker nou opgestel word?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Maak seker die persoon is beskikbaar om die toestel te vat en hul spasie op te stel"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Stel profiel nou op?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Stel nou op"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Nie nou nie"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Voeg by"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Nuwe gebruiker"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Nuwe profiel"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Gebruikerinligting"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profiel-inligting"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Voordat jy \'n beperkte profiel kan skep, moet jy \'n skermslot opstel om jou programme en persoonlike data te beskerm."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Stel slot op"</string>
 </resources>
