@@ -90,6 +90,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -2631,15 +2632,26 @@ public class HdmiControlService extends SystemService {
     private void announceHdmiControlStatusChange(boolean isEnabled) {
         assertRunOnServiceThread();
         synchronized (mLock) {
+            List<IHdmiControlStatusChangeListener> listeners = new ArrayList<>(
+                    mHdmiControlStatusChangeListenerRecords.size());
             for (HdmiControlStatusChangeListenerRecord record :
                     mHdmiControlStatusChangeListenerRecords) {
-                invokeHdmiControlStatusChangeListenerLocked(record.mListener, isEnabled);
+                listeners.add(record.mListener);
             }
+            invokeHdmiControlStatusChangeListenerLocked(listeners, isEnabled);
         }
     }
 
     private void invokeHdmiControlStatusChangeListenerLocked(
             IHdmiControlStatusChangeListener listener, boolean isEnabled) {
+        invokeHdmiControlStatusChangeListenerLocked(Collections.singletonList(listener), isEnabled);
+    }
+
+    private void invokeHdmiControlStatusChangeListenerLocked(
+            Collection<IHdmiControlStatusChangeListener> listeners, boolean isEnabled) {
+        if (listeners.isEmpty()) {
+            return;
+        }
         if (isEnabled) {
             queryDisplayStatus(new IHdmiControlCallback.Stub() {
                 public void onComplete(int status) {
@@ -2649,23 +2661,25 @@ public class HdmiControlService extends SystemService {
                             || status == HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE) {
                         isAvailable = false;
                     }
-
-                    try {
-                        listener.onStatusChange(isEnabled, isAvailable);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Failed to report HdmiControlStatusChange: " + isEnabled
-                                + " isAvailable: " + isAvailable, e);
-                    }
+                    invokeHdmiControlStatusChangeListenerLocked(listeners, isEnabled, isAvailable);
                 }
             });
             return;
         }
+        invokeHdmiControlStatusChangeListenerLocked(listeners, isEnabled, false);
+    }
 
-        try {
-            listener.onStatusChange(isEnabled, false);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to report HdmiControlStatusChange: " + isEnabled
-                    + " isAvailable: " + false, e);
+    private void invokeHdmiControlStatusChangeListenerLocked(
+            Collection<IHdmiControlStatusChangeListener> listeners, boolean isEnabled,
+            boolean isCecAvailable) {
+        for (IHdmiControlStatusChangeListener listener : listeners) {
+            try {
+                listener.onStatusChange(isEnabled, isCecAvailable);
+            } catch (RemoteException e) {
+                Slog.e(TAG,
+                        "Failed to report HdmiControlStatusChange: " + isEnabled + " isAvailable: "
+                                + isCecAvailable, e);
+            }
         }
     }
 
