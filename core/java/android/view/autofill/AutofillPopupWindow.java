@@ -25,7 +25,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.transition.Transition;
 import android.util.Log;
-import android.util.Size;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver;
@@ -129,10 +128,10 @@ public class AutofillPopupWindow extends PopupWindow {
             // Gravity.BOTTOM because PopupWindow base class does not expose computeGravity().
             final WindowManager windowManager = anchor.getContext()
                     .getSystemService(WindowManager.class);
-            final Size windowSize = windowManager.getCurrentWindowMetrics().getSize();
-            width = windowSize.getWidth();
+            final Rect windowBounds = windowManager.getCurrentWindowMetrics().getBounds();
+            width = windowBounds.width();
             if (height != LayoutParams.MATCH_PARENT) {
-                offsetY = windowSize.getHeight() - height;
+                offsetY = windowBounds.height() - height;
             }
             actualAnchor = anchor;
         } else if (virtualBounds != null) {

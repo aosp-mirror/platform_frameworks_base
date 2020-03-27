@@ -25,13 +25,13 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.Size;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
@@ -119,15 +119,15 @@ public class TestService extends Service {
         @Override
         public void showApplicationOverlay() throws RemoteException {
             final WindowManager wm = mOverlayContext.getSystemService(WindowManager.class);
-            final Size size = wm.getCurrentWindowMetrics().getSize();
+            final Rect bounds = wm.getCurrentWindowMetrics().getBounds();
 
             final WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(
                     TYPE_APPLICATION_OVERLAY,
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                             | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            wmlp.width = size.getWidth() / 2;
-            wmlp.height = size.getHeight() / 2;
+            wmlp.width = bounds.width() / 2;
+            wmlp.height = bounds.height() / 2;
             wmlp.gravity = Gravity.CENTER | Gravity.LEFT;
             wmlp.setTitle(TAG);
 
