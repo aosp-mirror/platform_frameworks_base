@@ -91,7 +91,7 @@ public class TestEnrollmentActivity extends Activity {
         }
         boolean status = mEnrollmentUtil.deleteSoundModel(KEYPHRASE_ID, BCP47_LOCALE);
         if (status) {
-            Toast.makeText(this, "Successfully un-enrolled, model UUID=" + soundModel.uuid,
+            Toast.makeText(this, "Successfully un-enrolled, model UUID=" + soundModel.getUuid(),
                     Toast.LENGTH_SHORT)
                     .show();
         } else {
@@ -112,11 +112,11 @@ public class TestEnrollmentActivity extends Activity {
         // Generate a fake model to push.
         byte[] data = new byte[2048];
         mRandom.nextBytes(data);
-        KeyphraseSoundModel updated = new KeyphraseSoundModel(soundModel.uuid,
-                soundModel.vendorUuid, data, soundModel.keyphrases);
+        KeyphraseSoundModel updated = new KeyphraseSoundModel(soundModel.getUuid(),
+                soundModel.getVendorUuid(), data, soundModel.getKeyphrases());
         boolean status = mEnrollmentUtil.addOrUpdateSoundModel(updated);
         if (status) {
-            Toast.makeText(this, "Successfully re-enrolled, model UUID=" + updated.uuid,
+            Toast.makeText(this, "Successfully re-enrolled, model UUID=" + updated.getUuid(),
                     Toast.LENGTH_SHORT)
                     .show();
         } else {
