@@ -49,8 +49,6 @@ import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
 import static android.system.OsConstants.IPPROTO_UDP;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import static java.util.Map.Entry;
 
 import android.Manifest;
@@ -929,7 +927,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
          * @see IpConnectivityMetrics.Logger
          */
         public IpConnectivityMetrics.Logger getMetricsLogger() {
-            return checkNotNull(LocalServices.getService(IpConnectivityMetrics.Logger.class),
+            return Objects.requireNonNull(LocalServices.getService(IpConnectivityMetrics.Logger.class),
                     "no IpConnectivityMetrics service");
         }
 
@@ -958,10 +956,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             IDnsResolver dnsresolver, IpConnectivityLog logger, INetd netd, Dependencies deps) {
         if (DBG) log("ConnectivityService starting up");
 
-        mDeps = checkNotNull(deps, "missing Dependencies");
+        mDeps = Objects.requireNonNull(deps, "missing Dependencies");
         mSystemProperties = mDeps.getSystemProperties();
         mNetIdManager = mDeps.makeNetIdManager();
-        mContext = checkNotNull(context, "missing Context");
+        mContext = Objects.requireNonNull(context, "missing Context");
 
         mMetricsLog = logger;
         mDefaultRequest = createDefaultInternetRequestForTransport(-1, NetworkRequest.Type.REQUEST);
@@ -991,13 +989,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mLingerDelayMs = mSystemProperties.getInt(LINGER_DELAY_PROPERTY, DEFAULT_LINGER_DELAY_MS);
 
-        mNMS = checkNotNull(netManager, "missing INetworkManagementService");
-        mStatsService = checkNotNull(statsService, "missing INetworkStatsService");
-        mPolicyManager = checkNotNull(policyManager, "missing INetworkPolicyManager");
-        mPolicyManagerInternal = checkNotNull(
+        mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
+        mStatsService = Objects.requireNonNull(statsService, "missing INetworkStatsService");
+        mPolicyManager = Objects.requireNonNull(policyManager, "missing INetworkPolicyManager");
+        mPolicyManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(NetworkPolicyManagerInternal.class),
                 "missing NetworkPolicyManagerInternal");
-        mDnsResolver = checkNotNull(dnsresolver, "missing IDnsResolver");
+        mDnsResolver = Objects.requireNonNull(dnsresolver, "missing IDnsResolver");
         mProxyTracker = mDeps.makeProxyTracker(mContext, mHandler);
 
         mNetd = netd;
@@ -5508,7 +5506,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public NetworkRequest pendingRequestForNetwork(NetworkCapabilities networkCapabilities,
             PendingIntent operation, @NonNull String callingPackageName) {
-        checkNotNull(operation, "PendingIntent cannot be null.");
+        Objects.requireNonNull(operation, "PendingIntent cannot be null.");
         final int callingUid = Binder.getCallingUid();
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
         enforceNetworkRequestPermissions(networkCapabilities);
@@ -5537,7 +5535,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public void releasePendingNetworkRequest(PendingIntent operation) {
-        checkNotNull(operation, "PendingIntent cannot be null.");
+        Objects.requireNonNull(operation, "PendingIntent cannot be null.");
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT,
                 getCallingUid(), 0, operation));
     }
@@ -5596,7 +5594,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public void pendingListenForNetwork(NetworkCapabilities networkCapabilities,
             PendingIntent operation, @NonNull String callingPackageName) {
-        checkNotNull(operation, "PendingIntent cannot be null.");
+        Objects.requireNonNull(operation, "PendingIntent cannot be null.");
         final int callingUid = Binder.getCallingUid();
         if (!hasWifiNetworkListenPermission(networkCapabilities)) {
             enforceAccessPermission();
