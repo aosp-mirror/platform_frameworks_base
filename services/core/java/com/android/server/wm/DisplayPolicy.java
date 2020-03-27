@@ -78,7 +78,6 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
@@ -850,7 +849,6 @@ public class DisplayPolicy {
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
                 attrs.flags &= ~WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
                 break;
-            case TYPE_DREAM:
             case TYPE_WALLPAPER:
                 // Dreams and wallpapers don't have an app window token and can thus not be
                 // letterboxed. Hence always let them extend under the cutout.
@@ -1225,13 +1223,6 @@ public class DisplayPolicy {
                 if (DEBUG_ANIM) Slog.i(TAG, "**** STARTING EXIT");
                 return R.anim.app_starting_exit;
             }
-        } else if (win.getAttrs().type == TYPE_DREAM && mDreamingLockscreen
-                && transit == TRANSIT_ENTER) {
-            // Special case: we are animating in a dream, while the keyguard
-            // is shown.  We don't want an animation on the dream, because
-            // we need it shown immediately with the keyguard animating away
-            // to reveal it.
-            return ANIMATION_NONE;
         }
 
         return ANIMATION_STYLEABLE;
@@ -2528,7 +2519,7 @@ public class DisplayPolicy {
             if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
                 mForceStatusBar = true;
             }
-            if (attrs.type == TYPE_DREAM) {
+            if (win.isDreamWindow()) {
                 // If the lockscreen was showing when the dream started then wait
                 // for the dream to draw before hiding the lockscreen.
                 if (!mDreamingLockscreen

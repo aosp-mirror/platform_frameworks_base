@@ -781,8 +781,6 @@ public interface WindowManager extends ViewManager {
                         to = "BOOT_PROGRESS"),
                 @ViewDebug.IntToString(from = TYPE_INPUT_CONSUMER,
                         to = "INPUT_CONSUMER"),
-                @ViewDebug.IntToString(from = TYPE_DREAM,
-                        to = "DREAM"),
                 @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR_PANEL,
                         to = "NAVIGATION_BAR_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_DISPLAY_OVERLAY,
@@ -1103,13 +1101,6 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_INPUT_CONSUMER = FIRST_SYSTEM_WINDOW+22;
 
         /**
-         * Window type: Dreams (screen saver) window, just above keyguard.
-         * In multiuser systems shows only on the owning user's window.
-         * @hide
-         */
-        public static final int TYPE_DREAM = FIRST_SYSTEM_WINDOW+23;
-
-        /**
          * Window type: Navigation bar panel (when navigation bar is distinct from status bar)
          * In multiuser systems shows on all users' windows.
          * @hide
@@ -1178,8 +1169,9 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_QS_DIALOG = FIRST_SYSTEM_WINDOW+35;
 
         /**
-         * Window type: shares similar characteristics with {@link #TYPE_DREAM}. The layer is
+         * Window type: shows directly above the keyguard. The layer is
          * reserved for screenshot region selection. These windows must not take input focus.
+         * In multiuser systems shows only on the owning user's window.
          * @hide
          */
         public static final int TYPE_SCREENSHOT = FIRST_SYSTEM_WINDOW + 36;
