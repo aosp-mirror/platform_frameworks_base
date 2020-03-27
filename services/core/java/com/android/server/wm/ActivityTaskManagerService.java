@@ -32,7 +32,6 @@ import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -2615,13 +2614,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
-        return getFilteredTasks(maxNum, ACTIVITY_TYPE_UNDEFINED, WINDOWING_MODE_UNDEFINED);
+        return getFilteredTasks(maxNum, false /* filterForVisibleRecents */);
     }
 
+    /**
+     * @param filterOnlyVisibleRecents whether to filter the tasks based on whether they would ever
+     *                                 be visible in the recent task list in systemui
+     */
     @Override
     public List<ActivityManager.RunningTaskInfo> getFilteredTasks(int maxNum,
-            @WindowConfiguration.ActivityType int ignoreActivityType,
-            @WindowConfiguration.WindowingMode int ignoreWindowingMode) {
+            boolean filterOnlyVisibleRecents) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         final boolean crossUser = isCrossUserAllowed(callingPid, callingUid);
@@ -2637,8 +2639,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (DEBUG_ALL) Slog.v(TAG, "getTasks: max=" + maxNum);
 
             final boolean allowed = isGetTasksAllowed("getTasks", callingPid, callingUid);
-            mRootWindowContainer.getRunningTasks(maxNum, list, ignoreActivityType,
-                    ignoreWindowingMode, callingUid, allowed, crossUser, callingProfileIds);
+            mRootWindowContainer.getRunningTasks(maxNum, list, filterOnlyVisibleRecents, callingUid,
+                    allowed, crossUser, callingProfileIds);
         }
 
         return list;
