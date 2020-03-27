@@ -36,6 +36,7 @@ import com.android.internal.util.Protocol;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,7 +48,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * An agent manages the life cycle of a network. A network starts its
  * life cycle when {@link register} is called on NetworkAgent. The network
  * is then connecting. When full L3 connectivity has been established,
- * the agent shoud call {@link setConnected} to inform the system that
+ * the agent shoud call {@link markConnected} to inform the system that
  * this network is ready to use. When the network disconnects its life
  * ends and the agent should call {@link unregister}, at which point the
  * system will clean up and free resources.
@@ -503,7 +504,8 @@ public abstract class NetworkAgent {
                     break;
                 }
                 case CMD_START_SOCKET_KEEPALIVE: {
-                    onStartSocketKeepalive(msg.arg1 /* slot */, msg.arg2 /* interval */,
+                    onStartSocketKeepalive(msg.arg1 /* slot */,
+                            Duration.ofSeconds(msg.arg2) /* interval */,
                             (KeepalivePacketData) msg.obj /* packet */);
                     break;
                 }
@@ -617,10 +619,10 @@ public abstract class NetworkAgent {
      * Inform ConnectivityService that this agent has now connected.
      * Call {@link #unregister} to disconnect.
      */
-    public void setConnected() {
+    public void markConnected() {
         if (mIsLegacy) {
             throw new UnsupportedOperationException(
-                    "Legacy agents can't call setConnected.");
+                    "Legacy agents can't call markConnected.");
         }
         mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
@@ -798,8 +800,8 @@ public abstract class NetworkAgent {
      * {@code VALIDATION_STATUS_VALID} if Internet connectivity was validated,
      * {@code VALIDATION_STATUS_NOT_VALID} if Internet connectivity was not validated.
      *
-     * This may be called multiple times as network status changes, or if there are multiple
-     * subsequent attempts to validate connectivity that fail.
+     * This is guaranteed to be called again when the network status changes, but the system
+     * may also call this multiple times even if the status does not change.
      *
      * @param status one of {@code VALIDATION_STATUS_VALID} or {@code VALIDATION_STATUS_NOT_VALID}.
      * @param redirectUri If Internet connectivity is being redirected (e.g., on a captive portal),
@@ -832,18 +834,25 @@ public abstract class NetworkAgent {
      * Requests that the network hardware send the specified packet at the specified interval.
      *
      * @param slot the hardware slot on which to start the keepalive.
-     * @param intervalSeconds the interval between packets
+     * @param interval the interval between packets, between 10 and 3600. Note that this API
+     *                 does not support sub-second precision and will round off the request.
      * @param packet the packet to send.
      */
     // seconds is from SocketKeepalive.MIN_INTERVAL_SEC to MAX_INTERVAL_SEC, but these should
     // not be exposed as constants because they may change in the future (API guideline 4.8)
     // and should have getters if exposed at all. Getters can't be used in the annotation,
     // so the values unfortunately need to be copied.
-    public void onStartSocketKeepalive(int slot,
-            @IntRange(from = 10, to = 3600) int intervalSeconds,
+    public void onStartSocketKeepalive(int slot, @NonNull Duration interval,
             @NonNull KeepalivePacketData packet) {
-        Message msg = mHandler.obtainMessage(CMD_START_SOCKET_KEEPALIVE, slot, intervalSeconds,
-                packet);
+        final long intervalSeconds = interval.getSeconds();
+        if (intervalSeconds < SocketKeepalive.MIN_INTERVAL_SEC
+                || intervalSeconds > SocketKeepalive.MAX_INTERVAL_SEC) {
+            throw new IllegalArgumentException("Interval needs to be comprised between "
+                    + SocketKeepalive.MIN_INTERVAL_SEC + " and " + SocketKeepalive.MAX_INTERVAL_SEC
+                    + " but was " + intervalSeconds);
+        }
+        final Message msg = mHandler.obtainMessage(CMD_START_SOCKET_KEEPALIVE, slot,
+                (int) intervalSeconds, packet);
         startSocketKeepalive(msg);
         msg.recycle();
     }

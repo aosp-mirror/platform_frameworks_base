@@ -97,7 +97,7 @@ public final class TelephonyNetworkSpecifier extends NetworkSpecifier implements
 
     /** @hide */
     @Override
-    public boolean satisfiedBy(NetworkSpecifier other) {
+    public boolean canBeSatisfiedBy(NetworkSpecifier other) {
         // Any generic requests should be satisfied by a specific telephony network.
         // For simplicity, we treat null same as MatchAllNetworkSpecifier
         return equals(other) || other == null || other instanceof MatchAllNetworkSpecifier;
