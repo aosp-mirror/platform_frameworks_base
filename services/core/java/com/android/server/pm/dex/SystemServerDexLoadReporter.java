@@ -38,7 +38,7 @@ public class SystemServerDexLoadReporter implements BaseDexClassLoader.Reporter 
 
     private final IPackageManager mPackageManager;
 
-    public SystemServerDexLoadReporter(IPackageManager pm) {
+    private SystemServerDexLoadReporter(IPackageManager pm) {
         mPackageManager = pm;
     }
 
@@ -59,6 +59,25 @@ public class SystemServerDexLoadReporter implements BaseDexClassLoader.Reporter 
                     VMRuntime.getRuntime().vmInstructionSet());
         } catch (RemoteException ignored) {
             // We're in system server, it can't happen.
+        }
+    }
+
+    /**
+     * Configures system server dex file reporting.
+     * <p>The method will install a reporter in the BaseDexClassLoader and also
+     * force the reporting of any dex files already loaded by the system server.
+     */
+    public static void configureSystemServerDexReporter(IPackageManager pm) {
+        Slog.i(TAG, "Configuring system server dex reporter");
+
+        SystemServerDexLoadReporter reporter = new SystemServerDexLoadReporter(pm);
+        BaseDexClassLoader.setReporter(reporter);
+        ClassLoader currrentClassLoader = reporter.getClass().getClassLoader();
+        if (currrentClassLoader instanceof BaseDexClassLoader) {
+            ((BaseDexClassLoader) currrentClassLoader).reportClassLoaderChain();
+        } else {
+            Slog.wtf(TAG, "System server class loader is not a BaseDexClassLoader. type="
+                    + currrentClassLoader.getClass().getName());
         }
     }
 }

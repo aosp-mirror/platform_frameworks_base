@@ -172,7 +172,6 @@ import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
-import dalvik.system.BaseDexClassLoader;
 import dalvik.system.VMRuntime;
 
 import com.google.android.startop.iorap.IorapForwardingService;
@@ -844,7 +843,7 @@ public final class SystemServer {
         // Now that the package manager has started, register the dex load reporter to capture any
         // dex files loaded by system server.
         // These dex files will be optimized by the BackgroundDexOptService.
-        BaseDexClassLoader.setReporter(new SystemServerDexLoadReporter(mPackageManagerService));
+        SystemServerDexLoadReporter.configureSystemServerDexReporter(mPackageManagerService);
 
         mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();
