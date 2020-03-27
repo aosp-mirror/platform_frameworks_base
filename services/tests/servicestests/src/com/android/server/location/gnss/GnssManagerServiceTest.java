@@ -61,17 +61,9 @@ import android.os.RemoteException;
 
 import com.android.server.LocalServices;
 import com.android.server.location.AppForegroundHelper;
-import com.android.server.location.GnssAntennaInfoProvider;
-import com.android.server.location.GnssAntennaInfoProvider.GnssAntennaInfoProviderNative;
-import com.android.server.location.GnssBatchingProvider;
-import com.android.server.location.GnssCapabilitiesProvider;
-import com.android.server.location.GnssLocationProvider;
-import com.android.server.location.GnssMeasurementCorrectionsProvider;
-import com.android.server.location.GnssMeasurementsProvider;
-import com.android.server.location.GnssMeasurementsProvider.GnssMeasurementProviderNative;
-import com.android.server.location.GnssNavigationMessageProvider;
-import com.android.server.location.GnssNavigationMessageProvider.GnssNavigationMessageProviderNative;
-import com.android.server.location.GnssStatusListenerHelper;
+import com.android.server.location.gnss.GnssAntennaInfoProvider.GnssAntennaInfoProviderNative;
+import com.android.server.location.gnss.GnssMeasurementsProvider.GnssMeasurementProviderNative;
+import com.android.server.location.gnss.GnssNavigationMessageProvider.GnssNavigationMessageProviderNative;
 import com.android.server.location.LocationUsageLogger;
 import com.android.server.location.SettingsHelper;
 
