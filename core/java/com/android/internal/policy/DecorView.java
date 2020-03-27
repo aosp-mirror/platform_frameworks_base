@@ -78,7 +78,6 @@ import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.InputQueue;
 import android.view.InsetsState;
-import android.view.InsetsController;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
@@ -1174,6 +1173,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     false /* matchVertical */, statusBarNeedsLeftInset, statusBarSideInset,
                     animate && !disallowAnimate,
                     mForceWindowDrawsBarBackgrounds, state);
+
+            if (mHasCaption) {
+                final int captionColor = calculateStatusBarColor();
+                mDecorCaptionView.getCaption().setBackgroundColor(captionColor);
+                updateDecorCaptionShade();
+            }
         }
 
         // When we expand the window with FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS or
@@ -1355,7 +1360,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 : state.attributes.isPresent(insetsState, mWindow.getAttributes().flags, force);
         boolean show = state.attributes.isVisible(state.present, color,
                 mWindow.getAttributes().flags, force);
-        boolean showView = show && !isResizing() && size > 0;
+        boolean showView = show && !isResizing() && !mHasCaption && size > 0;
 
         boolean visibilityChanged = false;
         View view = state.view;
@@ -2021,6 +2026,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             if (getForeground() != null) {
                 drawableChanged();
             }
+            getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
         }
     }
 
@@ -2094,6 +2100,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mDecorCaptionView.onConfigurationChanged(displayWindowDecor);
             enableCaption(displayWindowDecor);
         }
+        getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
     }
 
     void onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
@@ -2182,11 +2189,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         inflater = inflater.from(context);
         final DecorCaptionView view = (DecorCaptionView) inflater.inflate(R.layout.decor_caption,
                 null);
-        setDecorCaptionShade(context, view);
+        setDecorCaptionShade(view);
         return view;
     }
 
-    private void setDecorCaptionShade(Context context, DecorCaptionView view) {
+    private void setDecorCaptionShade(DecorCaptionView view) {
         final int shade = mWindow.getDecorCaptionShade();
         switch (shade) {
             case DECOR_CAPTION_SHADE_LIGHT:
@@ -2196,15 +2203,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 setDarkDecorCaptionShade(view);
                 break;
             default: {
-                TypedValue value = new TypedValue();
-                context.getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
-                // We invert the shade depending on brightness of the theme. Dark shade for light
-                // theme and vice versa. Thanks to this the buttons should be visible on the
-                // background.
-                if (Color.luminance(value.data) < 0.5) {
-                    setLightDecorCaptionShade(view);
-                } else {
+                if ((getWindowSystemUiVisibility() & SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0) {
                     setDarkDecorCaptionShade(view);
+                } else {
+                    setLightDecorCaptionShade(view);
                 }
                 break;
             }
@@ -2213,7 +2215,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     void updateDecorCaptionShade() {
         if (mDecorCaptionView != null) {
-            setDecorCaptionShade(getContext(), mDecorCaptionView);
+            setDecorCaptionShade(mDecorCaptionView);
         }
     }
 
@@ -2481,6 +2483,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     int getCaptionHeight() {
         return isShowingCaption() ? mDecorCaptionView.getCaptionHeight() : 0;
+    }
+
+    /**
+     * @hide
+     * @return the height of insets covering the top of window content area.
+     */
+    public int getCaptionInsetsHeight() {
+        if (!mWindow.isOverlayWithDecorCaptionEnabled()) return 0;
+        return getCaptionHeight();
     }
 
     /**
