@@ -1496,8 +1496,6 @@ public class AppOpsManager {
             OP_MANAGE_EXTERNAL_STORAGE,
             OP_INTERACT_ACROSS_PROFILES,
             OP_LOADER_USAGE_STATS,
-            OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
-            OP_AUTO_REVOKE_MANAGED_BY_INSTALLER,
     };
 
     /**
