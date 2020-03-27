@@ -169,6 +169,22 @@ public class MetricsFeatureProvider {
                 sourceMetricsCategory);
     }
 
+    /**
+     * Logs an event when the intent is started by Profile select dialog.
+     *
+     * @return true if the intent is loggable, otherwise false
+     */
+    public boolean logStartedIntentWithProfile(Intent intent, int sourceMetricsCategory,
+            boolean isWorkProfile) {
+        if (intent == null) {
+            return false;
+        }
+        final ComponentName cn = intent.getComponent();
+        final String key = cn != null ? cn.flattenToString() : intent.getAction();
+        return logSettingsTileClick(key + (isWorkProfile ? "/work" : "/personal"),
+                sourceMetricsCategory);
+    }
+
     private boolean logSettingsTileClick(String logKey, int sourceMetricsCategory) {
         if (TextUtils.isEmpty(logKey)) {
             // Not loggable

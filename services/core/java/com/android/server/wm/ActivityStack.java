@@ -2343,7 +2343,7 @@ class ActivityStack extends Task {
             // Starting activity cannot be occluding activity, otherwise starting window could be
             // remove immediately without transferring to starting activity.
             final ActivityRecord occludingActivity = getActivity(
-                    (ar) -> !ar.finishing && ar.occludesParent(), true, r);
+                    (ar) -> ar.occludesParent(), true, r);
             if (occludingActivity != null) {
                 // Here it is!  Now, if this is not yet visible (occluded by another task) to the
                 // user, then just add it without starting; it will get started when the user
@@ -3076,9 +3076,8 @@ class ActivityStack extends Task {
         }
 
         // See if there is an occluding activity on-top of this one.
-        final ActivityRecord occludingActivity = getActivity((ar) ->
-                ar.occludesParent() && !ar.finishing,
-                r, false /*includeBoundary*/, true /*traverseTopToBottom*/);
+        final ActivityRecord occludingActivity = getActivity((ar) -> ar.occludesParent(), r,
+                false /*includeBoundary*/, true /*traverseTopToBottom*/);
         if (occludingActivity != null) return false;
 
         if (r.finishing) Slog.e(TAG, "willActivityBeVisible: Returning false,"

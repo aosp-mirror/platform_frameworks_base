@@ -31,7 +31,7 @@ import android.app.contentsuggestions.SelectionsRequest;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
+import android.hardware.HardwareBuffer;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -156,7 +156,7 @@ public class ContentSuggestionsManagerService extends
             }
             enforceCaller(UserHandle.getCallingUserId(), "provideContextImage");
 
-            GraphicBuffer snapshotBuffer = null;
+            HardwareBuffer snapshotBuffer = null;
             int colorSpaceId = 0;
 
             // Skip taking TaskSnapshot when bitmap is provided.
@@ -165,7 +165,7 @@ public class ContentSuggestionsManagerService extends
                 ActivityManager.TaskSnapshot snapshot =
                         mActivityTaskManagerInternal.getTaskSnapshotBlocking(taskId, false);
                 if (snapshot != null) {
-                    snapshotBuffer = snapshot.getSnapshot();
+                    snapshotBuffer = snapshot.getHardwareBuffer();
                     ColorSpace colorSpace = snapshot.getColorSpace();
                     if (colorSpace != null) {
                         colorSpaceId = colorSpace.getId();

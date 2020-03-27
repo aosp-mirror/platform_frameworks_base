@@ -36,10 +36,9 @@ import android.content.ComponentName;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -66,8 +65,8 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
 
     private void setupSurface(int width, int height, Rect contentInsets, int sysuiVis,
             int windowFlags, Rect taskBounds) {
-        final GraphicBuffer buffer = GraphicBuffer.create(width, height, PixelFormat.RGBA_8888,
-                GraphicBuffer.USAGE_SW_READ_RARELY | GraphicBuffer.USAGE_SW_WRITE_NEVER);
+        final HardwareBuffer buffer = HardwareBuffer.create(width, height, HardwareBuffer.RGBA_8888,
+                1, HardwareBuffer.USAGE_CPU_READ_RARELY);
 
         // Previously when constructing TaskSnapshots for this test, scale was 1.0f, so to mimic
         // this behavior set the taskSize to be the same as the taskBounds width and height. The

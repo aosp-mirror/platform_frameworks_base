@@ -115,6 +115,11 @@ droidstubs {
             baseline_file: "api/lint-baseline.txt",
         },
     },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/public/api",
+        dest: "android.txt",
+    },
     jdiff_enabled: true,
 }
 
@@ -155,6 +160,11 @@ droidstubs {
             baseline_file: "api/system-lint-baseline.txt",
         },
     },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system/api",
+        dest: "android.txt",
+    },
     jdiff_enabled: true,
 }
 
@@ -177,6 +187,11 @@ droidstubs {
             enabled: true,
             baseline_file: "api/test-lint-baseline.txt",
         },
+    },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/test/api",
+        dest: "android.txt",
     },
 }
 
@@ -213,6 +228,11 @@ droidstubs {
             baseline_file: "api/module-lib-lint-baseline.txt",
         },
     },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/module-lib/api",
+        dest: "android.txt",
+    },
 }
 
 
@@ -235,16 +255,18 @@ droidstubs {
 java_defaults {
     name: "framework-stubs-default",
     libs: [ "stub-annotations" ],
-    static_libs: [ "private-stub-annotations-jar" ],
+    static_libs: [
+        "private-stub-annotations-jar",
+
+        // License notices from art module
+        "art-notices-for-framework-stubs-jar",
+    ],
     sdk_version: "core_current",
     errorprone: {
         javacflags: [
             "-XepDisableAllChecks",
         ],
     },
-    java_resources: [
-        ":notices-for-framework-stubs",
-    ],
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,

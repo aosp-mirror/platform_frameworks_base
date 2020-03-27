@@ -127,6 +127,9 @@ public final class ShareTargetPredictorTest {
         when(mEventHistory1.getEventIndex(anySet())).thenReturn(mEventIndex1);
         when(mEventHistory2.getEventIndex(anySet())).thenReturn(mEventIndex2);
         when(mEventHistory3.getEventIndex(anySet())).thenReturn(mEventIndex3);
+        when(mEventHistory1.getEventIndex(anyInt())).thenReturn(mEventIndex1);
+        when(mEventHistory2.getEventIndex(anyInt())).thenReturn(mEventIndex2);
+        when(mEventHistory3.getEventIndex(anyInt())).thenReturn(mEventIndex3);
         when(mEventIndex1.getMostRecentActiveTimeSlot()).thenReturn(new Range<>(1L, 2L));
         when(mEventIndex2.getMostRecentActiveTimeSlot()).thenReturn(new Range<>(2L, 3L));
         when(mEventIndex3.getMostRecentActiveTimeSlot()).thenReturn(new Range<>(3L, 4L));
@@ -183,6 +186,12 @@ public final class ShareTargetPredictorTest {
         when(mEventHistory4.getEventIndex(anySet())).thenReturn(mEventIndex4);
         when(mEventHistory5.getEventIndex(anySet())).thenReturn(mEventIndex5);
         when(mEventHistory6.getEventIndex(anySet())).thenReturn(mEventIndex6);
+        when(mEventHistory1.getEventIndex(anyInt())).thenReturn(mEventIndex1);
+        when(mEventHistory2.getEventIndex(anyInt())).thenReturn(mEventIndex2);
+        when(mEventHistory3.getEventIndex(anyInt())).thenReturn(mEventIndex3);
+        when(mEventHistory4.getEventIndex(anyInt())).thenReturn(mEventIndex4);
+        when(mEventHistory5.getEventIndex(anyInt())).thenReturn(mEventIndex5);
+        when(mEventHistory6.getEventIndex(anyInt())).thenReturn(mEventIndex6);
         when(mEventIndex1.getMostRecentActiveTimeSlot()).thenReturn(new Range<>(1L, 2L));
         when(mEventIndex2.getMostRecentActiveTimeSlot()).thenReturn(new Range<>(2L, 3L));
         when(mEventIndex3.getMostRecentActiveTimeSlot()).thenReturn(new Range<>(3L, 4L));
@@ -220,19 +229,19 @@ public final class ShareTargetPredictorTest {
     @Test
     public void testSortTargets() {
         AppTarget appTarget1 = new AppTarget.Builder(
-                    new AppTargetId("cls1#pkg1"), PACKAGE_1, UserHandle.of(USER_ID))
+                new AppTargetId("cls1#pkg1"), PACKAGE_1, UserHandle.of(USER_ID))
                 .setClassName(CLASS_1)
                 .build();
         AppTarget appTarget2 = new AppTarget.Builder(
-                    new AppTargetId("cls2#pkg1"), PACKAGE_1, UserHandle.of(USER_ID))
+                new AppTargetId("cls2#pkg1"), PACKAGE_1, UserHandle.of(USER_ID))
                 .setClassName(CLASS_2)
                 .build();
         AppTarget appTarget3 = new AppTarget.Builder(
-                    new AppTargetId("cls1#pkg2"), PACKAGE_2, UserHandle.of(USER_ID))
+                new AppTargetId("cls1#pkg2"), PACKAGE_2, UserHandle.of(USER_ID))
                 .setClassName(CLASS_1)
                 .build();
         AppTarget appTarget4 = new AppTarget.Builder(
-                    new AppTargetId("cls2#pkg2"), PACKAGE_2, UserHandle.of(USER_ID))
+                new AppTargetId("cls2#pkg2"), PACKAGE_2, UserHandle.of(USER_ID))
                 .setClassName(CLASS_2)
                 .build();
         AppTarget appTarget5 = new AppTarget.Builder(
@@ -251,6 +260,10 @@ public final class ShareTargetPredictorTest {
         when(mEventHistory2.getEventIndex(anySet())).thenReturn(mEventIndex2);
         when(mEventHistory3.getEventIndex(anySet())).thenReturn(mEventIndex3);
         when(mEventHistory4.getEventIndex(anySet())).thenReturn(mEventIndex4);
+        when(mEventHistory1.getEventIndex(anyInt())).thenReturn(mEventIndex1);
+        when(mEventHistory2.getEventIndex(anyInt())).thenReturn(mEventIndex2);
+        when(mEventHistory3.getEventIndex(anyInt())).thenReturn(mEventIndex3);
+        when(mEventHistory4.getEventIndex(anyInt())).thenReturn(mEventIndex4);
         when(mEventIndex1.getMostRecentActiveTimeSlot()).thenReturn(new Range<>(1L, 2L));
         when(mEventIndex2.getMostRecentActiveTimeSlot()).thenReturn(new Range<>(2L, 3L));
         when(mEventIndex3.getMostRecentActiveTimeSlot()).thenReturn(new Range<>(3L, 4L));
@@ -265,14 +278,14 @@ public final class ShareTargetPredictorTest {
                 appTarget4, appTarget3, appTarget2, appTarget1, appTarget5);
     }
 
-    private ShareShortcutInfo buildShareShortcut(
+    private static ShareShortcutInfo buildShareShortcut(
             String packageName, String className, String shortcutId) {
         ShortcutInfo shortcutInfo = buildShortcut(packageName, shortcutId);
         ComponentName componentName = new ComponentName(packageName, className);
         return new ShareShortcutInfo(shortcutInfo, componentName);
     }
 
-    private ShortcutInfo buildShortcut(String packageName, String shortcutId) {
+    private static ShortcutInfo buildShortcut(String packageName, String shortcutId) {
         Context mockContext = mock(Context.class);
         when(mockContext.getPackageName()).thenReturn(packageName);
         when(mockContext.getUserId()).thenReturn(USER_ID);

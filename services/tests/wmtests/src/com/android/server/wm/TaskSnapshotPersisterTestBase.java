@@ -38,6 +38,7 @@ import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.UserManager;
 import android.view.Surface;
 
@@ -177,7 +178,8 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             Canvas c = buffer.lockCanvas();
             c.drawColor(Color.RED);
             buffer.unlockCanvasAndPost(c);
-            return new TaskSnapshot(MOCK_SNAPSHOT_ID, new ComponentName("", ""), buffer,
+            return new TaskSnapshot(MOCK_SNAPSHOT_ID, new ComponentName("", ""),
+                    HardwareBuffer.createFromGraphicBuffer(buffer),
                     ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
                     mRotation, taskSize, TEST_INSETS,
                     // When building a TaskSnapshot with the Builder class, isLowResolution

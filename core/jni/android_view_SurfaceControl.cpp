@@ -27,6 +27,7 @@
 #include <android-base/chrono_utils.h>
 #include <android/graphics/region.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
 #include <gui/Surface.h>
@@ -133,11 +134,6 @@ static struct {
 
 static struct {
     jclass clazz;
-    jmethodID builder;
-} gGraphicBufferClassInfo;
-
-static struct {
-    jclass clazz;
     jmethodID ctor;
 } gDisplayedContentSampleClassInfo;
 
@@ -166,7 +162,7 @@ static struct {
 static struct {
     jclass clazz;
     jmethodID builder;
-} gScreenshotGraphicBufferClassInfo;
+} gScreenshotHardwareBufferClassInfo;
 
 static struct {
     jclass clazz;
@@ -298,16 +294,13 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
         return NULL;
     }
 
+    jobject jhardwareBuffer =
+            android_hardware_HardwareBuffer_createFromAHardwareBuffer(env,
+                                                                      buffer->toAHardwareBuffer());
     const jint namedColorSpace = fromDataspaceToNamedColorSpaceValue(dataspace);
-    return env->CallStaticObjectMethod(gScreenshotGraphicBufferClassInfo.clazz,
-            gScreenshotGraphicBufferClassInfo.builder,
-            buffer->getWidth(),
-            buffer->getHeight(),
-            buffer->getPixelFormat(),
-            (jint)buffer->getUsage(),
-            (jlong)buffer.get(),
-            namedColorSpace,
-            capturedSecureLayers);
+    return env->CallStaticObjectMethod(gScreenshotHardwareBufferClassInfo.clazz,
+                                       gScreenshotHardwareBufferClassInfo.builder, jhardwareBuffer,
+                                       namedColorSpace, capturedSecureLayers);
 }
 
 static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTokenObj,
@@ -356,16 +349,13 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTok
         return NULL;
     }
 
+    jobject jhardwareBuffer =
+            android_hardware_HardwareBuffer_createFromAHardwareBuffer(env,
+                                                                      buffer->toAHardwareBuffer());
     const jint namedColorSpace = fromDataspaceToNamedColorSpaceValue(dataspace);
-    return env->CallStaticObjectMethod(gScreenshotGraphicBufferClassInfo.clazz,
-                                       gScreenshotGraphicBufferClassInfo.builder,
-                                       buffer->getWidth(),
-                                       buffer->getHeight(),
-                                       buffer->getPixelFormat(),
-                                       (jint)buffer->getUsage(),
-                                       (jlong)buffer.get(),
-                                       namedColorSpace,
-                                       false /* capturedSecureLayers */);
+    return env->CallStaticObjectMethod(gScreenshotHardwareBufferClassInfo.clazz,
+                                       gScreenshotHardwareBufferClassInfo.builder, jhardwareBuffer,
+                                       namedColorSpace, false /* capturedSecureLayers */);
 }
 
 static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionObj, jboolean sync) {
@@ -1548,12 +1538,12 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetOverrideScalingMode },
     {"nativeScreenshot",
             "(Landroid/os/IBinder;Landroid/graphics/Rect;IIZIZ)"
-            "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
+            "Landroid/view/SurfaceControl$ScreenshotHardwareBuffer;",
             (void*)nativeScreenshot },
     {"nativeCaptureLayers",
             "(Landroid/os/IBinder;JLandroid/graphics/Rect;"
             "F[JI)"
-            "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
+            "Landroid/view/SurfaceControl$ScreenshotHardwareBuffer;",
             (void*)nativeCaptureLayers },
     {"nativeSetInputWindowInfo", "(JJLandroid/view/InputWindowHandle;)V",
             (void*)nativeSetInputWindowInfo },
@@ -1663,18 +1653,14 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetMethodIDOrDie(env, deviceProductInfoManufactureDateClazz, "<init>",
                              "(Ljava/lang/Integer;Ljava/lang/Integer;)V");
 
-    jclass graphicsBufferClazz = FindClassOrDie(env, "android/graphics/GraphicBuffer");
-    gGraphicBufferClassInfo.clazz = MakeGlobalRefOrDie(env, graphicsBufferClazz);
-    gGraphicBufferClassInfo.builder = GetStaticMethodIDOrDie(env, graphicsBufferClazz,
-            "createFromExisting", "(IIIIJ)Landroid/graphics/GraphicBuffer;");
-
-    jclass screenshotGraphicsBufferClazz = FindClassOrDie(env,
-            "android/view/SurfaceControl$ScreenshotGraphicBuffer");
-    gScreenshotGraphicBufferClassInfo.clazz =
+    jclass screenshotGraphicsBufferClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$ScreenshotHardwareBuffer");
+    gScreenshotHardwareBufferClassInfo.clazz =
             MakeGlobalRefOrDie(env, screenshotGraphicsBufferClazz);
-    gScreenshotGraphicBufferClassInfo.builder = GetStaticMethodIDOrDie(env,
-            screenshotGraphicsBufferClazz,
-            "createFromNative", "(IIIIJIZ)Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;");
+    gScreenshotHardwareBufferClassInfo.builder =
+            GetStaticMethodIDOrDie(env, screenshotGraphicsBufferClazz, "createFromNative",
+                                   "(Landroid/hardware/HardwareBuffer;IZ)Landroid/view/"
+                                   "SurfaceControl$ScreenshotHardwareBuffer;");
 
     jclass displayedContentSampleClazz = FindClassOrDie(env,
             "android/hardware/display/DisplayedContentSample");

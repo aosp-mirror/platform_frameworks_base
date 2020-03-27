@@ -258,7 +258,8 @@ class ZygoteConnection {
                 parsedArgs.mRuntimeFlags, rlimits, parsedArgs.mMountExternal, parsedArgs.mSeInfo,
                 parsedArgs.mNiceName, fdsToClose, fdsToIgnore, parsedArgs.mStartChildZygote,
                 parsedArgs.mInstructionSet, parsedArgs.mAppDataDir, parsedArgs.mIsTopApp,
-                parsedArgs.mPkgDataInfoList, parsedArgs.mBindMountAppStorageDirs);
+                parsedArgs.mPkgDataInfoList,parsedArgs.mWhitelistedDataInfoList,
+                parsedArgs.mBindMountAppDataDirs, parsedArgs.mBindMountAppStorageDirs);
 
         try {
             if (pid == 0) {

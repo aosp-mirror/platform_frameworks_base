@@ -51,6 +51,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
+import android.hardware.HardwareBuffer;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
@@ -2006,7 +2007,7 @@ public class ActivityManager {
         private final long mId;
         // Top activity in task when snapshot was taken
         private final ComponentName mTopActivityComponent;
-        private final GraphicBuffer mSnapshot;
+        private final HardwareBuffer mSnapshot;
         /** Indicates whether task was in landscape or portrait */
         @Configuration.Orientation
         private final int mOrientation;
@@ -2029,7 +2030,7 @@ public class ActivityManager {
         private final ColorSpace mColorSpace;
 
         public TaskSnapshot(long id,
-                @NonNull ComponentName topActivityComponent, GraphicBuffer snapshot,
+                @NonNull ComponentName topActivityComponent, HardwareBuffer snapshot,
                 @NonNull ColorSpace colorSpace, int orientation, int rotation, Point taskSize,
                 Rect contentInsets, boolean isLowResolution, boolean isRealSnapshot,
                 int windowingMode, int systemUiVisibility, boolean isTranslucent) {
@@ -2084,14 +2085,24 @@ public class ActivityManager {
 
         /**
          * @return The graphic buffer representing the screenshot.
+         *
+         * Note: Prefer {@link #getHardwareBuffer}, which returns the internal object. This version
+         * creates a new object.
          */
         @UnsupportedAppUsage
         public GraphicBuffer getSnapshot() {
+            return GraphicBuffer.createFromHardwareBuffer(mSnapshot);
+        }
+
+        /**
+         * @return The hardware buffer representing the screenshot.
+         */
+        public HardwareBuffer getHardwareBuffer() {
             return mSnapshot;
         }
 
         /**
-         * @return The color space of graphic buffer representing the screenshot.
+         * @return The color space of hardware buffer representing the screenshot.
          */
         public ColorSpace getColorSpace() {
             return mColorSpace;
@@ -2224,7 +2235,7 @@ public class ActivityManager {
         public static final class Builder {
             private long mId;
             private ComponentName mTopActivity;
-            private GraphicBuffer mSnapshot;
+            private HardwareBuffer mSnapshot;
             private ColorSpace mColorSpace;
             private int mOrientation;
             private int mRotation;
@@ -2246,7 +2257,7 @@ public class ActivityManager {
                 return this;
             }
 
-            public Builder setSnapshot(GraphicBuffer buffer) {
+            public Builder setSnapshot(HardwareBuffer buffer) {
                 mSnapshot = buffer;
                 return this;
             }

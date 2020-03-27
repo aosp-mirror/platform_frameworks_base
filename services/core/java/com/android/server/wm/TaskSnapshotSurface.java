@@ -53,12 +53,12 @@ import android.app.ActivityThread;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.hardware.HardwareBuffer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -202,7 +202,7 @@ class TaskSnapshotSurface implements StartingSurface {
             layoutParams.windowAnimations = mainWindow.getAttrs().windowAnimations;
             layoutParams.dimAmount = mainWindow.getAttrs().dimAmount;
             layoutParams.type = TYPE_APPLICATION_STARTING;
-            layoutParams.format = snapshot.getSnapshot().getFormat();
+            layoutParams.format = snapshot.getHardwareBuffer().getFormat();
             layoutParams.flags = (windowFlags & ~FLAG_INHERIT_EXCLUDES)
                     | FLAG_NOT_FOCUSABLE
                     | FLAG_NOT_TOUCHABLE;
@@ -306,8 +306,9 @@ class TaskSnapshotSurface implements StartingSurface {
         mFrame.set(frame);
         mContentInsets.set(contentInsets);
         mStableInsets.set(stableInsets);
-        mSizeMismatch = (mFrame.width() != mSnapshot.getSnapshot().getWidth()
-                || mFrame.height() != mSnapshot.getSnapshot().getHeight());
+        final HardwareBuffer snapshot = mSnapshot.getHardwareBuffer();
+        mSizeMismatch = (mFrame.width() != snapshot.getWidth()
+                || mFrame.height() != snapshot.getHeight());
         mSystemBarBackgroundPainter.setInsets(contentInsets, stableInsets);
     }
 
@@ -335,7 +336,7 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     private void drawSizeMatchSnapshot() {
-        mSurface.attachAndQueueBufferWithColorSpace(mSnapshot.getSnapshot(),
+        mSurface.attachAndQueueBufferWithColorSpace(mSnapshot.getHardwareBuffer(),
                 mSnapshot.getColorSpace());
         mSurface.release();
     }
@@ -344,7 +345,7 @@ class TaskSnapshotSurface implements StartingSurface {
         if (!mSurface.isValid()) {
             throw new IllegalStateException("mSurface does not hold a valid surface.");
         }
-        final GraphicBuffer buffer = mSnapshot.getSnapshot();
+        final HardwareBuffer buffer = mSnapshot.getHardwareBuffer();
         final SurfaceSession session = new SurfaceSession();
         // We consider nearly matched dimensions as there can be rounding errors and the user won't
         // notice very minute differences from scaling one dimension more than the other
@@ -403,12 +404,12 @@ class TaskSnapshotSurface implements StartingSurface {
     @VisibleForTesting
     Rect calculateSnapshotCrop() {
         final Rect rect = new Rect();
-        rect.set(0, 0, mSnapshot.getSnapshot().getWidth(), mSnapshot.getSnapshot().getHeight());
+        final HardwareBuffer snapshot = mSnapshot.getHardwareBuffer();
+        rect.set(0, 0, snapshot.getWidth(), snapshot.getHeight());
         final Rect insets = mSnapshot.getContentInsets();
 
-        final float scaleX = (float) mSnapshot.getSnapshot().getWidth() / mSnapshot.getTaskSize().x;
-        final float scaleY =
-                (float) mSnapshot.getSnapshot().getHeight() / mSnapshot.getTaskSize().y;
+        final float scaleX = (float) snapshot.getWidth() / mSnapshot.getTaskSize().x;
+        final float scaleY = (float) snapshot.getHeight() / mSnapshot.getTaskSize().y;
 
         // Let's remove all system decorations except the status bar, but only if the task is at the
         // very top of the screen.
@@ -427,9 +428,9 @@ class TaskSnapshotSurface implements StartingSurface {
      */
     @VisibleForTesting
     Rect calculateSnapshotFrame(Rect crop) {
-        final float scaleX = (float) mSnapshot.getSnapshot().getWidth() / mSnapshot.getTaskSize().x;
-        final float scaleY =
-                (float) mSnapshot.getSnapshot().getHeight() / mSnapshot.getTaskSize().y;
+        final HardwareBuffer snapshot = mSnapshot.getHardwareBuffer();
+        final float scaleX = (float) snapshot.getWidth() / mSnapshot.getTaskSize().x;
+        final float scaleY = (float) snapshot.getHeight() / mSnapshot.getTaskSize().y;
 
         // Rescale the frame from snapshot to window coordinate space
         final Rect frame = new Rect(

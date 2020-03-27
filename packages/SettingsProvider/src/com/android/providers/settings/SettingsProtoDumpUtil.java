@@ -1781,9 +1781,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
                 SecureSettingsProto.Accessibility.LARGE_POINTER_ICON);
         dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED,
-                SecureSettingsProto.Accessibility.SHORTCUT_ENABLED);
-        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
                 SecureSettingsProto.Accessibility.SHORTCUT_ON_LOCK_SCREEN);
         dumpSetting(s, p,

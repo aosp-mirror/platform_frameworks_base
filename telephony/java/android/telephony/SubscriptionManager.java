@@ -34,6 +34,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.PendingIntent;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -130,6 +131,33 @@ public class SubscriptionManager {
     @UnsupportedAppUsage
     public static final Uri CONTENT_URI = SimInfo.CONTENT_URI;
 
+    /** @hide */
+    public static final String CACHE_KEY_DEFAULT_SUB_ID_PROPERTY =
+            "cache_key.telephony.get_default_sub_id";
+
+    private static final int DEFAULT_SUB_ID_CACHE_SIZE = 1;
+
+    private static PropertyInvalidatedCache<Void, Integer> sDefaultSubIdCache =
+            new PropertyInvalidatedCache<Void, Integer>(
+                    DEFAULT_SUB_ID_CACHE_SIZE,
+                    CACHE_KEY_DEFAULT_SUB_ID_PROPERTY) {
+                @Override
+                protected Integer recompute(Void query) {
+                    int subId = INVALID_SUBSCRIPTION_ID;
+
+                    try {
+                        ISub iSub = TelephonyManager.getSubscriptionService();
+                        if (iSub != null) {
+                            subId = iSub.getDefaultSubId();
+                        }
+                    } catch (RemoteException ex) {
+                        // ignore it
+                    }
+
+                    if (VDBG) logd("getDefaultSubId=" + subId);
+                    return subId;
+                }
+            };
     /**
      * Generates a content {@link Uri} used to receive updates on simInfo change
      * on the given subscriptionId
@@ -944,6 +972,18 @@ public class SubscriptionManager {
             if (DBG) log("onSubscriptionsChanged: NOT OVERRIDDEN");
         }
 
+        /**
+         * Callback invoked when {@link SubscriptionManager#addOnSubscriptionsChangedListener(
+         * Executor, OnSubscriptionsChangedListener)} or
+         * {@link SubscriptionManager#addOnSubscriptionsChangedListener(
+         * OnSubscriptionsChangedListener)} fails to complete due to the
+         * {@link Context#TELEPHONY_REGISTRY_SERVICE} being unavailable.
+         * @hide
+         */
+        public void onAddListenerFailed() {
+            Rlog.w(LOG_TAG, "onAddListenerFailed not overridden");
+        }
+
         private void log(String s) {
             Rlog.d(LOG_TAG, s);
         }
@@ -1016,6 +1056,12 @@ public class SubscriptionManager {
         if (telephonyRegistryManager != null) {
             telephonyRegistryManager.addOnSubscriptionsChangedListener(listener,
                     executor);
+        } else {
+            // If the telephony registry isn't available, we will inform the caller on their
+            // listener that it failed so they can try to re-register.
+            loge("addOnSubscriptionsChangedListener: pkgname=" + pkgName + " failed to be added "
+                    + " due to TELEPHONY_REGISTRY_SERVICE being unavailable.");
+            executor.execute(() -> listener.onAddListenerFailed());
         }
     }
 
@@ -1826,19 +1872,7 @@ public class SubscriptionManager {
      * @return the "system" default subscription id.
      */
     public static int getDefaultSubscriptionId() {
-        int subId = INVALID_SUBSCRIPTION_ID;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                subId = iSub.getDefaultSubId();
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        if (VDBG) logd("getDefaultSubId=" + subId);
-        return subId;
+        return sDefaultSubIdCache.query(null);
     }
 
     /**
@@ -3259,5 +3293,10 @@ public class SubscriptionManager {
     public static void putSubscriptionIdExtra(Intent intent, int subId) {
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+    }
+
+    /** @hide */
+    public static void invalidateDefaultSubIdCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DEFAULT_SUB_ID_PROPERTY);
     }
 }

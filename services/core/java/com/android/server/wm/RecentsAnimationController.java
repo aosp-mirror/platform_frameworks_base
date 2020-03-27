@@ -610,7 +610,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         final TaskScreenshotAnimatable animatable = new TaskScreenshotAnimatable(mService.mSurfaceControlFactory, task,
-                new SurfaceControl.ScreenshotGraphicBuffer(taskSnapshot.getSnapshot(),
+                new SurfaceControl.ScreenshotHardwareBuffer(taskSnapshot.getHardwareBuffer(),
                         taskSnapshot.getColorSpace(), false /* containsSecureLayers */));
         mRecentScreenshotAnimator = new SurfaceAnimator(
                 animatable,
@@ -667,7 +667,7 @@ public class RecentsAnimationController implements DeathRecipient {
                         mTargetActivityRecord.token);
             }
             if (mTargetActivityRecord.hasFixedRotationTransform()) {
-                mTargetActivityRecord.clearFixedRotationTransform();
+                mTargetActivityRecord.finishFixedRotationTransform();
             }
         }
 

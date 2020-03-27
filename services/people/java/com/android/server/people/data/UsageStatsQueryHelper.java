@@ -19,6 +19,8 @@ package com.android.server.people.data;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.LocusId;
@@ -27,7 +29,10 @@ import android.util.ArrayMap;
 
 import com.android.server.LocalServices;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /** A helper class that queries {@link UsageStatsManagerInternal}. */
@@ -46,7 +51,7 @@ class UsageStatsQueryHelper {
      */
     UsageStatsQueryHelper(@UserIdInt int userId,
             Function<String, PackageData> packageDataGetter) {
-        mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
+        mUsageStatsManagerInternal = getUsageStatsManagerInternal();
         mUserId = userId;
         mPackageDataGetter = packageDataGetter;
     }
@@ -106,6 +111,53 @@ class UsageStatsQueryHelper {
         return mLastEventTimestamp;
     }
 
+    /**
+     * Queries {@link UsageStatsManagerInternal} events for moving app to foreground between
+     * {@code startTime} and {@code endTime}.
+     *
+     * @return a list containing events moving app to foreground.
+     */
+    static List<UsageEvents.Event> queryAppMovingToForegroundEvents(@UserIdInt int userId,
+            long startTime, long endTime) {
+        List<UsageEvents.Event> res = new ArrayList<>();
+        UsageEvents usageEvents = getUsageStatsManagerInternal().queryEventsForUser(userId,
+                startTime, endTime,
+                UsageEvents.HIDE_SHORTCUT_EVENTS | UsageEvents.HIDE_LOCUS_EVENTS);
+        if (usageEvents == null) {
+            return res;
+        }
+        while (usageEvents.hasNextEvent()) {
+            UsageEvents.Event e = new UsageEvents.Event();
+            usageEvents.getNextEvent(e);
+            if (e.getEventType() == UsageEvents.Event.ACTIVITY_RESUMED) {
+                res.add(e);
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Queries {@link UsageStatsManagerInternal} for launch count of apps within {@code
+     * packageNameFilter} between {@code startTime} and {@code endTime}.obfuscateInstantApps
+     *
+     * @return a map which keys are package names and values are app launch counts.
+     */
+    static Map<String, Integer> queryAppLaunchCount(@UserIdInt int userId, long startTime,
+            long endTime, Set<String> packageNameFilter) {
+        List<UsageStats> stats = getUsageStatsManagerInternal().queryUsageStatsForUser(userId,
+                UsageStatsManager.INTERVAL_BEST, startTime, endTime,
+                /* obfuscateInstantApps= */ false);
+        Map<String, Integer> aggregatedStats = new ArrayMap<>();
+        for (UsageStats stat : stats) {
+            String packageName = stat.getPackageName();
+            if (packageNameFilter.contains(packageName)) {
+                aggregatedStats.put(packageName,
+                        aggregatedStats.getOrDefault(packageName, 0) + stat.getAppLaunchCount());
+            }
+        }
+        return aggregatedStats;
+    }
+
     private void onInAppConversationEnded(@NonNull PackageData packageData,
             @NonNull UsageEvents.Event endEvent) {
         ComponentName activityName =
@@ -137,5 +189,9 @@ class UsageStatsQueryHelper {
         EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
                 EventStore.CATEGORY_LOCUS_ID_BASED, locusId.getId());
         eventHistory.addEvent(event);
+    }
+
+    private static UsageStatsManagerInternal getUsageStatsManagerInternal() {
+        return LocalServices.getService(UsageStatsManagerInternal.class);
     }
 }

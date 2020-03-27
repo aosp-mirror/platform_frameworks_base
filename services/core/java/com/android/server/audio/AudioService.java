@@ -2359,6 +2359,13 @@ public class AudioService extends IAudioService.Stub
 
         // For legacy reason, propagate to all streams associated to this volume group
         for (final int groupedStream : vgs.getLegacyStreamTypes()) {
+            try {
+                ensureValidStreamType(groupedStream);
+            } catch (IllegalArgumentException e) {
+                Log.d(TAG, "volume group " + volumeGroup + " has internal streams (" + groupedStream
+                        + "), do not change associated stream volume");
+                continue;
+            }
             setStreamVolume(groupedStream, index, flags, callingPackage, callingPackage,
                             Binder.getCallingUid());
         }
@@ -5040,10 +5047,6 @@ public class AudioService extends IAudioService.Stub
 
         public void applyAllVolumes() {
             synchronized (VolumeGroupState.class) {
-                if (mLegacyStreamType != AudioSystem.STREAM_DEFAULT) {
-                    // No-op to avoid regression with stream based volume management
-                    return;
-                }
                 // apply device specific volumes first
                 int index;
                 for (int i = 0; i < mIndexMap.size(); i++) {

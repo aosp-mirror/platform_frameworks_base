@@ -252,10 +252,17 @@ class ControlsControllerImpl @Inject constructor (
                                     it.controlId in favoritesForComponentKeys
                                 )
                             }
+                            val removedControls = mutableListOf<ControlStatus>()
+                            Favorites.getStructuresForComponent(componentName).forEach { st ->
+                                st.controls.forEach {
+                                    if (it.controlId in removed) {
+                                        val r = createRemovedStatus(componentName, it, st.structure)
+                                        removedControls.add(r)
+                                    }
+                                }
+                            }
                             val loadData = createLoadDataObject(
-                                Favorites.getControlsForComponent(componentName)
-                                    .filter { it.controlId in removed }
-                                    .map { createRemovedStatus(componentName, it) } +
+                                removedControls +
                                 controlsWithFavorite,
                                 favoritesForComponentKeys
                             )
@@ -266,17 +273,15 @@ class ControlsControllerImpl @Inject constructor (
                     override fun error(message: String) {
                         loadCanceller = null
                         executor.execute {
-                            val loadData = Favorites.getControlsForComponent(componentName)
-                                .let { controls ->
-                                val keys = controls.map { it.controlId }
-                                createLoadDataObject(
-                                        controls.map {
-                                            createRemovedStatus(componentName, it, false)
-                                        },
-                                        keys,
-                                        true
-                                )
-                            }
+                            val controls = Favorites.getStructuresForComponent(componentName)
+                                    .flatMap { st ->
+                                        st.controls.map {
+                                            createRemovedStatus(componentName, it, st.structure,
+                                                    false)
+                                        }
+                                    }
+                            val keys = controls.map { it.control.controlId }
+                            val loadData = createLoadDataObject(controls, keys, true)
                             dataCallback.accept(loadData)
                         }
                     }
@@ -372,6 +377,7 @@ class ControlsControllerImpl @Inject constructor (
     private fun createRemovedStatus(
         componentName: ComponentName,
         controlInfo: ControlInfo,
+        structure: CharSequence,
         setRemoved: Boolean = true
     ): ControlStatus {
         val intent = Intent(Intent.ACTION_MAIN).apply {
@@ -384,6 +390,8 @@ class ControlsControllerImpl @Inject constructor (
                 0)
         val control = Control.StatelessBuilder(controlInfo.controlId, pendingIntent)
                 .setTitle(controlInfo.controlTitle)
+                .setSubtitle(controlInfo.controlSubtitle)
+                .setStructure(structure)
                 .setDeviceType(controlInfo.deviceType)
                 .build()
         return ControlStatus(control, componentName, true, setRemoved)
