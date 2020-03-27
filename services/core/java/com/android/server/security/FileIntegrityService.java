@@ -18,14 +18,19 @@ package com.android.server.security;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.security.IFileIntegrityService;
 import android.util.Slog;
 
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.ByteArrayInputStream;
@@ -58,10 +63,10 @@ public class FileIntegrityService extends SystemService {
         }
 
         @Override
-        public boolean isAppSourceCertificateTrusted(@Nullable byte[] certificateBytes) {
-            enforceAnyCallingPermissions(
-                    android.Manifest.permission.REQUEST_INSTALL_PACKAGES,
-                    android.Manifest.permission.INSTALL_PACKAGES);
+        public boolean isAppSourceCertificateTrusted(@Nullable byte[] certificateBytes,
+                @NonNull String packageName) {
+            checkCallerPermission(packageName);
+
             try {
                 if (!isApkVeritySupported()) {
                     return false;
@@ -77,14 +82,30 @@ public class FileIntegrityService extends SystemService {
             }
         }
 
-        private void enforceAnyCallingPermissions(String ...permissions) {
-            for (String permission : permissions) {
-                if (getContext().checkCallingPermission(permission)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
+        private void checkCallerPermission(String packageName) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getUserId(callingUid);
+            final PackageManagerInternal packageManager =
+                    LocalServices.getService(PackageManagerInternal.class);
+            final int packageUid = packageManager.getPackageUid(
+                    packageName, 0 /*flag*/, callingUserId);
+            if (callingUid != packageUid) {
+                throw new SecurityException(
+                        "Calling uid " + callingUid + " does not own package " + packageName);
             }
-            throw new SecurityException("Insufficient permission");
+
+            if (getContext().checkCallingPermission(android.Manifest.permission.INSTALL_PACKAGES)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+
+            final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
+            final int mode = appOpsManager.checkOpNoThrow(
+                    AppOpsManager.OP_REQUEST_INSTALL_PACKAGES, callingUid, packageName);
+            if (mode != AppOpsManager.MODE_ALLOWED) {
+                throw new SecurityException(
+                        "Caller should have INSTALL_PACKAGES or REQUEST_INSTALL_PACKAGES");
+            }
         }
     };
 
