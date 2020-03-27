@@ -16,12 +16,10 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.WindowConfiguration.ActivityType;
-import android.app.WindowConfiguration.WindowingMode;
 import android.os.UserHandle;
 import android.util.ArraySet;
 
@@ -49,13 +47,13 @@ class RunningTasks {
     private boolean mCrossUser;
     private ArraySet<Integer> mProfileIds;
     private boolean mAllowed;
-    private int mIgnoreActivityType;
-    private int mIgnoreWindowingMode;
+    private boolean mFilterOnlyVisibleRecents;
     private ActivityStack mTopDisplayFocusStack;
+    private RecentTasks mRecentTasks;
 
-    void getTasks(int maxNum, List<RunningTaskInfo> list, @ActivityType int ignoreActivityType,
-            @WindowingMode int ignoreWindowingMode, RootWindowContainer root,
-            int callingUid, boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
+    void getTasks(int maxNum, List<RunningTaskInfo> list, boolean filterOnlyVisibleRecents,
+            RootWindowContainer root, int callingUid, boolean allowed, boolean crossUser,
+            ArraySet<Integer> profileIds) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {
             return;
@@ -68,9 +66,9 @@ class RunningTasks {
         mCrossUser = crossUser;
         mProfileIds = profileIds;
         mAllowed = allowed;
-        mIgnoreActivityType = ignoreActivityType;
-        mIgnoreWindowingMode = ignoreWindowingMode;
+        mFilterOnlyVisibleRecents = filterOnlyVisibleRecents;
         mTopDisplayFocusStack = root.getTopDisplayFocusedStack();
+        mRecentTasks = root.mService.getRecentTasks();
 
         final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,
                 PooledLambda.__(Task.class));
@@ -107,14 +105,12 @@ class RunningTasks {
                 return;
             }
         }
-        if (mIgnoreActivityType != ACTIVITY_TYPE_UNDEFINED
-                && task.getActivityType() == mIgnoreActivityType) {
-            // Skip ignored activity type
-            return;
-        }
-        if (mIgnoreWindowingMode != WINDOWING_MODE_UNDEFINED
-                && task.getWindowingMode() == mIgnoreWindowingMode) {
-            // Skip ignored windowing mode
+        if (mFilterOnlyVisibleRecents
+                && task.getActivityType() != ACTIVITY_TYPE_HOME
+                && task.getActivityType() != ACTIVITY_TYPE_RECENTS
+                && !mRecentTasks.isVisibleRecentTask(task)) {
+            // Skip if this task wouldn't be visibile (ever) from recents, with an exception for the
+            // home & recent tasks
             return;
         }
 
