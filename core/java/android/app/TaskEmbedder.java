@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
@@ -291,7 +292,7 @@ public class TaskEmbedder {
      * @see #startActivity(PendingIntent)
      */
     public void startActivity(@NonNull Intent intent) {
-        final ActivityOptions options = prepareActivityOptions();
+        final ActivityOptions options = prepareActivityOptions(null);
         mContext.startActivity(intent, options.toBundle());
     }
 
@@ -304,7 +305,7 @@ public class TaskEmbedder {
      * @see #startActivity(PendingIntent)
      */
     public void startActivity(@NonNull Intent intent, UserHandle user) {
-        final ActivityOptions options = prepareActivityOptions();
+        final ActivityOptions options = prepareActivityOptions(null);
         mContext.startActivityAsUser(intent, options.toBundle(), user);
     }
 
@@ -316,7 +317,7 @@ public class TaskEmbedder {
      * @see #startActivity(Intent)
      */
     public void startActivity(@NonNull PendingIntent pendingIntent) {
-        final ActivityOptions options = prepareActivityOptions();
+        final ActivityOptions options = prepareActivityOptions(null);
         try {
             pendingIntent.send(null /* context */, 0 /* code */, null /* intent */,
                     null /* onFinished */, null /* handler */, null /* requiredPermission */,
@@ -337,8 +338,7 @@ public class TaskEmbedder {
      */
     public void startActivity(@NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
             @NonNull ActivityOptions options) {
-
-        options.setLaunchDisplayId(mVirtualDisplay.getDisplay().getDisplayId());
+        prepareActivityOptions(options);
         try {
             pendingIntent.send(mContext, 0 /* code */, fillInIntent,
                     null /* onFinished */, null /* handler */, null /* requiredPermission */,
@@ -364,21 +364,25 @@ public class TaskEmbedder {
             @NonNull ActivityOptions options, @Nullable Rect sourceBounds) {
         LauncherApps service =
                 (LauncherApps) mContext.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-        options.setLaunchDisplayId(mVirtualDisplay.getDisplay().getDisplayId());
+        prepareActivityOptions(options);
         service.startShortcut(shortcut, sourceBounds, options.toBundle());
     }
 
     /**
-     * Check if container is ready to launch and create {@link ActivityOptions} to target the
-     * virtual display.
+     * Check if container is ready to launch and modify {@param options} to target the virtual
+     * display, creating them if necessary.
      */
-    private ActivityOptions prepareActivityOptions() {
+    private ActivityOptions prepareActivityOptions(ActivityOptions options) {
         if (mVirtualDisplay == null) {
             throw new IllegalStateException(
                     "Trying to start activity before ActivityView is ready.");
         }
-        final ActivityOptions options = ActivityOptions.makeBasic();
+        if (options == null) {
+            options = ActivityOptions.makeBasic();
+        }
         options.setLaunchDisplayId(getDisplayId());
+        options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        options.setTaskAlwaysOnTop(true);
         return options;
     }
 

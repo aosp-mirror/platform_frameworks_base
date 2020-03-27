@@ -17,7 +17,6 @@
 package com.android.systemui.recents;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.Prefs.Key.DISMISSED_RECENTS_SWIPE_UP_ONBOARDING_COUNT;
@@ -27,8 +26,7 @@ import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDIN
 import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_COUNT;
 import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_FROM_HOME_COUNT;
 import static com.android.systemui.shared.system.LauncherEventUtil.DISMISS;
-import static com.android.systemui.shared.system.LauncherEventUtil
-        .RECENTS_QUICK_SCRUB_ONBOARDING_TIP;
+import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_QUICK_SCRUB_ONBOARDING_TIP;
 import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_SWIPE_UP_ONBOARDING_TIP;
 import static com.android.systemui.shared.system.LauncherEventUtil.VISIBLE;
 
@@ -139,7 +137,7 @@ public class RecentsOnboarding {
 
         private void onAppLaunch() {
             ActivityManager.RunningTaskInfo info = ActivityManagerWrapper.getInstance()
-                    .getRunningTask(ACTIVITY_TYPE_UNDEFINED /* ignoreActivityType */);
+                    .getRunningTask();
             if (info == null) {
                 return;
             }

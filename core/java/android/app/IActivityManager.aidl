@@ -144,9 +144,6 @@ interface IActivityManager {
     void attachApplication(in IApplicationThread app, long startSeq);
     List<ActivityManager.RunningTaskInfo> getTasks(int maxNum);
     @UnsupportedAppUsage
-    List<ActivityManager.RunningTaskInfo> getFilteredTasks(int maxNum, int ignoreActivityType,
-            int ignoreWindowingMode);
-    @UnsupportedAppUsage
     void moveTaskToFront(in IApplicationThread caller, in String callingPackage, int task,
             int flags, in Bundle options);
     @UnsupportedAppUsage

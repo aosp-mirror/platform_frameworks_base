@@ -20,9 +20,7 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -38,7 +36,6 @@ import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration;
-import android.app.WindowConfiguration.ActivityType;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -113,15 +110,18 @@ public class ActivityManagerWrapper {
      * @return the top running task (can be {@code null}).
      */
     public ActivityManager.RunningTaskInfo getRunningTask() {
-        return getRunningTask(ACTIVITY_TYPE_RECENTS /* ignoreActivityType */);
+        return getRunningTask(false /* filterVisibleRecents */);
     }
 
-    public ActivityManager.RunningTaskInfo getRunningTask(@ActivityType int ignoreActivityType) {
+    /**
+     * @return the top running task filtering only for tasks that can be visible in the recent tasks
+     * list (can be {@code null}).
+     */
+    public ActivityManager.RunningTaskInfo getRunningTask(boolean filterOnlyVisibleRecents) {
         // Note: The set of running tasks from the system is ordered by recency
         try {
             List<ActivityManager.RunningTaskInfo> tasks =
-                    ActivityTaskManager.getService().getFilteredTasks(1, ignoreActivityType,
-                            WINDOWING_MODE_PINNED /* ignoreWindowingMode */);
+                    ActivityTaskManager.getService().getFilteredTasks(1, filterOnlyVisibleRecents);
             if (tasks.isEmpty()) {
                 return null;
             }
