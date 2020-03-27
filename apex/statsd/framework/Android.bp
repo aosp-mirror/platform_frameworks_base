@@ -46,19 +46,11 @@ filegroup {
         "//frameworks/base/apex/statsd:__subpackages__",
     ],
 }
-
-java_defaults {
-    name: "framework-statsd-defaults",
-    sdk_version: "module_current",
-    libs: [ "framework-annotations-lib" ],
-}
-
 java_library {
     name: "framework-statsd",
-    defaults: [
-        "framework-statsd-defaults",
-    ],
     installable: true,
+    sdk_version: "module_current",
+    libs: [ "framework-annotations-lib" ],
 
     srcs: [
         ":framework-statsd-sources",
@@ -129,39 +121,33 @@ droidstubs {
 
 java_library {
     name: "framework-statsd-stubs-publicapi",
-    defaults: [
-        "framework-statsd-defaults",
-    ],
+    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
     srcs: [ ":framework-statsd-stubs-srcs-publicapi" ],
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/statsd", // statsd apex
-    ]
+    ],
 }
 
 java_library {
     name: "framework-statsd-stubs-systemapi",
-    defaults: [
-        "framework-statsd-defaults",
-    ],
+    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
     srcs: [ ":framework-statsd-stubs-srcs-systemapi" ],
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/statsd", // statsd apex
-    ]
+    ],
 }
 
 java_library {
     name: "framework-statsd-stubs-module_libs_api",
-    defaults: [
-        "framework-statsd-defaults",
-    ],
+    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
     srcs: [ ":framework-statsd-stubs-srcs-module_libs_api" ],
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/statsd", // statsd apex
         "//frameworks/opt/net/wifi/service" // wifi service
-    ]
+    ],
 }
 
 android_test {

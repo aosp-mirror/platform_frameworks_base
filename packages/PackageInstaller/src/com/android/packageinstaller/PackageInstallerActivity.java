@@ -406,6 +406,10 @@ public class PackageInstallerActivity extends AlertActivity {
 
         mOk = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
         mOk.setEnabled(false);
+
+        if (!mOk.isInTouchMode()) {
+            mAlert.getButton(DialogInterface.BUTTON_NEGATIVE).requestFocus();
+        }
     }
 
     /**

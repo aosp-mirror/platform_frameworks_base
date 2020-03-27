@@ -1242,9 +1242,10 @@ public final class AutofillManager {
                 if (mLastAutofilledData.containsKey(id)) {
                     value = view.getAutofillValue();
                     valueWasRead = true;
+                    final boolean hideHighlight = mLastAutofilledData.keySet().size() == 1;
 
                     if (Objects.equals(mLastAutofilledData.get(id), value)) {
-                        view.setAutofilled(true, false);
+                        view.setAutofilled(true, hideHighlight);
                     } else {
                         view.setAutofilled(false, false);
                         mLastAutofilledData.remove(id);

@@ -6564,13 +6564,6 @@ public final class Settings {
          * Setting specifying if the accessibility shortcut is enabled.
          * @hide
          */
-        public static final String ACCESSIBILITY_SHORTCUT_ENABLED =
-                "accessibility_shortcut_enabled";
-
-        /**
-         * Setting specifying if the accessibility shortcut is enabled.
-         * @hide
-         */
         public static final String ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN =
                 "accessibility_shortcut_on_lock_screen";
 

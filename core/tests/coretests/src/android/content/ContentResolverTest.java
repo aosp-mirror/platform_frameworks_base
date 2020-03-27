@@ -238,12 +238,9 @@ public class ContentResolverTest {
 
     @Test
     public void testGetType_providerException() {
-        try {
-            mResolver.getType(Uri.parse("content://android.content.FakeProviderRemote/error"));
-            fail("Expected IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-            // Expected
-        }
+        String type =
+                mResolver.getType(Uri.parse("content://android.content.FakeProviderRemote/error"));
+        assertThat(type).isNull();
     }
 
     @Test
@@ -252,5 +249,16 @@ public class ContentResolverTest {
                 Uri.parse("content://android.content.FakeProviderRemote/something"));
         assertThat(canonical).isEqualTo(
                 Uri.parse("content://android.content.FakeProviderRemote/canonical"));
+    }
+
+    @Test
+    public void testCanonicalize_providerException() {
+        try {
+            mResolver.canonicalize(
+                    Uri.parse("content://android.content.FakeProviderRemote/error"));
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
     }
 }

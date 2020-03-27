@@ -22,11 +22,11 @@
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:visibility="gone"
+    android:paddingTop="48dp"
     android:paddingStart="24dp"
     android:paddingEnd="24dp">
     <ImageView
         android:id="@+id/resolver_empty_state_icon"
-        android:layout_marginTop="48dp"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_centerHorizontal="true" />

@@ -2852,7 +2852,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * @param candidateTask The possible task the activity might be put in.
      * @return Existing stack if there is a valid one, new dynamic stack if it is valid or null.
      */
-    private ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
+    @VisibleForTesting
+    ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
             @Nullable Task candidateTask, @Nullable ActivityOptions options,
             @Nullable LaunchParamsController.LaunchParams launchParams) {
         final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
@@ -2872,6 +2873,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final int attachedDisplayId = r.getDisplayId();
             if (attachedDisplayId == INVALID_DISPLAY || attachedDisplayId == displayId) {
                 return candidateTask.getStack();
+            }
+            // Or the candidate task is already a root task that can be reused by reparenting
+            // it to the target display.
+            if (candidateTask.isRootTask()) {
+                final ActivityStack stack = candidateTask.getStack();
+                displayContent.moveStackToDisplay(stack, true /* onTop */);
+                return stack;
             }
         }
 

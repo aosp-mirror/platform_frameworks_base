@@ -3929,7 +3929,7 @@
   <java-symbol type="dimen" name="resolver_empty_state_height" />
   <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />
   <java-symbol type="dimen" name="resolver_max_collapsed_height_with_tabs" />
-  <java-symbol type="bool" name="sharesheet_show_content_preview" />
+  <java-symbol type="bool" name="resolver_landscape_phone" />
   <java-symbol type="dimen" name="resolver_tab_text_size" />
 
   <!-- Toast message for background started foreground service while-in-use permission restriction feature -->
