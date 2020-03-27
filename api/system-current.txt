@@ -6177,7 +6177,6 @@ package android.net {
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public MatchAllNetworkSpecifier();
     method public int describeContents();
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.MatchAllNetworkSpecifier> CREATOR;
   }
@@ -6198,13 +6197,14 @@ package android.net {
   public abstract class NetworkAgent {
     ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, int, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
     method @Nullable public android.net.Network getNetwork();
+    method public void markConnected();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
     method public void onNetworkUnwanted();
     method public void onRemoveKeepalivePacketFilter(int);
     method public void onSaveAcceptUnvalidated(boolean);
     method public void onSignalStrengthThresholdsUpdated(@NonNull int[]);
-    method public void onStartSocketKeepalive(int, @IntRange(from=10, to=3600) int, @NonNull android.net.KeepalivePacketData);
+    method public void onStartSocketKeepalive(int, @NonNull java.time.Duration, @NonNull android.net.KeepalivePacketData);
     method public void onStopSocketKeepalive(int);
     method public void onValidationStatus(int, @Nullable android.net.Uri);
     method @NonNull public android.net.Network register();
@@ -6212,7 +6212,6 @@ package android.net {
     method public final void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
     method public final void sendNetworkScore(@IntRange(from=0, to=99) int);
     method public final void sendSocketKeepaliveEvent(int, int);
-    method public void setConnected();
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
     field public static final int VALIDATION_STATUS_VALID = 1; // 0x1
@@ -6283,8 +6282,8 @@ package android.net {
     ctor public NetworkProvider(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void declareNetworkRequestUnfulfillable(@NonNull android.net.NetworkRequest);
     method public int getProviderId();
-    method public void onNetworkRequested(@NonNull android.net.NetworkRequest, int, int);
-    method public void onRequestWithdrawn(@NonNull android.net.NetworkRequest);
+    method public void onNetworkRequestWithdrawn(@NonNull android.net.NetworkRequest);
+    method public void onNetworkRequested(@NonNull android.net.NetworkRequest, @IntRange(from=0, to=99) int, int);
     field public static final int ID_NONE = -1; // 0xffffffff
   }
 
@@ -6331,8 +6330,8 @@ package android.net {
   }
 
   public abstract class NetworkSpecifier {
+    method public boolean canBeSatisfiedBy(@Nullable android.net.NetworkSpecifier);
     method @Nullable public android.net.NetworkSpecifier redact();
-    method public abstract boolean satisfiedBy(@Nullable android.net.NetworkSpecifier);
   }
 
   public class NetworkStack {
@@ -6433,10 +6432,6 @@ package android.net {
     method @NonNull public android.net.StaticIpConfiguration.Builder setDomains(@Nullable String);
     method @NonNull public android.net.StaticIpConfiguration.Builder setGateway(@Nullable java.net.InetAddress);
     method @NonNull public android.net.StaticIpConfiguration.Builder setIpAddress(@Nullable android.net.LinkAddress);
-  }
-
-  public final class TelephonyNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
   }
 
   public final class TetheredClient implements android.os.Parcelable {
@@ -7425,10 +7420,6 @@ package android.net.wifi {
     field public int numUsage;
   }
 
-  public final class WifiNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
-  }
-
   public final class WifiNetworkSuggestion implements android.os.Parcelable {
     method @NonNull public android.net.wifi.WifiConfiguration getWifiConfiguration();
   }
@@ -7617,10 +7608,6 @@ package android.net.wifi.aware {
 
   public class DiscoverySession implements java.lang.AutoCloseable {
     method @Deprecated public android.net.NetworkSpecifier createNetworkSpecifierPmk(@NonNull android.net.wifi.aware.PeerHandle, @NonNull byte[]);
-  }
-
-  public final class WifiAwareNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
   }
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
