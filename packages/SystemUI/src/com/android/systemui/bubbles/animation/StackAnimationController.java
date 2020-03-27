@@ -287,7 +287,7 @@ public class StackAnimationController extends
     /** Whether the stack is on the left side of the screen. */
     public boolean isStackOnLeftSide() {
         if (mLayout == null || !isStackPositionSet()) {
-            return false;
+            return true; // Default to left, which is where it starts by default.
         }
 
         float stackCenter = mStackPosition.x + mBubbleBitmapSize / 2;
