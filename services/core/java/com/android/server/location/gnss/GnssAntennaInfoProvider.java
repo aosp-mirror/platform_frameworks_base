@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.gnss;
 
 import android.content.Context;
 import android.location.GnssAntennaInfo;
@@ -23,6 +23,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.location.CallerIdentity;
+import com.android.server.location.RemoteListenerHelper;
 
 import java.util.List;
 
