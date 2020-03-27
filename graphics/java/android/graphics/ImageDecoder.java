@@ -194,14 +194,11 @@ public final class ImageDecoder implements AutoCloseable {
     public static abstract class Source {
         private Source() {}
 
-        /* @hide */
         @Nullable
         Resources getResources() { return null; }
 
-        /* @hide */
         int getDensity() { return Bitmap.DENSITY_NONE; }
 
-        /* @hide */
         final int computeDstDensity() {
             Resources res = getResources();
             if (res == null) {
@@ -211,7 +208,6 @@ public final class ImageDecoder implements AutoCloseable {
             return res.getDisplayMetrics().densityDpi;
         }
 
-        /* @hide */
         @NonNull
         abstract ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException;
     };
@@ -1412,6 +1408,8 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link OnHeaderDecodedListener#onHeaderDecoded onHeaderDecoded}.</p>
      *
      *  @hide
+     *  Must be public for access from android.graphics.drawable,
+     *  but must not be called from outside the UI module.
      */
     public void setOutPaddingRect(@NonNull Rect outPadding) {
         mOutPaddingRect = outPadding;
