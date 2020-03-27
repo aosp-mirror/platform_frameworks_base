@@ -112,7 +112,7 @@ public class BubbleOverflow implements BubbleViewProvider {
         mPath.transform(matrix);
 
         mOverflowBtn.setVisibility(GONE);
-        mOverflowBtn.update(this);
+        mOverflowBtn.setRenderedBubble(this);
     }
 
     ImageView getBtn() {
