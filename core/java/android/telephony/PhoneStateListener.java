@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
@@ -64,17 +65,42 @@ public class PhoneStateListener {
     private static final String LOG_TAG = "PhoneStateListener";
     private static final boolean DBG = false; // STOPSHIP if true
 
-
     /**
+     * Experiment flag to set the per-pid registration limit for PhoneStateListeners
+     *
      * Limit on registrations of {@link PhoneStateListener}s on a per-pid
      * basis. When this limit is exceeded, any calls to {@link TelephonyManager#listen} will fail
      * with an {@link IllegalStateException}.
      *
      * {@link android.os.Process#PHONE_UID}, {@link android.os.Process#SYSTEM_UID}, and the uid that
      * TelephonyRegistry runs under are exempt from this limit.
+     *
+     * If the value of the flag is less than 1, enforcement of the limit will be disabled.
      * @hide
      */
-    public static final int PER_PID_REGISTRATION_LIMIT = 50;
+    public static final String FLAG_PER_PID_REGISTRATION_LIMIT =
+            "phone_state_listener_per_pid_registration_limit";
+
+    /**
+     * Default value for the per-pid registation limit.
+     * See {@link #FLAG_PER_PID_REGISTRATION_LIMIT}.
+     * @hide
+     */
+    public static final int DEFAULT_PER_PID_REGISTRATION_LIMIT = 50;
+
+    /**
+     * This change enables a limit on the number of {@link PhoneStateListener} objects any process
+     * may register via {@link TelephonyManager#listen}. The default limit is 50, which may change
+     * via remote device config updates.
+     *
+     * This limit is enforced via an {@link IllegalStateException} thrown from
+     * {@link TelephonyManager#listen} when the offending process attempts to register one too many
+     * listeners.
+     *
+     * @hide
+     */
+    @ChangeId
+    public static final long PHONE_STATE_LISTENER_LIMIT_CHANGE_ID = 150880553L;
 
     /**
      * Stop listening for updates.
