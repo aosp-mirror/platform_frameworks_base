@@ -329,7 +329,7 @@ public class ExpandedAnimationController
     }
 
     /** Plays a dismiss animation on the dragged out bubble. */
-    public void dismissDraggedOutBubble(View bubble, Runnable after) {
+    public void dismissDraggedOutBubble(View bubble, float translationYBy, Runnable after) {
         if (bubble == null) {
             return;
         }
@@ -337,6 +337,7 @@ public class ExpandedAnimationController
                 .withStiffness(SpringForce.STIFFNESS_HIGH)
                 .scaleX(1.1f)
                 .scaleY(1.1f)
+                .translationY(bubble.getTranslationY() + translationYBy)
                 .alpha(0f, after)
                 .start();
 

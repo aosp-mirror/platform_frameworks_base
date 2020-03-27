@@ -647,17 +647,18 @@ public class StackAnimationController extends
     }
 
     /**
-     * 'Implode' the stack by shrinking the bubbles via chained animations and fading them out.
+     * 'Implode' the stack by shrinking the bubbles, fading them out, and translating them down.
      */
-    public void implodeStack(Runnable after) {
-        // Pop and fade the bubbles sequentially.
-        animationForChildAtIndex(0)
-                .scaleX(0.5f)
-                .scaleY(0.5f)
-                .alpha(0f)
-                .withDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
-                .withStiffness(SpringForce.STIFFNESS_HIGH)
-                .start(after);
+    public void animateStackDismissal(float translationYBy, Runnable after) {
+        animationsForChildrenFromIndex(0, (index, animation) ->
+                animation
+                        .scaleX(0.5f)
+                        .scaleY(0.5f)
+                        .alpha(0f)
+                        .translationY(
+                                mLayout.getChildAt(index).getTranslationY() + translationYBy)
+                        .withStiffness(SpringForce.STIFFNESS_HIGH))
+                .startAll(after);
     }
 
     /**
@@ -710,8 +711,6 @@ public class StackAnimationController extends
         if (property.equals(DynamicAnimation.TRANSLATION_X)
                 || property.equals(DynamicAnimation.TRANSLATION_Y)) {
             return index + 1;
-        } else if (isStackStuckToTarget()) {
-            return index + 1; // Chain all animations in dismiss (scale, alpha, etc. are used).
         } else {
             return NONE;
         }
