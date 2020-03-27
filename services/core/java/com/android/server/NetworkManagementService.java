@@ -55,6 +55,7 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.Network;
 import android.net.NetworkPolicyManager;
+import android.net.NetworkStack;
 import android.net.NetworkStats;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
@@ -874,6 +875,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setIPv6AddrGenMode(String iface, int mode) throws ServiceSpecificException {
+        NetworkStack.checkNetworkStackPermission(mContext);
         try {
             mNetdService.setIPv6AddrGenMode(iface, mode);
         } catch (RemoteException e) {
