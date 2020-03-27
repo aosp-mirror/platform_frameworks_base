@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Quản trị viên đã từ bỏ quyền sở hữu thiết bị để cho phép dùng vào mục đích cá nhân"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Thiết bị được quản lý"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tổ chức của bạn sẽ quản lý thiết bị này và có thể theo dõi lưu lượng truy cập mạng. Nhấn để biết chi tiết."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"Quản trị viên của bạn đã thay đổi các tùy chọn cài đặt vị trí"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"Nhấn để xem các tùy chọn cài đặt vị trí của bạn."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Ứng dụng có thể truy cập vào thông tin vị trí của bạn"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Hãy liên hệ với quản trị viên CNTT để tìm hiểu thêm"</string>
     <string name="country_detector" msgid="7023275114706088854">"Trình phát hiện quốc gia"</string>
     <string name="location_service" msgid="2439187616018455546">"Dịch vụ vị trí"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Dịch vụ GNSS"</string>
@@ -201,8 +201,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Thiết bị của bạn sẽ bị xóa"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Không thể sử dụng ứng dụng quản trị. Thiết bị của bạn sẽ bị xóa ngay bây giờ.\n\nHãy liên hệ với quản trị viên của tổ chức nếu bạn có thắc mắc."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> đã tắt tính năng in."</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Các ứng dụng cá nhân đã bị một quản trị viên tạm ngưng"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Nhấn vào đây để kiểm tra tính tuân thủ đối với chính sách."</string>
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Bỏ chặn ứng dụng cá nhân của bạn"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Các ứng dụng sẽ bị chặn vào ngày mai"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"Quản trị viên CNTT không cho phép bạn tạm dừng hồ sơ công việc quá <xliff:g id="DAYS">%1$d</xliff:g> ngày"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Bật hồ sơ công việc"</string>
     <string name="me" msgid="6207584824693813140">"Tôi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tùy chọn máy tính bảng"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Tùy chọn dành cho Android TV"</string>
@@ -442,8 +444,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Cho phép một ứng dụng hoặc dịch vụ nhận lệnh gọi lại khi các thiết bị máy ảnh đang được mở/đóng."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ứng dụng này có thể nhận các lệnh gọi lại khi có bất kỳ thiết bị camera nào đang được mở (bằng ứng dụng) hoặc đóng."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kiểm soát rung"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Cho phép ứng dụng kiểm soát bộ rung."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Cho phép ứng dụng truy cập vào trạng thái bộ rung."</string>
@@ -2068,33 +2069,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Cơ quan"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Chế độ xem cá nhân"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Chế độ xem công việc"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Không thể chia sẻ nội dung này với các ứng dụng công việc"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Quản trị viên CNTT không cho phép chia sẻ nội dung này với các ứng dụng trong hồ sơ công việc của bạn"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Không thể mở nội dung này bằng các ứng dụng công việc"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Quản trị viên CNTT không cho phép mở nội dung này bằng các ứng dụng trong hồ sơ công việc của bạn"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Không thể chia sẻ nội dung này với các ứng dụng cá nhân"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Quản trị viên CNTT không cho phép chia sẻ nội dung này với các ứng dụng trong hồ sơ cá nhân của bạn"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Không thể mở nội dung này bằng các ứng dụng cá nhân"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Quản trị viên CNTT không cho phép mở nội dung này bằng các ứng dụng trong hồ sơ cá nhân của bạn"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Hồ sơ công việc bị tạm dừng"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Bật"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Các ứng dụng công việc không hỗ trợ nội dung này"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Các ứng dụng công việc không thể mở nội dung này"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Các ứng dụng cá nhân không hỗ trợ nội dung này"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Các ứng dụng cá nhân không thể mở nội dung này"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Ghi âm hoặc phát âm thanh trong cuộc gọi điện thoại"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Cho phép ứng dụng này ghi âm hoặc phát âm thanh trong cuộc gọi điện thoại khi được chỉ định làm ứng dụng trình quay số mặc định."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

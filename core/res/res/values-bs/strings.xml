@@ -193,8 +193,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator je ustupio uređaj za ličnu upotrebu"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Uređajem se upravlja."</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Vaša organizacija upravlja ovim uređajem i može pratiti mrežni saobraćaj. Dodirnite za detalje."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"Administrator je promijenio postavke lokacije"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"Dodirnite da vidite postavke lokacije."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikacije mogu pristupiti vašoj lokaciji"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Za više informacija kontaktirajte IT administratora"</string>
     <string name="country_detector" msgid="7023275114706088854">"Detektor zemlje"</string>
     <string name="location_service" msgid="2439187616018455546">"Usluga lokacije"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Usluga GNSS"</string>
@@ -203,8 +203,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Uređaj će biti izbrisan"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Nije moguće koristiti aplikaciju administratora. Potpuno će se izbrisati podaci na vašem uređaju.\n\nAko imate pitanja, obratite se administratoru svoje organizacije."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Štampanje je onemogućila aplikacija <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Lične aplikacije je obustavio administrator"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Dodirnite ovdje da provjerite usklađenost s pravilima."</string>
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Deblokirajte lične aplikacije"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Sutra se blokiraju aplikacije"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"IT administrator ne dozvoljava da pauzirate radni profil duže od <xliff:g id="DAYS">%1$d</xliff:g> dana"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Uključi radni profil"</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcije tableta"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcije Android TV uređaja"</string>
@@ -238,10 +240,8 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opcije telefona"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Zaključavanje ekrana"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Isključi telefon"</string>
-    <!-- no translation found for global_action_power_options (1185286119330160073) -->
-    <skip />
-    <!-- no translation found for global_action_restart (4678451019561687074) -->
-    <skip />
+    <string name="global_action_power_options" msgid="1185286119330160073">"Napajanje"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Ponovo pokreni"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Hitno"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Izvještaj o greškama"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Završi sesiju"</string>
@@ -442,11 +442,9 @@
     <string name="permlab_camera" msgid="6320282492904119413">"snimanje slika i videozapisa"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ova aplikacija može slikati fotografije i snimati videozapise koristeći kameru bilo kada."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Dopustite aplikaciji ili usluzi da pristupa kamerama sistema radi snimanja fotografija i videozapisa"</string>
-    <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
-    <skip />
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ova povlaštena ili sistemska aplikacija u svakom trenutku može snimati fotografije i videozapise pomoću kamere sistema. Aplikacija također mora imati odobrenje android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Dozvoliti aplikaciji ili usluzi da prima povratne pozive o otvaranju ili zatvaranju kamera."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ova aplikacija može primati povratne pozive kada se otvara ili zatvara bilo koja kamera (kojom aplikacijom)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrola vibracije"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Dozvoljava aplikaciji upravljanje vibracijom."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Dozvoljava aplikaciji pristup stanju vibracije."</string>
@@ -1643,24 +1641,15 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Želite li pojačati zvuk iznad preporučenog nivoa?\n\nDužim slušanjem glasnog zvuka možete oštetiti sluh."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite li koristiti Prečicu za pristupačnost?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kada je prečica uključena, pritiskom i držanjem oba dugmeta za jačinu zvuka u trajanju od 3 sekunde pokrenut će se funkcija pristupačnosti."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (8417489297036013065) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning (3740723309483706911) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (6935581470716541531) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning_title (3410100187167382427) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning (8412954203626349109) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (2819109500943271385) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning (6363127705112844257) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_on (5463618449556111344) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Uključiti funkcije pristupačnosti?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ako nekoliko sekundi držite pritisnute obje tipke za jačinu zvuka, uključit ćete funkcije pristupačnosti. Ovo može uticati na način rada uređaja.\n\nTrenutne funkcije:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nOdabrane funkcije možete izmijeniti u odjeljku Postavke &gt; Pristupačnost."</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Uključiti Talkback?"</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ako nekoliko sekundi držite pritisnute obje tipke za jačinu zvuka uključit ćete Talkback, čitač ekrana koji je od pomoći slijepim ili slabovidim osobama. Talkback u potpunosti mijenja način rada uređaja.\n\nOvu prečicu možete zamijeniti drugom funkcijom u odjeljku Postavke &gt; Pristupačnost."</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Uključiti <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ako nekoliko sekundi držite pritisnute obje tipke za jačinu zvuka, uključit ćete funkciju pristupačnosti, uslugu <xliff:g id="SERVICE">%1$s</xliff:g>. Ovo može promijeniti način rada uređaja.\n\nOvu prečicu možete zamijeniti drugom funkcijom u odjeljku Postavke &gt; Pristupačnost."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Uključi"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Nemoj uključivati"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Dozvoliti da usluga <xliff:g id="SERVICE">%1$s</xliff:g> ima punu kontrolu nad vašim uređajem?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ako uključite uslugu <xliff:g id="SERVICE">%1$s</xliff:g>, uređaj neće koristiti zaključavanje ekrana za poboljšanje šifriranja podataka."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Puna kontrola je prikladna za aplikacije koje vam pomažu kod potreba za pristupačnosti, ali nije za većinu aplikacija."</string>
@@ -1671,10 +1660,8 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Dozvoli"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Odbij"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Dodirnite funkciju da je počnete koristiti:"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Odaberite funkcije koje ćete koristiti s dugmetom Pristupačnost"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Odaberite funkcije koje ćete koristiti s tipkom prečice za jačinu zvuka"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Usluga <xliff:g id="SERVICE_NAME">%s</xliff:g> je isključena"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Uredi prečice"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gotovo"</string>
@@ -1682,23 +1669,15 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Koristi prečicu"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija boja"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Ispravka boja"</string>
-    <!-- no translation found for accessibility_shortcut_enabling_service (5473495203759847687) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_disabling_service (8675244165062700619) -->
-    <skip />
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Držali ste tipke za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je uključena."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Držali ste tipke za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je isključena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Pritisnite obje tipke za podešavanje jačine zvuka i držite ih pritisnutim tri sekunde da koristite uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_button_prompt_text (8343213623338605305) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (8742535972130563952) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (5211827854510660203) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8853928358872550500) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (9196230728837090497) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3425123684990193765) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Odaberite funkciju koja će se koristiti kada dodirnete dugme Pristupačnost:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Odaberite funkciju koju ćete koristiti kada izvedete pokret za pristupačnost (s dva prsta prevucite prema gore s dna ekrana):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Odaberite funkciju koju ćete koristiti kada izvedete pokret za pristupačnost (s tri prsta prevucite prema gore s dna ekrana):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Za prebacivanje između funkcija, dodirnite i zadržite dugme Pristupačnost."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Da prebacujete između funkcija, s dva prsta prevucite prema gore i zadržite."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Da prebacujete između funkcija, s tri prsta prevucite prema gore i zadržite."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Uvećavanje"</string>
     <string name="user_switched" msgid="7249833311585228097">"Trenutni korisnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Prebacivanje na korisnika <xliff:g id="NAME">%1$s</xliff:g>..."</string>
@@ -2081,8 +2060,7 @@
       <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fajla</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fajlova</item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (1511722103987329028) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nijedna osoba nije preporučena za dijeljenje"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Spisak aplikacija"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ovoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Početna stranica"</string>
@@ -2104,249 +2082,128 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Posao"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Prikaz ličnog sadržaja"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Prikaz poslovnog sadržaja"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Nije moguće dijeliti ovo putem poslovnih aplikacija"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Vaš IT administrator ne dozvoljava da dijelite ovaj sadržaj putem aplikacija na svom poslovnom profilu"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Nije moguće otvoriti ovo s poslovnim aplikacijama"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Vaš IT administrator ne dozvoljava da otvorite ovaj sadržaj putem aplikacija na svom poslovnom profilu"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Nije moguće dijeliti ovo putem ličnih aplikacija"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Vaš IT administrator ne dozvoljava da dijelite ovaj sadržaj putem aplikacija na svom ličnom profilu"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Nije moguće otvoriti ovo s ličnim aplikacijama"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Vaš IT administrator ne dozvoljava da otvorite ovaj sadržaj putem aplikacija na svom ličnom profilu"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Radni profil je pauziran"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Uključi"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Nijedna poslovna aplikacija ne može podržati ovaj sadržaj"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Nijedna poslovna aplikacija ne može otvoriti ovaj sadržaj"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Nijedna lična aplikacija ne može podržati ovaj sadržaj"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Nijedna lična aplikacija ne može otvoriti ovaj sadržaj"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Snimanje ili reproduciranje zvuka u telefonskim pozivima"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Kad je ova aplikacija postavljena kao zadana aplikacija za pozivanje, omogućava joj snimanje ili reproduciranje zvuka u telefonskim pozivima."</string>
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ENTRY (4447629474818217364) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY (973059024670737358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ENTRY (4487435301206073787) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY (768060297218652809) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY (7129527319490548930) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY (2876126640607573252) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY (8952595089930109282) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ENTRY (3013902515773728996) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ENTRY (2974411408893410289) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ENTRY (687618528751880721) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ENTRY (6810596579655575381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ENTRY (2715929642540980259) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY (8557791623303951590) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ENTRY (7382468767274580323) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY (6730880791104286987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY (6432126539782267026) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY (1730510161529488920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY (3369885925003346830) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY (9129139686191167829) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY (2869929685874615358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ENTRY (1238663472392741771) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY (3988705848553894358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ENTRY (6186770686690993200) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ENTRY (7043865376145617024) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ENTRY (6144227308185112176) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS (4233355366318061180) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS (6742563947637715645) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS (2033399698172403560) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS (4795977251920732254) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS (1090425878157254446) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS (6476898876518094438) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS (6006806734293747731) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (6546680489620881893) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS (3506845511000727015) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_IN_PROGRESS (6709169861932992750) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS (4013870911606478520) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS (9032651188219523434) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS (6584576506344491207) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS (830981927724888114) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS (7851790973098894802) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_IN_PROGRESS (1149560739586960121) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS (5708964693522116025) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS (7288103122966483455) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS (4036752174056147753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS (5089536274515338566) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS (6737197986936251958) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS (5658767775619998623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS (665978313257653727) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS (3857142652251836850) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS (2695664012344346788) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (2695678959963807782) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS (1230605365926493599) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ERROR (1924844017037151535) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR (3372797822292089708) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR (1878443146720411381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ERROR (7664778312218023192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ERROR (2472944311643350302) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ERROR (828089694480999120) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ERROR (17619001007092511) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ERROR (807214229604353614) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ERROR (8644184447744175747) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR (3801002648649640407) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ERROR (707397021218680753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR (894358680773257820) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR (352466878146726991) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR (7353389721907138671) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR (2655263155490857920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ERROR (6903740900892931310) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR (5165901670447518687) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR (2856763216589267623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR (817542684437829139) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR (5178635064113393143) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR (5391587926974531008) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR (4895494864493315868) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ERROR (9017576601595353649) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR (1116993930995545742) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ERROR (7559167306794441462) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ERROR (2782926139511136588) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ERROR (1890493954453456758) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUCCESS (4886243367747126325) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS (4053809277733513987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS (8249342930499801740) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_SUCCESS (2339794542560381270) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_SUCCESS (6975608174152828954) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS (2846699261330463192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS (5335414726057102801) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_SUCCESS (8868100318474971969) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS (6020936629725666932) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS (6944873647584595489) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_SUCCESS (2526483514124121988) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS (7662200333621664621) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS (2861223407953766632) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS (5345648571175243272) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS (3725278343103422466) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS (6998502547560297983) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS (8555433771162560361) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS (3555767296933606232) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS (6778051818199974237) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS (4080108758498911429) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS (7873675303000794343) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS (1763198215069819523) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_SUCCESS (2053891977727320532) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS (8146602361895007345) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_SUCCESS (8058678548991999545) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_SUCCESS (2545608067978550571) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_SUCCESS (4352382949744625007) -->
-    <skip />
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN za otključavanje mreže na SIM kartici"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN za otključavanje mrežne podgrupe na SIM kartici"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN za otključavanje korporativne SIM kartice"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"PIN za otključavanje SIM kartice pružaoca usluge"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"PIN za otključavanje SIM kartice"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"PIN za otključavanje mreže 1 na RUIM kartici"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"PIN za otključavanje mreže 2 na RUIM kartici"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"PIN za otključavanje RUIM hrpd kartice"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"PIN za otključavanje korporativne RUIM kartice"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"PIN za otključavanje RUIM kartice pružaoca usluge"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"PIN za otključavanje RUIM kartice"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"Unesite PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"PIN za otključavanje SPN-a"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"PIN za otključavanje ekvivalentnog kućnog PLMN sistema pružaoca usluge"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"PIN za otključavanje ICCID broja"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"PIN za otključavanje IMPI fajla"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"PIN za otključavanje mrežne podgrupe pružaoca usluge"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"Zahtijevanje otključavanja mreže na SIM kartici…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"Zahtijevanje otključavanja mrežne podgrupe na SIM kartici…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"Zahtijevanje otključavanja SIM kartice pružaoca usluge…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"Zahtijevanje otključavanja korporativne SIM kartice…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"Zahtijevanje otključavanja SIM kartice…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Zahtijevanje otključivanja mreže 1 na RUIM kartici…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Zahtijevanje otključavanja mreže 1 na RUIM kartici…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"Zahtijevanje otključavanje RUIM hrpd kartice…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"Zahtijevanje otključavanja RUIM kartice pružaoca usluge…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"Zahtijevanje otključavanja korporativne RUIM kartice…"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"Zahtijevanje otključavanja SPN-a…"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"Zahtijevanje otključavanja ekvivalentnog kućnog PLMN sistema pružaoca usluge…"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"Zahtijevanje otključavanja ICCID broja…"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"Zahtijevanje otključavanja IMPI fajla…"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"Zahtijevanje otključavanja mrežne podgrupe pružaoca usluge…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"Zahtijevanje otključavanja RUIM kartice…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"Zahtijevanje otključavanja PUK-om…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"Zahtjev za otključavanje mreže na SIM kartici je neuspješan."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"Zahtjev za otključavanje mrežne podgrupe na SIM kartici je neuspješan."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"Zahtjev za otključavanje SIM kartice pružaoca usluge je neuspješan."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"Zahtjev za otključavanje korporativne SIM kartice je neuspješan."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"Zahtjev za otključavanje SIM kartice je neuspješan."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"Zahtjev za otključavanje mreže 1 na RUIM kartici je neuspješan."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"Zahtjev za otkjučavanje mreže 2 na RUIM kartici je neuspješan."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"Zahtjev za otključavanje RUIM Hrpd kartice je neuspješan."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"Zahtjev za otključavanje korporativne RUIM kartice je neuspješan."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"Zahtjev za otključavanje RUIM kartice pružaoca usluge je neuspješan."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"Zahtjev za otključavanje RUIM kartice je neuspješan."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"Otključavanje PUK-om nije uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"Zahtjev za otključavanje SPN-a je neuspješan."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"Zahtjev za otključavanje ekvivalentnog kućnog PLMN sistema pružaoca usluge je neuspješan."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"Zahtjev za otključavanja ICCID broja je neuspješan."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"Zahtjev za otključavanje IMPI fajla je neuspješan."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"Zahtjev za otključavanje mrežne podgrupe pružaoca usluge je neuspješan."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"Otključavanje mreže na SIM kartici je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"Otključavanje mrežne podgrupe na SIM kartici je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"Otključavanje SIM kartice pružaoca usluge je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"Otključavanje SIM korporativne kartice je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"Otključavanje SIM kartice je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"Otključavanje mreže 1 na RUIM kartici je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"Otključavanje mreže 2 na RUIM kartici je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"Otključavanje RUIM Hrpd kartice je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"Otključavanja RUIM kartice pružaoca usluge je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"Otključavanje korporativne RUIM kartice je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"Otključavanje RUIM kartice je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"Otključavanje PUK-om je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"Otključavanje SPN-a je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"Otključavanje ekvivalentnog kućnog PLMN sistema pružaoca usluge je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"Otključavanje ICCID broja je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"Otključavanje IMPI fajla je uspjelo."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Otključavanje mrežne podgrupe pružaoca usluge je uspjelo."</string>
 </resources>

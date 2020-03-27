@@ -191,19 +191,26 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"நிர்வாகியால் தனிப்பட்ட உபயோகத்திற்காக ஒதுக்கப்பட்ட சாதனம்"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"சாதனம் நிர்வகிக்கப்படுகிறது"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"உங்கள் நிறுவனம் இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம். விவரங்களுக்கு, தட்டவும்."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"உங்கள் நிர்வாகியால் இருப்பிட அமைப்புகள் மாற்றப்பட்டன"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"உங்கள் இருப்பிட அமைப்புகளைப் பார்க்க தட்டவும்."</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"நாட்டைக் கண்டறியும் அம்சம்"</string>
     <string name="location_service" msgid="2439187616018455546">"இருப்பிடச் சேவை"</string>
-    <!-- no translation found for gnss_service (8907781262179951385) -->
-    <skip />
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS சேவை"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"சென்சார் அறிவிப்புச் சேவை"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight சேவை"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"நிர்வாகி ஆப்ஸை உபயோகிக்க முடியாது. இப்போது, உங்கள் சாதனம் ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்.\n\nஏதேனும் கேள்விகள் இருப்பின், உங்கள் நிறுவனத்தின் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"பிரிண்ட் செய்வதை <xliff:g id="OWNER_APP">%s</xliff:g> தடுத்துள்ளது."</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"தனிப்பட்ட ஆப்ஸை நிர்வாகி ஒருவர் இடைநிறுத்தியுள்ளார்"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"கொள்கை இணக்கத்தைச் சரிபார்ப்பதற்கு இங்கே தட்டவும்."</string>
+    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"நான்"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"டேப்லெட் விருப்பங்கள்"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV விருப்பத்தேர்வுகள்"</string>
@@ -442,8 +449,7 @@
     <string name="permlab_systemCamera" msgid="3642917457796210580">"படங்களையும் வீடியோக்களையும் எடுப்பதற்கு சிஸ்டம் கேமராக்களை அணுக ஆப்ஸையோ சேவையையோ அனுமதி"</string>
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
-    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
-    <skip />
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"கேமரா சாதனங்கள் திறக்கப்படும்போதோ மூடப்படும்போதோ அது குறித்த கால்பேக்குகளைப் பெற ஒரு ஆப்ஸையோ சேவையையோ அனுமதிக்கவும்."</string>
     <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
     <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"அதிர்வைக் கட்டுப்படுத்துதல்"</string>
@@ -459,10 +465,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"அழைக்கும் அனுபவத்தை மேம்படுத்தும் பொருட்டு, சிஸ்டம் மூலம் தனது அழைப்புகளை ரூட் செய்ய ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"சிஸ்டம் மூலமாக அழைப்புகளைப் பார்த்தலும் கட்டுப்படுத்துதலும்."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"செயலில் உள்ள அழைப்புகளைச் சாதனத்தில் பார்க்கவும் கட்டுப்படுத்தவும் ஆப்ஸை அனுமதிக்கிறது. அழைப்பு எண்கள் மற்றும் அழைப்புகளின் நிலை போன்ற தகவல்களும் இதில் அடங்கும்."</string>
-    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
-    <skip />
-    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
-    <skip />
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"ஆடியோ ரெக்கார்டு கட்டுப்பாடுகளிலிருந்து விலக்கு"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"ஆடியோ ரெக்கார்டு செய்வது தொடர்பான கட்டுப்பாடுகளிலிருந்து ஆப்ஸை விலக்கும்."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"மற்றொரு பயன்பாட்டிலிருந்து அழைப்பைத் தொடருதல்"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"மற்றொரு பயன்பாட்டில் தொடங்கப்பட்ட அழைப்பைத் தொடருவதற்கு, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ஃபோன் எண்களைப் படித்தல்"</string>
@@ -802,7 +806,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"மற்றவை"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"பிரத்தியேகம்"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"பிரத்தியேகம்"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"உதவியாளர்"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"சகோதரர்"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"குழந்தை"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"வாழ்வுத் துணை"</string>
@@ -1641,10 +1645,8 @@
     <skip />
     <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
     <skip />
-    <!-- no translation found for accessibility_enable_service_title (3931558336268541484) -->
-    <skip />
-    <!-- no translation found for accessibility_enable_service_encryption_warning (8603532708618236909) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"உங்கள் சாதனத்தை முழுமையாகக் கட்டுப்படுத்த <xliff:g id="SERVICE">%1$s</xliff:g> சேவையை அனுமதிக்க வேண்டுமா?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> சேவையை ஆன் செய்தால் தரவு என்க்ரிப்ஷனை மேம்படுத்த சாதனம் திரைப் பூட்டைப் பயன்படுத்தாது."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"உங்களுக்கு உதவக்கூடிய ஆப்ஸுக்குக் தேவையான அணுகல்தன்மையை அளித்து முழுக் கட்டுப்பாட்டையும் அளிக்கலாம், ஆனால் பெரும்பாலான ஆப்ஸுக்கு இது பொருந்தாது."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"திரையைப் பார்த்தலும் நிர்வகித்தலும்"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"இந்த அம்சத்தால் திரையில் உள்ள அனைத்தையும் படிக்க முடிவதோடு பிற ஆப்ஸின் மேல் உள்ளடக்கத்தைக் காட்டும்."</string>
@@ -1652,17 +1654,14 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ஏதேனும் ஆப்ஸ் அல்லது வன்பொருள் சென்சாரின் உதவியுடன் உரையாடல்களைக் கண்காணித்து உங்கள் சார்பாக ஆப்ஸுடன் உரையாட இச்சேவையால் இயலும்."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"அனுமதி"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"நிராகரி"</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (6002726538854613272) -->
-    <skip />
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ஒரு அம்சத்தைப் பயன்படுத்த அதைத் தட்டவும்:"</string>
     <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
     <skip />
     <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
     <skip />
-    <!-- no translation found for accessibility_uncheck_legacy_item_warning (8047830891064817447) -->
-    <skip />
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ஆஃப் செய்யப்பட்டுள்ளது"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ஷார்ட்கட்களை மாற்று"</string>
-    <!-- no translation found for done_accessibility_shortcut_menu_button (3668407723770815708) -->
-    <skip />
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"முடிந்தது"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ஷார்ட்கட்டை முடக்கு"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ஷார்ட்கட்டைப் பயன்படுத்து"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"வண்ணத்தை நேர் எதிராக மாற்றுதல்"</string>
@@ -1897,8 +1896,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"வகைப்படுத்தப்படாதவை"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"இந்த அறிவிப்புகளின் முக்கியத்துவத்தை அமைத்துள்ளீர்கள்."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ஈடுபட்டுள்ளவர்களின் காரணமாக, இது முக்கியமானது."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"பிரத்தியேக ஆப்ஸ் அறிவிப்பு"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா (இந்தக் கணக்கில் ஏற்கெனவே ஒரு பயனர் உள்ளார்) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"மொழியைச் சேர்"</string>
@@ -2081,33 +2079,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"பணிச் சுயவிவரம்"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"தனிப்பட்ட காட்சி"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"பணிக் காட்சி"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"பணி ஆப்ஸுடன் இதைப் பகிர முடியாது"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"உங்கள் பணிக் கணக்கில் உள்ள ஆப்ஸில் இந்த உள்ளடக்கத்தைப் பகிர்வதை உங்கள் IT நிர்வாகி அனுமதிக்கவில்லை"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"பணி ஆப்ஸில் இதைத் திறக்க முடியவில்லை"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"உங்கள் பணிக் கணக்கில் உள்ள ஆப்ஸில் இந்த உள்ளடக்கத்தைத் திறப்பதை உங்கள் IT நிர்வாகி அனுமதிக்கவில்லை"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"தனிப்பட்ட ஆப்ஸுடன் இதைப் பகிர முடியாது"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"உங்கள் தனிப்பட்ட கணக்கில் உள்ள ஆப்ஸில் இந்த உள்ளடக்கத்தைப் பகிர்வதை உங்கள் IT நிர்வாகி அனுமதிக்கவில்லை"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"தனிப்பட்ட ஆப்ஸில் இதைத் திறக்க முடியவில்லை"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"உங்கள் தனிப்பட்ட கணக்கில் உள்ள ஆப்ஸில் இந்த உள்ளடக்கத்தைத் திறப்பதை உங்கள் IT நிர்வாகி அனுமதிக்கவில்லை"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"பணிக் கணக்கு இடைநிறுத்தப்பட்டுள்ளது"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"இயக்கு"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"இந்த உள்ளடக்கத்தை எந்தவொரு பணி ஆப்ஸும் ஆதரிக்காது"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"இந்த உள்ளடக்கத்தை எந்தவொரு பணி ஆப்ஸாலும் திறக்க முடியாது"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"இந்த உள்ளடக்கத்தை எந்தவொரு தனிப்பட்ட ஆப்ஸும் ஆதரிக்காது"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"இந்த உள்ளடக்கத்தை எந்தவொரு தனிப்பட்ட ஆப்ஸாலும் திறக்க முடியாது"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"அழைப்புகளின்போது ரெக்கார்டு செய்தல் அல்லது ஆடியோவைப் பிளே செய்தல்"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"இயல்பான டயலர் ஆப்ஸாக இதை அமைக்கும்போது, அழைப்புகளை ரெக்கார்டு செய்ய அல்லது ஆடியோவைப் பிளே செய்ய இதை அனுமதிக்கும்."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

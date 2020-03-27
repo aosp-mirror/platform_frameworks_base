@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"管理者により、デバイスの個人使用が許可されました"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"管理対象のデバイス"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"このデバイスは組織によって管理され、ネットワーク トラフィックが監視される場合があります。詳しくはタップしてください。"</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"位置情報の設定が管理者によって変更されました"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"タップすると位置情報の設定が表示されます。"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"アプリに位置情報へのアクセスを許可しました"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"詳しくは IT 管理者にお問い合わせください"</string>
     <string name="country_detector" msgid="7023275114706088854">"国の検出"</string>
     <string name="location_service" msgid="2439187616018455546">"位置情報サービス"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS サービス"</string>
@@ -201,8 +201,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"デバイスのデータが消去されます"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"管理アプリを使用できません。デバイスのデータはこれから消去されます。\n\nご不明な点がある場合は、組織の管理者にお問い合わせください。"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」により印刷は無効にされています。"</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"個人用アプリは管理者によって停止されています"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"ポリシー コンプライアンスを確認するにはここをタップしてください。"</string>
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"個人用アプリのブロック解除"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"アプリは明日ブロックされます"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"IT 管理者は、仕事用プロファイルの一時停止が <xliff:g id="DAYS">%1$d</xliff:g> 日を超えることを許可していません"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"仕事用プロファイルを有効にする"</string>
     <string name="me" msgid="6207584824693813140">"自分"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"タブレットオプション"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV のオプション"</string>
@@ -236,10 +238,8 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"携帯電話オプション"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"画面ロック"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"電源を切る"</string>
-    <!-- no translation found for global_action_power_options (1185286119330160073) -->
-    <skip />
-    <!-- no translation found for global_action_restart (4678451019561687074) -->
-    <skip />
+    <string name="global_action_power_options" msgid="1185286119330160073">"電源"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"再起動"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"緊急通報"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"バグレポート"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"セッションを終了"</string>
@@ -439,11 +439,9 @@
     <string name="permlab_camera" msgid="6320282492904119413">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"写真と動画を撮影するには、システムカメラへのアクセスをアプリまたはサービスに許可してください"</string>
-    <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
-    <skip />
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"権限を付与されたこのアプリまたはシステムアプリは、いつでもシステムカメラを使用して写真と動画を撮影できます。アプリには android.permission.CAMERA 権限も必要です"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"カメラデバイスが起動または終了したときにコールバックを受け取ることを、アプリまたはサービスに許可してください。"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"このアプリは、カメラデバイスが（なんらかのアプリによって）起動するとき、または終了するときにコールバックを受け取ることができます。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"バイブレーションのオン / オフ状態の把握をアプリに許可します。"</string>
@@ -1619,24 +1617,15 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"推奨レベルを超えるまで音量を上げますか？\n\n大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ユーザー補助機能のショートカットの使用"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ショートカットが ON の場合、両方の音量ボタンを 3 秒ほど長押しするとユーザー補助機能が起動します。"</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (8417489297036013065) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning (3740723309483706911) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (6935581470716541531) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning_title (3410100187167382427) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning (8412954203626349109) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (2819109500943271385) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning (6363127705112844257) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_on (5463618449556111344) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ユーザー補助機能を ON にしますか？"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"音量大と音量小の両方のボタンを数秒ほど長押しすると、ユーザー補助機能が ON になります。この機能が ON になると、デバイスの動作が変わることがあります。\n\n現在の機能:\n<xliff:g id="SERVICE">%1$s</xliff:g>\n選択した機能は [設定] &gt; [ユーザー補助] で変更できます。"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack を ON にしますか？"</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"音量大と音量小の両方のボタンを数秒ほど長押しすると、TalkBack が ON になります。TalkBack は、目の不自由な方や視力の弱い方向けのスクリーン リーダーです。TalkBack を ON にすると、デバイスの動作が完全に変わります。\n\nこのショートカットは [設定] &gt; [ユーザー補助] で別の機能に変更できます。"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> を ON にしますか？"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"音量大と音量小の両方のボタンを数秒ほど長押しすると、ユーザー補助機能の <xliff:g id="SERVICE">%1$s</xliff:g> が ON になります。この機能が ON になると、デバイスの動作が変わることがあります。\n\nこのショートカットは [設定] &gt; [ユーザー補助] で別の機能に変更できます。"</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ON にする"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ON にしない"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能を必要とするユーザーをサポートするアプリには適していますが、ほとんどのアプリには適していません。"</string>
@@ -1647,10 +1636,8 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"許可"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"許可しない"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"使用を開始する機能をタップ:"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ユーザー補助機能ボタンで使用する機能の選択"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"音量ボタンのショートカットで使用する機能の選択"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> はオフになっています"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ショートカットの編集"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完了"</string>
@@ -1658,23 +1645,15 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ショートカットを使用"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色反転"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"色補正"</string>
-    <!-- no translation found for accessibility_shortcut_enabling_service (5473495203759847687) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_disabling_service (8675244165062700619) -->
-    <skip />
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が ON になりました。"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が OFF になりました。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を使用するには、音量大と音量小の両方のボタンを 3 秒間長押ししてください"</string>
-    <!-- no translation found for accessibility_button_prompt_text (8343213623338605305) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (8742535972130563952) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (5211827854510660203) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8853928358872550500) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (9196230728837090497) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3425123684990193765) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ユーザー補助機能ボタンをタップした場合に使用する機能を選択してください。"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ユーザー補助操作（2 本の指で画面の下から上にスワイプ）で使用する機能を選択してください。"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ユーザー補助操作（3 本の指で画面の下から上にスワイプ）で使用する機能を選択してください。"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"機能を切り替えるには、ユーザー補助機能ボタンを長押しします。"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"機能を切り替えるには、2 本の指で上にスワイプしたまま長押しします。"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"機能を切り替えるには、3 本の指で上にスワイプしたまま長押しします。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"拡大"</string>
     <string name="user_switched" msgid="7249833311585228097">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
@@ -2045,8 +2024,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g>、他 <xliff:g id="COUNT_3">%d</xliff:g> ファイル</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g>、他 <xliff:g id="COUNT_1">%d</xliff:g> ファイル</item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (1511722103987329028) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"おすすめの共有相手はいません"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"アプリのリスト"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"このアプリに録音権限は付与されていませんが、この USB デバイスから音声を収集できるようになります。"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ホーム"</string>
@@ -2084,220 +2062,112 @@
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"このコンテンツを開くことができる個人用アプリはありません"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"通話中に録音または音声の再生を行う"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"デフォルトの電話アプリケーションとして割り当てられている場合、このアプリに通話中の録音または音声の再生を許可します。"</string>
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ENTRY (4447629474818217364) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY (973059024670737358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ENTRY (4487435301206073787) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY (768060297218652809) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY (7129527319490548930) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY (2876126640607573252) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY (8952595089930109282) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ENTRY (3013902515773728996) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ENTRY (2974411408893410289) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ENTRY (687618528751880721) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ENTRY (6810596579655575381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ENTRY (2715929642540980259) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY (8557791623303951590) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ENTRY (7382468767274580323) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY (6730880791104286987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY (6432126539782267026) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY (1730510161529488920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY (3369885925003346830) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY (9129139686191167829) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY (2869929685874615358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ENTRY (1238663472392741771) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY (3988705848553894358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ENTRY (6186770686690993200) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ENTRY (7043865376145617024) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ENTRY (6144227308185112176) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS (4233355366318061180) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS (6742563947637715645) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS (2033399698172403560) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS (4795977251920732254) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS (1090425878157254446) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS (6476898876518094438) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS (6006806734293747731) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (6546680489620881893) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS (3506845511000727015) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_IN_PROGRESS (6709169861932992750) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS (4013870911606478520) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS (9032651188219523434) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS (6584576506344491207) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS (830981927724888114) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS (7851790973098894802) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_IN_PROGRESS (1149560739586960121) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS (5708964693522116025) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS (7288103122966483455) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS (4036752174056147753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS (5089536274515338566) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS (6737197986936251958) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS (5658767775619998623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS (665978313257653727) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS (3857142652251836850) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS (2695664012344346788) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (2695678959963807782) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS (1230605365926493599) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ERROR (1924844017037151535) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR (3372797822292089708) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR (1878443146720411381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ERROR (7664778312218023192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ERROR (2472944311643350302) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ERROR (828089694480999120) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ERROR (17619001007092511) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ERROR (807214229604353614) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ERROR (8644184447744175747) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR (3801002648649640407) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ERROR (707397021218680753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR (894358680773257820) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR (352466878146726991) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR (7353389721907138671) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR (2655263155490857920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ERROR (6903740900892931310) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR (5165901670447518687) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR (2856763216589267623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR (817542684437829139) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR (5178635064113393143) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR (5391587926974531008) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR (4895494864493315868) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ERROR (9017576601595353649) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR (1116993930995545742) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ERROR (7559167306794441462) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ERROR (2782926139511136588) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ERROR (1890493954453456758) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUCCESS (4886243367747126325) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS (4053809277733513987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS (8249342930499801740) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_SUCCESS (2339794542560381270) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_SUCCESS (6975608174152828954) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS (2846699261330463192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS (5335414726057102801) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_SUCCESS (8868100318474971969) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS (6020936629725666932) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS (6944873647584595489) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_SUCCESS (2526483514124121988) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS (7662200333621664621) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS (2861223407953766632) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS (5345648571175243272) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS (3725278343103422466) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS (6998502547560297983) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS (8555433771162560361) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS (3555767296933606232) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS (6778051818199974237) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS (4080108758498911429) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS (7873675303000794343) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS (1763198215069819523) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_SUCCESS (2053891977727320532) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS (8146602361895007345) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_SUCCESS (8058678548991999545) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_SUCCESS (2545608067978550571) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_SUCCESS (4352382949744625007) -->
-    <skip />
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM のネットワークのロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM のネットワーク サブネットのロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM の企業のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"SIM のサービス プロバイダのロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"SIM のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIM の Network1 のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIM の Network2 のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"RUIM の Hrpd のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"RUIM の企業のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"RUIM のサービス プロバイダのロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"RUIM のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"PUK を入力"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPN のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"SP Equivalent Home PLMN のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCID のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPI のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"ネットワーク サブセットのサービス プロバイダのロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"SIM のネットワークのロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"SIM のネットワーク サブセットのロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"SIM のサービス プロバイダのロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"SIM の企業のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"SIM のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"RUIM の Network1 のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"RUIM の Network2 のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"RUIM の Hrpd のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"RUIM のサービス プロバイダのロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"RUIM の企業のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"SPN のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"SP Equivalent Home PLMN のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"ICCID のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"IMPI のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"ネットワーク サブセットのサービス プロバイダのロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"RUIM のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"SIM のネットワークのロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"SIM のネットワーク サブセットのロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"SIM のサービス プロバイダのロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"SIM の企業のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"SIM のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"RUIM の Network1 のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"RUIM の Network2 のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"RUIM の Hrpd のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"RUIM の企業のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"RUIM のサービス プロバイダのロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"RUIM のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"SPN のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"SP Equivalent Home PLMN のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"ICCID のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"IMPI のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"ネットワーク サブセットのサービス プロバイダのロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"SIM のネットワークをロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"SIM のネットワーク サブセットをロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"SIM のサービス プロバイダをロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"SIM の企業をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"SIM をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM の Network1 をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM の Network2 をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM の Hrpd をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM のサービス プロバイダをロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"RUIM の企業をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"RUIM をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"SPN をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"SP Equivalent Home PLMN をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"ネットワーク サブセットのサービス プロバイダをロック解除しました。"</string>
 </resources>

@@ -191,8 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"വ്യക്തിപരമായ ഉപയോഗത്തിനായി, ഉപകരണത്തിന്റെ ഔദ്യോഗിക ഉപയോഗം അഡ്‌മിൻ അവസാനിപ്പിച്ചു"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ഉപകരണം മാനേജുചെയ്യുന്നുണ്ട്"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"നിങ്ങളുടെ സ്ഥാപനമാണ് ഈ ഉപകരണം മാനേജുചെയ്യുന്നത്, നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"നിങ്ങളുടെ അഡ്‌മിൻ ലൊക്കേഷൻ ക്രമീകരണം മാറ്റി"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"നിങ്ങളുടെ ലൊക്കേഷൻ ക്രമീകരണം കാണാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"രാജ്യം കണ്ടെത്താനുള്ള സംവിധാനം"</string>
     <string name="location_service" msgid="2439187616018455546">"ലൊക്കേഷൻ സേവനം"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS സേവനം"</string>
@@ -201,8 +203,14 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"അഡ്‌മിൻ ആപ്പ് ഉപയോഗിക്കാനാകില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ മായ്ക്കപ്പെടും.\n\nനിങ്ങൾക്ക് ചോദ്യങ്ങൾ ഉണ്ടെങ്കിൽ, നിങ്ങളുടെ സ്ഥാപനത്തിന്റെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> പ്രിന്റിംഗ് പ്രവർത്തനരഹിതമാക്കി."</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"വ്യക്തഗത ആപ്പുകൾ ഒരു അഡ്‌മിൻ താൽക്കാലികമായി റദ്ദാക്കിയിരിക്കുന്നു"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"നയത്തിന് അനുസൃതമാണോ എന്ന് പരിശോധിക്കാൻ ഇവിടെ ടാപ്പ് ചെയ്യുക."</string>
+    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"ഞാന്‍"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ടാബ്‌ലെറ്റ് ഓപ്‌ഷനുകൾ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android ടിവി ഓപ്‌ഷനുകൾ"</string>
@@ -797,7 +805,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"മറ്റുള്ളവ"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"ഇഷ്‌ടാനുസൃതം"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"ഇഷ്‌ടാനുസൃതം"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"സഹായി"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"സഹോദരന്‍‌"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"കുട്ടി"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"ഗാര്‍‌ഹിക പങ്കാളി"</string>
@@ -2067,33 +2075,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"ജോലിസ്ഥലം"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"വ്യക്തിപര കാഴ്‌ച"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ഔദ്യോഗിക കാഴ്‌ച"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"ഔദ്യോഗിക ആപ്പുകൾ ഉപയോഗിച്ച് ഇത് പങ്കിടാനാവില്ല"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫെെലിലെ ആപ്പുകൾ ഉപയോഗിച്ച് ഈ ഉള്ളടക്കം പങ്കിടാൻ ഐടി അഡ്‌മിൻ അനുവദിക്കുന്നില്ല"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"ഔദ്യോഗിക ആപ്പുകൾ ഉപയോഗിച്ച് ഇത് തുറക്കാനാവില്ല"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫെെലിലെ ആപ്പുകൾ ഉപയോഗിച്ച് ഈ ഉള്ളടക്കം തുറക്കാൻ ഐടി അഡ്‌മിൻ അനുവദിക്കുന്നില്ല"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"വ്യക്തിപര ആപ്പുകൾ ഉപയോഗിച്ച് ഇത് പങ്കിടാനാവില്ല"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"നിങ്ങളുടെ വ്യക്തിപര പ്രൊഫെെലിലെ ആപ്പുകൾ ഉപയോഗിച്ച് ഈ ഉള്ളടക്കം പങ്കിടാൻ ഐടി അഡ്‌മിൻ അനുവദിക്കുന്നില്ല"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"വ്യക്തിപര ആപ്പുകൾ ഉപയോഗിച്ച് ഇത് തുറക്കാനാവില്ല"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"നിങ്ങളുടെ വ്യക്തിപര പ്രൊഫെെലിലെ ആപ്പുകൾ ഉപയോഗിച്ച് ഈ ഉള്ളടക്കം തുറക്കാൻ ഐടി അഡ്‌മിൻ അനുവദിക്കുന്നില്ല"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ഔദ്യോഗിക പ്രൊഫൈൽ തൽക്കാലം നിർത്തിയിരിക്കുന്നു"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ഓണാക്കുക"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"ഔദ്യോഗിക ആപ്പുകൾക്കൊന്നും ഈ ഉള്ളടക്കത്തെ പിന്തുണയ്‌ക്കാനാവില്ല"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ഔദ്യോഗിക ആപ്പുകൾക്കൊന്നും ഈ ഉള്ളടക്കം തുറക്കാനാവില്ല"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"വ്യക്തിപര ആപ്പുകൾക്കൊന്നും ഈ ഉള്ളടക്കത്തെ പിന്തുണയ്‌ക്കാനാവില്ല"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"വ്യക്തിപര ആപ്പുകൾക്കൊന്നും ഈ ഉള്ളടക്കം തുറക്കാനാവില്ല"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യുക അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യുക"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ഡിഫോൾട്ട് ഡയലർ ആപ്പായി അസെെൻ ചെയ്യുന്ന സമയത്ത്, ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യാൻ അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യാൻ ഈ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

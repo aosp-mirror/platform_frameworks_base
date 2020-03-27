@@ -191,8 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"વ્યવસ્થાપકે ડિવાઇસ વ્યક્તિગત ઉપયોગ માટે આપી દીધું છે"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ઉપકરણ સંચાલિત છે"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"તમારી સંસ્થા આ ઉપકરણનું સંચાલન કરે છે અને નેટવર્ક ટ્રાફિફનું નિયમન કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"તમારા વ્યવસ્થાપક દ્વારા સ્થાન સેટિંગ બદલવામાં આવ્યાં"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"તમારા સ્થાન સેટિંગને જોવા માટે ટૅપ કરો."</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"દેશને ઓળખાવનારી સુવિધા"</string>
     <string name="location_service" msgid="2439187616018455546">"સ્થાન સેવા"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS સેવા"</string>
@@ -201,8 +203,14 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"તમારું ઉપકરણ કાઢી નાખવામાં આવશે"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"વ્યવસ્થાપક ઍપનો ઉપયોગ કરી શકાશે નહીં. તમારું ઉપકરણ હવે કાઢી નાખવામાં આવશે.\n\nજો તમને પ્રશ્નો હોય, તો તમારી સંસ્થાના વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> દ્વારા પ્રિન્ટ કરવાનું બંધ કરાયું છે."</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"વ્યવસ્થાપક દ્વારા વ્યક્તિગત ઍપ સ્થગિત કરવામાં આવી છે"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"નીતિનું પાલન થાય છે કે કેમ તે તપાસવા માટે અહીં ટૅપ કરો."</string>
+    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"હું"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ટેબ્લેટ વિકલ્પો"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TVના વિકલ્પો"</string>
@@ -442,7 +450,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"કૅમેરા ડિવાઇસ ચાલુ કે બંધ થવા વિશે કૉલબૅક પ્રાપ્ત કરવાની ઍપ્લિકેશન કે સેવાને મંજૂરી આપો."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"જ્યારે કોઈ કૅમેરા ડિવાઇસ (કયા ઍપ્લિકેશન વડે) ખોલવા કે બંધ કરવામાં આવે, ત્યારે આ વિશેષ ઍપ કૉલબૅક પ્રાપ્ત કરી શકે છે."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"જ્યારે કોઈ કૅમેરા ડિવાઇસ (કયા ઍપ્લિકેશન વડે) ખોલવા કે બંધ કરવામાં આવે, ત્યારે આ ઍપ કૉલબૅક પ્રાપ્ત કરી શકે છે."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"વાઇબ્રેશન નિયંત્રિત કરો"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"એપ્લિકેશનને વાઇબ્રેટરને નિયંત્રિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ઍપને વાઇબ્રેટર સ્થિતિને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
@@ -797,7 +805,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"અન્ય"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"કસ્ટમ"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"કસ્ટમ"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"સહાયક"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ભાઈ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"બાળક"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"ઘરેલું ભાગીદાર"</string>
@@ -2067,33 +2075,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"કાર્યાલય"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"વ્યક્તિગત વ્યૂ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ઑફિસ વ્યૂ"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"આને ઑફિસ માટેની ઍપ સાથે શેર કરી શકતાં નથી"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"તમારા IT વ્યવસ્થાપક તમને તમારી કાર્યાલયની પ્રોફાઇલમાંની ઍપ વડે આ કન્ટેન્ટ શેર કરવાની મંજૂરી આપતા નથી"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"ઑફિસ માટેની ઍપ વડે આને ખોલી શકતાં નથી"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"તમારા IT વ્યવસ્થાપક તમને તમારી કાર્યાલયની પ્રોફાઇલમાંની ઍપ વડે આ કન્ટેન્ટ ખોલવાની મંજૂરી આપતા નથી"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"આને વ્યક્તિગત ઍપ સાથે શેર કરી શકતાં નથી"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"તમારા IT વ્યવસ્થાપક તમને તમારી વ્યક્તિગત પ્રોફાઇલમાંની ઍપ વડે આ કન્ટેન્ટ શેર કરવાની મંજૂરી આપતા નથી"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"વ્યક્તિગત ઍપ વડે આને ખોલી શકતાં નથી"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"તમારા IT વ્યવસ્થાપક તમને તમારી વ્યક્તિગત પ્રોફાઇલમાંની ઍપ વડે આ કન્ટેન્ટ ખોલવાની મંજૂરી આપતા નથી"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"કાર્યાલયની પ્રોફાઇલ થોભાવી છે"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ચાલુ કરો"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"કોઈ ઑફિસ માટેની ઍપ આ કન્ટેન્ટને સપોર્ટ કરી શકતી નથી"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"કોઈ ઑફિસ માટેની ઍપ આ કન્ટેન્ટ ખોલી શકતી નથી"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"કોઈ વ્યક્તિગત ઍપ આ કન્ટેન્ટને સપોર્ટ કરી શકતી નથી"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"કોઈ વ્યક્તિગત ઍપ આ કન્ટેન્ટ ખોલી શકતી નથી"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ટેલિફોની કૉલમાં ઑડિયો રેકૉર્ડ કરો અથવા ચલાવો"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ડિફૉલ્ટ ડાયલર ઍપ તરીકે સોંપણી કરવામાં આવવા પર આ ઍપને ટેલિફોની કૉલમાં ઑડિયો રેકૉર્ડ કરવાની અથવા ચલાવવાની મંજૂરી આપે છે."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

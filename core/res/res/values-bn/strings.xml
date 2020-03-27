@@ -191,8 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ব্যক্তিগত কাজের জন্য অ্যাডমিন এই ডিভাইস ব্যবহার করার অনুমতি দেয়নি"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ডিভাইসটি পরিচালনা করা হচ্ছে"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"আপনার প্রতিষ্ঠান এই ডিভাইসটি পরিচালনা করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।,"</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"আপনার অ্যাডমিন লোকেশন সেটিংস পরিবর্তন করেছেন"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"আপনার লোকেশন সেটিংস দেখার জন্য ট্যাপ করুন।"</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"দেশ শনাক্তকারী"</string>
     <string name="location_service" msgid="2439187616018455546">"লোকেশন পরিষেবা"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS পরিষেবা"</string>
@@ -201,8 +203,14 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"অ্যাডমিন অ্যাপটি ব্যবহার করা যাবে না। আপনার ডিভাইসে থাকা সবকিছু এখন মুছে ফেলা হবে।\n\nকোনও প্রশ্ন থাকলে আপনার প্রতিষ্ঠানের অ্যাডমিনের সাথে যোগাযোগ করুন।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> প্রিন্টিং বন্ধ রেখেছে।"</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"অ্যাডমিন ব্যক্তিগত অ্যাপ সাসপেন্ড করেছেন"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"নীতি মেনে চলা হচ্ছে কিনা তা যাচাই করতে এখানে ট্যাপ করুন।"</string>
+    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"আমাকে"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ট্যাবলেট বিকল্পগুলি"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-র বিকল্প"</string>
@@ -797,7 +805,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"অন্যান্য"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"কাস্টম"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"কাস্টম"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"সহায়ক"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ভাই"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"সন্তান"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"জীবনসাথি"</string>
@@ -2067,33 +2075,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"অফিস"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ব্যক্তিগত ভিউ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"অফিসের ভিউ"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"অফিস অ্যাপের মাধ্যমে শেয়ার করা যাবে না"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"আইটি অ্যাডমিন আপনার অফিস প্রোফাইল ব্যবহার করে অ্যাপের মাধ্যমে এই কন্টেন্ট শেয়ার করার অনুমতি দেয় না"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"অফিসের অ্যাপের মাধ্যমে এটি খোলা যাবে না"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"আইটি অ্যাডমিন আপনার অফিস প্রোফাইল ব্যবহার করে অ্যাপের মাধ্যমে এই কন্টেন্ট খোলার অনুমতি দেয় না"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ব্যক্তিগত অ্যাপের মাধ্যমে শেয়ার করা যাবে না"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"আইটি অ্যাডমিন আপনার ব্যক্তিগত প্রোফাইল ব্যবহার করে অ্যাপের মাধ্যমে এই কন্টেন্ট শেয়ার করার অনুমতি দেয় না"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"ব্যক্তিগত অ্যাপের মাধ্যমে খোলা যাবে না"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"আইটি অ্যাডমিন আপনার ব্যক্তিগত প্রোফাইল ব্যবহার করে অ্যাপের মাধ্যমে এই কন্টেন্ট খোলার অনুমতি দেয় না"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"কাজের প্রোফাইল পজ করা আছে"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"চালু করুন"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"এই ধরনের কন্টেন্ট অফিসের অ্যাপের মাধ্যমে খুলে দেখা যাবে না"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"এই ধরনের কন্টেন্ট অফিসের অ্যাপের মাধ্যমে খুলে দেখা যাবে না"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"এই ধরনের কন্টেন্ট ব্যক্তিগত অ্যাপের মাধ্যমে খোলা বা দেখা যাবে না"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"এই ধরনের কন্টেন্ট ব্যক্তিগত অ্যাপের মাধ্যমে খোলা যাবে না"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"টেলিফোন কলে অডিও রেকর্ড বা প্লে করুন"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ডিফল্ট ডায়ালার অ্যাপ্লিকেশন হিসেবে বেছে নেওয়া হলে, টেলিফোন কলে অডিও রেকর্ড বা প্লে করার জন্য এই অ্যাপকে অনুমতি দেয়।"</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

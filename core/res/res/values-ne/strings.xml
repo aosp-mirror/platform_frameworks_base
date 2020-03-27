@@ -191,8 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"व्यवस्थापकले यन्त्रलाई व्यक्तिगत प्रयोगका लागि अस्वीकार गर्नुभयो"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"यन्त्र व्यवस्थित गरिएको छ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"तपाईंको संगठनले यस यन्त्रको व्यवस्थापन गर्दछ र नेटवर्क ट्राफिकको अनुगमन गर्न सक्छ। विवरणहरूका लागि ट्याप गर्नुहोस्।"</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"तपाईंका प्रशासकले परिवर्तन गरेका स्थानसम्बन्धी सेटिङहरू"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"आफ्नो स्थानका सेटिङहरू हेर्न ट्याप गर्नुहोस्।"</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"देश पत्ता लगाउने सुविधा"</string>
     <string name="location_service" msgid="2439187616018455546">"स्थानसम्बन्धी सेवा"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS सेवा"</string>
@@ -201,8 +203,14 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"तपाईंको यन्त्र मेटिनेछ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"प्रशासकको अनुप्रयोग प्रयोग गर्न मिल्दैन। तपाईंको यन्त्रको डेटा अब मेटाइने छ।\n\nतपाईंसँग प्रश्नहरू भएका खण्डमा आफ्नो संगठनका प्रशासकसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ले छाप्ने कार्यलाई असक्षम पार्यो।"</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"व्यक्तिगत एपहरू एकजना प्रशासकले निलम्बन गरिरहनुभएको छ"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"नीति पालनाबारे जाँच गर्न यहाँ ट्याप गर्नुहोस्।"</string>
+    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"मलाई"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ट्याब्लेट विकल्पहरू"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV सम्बन्धी विकल्पहरू"</string>
@@ -442,8 +450,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"कुनै अनुप्रयोग वा सेवालाई खोलिँदै वा बन्द गरिँदै गरेका क्यामेरा यन्त्रहरूका बारेमा कलब्याक प्राप्त गर्ने अनुमति दिनुहोस्।"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"कुनै क्यामेरा यन्त्र खोलिँदा (कुन अनुप्रयोगले खोलेको भन्ने बारेमा) वा बन्द गरिँदा यो अनुप्रयोगले कलब्याक प्राप्त गर्न सक्छ।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"कम्पन नियन्त्रण गर्नुहोस्"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अनुप्रयोगलाई भाइब्रेटर नियन्त्रण गर्न अनुमति दिन्छ।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"यो अनुप्रयोगलाई कम्पनको स्थितिमाथि पहुँच राख्न दिनुहोस्।"</string>
@@ -2074,33 +2081,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"काम"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"व्यक्तिगत दृश्य"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"कार्य दृश्य"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"यो सामग्री कामसम्बन्धी अनुप्रयोगहरूमार्फत सेयर गर्न मिल्दैन"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"तपाईंका IT प्रशासकले तपाईंलाई तपाईंको कार्य प्रोफाइलमा रहेका अनुप्रयोगहरूमार्फत यो सामग्री सेयर गर्ने अनुमति दिनुभएको छैन"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"यो सामग्री कामसम्बन्धी अनुप्रयोगहरूमार्फत खोल्न मिल्दैन"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"तपाईंका IT प्रशासकले तपाईंलाई तपाईंको कार्य प्रोफाइलमा रहेका अनुप्रयोगहरूमार्फत यो सामग्री खोल्ने अनुमति दिनुभएको छैन"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"यो सामग्री व्यक्तिगत अनुप्रयोगहरूमार्फत सेयर गर्न मिल्दैन"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"तपाईंका IT प्रशासकले तपाईंलाई तपाईंको व्यक्तिगत प्रोफाइलमा रहेका अनुप्रयोगहरूमार्फत यो सामग्री सेयर गर्ने अनुमति दिनुभएको छैन"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"यो सामग्री व्यक्तिगत अनुप्रयोगहरूमार्फत खोल्न मिल्दैन"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"तपाईंका IT प्रशासकले तपाईंलाई तपाईंको व्यक्तिगत प्रोफाइलमा रहेका अनुप्रयोगहरूमार्फत यो सामग्री खोल्ने अनुमति दिनुभएको छैन"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"कार्य प्रोफाइल पज गरिएको छ"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"सक्रिय गर्नुहोस्"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"यो सामग्री कामसम्बन्धी कुनै पनि अनुप्रयोगमार्फत सेयर गर्न मिल्दैन"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"यो सामग्री कामसम्बन्धी कुनै पनि अनुप्रयोगमार्फत खोल्न मिल्दैन"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"यो सामग्री कुनै पनि व्यक्तिगत अनुप्रयोगमार्फत सेयर गर्न मिल्दैन"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"यो सामग्री कुनै पनि व्यक्तिगत अनुप्रयोगमार्फत खोल्न मिल्दैन"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"टेलिफोन कल गर्दै गर्दा अडियो रेकर्ड गर्नुहोस् वा प्ले गर्नुहोस्"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"यस अनुप्रयोगलाई पूर्वनिर्धारित डायलर अनुप्रयोग निर्धारण गर्दा टेलिफोन कलको अडियो रेकर्ड गर्ने र प्ले गर्ने अनुमति दिन्छ।"</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
