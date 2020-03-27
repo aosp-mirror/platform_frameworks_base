@@ -874,11 +874,11 @@ public class TaskRecordTests extends ActivityTestsBase {
         spyOn(persister);
 
         final Task task = getTestTask();
-        task.hasBeenVisible = false;
+        task.setHasBeenVisible(false);
         task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
         task.getStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
-        task.hasBeenVisible = true;
+        task.setHasBeenVisible(true);
         task.onConfigurationChanged(task.getParent().getConfiguration());
 
         verify(persister).saveTask(task, task.getDisplayContent());
@@ -890,7 +890,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         spyOn(persister);
 
         final Task task = getTestTask();
-        task.hasBeenVisible = false;
+        task.setHasBeenVisible(false);
         task.getDisplayContent().setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
         task.getStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         final DisplayContent oldDisplay = task.getDisplayContent();
@@ -900,7 +900,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         persister.getLaunchParams(task, null, params);
         assertEquals(WINDOWING_MODE_UNDEFINED, params.mWindowingMode);
 
-        task.hasBeenVisible = true;
+        task.setHasBeenVisible(true);
         task.removeImmediately();
 
         verify(persister).saveTask(task, oldDisplay);
@@ -915,10 +915,10 @@ public class TaskRecordTests extends ActivityTestsBase {
         spyOn(persister);
 
         final Task task = getTestTask();
-        task.hasBeenVisible = false;
+        task.setHasBeenVisible(false);
         task.getStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
-        task.hasBeenVisible = true;
+        task.setHasBeenVisible(true);
         task.onConfigurationChanged(task.getParent().getConfiguration());
 
         verify(persister, never()).saveTask(same(task), any());
@@ -930,11 +930,11 @@ public class TaskRecordTests extends ActivityTestsBase {
         spyOn(persister);
 
         final Task task = getTestTask();
-        task.hasBeenVisible = false;
+        task.setHasBeenVisible(false);
         task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
         task.getStack().setWindowingMode(WINDOWING_MODE_PINNED);
 
-        task.hasBeenVisible = true;
+        task.setHasBeenVisible(true);
         task.onConfigurationChanged(task.getParent().getConfiguration());
 
         verify(persister, never()).saveTask(same(task), any());
