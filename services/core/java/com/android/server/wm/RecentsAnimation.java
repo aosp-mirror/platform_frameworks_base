@@ -400,6 +400,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     throw e;
                 } finally {
                     mService.continueWindowLayout();
+                    // Make sure the surfaces are updated with the latest state. Sometimes the
+                    // surface placement may be skipped if display configuration is changed (i.e.
+                    // {@link DisplayContent#mWaitingForConfig} is true).
+                    if (mWindowManager.mRoot.isLayoutNeeded()) {
+                        mWindowManager.mRoot.performSurfacePlacement();
+                    }
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 }
             });
