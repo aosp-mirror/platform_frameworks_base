@@ -193,13 +193,13 @@ public class TelecomManager {
 
     /**
      * Broadcast intent action indicating that the current default call screening app has changed.
-     *
-     * The string extra {@link #EXTRA_DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME} will contain the
-     * name of the Component of the previous or the new call screening app.
-     *
-     * The boolean extra {@link #EXTRA_IS_DEFAULT_CALL_SCREENING_APP} will indicate the component
-     * name in the String extra {@link #EXTRA_DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME} is default
-     * call screening app or not.
+     * <p>
+     * Note: This intent is NEVER actually broadcast and will be deprecated in the future.
+     * <p>
+     * An app that want to know if it holds the
+     * {@link android.app.role.RoleManager#ROLE_CALL_SCREENING} role can use
+     * {@link android.app.role.RoleManager#isRoleHeld(String)} to confirm if it holds the role or
+     * not.
      */
     public static final String ACTION_DEFAULT_CALL_SCREENING_APP_CHANGED =
         "android.telecom.action.DEFAULT_CALL_SCREENING_APP_CHANGED";
@@ -207,6 +207,8 @@ public class TelecomManager {
     /**
      * Extra value used with {@link #ACTION_DEFAULT_CALL_SCREENING_APP_CHANGED} broadcast to
      * indicate the ComponentName of the call screening app which has changed.
+     * <p>
+     * Note: This extra is NOT used and will be deprecated in the future.
      */
     public static final String EXTRA_DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME =
             "android.telecom.extra.DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME";
@@ -214,6 +216,8 @@ public class TelecomManager {
     /**
      * Extra value used with {@link #ACTION_DEFAULT_CALL_SCREENING_APP_CHANGED} broadcast to
      * indicate whether an app is the default call screening app.
+     * <p>
+     * Note: This extra is NOT used and will be deprecated in the future.
      */
     public static final String EXTRA_IS_DEFAULT_CALL_SCREENING_APP =
             "android.telecom.extra.IS_DEFAULT_CALL_SCREENING_APP";
