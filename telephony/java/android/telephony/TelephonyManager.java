@@ -12252,6 +12252,17 @@ public class TelephonyManager {
             "android.telephony.extra.NETWORK_COUNTRY";
 
     /**
+     * The extra used with an {@link #ACTION_NETWORK_COUNTRY_CHANGED} to specify the
+     * last known the country code in ISO-3166-1 alpha-2 format.
+     * <p class="note">
+     * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_LAST_KNOWN_NETWORK_COUNTRY =
+            "android.telephony.extra.LAST_KNOWN_NETWORK_COUNTRY";
+
+    /**
      * Indicate if the user is allowed to use multiple SIM cards at the same time to register
      * on the network (e.g. Dual Standby or Dual Active) when the device supports it, or if the
      * usage is restricted. This API is used to prevent usage of multiple SIM card, based on
