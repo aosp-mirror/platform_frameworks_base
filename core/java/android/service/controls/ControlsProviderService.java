@@ -304,12 +304,11 @@ public abstract class ControlsProviderService extends Service {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(componentName);
         Preconditions.checkNotNull(control);
-        final ComponentName sysuiComponent = ComponentName.unflattenFromString(
-                context.getResources().getString(
-                        com.android.internal.R.string.config_systemUIServiceComponent));
+        final String controlsPackage = context.getString(
+                com.android.internal.R.string.config_controlsPackage);
         Intent intent = new Intent(ACTION_ADD_CONTROL);
         intent.putExtra(Intent.EXTRA_COMPONENT_NAME, componentName);
-        intent.setPackage(sysuiComponent.getPackageName());
+        intent.setPackage(controlsPackage);
         if (isStatelessControl(control)) {
             intent.putExtra(EXTRA_CONTROL, control);
         } else {
