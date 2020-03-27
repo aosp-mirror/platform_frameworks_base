@@ -5752,7 +5752,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mLocalSyncId >= 0) {
             mBLASTSyncEngine.setReady(mLocalSyncId);
         } else {
-            mWaitingListener.transactionReady(mWaitingSyncId, mBLASTSyncTransaction);
+            mWaitingListener.onTransactionReady(mWaitingSyncId, mBLASTSyncTransaction);
         }
 
         mUsingBLASTSyncTransaction = false;

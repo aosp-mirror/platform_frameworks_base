@@ -24,5 +24,5 @@ import android.view.SurfaceControl;
  */
 oneway interface IWindowContainerTransactionCallback {
     /** Called upon completion of WindowOrganizer#applyTransaction */
-    void transactionReady(int id, in SurfaceControl.Transaction t);
+    void onTransactionReady(int id, in SurfaceControl.Transaction t);
 }

@@ -28,7 +28,7 @@ import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
-import android.window.IWindowContainer;
+import android.window.WindowContainerToken;
 
 /**
  * Stores information about a particular Task.
@@ -147,7 +147,7 @@ public class TaskInfo {
      * @hide
      */
     @NonNull
-    public IWindowContainer token;
+    public WindowContainerToken token;
 
     /**
      * The PictureInPictureParams for the Task, if set.
@@ -222,7 +222,7 @@ public class TaskInfo {
         supportsSplitScreenMultiWindow = source.readBoolean();
         resizeMode = source.readInt();
         configuration.readFromParcel(source);
-        token = IWindowContainer.Stub.asInterface(source.readStrongBinder());
+        token = WindowContainerToken.CREATOR.createFromParcel(source);
         topActivityType = source.readInt();
         pictureInPictureParams = source.readInt() != 0
                 ? PictureInPictureParams.CREATOR.createFromParcel(source)
@@ -265,7 +265,7 @@ public class TaskInfo {
         dest.writeBoolean(supportsSplitScreenMultiWindow);
         dest.writeInt(resizeMode);
         configuration.writeToParcel(dest, flags);
-        dest.writeStrongInterface(token);
+        token.writeToParcel(dest, flags);
         dest.writeInt(topActivityType);
         if (pictureInPictureParams == null) {
             dest.writeInt(0);

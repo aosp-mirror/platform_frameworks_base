@@ -18,7 +18,7 @@ package android.window;
 
 import android.app.ActivityManager;
 import android.window.ITaskOrganizer;
-import android.window.IWindowContainer;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 /** @hide */
@@ -40,23 +40,23 @@ interface ITaskOrganizerController {
     ActivityManager.RunningTaskInfo createRootTask(int displayId, int windowingMode);
 
     /** Deletes a persistent root task in WM */
-    boolean deleteRootTask(IWindowContainer task);
+    boolean deleteRootTask(in WindowContainerToken task);
 
     /** Gets direct child tasks (ordered from top-to-bottom) */
-    List<ActivityManager.RunningTaskInfo> getChildTasks(in IWindowContainer parent,
+    List<ActivityManager.RunningTaskInfo> getChildTasks(in WindowContainerToken parent,
             in int[] activityTypes);
 
     /** Gets all root tasks on a display (ordered from top-to-bottom) */
     List<ActivityManager.RunningTaskInfo> getRootTasks(int displayId, in int[] activityTypes);
 
     /** Get the root task which contains the current ime target */
-    IWindowContainer getImeTarget(int display);
+    WindowContainerToken getImeTarget(int display);
 
     /**
      * Set's the root task to launch new tasks into on a display. {@code null} means no launch root
      * and thus new tasks just end up directly on the display.
      */
-    void setLaunchRoot(int displayId, in IWindowContainer root);
+    void setLaunchRoot(int displayId, in WindowContainerToken root);
 
     /**
      * Requests that the given task organizer is notified when back is pressed on the root activity

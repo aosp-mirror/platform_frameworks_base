@@ -2784,7 +2784,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     false /* includingParents */);
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.reparent(task.getStack().mRemoteToken, primarySplitTask.mRemoteToken, toTop);
+        wct.reparent(task.getStack().mRemoteToken.toWindowContainerToken(),
+                primarySplitTask.mRemoteToken.toWindowContainerToken(), toTop);
         mWindowOrganizerController.applyTransaction(wct);
     }
 
@@ -4273,7 +4274,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         tempDockedTaskInsetBounds != null ? tempDockedTaskInsetBounds
                             : (tempDockedTaskBounds != null ? tempDockedTaskBounds
                                     : dockedBounds);
-                wct.setBounds(primary.mRemoteToken, primaryRect);
+                wct.setBounds(primary.mRemoteToken.toWindowContainerToken(), primaryRect);
                 Rect otherRect = tempOtherTaskInsetBounds != null ? tempOtherTaskInsetBounds
                         : tempOtherTaskBounds;
                 if (otherRect == null) {
@@ -4285,7 +4286,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         otherRect.top = primaryRect.bottom + 6;
                     }
                 }
-                wct.setBounds(secondary.mRemoteToken, otherRect);
+                wct.setBounds(secondary.mRemoteToken.toWindowContainerToken(), otherRect);
                 mWindowOrganizerController.applyTransaction(wct);
             }
         } finally {

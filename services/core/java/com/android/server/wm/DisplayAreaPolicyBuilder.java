@@ -87,8 +87,8 @@ class DisplayAreaPolicyBuilder {
          *
          * Must be unique among the features added to a {@link DisplayAreaPolicyBuilder}.
          *
-         * @see android.window.WindowOrganizer.DisplayAreaOrganizer#FEATURE_SYSTEM_FIRST
-         * @see android.window.WindowOrganizer.DisplayAreaOrganizer#FEATURE_VENDOR_FIRST
+         * @see android.window.DisplayAreaOrganizer#FEATURE_SYSTEM_FIRST
+         * @see android.window.DisplayAreaOrganizer#FEATURE_VENDOR_FIRST
          */
         public int getId() {
             return mId;
