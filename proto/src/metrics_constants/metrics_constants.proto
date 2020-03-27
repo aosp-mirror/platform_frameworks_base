@@ -7432,5 +7432,13 @@ message MetricsEvent {
 
     // Magma Constants
     MOONSHINE = 450;
+
+    // CustomSettings constant
+    CUSTOM_SETTINGS = 1999;
+
+    // AopLime and ConquerOS constant
+    AOSPLIME = 4000;
+    CONQUEROS = 4001;
+
   }
 }
