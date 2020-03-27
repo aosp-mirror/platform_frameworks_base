@@ -4712,12 +4712,6 @@
     <permission android:name="android.permission.MANAGE_SOUND_TRIGGER"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows preempting sound trigger recognitions for the sake of capturing audio on
-         implementations which do not support running both concurrently.
-         @hide -->
-    <permission android:name="android.permission.PREEMPT_SOUND_TRIGGER"
-                android:protectionLevel="signature|privileged" />
-
     <!-- Must be required by system/priv apps implementing sound trigger detection services
          @hide
          @SystemApi -->
