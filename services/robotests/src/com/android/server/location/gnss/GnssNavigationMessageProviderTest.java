@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.gnss;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -35,23 +35,23 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 /**
- * Unit tests for {@link GnssAntennaInfoProvider}.
+ * Unit tests for {@link GnssNavigationMessageProvider}.
  */
 @RunWith(RobolectricTestRunner.class)
 @Presubmit
-public class GnssAntennaInfoProviderTest {
+public class GnssNavigationMessageProviderTest {
     @Mock
-    private GnssAntennaInfoProvider.GnssAntennaInfoProviderNative mMockNative;
-    private GnssAntennaInfoProvider mTestProvider;
+    private GnssNavigationMessageProvider.GnssNavigationMessageProviderNative
+            mMockNative;
+    private GnssNavigationMessageProvider mTestProvider;
 
-    /** Setup. */
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mMockNative.startAntennaInfoListening()).thenReturn(true);
-        when(mMockNative.stopAntennaInfoListening()).thenReturn(true);
+        when(mMockNative.startNavigationMessageCollection()).thenReturn(true);
+        when(mMockNative.stopNavigationMessageCollection()).thenReturn(true);
 
-        mTestProvider = new GnssAntennaInfoProvider(RuntimeEnvironment.application,
+        mTestProvider = new GnssNavigationMessageProvider(RuntimeEnvironment.application,
                 new Handler(Looper.myLooper()), mMockNative) {
             @Override
             public boolean isGpsEnabled() {
@@ -60,35 +60,40 @@ public class GnssAntennaInfoProviderTest {
         };
     }
 
-    /**
-     * Test that registerWithService calls the native startAntennaInfoListening method.
-     */
     @Test
     public void register_nativeStarted() {
         mTestProvider.registerWithService();
-        verify(mMockNative, times(1)).startAntennaInfoListening();
+        verify(mMockNative).startNavigationMessageCollection();
     }
 
-    /**
-     * Test that unregisterFromService calls the native stopAntennaInfoListening method.
-     */
     @Test
     public void unregister_nativeStopped() {
         mTestProvider.registerWithService();
         mTestProvider.unregisterFromService();
-        verify(mMockNative, times(1)).stopAntennaInfoListening();
+        verify(mMockNative).stopNavigationMessageCollection();
     }
 
-    /**
-     * Test that GnssAntennaInfoProvider.isAntennaInfoSupported() returns the result of the
-     * native isAntennaInfoSupported method.
-     */
     @Test
     public void isSupported_nativeIsSupported() {
-        when(mMockNative.isAntennaInfoSupported()).thenReturn(true);
+        when(mMockNative.isNavigationMessageSupported()).thenReturn(true);
         assertThat(mTestProvider.isAvailableInPlatform()).isTrue();
 
-        when(mMockNative.isAntennaInfoSupported()).thenReturn(false);
+        when(mMockNative.isNavigationMessageSupported()).thenReturn(false);
         assertThat(mTestProvider.isAvailableInPlatform()).isFalse();
+    }
+
+    @Test
+    public void register_resume_started() {
+        mTestProvider.registerWithService();
+        mTestProvider.resumeIfStarted();
+        verify(mMockNative, times(2)).startNavigationMessageCollection();
+    }
+
+    @Test
+    public void unregister_resume_notStarted() {
+        mTestProvider.registerWithService();
+        mTestProvider.unregisterFromService();
+        mTestProvider.resumeIfStarted();
+        verify(mMockNative, times(1)).startNavigationMessageCollection();
     }
 }
