@@ -110,10 +110,14 @@ public class EdgeBackGestureHandler implements DisplayListener,
     private final float mTouchSlop;
     // Duration after which we consider the event as longpress.
     private final int mLongPressTimeout;
+    // The back gesture type
+    private int mBackType;
 
     private final PointF mDownPoint = new PointF();
+    private final PointF mEndPoint = new PointF();
     private boolean mThresholdCrossed = false;
     private boolean mAllowGesture = false;
+    private boolean mLogGesture = false;
     private boolean mInRejectedExclusion = false;
     private boolean mIsOnLeftEdge;
 
@@ -141,24 +145,16 @@ public class EdgeBackGestureHandler implements DisplayListener,
 
                     mOverviewProxyService.notifyBackAction(true, (int) mDownPoint.x,
                             (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
-                    int backtype = (mInRejectedExclusion
-                            ? SysUiStatsLog.BACK_GESTURE__TYPE__COMPLETED_REJECTED :
-                            SysUiStatsLog.BACK_GESTURE__TYPE__COMPLETED);
-                    SysUiStatsLog.write(SysUiStatsLog.BACK_GESTURE_REPORTED_REPORTED, backtype,
-                            (int) mDownPoint.y, mIsOnLeftEdge
-                                    ? SysUiStatsLog.BACK_GESTURE__X_LOCATION__LEFT :
-                                    SysUiStatsLog.BACK_GESTURE__X_LOCATION__RIGHT);
+                    logGesture(mInRejectedExclusion
+                            ? SysUiStatsLog.BACK_GESTURE__TYPE__COMPLETED_REJECTED
+                            : SysUiStatsLog.BACK_GESTURE__TYPE__COMPLETED);
                 }
 
                 @Override
                 public void cancelBack() {
+                    logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE);
                     mOverviewProxyService.notifyBackAction(false, (int) mDownPoint.x,
                             (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
-                    int backtype = SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE;
-                    SysUiStatsLog.write(SysUiStatsLog.BACK_GESTURE_REPORTED_REPORTED, backtype,
-                            (int) mDownPoint.y, mIsOnLeftEdge
-                                    ? SysUiStatsLog.BACK_GESTURE__X_LOCATION__LEFT :
-                                    SysUiStatsLog.BACK_GESTURE__X_LOCATION__RIGHT);
                 }
             };
 
@@ -331,44 +327,75 @@ public class EdgeBackGestureHandler implements DisplayListener,
     }
 
     private boolean isWithinTouchRegion(int x, int y) {
-        // Disallow if too far from the edge
-        if (x > mEdgeWidthLeft + mLeftInset
-                && x < (mDisplaySize.x - mEdgeWidthRight - mRightInset)) {
-            return false;
-        }
-
         // Disallow if we are in the bottom gesture area
         if (y >= (mDisplaySize.y - mBottomGestureHeight)) {
             return false;
         }
 
-        // Always allow if the user is in a transient sticky immersive state
-        if (mIsNavBarShownTransiently) {
-            return true;
+        // If the point is way too far (twice the margin), it is
+        // not interesting to us for logging purposes, nor we
+        // should process it.  Simply return false and keep
+        // mLogGesture = false.
+        if (x > 2 * (mEdgeWidthLeft + mLeftInset)
+                && x < (mDisplaySize.x - 2 * (mEdgeWidthRight + mRightInset))) {
+            return false;
         }
 
-        boolean isInExcludedRegion = mExcludeRegion.contains(x, y);
-        if (isInExcludedRegion) {
-            mOverviewProxyService.notifyBackAction(false /* completed */, -1, -1,
-                    false /* isButton */, !mIsOnLeftEdge);
-            SysUiStatsLog.write(SysUiStatsLog.BACK_GESTURE_REPORTED_REPORTED,
-                    SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_EXCLUDED, y,
-                    mIsOnLeftEdge ? SysUiStatsLog.BACK_GESTURE__X_LOCATION__LEFT :
-                            SysUiStatsLog.BACK_GESTURE__X_LOCATION__RIGHT);
-        } else {
-            mInRejectedExclusion = mUnrestrictedExcludeRegion.contains(x, y);
+        // Denotes whether we should proceed with the gesture.
+        // Even if it is false, we may want to log it assuming
+        // it is not invalid due to exclusion.
+        boolean withinRange = x <= mEdgeWidthLeft + mLeftInset
+                || x >= (mDisplaySize.x - mEdgeWidthRight - mRightInset);
+
+        // Always allow if the user is in a transient sticky immersive state
+        if (mIsNavBarShownTransiently) {
+            mLogGesture = true;
+            return withinRange;
         }
-        return !isInExcludedRegion;
+
+        if (mExcludeRegion.contains(x, y)) {
+            if (withinRange) {
+                // Log as exclusion only if it is in acceptable range in the first place.
+                mOverviewProxyService.notifyBackAction(
+                        false /* completed */, -1, -1, false /* isButton */, !mIsOnLeftEdge);
+                // We don't have the end point for logging purposes.
+                mEndPoint.x = -1;
+                mEndPoint.y = -1;
+                mLogGesture = true;
+                logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_EXCLUDED);
+            }
+            return false;
+        }
+
+        mInRejectedExclusion = mUnrestrictedExcludeRegion.contains(x, y);
+        mLogGesture = true;
+        return withinRange;
     }
 
     private void cancelGesture(MotionEvent ev) {
         // Send action cancel to reset all the touch events
         mAllowGesture = false;
+        mLogGesture = false;
         mInRejectedExclusion = false;
         MotionEvent cancelEv = MotionEvent.obtain(ev);
         cancelEv.setAction(MotionEvent.ACTION_CANCEL);
         mEdgeBackPlugin.onMotionEvent(cancelEv);
         cancelEv.recycle();
+    }
+
+    private void logGesture(int backType) {
+        if (!mLogGesture) {
+            return;
+        }
+        mLogGesture = false;
+        SysUiStatsLog.write(SysUiStatsLog.BACK_GESTURE_REPORTED_REPORTED, backType,
+                (int) mDownPoint.y, mIsOnLeftEdge
+                        ? SysUiStatsLog.BACK_GESTURE__X_LOCATION__LEFT
+                        : SysUiStatsLog.BACK_GESTURE__X_LOCATION__RIGHT,
+                (int) mDownPoint.x, (int) mDownPoint.y,
+                (int) mEndPoint.x, (int) mEndPoint.y,
+                mEdgeWidthLeft + mLeftInset,
+                mDisplaySize.x - (mEdgeWidthRight + mRightInset));
     }
 
     private void onMotionEvent(MotionEvent ev) {
@@ -377,45 +404,65 @@ public class EdgeBackGestureHandler implements DisplayListener,
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             mIsOnLeftEdge = ev.getX() <= mEdgeWidthLeft + mLeftInset;
+            mLogGesture = false;
             mInRejectedExclusion = false;
             mAllowGesture = !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
             if (mAllowGesture) {
                 mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
                 mEdgeBackPlugin.onMotionEvent(ev);
-
+            }
+            if (mLogGesture) {
                 mDownPoint.set(ev.getX(), ev.getY());
+                mEndPoint.set(-1, -1);
                 mThresholdCrossed = false;
             }
-
-        } else if (mAllowGesture) {
+        } else if (mAllowGesture || mLogGesture) {
             if (!mThresholdCrossed) {
+                mEndPoint.x = (int) ev.getX();
+                mEndPoint.y = (int) ev.getY();
                 if (action == MotionEvent.ACTION_POINTER_DOWN) {
-                    // We do not support multi touch for back gesture
-                    cancelGesture(ev);
+                    if (mAllowGesture) {
+                        logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_MULTI_TOUCH);
+                        // We do not support multi touch for back gesture
+                        cancelGesture(ev);
+                    }
+                    mLogGesture = false;
                     return;
                 } else if (action == MotionEvent.ACTION_MOVE) {
                     if ((ev.getEventTime() - ev.getDownTime()) > mLongPressTimeout) {
-                        cancelGesture(ev);
+                        if (mAllowGesture) {
+                            logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_LONG_PRESS);
+                            cancelGesture(ev);
+                        }
+                        mLogGesture = false;
                         return;
                     }
                     float dx = Math.abs(ev.getX() - mDownPoint.x);
                     float dy = Math.abs(ev.getY() - mDownPoint.y);
                     if (dy > dx && dy > mTouchSlop) {
-                        cancelGesture(ev);
+                        if (mAllowGesture) {
+                            logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_VERTICAL_MOVE);
+                            cancelGesture(ev);
+                        }
+                        mLogGesture = false;
                         return;
-
                     } else if (dx > dy && dx > mTouchSlop) {
-                        mThresholdCrossed = true;
-                        // Capture inputs
-                        mInputMonitor.pilferPointers();
+                        if (mAllowGesture) {
+                            mThresholdCrossed = true;
+                            // Capture inputs
+                            mInputMonitor.pilferPointers();
+                        } else {
+                            logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_FAR_FROM_EDGE);
+                        }
                     }
                 }
-
             }
 
-            // forward touch
-            mEdgeBackPlugin.onMotionEvent(ev);
+            if (mAllowGesture) {
+                // forward touch
+                mEdgeBackPlugin.onMotionEvent(ev);
+            }
         }
 
         Dependency.get(ProtoTracer.class).update();

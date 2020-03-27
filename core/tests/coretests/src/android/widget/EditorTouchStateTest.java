@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import android.platform.test.annotations.Presubmit;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -36,6 +37,7 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 @SmallTest
+@Presubmit
 public class EditorTouchStateTest {
 
     private EditorTouchState mTouchState;

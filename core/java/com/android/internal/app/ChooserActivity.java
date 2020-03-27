@@ -2674,7 +2674,7 @@ public class ChooserActivity extends ResolverActivity implements
      */
     private boolean shouldShowStickyContentPreview() {
         return shouldShowStickyContentPreviewNoOrientationCheck()
-                && getResources().getBoolean(R.bool.sharesheet_show_content_preview);
+                && !getResources().getBoolean(R.bool.resolver_landscape_phone);
     }
 
     private boolean shouldShowStickyContentPreviewNoOrientationCheck() {

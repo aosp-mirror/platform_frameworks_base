@@ -60,6 +60,9 @@ public class FakeProviderRemote extends ContentProvider {
 
     @Override
     public Uri canonicalize(Uri uri) {
+        if (uri.getPath() != null && uri.getPath().contains("error")) {
+            throw new IllegalArgumentException("Expected exception");
+        }
         return new Uri.Builder().scheme(uri.getScheme()).authority(uri.getAuthority())
                 .appendPath("canonical").build();
     }
