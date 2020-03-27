@@ -29,7 +29,6 @@ import android.content.pm.IDataLoader;
 import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.InstallationFile;
 import android.content.pm.InstallationFileParcel;
-import android.content.pm.NamedParcelFileDescriptor;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.util.ExceptionUtils;
@@ -130,16 +129,6 @@ public abstract class DataLoaderService extends Service {
                             control.incremental.log.close();
                         } catch (IOException e) {
                             Slog.e(TAG, "Failed to close IncFs LOG file descriptor " + e);
-                        }
-                    }
-                }
-                if (params.dynamicArgs != null) {
-                    NamedParcelFileDescriptor[] fds = params.dynamicArgs;
-                    for (NamedParcelFileDescriptor nfd : fds) {
-                        try {
-                            nfd.fd.close();
-                        } catch (IOException e) {
-                            Slog.e(TAG, "Failed to close DynamicArgs parcel file descriptor " + e);
                         }
                     }
                 }
