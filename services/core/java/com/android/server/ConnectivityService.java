@@ -63,6 +63,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.CaptivePortal;
@@ -5388,12 +5389,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private boolean checkUnsupportedStartingFrom(int version, String callingPackageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        final int userId = UserHandle.getCallingUserId();
+        try {
+            final int callingVersion = pm.getApplicationInfoAsUser(
+                    callingPackageName, 0 /* flags */, userId).targetSdkVersion;
+            if (callingVersion < version) return false;
+        } catch (PackageManager.NameNotFoundException e) { }
+        return true;
+    }
+
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType,
             @NonNull String callingPackageName) {
         if (legacyType != TYPE_NONE && !checkNetworkStackPermission()) {
-            throw new SecurityException("Insufficient permissions to specify legacy type");
+            if (checkUnsupportedStartingFrom(Build.VERSION_CODES.M, callingPackageName)) {
+                throw new SecurityException("Insufficient permissions to specify legacy type");
+            }
         }
         final int callingUid = Binder.getCallingUid();
         final NetworkRequest.Type type = (networkCapabilities == null)
