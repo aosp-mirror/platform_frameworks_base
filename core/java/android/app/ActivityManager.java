@@ -4176,10 +4176,8 @@ public class ActivityManager {
             "android.permission.INTERACT_ACROSS_USERS_FULL"
     })
     public static int getCurrentUser() {
-        UserInfo ui;
         try {
-            ui = getService().getCurrentUser();
-            return ui != null ? ui.id : 0;
+            return getService().getCurrentUserId();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
