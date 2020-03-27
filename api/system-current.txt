@@ -6198,13 +6198,14 @@ package android.net {
   public abstract class NetworkAgent {
     ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, int, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
     method @Nullable public android.net.Network getNetwork();
+    method public void markConnected();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
     method public void onNetworkUnwanted();
     method public void onRemoveKeepalivePacketFilter(int);
     method public void onSaveAcceptUnvalidated(boolean);
     method public void onSignalStrengthThresholdsUpdated(@NonNull int[]);
-    method public void onStartSocketKeepalive(int, @IntRange(from=10, to=3600) int, @NonNull android.net.KeepalivePacketData);
+    method public void onStartSocketKeepalive(int, @NonNull java.time.Duration, @NonNull android.net.KeepalivePacketData);
     method public void onStopSocketKeepalive(int);
     method public void onValidationStatus(int, @Nullable android.net.Uri);
     method @NonNull public android.net.Network register();
@@ -6212,7 +6213,6 @@ package android.net {
     method public final void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
     method public final void sendNetworkScore(@IntRange(from=0, to=99) int);
     method public final void sendSocketKeepaliveEvent(int, int);
-    method public void setConnected();
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
     field public static final int VALIDATION_STATUS_VALID = 1; // 0x1
