@@ -19,6 +19,7 @@ import com.android.internal.os.StatsdConfigProto.AtomMatcher;
 import com.android.internal.os.StatsdConfigProto.EventMetric;
 import com.android.internal.os.StatsdConfigProto.FieldFilter;
 import com.android.internal.os.StatsdConfigProto.GaugeMetric;
+import com.android.internal.os.StatsdConfigProto.PullAtomPackages;
 import com.android.internal.os.StatsdConfigProto.SimpleAtomMatcher;
 import com.android.internal.os.StatsdConfigProto.StatsdConfig;
 import com.android.internal.os.StatsdConfigProto.TimeUnit;
@@ -33,6 +34,7 @@ import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,19 +51,22 @@ public class TestDrive {
     private static final int VENDOR_PULLED_ATOM_START_TAG = 150000;
     private static final long CONFIG_ID = 54321;
     private static final String[] ALLOWED_LOG_SOURCES = {
-        "AID_GRAPHICS",
-        "AID_INCIDENTD",
-        "AID_STATSD",
-        "AID_RADIO",
-        "com.android.systemui",
-        "com.android.vending",
-        "AID_SYSTEM",
-        "AID_ROOT",
-        "AID_BLUETOOTH",
-        "AID_LMKD",
-        "com.android.managedprovisioning",
-        "AID_MEDIA",
-        "AID_NETWORK_STACK"
+            "AID_GRAPHICS",
+            "AID_INCIDENTD",
+            "AID_STATSD",
+            "AID_RADIO",
+            "com.android.systemui",
+            "com.android.vending",
+            "AID_SYSTEM",
+            "AID_ROOT",
+            "AID_BLUETOOTH",
+            "AID_LMKD",
+            "com.android.managedprovisioning",
+            "AID_MEDIA",
+            "AID_NETWORK_STACK"
+    };
+    private static final String[] DEFAULT_PULL_SOURCES = {
+            "AID_SYSTEM",
     };
     private static final Logger LOGGER = Logger.getLogger(TestDrive.class.getName());
 
@@ -158,6 +163,16 @@ public class TestDrive {
         StatsdConfig.Builder builder = StatsdConfig.newBuilder();
         builder
             .addAllAllowedLogSource(allowedSources)
+            .addAllDefaultPullPackages(Arrays.asList(DEFAULT_PULL_SOURCES))
+            .addPullAtomPackages(PullAtomPackages.newBuilder()
+                    .setAtomId(Atom.GPU_STATS_GLOBAL_INFO_FIELD_NUMBER)
+                    .addPackages("AID_GPU_SERVICE"))
+            .addPullAtomPackages(PullAtomPackages.newBuilder()
+                    .setAtomId(Atom.GPU_STATS_APP_INFO_FIELD_NUMBER)
+                    .addPackages("AID_GPU_SERVICE"))
+            .addPullAtomPackages(PullAtomPackages.newBuilder()
+                    .setAtomId(Atom.TRAIN_INFO_FIELD_NUMBER)
+                    .addPackages("AID_STATSD"))
             .setHashStringsInMetricReport(false);
 
         if (hasPulledAtom(atomIds)) {
