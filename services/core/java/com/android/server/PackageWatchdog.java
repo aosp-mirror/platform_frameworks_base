@@ -1062,7 +1062,12 @@ public class PackageWatchdog {
         public void updatePackagesLocked(List<MonitoredPackage> packages) {
             for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
                 MonitoredPackage p = packages.get(pIndex);
-                this.packages.put(p.getName(), p);
+                MonitoredPackage existingPackage = this.packages.get(p.getName());
+                if (existingPackage != null) {
+                    existingPackage.updateHealthCheckDuration(p.mDurationMs);
+                } else {
+                    this.packages.put(p.getName(), p);
+                }
             }
         }
 
@@ -1329,6 +1334,12 @@ public class PackageWatchdog {
                 mHealthCheckDurationMs -= elapsedMs;
             }
             return updateHealthCheckStateLocked();
+        }
+
+        /** Explicitly update the monitoring duration of the package. */
+        @GuardedBy("mLock")
+        public void updateHealthCheckDuration(long newDurationMs) {
+            mDurationMs = newDurationMs;
         }
 
         /**
