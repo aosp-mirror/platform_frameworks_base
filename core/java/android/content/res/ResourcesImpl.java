@@ -57,8 +57,6 @@ import android.view.DisplayAdjustments;
 
 import com.android.internal.util.GrowingArrayUtils;
 
-import libcore.io.IoUtils;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -818,27 +816,6 @@ public class ResourcesImpl {
     }
 
     /**
-     * Loads a Drawable from an encoded image stream, or null.
-     *
-     * This call will handle closing the {@link InputStream}.
-     */
-    @Nullable
-    private Drawable decodeImageDrawable(@NonNull InputStream inputStream,
-            @NonNull Resources wrapper, @NonNull TypedValue value) {
-        ImageDecoder.Source src = ImageDecoder.createSource(wrapper, inputStream, value.density);
-        try {
-            return ImageDecoder.decodeDrawable(src, (decoder, info, s) ->
-                    decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE));
-        } catch (IOException ignored) {
-            // This is okay. This may be something that ImageDecoder does not
-            // support, like SVG.
-            return null;
-        } finally {
-            IoUtils.closeQuietly(inputStream);
-        }
-    }
-
-    /**
      * Loads a drawable from XML or resources stream.
      *
      * @return Drawable, or null if Drawable cannot be decoded.
@@ -902,12 +879,8 @@ public class ResourcesImpl {
                 } else {
                     final InputStream is = mAssets.openNonAsset(
                             value.assetCookie, file, AssetManager.ACCESS_STREAMING);
-                    if (is instanceof AssetInputStream) {
-                        AssetInputStream ais = (AssetInputStream) is;
-                        dr = decodeImageDrawable(ais, wrapper, value);
-                    } else {
-                        dr = decodeImageDrawable(is, wrapper, value);
-                    }
+                    final AssetInputStream ais = (AssetInputStream) is;
+                    dr = decodeImageDrawable(ais, wrapper, value);
                 }
             } finally {
                 stack.pop();
