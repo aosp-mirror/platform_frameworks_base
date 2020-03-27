@@ -708,7 +708,7 @@ class MediaRouter2ServiceImpl {
         }
 
         List<RoutingSessionInfo> sessionInfos = new ArrayList<>();
-        for (MediaRoute2Provider provider : managerRecord.mUserRecord.mHandler.mMediaProviders) {
+        for (MediaRoute2Provider provider : managerRecord.mUserRecord.mHandler.mRouteProviders) {
             sessionInfos.addAll(provider.getSessionInfos());
         }
         return sessionInfos;
@@ -1059,7 +1059,7 @@ class MediaRouter2ServiceImpl {
 
         //TODO: Make this thread-safe.
         private final SystemMediaRoute2Provider mSystemProvider;
-        private final ArrayList<MediaRoute2Provider> mMediaProviders =
+        private final ArrayList<MediaRoute2Provider> mRouteProviders =
                 new ArrayList<>();
 
         private final List<MediaRoute2ProviderInfo> mLastProviderInfos = new ArrayList<>();
@@ -1074,7 +1074,7 @@ class MediaRouter2ServiceImpl {
             mServiceRef = new WeakReference<>(service);
             mUserRecord = userRecord;
             mSystemProvider = new SystemMediaRoute2Provider(service.mContext, this);
-            mMediaProviders.add(mSystemProvider);
+            mRouteProviders.add(mSystemProvider);
             mWatcher = new MediaRoute2ProviderWatcher(service.mContext, this,
                     this, mUserRecord.mUserId);
         }
@@ -1097,13 +1097,13 @@ class MediaRouter2ServiceImpl {
         @Override
         public void onAddProviderService(@NonNull MediaRoute2ProviderServiceProxy proxy) {
             proxy.setCallback(this);
-            mMediaProviders.add(proxy);
+            mRouteProviders.add(proxy);
             proxy.updateDiscoveryPreference(mUserRecord.mCompositeDiscoveryPreference);
         }
 
         @Override
         public void onRemoveProviderService(@NonNull MediaRoute2ProviderServiceProxy proxy) {
-            mMediaProviders.remove(proxy);
+            mRouteProviders.remove(proxy);
         }
 
         @Override
@@ -1148,10 +1148,10 @@ class MediaRouter2ServiceImpl {
 
         //TODO: notify session info updates
         private void onProviderStateChangedOnHandler(@NonNull MediaRoute2Provider provider) {
-            int providerIndex = getProviderInfoIndex(provider.getUniqueId());
+            int providerInfoIndex = getLastProviderInfoIndex(provider.getUniqueId());
             MediaRoute2ProviderInfo providerInfo = provider.getProviderInfo();
             MediaRoute2ProviderInfo prevInfo =
-                    (providerIndex < 0) ? null : mLastProviderInfos.get(providerIndex);
+                    (providerInfoIndex < 0) ? null : mLastProviderInfos.get(providerInfoIndex);
 
             if (Objects.equals(prevInfo, providerInfo)) return;
 
@@ -1171,7 +1171,7 @@ class MediaRouter2ServiceImpl {
                             this, getRouters(), new ArrayList<>(removedRoutes)));
                 }
             } else {
-                mLastProviderInfos.set(providerIndex, providerInfo);
+                mLastProviderInfos.set(providerInfoIndex, providerInfo);
                 List<MediaRoute2Info> addedRoutes = new ArrayList<>();
                 List<MediaRoute2Info> removedRoutes = new ArrayList<>();
                 List<MediaRoute2Info> changedRoutes = new ArrayList<>();
@@ -1219,7 +1219,7 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private int getProviderInfoIndex(@NonNull String providerId) {
+        private int getLastProviderInfoIndex(@NonNull String providerId) {
             for (int i = 0; i < mLastProviderInfos.size(); i++) {
                 MediaRoute2ProviderInfo providerInfo = mLastProviderInfos.get(i);
                 if (TextUtils.equals(providerInfo.getUniqueId(), providerId)) {
@@ -1795,13 +1795,13 @@ class MediaRouter2ServiceImpl {
                         new RouteDiscoveryPreference.Builder(discoveryPreferences)
                         .build();
             }
-            for (MediaRoute2Provider provider : mMediaProviders) {
+            for (MediaRoute2Provider provider : mRouteProviders) {
                 provider.updateDiscoveryPreference(mUserRecord.mCompositeDiscoveryPreference);
             }
         }
 
         private MediaRoute2Provider findProvider(@Nullable String providerId) {
-            for (MediaRoute2Provider provider : mMediaProviders) {
+            for (MediaRoute2Provider provider : mRouteProviders) {
                 if (TextUtils.equals(provider.getUniqueId(), providerId)) {
                     return provider;
                 }
