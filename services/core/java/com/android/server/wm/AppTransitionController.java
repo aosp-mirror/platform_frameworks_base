@@ -618,6 +618,7 @@ public class AppTransitionController {
                 Animation anim = mService.mPolicy.createKeyguardWallpaperExit(
                         (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0);
                 if (anim != null) {
+                    anim.scaleCurrentDuration(mService.getTransitionAnimationScaleLocked());
                     mDisplayContent.mWallpaperController.startWallpaperAnimation(anim);
                 }
             }
