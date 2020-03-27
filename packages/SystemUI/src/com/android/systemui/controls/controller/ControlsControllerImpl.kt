@@ -439,13 +439,14 @@ class ControlsControllerImpl @Inject constructor (
             Log.d(TAG, "Controls not available")
             return
         }
-        executor.execute {
-            val changed = Favorites.updateControls(
-                componentName,
-                listOf(control)
-            )
-            if (changed) {
-                persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+
+        // Assume that non STATUS_OK responses may contain incomplete or invalid information about
+        // the control, and do not attempt to update it
+        if (control.getStatus() == Control.STATUS_OK) {
+            executor.execute {
+                if (Favorites.updateControls(componentName, listOf(control))) {
+                    persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+                }
             }
         }
         uiController.onRefreshState(componentName, listOf(control))
