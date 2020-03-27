@@ -120,7 +120,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
                 .build();
         mTestTask.mUserId = TEST_USER_ID;
         mTestTask.mLastNonFullscreenBounds = TEST_BOUNDS;
-        mTestTask.hasBeenVisible = true;
+        mTestTask.setHasBeenVisible(true);
 
         mTaskWithDifferentComponent = new TaskBuilder(mSupervisor)
                 .setComponent(ALTERNATIVE_COMPONENT).build();
@@ -346,7 +346,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
                 .build();
         anotherTaskOfTheSameUser.setWindowingMode(WINDOWING_MODE_FREEFORM);
         anotherTaskOfTheSameUser.setBounds(200, 300, 400, 500);
-        anotherTaskOfTheSameUser.hasBeenVisible = true;
+        anotherTaskOfTheSameUser.setHasBeenVisible(true);
         mTarget.saveTask(anotherTaskOfTheSameUser);
 
         stack = mTestDisplay.createStack(TEST_WINDOWING_MODE,
@@ -358,7 +358,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
                 .build();
         anotherTaskOfDifferentUser.setWindowingMode(WINDOWING_MODE_FREEFORM);
         anotherTaskOfDifferentUser.setBounds(300, 400, 500, 600);
-        anotherTaskOfDifferentUser.hasBeenVisible = true;
+        anotherTaskOfDifferentUser.setHasBeenVisible(true);
         mTarget.saveTask(anotherTaskOfDifferentUser);
 
         mTarget.onCleanupUser(TEST_USER_ID);
