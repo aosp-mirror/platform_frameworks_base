@@ -4178,11 +4178,11 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDeviceForStrategyChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener) throws java.lang.SecurityException;
     method public void clearAudioServerStateCallback();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
-    method @IntRange(from=0) public int getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
+    method @IntRange(from=0) public long getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioProductStrategy> getAudioProductStrategies();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioVolumeGroup> getAudioVolumeGroups();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
-    method @IntRange(from=0) public int getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
+    method @IntRange(from=0) public long getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDeviceAttributes getPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
@@ -4197,7 +4197,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int requestAudioFocus(@NonNull android.media.AudioFocusRequest, @Nullable android.media.audiopolicy.AudioPolicy);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo, @IntRange(from=0) int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo, @IntRange(from=0) long);
     method public void setAudioServerStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.AudioServerStateCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAttributes);
@@ -4272,15 +4272,9 @@ package android.media {
   }
 
   public static class AudioTrack.TunerConfiguration {
+    ctor @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public AudioTrack.TunerConfiguration(@IntRange(from=1) int, @IntRange(from=1) int);
     method @IntRange(from=1) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getContentId();
     method @IntRange(from=1) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getSyncId();
-  }
-
-  public static class AudioTrack.TunerConfiguration.Builder {
-    ctor public AudioTrack.TunerConfiguration.Builder();
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioTrack.TunerConfiguration build();
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioTrack.TunerConfiguration.Builder setContentId(@IntRange(from=1) int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioTrack.TunerConfiguration.Builder setSyncId(@IntRange(from=1) int);
   }
 
   public class HwAudioSource {
