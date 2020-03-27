@@ -543,22 +543,6 @@ platform_compat_config {
     src: ":framework-annotation-proc",
 }
 
-// A library including just UnsupportedAppUsage.java classes.
-//
-// Provided for target so that libraries can use it without depending on
-// the whole of framework or the core platform API.
-//
-// Built for host so that the annotation processor can also use this annotation.
-java_library {
-    name: "unsupportedappusage-annotation",
-    host_supported: true,
-    srcs: [
-        "core/java/android/annotation/IntDef.java",
-    ],
-
-    sdk_version: "core_current",
-}
-
 // A temporary build target that is conditionally included on the bootclasspath if
 // android.test.base library has been removed and which provides support for
 // maintaining backwards compatibility for APKs that target pre-P and depend on
