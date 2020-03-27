@@ -211,7 +211,7 @@ public final class SoundTriggerManager {
          */
         @NonNull
         public UUID getModelUuid() {
-            return mGenericSoundModel.uuid;
+            return mGenericSoundModel.getUuid();
         }
 
         /**
@@ -221,7 +221,7 @@ public final class SoundTriggerManager {
          */
         @NonNull
         public UUID getVendorUuid() {
-            return mGenericSoundModel.vendorUuid;
+            return mGenericSoundModel.getVendorUuid();
         }
 
         /**
@@ -230,7 +230,7 @@ public final class SoundTriggerManager {
          * @return Version associated with the model
          */
         public int getVersion() {
-            return mGenericSoundModel.version;
+            return mGenericSoundModel.getVersion();
         }
 
         /**
@@ -240,7 +240,7 @@ public final class SoundTriggerManager {
          */
         @Nullable
         public byte[] getModelData() {
-            return mGenericSoundModel.data;
+            return mGenericSoundModel.getData();
         }
 
         /**
@@ -307,7 +307,7 @@ public final class SoundTriggerManager {
         }
 
         try {
-            switch (soundModel.type) {
+            switch (soundModel.getType()) {
                 case SoundModel.TYPE_GENERIC_SOUND:
                     return mSoundTriggerService.loadGenericSoundModel(
                             (GenericSoundModel) soundModel);
