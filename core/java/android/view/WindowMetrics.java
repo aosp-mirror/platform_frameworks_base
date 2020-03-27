@@ -18,10 +18,10 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.graphics.Point;
-import android.util.Size;
+import android.graphics.Rect;
 
 /**
- * Metrics about a Window, consisting of the size and {@link WindowInsets}.
+ * Metrics about a Window, consisting of the bounds and {@link WindowInsets}.
  * <p>
  * This is usually obtained from {@link WindowManager#getCurrentWindowMetrics()} and
  * {@link WindowManager#getMaximumWindowMetrics()}.
@@ -31,21 +31,22 @@ import android.util.Size;
  * @see WindowManager#getMaximumWindowMetrics()
  */
 public final class WindowMetrics {
-    private final @NonNull Size mSize;
+    private final @NonNull Rect mBounds;
     private final @NonNull WindowInsets mWindowInsets;
 
-    public WindowMetrics(@NonNull Size size, @NonNull WindowInsets windowInsets) {
-        mSize = size;
+    public WindowMetrics(@NonNull Rect bounds, @NonNull WindowInsets windowInsets) {
+        mBounds = bounds;
         mWindowInsets = windowInsets;
     }
 
     /**
-     * Returns the size of the window.
+     * Returns the bounds of the area associated with this window or visual context.
      * <p>
-     * <b>Note that this reports a different size than {@link Display#getSize(Point)}.</b>
-     * This method reports the window size including all system bars area, while
-     * {@link Display#getSize(Point)} reports the area excluding navigation bars and display cutout
-     * areas. The value reported by {@link Display#getSize(Point)} can be obtained by using:
+     * <b>Note that the size of the reported bounds can have different size than
+     * {@link Display#getSize(Point)}.</b> This method reports the window size including all system
+     * bar areas, while {@link Display#getSize(Point)} reports the area excluding navigation bars
+     * and display cutout areas. The value reported by {@link Display#getSize(Point)} can be
+     * obtained by using:
      * <pre class="prettyprint">
      * final WindowMetrics metrics = windowManager.getCurrentMetrics();
      * // Gets all excluding insets
@@ -66,16 +67,16 @@ public final class WindowMetrics {
      * </pre>
      * </p>
      *
-     * @return window size in pixel.
+     * @return window bounds in pixels.
      */
-    public @NonNull Size getSize() {
-        return mSize;
+    public @NonNull Rect getBounds() {
+        return mBounds;
     }
 
     /**
-     * Returns the {@link WindowInsets} of the window.
+     * Returns the {@link WindowInsets} of the area associated with this window or visual context.
      *
-     * @return the {@link WindowInsets} of the window.
+     * @return the {@link WindowInsets} of the visual area.
      */
     public @NonNull WindowInsets getWindowInsets() {
         return mWindowInsets;
