@@ -157,9 +157,7 @@ class WindowSurfacePlacer {
 
         mInLayout = true;
 
-        boolean recoveringMemory = false;
         if (!mService.mForceRemoves.isEmpty()) {
-            recoveringMemory = true;
             // Wait a little bit for things to settle down, and off we go.
             while (!mService.mForceRemoves.isEmpty()) {
                 final WindowState ws = mService.mForceRemoves.remove(0);
@@ -177,7 +175,7 @@ class WindowSurfacePlacer {
         }
 
         try {
-            mService.mRoot.performSurfacePlacement(recoveringMemory);
+            mService.mRoot.performSurfacePlacement();
 
             mInLayout = false;
 
