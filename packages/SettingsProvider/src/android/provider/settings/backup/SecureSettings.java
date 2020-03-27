@@ -96,6 +96,7 @@ public class SecureSettings {
         Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
         Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
         Settings.Secure.QS_TILES,
+        Settings.Secure.CONTROLS_ENABLED,
         Settings.Secure.DOZE_ENABLED,
         Settings.Secure.DOZE_ALWAYS_ON,
         Settings.Secure.DOZE_PICK_UP_GESTURE,
