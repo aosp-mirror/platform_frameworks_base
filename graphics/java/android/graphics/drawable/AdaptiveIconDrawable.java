@@ -975,6 +975,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
                 mChangingConfigurations = orig.mChangingConfigurations;
                 mChildrenChangingConfigurations = orig.mChildrenChangingConfigurations;
+                mSourceDrawableId = orig.mSourceDrawableId;
 
                 for (int i = 0; i < N_CHILDREN; i++) {
                     final ChildDrawable or = origChildDrawable[i];
