@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -33,8 +34,8 @@ import android.util.Log;
  * {@link NetworkAgent}s. The networks can then provide connectivity to apps and can be interacted
  * with via networking APIs such as {@link ConnectivityManager}.
  *
- * Subclasses should implement {@link #onNetworkRequested} and {@link #onRequestWithdrawn} to
- * receive {@link NetworkRequest}s sent by the system and by apps. A network that is not the
+ * Subclasses should implement {@link #onNetworkRequested} and {@link #onNetworkRequestWithdrawn}
+ * to receive {@link NetworkRequest}s sent by the system and by apps. A network that is not the
  * best (highest-scoring) network for any request is generally not used by the system, and torn
  * down.
  *
@@ -77,7 +78,7 @@ public class NetworkProvider {
      * Constructs a new NetworkProvider.
      *
      * @param looper the Looper on which to run {@link #onNetworkRequested} and
-     *               {@link #onRequestWithdrawn}.
+     *               {@link #onNetworkRequestWithdrawn}.
      * @param name the name of the listener, used only for debugging.
      *
      * @hide
@@ -94,7 +95,7 @@ public class NetworkProvider {
                         onNetworkRequested((NetworkRequest) m.obj, m.arg1, m.arg2);
                         break;
                     case CMD_CANCEL_REQUEST:
-                        onRequestWithdrawn((NetworkRequest) m.obj);
+                        onNetworkRequestWithdrawn((NetworkRequest) m.obj);
                         break;
                     default:
                         Log.e(mName, "Unhandled message: " + m.what);
@@ -142,14 +143,15 @@ public class NetworkProvider {
      *  @hide
      */
     @SystemApi
-    public void onNetworkRequested(@NonNull NetworkRequest request, int score, int providerId) {}
+    public void onNetworkRequested(@NonNull NetworkRequest request,
+            @IntRange(from = 0, to = 99) int score, int providerId) {}
 
     /**
      *  Called when a NetworkRequest is withdrawn.
      *  @hide
      */
     @SystemApi
-    public void onRequestWithdrawn(@NonNull NetworkRequest request) {}
+    public void onNetworkRequestWithdrawn(@NonNull NetworkRequest request) {}
 
     /**
      * Asserts that no provider will ever be able to satisfy the specified request. The provider
@@ -157,7 +159,7 @@ public class NetworkProvider {
      * satisfying this request, and that the request cannot be satisfied. The application filing the
      * request will receive an {@link NetworkCallback#onUnavailable()} callback.
      *
-     * @param request the request that cannot be fulfilled
+     * @param request the request that permanently cannot be fulfilled
      * @hide
      */
     @SystemApi
