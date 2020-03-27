@@ -191,8 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"वैयक्तिक वापरासाठी ॲडमिनने नियंत्रण सोडलेले डिव्हाइस"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"डिव्हाइस व्यवस्थापित केले आहे"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"तुमची संस्था हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे निरीक्षण करू शकते. तपशीलांसाठी टॅप करा."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"तुमच्या ॲडमिनने स्थान सेटिंग्ज बदलल्या आहेत"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"तुमची स्थान सेटिंग्ज पाहण्यासाठी टॅप करा."</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"कंट्री डिटेक्टर"</string>
     <string name="location_service" msgid="2439187616018455546">"स्थान सेवा"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS सेवा"</string>
@@ -201,8 +203,14 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"तुमचे डिव्हाइस मिटविले जाईल"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"प्रशासक अ‍ॅप वापरता येणार नाही. तुमचे डिव्हाइस आता साफ केले जाईल.\n\nतुम्हाला कुठलेही प्रश्न असल्यास, तुमच्या संस्थेच्या प्रशासकाशी संपर्क साधा."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> नी प्रिंट करणे बंद केले आहे."</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"ॲडमिनद्वारे वैयक्तिक ॲप निलंबित केले गेले आहेत"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"धोरणाचे पालन तपासण्यासाठी येथे टॅप करा."</string>
+    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"मी"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"टॅबलेट पर्याय"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV पर्याय"</string>
@@ -236,10 +244,8 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"फोन पर्याय"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"स्क्रीन लॉक"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"बंद"</string>
-    <!-- no translation found for global_action_power_options (1185286119330160073) -->
-    <skip />
-    <!-- no translation found for global_action_restart (4678451019561687074) -->
-    <skip />
+    <string name="global_action_power_options" msgid="1185286119330160073">"पॉवर"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"रीस्टार्ट करा"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"आणीबाणी"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"बग रीपोर्ट"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"सेशन समाप्त करा"</string>
@@ -439,11 +445,9 @@
     <string name="permlab_camera" msgid="6320282492904119413">"चित्रे आणि व्हिडिओ घ्या"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"हा अ‍ॅप कोणत्याही वेळी कॅमेरा वापरून चित्रेे घेऊ आणि व्ह‍िडिओ रेकॉर्ड करू शकतो."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"फोटो आणि व्हिडिओ काढण्यासाठी ॲप्लिकेशन किंवा सेवेला सिस्टम कॅमेरे ॲक्सेस करण्याची अनुमती द्या"</string>
-    <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
-    <skip />
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"हे विशेषाधिकृत किंवा सिस्टम ॲप कधीही सिस्टम कॅमेरा वापरून फोटो आणि व्हिडिओ रेकॉर्ड करू शकते. ॲपकडे android.permission.CAMERA परवानगी असण्याचीदेखील आवश्यकता आहे"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"एखाद्या अ‍ॅप्लिकेशन किंवा सेवेला कॅमेरा डिव्हाइस सुरू किंवा बंद केल्याची कॉलबॅक मिळवण्याची अनुमती द्या."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"कोणतेही कॅमेरा डिव्हाइस (कोणत्या अ‍ॅप्लिकेशनने) सुरू किंवा बंद केले जाते तेव्हा हे ॲप कॉलबॅक मिळवू शकते."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"व्हायब्रेट नियंत्रित करा"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अ‍ॅप ला व्हायब्रेटर नियंत्रित करण्यासाठी अनुमती देते."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"अ‍ॅपला व्हायब्रेटर स्थितीचा अ‍ॅक्सेस करण्याची अनुमती देते."</string>
@@ -798,7 +802,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"अन्य"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"कस्टम"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"कस्टम"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"असिस्टंट"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"भाऊ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"मूल"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"घरातील जोडीदार"</string>
@@ -1619,24 +1623,15 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"शिफारस केलेल्‍या पातळीच्या वर आवाज वाढवायचा?\n\nउच्च आवाजात दीर्घ काळ ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"प्रवेशयोग्यता शॉर्टकट वापरायचा?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी दाबून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (8417489297036013065) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning (3740723309483706911) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (6935581470716541531) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning_title (3410100187167382427) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning (8412954203626349109) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (2819109500943271385) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning (6363127705112844257) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_on (5463618449556111344) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"अ‍ॅक्सेसिबिलिटी वैशिष्ट्ये सुरू करायची आहेत का?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"दोन्ही व्हॉल्यूम की काही सेकंद धरून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्ये सुरू होतात. यामुळे तुमचे डिव्हाइस कसे काम करते हे पूर्णपणे बदलते.\n\nसध्याची वैशिष्ट्ये:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nतुम्ही हा शॉर्टकट सेटिंग्ज &gt; अ‍ॅक्सेसिबिलिटी मध्ये बदलू शकता."</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack सुरू करायचे आहे का?"</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"दोन्ही व्हॉल्यूम की काही सेकंद धरून ठेवल्याने अंधत्व असणार्‍या किंवा दृष्टी कमी असणार्‍या लोकांसाठी उपयुक्त असे TalkBack नावाचे स्क्रीन रीडर सुरू होते. TalkBack मुळे तुमचे डिव्हाइस कसे काम करते हे पूर्णपणे बदलते.\n\nतुम्ही हा शॉर्टकट सेटिंग्ज &gt; अ‍ॅक्सेसिबिलिटी मध्ये इतर वैशिष्ट्यामध्ये बदलू शकता."</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> सुरू करायची आहे का?"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"दोन्ही व्हॉल्यूम की काही सेकंद धरून ठेवल्याने <xliff:g id="SERVICE">%1$s</xliff:g>, एक अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होते. यामुळे तुमचे डिव्हाइस कसे काम करते हे पूर्णपणे बदलते.\n\nतुम्ही हा शॉर्टकट सेटिंग्ज &gt; अ‍ॅक्सेसिबिलिटी मध्ये बदलू शकता."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"सुरू करा"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"सुरू करू नका"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> ला तुमचे डिव्हाइसच संपूर्णपणे नियंत्रित करायची अनुमती द्यायची का?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"तुम्ही <xliff:g id="SERVICE">%1$s</xliff:g> सुरू केल्‍यास, तुमचे डिव्हाइस डेटा एंक्रिप्शनमध्ये सुधारणा करण्‍यासाठी स्क्रीन लॉक वापरणार नाही."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"जी ॲप्स तुमच्या ॲक्सेसिबिलिटी गरजा पूर्ण करतात अशा ॲप्ससाठी संपूर्ण नियंत्रण योग्य आहे. पण ते सर्व ॲप्सना लागू होईल असे नाही."</string>
@@ -1647,10 +1642,8 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमती द्या"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"नकार द्या"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"वैशिष्ट्य वापरणे सुरू करण्यासाठी त्यावर टॅप करा:"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"अ‍ॅक्सेसिबिलिटी बटणासोबत वापरायची असलेली ॲप्स निवडा"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"व्‍हॉल्‍यूम की शॉर्टकटसोबत वापरायची असलेली ॲप्स निवडा"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> बंद केले आहे"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"शॉर्टकट संपादित करा"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"पूर्ण झाले"</string>
@@ -1658,23 +1651,15 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट वापरा"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंगांची उलटापालट"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रंग सुधारणा"</string>
-    <!-- no translation found for accessibility_shortcut_enabling_service (5473495203759847687) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_disabling_service (8675244165062700619) -->
-    <skip />
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केला आहे."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद दाबा आणि धरून ठेवा"</string>
-    <!-- no translation found for accessibility_button_prompt_text (8343213623338605305) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (8742535972130563952) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (5211827854510660203) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8853928358872550500) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (9196230728837090497) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3425123684990193765) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"तुम्ही अ‍ॅक्सेसिबिलिटी बटणावर टॅप केल्यास वापरण्यासाठी एक वैशिष्ट्य निवडा:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"अ‍ॅक्सेसिबिलिटी जेश्चरसोबत वापराचे असलेले वैशिष्‍ट्य निवडा (दोन बोटांनी स्क्रीनच्या तळापासून वर स्वाइप करा):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"अ‍ॅक्सेसिबिलिटी जेश्चरसोबत वापराचे असलेले वैशिष्‍ट्य निवडा (तीनन बोटांनी स्क्रीनच्या तळापासून वर स्वाइप करा):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"वैशिष्टयांदरम्यान स्विच करण्यासाठी अ‍ॅक्सेसिबिलिटी बटणाला स्पर्श करा आणि धरून ठेवा."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"वैशिष्टयांदरम्यान स्विच करण्यासाठी दोन बोटांनी वर स्वाइप करा आणि धरून ठेवा."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"वैशिष्टयांदरम्यान स्विच करण्यासाठी तीन बोटांनी वर स्वाइप करा आणि धरून ठेवा."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"मोठे करणे"</string>
     <string name="user_switched" msgid="7249833311585228097">"वर्तमान वापरकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> वर स्विच करत आहे…"</string>
@@ -2045,8 +2030,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> फायली</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> फाइल</item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (1511722103987329028) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"शेअर करण्यासाठी कोणतीही शिफारस केलेले लोक नाहीत"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"अ‍ॅप्स सूची"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"या अ‍ॅपला रेकॉर्ड करण्याची परवानगी दिली गेली नाही पण हे USB डिव्हाइस वापरून ऑडिओ कॅप्चर केला जाऊ शकतो."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"होम"</string>
@@ -2068,249 +2052,128 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"ऑफिस"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"वैयक्तिक दृश्य"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"कार्य दृश्य"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"हे ऑफिस ॲप्ससोबत शेअर करू शकत नाही"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"तुमचा IT अ‍ॅडमिन तुम्हाला हा आशय तुमच्या ऑफिस प्रोफाइलमधील अ‍ॅप्ससोबत शेअर करू देत नाही"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"हे ऑफिस अ‍ॅप्ससोबत उघडू शकत नाही"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"तुमचा IT अ‍ॅडमिन तुम्हाला हा आशय तुमच्या ऑफिस प्रोफाइलमधील अ‍ॅप्ससोबत उघडू देत नाही"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"हे वैयक्तिक अ‍ॅप्ससोबत शेअर करू शकत नाही"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"तुमचा IT अ‍ॅडमिन तुम्हाला हा आशय तुमच्या वैयक्तिक प्रोफाइलमधील अ‍ॅप्ससोबत शेअर करू देत नाही"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"हे वैयक्तिक अ‍ॅप्ससोबत उघडू शकत नाही"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"तुमचा IT अ‍ॅडमिन तुम्हाला हा आशय तुमच्या वैयक्तिक प्रोफाइलमधील अ‍ॅप्ससोबत उघडू देत नाही"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ऑफिस प्रोफाइल थांबवली आहे"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"सुरू करा"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"ऑफिस अ‍ॅप्स या आशयाला सपोर्ट करू शकत नाही"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ऑफिस अ‍ॅप्स हा आशय उघडू शकत नाही"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"वैयक्तिक अ‍ॅप्स या आशयाला सपोर्ट करू शकत नाही"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"वैयक्तिक अ‍ॅप्स हा आशय उघडू शकत नाही"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"टेलिफोनी कॉलमध्ये ऑडिओ रेकॉर्ड करा किंवा प्ले करा"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"टेलिफोनी कॉलमध्ये ऑडिओ रेकॉर्ड करण्याची किंवा प्ले करण्यासाठी डीफॉल्ट डायलर अ‍ॅप्लिकेशन म्हणून असाइन केले असताना या ॲपला परवानगी देते."</string>
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ENTRY (4447629474818217364) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY (973059024670737358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ENTRY (4487435301206073787) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY (768060297218652809) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY (7129527319490548930) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY (2876126640607573252) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY (8952595089930109282) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ENTRY (3013902515773728996) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ENTRY (2974411408893410289) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ENTRY (687618528751880721) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ENTRY (6810596579655575381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ENTRY (2715929642540980259) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY (8557791623303951590) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ENTRY (7382468767274580323) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY (6730880791104286987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY (6432126539782267026) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY (1730510161529488920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY (3369885925003346830) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY (9129139686191167829) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY (2869929685874615358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ENTRY (1238663472392741771) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY (3988705848553894358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ENTRY (6186770686690993200) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ENTRY (7043865376145617024) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ENTRY (6144227308185112176) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS (4233355366318061180) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS (6742563947637715645) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS (2033399698172403560) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS (4795977251920732254) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS (1090425878157254446) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS (6476898876518094438) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS (6006806734293747731) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (6546680489620881893) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS (3506845511000727015) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_IN_PROGRESS (6709169861932992750) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS (4013870911606478520) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS (9032651188219523434) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS (6584576506344491207) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS (830981927724888114) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS (7851790973098894802) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_IN_PROGRESS (1149560739586960121) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS (5708964693522116025) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS (7288103122966483455) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS (4036752174056147753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS (5089536274515338566) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS (6737197986936251958) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS (5658767775619998623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS (665978313257653727) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS (3857142652251836850) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS (2695664012344346788) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (2695678959963807782) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS (1230605365926493599) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ERROR (1924844017037151535) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR (3372797822292089708) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR (1878443146720411381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ERROR (7664778312218023192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ERROR (2472944311643350302) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ERROR (828089694480999120) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ERROR (17619001007092511) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ERROR (807214229604353614) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ERROR (8644184447744175747) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR (3801002648649640407) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ERROR (707397021218680753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR (894358680773257820) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR (352466878146726991) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR (7353389721907138671) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR (2655263155490857920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ERROR (6903740900892931310) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR (5165901670447518687) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR (2856763216589267623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR (817542684437829139) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR (5178635064113393143) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR (5391587926974531008) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR (4895494864493315868) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ERROR (9017576601595353649) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR (1116993930995545742) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ERROR (7559167306794441462) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ERROR (2782926139511136588) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ERROR (1890493954453456758) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUCCESS (4886243367747126325) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS (4053809277733513987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS (8249342930499801740) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_SUCCESS (2339794542560381270) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_SUCCESS (6975608174152828954) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS (2846699261330463192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS (5335414726057102801) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_SUCCESS (8868100318474971969) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS (6020936629725666932) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS (6944873647584595489) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_SUCCESS (2526483514124121988) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS (7662200333621664621) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS (2861223407953766632) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS (5345648571175243272) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS (3725278343103422466) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS (6998502547560297983) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS (8555433771162560361) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS (3555767296933606232) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS (6778051818199974237) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS (4080108758498911429) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS (7873675303000794343) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS (1763198215069819523) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_SUCCESS (2053891977727320532) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS (8146602361895007345) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_SUCCESS (8058678548991999545) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_SUCCESS (2545608067978550571) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_SUCCESS (4352382949744625007) -->
-    <skip />
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM नेटवर्क सबसेट अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM कॉर्पोरेट अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"SIM सेवा पुरवठादार अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"SIM अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIM network1 अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIM network2 अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"RUIM hrpd अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"RUIM कॉर्पोरेट अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"RUIM सेवा पुरवठादार अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"RUIM अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"PUK एंटर करा"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPN अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"SP इक्वीव्हॅलंट होम PLMN अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCID अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPI अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"नेटवर्क सबसेट सेवा पुरवठादार अनलॉक पिन"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"SIM नेटवर्क अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"SIM नेटवर्क सबसेट अनलॉक करण्याची विनंती करत आहे …"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"SIM सेवा पुरवठादार अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"SIM कॉर्पोरेट अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"SIM अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"RUIM network1 अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"RUIM network2 अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"RUIM hrpd अनलॉक करण्याची विंनती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"RUIM सेवा पुरवठादार अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"RUIM कॉर्पोरेट अनलॉक करण्याची विंनती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"SPN अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"SP इक्वीव्हॅलंट होम PLMN अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"ICCID अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"IMPI अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"नेटवर्क सबसेट सेवा पुरवठादार अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"RUIM अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"PUK अनलॉक करण्याची विनंती करत आहे…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"SIM नेटवर्क अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"SIM नेटवर्क सबसेट अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"SIM सेवा पुरवठादार अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"SIM कॉर्पोरेट अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"SIM अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"RUIM Network1 अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"RUIM Network2 अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"RUIM Hrpd अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"RUIM कॉर्पोरेट अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"RUIM सेवा पुरवठादार अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"RUIM अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK अनलॉक करणे यशस्वी झाले नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"SPN अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"SP इक्वीव्हॅलंट होम PLMN अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"ICCID अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"IMPI अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"नेटवर्क सबसेट सेवा पुरवठादार अनलॉक करण्याची विनंती यशस्वी झाली नाही."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"SIM नेटवर्क अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"SIM नेटवर्क सबसेट अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"SIM सेवा पुरवठादार अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"SIM कॉर्पोरेट अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"SIM अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM Network1 अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM Network2 अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM Hrpd अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM सेवा पुरवठादार अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"RUIM कॉर्पोरेट अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"RUIM अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"SPN अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"SP इक्वीव्हॅलंट होम PLMN अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI अनलॉक करणे यशस्वी झाले."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"नेटवर्क सबसेट सेवा पुरवठादार अनलॉक करणे यशस्वी झाले."</string>
 </resources>

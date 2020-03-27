@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ອຸປະກອນທີ່ຍົກເລີກແລ້ວສຳລັບການໃຊ້ສ່ວນບຸກຄົນ"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ອຸປະກອນມີການຈັດການ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ອົງກອນຂອງທ່ານຈັດການອຸປະກອນນີ້ ແລະ ອາດກວດສອບທຣາບຟິກເຄືອຂ່າຍນຳ. ແຕະເພື່ອເບິ່ງລາຍລະອຽດ."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"ຜູ້ເບິ່ງແຍງຂອງທ່ານປ່ຽນການຕັ້ງຄ່າສະຖານທີ່ແລ້ວ"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"ແຕະເພື່ອເບິ່ງການຕັ້ງຄ່າສະຖານທີ່ຂອງທ່ານ."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"ແອັບສາມາດເຂົ້າເຖິງສະຖານທີ່ຂອງທ່ານໄດ້"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານເພື່ອສຶກສາເພີ່ມເຕີມ"</string>
     <string name="country_detector" msgid="7023275114706088854">"ຕົວກວດຫາປະເທດ"</string>
     <string name="location_service" msgid="2439187616018455546">"​ບໍ​ລິ​ການ​ສະ​ຖານ​ທີ່"</string>
     <string name="gnss_service" msgid="8907781262179951385">"ບໍລິການ GNSS"</string>
@@ -201,8 +201,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"ບໍ່ສາມາດໃຊ້ແອັບຜູ້ເບິ່ງແຍງລະບົບໄດ້. ອຸປະກອນຂອງທ່ານຈະຖືກລຶບຂໍ້ມູນໃນຕອນນີ້.\n\nຫາກທ່ານມີຄຳຖາມ, ໃຫ້ຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບອົງກອນຂອງທ່ານ."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ການພິມຖືກປິດໄວ້ໂດຍ <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"ແອັບສ່ວນຕົວຖືກລະງັບໄວ້ໂດຍຜູ້ເບິ່ງແຍງ"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"ແຕະບ່ອນນີ້ເພື່ອກວດສອບການປະຕິບັດຕາມນະໂຍບາຍ."</string>
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"ປົດບລັອກແອັບສ່ວນຕົວຂອງທ່ານ"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"ແອັບຈະຖືກບລັອກໃນມື້ອື່ນ"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ຢຸດໂປຣໄຟລ໌ວຽກຂອງທ່ານເກີນ <xliff:g id="DAYS">%1$d</xliff:g> ມື້ໄດ້"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"ເປີດໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ"</string>
     <string name="me" msgid="6207584824693813140">"ຂ້າພະເຈົ້າ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ໂຕເລືອກແທັບເລັດ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ຕົວເລືອກ Android TV"</string>
@@ -442,8 +444,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນ ຫຼື ບໍລິການຮັບການເອີ້ນກັບກ່ຽວກັບອຸປະກອນກ້ອງຖືກເປີດ ຫຼື ປິດໄດ້."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ແອັບນີ້ສາມາດຮັບການເອີ້ນກັບໄດ້ເມື່ອມີອຸປະກອນກ້ອງໃດຖືກເປີດ (ໂດຍແພັກເກດແອັບພລິເຄຊັນຫຍັງ) ຫຼື ຖືກປິດ."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ຄວບຄຸມການສັ່ນ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ອະນຸຍາດໃຫ້ແອັບຯຄວບຄຸມໂຕສັ່ນ."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງສະຖານະການສັ່ນໄດ້."</string>
@@ -2068,33 +2069,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"ວຽກ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ມຸມມອງສ່ວນຕົວ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ມຸມມອງວຽກ"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"ບໍ່ສາມາດແບ່ງປັນກັບແອັບວຽກໄດ້"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ທ່ານແບ່ງປັນເນື້ອຫານີ້ດ້ວຍແອັບໃນໂປຣໄຟລ໌ວຽກຂອງທ່ານ"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"ບໍ່ສາມາດເປີດດ້ວຍແອັບວຽກໄດ້"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ທ່ານເປີດເນື້ອຫານີ້ດ້ວຍແອັບໃນໂປຣໄຟລ໌ວຽກຂອງທ່ານ"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ບໍ່ສາມາດແບ່ງປັນກັບແອັບສ່ວນຕົວໄດ້"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ທ່ານແບ່ງປັນເນື້ອຫານີ້ກັບແອັບໃນໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານ"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"ບໍ່ສາມາດເປີດດ້ວຍແອັບສ່ວນຕົວໄດ້"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ທ່ານເປີດເນື້ອຫານີ້ກັບແອັບໃນໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານ"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ຢຸດໂປຣໄຟລ໌ວຽກໄວ້ຊົ່ວຄາວແລ້ວ"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ເປີດໃຊ້"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"ບໍ່ມີແອັບວຽກທີ່ຮອງຮັບເນື້ອຫານີ້"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ບໍ່ມີແອັບວຽກທີ່ສາມາດເປີດເນື້ອຫານີ້ໄດ້"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"ບໍ່ມີແອັບສ່ວນຕົວທີ່ຮອງຮັບເນື້ອຫານີ້"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"ບໍ່ມີແອັບສ່ວນຕົວທີ່ສາມາດເປີດເນື້ອຫານີ້ໄດ້"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ບັນທຶກ ຫຼື ຫຼິ້ນສຽງໃນການໂທລະສັບ"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ອະນຸຍາດແອັບນີ້, ເມື່ອມອບໝາຍເປັນແອັບພລິເຄຊັນໂທລະສັບເລີ່ມຕົ້ນເພື່ອບັນທຶກ ຫຼື ຫຼິ້ນສຽງໃນການໂທລະສັບ."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
