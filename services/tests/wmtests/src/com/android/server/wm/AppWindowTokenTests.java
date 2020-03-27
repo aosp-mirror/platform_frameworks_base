@@ -174,7 +174,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
                 null /* freezeThisOneIfNeeded */, false /* forceUpdate */);
         // In this test, DC will not get config update. Set the waiting flag to false.
         mDisplayContent.mWaitingForConfig = false;
-        mWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
+        mWm.mRoot.performSurfacePlacement();
         assertEquals(SCREEN_ORIENTATION_REVERSE_LANDSCAPE, mDisplayContent.getLastOrientation());
         assertTrue(appWindow.mResizeReported);
         appWindow.removeImmediately();

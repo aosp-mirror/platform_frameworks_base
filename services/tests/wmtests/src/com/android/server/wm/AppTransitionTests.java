@@ -28,7 +28,6 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
@@ -38,7 +37,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -70,7 +68,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
+        doNothing().when(mWm.mRoot).performSurfacePlacement();
         mDc = mWm.getDefaultDisplayContentLocked();
     }
 
