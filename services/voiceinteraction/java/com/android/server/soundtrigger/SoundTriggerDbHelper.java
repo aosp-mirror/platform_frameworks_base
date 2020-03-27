@@ -86,10 +86,11 @@ public class SoundTriggerDbHelper extends SQLiteOpenHelper {
         synchronized(this) {
             SQLiteDatabase db = getWritableDatabase();
             ContentValues values = new ContentValues();
-            values.put(GenericSoundModelContract.KEY_MODEL_UUID, soundModel.uuid.toString());
-            values.put(GenericSoundModelContract.KEY_VENDOR_UUID, soundModel.vendorUuid.toString());
-            values.put(GenericSoundModelContract.KEY_DATA, soundModel.data);
-            values.put(GenericSoundModelContract.KEY_MODEL_VERSION, soundModel.version);
+            values.put(GenericSoundModelContract.KEY_MODEL_UUID, soundModel.getUuid().toString());
+            values.put(GenericSoundModelContract.KEY_VENDOR_UUID,
+                    soundModel.getVendorUuid().toString());
+            values.put(GenericSoundModelContract.KEY_DATA, soundModel.getData());
+            values.put(GenericSoundModelContract.KEY_MODEL_VERSION, soundModel.getVersion());
 
             try {
                 return db.insertWithOnConflict(GenericSoundModelContract.TABLE, null, values,
@@ -140,7 +141,7 @@ public class SoundTriggerDbHelper extends SQLiteOpenHelper {
             // Delete all sound models for the given keyphrase and specified user.
             SQLiteDatabase db = getWritableDatabase();
             String soundModelClause = GenericSoundModelContract.KEY_MODEL_UUID
-                    + "='" + soundModel.uuid.toString() + "'";
+                    + "='" + soundModel.getUuid().toString() + "'";
             try {
                 return db.delete(GenericSoundModelContract.TABLE, soundModelClause, null) != 0;
             } finally {
