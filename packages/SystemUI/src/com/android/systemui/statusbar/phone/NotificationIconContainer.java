@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DELAY;
 import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DURATION;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -27,6 +29,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
+import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
 
@@ -43,6 +46,7 @@ import com.android.systemui.statusbar.notification.stack.ViewState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 /**
  * A container for notification icons. It handles overflowing icons properly and positions them
@@ -275,7 +279,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         super.onViewAdded(child);
         boolean isReplacingIcon = isReplacingIcon(child);
         if (!mChangingViewPositions) {
-            IconState v = new IconState();
+            IconState v = new IconState(child);
             if (isReplacingIcon) {
                 v.justAdded = false;
                 v.justReplaced = true;
@@ -703,6 +707,20 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public boolean noAnimations;
         public boolean isLastExpandIcon;
         public int customTransformHeight = NO_VALUE;
+        private final View mView;
+
+        private final Consumer<Property> mCannedAnimationEndListener;
+
+        public IconState(View child) {
+            mView = child;
+            mCannedAnimationEndListener = (property) -> {
+                // If we finished animating out of the shelf
+                if (property == View.TRANSLATION_Y && iconAppearAmount == 0.0f
+                        && mView.getVisibility() == VISIBLE) {
+                    mView.setVisibility(INVISIBLE);
+                }
+            };
+        }
 
         @Override
         public void applyToView(View view) {
@@ -747,6 +765,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                             interpolator = Interpolators.ICON_OVERSHOT;
                         }
                         sTempProperties.setCustomInterpolator(View.TRANSLATION_Y, interpolator);
+                        sTempProperties.setAnimationEndAction(mCannedAnimationEndListener);
                         if (animationProperties != null) {
                             animationFilter.combineFilter(animationProperties.getAnimationFilter());
                             sTempProperties.combineCustomInterpolators(animationProperties);
