@@ -219,11 +219,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         cancelAnimations();
         mMenuController.hideMenuWithoutResize();
         mPipTaskOrganizer.getUpdateHandler().post(() -> {
-            try {
-                mActivityTaskManager.dismissPip(!skipAnimation, EXPAND_STACK_TO_FULLSCREEN_DURATION);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error expanding PiP activity", e);
-            }
+            mPipTaskOrganizer.dismissPip(skipAnimation ? 0 : EXPAND_STACK_TO_FULLSCREEN_DURATION);
         });
     }
 
