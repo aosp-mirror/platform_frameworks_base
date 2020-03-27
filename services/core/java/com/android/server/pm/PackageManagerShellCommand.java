@@ -1163,42 +1163,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 pw.println("Success");
                 return 0;
             }
-
-            long timeoutMs = params.timeoutMs <= 0
-                    ? DEFAULT_WAIT_MS
-                    : params.timeoutMs;
-            PackageInstaller.SessionInfo si = mInterface.getPackageInstaller()
-                    .getSessionInfo(sessionId);
-            long currentTime = System.currentTimeMillis();
-            long endTime = currentTime + timeoutMs;
-            // Using a loop instead of BroadcastReceiver since we can receive session update
-            // broadcast only if packageInstallerName is "android". We can't always force
-            // "android" as packageIntallerName, e.g, rollback auto implies
-            // "-i com.android.shell".
-            while (currentTime < endTime) {
-                if (si != null
-                        && (si.isStagedSessionReady() || si.isStagedSessionFailed())) {
-                    break;
-                }
-                SystemClock.sleep(Math.min(endTime - currentTime, 100));
-                currentTime = System.currentTimeMillis();
-                si = mInterface.getPackageInstaller().getSessionInfo(sessionId);
-            }
-            if (si == null) {
-                pw.println("Failure [failed to retrieve SessionInfo]");
-                return 1;
-            }
-            if (!si.isStagedSessionReady() && !si.isStagedSessionFailed()) {
-                pw.println("Failure [timed out after " + timeoutMs + " ms]");
-                return 1;
-            }
-            if (!si.isStagedSessionReady()) {
-                pw.println("Error [" + si.getStagedSessionErrorCode() + "] ["
-                        + si.getStagedSessionErrorMessage() + "]");
-                return 1;
-            }
-            pw.println("Success. Reboot device to apply staged session");
-            return 0;
+            return doWaitForStagedSessionRead(sessionId, params.timeoutMs, pw);
         } finally {
             if (abandonSession) {
                 try {
@@ -1209,14 +1174,92 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
+    private int doWaitForStagedSessionRead(int sessionId, long timeoutMs, PrintWriter pw)
+              throws RemoteException {
+        if (timeoutMs <= 0) {
+            timeoutMs = DEFAULT_WAIT_MS;
+        }
+        PackageInstaller.SessionInfo si = mInterface.getPackageInstaller()
+                .getSessionInfo(sessionId);
+        if (si == null) {
+            pw.println("Failure [Unknown session " + sessionId + "]");
+            return 1;
+        }
+        if (!si.isStaged()) {
+            pw.println("Failure [Session " + sessionId + " is not a staged session]");
+            return 1;
+        }
+        long currentTime = System.currentTimeMillis();
+        long endTime = currentTime + timeoutMs;
+        // Using a loop instead of BroadcastReceiver since we can receive session update
+        // broadcast only if packageInstallerName is "android". We can't always force
+        // "android" as packageIntallerName, e.g, rollback auto implies
+        // "-i com.android.shell".
+        while (currentTime < endTime) {
+            if (si != null && (si.isStagedSessionReady() || si.isStagedSessionFailed())) {
+                break;
+            }
+            SystemClock.sleep(Math.min(endTime - currentTime, 100));
+            currentTime = System.currentTimeMillis();
+            si = mInterface.getPackageInstaller().getSessionInfo(sessionId);
+        }
+        if (si == null) {
+            pw.println("Failure [failed to retrieve SessionInfo]");
+            return 1;
+        }
+        if (!si.isStagedSessionReady() && !si.isStagedSessionFailed()) {
+            pw.println("Failure [timed out after " + timeoutMs + " ms]");
+            return 1;
+        }
+        if (!si.isStagedSessionReady()) {
+            pw.println("Error [" + si.getStagedSessionErrorCode() + "] ["
+                    + si.getStagedSessionErrorMessage() + "]");
+            return 1;
+        }
+        pw.println("Success. Reboot device to apply staged session");
+        return 0;
+    }
+
     private int runInstallAbandon() throws RemoteException {
         final int sessionId = Integer.parseInt(getNextArg());
         return doAbandonSession(sessionId, true /*logSuccess*/);
     }
 
     private int runInstallCommit() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        String opt;
+        boolean waitForStagedSessionReady = true;
+        long timeoutMs = -1;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--wait":
+                    waitForStagedSessionReady = true;
+                    // If there is only one remaining argument, then it represents the sessionId, we
+                    // shouldn't try to parse it as timeoutMs.
+                    if (getRemainingArgsCount() > 1) {
+                        try {
+                            timeoutMs = Long.parseLong(peekNextArg());
+                            getNextArg();
+                        } catch (NumberFormatException ignore) {
+                        }
+                    }
+                    break;
+                case "--no-wait":
+                    waitForStagedSessionReady = false;
+                    break;
+            }
+        }
         final int sessionId = Integer.parseInt(getNextArg());
-        return doCommitSession(sessionId, true /*logSuccess*/);
+        if (doCommitSession(sessionId, false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
+            return 1;
+        }
+        final PackageInstaller.SessionInfo si = mInterface.getPackageInstaller()
+                .getSessionInfo(sessionId);
+        if (si == null || !si.isStaged() || !waitForStagedSessionReady) {
+            pw.println("Success");
+            return 0;
+        }
+        return doWaitForStagedSessionRead(sessionId, timeoutMs, pw);
     }
 
     private int runInstallCreate() throws RemoteException {
