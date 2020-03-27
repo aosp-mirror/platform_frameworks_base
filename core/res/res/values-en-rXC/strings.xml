@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‏‎‏‎‎‎‏‎‎‎‏‏‏‎‎‏‎‎‎‏‏‎‎‏‎‎‎‏‎‎‎‏‏‎‎‏‎‏‏‏‎‏‏‏‏‎‎‎‎‏‎‎‏‏‎‎‎Admin relinquished device for personal use‎‏‎‎‏‎"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‏‎‎‏‎‎‏‎‎‎‏‎‎‏‏‎‎‎‏‏‎‎‏‏‏‎‏‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎Device is managed‎‏‎‎‏‎"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‏‎‎‎‏‏‎‏‎‎‎‎‏‎‏‎‏‎‎‎‏‏‎‏‎‎‏‎‏‎‎‎‏‎‏‎‎‎‎‎Your organization manages this device and may monitor network traffic. Tap for details.‎‏‎‎‏‎"</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‎‎‏‎‏‏‎‎‎‎‏‏‎‏‎‏‏‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‎‏‏‎‎‏‏‏‎‎‎‏‏‏‏‎‏‏‏‎‎Location settings changed by your admin‎‏‎‎‏‎"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‎‎‎‎‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‏‏‏‎‏‎‏‏‏‏‎‎‎‎‏‎‎‏‎‏‏‏‏‎Tap to see your location settings.‎‏‎‎‏‎"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‏‏‏‏‎‏‎‏‏‎‎‎‏‏‎‎‏‏‎‎‏‎‎‎‏‏‏‎‎‎‎‎‎‏‏‏‎‏‎‎‏‏‎‎‏‏‏‎‏‏‎‏‎‎‎Apps can access your location‎‏‎‎‏‎"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‏‎‏‏‏‏‏‎‏‎‏‎‎‎‎‎‏‏‎‎‏‏‏‎‎‏‎‏‏‏‎‎‎‏‎‎‎‏‏‎‏‏‎‎‎‏‏‏‎‎‎‎‎‎Contact your IT admin to learn more‎‏‎‎‏‎"</string>
     <string name="country_detector" msgid="7023275114706088854">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‎‏‏‏‏‎‏‎‏‏‏‏‏‎‎‎‎‎‎‏‏‎‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‏‏‎‎‏‏‏‎‎‏‎‏‏‎‎Country Detector‎‏‎‎‏‎"</string>
     <string name="location_service" msgid="2439187616018455546">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‎‏‏‎‎‏‏‎‏‏‏‏‎‎‎‎‏‏‎‏‏‎‏‎‏‎‎‎‎‏‎‏‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‏‎‏‎‎Location Service‎‏‎‎‏‎"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‏‏‎‏‏‏‎‏‏‏‎‎‏‎‎‏‏‏‏‏‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‎‎‎Sensor Notification Service‎‏‎‎‏‎"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‎‏‎‎‎‏‎‏‎‏‏‎‏‎‏‎‏‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎Your device will be erased‎‏‎‎‏‎"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‎‎‎‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‎‏‎The admin app can\'t be used. Your device will now be erased.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎If you have questions, contact your organization\'s admin.‎‏‎‎‏‎"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‎‎‎‎‏‎‏‎‏‎‏‏‎‏‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‎‎‏‎‏‏‏‏‎‎‏‎Printing disabled by ‎‏‎‎‏‏‎<xliff:g id="OWNER_APP">%s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‎‏‏‏‎‎‏‏‏‎‎‎‎‏‏‎‎‏‏‏‎‏‎‏‏‎‎‎‏‎‏‎‏‏‎‎‏‏‎‎‎‎‏‏‏‏‏‎‏‎‏‏‎‎Unblock your personal apps‎‏‎‎‏‎"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‎‏‎‎‏‎‏‎‏‎‏‏‎‏‏‎‏‏‎‏‏‏‏‏‎‎‎‏‎‏‎‎‎‎‏‎‎‏‏‎‎‏‏‏‏‏‏‎‎‎‏‎‎Apps will be blocked tomorrow‎‏‎‎‏‎"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‎‏‏‎‎‏‎‎‎‏‎‏‏‎‏‎‎‎‎‏‏‏‏‏‏‎‎‏‎‏‏‎‏‏‎‎‏‏‏‏‏‏‎‎‎‎‏‎‎‏‎‎Your IT admin doesn’t allow your work profile to be paused for more than ‎‏‎‎‏‏‎<xliff:g id="DAYS">%1$d</xliff:g>‎‏‎‎‏‏‏‎ days‎‏‎‎‏‎"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‎‏‎‏‏‏‏‏‎‎‏‎‏‏‎‏‏‏‎‎‏‏‏‏‎‎‏‏‎‏‎‏‎‎‎‏‏‏‏‎‏‎‏‎‎‎‏‎‎‎‏‏‎‎‎‏‎Turn on work profile‎‏‎‎‏‎"</string>
     <string name="me" msgid="6207584824693813140">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‎‎‎‏‎‎‏‎‏‏‏‎‎‎‏‎‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‎‏‏‏‏‏‎‏‎‏‏‏‎‏‏‏‏‏‎‎‏‎‏‎‎‎Me‎‏‎‎‏‎"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‎‏‎‎‏‎‏‏‎‎‎‎‎‎‎‎‏‎‎‏‏‏‏‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‏‎‎‎‏‎‏‎‏‏‎‏‎‏‏‎‏‎Tablet options‎‏‎‎‏‎"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‎‏‏‎‏‏‏‎‎‏‏‏‎‎‏‎‎‏‏‏‎‎‏‏‏‎‏‎‏‎‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‏‎Android TV options‎‏‎‎‏‎"</string>

@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Erabilera pertsonalerako utzi du gailua administratzaileak"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Jabeak kudeatzen du gailua"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Erakundeak kudeatzen du gailua eta baliteke sareko trafikoa gainbegiratzea. Sakatu hau xehetasunak ikusteko."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"Administratzaileak kokapen-ezarpenak aldatu ditu"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"Sakatu kokapen-ezarpenak ikusteko."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikazioek zure kokapena atzi dezakete"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Informazio gehiago lortzeko, jo IKT sailaren administratzailearengana"</string>
     <string name="country_detector" msgid="7023275114706088854">"Herrialde-hautemailea"</string>
     <string name="location_service" msgid="2439187616018455546">"Kokapen-zerbitzua"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sentsorearen jakinarazpen-zerbitzua"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Gailuko datuak ezabatu egingo dira"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Ezin da erabili administratzeko aplikazioa. Ezabatu egingo da gailuko eduki guztia.\n\nZalantzarik baduzu, jarri erakundeko administratzailearekin harremanetan."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> aplikazioak desgaitu egin du inprimatzeko aukera."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Desblokeatu aplikazio pertsonalak"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Bihar blokeatuko dira aplikazioak"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"IKT sailaren administratzaileak ez du onartzen laneko profila <xliff:g id="DAYS">%1$d</xliff:g> egunean baino gehiagoan pausatuta egotea"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Aktibatu laneko profila"</string>
     <string name="me" msgid="6207584824693813140">"Ni"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tabletaren aukerak"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV gailuaren aukerak"</string>
@@ -447,8 +443,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"eman jakinarazpenak jasotzeko baimena aplikazioari edo zerbitzuari kamerak ireki edo ixten direnean."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Kamera ireki edo itxi dela (eta zer aplikaziorekin) dioten jakinarazpenak jaso ditzake aplikazio honek."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolatu dardara"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko aukera ematen die aplikazioei."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Dardara-egoera atzitzeko baimena ematen dio aplikazioari."</string>
@@ -2073,33 +2068,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Lanekoa"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Ikuspegi pertsonala"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Laneko ikuspegia"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Ezin da partekatu laneko aplikazioekin"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IKT saileko administratzaileak ez dizu ematen baimenik eduki hau zure laneko profileko aplikazioekin partekatzeko"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Ezin da ireki laneko aplikazioekin"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IKT saileko administratzaileak ez dizu ematen baimenik eduki hau zure laneko profileko aplikazioekin irekitzeko"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Ezin da partekatu aplikazio pertsonalekin"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IKT saileko administratzaileak ez dizu ematen baimenik eduki hau zure profil pertsonaleko aplikazioekin partekatzeko"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Ezin da ireki aplikazio pertsonalekin"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IKT saileko administratzaileak ez dizu ematen baimenik eduki hau zure profil pertsonaleko aplikazioekin irekitzeko"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Laneko profila pausatuta dago"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Aktibatu"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Ez dago eduki honekin bateragarria den laneko aplikaziorik"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Ez dago eduki hau ireki dezakeen laneko aplikaziorik"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Ez dago eduki honekin bateragarria den aplikazio pertsonalik"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Ez dago eduki hau ireki dezakeen aplikazio pertsonalik"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"grabatu edo erreproduzitu telefono-deietako audioa"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Aplikazio hau markagailu lehenetsia denean, telefono-deietako audioa grabatu edo erreproduzitzeko aukera ematen dio."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
