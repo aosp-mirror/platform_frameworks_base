@@ -4424,4 +4424,7 @@
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">false</bool>
 
+    <!-- Set to true to make assistant show in front of the dream/screensaver. -->
+    <bool name="config_assistantOnTopOfDream">false</bool>
+
 </resources>
