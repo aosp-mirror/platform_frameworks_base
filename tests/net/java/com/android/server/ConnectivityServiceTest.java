@@ -6810,15 +6810,11 @@ public class ConnectivityServiceTest {
 
         mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
 
-        try {
-            assertFalse(
-                    "Mismatched uid/package name should not pass the location permission check",
-                    mService.checkConnectivityDiagnosticsPermissions(
-                            Process.myPid() + 1, Process.myUid() + 1, naiWithoutUid,
-                            mContext.getOpPackageName()));
-        } catch (SecurityException e) {
-            fail("checkConnectivityDiagnosticsPermissions shouldn't surface a SecurityException");
-        }
+        assertFalse(
+                "Mismatched uid/package name should not pass the location permission check",
+                mService.checkConnectivityDiagnosticsPermissions(
+                        Process.myPid() + 1, Process.myUid() + 1, naiWithoutUid,
+                        mContext.getOpPackageName()));
     }
 
     @Test
