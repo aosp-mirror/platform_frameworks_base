@@ -122,6 +122,7 @@ droidstubs {
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
     visibility: ["//visibility:private"],
+    filter_packages: ["com.android."],
     check_api: {
         current: {
             api_file: "api/current.txt",

@@ -17,6 +17,7 @@ filegroup {
     srcs: [
         "java/**/*.java",
     ],
+    path: "java",
 }
 
 java_library {
