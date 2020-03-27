@@ -153,6 +153,35 @@ public class InsetsStateTest {
         }
     }
 
+
+    @Test
+    public void testCalculateInsets_captionStatusBarOverlap() throws Exception {
+        try (InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_FULL)) {
+            mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));
+            mState.getSource(ITYPE_STATUS_BAR).setVisible(true);
+            mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(0, 0, 100, 300));
+            mState.getSource(ITYPE_CAPTION_BAR).setVisible(true);
+
+            Rect visibleInsets = mState.calculateVisibleInsets(
+                    new Rect(0, 0, 100, 400), SOFT_INPUT_ADJUST_NOTHING);
+            assertEquals(new Rect(0, 300, 0, 0), visibleInsets);
+        }
+    }
+
+    @Test
+    public void testCalculateInsets_captionBarOffset() throws Exception {
+        try (InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_FULL)) {
+            mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(0, 0, 100, 300));
+            mState.getSource(ITYPE_CAPTION_BAR).setVisible(true);
+
+            Rect visibleInsets = mState.calculateVisibleInsets(
+                    new Rect(0, 0, 150, 400), SOFT_INPUT_ADJUST_NOTHING);
+            assertEquals(new Rect(0, 300, 0, 0), visibleInsets);
+        }
+    }
+
     @Test
     public void testStripForDispatch() {
         mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));

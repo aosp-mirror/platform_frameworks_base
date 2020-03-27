@@ -158,6 +158,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneFallbackEventHandler;
 import com.android.internal.util.Preconditions;
 import com.android.internal.view.BaseSurfaceHolder;
@@ -2221,6 +2222,19 @@ public final class ViewRootImpl implements ViewParent,
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
+    private boolean updateCaptionInsets() {
+        if (!(mView instanceof DecorView)) return false;
+        final int captionInsetsHeight = ((DecorView) mView).getCaptionInsetsHeight();
+        final Rect captionFrame = new Rect();
+        if (captionInsetsHeight != 0) {
+            captionFrame.set(mWinFrame.left, mWinFrame.top, mWinFrame.right,
+                            mWinFrame.top + captionInsetsHeight);
+        }
+        if (mAttachInfo.mCaptionInsets.equals(captionFrame)) return false;
+        mAttachInfo.mCaptionInsets.set(captionFrame);
+        return true;
+    }
+
     private boolean shouldDispatchCutout() {
         return mWindowAttributes.layoutInDisplayCutoutMode
                         == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
@@ -2590,6 +2604,9 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 if (alwaysConsumeSystemBarsChanged) {
                     mAttachInfo.mAlwaysConsumeSystemBars = mPendingAlwaysConsumeSystemBars;
+                    dispatchApplyInsets = true;
+                }
+                if (updateCaptionInsets()) {
                     dispatchApplyInsets = true;
                 }
                 if (dispatchApplyInsets || mLastSystemUiVisibility !=
