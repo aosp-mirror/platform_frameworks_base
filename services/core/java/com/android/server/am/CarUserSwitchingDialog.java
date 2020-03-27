@@ -35,6 +35,8 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -50,12 +52,19 @@ import com.android.internal.R;
 final class CarUserSwitchingDialog extends UserSwitchingDialog {
 
     private static final String TAG = "ActivityManagerCarUserSwitchingDialog";
+    private View mView;
 
     public CarUserSwitchingDialog(ActivityManagerService service, Context context, UserInfo oldUser,
             UserInfo newUser, boolean aboveSystem, String switchingFromSystemUserMessage,
             String switchingToSystemUserMessage) {
         super(service, context, oldUser, newUser, aboveSystem, switchingFromSystemUserMessage,
                 switchingToSystemUserMessage);
+
+        // {@link UserSwitchingDialog} uses {@link WindowManager.LayoutParams.TYPE_SYSTEM_ERROR}
+        // when trying to show dialog above system. That window type has been deprecated and since
+        // this is a system dialog, hence, it makes sense to put this in System Dialog Window.
+        // This window also automatically shows status bar.
+        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
     }
 
     @Override
@@ -65,7 +74,7 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
         Resources res = getContext().getResources();
         // Custom view due to alignment and font size requirements
         getContext().setTheme(R.style.Theme_DeviceDefault_Light_Dialog_Alert_UserSwitchingDialog);
-        View view = LayoutInflater.from(getContext()).inflate(
+        mView = LayoutInflater.from(getContext()).inflate(
                 R.layout.car_user_switching_dialog,
                 null);
 
@@ -75,11 +84,11 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
         if (bitmap != null) {
             CircleFramedDrawable drawable = CircleFramedDrawable.getInstance(bitmap,
                     res.getDimension(R.dimen.car_fullscreen_user_pod_image_avatar_height));
-            ((ImageView) view.findViewById(R.id.user_loading_avatar))
+            ((ImageView) mView.findViewById(R.id.user_loading_avatar))
                     .setImageDrawable(drawable);
         }
 
-        TextView msgView = view.findViewById(R.id.user_loading);
+        TextView msgView = mView.findViewById(R.id.user_loading);
 
         // TODO(b/145132885): use constant from CarSettings
         boolean showInfo = "true".equals(Settings.Global.getString(
@@ -92,7 +101,17 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
         } else {
             msgView.setText(res.getString(R.string.car_loading_profile));
         }
-        setView(view);
+        setView(mView);
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        hideNavigationBar();
+    }
+
+    private void hideNavigationBar() {
+        mView.getWindowInsetsController().hide(WindowInsets.Type.navigationBars());
     }
 
     /**
