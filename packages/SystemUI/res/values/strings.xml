@@ -2685,9 +2685,9 @@
     <!-- Controls management controls screen header for Other zone [CHAR LIMIT=60] -->
     <string name="controls_favorite_other_zone_header">Other</string>
 
-    <!-- Controls dialog title [CHAR LIMIT=30] -->
+    <!-- Controls dialog title [CHAR LIMIT=40] -->
     <string name="controls_dialog_title">Add to quick controls</string>
-    <!-- Controls dialog add to favorites [CHAR LIMIT=30] -->
+    <!-- Controls dialog add to favorites [CHAR LIMIT=40] -->
     <string name="controls_dialog_ok">Add to favorites</string>
     <!-- Controls dialog message [CHAR LIMIT=NONE] -->
     <string name="controls_dialog_message"><xliff:g id="app" example="System UI">%s</xliff:g> suggested this control to add to your favorites.</string>
