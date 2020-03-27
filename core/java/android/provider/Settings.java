@@ -14176,6 +14176,23 @@ public final class Settings {
                 "appop_history_parameters";
 
         /**
+         * Auto revoke parameters. These parameters are represented by
+         * a comma-delimited key-value list.
+         *
+         * <pre>
+         *     enabledForPreRApps    (bolean)
+         *     unusedThresholdMs     (long)
+         *     checkFrequencyMs      (long)
+         * </pre>
+         *
+         * Ex: "enabledForPreRApps=false,unusedThresholdMs=7776000000,checkFrequencyMs=1296000000"
+         *
+         * @hide
+         */
+        public static final String AUTO_REVOKE_PARAMETERS =
+                "auto_revoke_parameters";
+
+        /**
          * Delay for sending ACTION_CHARGING after device is plugged in.
          * This is used as an override for constants defined in BatteryStatsImpl for
          * ease of experimentation.
