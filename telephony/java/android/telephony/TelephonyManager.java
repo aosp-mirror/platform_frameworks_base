@@ -11472,6 +11472,55 @@ public class TelephonyManager {
     @SystemApi
     public static final long NETWORK_TYPE_BITMASK_IWLAN = (1 << (NETWORK_TYPE_IWLAN -1));
 
+    /** @hide */
+    public static final long NETWORK_CLASS_BITMASK_2G = NETWORK_TYPE_BITMASK_GSM
+                | NETWORK_TYPE_BITMASK_GPRS
+                | NETWORK_TYPE_BITMASK_EDGE
+                | NETWORK_TYPE_BITMASK_CDMA
+                | NETWORK_TYPE_BITMASK_1xRTT;
+
+    /** @hide */
+    public static final long NETWORK_CLASS_BITMASK_3G = NETWORK_TYPE_BITMASK_EVDO_0
+            | NETWORK_TYPE_BITMASK_EVDO_A
+            | NETWORK_TYPE_BITMASK_EVDO_B
+            | NETWORK_TYPE_BITMASK_EHRPD
+            | NETWORK_TYPE_BITMASK_HSUPA
+            | NETWORK_TYPE_BITMASK_HSDPA
+            | NETWORK_TYPE_BITMASK_HSPA
+            | NETWORK_TYPE_BITMASK_HSPAP
+            | NETWORK_TYPE_BITMASK_UMTS
+            | NETWORK_TYPE_BITMASK_TD_SCDMA;
+
+    /** @hide */
+    public static final long NETWORK_CLASS_BITMASK_4G = NETWORK_TYPE_BITMASK_LTE
+            | NETWORK_TYPE_BITMASK_LTE_CA
+            | NETWORK_TYPE_BITMASK_IWLAN;
+
+    /** @hide */
+    public static final long NETWORK_CLASS_BITMASK_5G = NETWORK_TYPE_BITMASK_NR;
+
+    /** @hide */
+    public static final long NETWORK_STANDARDS_FAMILY_BITMASK_3GPP = NETWORK_TYPE_BITMASK_GSM
+            | NETWORK_TYPE_BITMASK_GPRS
+            | NETWORK_TYPE_BITMASK_EDGE
+            | NETWORK_TYPE_BITMASK_HSUPA
+            | NETWORK_TYPE_BITMASK_HSDPA
+            | NETWORK_TYPE_BITMASK_HSPA
+            | NETWORK_TYPE_BITMASK_HSPAP
+            | NETWORK_TYPE_BITMASK_UMTS
+            | NETWORK_TYPE_BITMASK_TD_SCDMA
+            | NETWORK_TYPE_BITMASK_LTE
+            | NETWORK_TYPE_BITMASK_LTE_CA
+            | NETWORK_TYPE_BITMASK_NR;
+
+    /** @hide */
+    public static final long NETWORK_STANDARDS_FAMILY_BITMASK_3GPP2 = NETWORK_TYPE_BITMASK_CDMA
+            | NETWORK_TYPE_BITMASK_1xRTT
+            | NETWORK_TYPE_BITMASK_EVDO_0
+            | NETWORK_TYPE_BITMASK_EVDO_A
+            | NETWORK_TYPE_BITMASK_EVDO_B
+            | NETWORK_TYPE_BITMASK_EHRPD;
+
     /**
      * @return Modem supported radio access family bitmask
      *
