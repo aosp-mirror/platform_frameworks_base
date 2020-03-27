@@ -288,7 +288,7 @@ public class BubbleData {
         boolean isBubbleExpandedAndSelected = mExpanded && mSelectedBubble == bubble;
         boolean suppress = isBubbleExpandedAndSelected || !showInShade || !bubble.showInShade();
         bubble.setSuppressNotification(suppress);
-        bubble.setShowDot(!isBubbleExpandedAndSelected /* show */, true /* animate */);
+        bubble.setShowDot(!isBubbleExpandedAndSelected /* show */);
 
         dispatchPendingChanges();
     }
