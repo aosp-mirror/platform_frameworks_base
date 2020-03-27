@@ -361,7 +361,8 @@ public final class TelephonyPermissions {
             TelephonyCommonStatsLog.write(TelephonyCommonStatsLog.DEVICE_IDENTIFIER_ACCESS_DENIED,
                     callingPackage, message, /* isPreinstalled= */ false, false);
         }
-        Log.w(LOG_TAG, "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message);
+        Log.w(LOG_TAG, "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message + ":"
+                + subId);
         // if the target SDK is pre-Q then check if the calling package would have previously
         // had access to device identifiers.
         if (callingPackageInfo != null && (
