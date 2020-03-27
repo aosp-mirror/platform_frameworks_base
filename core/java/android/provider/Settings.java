@@ -8573,6 +8573,16 @@ public final class Settings {
         public static final String QS_TILES = "sysui_qs_tiles";
 
         /**
+         * Whether this user has enabled Quick controls.
+         *
+         * 0 indicates disabled and 1 indicates enabled. A non existent value should be treated as
+         * enabled.
+         *
+         * @hide
+         */
+        public static final String CONTROLS_ENABLED = "controls_enabled";
+
+        /**
          * Specifies whether the web action API is enabled.
          *
          * @hide
