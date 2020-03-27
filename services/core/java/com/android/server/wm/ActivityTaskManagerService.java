@@ -3986,35 +3986,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    /**
-     * Dismisses Pip
-     * @param animate True if the dismissal should be animated.
-     * @param animationDuration The duration of the resize animation in milliseconds or -1 if the
-     *                          default animation duration should be used.
-     */
-    @Override
-    public void dismissPip(boolean animate, int animationDuration) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "dismissPip()");
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityStack stack =
-                        mRootWindowContainer.getDefaultDisplay().getRootPinnedTask();
-                if (stack == null) {
-                    Slog.w(TAG, "dismissPip: pinned stack not found.");
-                    return;
-                }
-                if (stack.getWindowingMode() != WINDOWING_MODE_PINNED) {
-                    throw new IllegalArgumentException("Stack: " + stack
-                            + " doesn't support animated resize.");
-                }
-                stack.dismissPip();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     @Override
     public void suppressResizeConfigChanges(boolean suppress) throws RemoteException {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "suppressResizeConfigChanges()");
