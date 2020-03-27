@@ -28768,6 +28768,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
         final Rect mStableInsets = new Rect();
 
+        /**
+         * Current caption insets to the display coordinate.
+         */
+        final Rect mCaptionInsets = new Rect();
+
         final DisplayCutout.ParcelableWrapper mDisplayCutout =
                 new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
 

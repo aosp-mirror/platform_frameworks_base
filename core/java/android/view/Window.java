@@ -49,9 +49,6 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.util.Pair;
 import android.view.View.OnApplyWindowInsetsListener;
-import android.view.ViewGroup.LayoutParams;
-import android.view.WindowInsets.Side.InsetsSide;
-import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityEvent;
 
 import java.util.Collections;
@@ -323,7 +320,7 @@ public abstract class Window {
     @UnsupportedAppUsage
     private boolean mDestroyed;
 
-    private boolean mOverlayWithDecorCaptionEnabled = false;
+    private boolean mOverlayWithDecorCaptionEnabled = true;
     private boolean mCloseOnSwipeEnabled = false;
 
     // The current window attributes.
