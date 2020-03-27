@@ -55,8 +55,8 @@ import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OperationCanceledException;
-import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -931,33 +931,20 @@ public abstract class ContentResolver implements ContentInterface {
         @Override
         public void onResult(Bundle result) {
             synchronized (this) {
-                this.exception = getExceptionFromBundle(result);
-                if (this.exception == null) {
+                ParcelableException e = result.getParcelable(REMOTE_CALLBACK_ERROR);
+                if (e != null) {
+                    Throwable t = e.getCause();
+                    if (t instanceof RuntimeException) {
+                        this.exception = (RuntimeException) t;
+                    } else {
+                        this.exception = new RuntimeException(t);
+                    }
+                } else {
                     this.result = getResultFromBundle(result);
                 }
                 done = true;
                 notifyAll();
             }
-        }
-
-        private RuntimeException getExceptionFromBundle(Bundle result) {
-            byte[] bytes = result.getByteArray(REMOTE_CALLBACK_ERROR);
-            if (bytes == null) {
-                return null;
-            }
-
-            Parcel parcel = Parcel.obtain();
-            try {
-                parcel.unmarshall(bytes, 0, bytes.length);
-                parcel.setDataPosition(0);
-                parcel.readException();
-            } catch (RuntimeException ex) {
-                return ex;
-            } finally {
-                parcel.recycle();
-            }
-
-            return null;
         }
 
         protected abstract T getResultFromBundle(Bundle result);
