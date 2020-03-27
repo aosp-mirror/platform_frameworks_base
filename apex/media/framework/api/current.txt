@@ -29,7 +29,7 @@ package android.media {
     method public boolean advance(@NonNull android.media.MediaParser.SeekableInputReader) throws java.io.IOException;
     method @NonNull public static android.media.MediaParser create(@NonNull android.media.MediaParser.OutputConsumer, @NonNull java.lang.String...);
     method @NonNull public static android.media.MediaParser createByName(@NonNull String, @NonNull android.media.MediaParser.OutputConsumer);
-    method @Nullable public String getParserName();
+    method @NonNull public String getParserName();
     method @NonNull public static java.util.List<java.lang.String> getParserNames(@NonNull android.media.MediaFormat);
     method public void release();
     method public void seek(@NonNull android.media.MediaParser.SeekPoint);
@@ -65,6 +65,7 @@ package android.media {
     field public static final String PARSER_NAME_OGG = "android.media.mediaparser.OggParser";
     field public static final String PARSER_NAME_PS = "android.media.mediaparser.PsParser";
     field public static final String PARSER_NAME_TS = "android.media.mediaparser.TsParser";
+    field public static final String PARSER_NAME_UNKNOWN = "android.media.mediaparser.UNKNOWN";
     field public static final String PARSER_NAME_WAV = "android.media.mediaparser.WavParser";
   }
 

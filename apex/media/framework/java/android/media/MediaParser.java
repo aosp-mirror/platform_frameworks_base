@@ -452,6 +452,7 @@ public final class MediaParser {
     @StringDef(
             prefix = {"PARSER_NAME_"},
             value = {
+                PARSER_NAME_UNKNOWN,
                 PARSER_NAME_MATROSKA,
                 PARSER_NAME_FMP4,
                 PARSER_NAME_MP4,
@@ -469,6 +470,7 @@ public final class MediaParser {
             })
     public @interface ParserName {}
 
+    public static final String PARSER_NAME_UNKNOWN = "android.media.mediaparser.UNKNOWN";
     public static final String PARSER_NAME_MATROSKA = "android.media.mediaparser.MatroskaParser";
     public static final String PARSER_NAME_FMP4 = "android.media.mediaparser.FragmentedMp4Parser";
     public static final String PARSER_NAME_MP4 = "android.media.mediaparser.Mp4Parser";
@@ -836,14 +838,14 @@ public final class MediaParser {
      * Returns the name of the backing parser implementation.
      *
      * <p>If this instance was creating using {@link #createByName}, the provided name is returned.
-     * If this instance was created using {@link #create}, this method will return null until the
-     * first call to {@link #advance}, after which the name of the backing parser implementation is
-     * returned.
+     * If this instance was created using {@link #create}, this method will return {@link
+     * #PARSER_NAME_UNKNOWN} until the first call to {@link #advance}, after which the name of the
+     * backing parser implementation is returned.
      *
      * @return The name of the backing parser implementation, or null if the backing parser
      *     implementation has not yet been selected.
      */
-    @Nullable
+    @NonNull
     @ParserName
     public String getParserName() {
         return mExtractorName;
@@ -880,7 +882,7 @@ public final class MediaParser {
 
         // TODO: Apply parameters when creating extractor instances.
         if (mExtractor == null) {
-            if (mExtractorName != null) {
+            if (!mExtractorName.equals(PARSER_NAME_UNKNOWN)) {
                 mExtractor = EXTRACTOR_FACTORIES_BY_NAME.get(mExtractorName).createInstance();
                 mExtractor.init(new ExtractorOutputAdapter());
             } else {
@@ -974,9 +976,7 @@ public final class MediaParser {
         mParserParameters = new HashMap<>();
         mOutputConsumer = outputConsumer;
         mParserNamesPool = parserNamesPool;
-        if (!sniff) {
-            mExtractorName = parserNamesPool[0];
-        }
+        mExtractorName = sniff ? PARSER_NAME_UNKNOWN : parserNamesPool[0];
         mPositionHolder = new PositionHolder();
         mDataSource = new InputReadingDataSource();
         removePendingSeek();
