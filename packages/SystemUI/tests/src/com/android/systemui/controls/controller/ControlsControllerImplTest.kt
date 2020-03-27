@@ -161,11 +161,20 @@ class ControlsControllerImplTest : SysuiTestCase() {
         verify(listingController).addCallback(capture(listingCallbackCaptor))
     }
 
-    private fun builderFromInfo(
+    private fun statelessBuilderFromInfo(
         controlInfo: ControlInfo,
         structure: CharSequence = ""
     ): Control.StatelessBuilder {
         return Control.StatelessBuilder(controlInfo.controlId, pendingIntent)
+                .setDeviceType(controlInfo.deviceType).setTitle(controlInfo.controlTitle)
+                .setSubtitle(controlInfo.controlSubtitle).setStructure(structure)
+    }
+
+    private fun statefulBuilderFromInfo(
+        controlInfo: ControlInfo,
+        structure: CharSequence = ""
+    ): Control.StatefulBuilder {
+        return Control.StatefulBuilder(controlInfo.controlId, pendingIntent)
                 .setDeviceType(controlInfo.deviceType).setTitle(controlInfo.controlTitle)
                 .setSubtitle(controlInfo.controlSubtitle).setStructure(structure)
     }
@@ -236,7 +245,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testLoadForComponent_noFavorites() {
         var loaded = false
-        val control = builderFromInfo(TEST_CONTROL_INFO).build()
+        val control = statelessBuilderFromInfo(TEST_CONTROL_INFO).build()
 
         controller.loadForComponent(TEST_COMPONENT, Consumer { data ->
             val controls = data.allControls
@@ -263,8 +272,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testLoadForComponent_favorites() {
         var loaded = false
-        val control = builderFromInfo(TEST_CONTROL_INFO).build()
-        val control2 = builderFromInfo(TEST_CONTROL_INFO_2).build()
+        val control = statelessBuilderFromInfo(TEST_CONTROL_INFO).build()
+        val control2 = statelessBuilderFromInfo(TEST_CONTROL_INFO_2).build()
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO_2)
         delayableExecutor.runAllReady()
@@ -445,7 +454,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         delayableExecutor.runAllReady()
 
         val newControlInfo = TEST_CONTROL_INFO.copy(controlTitle = TEST_CONTROL_TITLE_2)
-        val control = builderFromInfo(newControlInfo).build()
+        val control = statelessBuilderFromInfo(newControlInfo).build()
 
         controller.loadForComponent(TEST_COMPONENT, Consumer {})
 
@@ -461,11 +470,11 @@ class ControlsControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testFavoriteInformationModifiedOnRefresh() {
+    fun testFavoriteInformationModifiedOnRefreshWithOkStatus() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
 
         val newControlInfo = TEST_CONTROL_INFO.copy(controlTitle = TEST_CONTROL_TITLE_2)
-        val control = builderFromInfo(newControlInfo).build()
+        val control = statefulBuilderFromInfo(newControlInfo).setStatus(Control.STATUS_OK).build()
 
         controller.refreshStatus(TEST_COMPONENT, control)
 
@@ -474,6 +483,23 @@ class ControlsControllerImplTest : SysuiTestCase() {
         val favorites = controller.getFavorites().flatMap { it.controls }
         assertEquals(1, favorites.size)
         assertEquals(newControlInfo, favorites[0])
+    }
+
+    @Test
+    fun testFavoriteInformationNotModifiedOnRefreshWithNonOkStatus() {
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+
+        val newControlInfo = TEST_CONTROL_INFO.copy(controlTitle = TEST_CONTROL_TITLE_2)
+        val control = statefulBuilderFromInfo(newControlInfo).setStatus(Control.STATUS_ERROR)
+            .build()
+
+        controller.refreshStatus(TEST_COMPONENT, control)
+
+        delayableExecutor.runAllReady()
+
+        val favorites = controller.getFavorites().flatMap { it.controls }
+        assertEquals(1, favorites.size)
+        assertEquals(TEST_CONTROL_INFO, favorites[0])
     }
 
     @Test
@@ -762,7 +788,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testSeedFavoritesForComponent() {
         var succeeded = false
-        val control = builderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure).build()
+        val control = statelessBuilderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure)
+            .build()
 
         controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
             succeeded = accepted
@@ -803,7 +830,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun testSeedFavoritesForComponent_inProgressCallback() {
         var succeeded = false
         var seeded = false
-        val control = builderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure).build()
+        val control = statelessBuilderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure)
+            .build()
 
         controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
             succeeded = accepted
