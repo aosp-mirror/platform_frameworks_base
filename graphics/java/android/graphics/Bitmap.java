@@ -724,24 +724,6 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Creates a new immutable bitmap backed by ashmem which can efficiently
-     * be passed between processes.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public Bitmap createAshmemBitmap(Config config) {
-        checkRecycled("Can't copy a recycled bitmap");
-        noteHardwareBitmapSlowCall();
-        Bitmap b = nativeCopyAshmemConfig(mNativePtr, config.nativeInt);
-        if (b != null) {
-            b.setPremultiplied(mRequestPremultiplied);
-            b.mDensity = mDensity;
-        }
-        return b;
-    }
-
-    /**
      * Create a hardware bitmap backed by a {@link HardwareBuffer}.
      *
      * <p>The passed HardwareBuffer's usage flags must contain
