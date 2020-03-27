@@ -331,14 +331,14 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             @Override
             public void onZenChanged(int zen) {
                 for (Bubble b : mBubbleData.getBubbles()) {
-                    b.setShowDot(b.showInShade(), true /* animate */);
+                    b.setShowDot(b.showInShade());
                 }
             }
 
             @Override
             public void onConfigChanged(ZenModeConfig config) {
                 for (Bubble b : mBubbleData.getBubbles()) {
-                    b.setShowDot(b.showInShade(), true /* animate */);
+                    b.setShowDot(b.showInShade());
                 }
             }
         });
@@ -1101,7 +1101,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         } else if (interceptBubbleDismissal) {
             Bubble bubble = mBubbleData.getBubbleWithKey(entry.getKey());
             bubble.setSuppressNotification(true);
-            bubble.setShowDot(false /* show */, true /* animate */);
+            bubble.setShowDot(false /* show */);
         } else {
             return false;
         }
@@ -1141,7 +1141,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     Bubble bubbleChild = mBubbleData.getBubbleWithKey(child.getKey());
                     mNotificationGroupManager.onEntryRemoved(bubbleChild.getEntry());
                     bubbleChild.setSuppressNotification(true);
-                    bubbleChild.setShowDot(false /* show */, true /* animate */);
+                    bubbleChild.setShowDot(false /* show */);
                 } else {
                     // non-bubbled children can be removed
                     for (NotifCallback cb : mCallbacks) {
