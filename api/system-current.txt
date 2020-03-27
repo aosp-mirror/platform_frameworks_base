@@ -12712,9 +12712,6 @@ package android.view.contentcapture {
 
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
-  }
-
-  public abstract class ContentCaptureSession implements java.lang.AutoCloseable {
     field public static final int NO_SESSION_ID = 0; // 0x0
   }
 
