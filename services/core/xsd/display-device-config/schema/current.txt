@@ -3,23 +3,23 @@ package com.android.server.display.config {
 
   public class DisplayConfiguration {
     ctor public DisplayConfiguration();
-    method public com.android.server.display.config.NitsMap getScreenBrightnessMap();
-    method public void setScreenBrightnessMap(com.android.server.display.config.NitsMap);
+    method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
+    method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
   }
 
   public class NitsMap {
     ctor public NitsMap();
-    method public java.math.BigDecimal getHighBrightnessStart();
-    method public java.util.List<com.android.server.display.config.Point> getPoint();
-    method public void setHighBrightnessStart(java.math.BigDecimal);
+    method public final java.math.BigDecimal getHighBrightnessStart();
+    method @NonNull public final java.util.List<com.android.server.display.config.Point> getPoint();
+    method public final void setHighBrightnessStart(java.math.BigDecimal);
   }
 
   public class Point {
     ctor public Point();
-    method public java.math.BigDecimal getNits();
-    method public java.math.BigDecimal getValue();
-    method public void setNits(java.math.BigDecimal);
-    method public void setValue(java.math.BigDecimal);
+    method @NonNull public final java.math.BigDecimal getNits();
+    method @NonNull public final java.math.BigDecimal getValue();
+    method public final void setNits(@NonNull java.math.BigDecimal);
+    method public final void setValue(@NonNull java.math.BigDecimal);
   }
 
   public class XmlParser {
