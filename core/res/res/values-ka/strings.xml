@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"სურათებისა და ვიდეოების გადაღება"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ამ აპს ნებისმიერ დროს შეუძლია კამერით სურათების გადაღება და ვიდეოების ჩაწერა."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ნება დაერთოს აპლიკაციას ან სერვისს, მიიღოს გადმორეკვები კამერის მოწყობილობის გახსნის ან დახურვისას."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ამ აპს შეუძლია მიიღოს გადმორეკვები, როდესაც რომელიმე კამერის მოწყობილობა იხსნება (რომელიმე აპლიკაციით) ან იხურება."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ვიბრაციის კონტროლი"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"აპს შეეძლება, მართოს ვიბრირება."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"პირდაპირი დარეკვა ტელეფონის ნომრებზე"</string>

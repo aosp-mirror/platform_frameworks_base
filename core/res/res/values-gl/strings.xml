@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"facer fotos e vídeos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Esta aplicación pode utilizar a cámara en calquera momento para sacar fotos e gravar vídeos."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que unha aplicación ou servizo reciba retrochamadas cando se abran ou se pechen dispositivos con cámara."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esta aplicación pode recibir retrochamadas cando outra aplicación abra ou peche un dispositivo con cámara."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar a vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite á aplicación controlar o vibrador."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"chamar directamente aos números de teléfono"</string>

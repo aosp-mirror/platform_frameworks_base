@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"thatha izithombe namavidiyo"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Lolu hlelo lokusebenza lungathatha izithombe futhi lirekhode amavidiyo lusebenzisa ikhamera noma kunini."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Vumela uhlelo lokusebenza noma isevisi ukwamukela ukuphinda ufonelwe mayelana namadivayisi wekhamera avuliwe noma avaliwe."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Lolu hlelo lokusebenza lungakwazi ukuthola ukuphinda ufonelwe uma noma iyiphi idivayisi yekhamera ivulwa (ngephakheji yohlelo lokusebenza) noma ivalwa."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"lawula ukudlidliza"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ivumela uhlelo lokusebenza ukulawula isidlidlizi."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ngokuqondile shayela izinombolo zocingo"</string>

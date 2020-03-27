@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"चित्रे आणि व्हिडिओ घ्या"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"हा अ‍ॅप कोणत्याही वेळी कॅमेरा वापरून चित्रेे घेऊ आणि व्ह‍िडिओ रेकॉर्ड करू शकतो."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"एखाद्या अ‍ॅप्लिकेशन किंवा सेवेला कॅमेरा डिव्हाइस सुरू किंवा बंद केल्याची कॉलबॅक मिळवण्याची अनुमती द्या."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"कोणतेही कॅमेरा डिव्हाइस (कोणत्या अ‍ॅप्लिकेशनने) सुरू किंवा बंद केले जाते तेव्हा हे ॲप कॉलबॅक मिळवू शकते."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"व्हायब्रेट नियंत्रित करा"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अ‍ॅप ला व्हायब्रेटर नियंत्रित करण्यासाठी अनुमती देते."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फोन नंबरवर प्रत्यक्ष कॉल करा"</string>
@@ -784,7 +783,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"अन्य"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"कस्टम"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"कस्टम"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"असिस्टंट"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"भाऊ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"मूल"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"घरातील जोडीदार"</string>

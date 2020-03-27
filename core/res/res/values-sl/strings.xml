@@ -441,8 +441,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"fotografiranje in snemanje videoposnetkov"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ta aplikacija lahko poljubno uporablja fotoaparat za snemanje fotografij ali videoposnetkov."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Aplikaciji ali storitvi dovoli prejemanje povratnih klicev o odpiranju ali zapiranju naprav s fotoaparati."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ta aplikacija lahko prejema povratne klice, ko se odpira (s katero aplikacijo) ali zapira katera koli naprava s fotoaparatom."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"nadzor vibriranja"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Aplikaciji omogoča nadzor vibriranja."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"neposredno klicanje telefonskih številk"</string>

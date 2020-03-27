@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"fotók és videók készítése"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Az alkalmazás a kamera használatával bármikor készíthet fényképeket és rögzíthet videókat."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Visszahívás fogadásának engedélyezése alkalmazás vagy szolgáltatás számára, ha a kamerákat megnyitják vagy bezárják."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ez az alkalmazás fogadhat visszahívásokat bármelyik kamera (adott alkalmazás általi) megnyitásakor vagy bezárásakor."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"rezgés szabályozása"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lehetővé teszi az alkalmazás számára a rezgés vezérlését."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefonszámok közvetlen hívása"</string>
