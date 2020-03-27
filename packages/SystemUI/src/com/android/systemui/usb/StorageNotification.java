@@ -187,8 +187,9 @@ public class StorageNotification extends SystemUI {
     }
 
     private void updateMissingPrivateVolumes() {
-        if (isTv()) {
+        if (isTv() || isAutomotive()) {
             // On TV, TvSettings displays a modal full-screen activity in this case.
+            // Not applicable for automotive.
             return;
         }
 
@@ -595,6 +596,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction("com.android.tv.settings.action.NEW_STORAGE");
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add intent to handle unsupported usb
+            return null;
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageWizardInit");
@@ -611,6 +615,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction("com.android.tv.settings.action.NEW_STORAGE");
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add intent to handle unmountable usb
+            return null;
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageWizardInit");
@@ -669,6 +676,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add volume settings intent for automotive
+            return null;
         } else {
             switch (vol.getType()) {
                 case VolumeInfo.TYPE_PRIVATE:
@@ -700,7 +710,7 @@ public class StorageNotification extends SystemUI {
     }
 
     private PendingIntent buildForgetPendingIntent(VolumeRecord rec) {
-        // Not used on TV
+        // Not used on TV and Automotive
         final Intent intent = new Intent();
         intent.setClassName("com.android.settings",
                 "com.android.settings.Settings$PrivateVolumeForgetActivity");
@@ -716,6 +726,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction("com.android.tv.settings.action.MIGRATE_STORAGE");
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add storage migrate intent for automotive
+            return null;
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageWizardMigrateProgress");
@@ -735,6 +748,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction("com.android.tv.settings.action.MOVE_APP");
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add storage move intent for automotive
+            return null;
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageWizardMoveProgress");
@@ -750,6 +766,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add storage ready intent for automotive
+            return null;
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageWizardReady");
