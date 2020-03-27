@@ -247,7 +247,7 @@ class Bubble implements BubbleViewProvider {
             mExpandedView.update(/* bubble */ this);
         }
         if (mIconView != null) {
-            mIconView.update(/* bubble */ this);
+            mIconView.setRenderedBubble(/* bubble */ this);
         }
     }
 
@@ -306,7 +306,7 @@ class Bubble implements BubbleViewProvider {
     void markAsAccessedAt(long lastAccessedMillis) {
         mLastAccessed = lastAccessedMillis;
         setSuppressNotification(true);
-        setShowDot(false /* show */, true /* animate */);
+        setShowDot(false /* show */);
     }
 
     /**
@@ -346,12 +346,11 @@ class Bubble implements BubbleViewProvider {
     /**
      * Sets whether the bubble for this notification should show a dot indicating updated content.
      */
-    void setShowDot(boolean showDot, boolean animate) {
+    void setShowDot(boolean showDot) {
         mShowBubbleUpdateDot = showDot;
-        if (animate && mIconView != null) {
-            mIconView.animateDot();
-        } else if (mIconView != null) {
-            mIconView.invalidate();
+
+        if (mIconView != null) {
+            mIconView.updateDotVisibility(true /* animate */);
         }
     }
 

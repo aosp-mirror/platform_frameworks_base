@@ -28,6 +28,8 @@ import com.android.launcher3.icons.DotRenderer;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
+import java.util.EnumSet;
+
 /**
  * View that displays an adaptive icon with an app-badge and a dot.
  *
@@ -42,12 +44,27 @@ public class BadgedImageView extends ImageView {
     /** Same as value in Launcher3 IconShape */
     public static final int DEFAULT_PATH_SIZE = 100;
 
-    static final int DOT_STATE_DEFAULT = 0;
-    static final int DOT_STATE_SUPPRESSED_FOR_FLYOUT = 1;
-    static final int DOT_STATE_ANIMATING = 2;
+    /**
+     * Flags that suppress the visibility of the 'new' dot, for one reason or another. If any of
+     * these flags are set, the dot will not be shown even if {@link Bubble#showDot()} returns true.
+     */
+    enum SuppressionFlag {
+        // Suppressed because the flyout is visible - it will morph into the dot via animation.
+        FLYOUT_VISIBLE,
+        // Suppressed because this bubble is behind others in the collapsed stack.
+        BEHIND_STACK,
+    }
 
-    // Flyout gets shown before the dot
-    private int mCurrentDotState = DOT_STATE_SUPPRESSED_FOR_FLYOUT;
+    /**
+     * Start by suppressing the dot because the flyout is visible - most bubbles are added with a
+     * flyout, so this is a reasonable default.
+     */
+    private final EnumSet<SuppressionFlag> mDotSuppressionFlags =
+            EnumSet.of(SuppressionFlag.FLYOUT_VISIBLE);
+
+    private float mDotScale = 0f;
+    private float mAnimatingToDotScale = 0f;
+    private boolean mDotIsAnimating = false;
 
     private BubbleViewProvider mBubble;
 
@@ -57,8 +74,6 @@ public class BadgedImageView extends ImageView {
     private boolean mOnLeft;
 
     private int mDotColor;
-    private float mDotScale = 0f;
-    private boolean mDotDrawn;
 
     private Rect mTempBounds = new Rect();
 
@@ -88,23 +103,21 @@ public class BadgedImageView extends ImageView {
     /**
      * Updates the view with provided info.
      */
-    public void update(BubbleViewProvider bubble) {
+    public void setRenderedBubble(BubbleViewProvider bubble) {
         mBubble = bubble;
         setImageBitmap(bubble.getBadgedImage());
-        setDotState(DOT_STATE_SUPPRESSED_FOR_FLYOUT);
         mDotColor = bubble.getDotColor();
         drawDot(bubble.getDotPath());
-        animateDot();
     }
 
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (isDotHidden()) {
-            mDotDrawn = false;
+
+        if (!shouldDrawDot()) {
             return;
         }
-        mDotDrawn = mDotScale > 0.1f;
+
         getDrawingRect(mTempBounds);
 
         mDrawParams.color = mDotColor;
@@ -115,23 +128,33 @@ public class BadgedImageView extends ImageView {
         mDotRenderer.draw(canvas, mDrawParams);
     }
 
-    /**
-     * Sets the dot state, does not animate changes.
-     */
-    void setDotState(int state) {
-        mCurrentDotState = state;
-        if (state == DOT_STATE_SUPPRESSED_FOR_FLYOUT || state == DOT_STATE_DEFAULT) {
-            mDotScale = mBubble.showDot() ? 1f : 0f;
-            invalidate();
+    /** Adds a dot suppression flag, updating dot visibility if needed. */
+    void addDotSuppressionFlag(SuppressionFlag flag) {
+        if (mDotSuppressionFlags.add(flag)) {
+            // Update dot visibility, and animate out if we're now behind the stack.
+            updateDotVisibility(flag == SuppressionFlag.BEHIND_STACK /* animate */);
         }
     }
 
-    /**
-     * Whether the dot should be hidden based on current dot state.
-     */
-    private boolean isDotHidden() {
-        return (mCurrentDotState == DOT_STATE_DEFAULT && !mBubble.showDot())
-                || mCurrentDotState == DOT_STATE_SUPPRESSED_FOR_FLYOUT;
+    /** Removes a dot suppression flag, updating dot visibility if needed. */
+    void removeDotSuppressionFlag(SuppressionFlag flag) {
+        if (mDotSuppressionFlags.remove(flag)) {
+            // Update dot visibility, animating if we're no longer behind the stack.
+            updateDotVisibility(flag == SuppressionFlag.BEHIND_STACK);
+        }
+    }
+
+    /** Updates the visibility of the dot, animating if requested. */
+    void updateDotVisibility(boolean animate) {
+        final float targetScale = shouldDrawDot() ? 1f : 0f;
+
+        if (animate) {
+            animateDotScale(targetScale, null /* after */);
+        } else {
+            mDotScale = targetScale;
+            mAnimatingToDotScale = targetScale;
+            invalidate();
+        }
     }
 
     /**
@@ -194,11 +217,11 @@ public class BadgedImageView extends ImageView {
     }
 
     /** Sets the position of the 'new' dot, animating it out and back in if requested. */
-    void setDotPosition(boolean onLeft, boolean animate) {
-        if (animate && onLeft != getDotOnLeft() && !isDotHidden()) {
-            animateDot(false /* showDot */, () -> {
+    void setDotPositionOnLeft(boolean onLeft, boolean animate) {
+        if (animate && onLeft != getDotOnLeft() && shouldDrawDot()) {
+            animateDotScale(0f /* showDot */, () -> {
                 setDotOnLeft(onLeft);
-                animateDot(true /* showDot */, null);
+                animateDotScale(1.0f, null /* after */);
             });
         } else {
             setDotOnLeft(onLeft);
@@ -209,28 +232,34 @@ public class BadgedImageView extends ImageView {
         return getDotOnLeft();
     }
 
-    /** Changes the dot's visibility to match the bubble view's state. */
-    void animateDot() {
-        if (mCurrentDotState == DOT_STATE_DEFAULT) {
-            animateDot(mBubble.showDot(), null);
-        }
+    /** Whether to draw the dot in onDraw(). */
+    private boolean shouldDrawDot() {
+        // Always render the dot if it's animating, since it could be animating out. Otherwise, show
+        // it if the bubble wants to show it, and we aren't suppressing it.
+        return mDotIsAnimating || (mBubble.showDot() && mDotSuppressionFlags.isEmpty());
     }
 
     /**
-     * Animates the dot to show or hide.
+     * Animates the dot to the given scale, running the optional callback when the animation ends.
      */
-    private void animateDot(boolean showDot, Runnable after) {
-        if (mDotDrawn == showDot) {
-            // State is consistent, do nothing.
+    private void animateDotScale(float toScale, @Nullable Runnable after) {
+        mDotIsAnimating = true;
+
+        // Don't restart the animation if we're already animating to the given value.
+        if (mAnimatingToDotScale == toScale || !shouldDrawDot()) {
+            mDotIsAnimating = false;
             return;
         }
 
-        setDotState(DOT_STATE_ANIMATING);
+        mAnimatingToDotScale = toScale;
+
+        final boolean showDot = toScale > 0f;
 
         // Do NOT wait until after animation ends to setShowDot
         // to avoid overriding more recent showDot states.
         clearAnimation();
-        animate().setDuration(200)
+        animate()
+                .setDuration(200)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setUpdateListener((valueAnimator) -> {
                     float fraction = valueAnimator.getAnimatedFraction();
@@ -238,7 +267,7 @@ public class BadgedImageView extends ImageView {
                     setDotScale(fraction);
                 }).withEndAction(() -> {
                     setDotScale(showDot ? 1f : 0f);
-                    setDotState(DOT_STATE_DEFAULT);
+                    mDotIsAnimating = false;
                     if (after != null) {
                         after.run();
                     }
