@@ -4399,10 +4399,10 @@ package android.net {
 
   public class InvalidPacketException extends java.lang.Exception {
     ctor public InvalidPacketException(int);
+    method public int getError();
     field public static final int ERROR_INVALID_IP_ADDRESS = -21; // 0xffffffeb
     field public static final int ERROR_INVALID_LENGTH = -23; // 0xffffffe9
     field public static final int ERROR_INVALID_PORT = -22; // 0xffffffea
-    field public final int error;
   }
 
   public final class IpConfiguration implements android.os.Parcelable {
@@ -4456,12 +4456,12 @@ package android.net {
   }
 
   public class KeepalivePacketData {
-    ctor protected KeepalivePacketData(@NonNull java.net.InetAddress, int, @NonNull java.net.InetAddress, int, @NonNull byte[]) throws android.net.InvalidPacketException;
+    ctor protected KeepalivePacketData(@NonNull java.net.InetAddress, @IntRange(from=0, to=65535) int, @NonNull java.net.InetAddress, @IntRange(from=0, to=65535) int, @NonNull byte[]) throws android.net.InvalidPacketException;
+    method @NonNull public java.net.InetAddress getDstAddress();
+    method public int getDstPort();
     method @NonNull public byte[] getPacket();
-    field @NonNull public final java.net.InetAddress dstAddress;
-    field public final int dstPort;
-    field @NonNull public final java.net.InetAddress srcAddress;
-    field public final int srcPort;
+    method @NonNull public java.net.InetAddress getSrcAddress();
+    method public int getSrcPort();
   }
 
   public class LinkAddress implements android.os.Parcelable {
