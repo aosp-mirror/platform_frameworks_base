@@ -2779,6 +2779,10 @@
     <string name="config_systemUIServiceComponent" translatable="false"
             >com.android.systemui/com.android.systemui.SystemUIService</string>
 
+    <!-- Package handling Quick controls -->
+    <string name="config_controlsPackage" translatable="false"
+            >com.android.systemui</string>
+
     <!-- Keyguard component -->
     <string name="config_keyguardComponent" translatable="false"
             >com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
