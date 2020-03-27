@@ -5202,7 +5202,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         finishLaunchTickingLocked();
         if (task != null) {
-            task.hasBeenVisible = true;
+            task.setHasBeenVisible(true);
         }
     }
 
