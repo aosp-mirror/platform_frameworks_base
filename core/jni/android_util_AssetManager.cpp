@@ -213,12 +213,8 @@ static jint CopyValue(JNIEnv* env, ApkAssetsCookie cookie, const Res_value& valu
 
 // ----------------------------------------------------------------------------
 
-static std::unique_ptr<DynamicLibManager> sDynamicLibManager =
-    std::make_unique<DynamicLibManager>();
-
 // Let the opaque type AAssetManager refer to a guarded AssetManager2 instance.
 struct GuardedAssetManager : public ::AAssetManager {
-  GuardedAssetManager() : guarded_assetmanager(sDynamicLibManager.get()) {}
   Guarded<AssetManager2> guarded_assetmanager;
 };
 
