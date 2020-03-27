@@ -16,6 +16,9 @@
 
 package com.android.systemui.pip;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+
 import static com.android.systemui.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.systemui.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_NONE;
@@ -26,8 +29,6 @@ import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTI
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
-import android.window.ITaskOrganizerController;
 import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -38,9 +39,9 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
+import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.IWindowContainer;
-import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
@@ -216,6 +217,29 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         mOneShotAnimationType = animationType;
     }
 
+    /**
+     * Dismiss PiP, this is done in two phases using {@link WindowContainerTransaction}
+     * - setActivityWindowingMode to fullscreen at beginning of the transaction. without changing
+     *   the windowing mode of the Task itself. This makes sure the activity render it's fullscreen
+     *   configuration while the Task is still in PiP.
+     * - setWindowingMode to fullscreen at the end of transition
+     * @param animationDurationMs duration in millisecond for the exiting PiP transition
+     */
+    public void dismissPip(int animationDurationMs) {
+        try {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.setActivityWindowingMode(mToken, WINDOWING_MODE_FULLSCREEN);
+            WindowOrganizer.applyTransaction(wct);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to apply container transaction", e);
+        }
+        final Rect destinationBounds = mBoundsToRestore.remove(mToken.asBinder());
+        scheduleAnimateResizePip(mLastReportedBounds, destinationBounds,
+                TRANSITION_DIRECTION_TO_FULLSCREEN, animationDurationMs,
+                null /* updateBoundsCallback */);
+        mInPip = false;
+    }
+
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(info, "Requires RunningTaskInfo");
@@ -235,7 +259,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         mBoundsToRestore.put(mToken.asBinder(), currentBounds);
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             scheduleAnimateResizePip(currentBounds, destinationBounds,
-                    TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration, null);
+                    TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration,
+                    null /* updateBoundsCallback */);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             mUpdateHandler.post(() -> mPipAnimationController
                     .getAnimator(mLeash, destinationBounds, 0f, 1f)
@@ -249,6 +274,12 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         }
     }
 
+    /**
+     * Note that dismissing PiP is now originated from SystemUI, see {@link #dismissPip(int)}.
+     * Meanwhile this callback is invoked whenever the task is removed. For instance:
+     *   - as a result of removeStacksInWindowingModes from WM
+     *   - activity itself is died
+     */
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
         IWindowContainer token = info.token;
@@ -259,7 +290,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         }
         final Rect boundsToRestore = mBoundsToRestore.remove(token.asBinder());
         scheduleAnimateResizePip(mLastReportedBounds, boundsToRestore,
-                TRANSITION_DIRECTION_TO_FULLSCREEN, mEnterExitAnimationDuration, null);
+                TRANSITION_DIRECTION_TO_FULLSCREEN, mEnterExitAnimationDuration,
+                null /* updateBoundsCallback */);
         mInPip = false;
     }
 
@@ -274,7 +306,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
                 getAspectRatioOrDefault(newParams),
                 null /* bounds */, getMinimalSize(info.topActivityInfo));
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
-        scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration, null);
+        scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration,
+                null /* updateBoundsCallback */);
     }
 
     /**
@@ -434,12 +467,19 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         }
         mLastReportedBounds.set(destinationBounds);
         try {
-            // If we are animating to fullscreen, then we need to reset the override bounds on the
-            // task to ensure that the task "matches" the parent's bounds
-            Rect taskBounds = direction == TRANSITION_DIRECTION_TO_FULLSCREEN
-                    ? null
-                    : destinationBounds;
             final WindowContainerTransaction wct = new WindowContainerTransaction();
+            final Rect taskBounds;
+            if (direction == TRANSITION_DIRECTION_TO_FULLSCREEN) {
+                // If we are animating to fullscreen, then we need to reset the override bounds
+                // on the task to ensure that the task "matches" the parent's bounds, this applies
+                // also to the final windowing mode, which should be reset to undefined rather than
+                // fullscreen.
+                taskBounds = null;
+                wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED)
+                        .setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+            } else {
+                taskBounds = destinationBounds;
+            }
             if (direction == TRANSITION_DIRECTION_TO_PIP) {
                 wct.scheduleFinishEnterPip(mToken, taskBounds);
             } else {
