@@ -17,11 +17,15 @@ package com.android.server.pm;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import android.annotation.NonNull;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -30,7 +34,6 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
-import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.parsing.ParsingPackage;
@@ -49,6 +52,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 
 import androidx.annotation.Nullable;
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -69,9 +73,11 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -90,6 +96,9 @@ public class PackageParserTest {
 
     private File mTmpDir;
     private static final File FRAMEWORK = new File("/system/framework/framework-res.apk");
+    private static final String TEST_APP1_APK = "PackageParserTestApp1.apk";
+    private static final String TEST_APP2_APK = "PackageParserTestApp2.apk";
+    private static final String TEST_APP3_APK = "PackageParserTestApp3.apk";
 
     @Before
     public void setUp() throws IOException {
@@ -207,6 +216,61 @@ public class PackageParserTest {
                 deserialized2.getUsesOptionalLibraries().get(0));
         assertSame(deserialized.getVersionName(), deserialized2.getVersionName());
         assertSame(deserialized.getSharedUserId(), deserialized2.getSharedUserId());
+    }
+
+    private static PackageParser2 makeParser() {
+        return new PackageParser2(null, false, null, null, null);
+    }
+
+    private File extractFile(String filename) throws Exception {
+        final Context context = InstrumentationRegistry.getTargetContext();
+        final File tmpFile = File.createTempFile(filename, ".apk");
+        try (InputStream inputStream = context.getAssets().openNonAsset(filename)) {
+            Files.copy(inputStream, tmpFile.toPath(), REPLACE_EXISTING);
+        }
+        return tmpFile;
+    }
+
+    /**
+     * Tests AndroidManifest.xml with no android:isolatedSplits attribute.
+     */
+    @Test
+    public void testParseIsolatedSplitsDefault() throws Exception {
+        final File testFile = extractFile(TEST_APP1_APK);
+        try {
+            final ParsedPackage pkg = makeParser().parsePackage(testFile, 0, false);
+            assertFalse("isolatedSplits", pkg.isIsolatedSplitLoading());
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    /**
+     * Tests AndroidManifest.xml with an android:isolatedSplits attribute set to a constant.
+     */
+    @Test
+    public void testParseIsolatedSplitsConstant() throws Exception {
+        final File testFile = extractFile(TEST_APP2_APK);
+        try {
+            final ParsedPackage pkg = makeParser().parsePackage(testFile, 0, false);
+            assertTrue("isolatedSplits", pkg.isIsolatedSplitLoading());
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    /**
+     * Tests AndroidManifest.xml with an android:isolatedSplits attribute set to a resource.
+     */
+    @Test
+    public void testParseIsolatedSplitsResource() throws Exception {
+        final File testFile = extractFile(TEST_APP3_APK);
+        try {
+            final ParsedPackage pkg = makeParser().parsePackage(testFile, 0, false);
+            assertTrue("isolatedSplits", pkg.isIsolatedSplitLoading());
+        } finally {
+            testFile.delete();
+        }
     }
 
     /**
