@@ -27,7 +27,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.util.Size;
 import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
@@ -90,8 +89,8 @@ public class MirrorSurfaceActivity extends Activity implements View.OnClickListe
                 .getSystemService(WindowManager.class);
         mIWm = WindowManagerGlobal.getWindowManagerService();
 
-        Size windowSize = mWm.getCurrentWindowMetrics().getSize();
-        mWindowBounds.set(0, 0, windowSize.getWidth(), windowSize.getHeight());
+        Rect windowBounds = mWm.getCurrentWindowMetrics().getBounds();
+        mWindowBounds.set(0, 0, windowBounds.width(), windowBounds.height());
 
         mScaleText = findViewById(R.id.scale);
         mDisplayFrameText = findViewById(R.id.displayFrame);
