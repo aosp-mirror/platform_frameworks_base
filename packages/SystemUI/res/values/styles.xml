@@ -305,6 +305,9 @@
         <item name="android:windowExitAnimation">@null</item>
     </style>
 
+    <style name="Animation.ShutdownUi" parent="@android:style/Animation.Toast">
+    </style>
+
     <!-- Standard animations for hiding and showing the status bar. -->
     <style name="Animation.StatusBar">
     </style>
