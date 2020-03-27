@@ -1213,15 +1213,6 @@
                 android:description="@string/permdesc_acceptHandovers"
                 android:protectionLevel="dangerous" />
 
-    <!-- Allows an application assigned to the Dialer role to be granted access to the telephony
-         call audio streams, both TX and RX.
-         <p>Protection level: signature|appop
-    -->
-    <permission android:name="android.permission.ACCESS_CALL_AUDIO"
-                android.label="@string/permlab_accessCallAudio"
-                android:description="@string/permdesc_accessCallAudio"
-                android:protectionLevel="signature|appop" />
-
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device microphone                        -->
     <!-- ====================================================================== -->
@@ -3653,6 +3644,16 @@
     -->
     <permission android:name="com.android.permission.INSTALL_EXISTING_PACKAGES"
         android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to use the package installer v2 APIs.
+         <p>The package installer v2 APIs are still a work in progress and we're
+         currently validating they work in all scenarios.
+         <p>Not for use by third-party applications.
+         TODO(b/152310230): remove this permission once the APIs are confirmed to be sufficient.
+         @hide
+    -->
+    <permission android:name="com.android.permission.USE_INSTALLER_V2"
+        android:protectionLevel="signature|verifier" />
 
     <!-- @SystemApi @TestApi Allows an application to clear user data.
          <p>Not for use by third-party applications

@@ -164,6 +164,38 @@ public class MetricsFeatureProviderTest {
     }
 
     @Test
+    public void logStartedIntentWithProfile_isPersonalProfile_shouldTagPersonal() {
+        final Intent intent = new Intent().setComponent(new ComponentName("pkg", "cls"));
+
+        final boolean loggable = mProvider.logStartedIntentWithProfile(intent,
+                MetricsEvent.SETTINGS_GESTURES, false);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).action(
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                "pkg/cls/personal",
+                0);
+    }
+
+    @Test
+    public void logStartedIntentWithProfile_isWorkProfile_shouldTagWork() {
+        final Intent intent = new Intent().setComponent(new ComponentName("pkg", "cls"));
+
+        final boolean loggable = mProvider.logStartedIntentWithProfile(intent,
+                MetricsEvent.SETTINGS_GESTURES, true);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).action(
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                "pkg/cls/work",
+                0);
+    }
+
+    @Test
     public void getAttribution_noActivity_shouldReturnUnknown() {
         assertThat(mProvider.getAttribution(null /* activity */))
                 .isEqualTo(SettingsEnums.PAGE_UNKNOWN);

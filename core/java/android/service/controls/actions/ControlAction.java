@@ -136,7 +136,8 @@ public abstract class ControlAction {
     /**
      * Response code for the {@code consumer} in
      * {@link ControlsProviderService#performControlAction} indicating that in order for the action
-     * to be performed, acknowledgment from the user is required.
+     * to be performed, acknowledgment from the user is required. Any non-empty string returned
+     * from {@link #getChallengeValue} shall be treated as a positive acknowledgment.
      */
     public static final @ResponseResult int RESPONSE_CHALLENGE_ACK = 3;
     /**

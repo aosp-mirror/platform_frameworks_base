@@ -1353,8 +1353,15 @@ public class BlobStoreManagerService extends SystemService {
 
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
                     "Caller is not allowed to call this; caller=" + Binder.getCallingUid());
-            mHandler.post(PooledLambda.obtainRunnable(remoteCallback::sendResult, null)
-                    .recycleOnUse());
+            // We post messages back and forth between mHandler thread and mBackgroundHandler
+            // thread while committing a blob. We need to replicate the same pattern here to
+            // ensure pending messages have been handled.
+            mHandler.post(() -> {
+                mBackgroundHandler.post(() -> {
+                    mHandler.post(PooledLambda.obtainRunnable(remoteCallback::sendResult, null)
+                            .recycleOnUse());
+                });
+            });
         }
 
         @Override

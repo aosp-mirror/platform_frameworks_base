@@ -374,8 +374,8 @@ public final class AudioProductStrategy implements Parcelable {
         if (refAttr.equals(sDefaultAttributes)) {
             return false;
         }
-        return ((refAttr.getUsage() == AudioAttributes.USAGE_UNKNOWN)
-                || (attr.getUsage() == refAttr.getUsage()))
+        return ((refAttr.getSystemUsage() == AudioAttributes.USAGE_UNKNOWN)
+                || (attr.getSystemUsage() == refAttr.getSystemUsage()))
             && ((refAttr.getContentType() == AudioAttributes.CONTENT_TYPE_UNKNOWN)
                 || (attr.getContentType() == refAttr.getContentType()))
             && ((refAttr.getAllFlags() == 0)

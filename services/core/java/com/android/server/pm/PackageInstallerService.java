@@ -490,6 +490,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             throw new SecurityException("User restriction prevents installing");
         }
 
+        if (params.dataLoaderParams != null
+                && mContext.checkCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2)
+                        != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the "
+                    + "com.android.permission.USE_INSTALLER_V2 permission "
+                    + "to use a data loader");
+        }
+
         String requestedInstallerPackageName = params.installerPackageName != null
                 ? params.installerPackageName : installerPackageName;
 

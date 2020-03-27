@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Админ хувийн хэрэглээнд зориулж төхөөрөмжийн эрхийг хассан"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Төхөөрөмжийг удирдсан"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Таны байгууллага энэ төхөөрөмжийг удирдаж, сүлжээний ачааллыг хянадаг. Дэлгэрэнгүй мэдээлэл авах бол товшино уу."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"Таны админ байршлын тохиргоог өөрчилсөн байна"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"Байршлын тохиргоогоо харахын тулд товшино уу."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Аппууд нь таны байршилд хандах боломжтой"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Нэмэлт мэдээлэл авахын тулд мэдээлэл технологийн админтайгаа холбогдоно уу"</string>
     <string name="country_detector" msgid="7023275114706088854">"Улс тодорхойлогч"</string>
     <string name="location_service" msgid="2439187616018455546">"Байршлын үйлчилгээ"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Мэдрэгчийн мэдэгдлийн үйлчилгээ"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Таны төхөөрөмж устах болно."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Админ аппыг ашиглах боломжгүй. Таны төхөөрөмжийг одоо устгана.\n\nХэрэв танд асуулт байгаа бол байгууллагынхаа админтай холбогдоно уу."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> хэвлэх үйлдлийг идэвхгүй болгосон."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Хувийн аппуудаа блокоос гаргана уу"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Аппуудыг маргааш блоклоно"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"Таны мэдээлэл технологийн админ таны ажлын профайлыг <xliff:g id="DAYS">%1$d</xliff:g>-с олон хоног түр зогсоохыг зөвшөөрөхгүй байна"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Ажлын профайлыг асаах"</string>
     <string name="me" msgid="6207584824693813140">"Би"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Таблетын сонголтууд"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android ТВ-н сонголт"</string>
@@ -2072,33 +2068,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Ажил"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Хувийн харагдах байдал"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Ажлын харагдах байдал"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Ажлын аппаар үүнийг хуваалцах боломжгүй"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Таны IT админ танд ажлын профайл дахь аппуудаа ашиглан энэ контентыг хуваалцахыг зөвшөөрөхгүй байна"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Ажлын аппаар үүнийг нээх боломжгүй"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Таны IT админ танд ажлын профайл дахь аппуудаа ашиглан энэ контентыг нээхийг зөвшөөрөхгүй байна"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Хувийн аппаар үүнийг хуваалцах боломжгүй"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Таны IT админ танд хувийн профайл дахь аппуудаа ашиглан энэ контентыг хуваалцахыг зөвшөөрөхгүй байна"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Хувийн аппаар үүнийг нээх боломжгүй"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Таны IT админ танд хувийн профайл дахь аппуудаа ашиглан энэ контентыг нээхийг зөвшөөрөхгүй байна"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Ажлын профайлыг түр зогсоосон"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Асаах"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Ажлын ямар ч апп энэ контентыг дэмжих боломжгүй"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Ажлын ямар ч апп энэ контентыг нээх боломжгүй"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Хувийн ямар ч апп энэ контентыг дэмжих боломжгүй"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Хувийн ямар ч апп энэ контентыг нээх боломжгүй"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Утасны дуудлагын үеэр аудио бичих эсвэл тоглуулах"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Энэ аппыг залгагч өгөгдмөл аппликэйшн болгосон үед түүнд утасны дуудлагын үеэр аудио бичих эсвэл тоглуулахыг зөвшөөрдөг."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

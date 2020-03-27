@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP 地址和端口"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"扫描二维码"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"扫描二维码即可通过 WLAN 配对设备"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"请连接到 WLAN 网络"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, 调试, debug, 开发, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"错误报告快捷方式"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"在电源菜单中显示用于提交错误报告的按钮"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"红色弱视（红绿不分）"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"蓝色弱视（蓝黄不分）"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"借助颜色校正功能，您可以调整设备上的颜色显示方式"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已被“<xliff:g id="TITLE">%1$s</xliff:g>”覆盖"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"大约还可使用 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>，估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"直到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"电池电量可能在<xliff:g id="TIME">%1$s</xliff:g> 耗尽"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"电量剩余使用时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"电量剩余使用时间超过 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,34 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"手机扬声器"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"连接时遇到问题。请关闭并重新开启设备"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有线音频设备"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"帮助和反馈"</string>
+    <string name="storage_category" msgid="2287342585424631813">"存储"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"共享数据"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"查看和修改共享数据"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"共享数据 ID：<xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"到期时间是 <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"共享数据的应用"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"该应用未提供任何说明。"</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"租约到期时间是 <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"删除共享数据"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"确定要删除这些共享数据吗？"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"用户拥有个人专属的应用和内容"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"您可以限制其他人使用来自您的帐号的应用和内容"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"用户"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"受限个人资料"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"要添加新用户吗？"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"创建新用户后，您就能够与其他人共用此设备。每位用户都有自己的专属空间，而且在自己的个人空间内还可以自行安装自己想要的应用、设置壁纸等。此外，用户还可以调整会影响所有用户的设备设置（例如 WLAN 设置）。\n\n当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。无障碍功能设置和服务可能无法转移给新用户。"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"您添加新用户后，该用户必须设置自己的空间。\n\n任何用户均可为其他所有用户更新应用。"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"要现在设置该用户吗？"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"请让相应用户操作设备并设置他们自己的空间。"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"要立即设置个人资料吗？"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"立即设置"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"以后再说"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"添加"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"新用户"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"新的个人资料"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"用户信息"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"个人资料信息"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"您需要先设置锁定屏幕来保护您的应用和个人数据，然后才可以创建受限个人资料。"</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"设置屏幕锁定方式"</string>
 </resources>

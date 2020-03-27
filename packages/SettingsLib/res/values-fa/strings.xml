@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏نشانی IP و درگاه"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"‏اسکن کد QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"‏دستگاه را ازطریق Wi‑Fi و با اسکن کردن کد QR مرتبط کنید"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏لطفاً به شبکه Wi-Fi متصل شوید"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏ADB (پل اشکال‌زدایی Android)، اشکال‌زدایی کردن، برنامه‌نویس"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"میان‌بر گزارش مشکل"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"نمایش دکمه‌ای در منوی روشن/خاموش برای گرفتن گزارش اشکال"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"قرمزدشواربینی (قرمز-سبز)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"آبی‌دشواربینی (آبی-زرد)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"تصحیح رنگ"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"تصحیح رنگ به شما امکان می‌دهد نحوه نمایش رنگ‌ها را در دستگاهتان تنظیم کنید"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"توسط <xliff:g id="TITLE">%1$s</xliff:g> لغو شد"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"تقریباً <xliff:g id="TIME_REMAINING">%1$s</xliff:g> شارژ باقی مانده است"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"باید حدوداً تا <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) شارژ داشته باشید"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"باید حدوداً تا <xliff:g id="TIME">%1$s</xliff:g> شارژ داشته باشید"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"تا <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ممکن است باتری در <xliff:g id="TIME">%1$s</xliff:g> تمام شود"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"کمتر از <xliff:g id="THRESHOLD">%1$s</xliff:g> باقی مانده"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"کمتر از <xliff:g id="THRESHOLD">%1$s</xliff:g> شارژ باقی مانده است (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"بیش از <xliff:g id="TIME_REMAINING">%1$s</xliff:g> شارژ باقی مانده است (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,34 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"بلندگوی تلفن"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"مشکل در اتصال. دستگاه را خاموش و دوباره روشن کنید"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"دستگاه صوتی سیمی"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"راهنما و بازخورد"</string>
+    <string name="storage_category" msgid="2287342585424631813">"فضای ذخیره‌سازی"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"داده‌های هم‌رسانی‌شده"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"مشاهده و تغییر داده‌های هم‌رسانی‌شده"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"شناسه داده‌های هم‌رسانی‌شده: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"تاریخ انقضا <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"داده‌های هم‌رسانی برنامه‌ها"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"برنامه هیچ توضیحی ارائه نکرده است."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"تاریخ انقضای کرایه <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"حذف داده‌های هم‌رسانی‌شده"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"مطمئن هستید می‌خواهید این داده‌های هم‌رسانی‌شده را حذف کنید؟"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"کاربران دارای برنامه‌ها و محتوای متعلق به خود هستند"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"می‌توانید از حساب خود دسترسی به برنامه‌ها و محتوا را محدود کنید"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"کاربر"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"نمایه محدود شده"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"کاربر جدیدی اضافه می‌کنید؟"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏با ایجاد کاربران بیشتر، می‌توانید این دستگاه را با دیگران به‌اشتراک بگذارید. هر کاربر فضای مخصوص به خودش را دارد که می‌تواند آن را با برنامه‌ها، کاغذدیواری و موارد دیگر سفارشی کند. همچنین کاربران می‌توانند تنظیماتی در دستگاه ایجاد کنند، مانند تنظیمات Wi-Fi، که بر تنظیمات بقیه اثر دارد.\n\nوقتی کاربر جدیدی اضافه می‌کنید، آن شخص باید فضای خودش را تنظیم کند.\n\nهر کاربر می‌تواند برنامه‌ها را برای سایر کاربران به‌روزرسانی کند. دسترس‌پذیری، تنظیمات، و سرویس‌ها قابل‌انتقال به کاربر جدید نیستند."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"وقتی کاربر جدیدی اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"هم اکنون کاربر تنظیم شود؟"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"مطمئن شوید شخص در دسترس است تا دستگاه را بگیرد و فضایش را تنظیم کند"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"اکنون نمایه را تنظیم می‌کنید؟"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"اکنون تنظیم شود"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"اکنون نه"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"افزودن"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"کاربر جدید"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"نمایه جدید"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"اطلاعات کاربر"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"اطلاعات نمایه"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"قبل از ایجاد یک نمایه محدود، باید یک قفل صفحه را برای محافظت از برنامه‌ها و داده‌های شخصی خود تنظیم کنید."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"تنظیم قفل"</string>
 </resources>

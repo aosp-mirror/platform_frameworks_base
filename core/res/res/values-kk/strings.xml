@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Әкімші құрылғыны жеке пайдалануға ұсынды."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Құрылғы басқарылады"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ұйымыңыз осы құрылғыны басқарады және желі трафигін бақылауы мүмкін. Мәліметтер алу үшін түртіңіз."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"Орналасу параметрлерін әкімшіңіз өзгертті."</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"Орналасу параметрлерін көру үшін түртіңіз."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Қолданбалар геодерегіңізді пайдалана алады"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Қосымша мәліметтер алу үшін әкімшіге хабарласыңыз."</string>
     <string name="country_detector" msgid="7023275114706088854">"Ел детекторы"</string>
     <string name="location_service" msgid="2439187616018455546">"Орынды анықтау қызметі"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Датчик хабарландыруы қызметі"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Құрылғыңыздағы деректер өшіріледі"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Әкімші қолданбасын пайдалану мүмкін емес. Қазір құрылғыдағы деректер өшіріледі\n\nСұрақтарыңыз болса, ұйым әкімшісіне хабарласыңыз."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Басып шығаруды <xliff:g id="OWNER_APP">%s</xliff:g> өшірді."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Жеке қолданбалардың құлпын ашу"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Қолданбалар ертең құлыпталады"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"Әкімші жұмыс профилін <xliff:g id="DAYS">%1$d</xliff:g> күннен аса мерзімге өшіруге рұқсат етпейді."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Жұмыс профилін қосу"</string>
     <string name="me" msgid="6207584824693813140">"Мен"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Планшет опциялары"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV опциялары"</string>
@@ -447,8 +443,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Қолданбаға не қызметке ашылып не жабылып жатқан камера құрылғылары туралы кері шақыру алуға рұқсат ету"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Кез келген камера ашылып (көрсетілген қолданба арқылы) не жабылып жатқанда, бұл қолданба кері шақыру алады."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"тербелісті басқару"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Қолданбаға вибраторды басқаруға рұқсат береді."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Қолданбаға діріл күйін пайдалануға мүмкіндік береді."</string>

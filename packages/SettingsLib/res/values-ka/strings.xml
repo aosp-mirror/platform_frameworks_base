@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP მისამართი და პორტი"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR კოდის სკანირება"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"მოწყობილობის დაწყვილება Wi-Fi-ის მეშვეობით QR კოდის სკანირებით"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"დაუკავშირდით Wi-Fi ქსელს"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, შეცდომების გამართვა, დეველოპერული"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ხარვეზის შეტყობინების მალსახმობი"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ელკვების პარამეტრებში ხარვეზის შეტყობინების ღილაკის ჩვენება"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"პროტოანომალია (წითელი-მწვანე)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ტრიტანომალია (ლურჯი-ყვითელი)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ფერის კორექცია"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"ფერთა კორექცია საშუალებას გაძლევთ დაარეგულიროთ, თუ როგორ გამოჩნდება ფერები თქვენს მოწყობილობაზე"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"უკუგებულია <xliff:g id="TITLE">%1$s</xliff:g>-ის მიერ"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"დარჩა დაახლოებით <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"უნდა იმუშაოს დაახლოებით <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"უნდა იმუშაოს დაახლოებით <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g>-მდე"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ბატარეა შესაძლოა ამოიწუროს <xliff:g id="TIME">%1$s</xliff:g>-ისთვის"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"დარჩენილია <xliff:g id="THRESHOLD">%1$s</xliff:g>-ზე ნაკლები"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"დარჩენილია <xliff:g id="THRESHOLD">%1$s</xliff:g>-ზე ნაკლები დრო (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"დარჩენილია <xliff:g id="TIME_REMAINING">%1$s</xliff:g>-ზე მეტი დრო (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,34 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ტელეფონის დინამიკი"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"დაკავშირებისას წარმოიქმნა პრობლემა. გამორთეთ და კვლავ ჩართეთ მოწყობილობა"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"სადენიანი აუდიო მოწყობილობა"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"დახმარება და გამოხმაურება"</string>
+    <string name="storage_category" msgid="2287342585424631813">"საცავი"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"გაზიარებული მონაცემები"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"გაზიარებული მონაცემების ნახვა და შეცვლა"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"გაზიარებულ მონაცემთა ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"ვადა ეწურება <xliff:g id="DATE">%s</xliff:g>-ში"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"აპები, რომლებიც მონაცემებს აზიარებენ"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"აპის მიერ აწერილობა არ არის მოწოდებული."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"დაქირავების ამოწურვის თარიღი: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"გაზიარებული მონაცემების წაშლა"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"ნამდვილად გსურთ ამ გაზიარებული მონაცემების წაშლა?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"მომხმარებლებს აქვთ მათი კუთვნილი აპები და შინაარსი"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"თქვენი ანგარიშიდან შეგიძლიათ შეზღუდოთ აპებზე და კონტენტზე წვდომა"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"მომხმარებელი"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"შეზღუდული პროფილი"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"დაემატოს ახალი მომხმარებელი?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"დამატებითი მომხმარებლების შექმნით, შეგიძლიათ ეს მოწყობილობა სხვებს გაუზიაროთ. ყოველ მომხმარებელს თავისი სივრცე აქვს, რომლის პერსონალიზება შეუძლია საკუთარი აპებით, ფონით და ა.შ. მომხმარებლებს აგრეთვე შეუძლიათ ისეთი პარამეტრების მორგება, როგორიცაა Wi‑Fi, რაც ყველაზე გავრცელდება.\n\nახალი მომხმარებლის დამატების შემდეგ, მომხმარებელმა საკუთარი სივრცე უნდა დააყენოს.\n\nყველა მომხმარებელი შეძლებს აპების ყველა სხვა მომხმარებლისთვის განახლებას. მარტივი წვდომის პარამეტრები/სერვისები შესაძლოა ახალ მომხმარებლებზე არ გავრცელდეს."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"ახალი მომხმარებლის დამატებისას, ამ მომხმარებელს საკუთარი სივრცის შექმნა მოუწევს.\n\nნებისმიერ მომხმარებელს შეუძლია აპები ყველა სხვა მომხმარებლისათვის განაახლოს."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"გსურთ მომხმარებლის პარამეტრების დაყენება?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"დარწმუნდით, რომ პირს შეუძლია მოწყობილობის აღება და საკუთარი სივრცის დაყენება"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"გსურთ დავაყენო პროფილი ახლა?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"დაყენება ახლა"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ახლა არა"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"დამატება"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"ახალი მომხმარებელი"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"ახალი პროფილი"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"მომხმარებლის ინფორმაცია"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"ინფორმაცია პროფილზე"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"შეზღუდული პროფილის შექმნამდე, საკუთარი აპლიკაციებისა და პირადი მონაცემების დასაცავად, უნდა დაბლოკოთ ეკრანი."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"საკეტის დაყენება"</string>
 </resources>

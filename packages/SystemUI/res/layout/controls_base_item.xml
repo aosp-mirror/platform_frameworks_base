@@ -30,8 +30,8 @@
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/control_icon_size"
+        android:layout_height="@dimen/control_icon_size"
         android:paddingTop="@dimen/control_padding_adjustment"
         android:clickable="false"
         android:focusable="false"

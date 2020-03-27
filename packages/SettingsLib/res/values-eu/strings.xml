@@ -418,8 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopia (urdin-horia)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koloreen zuzenketa"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Kolore-zuzenketaren bidez, gailuan koloreak bistaratzen diren modua doi dezakezu"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> inguru gelditzen dira"</string>
@@ -534,4 +533,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Erabiltzaileek euren aplikazioak eta edukia dituzte."</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Aplikazioetarako eta edukirako sarbidea muga dezakezu zure kontutik."</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Erabiltzailea"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profil murriztua"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Beste erabiltzaile bat gehitu nahi duzu?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Gailu hau beste pertsona batzuekin partekatzeko, sortu erabiltzaile gehiago. Erabiltzaile bakoitzak bere eremua izango du eta, bertan, aplikazioak, horma-papera eta antzekoak pertsonalizatu ahal izango ditu. Horrez gain, erabiltzaile guztiei eragin diezaieketen ezarpen batzuk ere doi daitezke; adibidez, wifi-konexioarena.\n\nErabiltzaile bat gehitzen duzunean, pertsona horrek berak konfiguratu beharko du bere eremua.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak. Baliteke erabilerraztasun-ezarpenak eta -zerbitzuak ez transferitzea erabiltzaile berriei."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Erabiltzaile bat gehitzen duzunean, erabiltzaile horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Erabiltzailea konfiguratu?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Ziurtatu pertsona horrek gailua hartu eta bere eremua konfigura dezakeela"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Profila konfiguratu?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Konfiguratu"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Orain ez"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Gehitu"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Erabiltzaile berria"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Profil berria"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Erabiltzaile-info."</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profileko informazioa"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Profil murriztua sortu aurretik, aplikazioak eta datu pertsonalak babesteko, pantaila blokeatzeko metodo bat konfiguratu beharko duzu."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Ezarri blokeoa"</string>
 </resources>

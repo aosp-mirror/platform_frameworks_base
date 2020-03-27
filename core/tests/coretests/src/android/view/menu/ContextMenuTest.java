@@ -16,9 +16,9 @@
 
 package android.view.menu;
 
+import android.graphics.Rect;
 import android.test.ActivityInstrumentationTestCase;
 import android.util.PollingCheck;
-import android.util.Size;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.espresso.ContextMenuUtils;
@@ -81,8 +81,8 @@ public class ContextMenuTest extends ActivityInstrumentationTestCase<ContextMenu
      */
     private int getMinScreenDimension() {
         final WindowManager windowManager = getActivity().getSystemService(WindowManager.class);
-        final Size maxWindowSize = windowManager.getMaximumWindowMetrics().getSize();
-        return Math.min(maxWindowSize.getWidth(), maxWindowSize.getHeight());
+        final Rect maxWindowBounds = windowManager.getMaximumWindowMetrics().getBounds();
+        return Math.min(maxWindowBounds.width(), maxWindowBounds.height());
     }
 
     /**

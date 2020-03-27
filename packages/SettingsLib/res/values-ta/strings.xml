@@ -534,4 +534,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"பயனர்கள் தங்களுக்குச் சொந்தமான ஆப்ஸ் மற்றும் உள்ளடக்கத்தை வைத்திருக்க வேண்டும்"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"உங்கள் கணக்கிலிருந்து ஆப்ஸ் மற்றும் உள்ளடக்கத்திற்கான அணுகலை நீங்கள் வரையறுக்கலாம்"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"பயனர்"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"கட்டுப்படுத்தப்பட்ட சுயவிவரம்"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"புதியவரைச் சேர்க்கவா?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"கூடுதல் பயனர்களை உருவாக்குவதன் மூலம், பிறருடன் இந்தச் சாதனத்தைப் பகிர்ந்துகொள்ளலாம். ஒவ்வொரு பயனருக்கும் அவர்களுக்கென ஒரு இடம் இருக்கும், அதில் அவர்கள் ஆப்ஸ், வால்பேப்பர் மற்றும் பலவற்றைப் பயன்படுத்திப் பிரத்தியேகப்படுத்தலாம். வைஃபை போன்ற மற்ற சாதன அமைப்புகளைப் பயனர்கள் மாற்றலாம், இந்த மாற்றம் அனைவருக்கும் பொருந்தும்.\n\nநீங்கள் புதிய பயனரைச் சேர்க்கும்போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஎந்தவொரு பயனரும், பிற எல்லாப் பயனர்களுக்குமான ஆப்ஸைப் புதுப்பிக்கலாம். அணுகல்தன்மை அமைப்புகளையும் சேவைகளையும், புதிய பயனருக்கு இடமாற்ற முடியாமல் போகலாம்."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"புதியவரைச் சேர்க்கும் போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஇருக்கும் ஆப்ஸை எவரும் புதுப்பிக்கலாம்."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"இப்போது பயனரை அமைக்கவா?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"இந்தச் சாதனத்தை இவர் பயன்படுத்தும் நிலையிலும், அவருக்கான அமைப்புகளை அவரே செய்து கொள்பவராகவும் இருக்க வேண்டும்."</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"இப்போது சுயவிவரத்தை அமைக்கவா?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"இப்போது அமை"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"இப்போது இல்லை"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"சேர்"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"புதியவர்"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"புதிய சுயவிவரம்"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"பயனர் தகவல்"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"சுயவிவரத் தகவல்"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"நீங்கள் வரையறுக்கப்பட்டச் சுயவிவரத்தை உருவாக்குவதற்கு முன்பு, உங்கள் ஆப்ஸ் மற்றும் தனிப்பட்ட தரவைப் பாதுகாக்கும் வகையில் நீங்கள் திரைப் பூட்டை அமைக்க வேண்டும்."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"பூட்டை அமை"</string>
 </resources>

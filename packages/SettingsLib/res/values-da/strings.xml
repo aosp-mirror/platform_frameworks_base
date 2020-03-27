@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adresse og port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scan QR-kode"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Dan par med en enhed via Wi-Fi ved at scanne en QR-kode"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Opret forbindelse til et Wi-Fi-netværk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, fejlfinding, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Genvej til fejlrapportering"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vis en knap til oprettelse af fejlrapporter i afbrydermenuen"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopi (rød-grøn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopi (blå-gul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korriger farver"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Ved hjælp af farvekorrigering kan du justere, hvordan farver ser ud på din enhed"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Tilsidesat af <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ca. <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Indtil <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Enheden løber muligvis tør for batteri inden <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Der er mere end <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,34 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonens højttaler"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Der kunne ikke oprettes forbindelse. Sluk og tænd enheden"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhed med ledning"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"Hjælp og feedback"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Lager"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Delte data"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Se og rediger delte data"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Id for delte data: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Udløber <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Apps, der deler data"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Der er ikke angivet nogen beskrivelse af appen."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Leasingen udløber <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Slet delte data"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Er du sikker på, at du vil slette disse delte data?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Brugere har egne apps og eget indhold"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Du kan begrænse adgangen til apps og indhold fra din konto"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Bruger"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begrænset profil"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Vil du tilføje en ny bruger?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enhed med andre ved at oprette ekstra brugere. Hver bruger har sit eget rum, som kan tilpasses med apps, baggrund osv. Brugerne kan også justere enhedsindstillinger, som for eksempel Wi-Fi, som påvirker alle.\n\nNår du tilføjer en ny bruger, skal vedkommende konfigurere sit rum.\n\nAlle brugere kan opdatere apps for alle andre brugere. Indstillinger og tjenester for hjælpefunktioner overføres muligvis ikke til den nye bruger."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit rum.\n\nEnhver bruger kan opdatere apps for alle andre brugere."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brugeren nu?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for, at brugeren har mulighed for at tage enheden og konfigurere sit eget rum"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du oprette en profil nu?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Konfigurer nu"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Ikke nu"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Tilføj"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Ny bruger"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Ny profil"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Brugeroplysninger"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profiloplysninger"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Før du kan oprette en begrænset profil, skal du oprette en skærmlås for at beskytte dine apps og personlige data."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Konfigurer låseskærmen"</string>
 </resources>

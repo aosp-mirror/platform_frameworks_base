@@ -169,9 +169,37 @@ public class AccessibilityButtonChooserActivity extends Activity {
     private static List<AccessibilityButtonTarget> getInstalledServiceTargets(
             @NonNull Context context) {
         final List<AccessibilityButtonTarget> targets = new ArrayList<>();
-        targets.addAll(getAccessibilityServiceTargets(context));
-        targets.addAll(getAccessibilityActivityTargets(context));
+        targets.addAll(getAccessibilityFilteredTargets(context));
         targets.addAll(getWhiteListingServiceTargets(context));
+
+        return targets;
+    }
+
+    private static List<AccessibilityButtonTarget> getAccessibilityFilteredTargets(
+            @NonNull Context context) {
+        final List<AccessibilityButtonTarget> serviceTargets =
+                getAccessibilityServiceTargets(context);
+        final List<AccessibilityButtonTarget> activityTargets =
+                getAccessibilityActivityTargets(context);
+
+        for (AccessibilityButtonTarget activityTarget : activityTargets) {
+            serviceTargets.removeIf(serviceTarget -> {
+                final ComponentName serviceComponentName =
+                        ComponentName.unflattenFromString(serviceTarget.getId());
+                final ComponentName activityComponentName =
+                        ComponentName.unflattenFromString(activityTarget.getId());
+                final boolean isSamePackageName = activityComponentName.getPackageName().equals(
+                        serviceComponentName.getPackageName());
+                final boolean isSameLabel = activityTarget.getLabel().equals(
+                        serviceTarget.getLabel());
+
+                return isSamePackageName && isSameLabel;
+            });
+        }
+
+        final List<AccessibilityButtonTarget> targets = new ArrayList<>();
+        targets.addAll(serviceTargets);
+        targets.addAll(activityTargets);
 
         return targets;
     }

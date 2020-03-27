@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator shaxsiy foydalanishga qoldirilgan qurilmani rad etdi"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Bu – boshqariladigan qurilma"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tashkilotingiz bu qurilmani boshqaradi va tarmoq trafigini nazorat qilishi mumkin. Tafsilotlar uchun bosing."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"Joylashuv sozlamalari administratoringiz tomonidan oʻzgartirildi"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"Joylashuv sozlamalarini koʻrish uchun bosing."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Ilovalar joylashuv axborotidan foydalana oladi"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Batafsil axborot olish uchun AT administratoringizga murojaat qiling"</string>
     <string name="country_detector" msgid="7023275114706088854">"Mamlakatni aniqlash"</string>
     <string name="location_service" msgid="2439187616018455546">"Joylashuvni aniqlash xizmati"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensorli bildirishnoma xizmati"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Qurilmangizdagi ma’lumotlar o‘chirib tashlanadi"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administrator ilovasini ishlatib bo‘lmaydi. Qurilmada barcha ma’lumotlar o‘chirib tashlanadi.\n\nSavollaringiz bo‘lsa, administrator bilan bog‘laning."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Chop etish funksiyasi <xliff:g id="OWNER_APP">%s</xliff:g> tomonidan faolsizlantirilgan."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Shaxsiy ilovalarni blokdan chiqaring"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Ilovalar ertaga bloklanadi"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"AT administratoringiz ishchi profil <xliff:g id="DAYS">%1$d</xliff:g> kunndan ortiq pauza qilinishini taqiqlagan"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Ishchi profilni yoqish"</string>
     <string name="me" msgid="6207584824693813140">"Men"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planshet sozlamalari"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV parametrlari"</string>

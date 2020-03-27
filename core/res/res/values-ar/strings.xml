@@ -199,8 +199,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"تنازل المشرف عن الجهاز للاستخدام الشخصي"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"تتم إدارة الجهاز"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"تدير مؤسستك هذا الجهاز ويمكنها مراقبة حركة بيانات الشبكة. يمكنك النقر للحصول على تفاصيل."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"غيّرَ مشرفك إعدادات الموقع الجغرافي"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"انقر لعرض إعدادات الموقع الجغرافي."</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"أداة التعرّف على البلدان"</string>
     <string name="location_service" msgid="2439187616018455546">"خدمات الموقع الجغرافي"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"خدمة إشعارات جهاز الاستشعار"</string>
@@ -459,8 +461,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"يسمح الإذن لتطبيق أو خدمة بتلقّي استدعاءات عما إذا كانت أجهزة الكاميرات مفتوحة أو مغلقة."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"يمكن أن يتلقّى هذا التطبيق استدعاءات عندما يكون جهاز أي كاميرا مفتوحًا (بتطبيق) أو مغلقًا."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"التحكم في الاهتزاز"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"للسماح للتطبيق بالتحكم في الهزّاز."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"يسمح هذا الإذن للتطبيق بالوصول إلى حالة الهزّاز."</string>
@@ -2209,33 +2210,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"عمل"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"عرض المحتوى الشخصي"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"عرض محتوى العمل"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"تتعذّر مشاركة هذا المحتوى باستخدام تطبيقات العمل"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"لا يسمح لك مشرف تكنولوجيا المعلومات بمشاركة هذا المحتوى باستخدام التطبيقات في ملفك الشخصي للعمل."</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"لا يمكن فتح هذا المحتوى باستخدام تطبيقات العمل"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"لا يسمح لك مشرف تكنولوجيا المعلومات بفتح هذا المحتوى باستخدام التطبيقات في ملفك الشخصي للعمل."</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"تتعذّر مشاركة هذا المحتوى باستخدام التطبيقات الشخصية"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"لا يسمح لك مشرف تكنولوجيا المعلومات بمشاركة هذا المحتوى باستخدام التطبيقات في ملفك الشخصي."</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"يتعذّر فتح هذا المحتوى باستخدام التطبيقات الشخصية"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"لا يسمح لك مشرف تكنولوجيا المعلومات بفتح هذا المحتوى باستخدام التطبيقات في ملفك الشخصي."</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"تم إيقاف الملف الشخصي للعمل مؤقتًا."</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"تفعيل"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"لا يمكن لتطبيقات العمل أن تدعم هذا المحتوى."</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"لا يمكن لتطبيقات العمل أن تفتح هذا المحتوى."</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"لا يمكن للتطبيقات الشخصية أن تدعم هذا المحتوى."</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"لا يمكن للتطبيقات الشخصية أن تفتح هذا المحتوى."</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"تسجيل الصوت أو تشغيله في المكالمات الهاتفية"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"يسمح الإذن لهذا التطبيق بتسجيل الصوت أو تشغيله في المكالمات الهاتفية عندما يتم تخصيصه كالتطبيق التلقائي لبرنامج الاتصال."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

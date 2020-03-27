@@ -191,8 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ବ୍ୟକ୍ତିଗତ ବ୍ୟବହାର ପାଇଁ ଆଡ୍‌ମିନ୍ ଡିଭାଇସ୍‌କୁ ଅଲଗା କରିଛନ୍ତି"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ଡିଭାଇସକୁ ପରିଚାଳନା କରାଯାଉଛି"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ଆପଣଙ୍କ ସଂସ୍ଥା ଏହି ଡିଭାଇସକୁ ପରିଚାଳନା କରନ୍ତି ଏବଂ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରନ୍ତି। ବିବରଣୀ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"ଲୋକେସନ୍ ସେଟିଂସ୍ ଆପଣଙ୍କର ଆଡମିନଙ୍କ ଦ୍ୱରା ବଦଳାଯାଇଛି"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"ଆପଣଙ୍କର ଲୋକେସନ୍ ସେଟିଂସ୍ ଦେଖିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
+    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"କଣ୍ଟ୍ରି ଡିଟେକ୍ଟର୍"</string>
     <string name="location_service" msgid="2439187616018455546">"ଲୋକେସନ୍ ସର୍ଭିସ୍"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"ସେନ୍ସର୍ ନୋଟିଫିକେସନ୍ ସର୍ଭିସ୍"</string>
@@ -447,8 +449,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"କ୍ୟାମେରା ଡିଭାଇସଗୁଡ଼ିକ ଖୋଲିବା କିମ୍ବା ବନ୍ଦ କରିବା ବିଷୟରେ କଲବ୍ୟାକଗୁଡ଼ିକ ପାଇବାକୁ ଏକ ଆପ୍ଲିକେସନ୍ କିମ୍ବା ସେବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ଯେ କୌଣସି କ୍ୟାମେରା ଡିଭାଇସ୍ ଖୋଲାଗଲେ (କେଉଁ ଆପ୍ଲିକେସନ୍ ଦ୍ୱାରା) କିମ୍ବା ବନ୍ଦ କରାଗଲେ ଏହି ଆପ୍ କଲବ୍ୟାକ୍ ପାଇପାରିବ।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"କମ୍ପନ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ଆପ୍‍କୁ, ଭାଇବ୍ରେଟର୍‍ ନିୟନ୍ତ୍ରଣ କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ଭାଇବ୍ରେଟର୍ ସ୍ଥିତି ଆକ୍ସେସ୍ କରିବାକୁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
@@ -770,7 +771,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"ୱାର୍କ ମୋବାଇଲ୍"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"ୱାର୍କ ପେଜର୍"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"ସହାୟକ"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"କଷ୍ଟମ୍‌"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"ଜନ୍ମଦିନ"</string>
@@ -803,7 +804,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"ଅନ୍ୟାନ୍ୟ"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"କଷ୍ଟମ୍‌"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"କଷ୍ଟମ୍‌"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"ସହାୟକ"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ଭାଇ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"ଶିଶୁ"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"ଡୋମେଷ୍ଟିକ୍‌ ପାର୍ଟନର୍‌"</string>
@@ -2073,33 +2074,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"କାର୍ଯ୍ୟ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ବ୍ୟକ୍ତିଗତ ଭ୍ୟୁ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ଭ୍ୟୁ"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହା ସେୟାର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲରେ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହି ବିଷୟବସ୍ତୁକୁ ସେୟାର୍ କରିବାକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହି ଆପ୍ ଖୋଲାଯାଇ ପାରିବ ନାହିଁ"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲରେ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହି ବିଷୟବସ୍ତୁ ଖୋଲିବାକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହା ସେୟାର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲରେ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହି ବିଷୟବସ୍ତୁ ସେୟାର୍ କରିବାକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକୁ ଖୋଲାଯାଇ ପାରିବ ନାହିଁ"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲରେ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହି ବିଷୟବସ୍ତୁକୁ ଖୋଲିବାକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ୱାର୍କ ପ୍ରୋଫାଇଲକୁ ବିରତ କରାଯାଇଛି"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ଚାଲୁ କରନ୍ତୁ"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"କୌଣସି କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପ୍ ଏହି ବିଷୟବସ୍ତୁକୁ ସମର୍ଥନ କରିପାରିବ ନାହିଁ"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"କୌଣସି କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପ୍ ଏହି ବିଷୟବସ୍ତୁକୁ ଖୋଲିପାରିବ ନାହିଁ"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"କୌଣସି ବ୍ୟକ୍ତିଗତ ଆପ୍ ଏହି ବିଷୟବସ୍ତୁକୁ ସମର୍ଥନ କରିପାରିବ ନାହିଁ"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"କୌଣସି ବ୍ୟକ୍ତିଗତ ଆପ୍ ଏହି ବିଷୟବସ୍ତୁକୁ ଖୋଲିପାରିବ ନାହିଁ"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ଟେଲିଫୋନି କଲଗୁଡ଼ିକରେ ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ ବା ଚଲାନ୍ତୁ"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ଏହି ଆପ୍ ଡିଫଲ୍ଟ ଡାଏଲର୍ ଆପ୍ଲିକେସନ୍ ଭାବରେ ଆସାଇନ୍ ହୋଇଥିଲେ ଟେଲିଫୋନି କଲଗୁଡ଼ିକରେ ଅଡିଓ ରେକର୍ଡ କରିବା ବା ଚଲାଇବା ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
