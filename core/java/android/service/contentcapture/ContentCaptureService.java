@@ -18,7 +18,7 @@ package android.service.contentcapture;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureHelper.toList;
-import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
+import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
