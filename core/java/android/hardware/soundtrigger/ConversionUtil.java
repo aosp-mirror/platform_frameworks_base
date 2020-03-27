@@ -106,11 +106,11 @@ class ConversionUtil {
 
     public static SoundModel api2aidlSoundModel(SoundTrigger.SoundModel apiModel) {
         SoundModel aidlModel = new SoundModel();
-        aidlModel.type = apiModel.type;
-        aidlModel.uuid = api2aidlUuid(apiModel.uuid);
-        aidlModel.vendorUuid = api2aidlUuid(apiModel.vendorUuid);
-        aidlModel.data = byteArrayToSharedMemory(apiModel.data, "SoundTrigger SoundModel");
-        aidlModel.dataSize = apiModel.data.length;
+        aidlModel.type = apiModel.getType();
+        aidlModel.uuid = api2aidlUuid(apiModel.getUuid());
+        aidlModel.vendorUuid = api2aidlUuid(apiModel.getVendorUuid());
+        aidlModel.data = byteArrayToSharedMemory(apiModel.getData(), "SoundTrigger SoundModel");
+        aidlModel.dataSize = apiModel.getData().length;
         return aidlModel;
     }
 
@@ -122,20 +122,20 @@ class ConversionUtil {
             SoundTrigger.KeyphraseSoundModel apiModel) {
         PhraseSoundModel aidlModel = new PhraseSoundModel();
         aidlModel.common = api2aidlSoundModel(apiModel);
-        aidlModel.phrases = new Phrase[apiModel.keyphrases.length];
-        for (int i = 0; i < apiModel.keyphrases.length; ++i) {
-            aidlModel.phrases[i] = api2aidlPhrase(apiModel.keyphrases[i]);
+        aidlModel.phrases = new Phrase[apiModel.getKeyphrases().length];
+        for (int i = 0; i < apiModel.getKeyphrases().length; ++i) {
+            aidlModel.phrases[i] = api2aidlPhrase(apiModel.getKeyphrases()[i]);
         }
         return aidlModel;
     }
 
     public static Phrase api2aidlPhrase(SoundTrigger.Keyphrase apiPhrase) {
         Phrase aidlPhrase = new Phrase();
-        aidlPhrase.id = apiPhrase.id;
-        aidlPhrase.recognitionModes = api2aidlRecognitionModes(apiPhrase.recognitionModes);
-        aidlPhrase.users = Arrays.copyOf(apiPhrase.users, apiPhrase.users.length);
-        aidlPhrase.locale = apiPhrase.locale.toLanguageTag();
-        aidlPhrase.text = apiPhrase.text;
+        aidlPhrase.id = apiPhrase.getId();
+        aidlPhrase.recognitionModes = api2aidlRecognitionModes(apiPhrase.getRecognitionModes());
+        aidlPhrase.users = Arrays.copyOf(apiPhrase.getUsers(), apiPhrase.getUsers().length);
+        aidlPhrase.locale = apiPhrase.getLocale().toLanguageTag();
+        aidlPhrase.text = apiPhrase.getText();
         return aidlPhrase;
     }
 
