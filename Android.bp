@@ -545,6 +545,9 @@ java_library {
     static_libs: [
         "exoplayer2-extractor",
         "android.hardware.wifi-V1.0-java-constants",
+
+        // Additional dependencies needed to build the ike API classes.
+        "ike-internals",
     ],
     libs: ["icing-java-proto-lite"],
     apex_available: ["//apex_available:platform"],
@@ -558,6 +561,7 @@ java_library {
 
 java_library {
     name: "framework-annotation-proc",
+    visibility: ["//visibility:private"],
     srcs: [
         ":framework-all-sources",
         "core/java/**/*.logtags",
@@ -568,6 +572,8 @@ java_library {
         "ext",
         "icing-java-proto-lite",
         "unsupportedappusage",
+        // Additional dependencies needed to build the ike API classes.
+        "ike-internals",
     ],
 
     installable: false,
