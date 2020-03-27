@@ -111,6 +111,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @hide
@@ -458,7 +459,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void registerTetheringStatsProvider(ITetheringStatsProvider provider, String name) {
         NetworkStack.checkNetworkStackPermission(mContext);
-        Preconditions.checkNotNull(provider);
+        Objects.requireNonNull(provider);
         synchronized(mTetheringStatsProviders) {
             mTetheringStatsProviders.put(provider, name);
         }
