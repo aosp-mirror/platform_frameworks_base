@@ -159,36 +159,36 @@ public class EnrollmentUtil {
             Log.e(TAG, "KeyphraseSoundModel must be non-null");
             return false;
         }
-        if (soundModel.uuid == null) {
+        if (soundModel.getUuid() == null) {
             Log.e(TAG, "KeyphraseSoundModel must have a UUID");
             return false;
         }
-        if (soundModel.data == null) {
+        if (soundModel.getData() == null) {
             Log.e(TAG, "KeyphraseSoundModel must have data");
             return false;
         }
-        if (soundModel.keyphrases == null || soundModel.keyphrases.length != 1) {
+        if (soundModel.getKeyphrases() == null || soundModel.getKeyphrases().length != 1) {
             Log.e(TAG, "Keyphrase must be exactly 1");
             return false;
         }
-        Keyphrase keyphrase = soundModel.keyphrases[0];
-        if (keyphrase.id <= 0) {
+        Keyphrase keyphrase = soundModel.getKeyphrases()[0];
+        if (keyphrase.getId() <= 0) {
             Log.e(TAG, "Keyphrase must have a valid ID");
             return false;
         }
-        if (keyphrase.recognitionModes < 0) {
+        if (keyphrase.getRecognitionModes() < 0) {
             Log.e(TAG, "Recognition modes must be valid");
             return false;
         }
-        if (keyphrase.locale == null) {
+        if (keyphrase.getLocale() == null) {
             Log.e(TAG, "Locale must not be null");
             return false;
         }
-        if (keyphrase.text == null) {
+        if (keyphrase.getText() == null) {
             Log.e(TAG, "Text must not be null");
             return false;
         }
-        if (keyphrase.users == null || keyphrase.users.length == 0) {
+        if (keyphrase.getUsers() == null || keyphrase.getUsers().length == 0) {
             Log.e(TAG, "Keyphrase must have valid user(s)");
             return false;
         }
