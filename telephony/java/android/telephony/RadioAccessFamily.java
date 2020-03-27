@@ -260,24 +260,6 @@ public class RadioAccessFamily implements Parcelable {
         return raf;
     }
 
-    /**
-     * Returns the highest capability of the RadioAccessFamily (4G > 3G > 2G).
-     * @param raf The RadioAccessFamily that we wish to filter
-     * @return The highest radio capability
-     */
-    public static int getHighestRafCapability(int raf) {
-        if ((LTE & raf) > 0) {
-            return TelephonyManager.NETWORK_CLASS_4_G;
-        }
-        if ((EVDO|HS|WCDMA & raf) > 0) {
-            return TelephonyManager.NETWORK_CLASS_3_G;
-        }
-        if((GSM|CDMA & raf) > 0) {
-            return TelephonyManager.NETWORK_CLASS_2_G;
-        }
-        return TelephonyManager.NETWORK_CLASS_UNKNOWN;
-    }
-
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     @PrefNetworkMode
     public static int getNetworkTypeFromRaf(int raf) {
@@ -394,5 +376,35 @@ public class RadioAccessFamily implements Parcelable {
             result |= rafType;
         }
         return result;
+    }
+
+    /**
+     * Compare two sets of network types to see which is more capable.
+     *
+     * This algorithm first tries to see see if a set has a strict superset of RAT support for
+     * each generation, from newest to oldest; if that results in a tie, then it returns the set
+     * that supports the most RAT types.
+     */
+    public static int compare(long networkTypeBitmaskL, long networkTypeBitmaskR) {
+        final long[] prioritizedNetworkClassBitmasks = new long[] {
+            TelephonyManager.NETWORK_CLASS_BITMASK_5G,
+            TelephonyManager.NETWORK_CLASS_BITMASK_4G,
+            TelephonyManager.NETWORK_CLASS_BITMASK_3G,
+            TelephonyManager.NETWORK_CLASS_BITMASK_2G,
+        };
+
+        long lhsUnique = networkTypeBitmaskL & ~networkTypeBitmaskR;
+        long rhsUnique = networkTypeBitmaskR & ~networkTypeBitmaskL;
+
+        // See if one has a strict super-set of capabilities, generation by generation.
+        for (long classBitmask : prioritizedNetworkClassBitmasks) {
+            int result = 0;
+            if ((lhsUnique & classBitmask) != 0) ++result;
+            if ((rhsUnique & classBitmask) != 0) --result;
+            if (result != 0) return result;
+        }
+
+        // Without a clear winner, return the one that supports the most types.
+        return Long.bitCount(networkTypeBitmaskL) - Long.bitCount(networkTypeBitmaskR);
     }
 }
