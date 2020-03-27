@@ -122,7 +122,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
                         | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         window.setBackgroundDrawable(background);
-        window.setWindowAnimations(R.style.Animation_Toast);
+        window.setWindowAnimations(com.android.systemui.R.style.Animation_ShutdownUi);
 
         d.setContentView(R.layout.shutdown_dialog);
         d.setCancelable(false);
