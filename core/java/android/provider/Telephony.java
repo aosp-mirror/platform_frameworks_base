@@ -1332,7 +1332,6 @@ public final class Telephony {
              * @hide
              */
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
             public static final String ACTION_SMS_MMS_DB_LOST =
                     "android.provider.action.SMS_MMS_DB_LOST";
 
