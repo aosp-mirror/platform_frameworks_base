@@ -777,18 +777,6 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Utility method to create a hardware backed bitmap using the graphics buffer.
-     * @hide
-     */
-    @Nullable
-    public static Bitmap wrapHardwareBuffer(@NonNull GraphicBuffer graphicBuffer,
-            @Nullable ColorSpace colorSpace) {
-        try (HardwareBuffer hb = HardwareBuffer.createFromGraphicBuffer(graphicBuffer)) {
-            return wrapHardwareBuffer(hb, colorSpace);
-        }
-    }
-
-    /**
      * Creates a new bitmap, scaled from an existing bitmap, when possible. If the
      * specified width and height are the same as the current width and height of
      * the source bitmap, the source bitmap is returned and no new bitmap is
