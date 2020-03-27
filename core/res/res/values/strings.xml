@@ -3599,6 +3599,8 @@
     <string name="ext_media_new_notification_title">New <xliff:g id="name" example="SD card">%s</xliff:g></string>
     <!-- Notification body when new external media is detected [CHAR LIMIT=NONE] -->
     <string name="ext_media_new_notification_message">Tap to set up</string>
+    <!-- Automotive specific notification body when new external media is detected. Empty because there is no fix action (b/151671685) [CHAR LIMIT=NONE] -->
+    <string name="ext_media_new_notification_message" product="automotive"></string>
 
     <!-- Notification body when external media is ready for use [CHAR LIMIT=NONE] -->
     <string name="ext_media_ready_notification_message">For transferring photos and media</string>
@@ -3607,8 +3609,10 @@
     <string name="ext_media_unmountable_notification_title">Issue with <xliff:g id="name" example="SD card">%s</xliff:g></string>
     <!-- Notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
     <string name="ext_media_unmountable_notification_message">Tap to fix</string>
-    <!-- TV-specifiv notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
+    <!-- TV-specific notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
     <string name="ext_media_unmountable_notification_message" product="tv"><xliff:g id="name" example="SD card">%s</xliff:g> is corrupt. Select to fix.</string>
+    <!-- Automotive specific notification body when external media is unmountable (corrupt). Empty because there is no fix action (b/151671685) [CHAR LIMIT=NONE] -->
+    <string name="ext_media_unmountable_notification_message" product="automotive"></string>
 
     <!-- Notification title when external media is unsupported [CHAR LIMIT=30] -->
     <string name="ext_media_unsupported_notification_title">Unsupported <xliff:g id="name" example="SD card">%s</xliff:g></string>
@@ -3616,6 +3620,8 @@
     <string name="ext_media_unsupported_notification_message">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Tap to set up in a supported format.</string>
     <!-- TV-specific notification body when external media is unsupported [CHAR LIMIT=NONE] -->
     <string name="ext_media_unsupported_notification_message" product="tv">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Select to set up in a supported format.</string>
+    <!-- Automotive specific notification body when external media is unsupported. No action is specified to fix (b/151671685) [CHAR LIMIT=NONE] -->
+    <string name="ext_media_unsupported_notification_message" product="automotive">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>.</string>
 
     <!-- Notification title when external media is unsafely removed [CHAR LIMIT=30] -->
     <string name="ext_media_badremoval_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> unexpectedly removed</string>
