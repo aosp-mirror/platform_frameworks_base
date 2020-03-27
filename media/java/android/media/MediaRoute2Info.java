@@ -663,8 +663,8 @@ public final class MediaRoute2Info implements Parcelable {
         }
 
         /**
-         * Constructor for builder to create {@link MediaRoute2Info} with
-         * existing {@link MediaRoute2Info} instance.
+         * Constructor for builder to create {@link MediaRoute2Info} with existing
+         * {@link MediaRoute2Info} instance.
          *
          * @param routeInfo the existing instance to copy data from.
          */
@@ -672,6 +672,38 @@ public final class MediaRoute2Info implements Parcelable {
             Objects.requireNonNull(routeInfo, "routeInfo must not be null");
 
             mId = routeInfo.mId;
+            mName = routeInfo.mName;
+            mFeatures = new ArrayList<>(routeInfo.mFeatures);
+            mType = routeInfo.mType;
+            mIsSystem = routeInfo.mIsSystem;
+            mIconUri = routeInfo.mIconUri;
+            mDescription = routeInfo.mDescription;
+            mConnectionState = routeInfo.mConnectionState;
+            mClientPackageName = routeInfo.mClientPackageName;
+            mVolumeHandling = routeInfo.mVolumeHandling;
+            mVolumeMax = routeInfo.mVolumeMax;
+            mVolume = routeInfo.mVolume;
+            if (routeInfo.mExtras != null) {
+                mExtras = new Bundle(routeInfo.mExtras);
+            }
+            mProviderId = routeInfo.mProviderId;
+        }
+
+        /**
+         * Constructor for builder to create {@link MediaRoute2Info} with existing
+         * {@link MediaRoute2Info} instance and replace ID with the given {@code id}.
+         *
+         * @param id The ID of the new route. Must not be empty.
+         * @param routeInfo the existing instance to copy data from.
+         * @hide
+         */
+        public Builder(@NonNull String id, @NonNull MediaRoute2Info routeInfo) {
+            if (TextUtils.isEmpty(id)) {
+                throw new IllegalArgumentException("id must not be empty");
+            }
+            Objects.requireNonNull(routeInfo, "routeInfo must not be null");
+
+            mId = id;
             mName = routeInfo.mName;
             mFeatures = new ArrayList<>(routeInfo.mFeatures);
             mType = routeInfo.mType;
