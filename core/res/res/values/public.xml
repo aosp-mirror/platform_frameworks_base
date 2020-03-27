@@ -3014,6 +3014,8 @@
       <!-- @hide @SystemApi -->
       <public name="minExtensionVersion" />
       <public name="allowNativeHeapPointerTagging" />
+      <!-- @hide no longer used, kept to preserve padding -->
+      <public name="allowAutoRevokePermissionsExemption"/>
       <public name="autoRevokePermissions" />
       <public name="preserveLegacyExternalStorage" />
       <public name="mimeGroup" />
