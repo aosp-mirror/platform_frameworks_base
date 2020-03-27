@@ -351,7 +351,7 @@ public abstract class Vibrator {
      *         what it supports.
      */
     @Nullable
-    public Boolean areAllEffectsSupported(
+    public final Boolean areAllEffectsSupported(
             @NonNull @VibrationEffect.EffectType int... effectIds) {
         for (boolean supported : areEffectsSupported(effectIds)) {
             if (!supported) {
@@ -384,7 +384,7 @@ public abstract class Vibrator {
      * @param primitiveIds Which primitives to query for.
      * @return Whether primitives effects are supported.
      */
-    public boolean areAllPrimitivesSupported(
+    public final boolean areAllPrimitivesSupported(
             @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
         for (boolean supported : arePrimitivesSupported(primitiveIds)) {
             if (!supported) {
