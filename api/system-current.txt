@@ -6177,7 +6177,6 @@ package android.net {
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public MatchAllNetworkSpecifier();
     method public int describeContents();
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.MatchAllNetworkSpecifier> CREATOR;
   }
@@ -6331,8 +6330,8 @@ package android.net {
   }
 
   public abstract class NetworkSpecifier {
+    method public boolean canBeSatisfiedBy(@Nullable android.net.NetworkSpecifier);
     method @Nullable public android.net.NetworkSpecifier redact();
-    method public abstract boolean satisfiedBy(@Nullable android.net.NetworkSpecifier);
   }
 
   public class NetworkStack {
@@ -6433,10 +6432,6 @@ package android.net {
     method @NonNull public android.net.StaticIpConfiguration.Builder setDomains(@Nullable String);
     method @NonNull public android.net.StaticIpConfiguration.Builder setGateway(@Nullable java.net.InetAddress);
     method @NonNull public android.net.StaticIpConfiguration.Builder setIpAddress(@Nullable android.net.LinkAddress);
-  }
-
-  public final class TelephonyNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
   }
 
   public final class TetheredClient implements android.os.Parcelable {
@@ -7425,10 +7420,6 @@ package android.net.wifi {
     field public int numUsage;
   }
 
-  public final class WifiNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
-  }
-
   public final class WifiNetworkSuggestion implements android.os.Parcelable {
     method @NonNull public android.net.wifi.WifiConfiguration getWifiConfiguration();
   }
@@ -7617,10 +7608,6 @@ package android.net.wifi.aware {
 
   public class DiscoverySession implements java.lang.AutoCloseable {
     method @Deprecated public android.net.NetworkSpecifier createNetworkSpecifierPmk(@NonNull android.net.wifi.aware.PeerHandle, @NonNull byte[]);
-  }
-
-  public final class WifiAwareNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
   }
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
