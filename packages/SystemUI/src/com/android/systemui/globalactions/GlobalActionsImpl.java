@@ -49,8 +49,6 @@ import dagger.Lazy;
 
 public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks {
 
-    private static final float SHUTDOWN_SCRIM_ALPHA = 0.95f;
-
     private final Context mContext;
     private final Lazy<GlobalActionsDialog> mGlobalActionsDialogLazy;
     private final KeyguardStateController mKeyguardStateController;
@@ -153,7 +151,9 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
             mBlurUtils.applyBlur(d.getWindow().getDecorView().getViewRootImpl(),
                         mBlurUtils.blurRadiusOfRatio(1));
         } else {
-            background.setAlpha((int) (SHUTDOWN_SCRIM_ALPHA * 255));
+            float backgroundAlpha = mContext.getResources().getFloat(
+                    com.android.systemui.R.dimen.shutdown_scrim_behind_alpha);
+            background.setAlpha((int) (backgroundAlpha * 255));
         }
 
         d.show();
