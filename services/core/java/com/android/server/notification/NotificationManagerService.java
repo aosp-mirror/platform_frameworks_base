@@ -1217,10 +1217,12 @@ public class NotificationManagerService extends SystemService {
                         // apps querying noMan will know that their notification is not showing
                         // as a bubble.
                         r.getNotification().flags &= ~FLAG_BUBBLE;
+                        r.setFlagBubbleRemoved(true);
                     } else {
                         // Enqueue will trigger resort & if the flag is allowed to be true it'll
                         // be applied there.
                         r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
+                        r.setFlagBubbleRemoved(false);
                         mHandler.post(new EnqueueNotificationRunnable(r.getUser().getIdentifier(),
                                 r, isAppForeground));
                     }
@@ -5650,6 +5652,7 @@ public class NotificationManagerService extends SystemService {
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
         r.setIsAppImportanceLocked(mPreferencesHelper.getIsAppImportanceLocked(pkg, callingUid));
         r.setPostSilently(postSilently);
+        r.setFlagBubbleRemoved(false);
 
         if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
             final boolean fgServiceShown = channel.isFgServiceShown();
