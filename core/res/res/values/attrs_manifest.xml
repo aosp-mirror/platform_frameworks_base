@@ -2116,35 +2116,6 @@
     <declare-styleable name="AndroidManifestQueriesProvider" parent="AndroidManifestQueries" >
         <attr name="authorities" />
     </declare-styleable>
-    <!--
-        Matches an overlayable, its overlays, its actor, and/or its containing target.
-        A target or actor must always be specified, but can be combined for more specificity.
-        Valid combinations and what they match are:
-
-        targetPackage:
-         - All overlays targeting any overlayables inside 'targetPackage'
-
-        targetPackage + targetName:
-         - All overlays targeting the overlayable 'targetName' inside 'targetPackage'
-
-        targetPackage + targetName + actor:
-         - All overlays targeting the overlayable 'targetName' inside 'targetPackage' if the
-           overlayable specifies 'actor'
-
-        targetPackage + actor:
-         - All overlays targeting overlayables inside 'targetPackage' that specify `actor`
-         - The actor itself if the above matches
-
-        actor:
-         - All overlays targeting overlayables that specify `actor`
-         - All targets that contain an overlayable that specifies `actor`
-         - The actor itself
-    -->
-    <declare-styleable name="AndroidManifestQueriesOverlayable">
-        <attr name="targetPackage" />
-        <attr name="targetName"/>
-        <attr name="actor" format="string" />
-    </declare-styleable>
 
 
     <!-- The <code>static-library</code> tag declares that this apk is providing itself
