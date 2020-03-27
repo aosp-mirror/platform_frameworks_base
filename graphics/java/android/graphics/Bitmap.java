@@ -684,14 +684,16 @@ public final class Bitmap implements Parcelable {
         return b;
     }
 
+    // FIXME: The maxTargetSdk should be R, once R is no longer set to
+    // CUR_DEVELOPMENT.
     /**
      * Creates a new immutable bitmap backed by ashmem which can efficiently
-     * be passed between processes. The bitmap is assumed to be in the sRGB
-     * color space.
+     * be passed between processes.
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link #asShared()} instead")
     public Bitmap createAshmemBitmap() {
         checkRecycled("Can't copy a recycled bitmap");
         noteHardwareBitmapSlowCall();
@@ -704,9 +706,26 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Return an immutable bitmap backed by shared memory which can be
+     * efficiently passed between processes via Parcelable.
+     *
+     * <p>If this bitmap already meets these criteria it will return itself.
+     */
+    @NonNull
+    public Bitmap asShared() {
+        if (nativeIsBackedByAshmem(mNativePtr) && nativeIsImmutable(mNativePtr)) {
+            return this;
+        }
+        Bitmap shared = createAshmemBitmap();
+        if (shared == null) {
+            throw new RuntimeException("Failed to create shared Bitmap!");
+        }
+        return shared;
+    }
+
+    /**
      * Creates a new immutable bitmap backed by ashmem which can efficiently
-     * be passed between processes. The bitmap is assumed to be in the sRGB
-     * color space.
+     * be passed between processes.
      *
      * @hide
      */
@@ -2344,4 +2363,7 @@ public final class Bitmap implements Parcelable {
 
     @CriticalNative
     private static native boolean nativeIsImmutable(long nativePtr);
+
+    @CriticalNative
+    private static native boolean nativeIsBackedByAshmem(long nativePtr);
 }

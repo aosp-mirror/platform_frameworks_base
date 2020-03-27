@@ -4053,10 +4053,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /**
      * Takes a snapshot of the display.  In landscape mode this grabs the whole screen.
      * In portrait mode, it grabs the full screenshot.
-     *
-     * @param config of the output bitmap
      */
-    Bitmap screenshotDisplayLocked(Bitmap.Config config) {
+    Bitmap screenshotDisplayLocked() {
         if (!mWmService.mPolicy.isScreenOn()) {
             if (DEBUG_SCREENSHOT) {
                 Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
@@ -4101,8 +4099,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // Create a copy of the screenshot that is immutable and backed in ashmem.
         // This greatly reduces the overhead of passing the bitmap between processes.
-        final Bitmap ret = bitmap.createAshmemBitmap(config);
-        bitmap.recycle();
+        final Bitmap ret = bitmap.asShared();
+        if (ret != bitmap) {
+            bitmap.recycle();
+        }
         return ret;
     }
 

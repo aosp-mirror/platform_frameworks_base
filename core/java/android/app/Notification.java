@@ -6748,7 +6748,7 @@ public class Notification implements Parcelable
             if (mPicture != null &&
                 mPicture.isMutable() &&
                 mPicture.getAllocationByteCount() >= MIN_ASHMEM_BITMAP_SIZE) {
-                mPicture = mPicture.createAshmemBitmap();
+                mPicture = mPicture.asShared();
             }
             if (mBigLargeIcon != null) {
                 mBigLargeIcon.convertToAshmem();
