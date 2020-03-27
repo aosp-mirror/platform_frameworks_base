@@ -3020,7 +3020,6 @@
       <public name="preserveLegacyExternalStorage" />
       <public name="mimeGroup" />
       <public name="gwpAsanMode" />
-      <public name="actor" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">
