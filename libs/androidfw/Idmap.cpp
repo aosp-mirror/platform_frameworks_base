@@ -20,6 +20,7 @@
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/misc.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/Util.h"
 #include "utils/ByteOrder.h"
@@ -192,7 +193,9 @@ static bool IsValidIdmapHeader(const StringPiece& data) {
   return true;
 }
 
-LoadedIdmap::LoadedIdmap(const Idmap_header* header,
+LoadedIdmap::LoadedIdmap(std::string&& idmap_path,
+                         const time_t last_mod_time,
+                         const Idmap_header* header,
                          const Idmap_data_header* data_header,
                          const Idmap_target_entry* target_entries,
                          const Idmap_overlay_entry* overlay_entries,
@@ -201,7 +204,9 @@ LoadedIdmap::LoadedIdmap(const Idmap_header* header,
        data_header_(data_header),
        target_entries_(target_entries),
        overlay_entries_(overlay_entries),
-       string_pool_(string_pool) {
+       string_pool_(string_pool),
+       idmap_path_(std::move(idmap_path)),
+       idmap_last_mod_time_(last_mod_time) {
 
   size_t length = strnlen(reinterpret_cast<const char*>(header_->overlay_path),
                           arraysize(header_->overlay_path));
@@ -212,7 +217,8 @@ LoadedIdmap::LoadedIdmap(const Idmap_header* header,
   target_apk_path_.assign(reinterpret_cast<const char*>(header_->target_path), length);
 }
 
-std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_data) {
+std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_path,
+                                                     const StringPiece& idmap_data) {
   ATRACE_CALL();
   if (!IsValidIdmapHeader(idmap_data)) {
     return {};
@@ -275,10 +281,14 @@ std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_da
 
   // Can't use make_unique because LoadedIdmap constructor is private.
   std::unique_ptr<LoadedIdmap> loaded_idmap = std::unique_ptr<LoadedIdmap>(
-      new LoadedIdmap(header, data_header, target_entries, overlay_entries,
-                      idmap_string_pool.release()));
+      new LoadedIdmap(idmap_path.to_string(), getFileModDate(idmap_path.data()), header,
+                      data_header, target_entries, overlay_entries, idmap_string_pool.release()));
 
   return std::move(loaded_idmap);
+}
+
+bool LoadedIdmap::IsUpToDate() const {
+  return idmap_last_mod_time_ == getFileModDate(idmap_path_.c_str());
 }
 
 }  // namespace android

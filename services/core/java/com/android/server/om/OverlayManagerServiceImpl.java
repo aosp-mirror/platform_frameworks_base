@@ -700,14 +700,15 @@ final class OverlayManagerServiceImpl {
         final PackageInfo overlayPackage = mPackageManager.getPackageInfo(overlayPackageName,
                 userId);
 
-        // Immutable RROs targeting to "android", ie framework-res.apk, are handled by native layers.
+        // Immutable RROs targeting to "android", ie framework-res.apk, are handled by native
+        // layers.
+        boolean modified = false;
         if (targetPackage != null && overlayPackage != null
                 && !("android".equals(targetPackageName)
                     && !isPackageConfiguredMutable(overlayPackageName))) {
-            mIdmapManager.createIdmap(targetPackage, overlayPackage, userId);
+            modified |= mIdmapManager.createIdmap(targetPackage, overlayPackage, userId);
         }
 
-        boolean modified = false;
         if (overlayPackage != null) {
             modified |= mSettings.setBaseCodePath(overlayPackageName, userId,
                     overlayPackage.applicationInfo.getBaseCodePath());

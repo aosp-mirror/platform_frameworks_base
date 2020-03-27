@@ -38,7 +38,7 @@ class IdmapTest : public ::testing::Test {
  protected:
   void SetUp() override {
     // Move to the test data directory so the idmap can locate the overlay APK.
-    std::string original_path = base::GetExecutableDirectory();
+    original_path = base::GetExecutableDirectory();
     chdir(GetTestDataPath().c_str());
 
     system_assets_ = ApkAssets::Load("system/system.apk");
@@ -49,10 +49,14 @@ class IdmapTest : public ::testing::Test {
 
     overlayable_assets_ = ApkAssets::Load("overlayable/overlayable.apk");
     ASSERT_NE(nullptr, overlayable_assets_);
+  }
+
+  void TearDown() override {
     chdir(original_path.c_str());
   }
 
  protected:
+  std::string original_path;
   std::unique_ptr<const ApkAssets> system_assets_;
   std::unique_ptr<const ApkAssets> overlay_assets_;
   std::unique_ptr<const ApkAssets> overlayable_assets_;
@@ -221,8 +225,7 @@ TEST_F(IdmapTest, OverlaidResourceHasSameName) {
 
 TEST_F(IdmapTest, OverlayLoaderInterop) {
   std::string contents;
-  auto loader_assets = ApkAssets::LoadTable(GetTestDataPath() + "/loader/resources.arsc",
-                                            PROPERTY_LOADER);
+  auto loader_assets = ApkAssets::LoadTable("loader/resources.arsc", PROPERTY_LOADER);
 
   AssetManager2 asset_manager;
   asset_manager.SetApkAssets({overlayable_assets_.get(), loader_assets.get(),
@@ -239,6 +242,27 @@ TEST_F(IdmapTest, OverlayLoaderInterop) {
   ASSERT_EQ(cookie, 1U);
   ASSERT_EQ(val.dataType, Res_value::TYPE_STRING);
   ASSERT_EQ(GetStringFromApkAssets(asset_manager, val, cookie), "loader");
+}
+
+TEST_F(IdmapTest, OverlayAssetsIsUpToDate) {
+  std::string idmap_contents;
+  ASSERT_TRUE(base::ReadFileToString("overlay/overlay.idmap", &idmap_contents));
+
+  TemporaryFile temp_file;
+  ASSERT_TRUE(base::WriteStringToFile(idmap_contents, temp_file.path));
+
+  auto apk_assets = ApkAssets::LoadOverlay(temp_file.path);
+  ASSERT_NE(nullptr, apk_assets);
+  ASSERT_TRUE(apk_assets->IsUpToDate());
+
+  unlink(temp_file.path);
+  ASSERT_FALSE(apk_assets->IsUpToDate());
+  sleep(2);
+
+  base::WriteStringToFile("hello", temp_file.path);
+  sleep(2);
+
+  ASSERT_FALSE(apk_assets->IsUpToDate());
 }
 
 }  // namespace
