@@ -2288,6 +2288,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                                 TRANSIT_SHOW_SINGLE_TASK_DISPLAY, false);
                     }
                     stack.awakeFromSleepingLocked();
+                    if (display.isSingleTaskInstance()) {
+                        display.executeAppTransition();
+                    }
                     if (stack.isFocusedStackOnDisplay()
                             && !mStackSupervisor.getKeyguardController()
                             .isKeyguardOrAodShowing(display.mDisplayId)) {
