@@ -212,7 +212,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
 
     /** @hide */
     @Override
-    public boolean satisfiedBy(NetworkSpecifier other) {
+    public boolean canBeSatisfiedBy(NetworkSpecifier other) {
         // MatchAllNetworkSpecifier is taken care in NetworkCapabilities#satisfiedBySpecifier.
         if (other instanceof WifiAwareAgentNetworkSpecifier) {
             return ((WifiAwareAgentNetworkSpecifier) other).satisfiesAwareNetworkSpecifier(this);
