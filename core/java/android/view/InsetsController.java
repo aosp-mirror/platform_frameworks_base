@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.toInternalType;
 import static android.view.InsetsState.toPublicType;
@@ -367,6 +368,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private int mLastLegacySystemUiFlags;
     private DisplayCutout mLastDisplayCutout;
     private boolean mStartingAnimation;
+    private int mCaptionInsetsHeight = 0;
 
     private SyncRtSurfaceTransactionApplier mApplier;
 
@@ -460,7 +462,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public boolean onStateChanged(InsetsState state) {
-        boolean localStateChanged = !mState.equals(state);
+        boolean localStateChanged = !mState.equals(state, true /* excludingCaptionInsets */)
+                || !captionInsetsUnchanged();
         if (!localStateChanged && mLastDispachedState.equals(state)) {
             return false;
         }
@@ -470,7 +473,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (localStateChanged) {
             mViewRoot.notifyInsetsChanged();
         }
-        if (!mState.equals(mLastDispachedState)) {
+        if (!mState.equals(mLastDispachedState, true /* excludingCaptionInsets */)) {
             sendStateToWindowManager();
         }
         return true;
@@ -488,6 +491,23 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 mState.removeSource(source.getType());
             }
         }
+        if (mCaptionInsetsHeight != 0) {
+            mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(mFrame.left, mFrame.top,
+                    mFrame.right, mFrame.top + mCaptionInsetsHeight));
+        }
+    }
+
+    private boolean captionInsetsUnchanged() {
+        if (mState.peekSource(ITYPE_CAPTION_BAR) == null
+                && mCaptionInsetsHeight == 0) {
+            return true;
+        }
+        if (mState.peekSource(ITYPE_CAPTION_BAR) != null
+                && mCaptionInsetsHeight
+                == mState.peekSource(ITYPE_CAPTION_BAR).getFrame().height()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -964,6 +984,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         InsetsState tmpState = new InsetsState();
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+            if (consumer.getType() == ITYPE_CAPTION_BAR) continue;
             if (consumer.getControl() != null) {
                 tmpState.addSource(mState.getSource(consumer.getType()));
             }
@@ -1102,6 +1123,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return 0;
         }
         return mViewRoot.mWindowAttributes.insetsFlags.appearance;
+    }
+
+    @Override
+    public void setCaptionInsetsHeight(int height) {
+        mCaptionInsetsHeight = height;
     }
 
     @Override
