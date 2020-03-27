@@ -7744,23 +7744,19 @@ public class WindowManagerService extends IWindowManager.Stub
     public void syncInputTransactions() {
         waitForAnimationsToComplete();
 
-        // Collect all input transactions from all displays to make sure we could sync all input
-        // windows at same time.
-        final SurfaceControl.Transaction t = mTransactionFactory.get();
         synchronized (mGlobalLock) {
             mWindowPlacerLocked.performSurfacePlacementIfScheduled();
             mRoot.forAllDisplays(displayContent ->
-                    displayContent.getInputMonitor().updateInputWindowsImmediately(t));
+                    displayContent.getInputMonitor().updateInputWindowsImmediately());
         }
 
-        t.syncInputWindows().apply();
+        mTransactionFactory.get().syncInputWindows().apply(true);
     }
 
     private void waitForAnimationsToComplete() {
         synchronized (mGlobalLock) {
             long timeoutRemaining = ANIMATION_COMPLETED_TIMEOUT_MS;
-            while ((mAnimator.isAnimationScheduled()
-                    || mRoot.isAnimating(TRANSITION | CHILDREN)) && timeoutRemaining > 0) {
+            while (mRoot.isAnimating(TRANSITION | CHILDREN) && timeoutRemaining > 0) {
                 long startTime = System.currentTimeMillis();
                 try {
                     mGlobalLock.wait(timeoutRemaining);
