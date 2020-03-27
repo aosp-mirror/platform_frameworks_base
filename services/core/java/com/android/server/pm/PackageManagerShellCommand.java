@@ -105,6 +105,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
+import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
 
 import dalvik.system.DexFile;
 
@@ -118,7 +119,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -3025,9 +3025,9 @@ class PackageManagerShellCommand extends ShellCommand {
             // 1. Single file from stdin.
             if (args.isEmpty() || STDIN_PATH.equals(args.get(0))) {
                 final String name = "base." + (isApex ? "apex" : "apk");
-                final String metadata = "-" + name;
+                final Metadata metadata = Metadata.forStdIn(name);
                 session.addFile(LOCATION_DATA_APP, name, sessionSizeBytes,
-                        metadata.getBytes(StandardCharsets.UTF_8), null);
+                        metadata.toByteArray(), null);
                 return 0;
             }
 
@@ -3056,9 +3056,10 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int processArgForStdin(String arg, PackageInstaller.Session session) {
         final String[] fileDesc = arg.split(":");
-        String name, metadata;
+        String name, fileId;
         long sizeBytes;
         byte[] signature = null;
+        int streamingVersion = 0;
 
         try {
             if (fileDesc.length < 2) {
@@ -3067,13 +3068,21 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             name = fileDesc[0];
             sizeBytes = Long.parseUnsignedLong(fileDesc[1]);
-            metadata = name;
+            fileId = name;
 
             if (fileDesc.length > 2 && !TextUtils.isEmpty(fileDesc[2])) {
-                metadata = fileDesc[2];
+                fileId = fileDesc[2];
             }
             if (fileDesc.length > 3) {
                 signature = Base64.getDecoder().decode(fileDesc[3]);
+            }
+            if (fileDesc.length > 4) {
+                streamingVersion = Integer.parseUnsignedInt(fileDesc[4]);
+                if (streamingVersion < 0 || streamingVersion > 1) {
+                    getErrPrintWriter().println(
+                            "Unsupported streaming version: " + streamingVersion);
+                    return 1;
+                }
             }
         } catch (IllegalArgumentException e) {
             getErrPrintWriter().println(
@@ -3086,9 +3095,14 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
+        final Metadata metadata;
+
         if (signature != null) {
-            // Streaming/adb mode.
-            metadata = "+" + metadata;
+            // Streaming/adb mode. Versions:
+            // 0: data only streaming, tree has to be fully available,
+            // 1: tree and data streaming.
+            metadata = (streamingVersion == 0) ? Metadata.forDataOnlyStreaming(fileId)
+                    : Metadata.forStreaming(fileId);
             try {
                 if (V4Signature.readFrom(signature) == null) {
                     getErrPrintWriter().println("V4 signature is invalid in: " + arg);
@@ -3101,11 +3115,10 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         } else {
             // Single-shot read from stdin.
-            metadata = "-" + metadata;
+            metadata = Metadata.forStdIn(fileId);
         }
 
-        session.addFile(LOCATION_DATA_APP, name, sizeBytes,
-                metadata.getBytes(StandardCharsets.UTF_8), signature);
+        session.addFile(LOCATION_DATA_APP, name, sizeBytes, metadata.toByteArray(), signature);
         return 0;
     }
 
@@ -3115,7 +3128,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final File file = new File(inPath);
         final String name = file.getName();
         final long size = file.length();
-        final byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
+        final Metadata metadata = Metadata.forLocalFile(inPath);
 
         byte[] v4signatureBytes = null;
         // Try to load the v4 signature file for the APK; it might not exist.
@@ -3132,7 +3145,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         }
 
-        session.addFile(LOCATION_DATA_APP, name, size, metadata, v4signatureBytes);
+        session.addFile(LOCATION_DATA_APP, name, size, metadata.toByteArray(), v4signatureBytes);
     }
 
     private int doWriteSplits(int sessionId, ArrayList<String> splitPaths, long sessionSizeBytes,
