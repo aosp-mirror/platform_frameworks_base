@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility;
 
+import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_GLOBAL_ACTIONS;
+
 import android.accessibilityservice.AccessibilityService;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
@@ -282,8 +284,8 @@ public class SystemActions extends SystemUI {
 
     private void handleTakeScreenshot() {
         ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
-        screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
-                true, true, new Handler(Looper.getMainLooper()), null);
+        screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN, true, true,
+                SCREENSHOT_GLOBAL_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 
     private void handleAccessibilityMenu() {
