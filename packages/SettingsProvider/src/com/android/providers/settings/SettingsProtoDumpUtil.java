@@ -1972,6 +1972,13 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                 SecureSettingsProto.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS);
+
+        final long controlsToken = p.start(SecureSettingsProto.CONTROLS);
+        dumpSetting(s, p,
+                Settings.Secure.CONTROLS_ENABLED,
+                SecureSettingsProto.Controls.ENABLED);
+        p.end(controlsToken);
+
         dumpSetting(s, p,
                 Settings.Secure.DEVICE_PAIRED,
                 SecureSettingsProto.DEVICE_PAIRED);
