@@ -57,8 +57,8 @@ import java.util.List;
  * <li>The application display area specifies the part of the display that may contain
  * an application window, excluding the system decorations.  The application display area may
  * be smaller than the real display area because the system subtracts the space needed
- * for decor elements such as the status bar.  Use {@link WindowMetrics#getSize()} to query the
- * application window size.</li>
+ * for decor elements such as the status bar.  Use {@link WindowMetrics#getBounds()} to query the
+ * application window bounds.</li>
  * <li>The real display area specifies the part of the display that contains content
  * including the system decorations.  Even so, the real display area may be smaller than the
  * physical size of the display if the window manager is emulating a smaller display
@@ -673,7 +673,7 @@ public final class Display {
      *
      * @param outSize A {@link Point} object to receive the size information.
      * @deprecated Use {@link WindowManager#getCurrentWindowMetrics()} to obtain an instance of
-     * {@link WindowMetrics} and use {@link WindowMetrics#getSize()} instead.
+     * {@link WindowMetrics} and use {@link WindowMetrics#getBounds()} instead.
      */
     @Deprecated
     public void getSize(Point outSize) {
@@ -689,7 +689,7 @@ public final class Display {
      * Gets the size of the display as a rectangle, in pixels.
      *
      * @param outSize A {@link Rect} object to receive the size information.
-     * @deprecated Use {@link WindowMetrics#getSize()} to get the dimensions of the application
+     * @deprecated Use {@link WindowMetrics#getBounds()} to get the dimensions of the application
      * window area.
      */
     @Deprecated
@@ -755,7 +755,7 @@ public final class Display {
     }
 
     /**
-     * @deprecated Use {@link WindowMetrics#getSize()} instead.
+     * @deprecated Use {@link WindowMetrics#getBounds#width()} instead.
      */
     @Deprecated
     public int getWidth() {
@@ -766,7 +766,7 @@ public final class Display {
     }
 
     /**
-     * @deprecated Use {@link WindowMetrics#getSize()} instead.
+     * @deprecated Use {@link WindowMetrics#getBounds()#height()} instead.
      */
     @Deprecated
     public int getHeight() {
@@ -1105,7 +1105,7 @@ public final class Display {
      * </p>
      *
      * @param outMetrics A {@link DisplayMetrics} object to receive the metrics.
-     * @deprecated Use {@link WindowMetrics#getSize()} to get the dimensions of the application
+     * @deprecated Use {@link WindowMetrics#getBounds()} to get the dimensions of the application
      * window area, and {@link Configuration#densityDpi} to get the current density.
      */
     @Deprecated
