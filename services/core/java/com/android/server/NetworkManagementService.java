@@ -886,6 +886,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setIPv6AddrGenMode(String iface, int mode) throws ServiceSpecificException {
+        NetworkStack.checkNetworkStackPermission(mContext);
         try {
             mNetdService.setIPv6AddrGenMode(iface, mode);
         } catch (RemoteException e) {
