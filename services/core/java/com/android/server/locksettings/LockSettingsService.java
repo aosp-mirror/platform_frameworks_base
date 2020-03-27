@@ -1016,9 +1016,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void enforceFrpResolved() {
-        if (mInjector.settingsSecureGetInt(mContext.getContentResolver(),
-                Settings.Secure.SECURE_FRP_MODE, 0, UserHandle.USER_SYSTEM) == 1) {
-            throw new SecurityException("Cannot change credential while FRP is not resolved yet");
+        final ContentResolver cr = mContext.getContentResolver();
+        final boolean inSetupWizard = mInjector.settingsSecureGetInt(cr,
+                Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_SYSTEM) == 0;
+        final boolean secureFrp = mInjector.settingsSecureGetInt(cr,
+                Settings.Secure.SECURE_FRP_MODE, 0, UserHandle.USER_SYSTEM) == 1;
+        if (inSetupWizard && secureFrp) {
+            throw new SecurityException("Cannot change credential in SUW while factory reset"
+                    + " protection is not resolved yet");
         }
     }
 
