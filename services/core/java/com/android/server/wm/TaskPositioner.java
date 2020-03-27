@@ -268,9 +268,8 @@ class TaskPositioner implements IBinder.DeathRecipient {
         mDisplayContent.getDisplayRotation().pause();
 
         // Notify InputMonitor to take mDragWindowHandle.
-        final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
-        mDisplayContent.getInputMonitor().updateInputWindowsImmediately(t);
-        t.syncInputWindows().apply();
+        mDisplayContent.getInputMonitor().updateInputWindowsImmediately();
+        new SurfaceControl.Transaction().syncInputWindows().apply(true);
 
         final DisplayMetrics displayMetrics = displayContent.getDisplayMetrics();
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics);
