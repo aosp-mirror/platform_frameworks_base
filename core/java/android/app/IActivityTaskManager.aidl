@@ -155,8 +155,8 @@ interface IActivityTaskManager {
     boolean removeTask(int taskId);
     void removeAllVisibleRecentTasks();
     List<ActivityManager.RunningTaskInfo> getTasks(int maxNum);
-    List<ActivityManager.RunningTaskInfo> getFilteredTasks(int maxNum, int ignoreActivityType,
-            int ignoreWindowingMode);
+    List<ActivityManager.RunningTaskInfo> getFilteredTasks(int maxNum,
+            boolean filterOnlyVisibleRecents);
     boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
     boolean navigateUpTo(in IBinder token, in Intent target, int resultCode,
             in Intent resultData);
