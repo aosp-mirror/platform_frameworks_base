@@ -34,6 +34,7 @@ import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.ROAMING_YES;
 import static android.net.wifi.WifiInfo.sanitizeSsid;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
@@ -52,6 +53,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -475,6 +478,32 @@ public class NetworkTemplate implements Parcelable {
             default:
                 return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
+    }
+
+    /**
+     * Return all supported collapsed RAT types that could be returned by
+     * {@link #getCollapsedRatType(int)}.
+     */
+    @NonNull
+    public static final int[] getAllCollapsedRatTypes() {
+        final int[] ratTypes = TelephonyManager.getAllNetworkTypes();
+        final HashSet<Integer> collapsedRatTypes = new HashSet<>();
+        for (final int ratType : ratTypes) {
+            collapsedRatTypes.add(NetworkTemplate.getCollapsedRatType(ratType));
+        }
+        // Ensure that unknown type is returned.
+        collapsedRatTypes.add(TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        return toIntArray(collapsedRatTypes);
+    }
+
+    @NonNull
+    private static int[] toIntArray(@NonNull Collection<Integer> list) {
+        final int[] array = new int[list.size()];
+        int i = 0;
+        for (final Integer item : list) {
+            array[i++] = item;
+        }
+        return array;
     }
 
     /**
