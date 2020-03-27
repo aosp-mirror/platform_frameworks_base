@@ -44,7 +44,6 @@ cc_library {
         "AttributeResolution.cpp",
         "ChunkIterator.cpp",
         "ConfigDescription.cpp",
-        "DynamicLibManager.cpp",
         "Idmap.cpp",
         "LoadedArsc.cpp",
         "Locale.cpp",
