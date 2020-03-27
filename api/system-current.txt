@@ -6210,14 +6210,14 @@ package android.net {
     method public void onRemoveKeepalivePacketFilter(int);
     method public void onSaveAcceptUnvalidated(boolean);
     method public void onSignalStrengthThresholdsUpdated(@NonNull int[]);
-    method public void onStartSocketKeepalive(int, int, @NonNull android.net.KeepalivePacketData);
+    method public void onStartSocketKeepalive(int, @IntRange(from=10, to=3600) int, @NonNull android.net.KeepalivePacketData);
     method public void onStopSocketKeepalive(int);
-    method public void onValidationStatus(int, @Nullable String);
+    method public void onValidationStatus(int, @Nullable android.net.Uri);
     method @NonNull public android.net.Network register();
-    method public void sendLinkProperties(@NonNull android.net.LinkProperties);
-    method public void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
-    method public void sendNetworkScore(int);
-    method public void sendSocketKeepaliveEvent(int, int);
+    method public final void sendLinkProperties(@NonNull android.net.LinkProperties);
+    method public final void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
+    method public final void sendNetworkScore(@IntRange(from=0, to=99) int);
+    method public final void sendSocketKeepaliveEvent(int, int);
     method public void setConnected();
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
@@ -6235,7 +6235,7 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkAgentConfig> CREATOR;
   }
 
-  public static class NetworkAgentConfig.Builder {
+  public static final class NetworkAgentConfig.Builder {
     ctor public NetworkAgentConfig.Builder();
     method @NonNull public android.net.NetworkAgentConfig build();
     method @NonNull public android.net.NetworkAgentConfig.Builder setExplicitlySelected(boolean);
@@ -6303,7 +6303,6 @@ package android.net {
   public class NetworkRequest implements android.os.Parcelable {
     method @Nullable public String getRequestorPackageName();
     method public int getRequestorUid();
-    method public boolean satisfiedBy(@Nullable android.net.NetworkCapabilities);
   }
 
   public static class NetworkRequest.Builder {
