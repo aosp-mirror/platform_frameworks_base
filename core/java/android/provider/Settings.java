@@ -4614,12 +4614,6 @@ public final class Settings {
          */
 
         /**
-         * Whether to show charging animation
-         * @hide
-         */
-        public static final String CHARGING_ANIMATION = "charging_animation";
-
-        /**
          * Whether to enable Ambient edge light
          * @hide
          */
