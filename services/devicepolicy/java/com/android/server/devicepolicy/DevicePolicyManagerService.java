@@ -2079,7 +2079,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Owners newOwners() {
             return new Owners(getUserManager(), getUserManagerInternal(),
-                    getPackageManagerInternal(), getActivityTaskManagerInternal());
+                    getPackageManagerInternal(), getActivityTaskManagerInternal(),
+                    getActivityManagerInternal());
         }
 
         UserManager getUserManager() {
