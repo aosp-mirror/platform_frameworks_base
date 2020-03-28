@@ -21,12 +21,13 @@ import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.AudioAttributes;
-import android.os.IVibratorStateListener;
 import android.util.ArrayMap;
 import android.util.Log;
+
 import com.android.internal.annotations.GuardedBy;
-import java.util.concurrent.Executor;
+
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Vibrator implementation that controls the main system vibrator.
@@ -238,13 +239,13 @@ public class SystemVibrator extends Vibrator {
     }
 
     @Override
-    public boolean[] areEffectsSupported(@VibrationEffect.EffectType int... effectIds) {
+    public int[] areEffectsSupported(@VibrationEffect.EffectType int... effectIds) {
         try {
             return mService.areEffectsSupported(effectIds);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to query effect support");
+            throw e.rethrowAsRuntimeException();
         }
-        return new boolean[effectIds.length];
     }
 
     @Override
@@ -254,8 +255,8 @@ public class SystemVibrator extends Vibrator {
             return mService.arePrimitivesSupported(primitiveIds);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to query effect support");
+            throw e.rethrowAsRuntimeException();
         }
-        return new boolean[primitiveIds.length];
     }
 
 

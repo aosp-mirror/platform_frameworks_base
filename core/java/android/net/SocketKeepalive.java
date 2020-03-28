@@ -109,6 +109,17 @@ public abstract class SocketKeepalive implements AutoCloseable {
     })
     public @interface ErrorCode {}
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            SUCCESS,
+            ERROR_INVALID_LENGTH,
+            ERROR_UNSUPPORTED,
+            ERROR_INSUFFICIENT_RESOURCES,
+            ERROR_HARDWARE_UNSUPPORTED
+    })
+    public @interface KeepaliveEvent {}
+
     /**
      * The minimum interval in seconds between keepalive packet transmissions.
      *

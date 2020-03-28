@@ -2342,8 +2342,7 @@ class ActivityStack extends Task {
         if (!newTask && isOrhasTask) {
             // Starting activity cannot be occluding activity, otherwise starting window could be
             // remove immediately without transferring to starting activity.
-            final ActivityRecord occludingActivity = getActivity(
-                    (ar) -> ar.occludesParent(), true, r);
+            final ActivityRecord occludingActivity = getOccludingActivityAbove(r);
             if (occludingActivity != null) {
                 // Here it is!  Now, if this is not yet visible (occluded by another task) to the
                 // user, then just add it without starting; it will get started when the user
@@ -3069,6 +3068,14 @@ class ActivityStack extends Task {
         task.setOverrideDisplayedBounds(bounds == null || bounds.isEmpty() ? null : bounds);
     }
 
+    /**
+     * Returns the top-most activity that occludes the given one, or @{code null} if none.
+     */
+    @Nullable
+    private ActivityRecord getOccludingActivityAbove(ActivityRecord activity) {
+        return getActivity((ar) -> ar.occludesParent(), true /* traverseTopToBottom */, activity);
+    }
+
     boolean willActivityBeVisible(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (r == null) {
@@ -3076,8 +3083,7 @@ class ActivityStack extends Task {
         }
 
         // See if there is an occluding activity on-top of this one.
-        final ActivityRecord occludingActivity = getActivity((ar) -> ar.occludesParent(), r,
-                false /*includeBoundary*/, true /*traverseTopToBottom*/);
+        final ActivityRecord occludingActivity = getOccludingActivityAbove(r);
         if (occludingActivity != null) return false;
 
         if (r.finishing) Slog.e(TAG, "willActivityBeVisible: Returning false,"

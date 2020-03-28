@@ -665,15 +665,17 @@ public class RecoverySystem {
      * the preparation for unattended update is reset.
      *
      * @param context the Context to use.
-     * @throws IOException if there were any errors setting up unattended update
+     * @throws IOException if there were any errors clearing the unattended update state
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.RECOVERY)
-    public static boolean clearPrepareForUnattendedUpdate(@NonNull Context context)
+    public static void clearPrepareForUnattendedUpdate(@NonNull Context context)
             throws IOException {
         RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
-        return rs.clearLskf();
+        if (!rs.clearLskf()) {
+            throw new IOException("could not reset unattended update state");
+        }
     }
 
     /**
@@ -684,21 +686,22 @@ public class RecoverySystem {
      * @param context the Context to use.
      * @param updateToken the token used to call {@link #prepareForUnattendedUpdate} before
      * @param reason the reboot reason to give to the {@link PowerManager}
-     * @throws IOException if there were any errors setting up unattended update
-     * @return false if the reboot couldn't proceed because the device wasn't ready for an
+     * @throws IOException if the reboot couldn't proceed because the device wasn't ready for an
      *               unattended reboot or if the {@code updateToken} did not match the previously
      *               given token
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.RECOVERY)
-    public static boolean rebootAndApply(@NonNull Context context, @NonNull String updateToken,
+    public static void rebootAndApply(@NonNull Context context, @NonNull String updateToken,
             @NonNull String reason) throws IOException {
         if (updateToken == null) {
             throw new NullPointerException("updateToken == null");
         }
         RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
-        return rs.rebootWithLskf(updateToken, reason);
+        if (!rs.rebootWithLskf(updateToken, reason)) {
+            throw new IOException("system not prepared to apply update");
+        }
     }
 
     /**

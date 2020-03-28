@@ -64,8 +64,7 @@ import java.util.function.Consumer;
 @RunWith(AndroidJUnit4.class)
 public class ControlProviderServiceTest {
 
-    private static final ComponentName TEST_SYSUI_COMPONENT =
-            ComponentName.unflattenFromString("sysui/.test.cls");
+    private static final String TEST_CONTROLS_PACKAGE = "sysui";
     private static final ComponentName TEST_COMPONENT =
             ComponentName.unflattenFromString("test.pkg/.test.cls");
 
@@ -97,8 +96,8 @@ public class ControlProviderServiceTest {
         when(mSubscriber.asBinder()).thenCallRealMethod();
         when(mSubscriber.queryLocalInterface(any())).thenReturn(mSubscriber);
 
-        when(mResources.getString(com.android.internal.R.string.config_systemUIServiceComponent))
-                .thenReturn(TEST_SYSUI_COMPONENT.flattenToString());
+        when(mResources.getString(com.android.internal.R.string.config_controlsPackage))
+                .thenReturn(TEST_CONTROLS_PACKAGE);
         when(mContext.getResources()).thenReturn(mResources);
 
         Bundle b = new Bundle();
@@ -252,7 +251,7 @@ public class ControlProviderServiceTest {
                 eq(Manifest.permission.BIND_CONTROLS));
         Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals(ControlsProviderService.ACTION_ADD_CONTROL, intent.getAction());
-        assertEquals(TEST_SYSUI_COMPONENT.getPackageName(), intent.getPackage());
+        assertEquals(TEST_CONTROLS_PACKAGE, intent.getPackage());
         assertEquals(TEST_COMPONENT, intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME));
         assertTrue(equals(control,
                 intent.getParcelableExtra(ControlsProviderService.EXTRA_CONTROL)));

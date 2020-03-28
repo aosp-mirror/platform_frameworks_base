@@ -155,8 +155,8 @@ public class WifiNetworkAgentSpecifierTest {
     public void testWifiNetworkAgentSpecifierSatisifiesNullAndAllMatch() {
         WifiNetworkAgentSpecifier specifier = createDefaultNetworkAgentSpecifier();
 
-        assertTrue(specifier.satisfiedBy(null));
-        assertTrue(specifier.satisfiedBy(new MatchAllNetworkSpecifier()));
+        assertTrue(specifier.canBeSatisfiedBy(null));
+        assertTrue(specifier.canBeSatisfiedBy(new MatchAllNetworkSpecifier()));
     }
 
     /**
@@ -170,7 +170,7 @@ public class WifiNetworkAgentSpecifierTest {
         WifiNetworkAgentSpecifier specifier1 = createDefaultNetworkAgentSpecifier();
         WifiNetworkAgentSpecifier specifier2 = createDefaultNetworkAgentSpecifier();
 
-        assertTrue(specifier2.satisfiedBy(specifier1));
+        assertTrue(specifier2.canBeSatisfiedBy(specifier1));
     }
 
     /**
@@ -196,8 +196,8 @@ public class WifiNetworkAgentSpecifierTest {
                 bssidPattern,
                 wificonfigurationNetworkSpecifier);
 
-        assertTrue(wifiNetworkSpecifier.satisfiedBy(wifiNetworkAgentSpecifier));
-        assertTrue(wifiNetworkAgentSpecifier.satisfiedBy(wifiNetworkSpecifier));
+        assertTrue(wifiNetworkSpecifier.canBeSatisfiedBy(wifiNetworkAgentSpecifier));
+        assertTrue(wifiNetworkAgentSpecifier.canBeSatisfiedBy(wifiNetworkSpecifier));
     }
 
     /**
@@ -224,8 +224,8 @@ public class WifiNetworkAgentSpecifierTest {
                 bssidPattern,
                 wificonfigurationNetworkSpecifier);
 
-        assertTrue(wifiNetworkSpecifier.satisfiedBy(wifiNetworkAgentSpecifier));
-        assertTrue(wifiNetworkAgentSpecifier.satisfiedBy(wifiNetworkSpecifier));
+        assertTrue(wifiNetworkSpecifier.canBeSatisfiedBy(wifiNetworkAgentSpecifier));
+        assertTrue(wifiNetworkAgentSpecifier.canBeSatisfiedBy(wifiNetworkSpecifier));
     }
 
     /**
@@ -252,8 +252,8 @@ public class WifiNetworkAgentSpecifierTest {
                 bssidPattern,
                 wificonfigurationNetworkSpecifier);
 
-        assertTrue(wifiNetworkSpecifier.satisfiedBy(wifiNetworkAgentSpecifier));
-        assertTrue(wifiNetworkAgentSpecifier.satisfiedBy(wifiNetworkSpecifier));
+        assertTrue(wifiNetworkSpecifier.canBeSatisfiedBy(wifiNetworkAgentSpecifier));
+        assertTrue(wifiNetworkAgentSpecifier.canBeSatisfiedBy(wifiNetworkSpecifier));
     }
 
     /**
@@ -283,8 +283,8 @@ public class WifiNetworkAgentSpecifierTest {
                 bssidPattern,
                 wificonfigurationNetworkSpecifier);
 
-        assertFalse(wifiNetworkSpecifier.satisfiedBy(wifiNetworkAgentSpecifier));
-        assertFalse(wifiNetworkAgentSpecifier.satisfiedBy(wifiNetworkSpecifier));
+        assertFalse(wifiNetworkSpecifier.canBeSatisfiedBy(wifiNetworkAgentSpecifier));
+        assertFalse(wifiNetworkAgentSpecifier.canBeSatisfiedBy(wifiNetworkSpecifier));
     }
 
     /**
@@ -315,8 +315,8 @@ public class WifiNetworkAgentSpecifierTest {
                 bssidPattern,
                 wificonfigurationNetworkSpecifier);
 
-        assertFalse(wifiNetworkSpecifier.satisfiedBy(wifiNetworkAgentSpecifier));
-        assertFalse(wifiNetworkAgentSpecifier.satisfiedBy(wifiNetworkSpecifier));
+        assertFalse(wifiNetworkSpecifier.canBeSatisfiedBy(wifiNetworkAgentSpecifier));
+        assertFalse(wifiNetworkAgentSpecifier.canBeSatisfiedBy(wifiNetworkSpecifier));
     }
 
     /**
@@ -347,8 +347,8 @@ public class WifiNetworkAgentSpecifierTest {
                 bssidPattern,
                 wificonfigurationNetworkSpecifier);
 
-        assertFalse(wifiNetworkSpecifier.satisfiedBy(wifiNetworkAgentSpecifier));
-        assertFalse(wifiNetworkAgentSpecifier.satisfiedBy(wifiNetworkSpecifier));
+        assertFalse(wifiNetworkSpecifier.canBeSatisfiedBy(wifiNetworkAgentSpecifier));
+        assertFalse(wifiNetworkAgentSpecifier.canBeSatisfiedBy(wifiNetworkSpecifier));
     }
 
     /**
@@ -374,8 +374,8 @@ public class WifiNetworkAgentSpecifierTest {
                 bssidPattern,
                 wificonfigurationNetworkSpecifier);
 
-        assertFalse(wifiNetworkSpecifier.satisfiedBy(wifiNetworkAgentSpecifier));
-        assertFalse(wifiNetworkAgentSpecifier.satisfiedBy(wifiNetworkSpecifier));
+        assertFalse(wifiNetworkSpecifier.canBeSatisfiedBy(wifiNetworkAgentSpecifier));
+        assertFalse(wifiNetworkAgentSpecifier.canBeSatisfiedBy(wifiNetworkSpecifier));
     }
 
 

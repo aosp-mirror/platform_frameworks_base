@@ -1138,17 +1138,17 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessFineLocation">access precise location only in the foreground</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessFineLocation">This app can get your exact location only when it is in the foreground. Location services must be turned on and available on your device for the app to be able to use them. This may increase battery consumption.</string>
+    <string name="permdesc_accessFineLocation">This app can get your precise location from location services while the app is in use. Location services for your device must be turned on for the app to get location. This may increase battery usage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessCoarseLocation">access approximate location only in the foreground</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation">This app can get your approximate location only when it is in the foreground. Location services must be turned on and available on your device for the app to be able to use them.</string>
+    <string name="permdesc_accessCoarseLocation">This app can get your approximate location from location services while the app is in use. Location services for your device must be turned on for the app to get location.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessBackgroundLocation">access location in the background</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessBackgroundLocation">This app can access location while running in the background, in addition to foreground location access.</string>
+    <string name="permdesc_accessBackgroundLocation">This app can access location at any time, even while the app is not in use.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>
@@ -3597,6 +3597,8 @@
     <string name="ext_media_new_notification_title">New <xliff:g id="name" example="SD card">%s</xliff:g></string>
     <!-- Notification body when new external media is detected [CHAR LIMIT=NONE] -->
     <string name="ext_media_new_notification_message">Tap to set up</string>
+    <!-- Automotive specific notification body when new external media is detected. Empty because there is no fix action (b/151671685) [CHAR LIMIT=NONE] -->
+    <string name="ext_media_new_notification_message" product="automotive"></string>
 
     <!-- Notification body when external media is ready for use [CHAR LIMIT=NONE] -->
     <string name="ext_media_ready_notification_message">For transferring photos and media</string>
@@ -3605,8 +3607,10 @@
     <string name="ext_media_unmountable_notification_title">Issue with <xliff:g id="name" example="SD card">%s</xliff:g></string>
     <!-- Notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
     <string name="ext_media_unmountable_notification_message">Tap to fix</string>
-    <!-- TV-specifiv notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
+    <!-- TV-specific notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
     <string name="ext_media_unmountable_notification_message" product="tv"><xliff:g id="name" example="SD card">%s</xliff:g> is corrupt. Select to fix.</string>
+    <!-- Automotive specific notification body when external media is unmountable (corrupt). Empty because there is no fix action (b/151671685) [CHAR LIMIT=NONE] -->
+    <string name="ext_media_unmountable_notification_message" product="automotive"></string>
 
     <!-- Notification title when external media is unsupported [CHAR LIMIT=30] -->
     <string name="ext_media_unsupported_notification_title">Unsupported <xliff:g id="name" example="SD card">%s</xliff:g></string>
@@ -3614,6 +3618,8 @@
     <string name="ext_media_unsupported_notification_message">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Tap to set up in a supported format.</string>
     <!-- TV-specific notification body when external media is unsupported [CHAR LIMIT=NONE] -->
     <string name="ext_media_unsupported_notification_message" product="tv">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Select to set up in a supported format.</string>
+    <!-- Automotive specific notification body when external media is unsupported. No action is specified to fix (b/151671685) [CHAR LIMIT=NONE] -->
+    <string name="ext_media_unsupported_notification_message" product="automotive">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>.</string>
 
     <!-- Notification title when external media is unsafely removed [CHAR LIMIT=30] -->
     <string name="ext_media_badremoval_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> unexpectedly removed</string>

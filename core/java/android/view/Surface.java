@@ -871,24 +871,24 @@ public class Surface implements Parcelable {
     /**
      * Sets the intended frame rate for this surface.
      *
-     * On devices that are capable of running the display at different refresh rates, the
-     * system may choose a display refresh rate to better match this surface's frame
+     * <p>On devices that are capable of running the display at different refresh rates,
+     * the system may choose a display refresh rate to better match this surface's frame
      * rate. Usage of this API won't introduce frame rate throttling, or affect other
      * aspects of the application's frame production pipeline. However, because the system
      * may change the display refresh rate, calls to this function may result in changes
      * to Choreographer callback timings, and changes to the time interval at which the
-     * system releases buffers back to the application.
+     * system releases buffers back to the application.</p>
      *
-     * Note that this only has an effect for surfaces presented on the display. If this
+     * <p>Note that this only has an effect for surfaces presented on the display. If this
      * surface is consumed by something other than the system compositor, e.g. a media
-     * codec, this call has no effect.
+     * codec, this call has no effect.</p>
      *
      * @param frameRate The intended frame rate of this surface, in frames per second. 0
      * is a special value that indicates the app will accept the system's choice for the
      * display frame rate, which is the default behavior if this function isn't
-     * called. The frameRate param does *not* need to be a valid refresh rate for this
-     * device's display - e.g., it's fine to pass 30fps to a device that can only run the
-     * display at 60fps.
+     * called. The frameRate param does <em>not</em> need to be a valid refresh rate for
+     * this device's display - e.g., it's fine to pass 30fps to a device that can only run
+     * the display at 60fps.
      *
      * @param compatibility The frame rate compatibility of this surface. The
      * compatibility value may influence the system's choice of display frame rate. See

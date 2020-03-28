@@ -286,7 +286,6 @@ void IncrementalService::onDump(int fd) {
             dprintf(fd, "\t\t\tpackageName: %s\n", params.packageName.c_str());
             dprintf(fd, "\t\t\tclassName: %s\n", params.className.c_str());
             dprintf(fd, "\t\t\targuments: %s\n", params.arguments.c_str());
-            dprintf(fd, "\t\t\tdynamicArgs: %d\n", int(params.dynamicArgs.size()));
         }
         dprintf(fd, "\t\tstorages (%d):\n", int(mnt.storages.size()));
         for (auto&& [storageId, storage] : mnt.storages) {

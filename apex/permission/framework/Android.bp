@@ -31,6 +31,10 @@ java_library {
         "com.android.permission",
         "test_com.android.permission",
     ],
+    permitted_packages: [
+        "android.permission",
+        "android.app.role",
+    ],
     hostdex: true,
     installable: true,
     visibility: [

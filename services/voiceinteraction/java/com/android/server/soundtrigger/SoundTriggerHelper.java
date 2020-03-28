@@ -195,7 +195,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
 
             // Process existing model first.
-            if (model != null && !model.getModelId().equals(soundModel.uuid)) {
+            if (model != null && !model.getModelId().equals(soundModel.getUuid())) {
                 // The existing model has a different UUID, should be replaced.
                 int status = cleanUpExistingKeyphraseModelLocked(model);
                 if (status != STATUS_OK) {
@@ -208,7 +208,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             // We need to create a new one: either no previous models existed for given keyphrase id
             // or the existing model had a different UUID and was cleaned up.
             if (model == null) {
-                model = createKeyphraseModelDataLocked(soundModel.uuid, keyphraseId);
+                model = createKeyphraseModelDataLocked(soundModel.getUuid(), keyphraseId);
             }
 
             return startRecognition(soundModel, model, callback, recognitionConfig,
@@ -249,7 +249,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 return STATUS_ERROR;
             }
             if (mModule == null) {
-                mModule = SoundTrigger.attachModule(mModuleProperties.id, this, null);
+                mModule = SoundTrigger.attachModule(mModuleProperties.getId(), this, null);
                 if (mModule == null) {
                     Slog.w(TAG, "startRecognition cannot attach to sound trigger module");
                     return STATUS_ERROR;

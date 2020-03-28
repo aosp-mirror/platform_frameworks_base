@@ -196,6 +196,15 @@ public interface WindowInsetsController {
     @Appearance int getSystemBarsAppearance();
 
     /**
+     * Notify the caption insets height change. The information will be used on the client side to,
+     * make sure the InsetsState has the correct caption insets.
+     *
+     * @param height the height of caption bar insets.
+     * @hide
+     */
+    void setCaptionInsetsHeight(int height);
+
+    /**
      * Controls the behavior of system bars.
      *
      * @param behavior Determines how the bars behave when being hidden by the application.

@@ -2738,7 +2738,7 @@ public final class SurfaceControl implements Parcelable {
 
         /**
          * Sets the intended frame rate for the surface {@link SurfaceControl}.
-         *
+         * <p>
          * On devices that are capable of running the display at different refresh rates, the system
          * may choose a display refresh rate to better match this surface's frame rate. Usage of
          * this API won't directly affect the application's frame production pipeline. However,
@@ -2750,9 +2750,9 @@ public final class SurfaceControl implements Parcelable {
          * @param frameRate The intended frame rate for this surface, in frames per second. 0 is a
          *                  special value that indicates the app will accept the system's choice for
          *                  the display frame rate, which is the default behavior if this function
-         *                  isn't called. The frameRate param does *not* need to be a valid refresh
-         *                  rate for this device's display - e.g., it's fine to pass 30fps to a
-         *                  device that can only run the display at 60fps.
+         *                  isn't called. The frameRate param does <em>not</em> need to be a valid
+         *                  refresh rate for this device's display - e.g., it's fine to pass 30fps
+         *                  to a device that can only run the display at 60fps.
          * @param compatibility The frame rate compatibility of this surface. The compatibility
          *                      value may influence the system's choice of display frame rate. See
          *                      the Surface.FRAME_RATE_COMPATIBILITY_* values for more info.

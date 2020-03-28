@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 
 import android.annotation.NonNull;
@@ -117,6 +118,12 @@ public class InsetsSource implements Parcelable {
         }
         if (!getIntersection(frame, relativeFrame, mTmpFrame)) {
             return Insets.NONE;
+        }
+        // During drag-move and drag-resizing, the caption insets position may not get updated
+        // before the app frame get updated. To layout the app content correctly during drag events,
+        // we always return the insets with the corresponding height covering the top.
+        if (getType() == ITYPE_CAPTION_BAR) {
+            return Insets.of(0, frame.height(), 0, 0);
         }
 
         // TODO: Currently, non-floating IME always intersects at bottom due to issues with cutout.

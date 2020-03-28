@@ -928,4 +928,10 @@ public class MockContext extends Context {
     public Handler getMainThreadHandler() {
         throw new UnsupportedOperationException();
     }
+
+    /** {@hide} */
+    @Override
+    public boolean isUiContext() {
+        throw new UnsupportedOperationException();
+    }
 }

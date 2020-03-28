@@ -65,7 +65,7 @@ class ControlsControllerImpl @Inject constructor (
 
     companion object {
         private const val TAG = "ControlsControllerImpl"
-        internal const val CONTROLS_AVAILABLE = "systemui.controls_available"
+        internal const val CONTROLS_AVAILABLE = Settings.Secure.CONTROLS_ENABLED
         internal val URI = Settings.Secure.getUriFor(CONTROLS_AVAILABLE)
         private const val USER_CHANGE_RETRY_DELAY = 500L // ms
         private const val DEFAULT_ENABLED = 1
@@ -439,13 +439,14 @@ class ControlsControllerImpl @Inject constructor (
             Log.d(TAG, "Controls not available")
             return
         }
-        executor.execute {
-            val changed = Favorites.updateControls(
-                componentName,
-                listOf(control)
-            )
-            if (changed) {
-                persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+
+        // Assume that non STATUS_OK responses may contain incomplete or invalid information about
+        // the control, and do not attempt to update it
+        if (control.getStatus() == Control.STATUS_OK) {
+            executor.execute {
+                if (Favorites.updateControls(componentName, listOf(control))) {
+                    persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+                }
             }
         }
         uiController.onRefreshState(componentName, listOf(control))

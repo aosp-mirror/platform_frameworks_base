@@ -432,7 +432,7 @@ public final class AudioDeviceInfo {
      * @return An array of supported encapsulation modes for the device.  This
      *     may be an empty array if no encapsulation modes are supported.
      */
-    public @NonNull int[] getEncapsulationModes() {
+    public @NonNull @AudioTrack.EncapsulationMode int[] getEncapsulationModes() {
         // Implement a getter in r-dev or r-tv-dev as needed.
         return new int[0];  // be careful of returning a copy of any internal data.
     }
@@ -451,7 +451,7 @@ public final class AudioDeviceInfo {
      * @return An array of supported encapsulation metadata types for the device.  This
      *     may be an empty array if no metadata types are supported.
      */
-    public @NonNull int[] getEncapsulationMetadataTypes() {
+    public @NonNull @AudioTrack.EncapsulationMetadataType int[] getEncapsulationMetadataTypes() {
         // Implement a getter in r-dev or r-tv-dev as needed.
         return new int[0];  // be careful of returning a copy of any internal data.
     }

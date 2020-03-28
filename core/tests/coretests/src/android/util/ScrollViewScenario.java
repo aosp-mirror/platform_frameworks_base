@@ -239,7 +239,7 @@ public abstract class ScrollViewScenario extends Activity {
 
         // for test stability, turn off title bar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        int screenHeight = getWindowManager().getCurrentWindowMetrics().getSize().getHeight()
+        int screenHeight = getWindowManager().getCurrentWindowMetrics().getBounds().height()
                 - 25;
         mLinearLayout = new LinearLayout(this);
         mLinearLayout.setOrientation(LinearLayout.VERTICAL);

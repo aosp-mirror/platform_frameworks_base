@@ -2068,8 +2068,8 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     class_gnssClock = (jclass) env->NewGlobalRef(gnssClockClass);
     method_gnssClockCtor = env->GetMethodID(class_gnssClock, "<init>", "()V");
 
-    jclass gnssConfiguration_halInterfaceVersionClass =
-            env->FindClass("com/android/server/location/GnssConfiguration$HalInterfaceVersion");
+    jclass gnssConfiguration_halInterfaceVersionClass = env->FindClass(
+            "com/android/server/location/gnss/GnssConfiguration$HalInterfaceVersion");
     class_gnssConfiguration_halInterfaceVersion =
             (jclass) env->NewGlobalRef(gnssConfiguration_halInterfaceVersionClass);
     method_halInterfaceVersionCtor =
@@ -3738,39 +3738,29 @@ static const JNINativeMethod sNetworkConnectivityMethods[] = {
 };
 
 static const JNINativeMethod sConfigurationMethods[] = {
-     /* name, signature, funcPtr */
-    {"native_get_gnss_configuration_version",
-            "()Lcom/android/server/location/GnssConfiguration$HalInterfaceVersion;",
-            reinterpret_cast<void *>(
-                    android_location_GnssConfiguration_get_gnss_configuration_version)},
-    {"native_set_supl_es",
-            "(I)Z",
-            reinterpret_cast<void *>(android_location_GnssConfiguration_set_supl_es)},
-    {"native_set_supl_version",
-            "(I)Z",
-            reinterpret_cast<void *>(android_location_GnssConfiguration_set_supl_version)},
-    {"native_set_supl_mode",
-            "(I)Z",
-            reinterpret_cast<void *>(android_location_GnssConfiguration_set_supl_mode)},
-    {"native_set_lpp_profile",
-            "(I)Z",
-            reinterpret_cast<void *>(android_location_GnssConfiguration_set_lpp_profile)},
-    {"native_set_gnss_pos_protocol_select",
-            "(I)Z",
-            reinterpret_cast<void *>(
-                    android_location_GnssConfiguration_set_gnss_pos_protocol_select)},
-    {"native_set_gps_lock",
-            "(I)Z",
-            reinterpret_cast<void *>(android_location_GnssConfiguration_set_gps_lock)},
-    {"native_set_emergency_supl_pdn",
-            "(I)Z",
-            reinterpret_cast<void *>(android_location_GnssConfiguration_set_emergency_supl_pdn)},
-    {"native_set_satellite_blacklist",
-            "([I[I)Z",
-            reinterpret_cast<void *>(android_location_GnssConfiguration_set_satellite_blacklist)},
-    {"native_set_es_extension_sec",
-            "(I)Z",
-            reinterpret_cast<void *>(android_location_GnssConfiguration_set_es_extension_sec)},
+        /* name, signature, funcPtr */
+        {"native_get_gnss_configuration_version",
+         "()Lcom/android/server/location/gnss/GnssConfiguration$HalInterfaceVersion;",
+         reinterpret_cast<void*>(
+                 android_location_GnssConfiguration_get_gnss_configuration_version)},
+        {"native_set_supl_es", "(I)Z",
+         reinterpret_cast<void*>(android_location_GnssConfiguration_set_supl_es)},
+        {"native_set_supl_version", "(I)Z",
+         reinterpret_cast<void*>(android_location_GnssConfiguration_set_supl_version)},
+        {"native_set_supl_mode", "(I)Z",
+         reinterpret_cast<void*>(android_location_GnssConfiguration_set_supl_mode)},
+        {"native_set_lpp_profile", "(I)Z",
+         reinterpret_cast<void*>(android_location_GnssConfiguration_set_lpp_profile)},
+        {"native_set_gnss_pos_protocol_select", "(I)Z",
+         reinterpret_cast<void*>(android_location_GnssConfiguration_set_gnss_pos_protocol_select)},
+        {"native_set_gps_lock", "(I)Z",
+         reinterpret_cast<void*>(android_location_GnssConfiguration_set_gps_lock)},
+        {"native_set_emergency_supl_pdn", "(I)Z",
+         reinterpret_cast<void*>(android_location_GnssConfiguration_set_emergency_supl_pdn)},
+        {"native_set_satellite_blacklist", "([I[I)Z",
+         reinterpret_cast<void*>(android_location_GnssConfiguration_set_satellite_blacklist)},
+        {"native_set_es_extension_sec", "(I)Z",
+         reinterpret_cast<void*>(android_location_GnssConfiguration_set_es_extension_sec)},
 };
 
 static const JNINativeMethod sVisibilityControlMethods[] = {
@@ -3782,53 +3772,27 @@ static const JNINativeMethod sVisibilityControlMethods[] = {
 };
 
 int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
-    jniRegisterNativeMethods(env, "com/android/server/location/GnssAntennaInfoProvider",
+    jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssAntennaInfoProvider",
                              sAntennaInfoMethods, NELEM(sAntennaInfoMethods));
-    jniRegisterNativeMethods(
-            env,
-            "com/android/server/location/GnssBatchingProvider",
-            sMethodsBatching,
-            NELEM(sMethodsBatching));
-    jniRegisterNativeMethods(
-            env,
-            "com/android/server/location/GnssGeofenceProvider",
-            sGeofenceMethods,
-            NELEM(sGeofenceMethods));
-    jniRegisterNativeMethods(
-            env,
-            "com/android/server/location/GnssMeasurementsProvider",
-            sMeasurementMethods,
-            NELEM(sMeasurementMethods));
-    jniRegisterNativeMethods(
-            env,
-            "com/android/server/location/GnssMeasurementCorrectionsProvider",
-            sMeasurementCorrectionsMethods,
-            NELEM(sMeasurementCorrectionsMethods));
-    jniRegisterNativeMethods(
-            env,
-            "com/android/server/location/GnssNavigationMessageProvider",
-            sNavigationMessageMethods,
-            NELEM(sNavigationMessageMethods));
-    jniRegisterNativeMethods(
-            env,
-            "com/android/server/location/GnssNetworkConnectivityHandler",
-            sNetworkConnectivityMethods,
-            NELEM(sNetworkConnectivityMethods));
-    jniRegisterNativeMethods(
-            env,
-            "com/android/server/location/GnssConfiguration",
-            sConfigurationMethods,
-            NELEM(sConfigurationMethods));
-    jniRegisterNativeMethods(
-            env,
-            "com/android/server/location/GnssVisibilityControl",
-            sVisibilityControlMethods,
-            NELEM(sVisibilityControlMethods));
-    return jniRegisterNativeMethods(
-            env,
-            "com/android/server/location/GnssLocationProvider",
-            sMethods,
-            NELEM(sMethods));
+    jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssBatchingProvider",
+                             sMethodsBatching, NELEM(sMethodsBatching));
+    jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssGeofenceProvider",
+                             sGeofenceMethods, NELEM(sGeofenceMethods));
+    jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssMeasurementsProvider",
+                             sMeasurementMethods, NELEM(sMeasurementMethods));
+    jniRegisterNativeMethods(env,
+                             "com/android/server/location/gnss/GnssMeasurementCorrectionsProvider",
+                             sMeasurementCorrectionsMethods, NELEM(sMeasurementCorrectionsMethods));
+    jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssNavigationMessageProvider",
+                             sNavigationMessageMethods, NELEM(sNavigationMessageMethods));
+    jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssNetworkConnectivityHandler",
+                             sNetworkConnectivityMethods, NELEM(sNetworkConnectivityMethods));
+    jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssConfiguration",
+                             sConfigurationMethods, NELEM(sConfigurationMethods));
+    jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssVisibilityControl",
+                             sVisibilityControlMethods, NELEM(sVisibilityControlMethods));
+    return jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssLocationProvider",
+                                    sMethods, NELEM(sMethods));
 }
 
 } /* namespace android */

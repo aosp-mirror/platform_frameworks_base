@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -32,17 +34,52 @@ import android.util.Log;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A Utility class for handling for communicating between bearer-specific
+ * A utility class for handling for communicating between bearer-specific
  * code and ConnectivityService.
+ *
+ * An agent manages the life cycle of a network. A network starts its
+ * life cycle when {@link register} is called on NetworkAgent. The network
+ * is then connecting. When full L3 connectivity has been established,
+ * the agent shoud call {@link markConnected} to inform the system that
+ * this network is ready to use. When the network disconnects its life
+ * ends and the agent should call {@link unregister}, at which point the
+ * system will clean up and free resources.
+ * Any reconnection becomes a new logical network, so after a network
+ * is disconnected the agent cannot be used any more. Network providers
+ * should create a new NetworkAgent instance to handle new connections.
  *
  * A bearer may have more than one NetworkAgent if it can simultaneously
  * support separate networks (IMS / Internet / MMS Apns on cellular, or
  * perhaps connections with different SSID or P2P for Wi-Fi).
+ *
+ * This class supports methods to start and stop sending keepalive packets.
+ * Keepalive packets are typically sent at periodic intervals over a network
+ * with NAT when there is no other traffic to avoid the network forcefully
+ * closing the connection. NetworkAgents that manage technologies that
+ * have hardware support for keepalive should implement the related
+ * methods to save battery life. NetworkAgent that cannot get support
+ * without waking up the CPU should not, as this would be prohibitive in
+ * terms of battery - these agents should simply not override the related
+ * methods, which results in the implementation returning
+ * {@link SocketKeepalive.ERROR_UNSUPPORTED} as appropriate.
+ *
+ * Keepalive packets need to be sent at relatively frequent intervals
+ * (a few seconds to a few minutes). As the contents of keepalive packets
+ * depend on the current network status, hardware needs to be configured
+ * to send them and has a limited amount of memory to do so. The HAL
+ * formalizes this as slots that an implementation can configure to send
+ * the correct packets. Devices typically have a small number of slots
+ * per radio technology, and the specific number of slots for each
+ * technology is specified in configuration files.
+ * {@see SocketKeepalive} for details.
  *
  * @hide
  */
@@ -65,7 +102,7 @@ public abstract class NetworkAgent {
     private final String LOG_TAG;
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
-    private final ArrayList<Message>mPreConnectedQueue = new ArrayList<Message>();
+    private final ArrayList<Message> mPreConnectedQueue = new ArrayList<Message>();
     private volatile long mLastBwRefreshTime = 0;
     private static final long BW_REFRESH_MIN_WIN_MS = 500;
     private boolean mBandwidthUpdateScheduled = false;
@@ -74,6 +111,8 @@ public abstract class NetworkAgent {
     // into the internal API of ConnectivityService.
     @NonNull
     private NetworkInfo mNetworkInfo;
+    @NonNull
+    private final Object mRegisterLock = new Object();
 
     /**
      * The ID of the {@link NetworkProvider} that created this object, or
@@ -158,6 +197,14 @@ public abstract class NetworkAgent {
      */
     public static final int VALIDATION_STATUS_NOT_VALID = 2;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "VALIDATION_STATUS_" }, value = {
+            VALIDATION_STATUS_VALID,
+            VALIDATION_STATUS_NOT_VALID
+    })
+    public @interface ValidationStatus {}
+
     // TODO: remove.
     /** @hide */
     public static final int VALID_NETWORK = 1;
@@ -202,7 +249,7 @@ public abstract class NetworkAgent {
      * Sent by ConnectivityService to the NetworkAgent to request that the specified packet be sent
      * periodically on the given interval.
      *
-     *   arg1 = the slot number of the keepalive to start
+     *   arg1 = the hardware slot number of the keepalive to start
      *   arg2 = interval in seconds
      *   obj = KeepalivePacketData object describing the data to be sent
      *
@@ -214,7 +261,7 @@ public abstract class NetworkAgent {
     /**
      * Requests that the specified keepalive packet be stopped.
      *
-     * arg1 = slot number of the keepalive to stop.
+     * arg1 = hardware slot number of the keepalive to stop.
      *
      * Also used internally by ConnectivityService / KeepaliveTracker, with different semantics.
      * @hide
@@ -229,7 +276,7 @@ public abstract class NetworkAgent {
      * This is also sent by KeepaliveTracker to the app's {@link SocketKeepalive},
      * so that the app's {@link SocketKeepalive.Callback} methods can be called.
      *
-     * arg1 = slot number of the keepalive
+     * arg1 = hardware slot number of the keepalive
      * arg2 = error code
      * @hide
      */
@@ -259,7 +306,7 @@ public abstract class NetworkAgent {
      * remote site will send ACK packets in response to the keepalive packets, the firmware also
      * needs to be configured to properly filter the ACKs to prevent the system from waking up.
      * This does not happen with UDP, so this message is TCP-specific.
-     * arg1 = slot number of the keepalive to filter for.
+     * arg1 = hardware slot number of the keepalive to filter for.
      * obj = the keepalive packet to send repeatedly.
      * @hide
      */
@@ -268,7 +315,7 @@ public abstract class NetworkAgent {
     /**
      * Sent by the KeepaliveTracker to NetworkAgent to remove a packet filter. See
      * {@link #CMD_ADD_KEEPALIVE_PACKET_FILTER}.
-     * arg1 = slot number of the keepalive packet filter to remove.
+     * arg1 = hardware slot number of the keepalive packet filter to remove.
      * @hide
      */
     public static final int CMD_REMOVE_KEEPALIVE_PACKET_FILTER = BASE + 17;
@@ -441,7 +488,15 @@ public abstract class NetworkAgent {
                                 + (msg.arg1 == VALID_NETWORK ? "VALID, " : "INVALID, ")
                                 + redirectUrl);
                     }
-                    onValidationStatus(msg.arg1 /* status */, redirectUrl);
+                    Uri uri = null;
+                    try {
+                        if (null != redirectUrl) {
+                            uri = Uri.parse(redirectUrl);
+                        }
+                    } catch (Exception e) {
+                        Log.wtf(LOG_TAG, "Surprising URI : " + redirectUrl, e);
+                    }
+                    onValidationStatus(msg.arg1 /* status */, uri);
                     break;
                 }
                 case CMD_SAVE_ACCEPT_UNVALIDATED: {
@@ -449,7 +504,8 @@ public abstract class NetworkAgent {
                     break;
                 }
                 case CMD_START_SOCKET_KEEPALIVE: {
-                    onStartSocketKeepalive(msg.arg1 /* slot */, msg.arg2 /* interval */,
+                    onStartSocketKeepalive(msg.arg1 /* slot */,
+                            Duration.ofSeconds(msg.arg2) /* interval */,
                             (KeepalivePacketData) msg.obj /* packet */);
                     break;
                 }
@@ -489,19 +545,29 @@ public abstract class NetworkAgent {
 
     /**
      * Register this network agent with ConnectivityService.
+     *
+     * This method can only be called once per network agent.
+     *
      * @return the Network associated with this network agent (which can also be obtained later
      *         by calling getNetwork() on this agent).
+     * @throws IllegalStateException thrown by the system server if this network agent is
+     *         already registered.
      */
     @NonNull
     public Network register() {
         if (VDBG) log("Registering NetworkAgent");
         final ConnectivityManager cm = (ConnectivityManager) mInitialConfiguration.context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-        mNetwork = cm.registerNetworkAgent(new Messenger(mHandler),
-                new NetworkInfo(mInitialConfiguration.info),
-                mInitialConfiguration.properties, mInitialConfiguration.capabilities,
-                mInitialConfiguration.score, mInitialConfiguration.config, providerId);
-        mInitialConfiguration = null; // All this memory can now be GC'd
+        synchronized (mRegisterLock) {
+            if (mNetwork != null) {
+                throw new IllegalStateException("Agent already registered");
+            }
+            mNetwork = cm.registerNetworkAgent(new Messenger(mHandler),
+                    new NetworkInfo(mInitialConfiguration.info),
+                    mInitialConfiguration.properties, mInitialConfiguration.capabilities,
+                    mInitialConfiguration.score, mInitialConfiguration.config, providerId);
+            mInitialConfiguration = null; // All this memory can now be GC'd
+        }
         return mNetwork;
     }
 
@@ -544,18 +610,19 @@ public abstract class NetworkAgent {
      * Must be called by the agent when the network's {@link LinkProperties} change.
      * @param linkProperties the new LinkProperties.
      */
-    public void sendLinkProperties(@NonNull LinkProperties linkProperties) {
+    public final void sendLinkProperties(@NonNull LinkProperties linkProperties) {
         Objects.requireNonNull(linkProperties);
         queueOrSendMessage(EVENT_NETWORK_PROPERTIES_CHANGED, new LinkProperties(linkProperties));
     }
 
     /**
      * Inform ConnectivityService that this agent has now connected.
+     * Call {@link #unregister} to disconnect.
      */
-    public void setConnected() {
+    public void markConnected() {
         if (mIsLegacy) {
             throw new UnsupportedOperationException(
-                    "Legacy agents can't call setConnected.");
+                    "Legacy agents can't call markConnected.");
         }
         mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
@@ -569,8 +636,7 @@ public abstract class NetworkAgent {
      */
     public void unregister() {
         if (mIsLegacy) {
-            throw new UnsupportedOperationException(
-                    "Legacy agents can't call unregister.");
+            throw new UnsupportedOperationException("Legacy agents can't call unregister.");
         }
         mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
@@ -626,7 +692,7 @@ public abstract class NetworkAgent {
      * @hide TODO: expose something better.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public void sendNetworkInfo(NetworkInfo networkInfo) {
+    public final void sendNetworkInfo(NetworkInfo networkInfo) {
         if (!mIsLegacy) {
             throw new UnsupportedOperationException("Only legacy agents can call sendNetworkInfo.");
         }
@@ -637,7 +703,7 @@ public abstract class NetworkAgent {
      * Must be called by the agent when the network's {@link NetworkCapabilities} change.
      * @param networkCapabilities the new NetworkCapabilities.
      */
-    public void sendNetworkCapabilities(@NonNull NetworkCapabilities networkCapabilities) {
+    public final void sendNetworkCapabilities(@NonNull NetworkCapabilities networkCapabilities) {
         Objects.requireNonNull(networkCapabilities);
         mBandwidthUpdatePending.set(false);
         mLastBwRefreshTime = System.currentTimeMillis();
@@ -647,9 +713,10 @@ public abstract class NetworkAgent {
 
     /**
      * Must be called by the agent to update the score of this network.
-     * @param score the new score.
+     *
+     * @param score the new score, between 0 and 99.
      */
-    public void sendNetworkScore(int score) {
+    public final void sendNetworkScore(@IntRange(from = 0, to = 99) int score) {
         if (score < 0) {
             throw new IllegalArgumentException("Score must be >= 0");
         }
@@ -733,15 +800,15 @@ public abstract class NetworkAgent {
      * {@code VALIDATION_STATUS_VALID} if Internet connectivity was validated,
      * {@code VALIDATION_STATUS_NOT_VALID} if Internet connectivity was not validated.
      *
-     * This may be called multiple times as network status changes, or if there are multiple
-     * subsequent attempts to validate connectivity that fail.
+     * This is guaranteed to be called again when the network status changes, but the system
+     * may also call this multiple times even if the status does not change.
      *
      * @param status one of {@code VALIDATION_STATUS_VALID} or {@code VALIDATION_STATUS_NOT_VALID}.
-     * @param redirectUrl If Internet connectivity is being redirected (e.g., on a captive portal),
+     * @param redirectUri If Internet connectivity is being redirected (e.g., on a captive portal),
      *        this is the destination the probes are being redirected to, otherwise {@code null}.
      */
-    public void onValidationStatus(int status, @Nullable String redirectUrl) {
-        networkStatus(status, redirectUrl);
+    public void onValidationStatus(@ValidationStatus int status, @Nullable Uri redirectUri) {
+        networkStatus(status, redirectUri.toString());
     }
     /** @hide TODO delete once subclasses have moved to onValidationStatus */
     protected void networkStatus(int status, String redirectUrl) {
@@ -767,13 +834,25 @@ public abstract class NetworkAgent {
      * Requests that the network hardware send the specified packet at the specified interval.
      *
      * @param slot the hardware slot on which to start the keepalive.
-     * @param intervalSeconds the interval between packets
+     * @param interval the interval between packets, between 10 and 3600. Note that this API
+     *                 does not support sub-second precision and will round off the request.
      * @param packet the packet to send.
      */
-    public void onStartSocketKeepalive(int slot, int intervalSeconds,
+    // seconds is from SocketKeepalive.MIN_INTERVAL_SEC to MAX_INTERVAL_SEC, but these should
+    // not be exposed as constants because they may change in the future (API guideline 4.8)
+    // and should have getters if exposed at all. Getters can't be used in the annotation,
+    // so the values unfortunately need to be copied.
+    public void onStartSocketKeepalive(int slot, @NonNull Duration interval,
             @NonNull KeepalivePacketData packet) {
-        Message msg = mHandler.obtainMessage(CMD_START_SOCKET_KEEPALIVE, slot, intervalSeconds,
-                packet);
+        final long intervalSeconds = interval.getSeconds();
+        if (intervalSeconds < SocketKeepalive.MIN_INTERVAL_SEC
+                || intervalSeconds > SocketKeepalive.MAX_INTERVAL_SEC) {
+            throw new IllegalArgumentException("Interval needs to be comprised between "
+                    + SocketKeepalive.MIN_INTERVAL_SEC + " and " + SocketKeepalive.MAX_INTERVAL_SEC
+                    + " but was " + intervalSeconds);
+        }
+        final Message msg = mHandler.obtainMessage(CMD_START_SOCKET_KEEPALIVE, slot,
+                (int) intervalSeconds, packet);
         startSocketKeepalive(msg);
         msg.recycle();
     }
@@ -801,9 +880,11 @@ public abstract class NetworkAgent {
      * Must be called by the agent when a socket keepalive event occurs.
      *
      * @param slot the hardware slot on which the event occurred.
-     * @param event the event that occurred.
+     * @param event the event that occurred, as one of the SocketKeepalive.ERROR_*
+     *              or SocketKeepalive.SUCCESS constants.
      */
-    public void sendSocketKeepaliveEvent(int slot, int event) {
+    public final void sendSocketKeepaliveEvent(int slot,
+            @SocketKeepalive.KeepaliveEvent int event) {
         queueOrSendMessage(EVENT_SOCKET_KEEPALIVE, slot, event);
     }
     /** @hide TODO delete once callers have moved to sendSocketKeepaliveEvent */
@@ -845,8 +926,17 @@ public abstract class NetworkAgent {
     }
 
     /**
-     * Called by ConnectivityService to inform this network transport of signal strength thresholds
+     * Called by ConnectivityService to inform this network agent of signal strength thresholds
      * that when crossed should trigger a system wakeup and a NetworkCapabilities update.
+     *
+     * When the system updates the list of thresholds that should wake up the CPU for a
+     * given agent it will call this method on the agent. The agent that implement this
+     * should implement it in hardware so as to ensure the CPU will be woken up on breach.
+     * Agents are expected to react to a breach by sending an updated NetworkCapabilities
+     * object with the appropriate signal strength to sendNetworkCapabilities.
+     *
+     * The specific units are bearer-dependent. See details on the units and requests in
+     * {@link NetworkCapabilities.Builder#setSignalStrength}.
      *
      * @param thresholds the array of thresholds that should trigger wakeups.
      */
