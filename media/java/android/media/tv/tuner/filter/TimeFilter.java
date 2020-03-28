@@ -83,7 +83,7 @@ public class TimeFilter implements AutoCloseable {
     @Result
     public int clearTimestamp() {
         int res = nativeClearTimestamp();
-        if (res == 0) {
+        if (res == Tuner.RESULT_SUCCESS) {
             mEnable = false;
         }
         return res;
