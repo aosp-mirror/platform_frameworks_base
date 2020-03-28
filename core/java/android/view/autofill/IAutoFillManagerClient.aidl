@@ -117,4 +117,9 @@ oneway interface IAutoFillManagerClient {
     * Notifies disables autofill for the app or activity.
     */
    void notifyDisableAutofill(long disableDuration, in ComponentName componentName);
+
+   /**
+    * Requests to show the soft input method if the focus is on the given id.
+    */
+   void requestShowSoftInput(in AutofillId id);
 }
