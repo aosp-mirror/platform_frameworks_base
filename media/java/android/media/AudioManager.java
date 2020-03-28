@@ -5987,6 +5987,20 @@ public class AudioManager {
         }
     }
 
+    /**
+     * Set whether or not there is an active RTT call.
+     * This method should be called by Telecom service.
+     * @hide
+     * TODO: make this a @SystemApi
+     */
+    public static void setRttEnabled(boolean rttEnabled) {
+        try {
+            getService().setRttEnabled(rttEnabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     //---------------------------------------------------------
     // Inner classes
     //--------------------
