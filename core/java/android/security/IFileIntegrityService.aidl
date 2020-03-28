@@ -22,5 +22,5 @@ package android.security;
  */
 interface IFileIntegrityService {
     boolean isApkVeritySupported();
-    boolean isAppSourceCertificateTrusted(in byte[] certificateBytes);
+    boolean isAppSourceCertificateTrusted(in byte[] certificateBytes, in String packageName);
 }
