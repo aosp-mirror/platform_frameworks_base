@@ -49,6 +49,7 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
     ArrayList<SurfaceControl> mHomeAndRecentsSurfaces = new ArrayList<>();
     Rect mHomeBounds = new Rect();
     final Divider mDivider;
+    private boolean mSplitScreenSupported = false;
 
     SplitScreenTaskOrganizer(Divider divider) {
         mDivider = divider;
@@ -57,12 +58,19 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
     void init(SurfaceSession session) throws RemoteException {
         TaskOrganizer.registerOrganizer(this, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         TaskOrganizer.registerOrganizer(this, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        mPrimary = TaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
-                WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        mSecondary = TaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
-                WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        mPrimarySurface = mPrimary.token.getLeash();
-        mSecondarySurface = mSecondary.token.getLeash();
+        try {
+            mPrimary = TaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
+                    WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+            mSecondary = TaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
+                    WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+            mPrimarySurface = mPrimary.token.getLeash();
+            mSecondarySurface = mSecondary.token.getLeash();
+        } catch (RemoteException e) {
+            // teardown to prevent callbacks
+            TaskOrganizer.unregisterOrganizer(this);
+            throw e;
+        }
+        mSplitScreenSupported = true;
 
         // Initialize dim surfaces:
         mPrimaryDim = new SurfaceControl.Builder(session).setParent(mPrimarySurface)
@@ -76,6 +84,10 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
         t.setColor(mSecondaryDim, new float[]{0f, 0f, 0f});
         t.apply();
         releaseTransaction(t);
+    }
+
+    boolean isSplitScreenSupported() {
+        return mSplitScreenSupported;
     }
 
     SurfaceControl.Transaction getTransaction() {
