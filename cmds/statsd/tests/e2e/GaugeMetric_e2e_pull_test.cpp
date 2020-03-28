@@ -38,6 +38,7 @@ StatsdConfig CreateStatsdConfig(const GaugeMetric::SamplingType sampling_type,
                                 bool useCondition = true) {
     StatsdConfig config;
     config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
+    config.add_default_pull_packages("AID_ROOT");  // Fake puller is registered with root.
     auto atomMatcher = CreateSimpleAtomMatcher("TestMatcher", ATOM_TAG);
     *config.add_atom_matcher() = atomMatcher;
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
