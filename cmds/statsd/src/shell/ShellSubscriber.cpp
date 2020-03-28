@@ -108,7 +108,21 @@ bool ShellSubscriber::readConfig(shared_ptr<SubscriptionInfo> subscriptionInfo) 
         if (minInterval < 0 || pulled.freq_millis() < minInterval) {
             minInterval = pulled.freq_millis();
         }
-        subscriptionInfo->mPulledInfo.emplace_back(pulled.matcher(), pulled.freq_millis());
+
+        vector<string> packages;
+        vector<int32_t> uids;
+        for (const string& pkg : pulled.packages()) {
+            auto it = UidMap::sAidToUidMapping.find(pkg);
+            if (it != UidMap::sAidToUidMapping.end()) {
+                uids.push_back(it->second);
+            } else {
+                packages.push_back(pkg);
+            }
+        }
+
+        subscriptionInfo->mPulledInfo.emplace_back(pulled.matcher(), pulled.freq_millis(), packages,
+                                                   uids);
+        VLOG("adding matcher for pulled atom %d", pulled.matcher().atom_id());
     }
     subscriptionInfo->mPullIntervalMin = minInterval;
 
@@ -127,7 +141,15 @@ void ShellSubscriber::startPull(int64_t myToken) {
         for (auto& pullInfo : mSubscriptionInfo->mPulledInfo) {
             if (pullInfo.mPrevPullElapsedRealtimeMs + pullInfo.mInterval < nowMillis) {
                 vector<std::shared_ptr<LogEvent>> data;
-                mPullerMgr->Pull(pullInfo.mPullerMatcher.atom_id(), &data);
+                vector<int32_t> uids;
+                uids.insert(uids.end(), pullInfo.mPullUids.begin(), pullInfo.mPullUids.end());
+                // This is slow. Consider storing the uids per app and listening to uidmap updates.
+                for (const string& pkg : pullInfo.mPullPackages) {
+                    set<int32_t> uidsForPkg = mUidMap->getAppUid(pkg);
+                    uids.insert(uids.end(), uidsForPkg.begin(), uidsForPkg.end());
+                }
+                uids.push_back(DEFAULT_PULL_UID);
+                mPullerMgr->Pull(pullInfo.mPullerMatcher.atom_id(), uids, &data);
                 VLOG("pulled %zu atoms with id %d", data.size(), pullInfo.mPullerMatcher.atom_id());
 
                 // TODO(b/150969574): Don't write to a pipe while holding a lock.

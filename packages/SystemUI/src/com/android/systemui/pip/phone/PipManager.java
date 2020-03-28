@@ -36,7 +36,6 @@ import android.util.Pair;
 import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
 import android.window.WindowContainerTransaction;
-import android.window.WindowOrganizer;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
@@ -258,7 +257,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 // register the pip input consumer to ensure touch can send to it.
                 mInputConsumerController.registerInputConsumer();
             }
-        } catch (RemoteException e) {
+        } catch (RemoteException | UnsupportedOperationException e) {
             e.printStackTrace();
         }
     }

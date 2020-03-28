@@ -29,6 +29,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.os.StatsdConfigProto.AtomMatcher;
 import com.android.internal.os.StatsdConfigProto.FieldFilter;
 import com.android.internal.os.StatsdConfigProto.GaugeMetric;
+import com.android.internal.os.StatsdConfigProto.PullAtomPackages;
 import com.android.internal.os.StatsdConfigProto.SimpleAtomMatcher;
 import com.android.internal.os.StatsdConfigProto.StatsdConfig;
 import com.android.internal.os.StatsdConfigProto.TimeUnit;
@@ -271,6 +272,9 @@ public class LibStatsPullTests {
                         .setSamplingType(GaugeMetric.SamplingType.FIRST_N_SAMPLES)
                         .setMaxNumGaugeAtomsPerBucket(1000)
                 )
+                .addPullAtomPackages(PullAtomPackages.newBuilder()
+                        .setAtomId(PULL_ATOM_TAG)
+                        .addPackages(LibStatsPullTests.class.getPackage().getName()))
                 .build();
         statsManager.addConfig(sConfigId, config.toByteArray());
         assertThat(StatsConfigUtils.verifyValidConfigExists(statsManager, sConfigId)).isTrue();
