@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import android.app.Instrumentation;
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.InstrumentationRegistry;
@@ -40,6 +41,8 @@ import org.mockito.MockitoAnnotations;
 public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Mock
+    Handler mHandler;
+    @Mock
     MirrorWindowControl mMirrorWindowControl;
     @Mock
     WindowMagnifierCallback mWindowMagnifierCallback;
@@ -51,6 +54,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mWindowMagnificationController = new WindowMagnificationController(getContext(),
+                mHandler,
                 mMirrorWindowControl, mWindowMagnifierCallback);
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));

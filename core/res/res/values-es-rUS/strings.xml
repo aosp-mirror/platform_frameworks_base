@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"El administrador no permite hacer un uso personal del dispositivo"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dispositivo administrado"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tu organización administra este dispositivo y es posible que controle el tráfico de red. Presiona para obtener más información."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"El administrador cambió la configuración de la ubicación"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"Presiona para ver la configuración de la ubicación."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Las apps pueden acceder a tu ubicación"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Para obtener más información, comunícate con tu administrador de TI"</string>
     <string name="country_detector" msgid="7023275114706088854">"Detector de país"</string>
     <string name="location_service" msgid="2439187616018455546">"Servicio de ubicación"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Servicio de Sistemas Globales de Navegación por Satélites (GNSS)"</string>
@@ -201,8 +201,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Se borrarán los datos del dispositivo"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"No se puede usar la app de administrador. Ahora se borrará tu dispositivo.\n\nSi tienes preguntas, comunícate con el administrador de tu organización."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> inhabilitó la impresión."</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Un administrador suspendió las apps personales"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Presiona aquí para consultar el cumplimiento de políticas."</string>
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Desbloquea apps personales"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Las apps se bloquearán mañana"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"Tu administrador de TI no permite que se pause el perfil de trabajo durante más de <xliff:g id="DAYS">%1$d</xliff:g> días"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Activar perfil de trabajo"</string>
     <string name="me" msgid="6207584824693813140">"Yo"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opciones de tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opciones de Android TV"</string>
@@ -2067,33 +2069,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabajo"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Vista personal"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Vista de trabajo"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"No se puede compartir con las apps de trabajo"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Tu administrador de TI no te permite compartir este contenido con apps de tu perfil de trabajo"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"No se puede abrir con apps de trabajo"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Tu administrador de TI no te permite abrir este contenido con apps de tu perfil de trabajo"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"No se puede compartir con las apps personales"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Tu administrador de TI no te permite compartir este contenido con apps de tu perfil personal"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"No se puede abrir con apps personales"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Tu administrador de TI no te permite abrir este contenido con apps de tu perfil personal"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"El perfil de trabajo está en pausa"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Activar"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Las apps de trabajo no pueden admitir este contenido"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Las apps de trabajo no pueden abrir este contenido"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Las apps personales no pueden admitir este contenido"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Las apps personales no pueden abrir este contenido"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Graba o reproduce audio en llamadas de telefonía"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Permite que esta app grabe o reproduzca audio en llamadas de telefonía cuando se la asigna como aplicación de teléfono predeterminada."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

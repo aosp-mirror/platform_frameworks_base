@@ -2906,6 +2906,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     mMetrics, mCacheDir, mPackageParserCallback);
 
             ExecutorService executorService = ParallelPackageParser.makeExecutorService();
+            // Prepare apex package info before scanning APKs, these information are needed when
+            // scanning apk in apex.
+            mApexManager.scanApexPackagesTraced(packageParser, executorService);
             // Collect vendor/product/system_ext overlay packages. (Do this before scanning
             // any apps.)
             // For security and version matching reason, only consider overlay packages if they
@@ -20693,7 +20696,6 @@ public class PackageManagerService extends IPackageManager.Stub
         storage.registerListener(mStorageListener);
 
         mInstallerService.systemReady();
-        mApexManager.systemReady(mContext);
         mPackageDexOptimizer.systemReady();
 
         mInjector.getStorageManagerInternal().addExternalStoragePolicy(

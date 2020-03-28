@@ -127,6 +127,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
     private static final boolean DEBUG_FACE = true;
+    private static final boolean DEBUG_SPEW = false;
     private static final int LOW_BATTERY_THRESHOLD = 20;
 
     private static final String ACTION_FACE_UNLOCK_STARTED
@@ -324,7 +325,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 }
             };
 
-    private class BiometricAuthenticated {
+    @VisibleForTesting
+    static class BiometricAuthenticated {
         private final boolean mAuthenticated;
         private final boolean mIsStrongBiometric;
 
@@ -338,10 +340,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private SparseBooleanArray mUserHasTrust = new SparseBooleanArray();
     private SparseBooleanArray mUserTrustIsManaged = new SparseBooleanArray();
     private SparseBooleanArray mUserTrustIsUsuallyManaged = new SparseBooleanArray();
-    private SparseArray<BiometricAuthenticated> mUserFingerprintAuthenticated = new SparseArray<>();
-    private SparseArray<BiometricAuthenticated> mUserFaceAuthenticated = new SparseArray<>();
     private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
     private Map<Integer, Intent> mSecondaryLockscreenRequirement = new HashMap<Integer, Intent>();
+
+    @VisibleForTesting
+    SparseArray<BiometricAuthenticated> mUserFingerprintAuthenticated = new SparseArray<>();
+    @VisibleForTesting
+    SparseArray<BiometricAuthenticated> mUserFaceAuthenticated = new SparseArray<>();
 
     private static int sCurrentUser;
     private Runnable mUpdateBiometricListeningState = this::updateBiometricListeningState;
@@ -1850,11 +1855,33 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
-        return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
+        final boolean shouldListen =
+                (mBouncer || mAuthInterruptActive || awakeKeyguard
+                        || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !isFaceDisabled(user) && becauseCannotSkipBouncer
                 && !mKeyguardGoingAway && mFaceSettingEnabledForUser.get(user) && !mLockIconPressed
                 && strongAuthAllowsScanning && mIsPrimaryUser
                 && !mSecureCameraLaunched;
+
+        // Too chatty, but very useful when debugging issues.
+        if (DEBUG_SPEW) {
+            Log.v(TAG, "shouldListenForFace(" + user + ")=" + shouldListen + "... "
+                    + ", mBouncer: " + mBouncer
+                    + ", mAuthInterruptActive: " + mAuthInterruptActive
+                    + ", awakeKeyguard: " + awakeKeyguard
+                    + ", shouldListenForFaceAssistant: " + shouldListenForFaceAssistant()
+                    + ", mSwitchingUser: " + mSwitchingUser
+                    + ", isFaceDisabled(" + user + "): " + isFaceDisabled(user)
+                    + ", becauseCannotSkipBouncer: " + becauseCannotSkipBouncer
+                    + ", mKeyguardGoingAway: " + mKeyguardGoingAway
+                    + ", mFaceSettingEnabledForUser(" + user + "): "
+                            + mFaceSettingEnabledForUser.get(user)
+                    + ", mLockIconPressed: " + mLockIconPressed
+                    + ", strongAuthAllowsScanning: " + strongAuthAllowsScanning
+                    + ", isPrimaryUser: " + mIsPrimaryUser
+                    + ", mSecureCameraLaunched: " + mSecureCameraLaunched);
+        }
+        return shouldListen;
     }
 
     /**
@@ -2049,8 +2076,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     /**
      * Handle {@link #MSG_USER_SWITCHING}
      */
-    private void handleUserSwitching(int userId, IRemoteCallback reply) {
+    @VisibleForTesting
+    void handleUserSwitching(int userId, IRemoteCallback reply) {
         Assert.isMainThread();
+        clearBiometricRecognized();
         mUserTrustIsUsuallyManaged.put(userId, mTrustManager.isTrustUsuallyManaged(userId));
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();

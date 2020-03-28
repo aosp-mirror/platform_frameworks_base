@@ -1837,6 +1837,12 @@ public class PackageParser {
 
         pkg.coreApp = parser.getAttributeBooleanValue(null, "coreApp", false);
 
+        final boolean isolatedSplits = sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifest_isolatedSplits, false);
+        if (isolatedSplits) {
+            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING;
+        }
+
         pkg.mCompileSdkVersion = sa.getInteger(
                 com.android.internal.R.styleable.AndroidManifest_compileSdkVersion, 0);
         pkg.applicationInfo.compileSdkVersion = pkg.mCompileSdkVersion;
@@ -1910,10 +1916,6 @@ public class PackageParser {
         /* Set the global "on SD card" flag */
         if ((flags & PARSE_EXTERNAL_STORAGE) != 0) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
-        }
-
-        if (sa.getBoolean(com.android.internal.R.styleable.AndroidManifest_isolatedSplits, false)) {
-            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING;
         }
 
         // Resource boolean are -1, so 1 means we don't know the value.

@@ -92,7 +92,15 @@ android_test {
         enabled: false,
     },
 
-    data: [":JobTestApp"],
+    data: [
+        ":JobTestApp",
+    ],
+
+    java_resources: [
+        ":PackageParserTestApp1",
+        ":PackageParserTestApp2",
+        ":PackageParserTestApp3",
+    ],
     resource_zips: [":FrameworksServicesTests_apks_as_resources"],
 }
 

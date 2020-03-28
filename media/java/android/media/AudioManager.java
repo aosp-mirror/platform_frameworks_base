@@ -4769,7 +4769,7 @@ public class AudioManager {
      * opened on that device.
      *
      * @param device an instance of {@link AudioDeviceInfo} returned from {@link getDevices()}.
-     * @param delayMs delay in milliseconds desired.  This should be in range of {@code 0}
+     * @param delayMillis delay in milliseconds desired.  This should be in range of {@code 0}
      *     to the value returned by {@link #getMaxAdditionalOutputDeviceDelay()}.
      * @return true if successful, false if the device does not support output device delay
      *     or the delay is not in range of {@link #getMaxAdditionalOutputDeviceDelay()}.
@@ -4777,7 +4777,7 @@ public class AudioManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public boolean setAdditionalOutputDeviceDelay(
-            @NonNull AudioDeviceInfo device, @IntRange(from = 0) int delayMs) {
+            @NonNull AudioDeviceInfo device, @IntRange(from = 0) long delayMillis) {
         Objects.requireNonNull(device);
         // Implement the setter in r-dev or r-tv-dev as needed.
         return false;
@@ -4793,7 +4793,7 @@ public class AudioManager {
      */
     @SystemApi
     @IntRange(from = 0)
-    public int getAdditionalOutputDeviceDelay(@NonNull AudioDeviceInfo device) {
+    public long getAdditionalOutputDeviceDelay(@NonNull AudioDeviceInfo device) {
         Objects.requireNonNull(device);
         // Implement the getter in r-dev or r-tv-dev as needed.
         return 0;
@@ -4811,7 +4811,7 @@ public class AudioManager {
      */
     @SystemApi
     @IntRange(from = 0)
-    public int getMaxAdditionalOutputDeviceDelay(@NonNull AudioDeviceInfo device) {
+    public long getMaxAdditionalOutputDeviceDelay(@NonNull AudioDeviceInfo device) {
         Objects.requireNonNull(device);
         // Implement the getter in r-dev or r-tv-dev as needed.
         return 0;

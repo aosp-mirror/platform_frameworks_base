@@ -17,6 +17,7 @@
 
 package android.view;
 
+import static android.view.WindowInsets.Type.CAPTION_BAR;
 import static android.view.WindowInsets.Type.DISPLAY_CUTOUT;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.IME;

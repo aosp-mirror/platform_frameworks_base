@@ -47,8 +47,9 @@ stubs_defaults {
         "core/java/**/*.logtags",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
-        ":core-current-stubs-source",
-        ":core_public_api_files",
+        ":art-module-public-api-stubs-source",
+        ":conscrypt-module-public-api-stubs-source",
+        ":android_icu4j_public_api_files",
     ],
     // TODO(b/147699819): remove below aidl includes.
     aidl: {

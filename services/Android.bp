@@ -81,10 +81,6 @@ java_library {
         "framework-tethering-stubs-module_libs_api",
     ],
 
-    plugins: [
-        "compat-changeid-annotation-processor",
-    ],
-
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
     //javacflags: ["-Xlint"],
 
@@ -126,6 +122,7 @@ droidstubs {
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
     visibility: ["//visibility:private"],
+    filter_packages: ["com.android."],
     check_api: {
         current: {
             api_file: "api/current.txt",

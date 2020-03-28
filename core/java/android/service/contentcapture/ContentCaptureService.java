@@ -18,7 +18,7 @@ package android.service.contentcapture;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureHelper.toList;
-import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
+import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -60,7 +60,9 @@ import com.android.internal.util.Preconditions;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -118,6 +120,9 @@ public abstract class ContentCaptureService extends Service {
      * </pre>
      */
     public static final String SERVICE_META_DATA = "android.content_capture";
+
+    private final LocalDataShareAdapterResourceManager mDataShareAdapterResourceManager =
+            new LocalDataShareAdapterResourceManager();
 
     private Handler mHandler;
     private IContentCaptureServiceCallback mCallback;
@@ -546,7 +551,8 @@ public abstract class ContentCaptureService extends Service {
                 Preconditions.checkNotNull(executor);
 
                 DataShareReadAdapterDelegate delegate =
-                        new DataShareReadAdapterDelegate(executor, adapter);
+                        new DataShareReadAdapterDelegate(executor, adapter,
+                                mDataShareAdapterResourceManager);
 
                 try {
                     callback.accept(delegate);
@@ -653,16 +659,17 @@ public abstract class ContentCaptureService extends Service {
 
     private static class DataShareReadAdapterDelegate extends IDataShareReadAdapter.Stub {
 
+        private final WeakReference<LocalDataShareAdapterResourceManager> mResourceManagerReference;
         private final Object mLock = new Object();
-        private final WeakReference<DataShareReadAdapter> mAdapterReference;
-        private final WeakReference<Executor> mExecutorReference;
 
-        DataShareReadAdapterDelegate(Executor executor, DataShareReadAdapter adapter) {
+        DataShareReadAdapterDelegate(Executor executor, DataShareReadAdapter adapter,
+                LocalDataShareAdapterResourceManager resourceManager) {
             Preconditions.checkNotNull(executor);
             Preconditions.checkNotNull(adapter);
+            Preconditions.checkNotNull(resourceManager);
 
-            mExecutorReference = new WeakReference<>(executor);
-            mAdapterReference = new WeakReference<>(adapter);
+            resourceManager.initializeForDelegate(this, adapter, executor);
+            mResourceManagerReference = new WeakReference<>(resourceManager);
         }
 
         @Override
@@ -670,6 +677,10 @@ public abstract class ContentCaptureService extends Service {
                 throws RemoteException {
             synchronized (mLock) {
                 executeAdapterMethodLocked(adapter -> adapter.onStart(fd), "onStart");
+
+                // Client app and Service successfully connected, so this object would be kept alive
+                // until the session has finished.
+                clearHardReferences();
             }
         }
 
@@ -678,16 +689,23 @@ public abstract class ContentCaptureService extends Service {
             synchronized (mLock) {
                 executeAdapterMethodLocked(
                         adapter -> adapter.onError(errorCode), "onError");
+                clearHardReferences();
             }
         }
 
         private void executeAdapterMethodLocked(Consumer<DataShareReadAdapter> adapterFn,
                 String methodName) {
-            DataShareReadAdapter adapter = mAdapterReference.get();
-            Executor executor = mExecutorReference.get();
+            LocalDataShareAdapterResourceManager resourceManager = mResourceManagerReference.get();
+            if (resourceManager == null) {
+                Slog.w(TAG, "Can't execute " + methodName + "(), resource manager has been GC'ed");
+                return;
+            }
+
+            DataShareReadAdapter adapter = resourceManager.getAdapter(this);
+            Executor executor = resourceManager.getExecutor(this);
 
             if (adapter == null || executor == null) {
-                Slog.w(TAG, "Can't execute " + methodName + "(), references have been GC'ed");
+                Slog.w(TAG, "Can't execute " + methodName + "(), references are null");
                 return;
             }
 
@@ -697,6 +715,52 @@ public abstract class ContentCaptureService extends Service {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        private void clearHardReferences() {
+            LocalDataShareAdapterResourceManager resourceManager = mResourceManagerReference.get();
+            if (resourceManager == null) {
+                Slog.w(TAG, "Can't clear references, resource manager has been GC'ed");
+                return;
+            }
+
+            resourceManager.clearHardReferences(this);
+        }
+    }
+
+    /**
+     * Wrapper class making sure dependencies on the current application stay in the application
+     * context.
+     */
+    private static class LocalDataShareAdapterResourceManager {
+
+        // Keeping hard references to the remote objects in the current process (static context)
+        // to prevent them to be gc'ed during the lifetime of the application. This is an
+        // artifact of only operating with weak references remotely: there has to be at least 1
+        // hard reference in order for this to not be killed.
+        private Map<DataShareReadAdapterDelegate, DataShareReadAdapter>
+                mDataShareReadAdapterHardReferences = new HashMap<>();
+        private Map<DataShareReadAdapterDelegate, Executor> mExecutorHardReferences =
+                new HashMap<>();
+
+
+        void initializeForDelegate(DataShareReadAdapterDelegate delegate,
+                DataShareReadAdapter adapter, Executor executor) {
+            mDataShareReadAdapterHardReferences.put(delegate, adapter);
+            mExecutorHardReferences.remove(delegate, executor);
+        }
+
+        Executor getExecutor(DataShareReadAdapterDelegate delegate) {
+            return mExecutorHardReferences.get(delegate);
+        }
+
+        DataShareReadAdapter getAdapter(DataShareReadAdapterDelegate delegate) {
+            return mDataShareReadAdapterHardReferences.get(delegate);
+        }
+
+        void clearHardReferences(DataShareReadAdapterDelegate delegate) {
+            mDataShareReadAdapterHardReferences.remove(delegate);
+            mExecutorHardReferences.remove(delegate);
         }
     }
 }

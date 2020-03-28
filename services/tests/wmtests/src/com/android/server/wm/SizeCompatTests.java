@@ -481,7 +481,7 @@ public class SizeCompatTests extends ActivityTestsBase {
         // The letterbox needs a main window to layout.
         addWindowToActivity(mActivity);
         // Compute the frames of the window and invoke {@link ActivityRecord#layoutLetterbox}.
-        mActivity.mRootWindowContainer.performSurfacePlacement(false /* recoveringMemory */);
+        mActivity.mRootWindowContainer.performSurfacePlacement();
         // The letterbox insets should be [350, 0 - 350, 0].
         assertEquals(new Rect(mActivity.getBounds().left, 0, dh - mActivity.getBounds().right, 0),
                 mActivity.getLetterboxInsets());

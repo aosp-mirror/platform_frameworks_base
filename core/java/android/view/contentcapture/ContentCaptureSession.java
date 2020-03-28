@@ -17,12 +17,12 @@ package android.view.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.graphics.Insets;
 import android.util.DebugUtils;
 import android.util.Log;
@@ -51,13 +51,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     private static final String TAG = ContentCaptureSession.class.getSimpleName();
 
     private static final Random sIdGenerator = new Random();
-
-    /**
-    *  ID used to indicate that a session does not exist
-    *  @hide
-    */
-    @SystemApi
-    public static final int NO_SESSION_ID = 0;
 
     /**
      * Initial state, when there is no session.

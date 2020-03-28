@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -67,7 +68,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFI
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -766,11 +766,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (mTmpInitial) {
                 w.resetContentChanged();
             }
-            if (w.mAttrs.type == TYPE_DREAM) {
-                // Don't layout windows behind a dream, so that if it does stuff like hide
-                // the status bar we won't get a bad transition when it goes away.
-                mTmpWindow = w;
-            }
             w.mLayoutNeeded = false;
             w.prelayout();
             final boolean firstLayout = !w.isLaidOut();
@@ -824,10 +819,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         + " mContainingFrame=" + w.getContainingFrame()
                         + " mDisplayFrame=" + w.getDisplayFrameLw());
             }
-        } else if (w.mAttrs.type == TYPE_DREAM) {
-            // Don't layout windows behind a dream, so that if it does stuff like hide the
-            // status bar we won't get a bad transition when it goes away.
-            mTmpWindow = mTmpWindow2;
         }
     };
 
@@ -911,17 +902,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // Take care of the window being ready to display.
             final boolean committed = winAnimator.commitFinishDrawingLocked();
             if (isDefaultDisplay && committed) {
-                if (w.mAttrs.type == TYPE_DREAM) {
-                    // HACK: When a dream is shown, it may at that point hide the lock screen.
-                    // So we need to redo the layout to let the phone window manager make this
-                    // happen.
-                    pendingLayoutChanges |= FINISH_LAYOUT_REDO_LAYOUT;
-                    if (DEBUG_LAYOUT_REPEATS) {
-                        surfacePlacer.debugLayoutRepeats(
-                                "dream and commitFinishDrawingLocked true",
-                                pendingLayoutChanges);
-                    }
-                }
                 if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                     if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                             "First draw done in potential wallpaper target " + w);
@@ -3021,6 +3001,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (recentsStack != null) {
             pw.println(prefix + "recentsStack=" + recentsStack.getName());
         }
+        final ActivityStack dreamStack =
+                getStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_DREAM);
+        if (dreamStack != null) {
+            pw.println(prefix + "dreamStack=" + dreamStack.getName());
+        }
 
         pw.println();
         mPinnedStackControllerLocked.dump(prefix, pw);
@@ -3209,7 +3194,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                 performLayout(true /*initial*/, updateInputWindows);
             } else if (mode == UPDATE_FOCUS_REMOVING_FOCUS) {
-                mWmService.mRoot.performSurfacePlacement(false);
+                mWmService.mRoot.performSurfacePlacement();
             }
         }
 
@@ -3846,7 +3831,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     // TODO: Super crazy long method that should be broken down...
-    void applySurfaceChangesTransaction(boolean recoveringMemory) {
+    void applySurfaceChangesTransaction() {
         final WindowSurfacePlacer surfacePlacer = mWmService.mWindowPlacerLocked;
 
         mTmpUpdateAllDrawn.clear();
@@ -4053,10 +4038,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /**
      * Takes a snapshot of the display.  In landscape mode this grabs the whole screen.
      * In portrait mode, it grabs the full screenshot.
-     *
-     * @param config of the output bitmap
      */
-    Bitmap screenshotDisplayLocked(Bitmap.Config config) {
+    Bitmap screenshotDisplayLocked() {
         if (!mWmService.mPolicy.isScreenOn()) {
             if (DEBUG_SCREENSHOT) {
                 Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
@@ -4101,8 +4084,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // Create a copy of the screenshot that is immutable and backed in ashmem.
         // This greatly reduces the overhead of passing the bitmap between processes.
-        final Bitmap ret = bitmap.createAshmemBitmap(config);
-        bitmap.recycle();
+        final Bitmap ret = bitmap.asShared();
+        if (ret != bitmap) {
+            bitmap.recycle();
+        }
         return ret;
     }
 
@@ -5628,6 +5613,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void onDisplayChanged() {
+        mDisplay.getRealSize(mTmpDisplaySize);
+        setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
+        updateDisplayInfo();
+
         // The window policy is responsible for stopping activities on the default display.
         final int displayId = mDisplay.getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
@@ -5639,10 +5628,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mOffToken = null;
             }
         }
-
-        mDisplay.getRealSize(mTmpDisplaySize);
-        setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
-        updateDisplayInfo();
         mWmService.requestTraversal();
     }
 

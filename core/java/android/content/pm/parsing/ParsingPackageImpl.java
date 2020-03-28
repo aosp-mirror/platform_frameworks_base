@@ -433,6 +433,10 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
                     R.styleable.AndroidManifest_compileSdkVersion, 0));
             setCompileSdkVersionCodename(manifestArray.getNonConfigurationString(
                     R.styleable.AndroidManifest_compileSdkVersionCodename, 0));
+
+            setIsolatedSplitLoading(manifestArray.getBoolean(
+                    R.styleable.AndroidManifest_isolatedSplits, false));
+
         }
     }
 

@@ -16,7 +16,6 @@
 
 package android.hardware.soundtrigger;
 
-import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.ConfidenceLevel;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
@@ -51,10 +50,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         Keyphrase unparceled = Keyphrase.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(keyphrase.id, unparceled.id);
-        assertNull(unparceled.users);
-        assertEquals(keyphrase.locale, unparceled.locale);
-        assertEquals(keyphrase.text, unparceled.text);
+        assertEquals(keyphrase.getId(), unparceled.getId());
+        assertNull(unparceled.getUsers());
+        assertEquals(keyphrase.getLocale(), unparceled.getLocale());
+        assertEquals(keyphrase.getText(), unparceled.getText());
     }
 
     @SmallTest
@@ -71,10 +70,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         Keyphrase unparceled = Keyphrase.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(keyphrase.id, unparceled.id);
-        assertTrue(Arrays.equals(keyphrase.users, unparceled.users));
-        assertEquals(keyphrase.locale, unparceled.locale);
-        assertEquals(keyphrase.text, unparceled.text);
+        assertEquals(keyphrase.getId(), unparceled.getId());
+        assertTrue(Arrays.equals(keyphrase.getUsers(), unparceled.getUsers()));
+        assertEquals(keyphrase.getLocale(), unparceled.getLocale());
+        assertEquals(keyphrase.getText(), unparceled.getText());
     }
 
     @SmallTest
@@ -91,10 +90,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         Keyphrase unparceled = Keyphrase.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(keyphrase.id, unparceled.id);
-        assertTrue(Arrays.equals(keyphrase.users, unparceled.users));
-        assertEquals(keyphrase.locale, unparceled.locale);
-        assertEquals(keyphrase.text, unparceled.text);
+        assertEquals(keyphrase.getId(), unparceled.getId());
+        assertTrue(Arrays.equals(keyphrase.getUsers(), unparceled.getUsers()));
+        assertEquals(keyphrase.getLocale(), unparceled.getLocale());
+        assertEquals(keyphrase.getText(), unparceled.getText());
     }
 
     @SmallTest
@@ -116,10 +115,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         KeyphraseSoundModel unparceled = KeyphraseSoundModel.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(ksm.uuid, unparceled.uuid);
-        assertNull(unparceled.data);
-        assertEquals(ksm.type, unparceled.type);
-        assertTrue(Arrays.equals(keyphrases, unparceled.keyphrases));
+        assertEquals(ksm.getUuid(), unparceled.getUuid());
+        assertNull(unparceled.getData());
+        assertEquals(ksm.getType(), unparceled.getType());
+        assertTrue(Arrays.equals(keyphrases, unparceled.getKeyphrases()));
     }
 
     @SmallTest
@@ -141,10 +140,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         KeyphraseSoundModel unparceled = KeyphraseSoundModel.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(ksm.uuid, unparceled.uuid);
-        assertEquals(ksm.type, unparceled.type);
-        assertTrue(Arrays.equals(ksm.keyphrases, unparceled.keyphrases));
-        assertTrue(Arrays.equals(ksm.data, unparceled.data));
+        assertEquals(ksm.getUuid(), unparceled.getUuid());
+        assertEquals(ksm.getType(), unparceled.getType());
+        assertTrue(Arrays.equals(ksm.getKeyphrases(), unparceled.getKeyphrases()));
+        assertTrue(Arrays.equals(ksm.getData(), unparceled.getData()));
     }
 
     @SmallTest
@@ -163,10 +162,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         KeyphraseSoundModel unparceled = KeyphraseSoundModel.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(ksm.uuid, unparceled.uuid);
-        assertEquals(ksm.type, unparceled.type);
-        assertNull(unparceled.keyphrases);
-        assertTrue(Arrays.equals(ksm.data, unparceled.data));
+        assertEquals(ksm.getUuid(), unparceled.getUuid());
+        assertEquals(ksm.getType(), unparceled.getType());
+        assertNull(unparceled.getKeyphrases());
+        assertTrue(Arrays.equals(ksm.getData(), unparceled.getData()));
     }
 
     @SmallTest
@@ -185,10 +184,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         KeyphraseSoundModel unparceled = KeyphraseSoundModel.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(ksm.uuid, unparceled.uuid);
-        assertEquals(ksm.type, unparceled.type);
-        assertTrue(Arrays.equals(ksm.keyphrases, unparceled.keyphrases));
-        assertTrue(Arrays.equals(ksm.data, unparceled.data));
+        assertEquals(ksm.getUuid(), unparceled.getUuid());
+        assertEquals(ksm.getType(), unparceled.getType());
+        assertTrue(Arrays.equals(ksm.getKeyphrases(), unparceled.getKeyphrases()));
+        assertTrue(Arrays.equals(ksm.getData(), unparceled.getData()));
     }
 
     @LargeTest
@@ -212,10 +211,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         KeyphraseSoundModel unparceled = KeyphraseSoundModel.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(ksm.uuid, unparceled.uuid);
-        assertEquals(ksm.type, unparceled.type);
-        assertTrue(Arrays.equals(ksm.data, unparceled.data));
-        assertTrue(Arrays.equals(ksm.keyphrases, unparceled.keyphrases));
+        assertEquals(ksm.getUuid(), unparceled.getUuid());
+        assertEquals(ksm.getType(), unparceled.getType());
+        assertTrue(Arrays.equals(ksm.getData(), unparceled.getData()));
+        assertTrue(Arrays.equals(ksm.getKeyphrases(), unparceled.getKeyphrases()));
     }
 
     @SmallTest

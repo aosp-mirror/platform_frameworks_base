@@ -418,8 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaliya (qizil/yashil)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaliya (ko‘k/sariq)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Rangni tuzatish"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Ranglarni tuzatish orqali qurilmangizda ranglar qanday chiqishini tuzatish mumkin"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> bilan almashtirildi"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi"</string>
@@ -534,4 +533,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Foydalanuvchilar o‘zlarining ilovalari va kontenlariga egalar"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Hisobingizdan ilovalar va kontentlarga kirishga cheklov o‘rnatishingiz mumkin"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Foydalanuvchi"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Cheklangan profil"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Foydalanuvchi qo‘shilsinmi?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Bu qurilmadan bir necha kishi alohida foydalanuvchilar qo‘shib foydalanishi mumkin. Har bir foydalanuvchiga diskda joy ajratiladi, tayinlangan hajm ilovalar, ekran foni rasmi, va hokazolarga taqsimlanishi mumkin. Foydalanuvchilar Wi-Fi kabi sozlamalarni o‘zgartirsa, qolganlarda ham aks etishi mumkin. \n\nYangi profil qo‘shilgach, uni sozlash lozim.\n\nQurilmaning istalgan foydalanuvchisi ilovalarni barcha hisoblar uchun yangilashi mumkin. Maxsus imkoniyatlar sozlamalari va xizmatlar yangi foydalanuvchiga o‘tkazilmasligi mumkin."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Yangi profil qo‘shilgach, uni sozlash lozim.\n\nQurilmaning istalgan foydalanuvchisi ilovalarni barcha hisoblar uchun yangilashi mumkin."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Profil hozir sozlansinmi?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Agar foydalanuvchi profilini hozir sozlay olmasa, keyinroq ham sozlab olishi mumkin."</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Profil hozir sozlansinmi?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Hozir sozlash"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Hozir emas"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Qo‘shish"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Yangi foydalanuvchi"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Yangi profil"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Foydalanuvchi ma‘lumoti"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profil haqida axborot"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Cheklangan profil yaratish uchun, shaxsiy ilovlar va ma‘lumotlarni himoyalash maqsadida avval ekran qulfini yaratish lozim."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Qulf o‘rnatish"</string>
 </resources>

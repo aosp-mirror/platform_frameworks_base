@@ -78,9 +78,7 @@ public class SecureSettingsValidators {
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         // technically either ComponentName or class name, but there's proper value
         // validation at callsites, so allow any non-null string
-        VALIDATORS.put(
-                Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
-                ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
+        VALIDATORS.put(Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT, value -> value != null);
         VALIDATORS.put(Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED, BOOLEAN_VALIDATOR);
@@ -143,6 +141,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.SYSTEM_NAVIGATION_KEYS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.QS_TILES, TILE_LIST_VALIDATOR);
+        VALIDATORS.put(Secure.CONTROLS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DOZE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DOZE_ALWAYS_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DOZE_PICK_UP_GESTURE, BOOLEAN_VALIDATOR);
@@ -252,7 +251,7 @@ public class SecureSettingsValidators {
                         Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
                         Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL));
         VALIDATORS.put(
-                Secure.ACCESSIBILITY_BUTTON_LONG_PRESS_TARGETS,
+                Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
     }
 }

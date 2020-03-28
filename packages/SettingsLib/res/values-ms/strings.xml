@@ -418,8 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (merah-hijau)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (biru-kuning)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Pembetulan warna"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Pembetulan warna membolehkan anda melaraskan cara warna dipaparkan pada peranti anda"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Diatasi oleh <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Kira-kira <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi"</string>
@@ -534,4 +533,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Pengguna mempunyai apl dan kandungan mereka sendiri"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Anda boleh menyekat akses kepada apl dan kandungan dari akaun anda"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Pengguna"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profil terhad"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Tambah pengguna baharu?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Anda boleh berkongsi peranti ini dengan orang lain dengan membuat pengguna tambahan. Setiap pengguna mempunyai ruang mereka sendiri, yang boleh diperibadikan dengan apl, kertas dinding dan sebagainya. Pengguna juga boleh melaraskan tetapan peranti seperti Wi-Fi yang akan memberi kesan kepada semua orang.\n\nApabila anda menambah pengguna baharu, orang itu perlu menyediakan ruang mereka.\n\nMana-mana pengguna boleh mengemas kini apl untuk semua pengguna lain. Tetapan dan perkhidmatan kebolehaksesan tidak boleh dipindahkan kepada pengguna baharu."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Apabila anda menambah pengguna baharu, orang itu perlu menyediakan ruang mereka.\n\nMana-mana pengguna boleh mengemas kini apl untuk semua pengguna lain."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Sediakan pengguna sekarang?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Pastikan orang itu tersedia untuk mengambil peranti dan menyediakan ruangan"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Sediakan profil sekarang?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Sediakan sekarang"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Bukan sekarang"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Tambah"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Pengguna baharu"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Profil baharu"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Maklumat pengguna"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Maklumat profil"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Sebelum anda boleh membuat profil yang terhad, anda perlu menyediakan kunci skrin untuk melindungi apl dan data peribadi anda."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Tetapkan kunci"</string>
 </resources>

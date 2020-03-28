@@ -37,10 +37,10 @@ import java.util.Objects;
 
 public class WifiSignalController extends
         SignalController<WifiSignalController.WifiState, SignalController.IconGroup> {
-    private final boolean mHasMobileData;
+    private final boolean mHasMobileDataFeature;
     private final WifiStatusTracker mWifiTracker;
 
-    public WifiSignalController(Context context, boolean hasMobileData,
+    public WifiSignalController(Context context, boolean hasMobileDataFeature,
             CallbackHandler callbackHandler, NetworkControllerImpl networkController,
             WifiManager wifiManager) {
         super("WifiSignalController", context, NetworkCapabilities.TRANSPORT_WIFI,
@@ -52,7 +52,7 @@ public class WifiSignalController extends
         mWifiTracker = new WifiStatusTracker(mContext, wifiManager, networkScoreManager,
                 connectivityManager, this::handleStatusUpdated);
         mWifiTracker.setListening(true);
-        mHasMobileData = hasMobileData;
+        mHasMobileDataFeature = hasMobileDataFeature;
         if (wifiManager != null) {
             wifiManager.registerTrafficStateCallback(context.getMainExecutor(),
                     new WifiTrafficStateCallback());
@@ -85,9 +85,10 @@ public class WifiSignalController extends
         // only show wifi in the cluster if connected or if wifi-only
         boolean visibleWhenEnabled = mContext.getResources().getBoolean(
                 R.bool.config_showWifiIndicatorWhenEnabled);
-        boolean wifiVisible = mCurrentState.enabled
-                && ((mCurrentState.connected && mCurrentState.inetCondition == 1)
-                    || !mHasMobileData || visibleWhenEnabled);
+        boolean wifiVisible = mCurrentState.enabled && (
+                (mCurrentState.connected && mCurrentState.inetCondition == 1)
+                        || !mHasMobileDataFeature || mWifiTracker.isDefaultNetwork
+                        || visibleWhenEnabled);
         String wifiDesc = mCurrentState.connected ? mCurrentState.ssid : null;
         boolean ssidPresent = wifiVisible && mCurrentState.ssid != null;
         String contentDescription = getTextIfExists(getContentDescription()).toString();

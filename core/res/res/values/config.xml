@@ -2779,6 +2779,10 @@
     <string name="config_systemUIServiceComponent" translatable="false"
             >com.android.systemui/com.android.systemui.SystemUIService</string>
 
+    <!-- Package handling Quick controls -->
+    <string name="config_controlsPackage" translatable="false"
+            >com.android.systemui</string>
+
     <!-- Keyguard component -->
     <string name="config_keyguardComponent" translatable="false"
             >com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
@@ -4423,5 +4427,8 @@
 
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">false</bool>
+
+    <!-- Set to true to make assistant show in front of the dream/screensaver. -->
+    <bool name="config_assistantOnTopOfDream">false</bool>
 
 </resources>

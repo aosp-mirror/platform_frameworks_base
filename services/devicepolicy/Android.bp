@@ -13,8 +13,4 @@ java_library_static {
         "services.core",
         "app-compat-annotations",
     ],
-
-    plugins: [
-        "compat-changeid-annotation-processor",
-    ],
 }

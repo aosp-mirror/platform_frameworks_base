@@ -385,15 +385,14 @@ public class ParsingPackageUtils {
             return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME);
         }
 
-        TypedArray manifestArray = res.obtainAttributes(parser, R.styleable.AndroidManifest);
+        final TypedArray manifestArray = res.obtainAttributes(parser, R.styleable.AndroidManifest);
         try {
-            boolean isCoreApp = parser.getAttributeBooleanValue(null, "coreApp", false);
-
-            ParsingPackage pkg = mCallback.startParsingPackage(pkgName, apkPath, codePath,
-                    manifestArray, isCoreApp);
-
-            ParseResult<ParsingPackage> result = parseBaseApkTags(input, pkg, manifestArray,
-                    res, parser, flags);
+            final boolean isCoreApp =
+                    parser.getAttributeBooleanValue(null, "coreApp", false);
+            final ParsingPackage pkg = mCallback.startParsingPackage(
+                    pkgName, apkPath, codePath, manifestArray, isCoreApp);
+            final ParseResult<ParsingPackage> result =
+                    parseBaseApkTags(input, pkg, manifestArray, res, parser, flags);
             if (result.isError()) {
                 return result;
             }
@@ -619,14 +618,12 @@ public class ParsingPackageUtils {
             return sharedUserResult;
         }
 
-        pkg.setInstallLocation(anInt(PackageParser.PARSE_DEFAULT_INSTALL_LOCATION,
+        pkg.setInstallLocation(anInteger(PackageParser.PARSE_DEFAULT_INSTALL_LOCATION,
                 R.styleable.AndroidManifest_installLocation, sa))
-                .setTargetSandboxVersion(anInt(PackageParser.PARSE_DEFAULT_TARGET_SANDBOX,
+                .setTargetSandboxVersion(anInteger(PackageParser.PARSE_DEFAULT_TARGET_SANDBOX,
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
-                .setExternalStorage((flags & PackageParser.PARSE_EXTERNAL_STORAGE) != 0)
-                .setIsolatedSplitLoading(
-                        bool(false, R.styleable.AndroidManifest_isolatedSplits, sa));
+                .setExternalStorage((flags & PackageParser.PARSE_EXTERNAL_STORAGE) != 0);
 
         boolean foundApp = false;
         final int depth = parser.getDepth();
@@ -2639,6 +2636,10 @@ public class ParsingPackageUtils {
         return sa.getInt(attribute, defaultValue);
     }
 
+    private static int anInteger(int defaultValue, @StyleableRes int attribute, TypedArray sa) {
+        return sa.getInteger(attribute, defaultValue);
+    }
+
     private static int anInt(@StyleableRes int attribute, TypedArray sa) {
         return sa.getInt(attribute, 0);
     }
@@ -2669,6 +2670,6 @@ public class ParsingPackageUtils {
         boolean hasFeature(String feature);
 
         ParsingPackage startParsingPackage(String packageName, String baseCodePath, String codePath,
-                TypedArray manifestArray, boolean isCoreApp);
+                @NonNull TypedArray manifestArray, boolean isCoreApp);
     }
 }

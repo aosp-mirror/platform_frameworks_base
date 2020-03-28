@@ -545,6 +545,9 @@ java_library {
     static_libs: [
         "exoplayer2-extractor",
         "android.hardware.wifi-V1.0-java-constants",
+
+        // Additional dependencies needed to build the ike API classes.
+        "ike-internals",
     ],
     libs: ["icing-java-proto-lite"],
     apex_available: ["//apex_available:platform"],
@@ -556,34 +559,9 @@ java_library {
     ],
 }
 
-java_library {
-    name: "framework-annotation-proc",
-    srcs: [
-        ":framework-all-sources",
-        "core/java/**/*.logtags",
-    ],
-    sdk_version: "core_platform",
-    libs: [
-        "app-compat-annotations",
-        "ext",
-        "icing-java-proto-lite",
-        "unsupportedappusage",
-    ],
-
-    installable: false,
-    plugins: [
-        "compat-changeid-annotation-processor",
-    ],
-    static_libs: [
-        "framework-internal-utils",
-        "exoplayer2-extractor",
-        "android.hardware.wifi-V1.0-java-constants",
-    ]
-}
-
 platform_compat_config {
-    name: "framework-platform-compat-config",
-    src: ":framework-annotation-proc",
+   name: "framework-platform-compat-config",
+   src: ":framework-minus-apex",
 }
 
 // A temporary build target that is conditionally included on the bootclasspath if
@@ -961,7 +939,6 @@ filegroup {
         "core/java/android/content/pm/InstallationFileLocation.aidl",
         "core/java/android/content/pm/IDataLoaderStatusListener.aidl",
         "core/java/android/content/pm/IPackageInstallerSessionFileSystemConnector.aidl",
-        "core/java/android/content/pm/NamedParcelFileDescriptor.aidl",
     ],
     path: "core/java",
 }

@@ -120,7 +120,7 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
     }
 
     @Override
-    public boolean satisfiedBy(NetworkSpecifier other) {
+    public boolean canBeSatisfiedBy(NetworkSpecifier other) {
         if (!(other instanceof WifiAwareAgentNetworkSpecifier)) {
             return false;
         }
