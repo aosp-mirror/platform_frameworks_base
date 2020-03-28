@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Autoriser"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Débogage USB non autorisé"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"L\'utilisateur actuellement connecté sur cet appareil ne peut pas activer le débogage USB. Pour utiliser cette fonctionnalité, l\'utilisateur principal doit se connecter."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Autoriser le débogage sans fil sur ce réseau?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Nom du réseau (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresse Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Toujours autoriser sur ce réseau"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Autoriser"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Débogage sans fil non autorisé"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"L\'utilisateur actuellement connecté sur cet appareil ne peut pas activer le débogage sans fil. Pour utiliser cette fonctionnalité, l\'utilisateur principal doit se connecter."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Le port USB a été désactivé"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Pour protéger votre appareil des liquides et des débris, le port USB est désactivé et ne pourra pas détecter les accessoires.\n\nVous verrez une notification lorsque vous pourrez utiliser le port USB à nouveau."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Le port USB a été activé afin de détecté les chargeurs et les accessoires"</string>
@@ -80,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Essayez de faire une autre capture d\'écran"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Impossible d\'enregistrer la capture d\'écran, car l\'espace de stockage est limité"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'application ou votre organisation n\'autorise pas les saisies d\'écran"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Fermer la capture d\'écran"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"Ouvrir la capture d\'écran"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Enregistreur d\'écran"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notification en cours pour une session d\'enregistrement d\'écran"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Commencer l\'enregistrement?"</string>
@@ -92,7 +100,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"Démarrer"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Enregistrement de l\'écran"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Enregistrement de l\'écran et de l\'audio"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afficher là où le doigt touche l\'écran"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afficher les endroits touchés à l\'écran"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Toucher pour arrêter"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Arrêter"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Pause"</string>
@@ -146,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Schéma incorrect"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Mot de passe incorrect"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Trop de tentatives incorrectes. \nRéessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Réessayez. Tentative <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> sur <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Trop de tentatives incorrectes. Les données de cet appareil seront supprimées."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Trop de tentatives incorrectes. Cet utilisateur sera supprimé."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Trop de tentatives incorrectes. Ce profil professionnel et ses données seront supprimés."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Fermer"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Touchez le capteur d\'empreintes digitales"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Icône d\'empreinte digitale"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Recherche de votre visage…"</string>
@@ -217,7 +230,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Ouvrir les détails de la pile"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Pile : <xliff:g id="NUMBER">%d</xliff:g> pour cent"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Pile chargée à <xliff:g id="PERCENTAGE">%1$s</xliff:g> pour cent (environ <xliff:g id="TIME">%2$s</xliff:g> d\'autonomie en fonction de votre usage)"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"La pile est en cours de charge : <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Pile en charge : <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Paramètres système"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Notifications"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Afficher toutes les notifications"</string>
@@ -488,6 +501,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historique"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notifications silencieuses"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Notifications d\'alerte"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversations"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Effacer toutes les notifications silencieuses"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Les notifications sont suspendues par le mode Ne pas déranger"</string>
@@ -551,6 +565,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ce profil est connecté à <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, qui peut contrôler votre activité professionnelle sur le réseau, y compris l\'activité relative aux courriels, aux applications et aux sites Web.\n\nVous êtes également connecté à <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, qui peut contrôler votre activité personnelle sur le réseau."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Maintenu déverrouillé par TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"L\'appareil restera verrouillé jusqu\'à ce que vous le déverrouilliez manuellement"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Voir les notifications plus rapidement"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Afficher les notifications avant de déverrouiller l\'appareil"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Non, merci"</string>
@@ -686,10 +701,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Vous aider à vous concentrer, sans son ni vibration."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Attire votre attention à l\'aide de sons et de vibrations."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Garde votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"S\'affiche en haut de la section des conversations sous forme de bulle."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Par défaut, toutes les conversations <xliff:g id="APP_NAME_0">%1$s</xliff:g> s\'affichent sous forme de bulles. Vous pouvez gérer cela dans <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Priorité"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bulles récentes et les bulles ignorées s\'afficheront ici"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ces notifications ne peuvent pas être modifiées"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ce groupe de notifications ne peut pas être configuré ici"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notification par mandataire"</string>
@@ -959,13 +976,8 @@
     <string name="device_services" msgid="1549944177856658705">"Services de l\'appareil"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sans titre"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Touchez pour redémarrer cette application et passer en plein écran."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Ouvrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Paramètres pour les bulles de l\'application <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Autoriser les bulles de l\'application <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Gérer"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Refuser"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Autoriser"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Me demander plus tard"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g> et <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> autres"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Déplacer"</string>
@@ -974,25 +986,54 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Déplacer dans coin inf. gauche"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Déplacer dans coin inf. droit"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Fermer"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ne pas afficher les conversations dans des bulles"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Clavarder en utilisant des bulles"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Les nouvelles conversations s\'affichent sous forme d\'icônes flottantes (de bulles). Touchez une bulle pour l\'ouvrir. Faites-la glisser pour la déplacer."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Gérer les paramètres des bulles"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Toucher Gérer pour désactiver les bulles de cette application"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"La navigation système a été mise à jour. Pour apporter des modifications, accédez au menu Paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez au menu Paramètres pour mettre à jour la navigation système"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Veille"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Fenêtre d\'agrandissement superposée"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Commandes pour la fenêtre d\'agrandissement"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"Commandes rapides"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"Ajouter des commandes"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Choisissez une application de laquelle ajouter des commandes"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> favori actuel.</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> favoris actuels.</item>
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ajoutez des commandes pour vos appareils connectés"</string>
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> commande ajoutée.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Choisissez les commandes d\'accès rapide"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Sélectionnez les commandes auxquelles vous souhaitez accéder à partir du menu de l\'interrupteur"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Maintenez le doigt sur une commande et faites-la glisser pour la déplacer"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossible de charger la liste des commandes."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"Ajouter aux commandes rapides"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"Ajouter aux favoris"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"L\'application <xliff:g id="APP">%s</xliff:g> a suggéré d\'ajouter cette commande à vos favoris."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Commandes mises à jour"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Le NIP contient des lettres ou des symboles"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Vérifier <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"Vérification en cours…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Entrez le NIP"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Essayez un autre NIP"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Confirmation en cours…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Confirmer la modification pour <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"Balayez l\'écran pour en afficher davantage"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Chargement des recommandations…"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"Fermer cette session multimédia"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Délai expiré, vérifiez l\'appli"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Erreur. Veuillez réessayer."</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"En cours"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"Maintenez enfoncé l\'interrupteur pour afficher les nouvelles commandes"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Ajouter des commandes"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Modifier des commandes"</string>
 </resources>

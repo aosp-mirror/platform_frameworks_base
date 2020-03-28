@@ -35,7 +35,7 @@
     <string name="battery_low_why" msgid="2056750982959359863">"الإعدادات"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"هل تريد تفعيل ميزة توفير شحن البطارية؟"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"لمحة حول ميزة \"توفير شحن البطارية\""</string>
-    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"تشغيل"</string>
+    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"تفعيل"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"هل تريد تفعيل ميزة توفير شحن البطارية؟"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"الإعدادات"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
@@ -62,7 +62,13 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"السماح دائمًا من هذا الكمبيوتر"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"سماح"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"‏لا يُسمح بتصحيح أخطاء USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تشغيل تصحيح أخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تفعيل تصحيح الأخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"‏هل تريد السماح باستخدام ميزة \"تصحيح الأخطاء عبر شبكة Wi-Fi\" على هذه الشبكة؟"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"‏اسم الشبكة (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nعنوان شبكة Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"السماح باستخدام هذه الميزة على هذه الشبكة دائمًا"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"سماح"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"‏غير مسموح باستخدام ميزة \"تصحيح الأخطاء عبر شبكة Wi-Fi\""</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"‏لا يمكن للمستخدم المسجِّل دخوله حاليًا على هذا الجهاز تفعيل ميزة \"تصحيح الأخطاء عبر شبكة Wi-Fi\". لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏تمّ إيقاف منفذ USB"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"‏لحماية جهازك من السوائل أو الشوائب، سيتمّ إيقاف منفذ USB ولن يتم رصد أيّ ملحقات.\n\nوسيتمّ إعلامك عندما يُسمح باستخدام منفذ USB مرة أخرى."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"‏تم تفعيل منفذ USB لاكتشاف أجهزة الشحن والملحقات."</string>
@@ -80,31 +86,21 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"جرّب أخذ لقطة الشاشة مرة أخرى"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"يتعذر حفظ لقطة الشاشة لأن مساحة التخزين المتاحة محدودة."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"يحظر التطبيق أو تحظر مؤسستك التقاط لقطات شاشة"</string>
-    <!-- no translation found for screenrecord_name (2596401223859996572) -->
-    <skip />
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"إغلاق لقطة الشاشة"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"فتح لقطة الشاشة"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"مسجّل الشاشة"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"إشعار مستمر لجلسة تسجيل شاشة"</string>
-    <!-- no translation found for screenrecord_start_label (1750350278888217473) -->
-    <skip />
-    <!-- no translation found for screenrecord_description (1123231719680353736) -->
-    <skip />
-    <!-- no translation found for screenrecord_audio_label (6183558856175159629) -->
-    <skip />
-    <!-- no translation found for screenrecord_device_audio_label (9016927171280567791) -->
-    <skip />
-    <!-- no translation found for screenrecord_device_audio_description (4922694220572186193) -->
-    <skip />
-    <!-- no translation found for screenrecord_mic_label (2111264835791332350) -->
-    <skip />
-    <!-- no translation found for screenrecord_device_audio_and_mic_label (1831323771978646841) -->
-    <skip />
-    <!-- no translation found for screenrecord_start (330991441575775004) -->
-    <skip />
-    <!-- no translation found for screenrecord_ongoing_screen_only (4459670242451527727) -->
-    <skip />
-    <!-- no translation found for screenrecord_ongoing_screen_and_audio (5351133763125180920) -->
-    <skip />
-    <!-- no translation found for screenrecord_taps_label (1595690528298857649) -->
-    <skip />
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"هل تريد بدء التسجيل؟"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"‏أثناء التسجيل، يمكن أن يسجّل نظام Android أي معلومات حساسة مرئية على شاشتك أو يتم تشغيلها على جهازك. ويشمل ذلك كلمات المرور ومعلومات الدفع والصور والرسائل والمقاطع الصوتية."</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"تسجيل الصوت"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"صوت الجهاز"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"الصوت من جهازك، مثلاً الموسيقى والمكالمات ونغمات الرنين"</string>
+    <string name="screenrecord_mic_label" msgid="2111264835791332350">"الميكروفون"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"صوت الجهاز والميكروفون"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"بدء"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"جارٍ تسجيل الشاشة"</string>
+    <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"جارٍ تسجيل الشاشة والصوت"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"إظهار اللمسات على الشاشة"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"انقر لإيقاف التسجيل"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"إيقاف"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"إيقاف مؤقت"</string>
@@ -117,8 +113,7 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"تمّ حذف تسجيل الشاشة."</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"حدث خطأ أثناء حذف تسجيل الشاشة."</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"تعذّر الحصول على أذونات."</string>
-    <!-- no translation found for screenrecord_start_error (2200660692479682368) -->
-    <skip />
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"حدث خطأ في بدء تسجيل الشاشة"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"‏خيارات نقل الملفات عبر USB"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"‏تثبيت كمشغل وسائط (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"‏تثبيت ككاميرا (PTP)"</string>
@@ -159,6 +154,16 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"نقش غير صحيح"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"كلمة مرور غير صحيحة"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"تم إجراء عدد كبير جدًا من المحاولات غير الصحيحة.\nأعد المحاولة خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية."</string>
+    <!-- no translation found for biometric_dialog_credential_attempts_before_wipe (6751859711975516999) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_device (6585503524026243042) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_user (7015008539146949115) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_profile (5239378521440749682) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_now_wiping_dialog_dismiss (7189432882125106154) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس زر استشعار بصمة الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"رمز بصمة الإصبع"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"جارٍ البحث عن وجهك…"</string>
@@ -218,13 +223,13 @@
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"‏ليست هناك شريحة SIM."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"بيانات الجوّال"</string>
-    <string name="accessibility_cell_data_on" msgid="691666434519443162">"تشغيل بيانات الجوال"</string>
+    <string name="accessibility_cell_data_on" msgid="691666434519443162">"تفعيل بيانات الجوال"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"تم إيقاف بيانات الجوال"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"لم يتم الضبط على استخدام البيانات"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"إيقاف"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"التوصيل عبر البلوتوث"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطائرة."</string>
-    <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏الشبكة الافتراضية الخاصة (VPN) قيد التشغيل."</string>
+    <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏الشبكة الافتراضية الخاصة (VPN) قيد التفعيل."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"‏ليس هناك شريحة SIM."</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"جارٍ تغيير شبكة مشغِّل شبكة الجوّال."</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"فتح تفاصيل البطارية"</string>
@@ -254,13 +259,13 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"إغلاق"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"‏تم إيقاف Wifi."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"‏تم تشغيل Wifi."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"‏تم تفعيل Wifi."</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"الجوّال <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"البطارية <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"إيقاف وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"تشغيل وضع الطائرة."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"تفعيل وضع الطائرة."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"تم إيقاف وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"تم تشغيل وضع الطائرة."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"تم تفعيل وضع الطائرة."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"كتم الصوت تمامًا"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"المنبِّهات فقط"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"عدم الإزعاج"</string>
@@ -268,11 +273,11 @@
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"تم تفعيل \"عدم الإزعاج\"."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="3795983516942423240">"إيقاف البلوتوث."</string>
-    <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"تشغيل البلوتوث."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"تفعيل البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="7362294657419149294">"جارٍ توصيل البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_connected" msgid="5237625393869747261">"تم توصيل البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"تم إيقاف البلوتوث."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"تم تشغيل البلوتوث."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"تم تفعيل البلوتوث."</string>
     <string name="accessibility_quick_settings_location_off" msgid="6122523378294740598">"إيقاف الإبلاغ عن الموقع."</string>
     <string name="accessibility_quick_settings_location_on" msgid="6869947200325467243">"تفعيل ميزة الإبلاغ عن الموقع الجغرافي."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"تم إيقاف الإبلاغ عن الموقع."</string>
@@ -283,18 +288,18 @@
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"وقت أقل."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="7606563260714825190">"إيقاف الفلاش."</string>
     <string name="accessibility_quick_settings_flashlight_unavailable" msgid="7458591827288347635">"تطبيق المصباح اليدوي غير متاح."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"تشغيل الفلاش."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"تفعيل الفلاش."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"تم إيقاف الفلاش."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"تم تشغيل الفلاش."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"تم تفعيل الفلاش."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"تم إيقاف انعكاس اللون."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"تم تشغيل انعكاس اللون."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"تم تفعيل انعكاس اللون."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"تم إيقاف نقطة اتصال الجوّال."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"تم تشغيل نقطة اتصال الجوّال."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"تم تفعيل نقطة اتصال الجوّال."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"توقف إرسال الشاشة."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"وضع العمل معطَّل."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"وضع العمل قيد التشغيل."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"تم إيقاف وضع العمل."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"تم تشغيل وضع العمل."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"تم تفعيل وضع العمل."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"تم إيقاف توفير البيانات."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"تم تفعيل توفير البيانات."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"تم إيقاف \"خصوصية أجهزة الاستشعار\"."</string>
@@ -370,7 +375,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"ليست متصلة"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"لا تتوفر شبكة"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"‏إيقاف Wi-Fi"</string>
-    <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"‏تم تشغيل Wi-Fi"</string>
+    <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"‏تم تفعيل Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"‏لا تتوفر أي شبكة Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"جارٍ التفعيل…"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"بث الشاشة"</string>
@@ -488,7 +493,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"خروج المستخدم الحالي"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"خروج المستخدم"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"هل تريد إضافة مستخدم جديد؟"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"عند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nويُمكن لأي مستخدم إعادة تحميل التطبيقات لجميع المستخدمين الآخرين."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"عند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nويُمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"تم الوصول إلى أقصى عدد للمستخدمين"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="zero">يمكنك إضافة ما يصل إلى <xliff:g id="COUNT">%d</xliff:g> مستخدم.</item>
@@ -511,9 +516,9 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"عدم الإظهار مرة أخرى"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"محو الكل"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"إدارة"</string>
-    <!-- no translation found for manage_notifications_history_text (57055985396576230) -->
-    <skip />
+    <string name="manage_notifications_history_text" msgid="57055985396576230">"السجلّ"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"الإشعارات الصامتة"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"إشعارات التنبيه"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"المحادثات"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"محو جميع الإشعارات الصامتة"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"الرجاء عدم الإزعاج\""</string>
@@ -577,12 +582,13 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"يخضع الملف الشخصي للعمل لإدارة <xliff:g id="ORGANIZATION">%1$s</xliff:g>. تم ربط هذا الملف الشخصي بـ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>، الذي يمكنه مراقبة أنشطة شبكتك، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nتم ربطك بـ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>، الذي يمكنه مراقبة أنشطة شبكتك الشخصية."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"‏فتح القفل باستمرار بواسطة TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"سيظل الجهاز مقفلاً إلى أن يتم فتح قفله يدويًا"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"الحصول على الإشعارات بشكل أسرع"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"الاطّلاع عليها قبل فتح القفل"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"لا، شكرًا"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"إعداد"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="5901885672973736563">"إيقاف التشغيل الآن"</string>
+    <string name="volume_zen_end_now" msgid="5901885672973736563">"إيقاف التفعيل الآن"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"إعدادات الصوت"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"توسيع"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"تصغير"</string>
@@ -675,9 +681,9 @@
     <string name="qs_rearrange" msgid="484816665478662911">"إعادة ترتيب الإعدادات السريعة"</string>
     <string name="show_brightness" msgid="6700267491672470007">"عرض السطوع في الإعدادات السريعة"</string>
     <string name="experimental" msgid="3549865454812314826">"إعدادات تجريبية"</string>
-    <string name="enable_bluetooth_title" msgid="866883307336662596">"تشغيل البلوتوث؟"</string>
-    <string name="enable_bluetooth_message" msgid="6740938333772779717">"لتوصيل لوحة المفاتيح بالجهاز اللوحي، يلزمك تشغيل بلوتوث أولاً."</string>
-    <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"تشغيل"</string>
+    <string name="enable_bluetooth_title" msgid="866883307336662596">"تفعيل البلوتوث؟"</string>
+    <string name="enable_bluetooth_message" msgid="6740938333772779717">"لتوصيل لوحة المفاتيح بالجهاز اللوحي، يلزمك تفعيل بلوتوث أولاً."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"تفعيل"</string>
     <string name="show_silently" msgid="5629369640872236299">"عرض الإشعارات بدون تنبيه صوتي"</string>
     <string name="block" msgid="188483833983476566">"حظر كل الإشعارات"</string>
     <string name="do_not_silence" msgid="4982217934250511227">"عدم كتم التنبيه الصوتي"</string>
@@ -712,9 +718,16 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"يساعدك هذا الإشعار على التركيز بدون صوت أو اهتزاز."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"يلفت هذا الإشعار انتباهك باستخدام الصوت والاهتزاز."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"يلفِت هذا الإشعار انتباهك لهذا المحتوى باستخدام اختصار عائم."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
+    <!-- no translation found for notification_channel_summary_priority (7415770044553264622) -->
     <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
+    <!-- no translation found for notification_conversation_channel_all_bubble (5389290797101635297) -->
+    <skip />
+    <!-- no translation found for notification_conversation_channel_settings (2409977688430606835) -->
+    <skip />
+    <!-- no translation found for notification_priority_title (2079708866333537093) -->
+    <skip />
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ليس هناك فقاعات حديثة"</string>
+    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
     <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"يتعذّر تعديل هذه الإشعارات."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"يتعذّر ضبط مجموعة الإشعارات هذه هنا."</string>
@@ -738,25 +751,18 @@
     <string name="notification_done" msgid="6215117625922713976">"تم"</string>
     <string name="inline_undo" msgid="9026953267645116526">"تراجع"</string>
     <string name="demote" msgid="6225813324237153980">"تحويل الإشعار من محادثة إلى إشعار عادي"</string>
-    <!-- no translation found for notification_conversation_favorite (1905240206975921907) -->
-    <skip />
-    <!-- no translation found for notification_conversation_unfavorite (181383708304763807) -->
-    <skip />
-    <!-- no translation found for notification_conversation_mute (268951550222925548) -->
-    <skip />
+    <string name="notification_conversation_favorite" msgid="1905240206975921907">"محادثة مهمة"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"ليست محادثة مهمة."</string>
+    <string name="notification_conversation_mute" msgid="268951550222925548">"تم كتم الصوت"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"تنبيه"</string>
-    <!-- no translation found for notification_conversation_bubble (2242180995373949022) -->
-    <skip />
-    <!-- no translation found for notification_conversation_unbubble (6908427185031099868) -->
-    <skip />
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"إظهار فقاعة تفسيرية"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"إزالة الفقاعات التفسيرية"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"إضافة إلى الشاشة الرئيسية"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"عناصر التحكم في الإشعارات"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"خيارات تأجيل الإشعارات"</string>
-    <!-- no translation found for notification_menu_snooze_action (5415729610393475019) -->
-    <skip />
-    <!-- no translation found for notification_menu_settings_action (7085494017202764285) -->
-    <skip />
+    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"تذكيري"</string>
+    <string name="notification_menu_settings_action" msgid="7085494017202764285">"الإعدادات"</string>
     <string name="snooze_undo" msgid="60890935148417175">"تراجع"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"تم تأجيل الإشعار لمدة <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
@@ -795,7 +801,7 @@
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"إيقاف"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"التالي"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"السابق"</string>
-    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"إرجاع"</string>
+    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"ترجيع"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"تقديم سريع"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
@@ -836,8 +842,7 @@
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"تم إيقاف توفير البيانات"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"مفعّل"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"إيقاف"</string>
-    <!-- no translation found for tile_unavailable (3095879009136616920) -->
-    <skip />
+    <string name="tile_unavailable" msgid="3095879009136616920">"غير متوفّر"</string>
     <string name="nav_bar" msgid="4642708685386136807">"شريط التنقل"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"التنسيق"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"نوع زر اليسار الإضافي"</string>
@@ -971,9 +976,9 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"‏تم إيقاف شبكة Wi-Fi"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"تم إيقاف البلوتوث."</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"تم إيقاف وضع \"عدم الإزعاج\""</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"تم تشغيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"تم تشغيل وضع \"عدم الإزعاج\" بواسطة تطبيق (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"تم تشغيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية أو تطبيق."</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة تطبيق (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية أو تطبيق."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"حتى <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="3829697305432866434">"الإبقاء على الإعدادات"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"استبدال"</string>
@@ -1001,13 +1006,8 @@
     <string name="device_services" msgid="1549944177856658705">"خدمات الأجهزة"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"بلا عنوان"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"انقر لإعادة تشغيل هذا التطبيق والانتقال إلى وضع ملء الشاشة."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"فتح <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"إعداد الفقاعات التفسيرية على <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"هل تريد السماح بالفقاعات التفسيرية من <xliff:g id="APP_NAME">%1$s</xliff:g>؟"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"إدارة"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"رفض"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"سماح"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"اسألني لاحقًا"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> من <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> من <xliff:g id="APP_NAME">%2$s</xliff:g> و<xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> أيضًا"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"نقل"</string>
@@ -1016,29 +1016,81 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"نقل إلى أسفل يمين الشاشة"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"نقل إلى أسفل اليسار"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"تجاهل"</string>
-    <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"تم إعادة تحميل التنقل داخل النظام. لإجراء التغييرات، يُرجى الانتقال إلى \"الإعدادات\"."</string>
+    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
+    <skip />
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"انقر على \"إدارة\" لإيقاف الفقاعات من هذا التطبيق."</string>
+    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
+    <skip />
+    <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"تم تحديث التنقل داخل النظام. لإجراء التغييرات، يُرجى الانتقال إلى \"الإعدادات\"."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"الانتقال إلى \"الإعدادات\" لتعديل التنقل داخل النظام"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"وضع الاستعداد"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"نافذة تراكب التكبير"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"نافذة التكبير"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"عناصر التحكم في نافذة التكبير"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"عناصر التحكّم السريعة"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"إضافة عناصر تحكّم"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"اختيار تطبيق لإضافة عناصر التحكّم منه"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="zero"><xliff:g id="NUMBER_1">%s</xliff:g> عنصر مفضّل حالي</item>
-      <item quantity="two">عنصران مفضّلان (<xliff:g id="NUMBER_1">%s</xliff:g>) حاليان</item>
-      <item quantity="few"><xliff:g id="NUMBER_1">%s</xliff:g> عناصر مفضّلة حالية</item>
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> عنصرًا مفضّلاً حاليًا</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> عنصر مفضّل حالي</item>
-      <item quantity="one">عنصر مفضّل (<xliff:g id="NUMBER_0">%s</xliff:g>) واحد حالي</item>
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <!-- no translation found for quick_controls_subtitle (1667408093326318053) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="zero">تمت إضافة <xliff:g id="NUMBER_1">%s</xliff:g> عنصر تحكّم.</item>
+      <item quantity="two">تمت إضافة عنصرَي تحكّم (<xliff:g id="NUMBER_1">%s</xliff:g>).</item>
+      <item quantity="few">تمت إضافة <xliff:g id="NUMBER_1">%s</xliff:g> عناصر تحكّم.</item>
+      <item quantity="many">تمت إضافة <xliff:g id="NUMBER_1">%s</xliff:g> عنصر تحكّم.</item>
+      <item quantity="other">تمت إضافة <xliff:g id="NUMBER_1">%s</xliff:g> عنصر تحكّم.</item>
+      <item quantity="one">تمت إضافة عنصر تحكّم واحد (<xliff:g id="NUMBER_0">%s</xliff:g>).</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"عناصر التحكّم"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"اختيار عناصر التحكّم للوصول السريع"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
+    <!-- no translation found for controls_favorite_subtitle (6604402232298443956) -->
     <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
+    <!-- no translation found for controls_favorite_rearrange (7364147066539766260) -->
     <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"تعذّر تحميل قائمة كل عناصر التحكّم."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"غير ذلك"</string>
+    <!-- no translation found for controls_dialog_title (3475025327938684220) -->
+    <skip />
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"إضافة إلى الإعدادات المفضّلة"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"اقترح تطبيق <xliff:g id="APP">%s</xliff:g> إضافة عنصر التحكّم هذا إلى الإعدادات المفضّلة."</string>
+    <!-- no translation found for controls_dialog_confirmation (586517302736263447) -->
+    <skip />
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"يشتمل رقم التعريف الشخصي على أحرف أو رموز."</string>
+    <!-- no translation found for controls_pin_verify (3452778292918877662) -->
+    <skip />
+    <!-- no translation found for controls_pin_verifying (3755045989392131746) -->
+    <skip />
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"إدخال رقم التعريف الشخصي"</string>
+    <!-- no translation found for controls_pin_instructions_retry (1566667581012131046) -->
+    <skip />
+    <!-- no translation found for controls_confirmation_confirming (2596071302617310665) -->
+    <skip />
+    <!-- no translation found for controls_confirmation_message (7744104992609594859) -->
+    <skip />
+    <!-- no translation found for controls_structure_tooltip (4355922222944447867) -->
+    <skip />
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"جارٍ تحميل الاقتراحات"</string>
+    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
+    <skip />
+    <!-- no translation found for controls_error_timeout (794197289772728958) -->
+    <skip />
+    <!-- no translation found for controls_error_failed (960228639198558525) -->
+    <skip />
+    <!-- no translation found for controls_in_progress (4421080500238215939) -->
+    <skip />
+    <!-- no translation found for controls_added_tooltip (4842812921719153085) -->
+    <skip />
+    <!-- no translation found for controls_menu_add (4447246119229920050) -->
+    <skip />
+    <!-- no translation found for controls_menu_edit (890623986951347062) -->
     <skip />
 </resources>

@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Atļaut"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB atkļūdošana nav atļauta"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Lietotājs, kurš pašlaik ir pierakstījies šajā ierīcē, nevar iespējot USB atkļūdošanu. Lai izmantotu šo funkciju, pārslēdzieties uz galveno lietotāju."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Vai atļaut bezvadu atkļūdošanu šajā tīklā?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Tīkla nosaukums (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi adrese (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Vienmēr atļaut šajā tīklā"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Atļaut"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Bezvadu atkļūdošana nav atļauta"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Lietotājs, kurš pašlaik ir pierakstījies šajā ierīcē, nevar iespējot bezvadu atkļūdošanu. Lai izmantotu šo funkciju, pārslēdzieties uz galveno lietotāju."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB pieslēgvieta atspējota"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Lai aizsargātu ierīci no šķidruma un gružiem, USB pieslēgvieta ir atspējota un tajā nevarēs noteikt pieslēgtus piederumus.\n\nKad USB pieslēgvietu atkal drīkstēs izmantot, saņemsiet paziņojumu."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB portam ir iespējota uzlādes ierīču un piederumu noteikšana"</string>
@@ -80,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Mēģiniet izveidot jaunu ekrānuzņēmumu."</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Nevar saglabāt ekrānuzņēmumu, jo krātuvē nepietiek vietas."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Lietotne vai jūsu organizācija neatļauj veikt ekrānuzņēmumus."</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Nerādīt ekrānuzņēmumu"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"Atvērt ekrānuzņēmumu"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrāna ierakstītājs"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Aktīvs paziņojums par ekrāna ierakstīšanas sesiju"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Vai sākt ierakstīšanu?"</string>
@@ -146,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Nepareiza kombinācija"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Nepareiza parole"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Pārāk daudz neveiksmīgu mēģinājumu.\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER">%d</xliff:g> sekundēm."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Mēģiniet vēlreiz (<xliff:g id="ATTEMPTS_0">%1$d</xliff:g>. mēģinājums no <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>)."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Pārāk daudz neveiksmīgu mēģinājumu. Dati šajā ierīcē tiks dzēsti."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Pārāk daudz neveiksmīgu mēģinājumu. Šis lietotājs tiks dzēsts."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Pārāk daudz neveiksmīgu mēģinājumu. Šis darba profils un ar to saistītie dati tiks dzēsti."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Nerādīt"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Pieskarieties pirksta nospieduma sensoram"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Pirksta nospieduma ikona"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Notiek jūsu sejas meklēšana…"</string>
@@ -491,6 +504,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Pārvaldīt"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Vēsture"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Klusie paziņojumi"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Paziņojumi ar skaņu vai vibrāciju"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Sarunas"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Notīrīt visus klusos paziņojumus"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Paziņojumi pārtraukti, izmantojot iestatījumu “Netraucēt”"</string>
@@ -554,6 +568,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Jūsu darba profilu pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profils ir saistīts ar lietotni <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, kura var pārraudzīt jūsu tīklā veiktās darbības, tostarp saņemtos un nosūtītos e-pasta ziņojumus, instalētās lietotnes un apmeklētās tīmekļa vietnes.\n\nIr izveidots savienojums ar lietotni <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās privātās darbības, tostarp saņemtos un nosūtītos e-pasta ziņojumus, instalētās lietotnes un apmeklētās tīmekļa vietnes."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Bloķēšanu liedzis TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Ierīce būs bloķēta, līdz to manuāli atbloķēsiet."</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Saņemiet paziņojumus ātrāk"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Skatiet tos pirms atbloķēšanas."</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Nē"</string>
@@ -689,10 +704,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Palīdz jums koncentrēties, nenovēršot uzmanību ar skaņu vai vibrāciju."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Jūsu uzmanība tiek piesaistīta ar skaņas vai vibrācijas signālu."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Piesaista jūsu uzmanību, rādot peldošu saīsni uz šo saturu."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Tiek rādīta sarunas sadaļas augšdaļā kā burbulis."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Pēc noklusējuma visas sarunas no lietotnes <xliff:g id="APP_NAME_0">%1$s</xliff:g> rādīt burbuļos. Pārvaldīt lietotnē <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Iestatījumi"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritārs"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nav nesen aizvērtu burbuļu"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Šeit būs redzami nesen rādītie burbuļi un aizvērtie burbuļi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šos paziņojumus nevar modificēt."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Šeit nevar konfigurēt šo paziņojumu grupu."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Starpniekservera paziņojums"</string>
@@ -964,13 +981,8 @@
     <string name="device_services" msgid="1549944177856658705">"Ierīces pakalpojumi"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Nav nosaukuma"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Pieskarieties, lai restartētu šo lietotni un pārietu pilnekrāna režīmā."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Atvērt lietotni <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> burbuļu iestatījumi"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Vai atļaut burbuļus no lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Pārvaldīt"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Neatļaut"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Atļaut"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Pajautāt vēlāk"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> no: <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> no lietotnes “<xliff:g id="APP_NAME">%2$s</xliff:g>” un vēl <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Pārvietot"</string>
@@ -979,26 +991,55 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Pārvietot apakšpusē pa kreisi"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Pārvietot apakšpusē pa labi"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Nerādīt"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nerādīt sarunu burbuļos"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Tērzēšana, izmantojot burbuļus"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Jaunas sarunas tiek rādītas kā peldošas ikonas vai burbuļi. Pieskarieties, lai atvērtu burbuli. Velciet, lai to pārvietotu."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Pārvaldīt burbuļus jebkurā laikā"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Pieskarieties pogai “Pārvaldīt”, lai izslēgtu burbuļus no šīs lietotnes."</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Labi"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistēmas navigācija ir atjaunināta. Lai veiktu izmaiņas, atveriet iestatījumus."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Atveriet iestatījumus, lai atjauninātu sistēmas navigāciju"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Gaidstāve"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Palielināšanas pārklājuma logs"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Palielināšanas logs"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Palielināšanas loga vadīklas"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"Ātrās vadīklas"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"Vadīklu pievienošana"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Izvēlieties lietotni, no kuras pievienot vadīklas."</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="zero">Šobrīd izlasē ir <xliff:g id="NUMBER_1">%s</xliff:g> vienumi.</item>
-      <item quantity="one">Šobrīd izlasē ir <xliff:g id="NUMBER_1">%s</xliff:g> vienums.</item>
-      <item quantity="other">Šobrīd izlasē ir <xliff:g id="NUMBER_1">%s</xliff:g> vienumi.</item>
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Pievienojiet vadīklas pievienotajām ierīcēm"</string>
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="zero">Pievienotas <xliff:g id="NUMBER_1">%s</xliff:g> vadīklas.</item>
+      <item quantity="one">Pievienota <xliff:g id="NUMBER_1">%s</xliff:g> vadīkla.</item>
+      <item quantity="other">Pievienotas <xliff:g id="NUMBER_1">%s</xliff:g> vadīklas.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Vadīklas"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Izvēlieties vadīklas ātrajai piekļuvei."</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izvēlieties vadīklas, kurām piekļūt no barošanas izvēlnes"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Lai pārvietotu lietotni, turiet un velciet to"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nevarēja ielādēt sarakstu ar visām vadīklām."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Cita"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"Pievienošana ātrajām vadīklām"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"Pievienot izlasei"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ieteica pievienot šo vadīklu izlasei."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Vadīklas atjauninātas"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN ietver burtus vai simbolus."</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Verifikācija: <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"Notiek verifikācija…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Ievadiet PIN."</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Izmēģiniet citu PIN"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Notiek apstiprināšana…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Izmaiņu apstiprināšana ierīcei <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"Velciet, lai skatītu citus vienumus"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Notiek ieteikumu ielāde"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"Aizvērt multivides sesiju"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Neaktīva, pārbaudiet lietotni"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Radās kļūda. Mēģiniet vēlreiz."</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"Sākta"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"Nospiediet barošanas pogu un turiet to, lai skatītu jaunas vadīklas"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Pievienot vadīklas"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Rediģēt vadīklas"</string>
 </resources>
