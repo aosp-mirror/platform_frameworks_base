@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Попробуйте сделать скриншот снова."</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Не удалось сохранить скриншот: недостаточно места."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Не удалось сделать скриншот: нет разрешения от приложения или организации."</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Закрыть скриншот"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"Открыть скриншот"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Запись видео с экрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущее уведомление для записи видео с экрана"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Начать запись?"</string>
@@ -152,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Неверный графический ключ."</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Неверный пароль."</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Слишком много неудачных попыток.\nПовторите через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Попробуйте ещё раз. Попытка <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> из <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Слишком много неудачных попыток. С устройства будут удалены все данные."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Слишком много неудачных попыток. Этот пользователь будет удален."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Слишком много неудачных попыток. Этот рабочий профиль и его данные будут удалены."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Закрыть"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Прикоснитесь к сканеру отпечатков пальцев."</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Значок отпечатка пальца"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Поиск лица…"</string>
@@ -564,6 +571,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Вашим рабочим профилем управляет организация \"<xliff:g id="ORGANIZATION">%1$s</xliff:g>\". Приложение \"<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>\" может отслеживать ваши действия в корпоративной сети, включая работу с электронной почтой, приложениями и веб-сайтами.\n\nТакже запущено приложение \"<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>\", которое может отслеживать ваши действия в сети, выполняемые в личном профиле."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Разблокировано агентом доверия"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Устройство необходимо будет разблокировать вручную"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Быстрый доступ к уведомлениям"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Просматривайте уведомления на заблокированном экране."</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Закрыть"</string>
@@ -699,8 +707,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Уведомления приходят без звука и вибрации"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Уведомления приходят со звуком или вибрацией"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Привлекает ваше внимание к контенту с помощью плавающего ярлыка"</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Появляется в верхней части раздела чатов в виде всплывающего уведомления."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Все сообщения из сервиса \"<xliff:g id="APP_NAME_0">%1$s</xliff:g>\" по умолчанию появляются в виде всплывающих уведомлений. Изменить настройки можно в приложении \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\"."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нет недавних подсказок"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Здесь будут появляться недавние и закрытые всплывающие уведомления."</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Здесь будут появляться недавние и закрытые всплывающие уведомления."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Эти уведомления нельзя изменить."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Эту группу уведомлений нельзя настроить здесь."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Уведомление отправлено через прокси-сервер."</string>
@@ -974,13 +986,8 @@
     <string name="device_services" msgid="1549944177856658705">"Сервисы устройства"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без названия"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Нажмите, чтобы перезапустить приложение и перейти в полноэкранный режим."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Открыть приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Настройки всплывающих уведомлений от приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Разрешить всплывающие уведомления от приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Настроить"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Запретить"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Разрешить"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Напомнить позже"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> из приложения \"<xliff:g id="APP_NAME">%2$s</xliff:g>\""</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> от приложения \"<xliff:g id="APP_NAME">%2$s</xliff:g>\" и ещё <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Перенести"</string>
@@ -989,21 +996,26 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Перенести в левый нижний угол"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Перенести в правый нижний угол"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Закрыть"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Не показывать всплывающие уведомления"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Всплывающие уведомления для сообщений"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Новые сообщения будут появляться в качестве плавающих значков или всплывающих уведомлений. Чтобы открыть сообщение, нажмите на уведомление. Чтобы переместить сообщение, перетащите уведомление."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Настройки всплывающих уведомлений"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Чтобы отключить всплывающие уведомления от приложения, нажмите \"Настроить\"."</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ОК"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Параметры навигации в системе обновлены. Чтобы изменить их, перейдите в настройки."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Чтобы обновить параметры навигации в системе, перейдите в настройки."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Переход в режим ожидания"</string>
-    <string name="magnification_overlay_title" msgid="6584179429612427958">"Наложение окна увеличения"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Окно увеличения"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Настройки окна увеличения"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"Управление умным домом"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"Добавление элементов"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Выберите приложение, из которого нужно добавить элементы управления."</string>
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Добавьте элементы управления для подключенных устройств"</string>
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one">Добавлен <xliff:g id="NUMBER_1">%s</xliff:g> элемент управления.</item>
       <item quantity="few">Добавлено <xliff:g id="NUMBER_1">%s</xliff:g> элемента управления.</item>
@@ -1011,9 +1023,28 @@
       <item quantity="other">Добавлено <xliff:g id="NUMBER_1">%s</xliff:g> элемента управления.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Элементы управления"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Выберите элементы управления для быстрого доступа."</string>
-    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"Избранные"</string>
-    <string name="controls_favorite_header_all" msgid="7507855973418969992">"Все"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Выберите элементы управления, которые будут доступны в меню кнопки питания."</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Чтобы перенести элемент, нажмите на него и удерживайте, а затем перетащите в нужное место."</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не удалось загрузить список элементов управления."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Другое"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"Добавить на панель инструментов"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"Добавить в избранное"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"Приложение \"<xliff:g id="APP">%s</xliff:g>\" предлагает добавить этот элемент управления в избранное."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Элементы управления обновлены."</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-код содержит буквы или символы"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Подтвердите устройство \"<xliff:g id="DEVICE">%s</xliff:g>\""</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"Проверка…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Введите PIN-код"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Введите другой PIN-код"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Подождите…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Подтвердите изменения для устройства \"<xliff:g id="DEVICE">%s</xliff:g>\""</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"Проведите по экрану, чтобы увидеть больше"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Загрузка рекомендаций…"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"Закрыть этот мультимедийный сеанс"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Истекло время ожидания. Проверьте приложение."</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Ошибка. Повторите попытку."</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"Выполняется"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"Удерживайте кнопку питания, чтобы увидеть новые элементы управления"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Добавить элементы управления"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Изменить элементы управления"</string>
 </resources>
