@@ -159,6 +159,9 @@ class UserController implements Handler.Callback {
     // when it never calls back.
     private static final int USER_SWITCH_CALLBACKS_TIMEOUT_MS = 5 * 1000;
 
+    // TODO(b/149604218): STOPSHIP remove  this constant and the logcat
+    private static final boolean TESTS_NEED_LOGCAT = true;
+
     /**
      * Maximum number of users we allow to be running at a time, including system user.
      *
@@ -1668,6 +1671,9 @@ class UserController implements Handler.Callback {
     }
 
     void continueUserSwitch(UserState uss, int oldUserId, int newUserId) {
+        if (TESTS_NEED_LOGCAT) {
+            Slog.d(TAG, "Continue user switch oldUser #" + oldUserId + ", newUser #" + newUserId);
+        }
         EventLog.writeEvent(EventLogTags.UC_CONTINUE_USER_SWITCH, oldUserId, newUserId);
 
         if (isUserSwitchUiEnabled()) {
@@ -1675,8 +1681,7 @@ class UserController implements Handler.Callback {
         }
         uss.switching = false;
         mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
-        mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG,
-                newUserId, 0));
+        mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG, newUserId, 0));
         stopGuestOrEphemeralUserIfBackground(oldUserId);
         stopBackgroundUsersIfEnforced(oldUserId);
     }
