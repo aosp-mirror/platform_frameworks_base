@@ -292,6 +292,8 @@ interface IAudioService {
     oneway void unregisterStrategyPreferredDeviceDispatcher(
             IStrategyPreferredDeviceDispatcher dispatcher);
 
+    oneway void setRttEnabled(in boolean rttEnabled);
+
     // WARNING: read warning at top of file, new methods that need to be used by native
     // code via IAudioManager.h need to be added to the top section.
 }
