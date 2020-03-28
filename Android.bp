@@ -1281,7 +1281,22 @@ droidstubs {
             removed_api_file: "telephony/api/system-removed.txt",
         },
     },
-    defaults: ["framework-module-stubs-defaults-systemapi"],
+    // TODO: make telephony inherit the shared stubs and remove this
+    args: "--show-annotation android.annotation.SystemApi\\(" +
+            "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+        "\\) " +
+        "--error UnhiddenSystemApi " +
+        "--hide BroadcastBehavior " +
+        "--hide DeprecationMismatch " +
+        "--hide HiddenSuperclass " +
+        "--hide HiddenTypedefConstant " +
+        "--hide HiddenTypeParameter " +
+        "--hide MissingPermission " +
+        "--hide RequiresPermission " +
+        "--hide SdkConstant " +
+        "--hide Todo " +
+        "--hide Typo " +
+        "--hide UnavailableSymbol ",
     filter_packages: ["android.telephony"],
     sdk_version: "system_current",
 }
