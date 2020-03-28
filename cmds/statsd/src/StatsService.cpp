@@ -385,9 +385,11 @@ void StatsService::print_cmd_help(int out) {
     dprintf(out, "  PKG           Optional package name to print the uids of the package\n");
     dprintf(out, "\n");
     dprintf(out, "\n");
-    dprintf(out, "usage: adb shell cmd stats pull-source [int] \n");
+    dprintf(out, "usage: adb shell cmd stats pull-source ATOM_TAG [PACKAGE] \n");
     dprintf(out, "\n");
-    dprintf(out, "  Prints the output of a pulled metrics source (int indicates source)\n");
+    dprintf(out, "  Prints the output of a pulled atom\n");
+    dprintf(out, "  UID           The atom to pull\n");
+    dprintf(out, "  PACKAGE       The package to pull from. Default is AID_SYSTEM\n");
     dprintf(out, "\n");
     dprintf(out, "\n");
     dprintf(out, "usage: adb shell cmd stats write-to-disk \n");
@@ -806,8 +808,21 @@ status_t StatsService::cmd_log_binary_push(int out, const Vector<String8>& args)
 
 status_t StatsService::cmd_print_pulled_metrics(int out, const Vector<String8>& args) {
     int s = atoi(args[1].c_str());
-    vector<shared_ptr<LogEvent> > stats;
-    if (mPullerManager->Pull(s, &stats)) {
+    vector<int32_t> uids;
+    if (args.size() > 2) {
+        string package = string(args[2].c_str());
+        auto it = UidMap::sAidToUidMapping.find(package);
+        if (it != UidMap::sAidToUidMapping.end()) {
+            uids.push_back(it->second);
+        } else {
+            set<int32_t> uids_set = mUidMap->getAppUid(package);
+            uids.insert(uids.end(), uids_set.begin(), uids_set.end());
+        }
+    } else {
+        uids.push_back(AID_SYSTEM);
+    }
+    vector<shared_ptr<LogEvent>> stats;
+    if (mPullerManager->Pull(s, uids, &stats)) {
         for (const auto& it : stats) {
             dprintf(out, "Pull from %d: %s\n", s, it->ToString().c_str());
         }

@@ -333,6 +333,7 @@ cc_test {
         "tests/external/puller_util_test.cpp",
         "tests/external/StatsCallbackPuller_test.cpp",
         "tests/external/StatsPuller_test.cpp",
+        "tests/external/StatsPullerManager_test.cpp",
         "tests/FieldValue_test.cpp",
         "tests/guardrail/StatsdStats_test.cpp",
         "tests/indexed_priority_queue_test.cpp",

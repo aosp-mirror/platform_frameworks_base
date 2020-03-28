@@ -803,9 +803,8 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         if (!success) return false;
 
         sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(
-                key, metric, conditionIndex, wizard,
-                trackerIndex, matcherWizard, pullTagId, triggerAtomId, atomTagId,
-                timeBaseTimeNs, currentTimeNs, pullerManager,
+                key, metric, conditionIndex, wizard, trackerIndex, matcherWizard, pullTagId,
+                triggerAtomId, atomTagId, timeBaseTimeNs, currentTimeNs, pullerManager,
                 eventActivationMap, eventDeactivationMap);
         allMetricProducers.push_back(gaugeProducer);
     }
@@ -964,6 +963,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
         ALOGE("initConditionTrackers failed");
         return false;
     }
+
     if (!initStates(config, stateAtomIdMap, allStateGroupMaps)) {
         ALOGE("initStates failed");
         return false;

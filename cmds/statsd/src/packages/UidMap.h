@@ -149,7 +149,7 @@ public:
     // Get currently cached value of memory used by UID map.
     size_t getBytesUsed() const;
 
-    std::set<int32_t> getAppUid(const string& package) const;
+    virtual std::set<int32_t> getAppUid(const string& package) const;
 
     // Write current PackageInfoSnapshot to ProtoOutputStream.
     // interestingUids: If not empty, only write the package info for these uids. If empty, write

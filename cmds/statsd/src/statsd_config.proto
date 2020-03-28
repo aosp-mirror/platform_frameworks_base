@@ -428,6 +428,12 @@ message MetricActivation {
   repeated EventActivation event_activation = 2;
 }
 
+message PullAtomPackages {
+    optional int32 atom_id = 1;
+
+    repeated string packages = 2;
+}
+
 message StatsdConfig {
   optional int64 id = 1;
 
@@ -474,6 +480,10 @@ message StatsdConfig {
   optional bool persist_locally = 20 [default = false];
 
   repeated State state = 21;
+
+  repeated string default_pull_packages = 22;
+
+  repeated PullAtomPackages pull_atom_packages = 23;
 
   // Field number 1000 is reserved for later use.
   reserved 1000;

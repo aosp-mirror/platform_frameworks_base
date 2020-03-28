@@ -75,11 +75,9 @@ GaugeMetricProducer::GaugeMetricProducer(
         const int atomId, const int64_t timeBaseNs, const int64_t startTimeNs,
         const sp<StatsPullerManager>& pullerManager,
         const unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
-        const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap,
-        const vector<int>& slicedStateAtoms,
-        const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap)
+        const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap)
     : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard, eventActivationMap,
-                     eventDeactivationMap, slicedStateAtoms, stateGroupMap),
+                     eventDeactivationMap, /*slicedStateAtoms=*/{}, /*stateGroupMap=*/{}),
       mWhatMatcherIndex(whatMatcherIndex),
       mEventMatcherWizard(matcherWizard),
       mPullerManager(pullerManager),
@@ -135,15 +133,12 @@ GaugeMetricProducer::GaugeMetricProducer(
     flushIfNeededLocked(startTimeNs);
     // Kicks off the puller immediately.
     if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
-        mPullerManager->RegisterReceiver(mPullTagId, this, getCurrentBucketEndTimeNs(),
+        mPullerManager->RegisterReceiver(mPullTagId, mConfigKey, this, getCurrentBucketEndTimeNs(),
                                          mBucketSizeNs);
     }
 
     // Adjust start for partial first bucket and then pull if needed
     mCurrentBucketStartTimeNs = startTimeNs;
-    if (mIsActive && mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
-        pullAndMatchEventsLocked(mCurrentBucketStartTimeNs);
-    }
 
     VLOG("Gauge metric %lld created. bucket size %lld start_time: %lld sliced %d",
          (long long)metric.id(), (long long)mBucketSizeNs, (long long)mTimeBaseNs,
@@ -153,7 +148,7 @@ GaugeMetricProducer::GaugeMetricProducer(
 GaugeMetricProducer::~GaugeMetricProducer() {
     VLOG("~GaugeMetricProducer() called");
     if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
-        mPullerManager->UnRegisterReceiver(mPullTagId, this);
+        mPullerManager->UnRegisterReceiver(mPullTagId, mConfigKey, this);
     }
 }
 
@@ -298,6 +293,11 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     }
 }
 
+void GaugeMetricProducer::prepareFirstBucketLocked() {
+    if (mIsActive && mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
+        pullAndMatchEventsLocked(mCurrentBucketStartTimeNs);
+    }
+}
 
 void GaugeMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     bool triggerPuller = false;
@@ -323,7 +323,7 @@ void GaugeMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
         return;
     }
     vector<std::shared_ptr<LogEvent>> allData;
-    if (!mPullerManager->Pull(mPullTagId, &allData)) {
+    if (!mPullerManager->Pull(mPullTagId, mConfigKey, &allData)) {
         ALOGE("Gauge Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
         return;
     }
