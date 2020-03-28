@@ -31,9 +31,11 @@ import java.security.cert.X509Certificate;
 @SystemService(Context.FILE_INTEGRITY_SERVICE)
 public final class FileIntegrityManager {
     @NonNull private final IFileIntegrityService mService;
+    @NonNull private final Context mContext;
 
     /** @hide */
-    public FileIntegrityManager(@NonNull IFileIntegrityService service) {
+    public FileIntegrityManager(@NonNull Context context, @NonNull IFileIntegrityService service) {
+        mContext = context;
         mService = service;
     }
 
@@ -69,7 +71,8 @@ public final class FileIntegrityManager {
     public boolean isAppSourceCertificateTrusted(@NonNull X509Certificate certificate)
             throws CertificateEncodingException {
         try {
-            return mService.isAppSourceCertificateTrusted(certificate.getEncoded());
+            return mService.isAppSourceCertificateTrusted(
+                    certificate.getEncoded(), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
