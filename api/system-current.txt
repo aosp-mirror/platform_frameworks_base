@@ -11327,9 +11327,9 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoiceActivationState(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void shutdownAllRadios();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPin(String);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPinReportResult(String);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPinReportResult(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPuk(String, String);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPukReportResult(String, String);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPukReportResult(String, String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateOtaEmergencyNumberDbFilePath(@NonNull android.os.ParcelFileDescriptor);
