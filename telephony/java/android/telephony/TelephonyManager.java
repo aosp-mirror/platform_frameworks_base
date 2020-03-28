@@ -8679,13 +8679,9 @@ public class TelephonyManager {
         return false;
     }
 
-    /**
-     * @deprecated use {@link #supplyPinReportPinResult(String pin)} instead.
-     *
-     * @hide */
+    /** @hide */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    @Deprecated
     public int[] supplyPinReportResult(String pin) {
         try {
             ITelephony telephony = getITelephony();
@@ -8697,13 +8693,9 @@ public class TelephonyManager {
         return new int[0];
     }
 
-    /**
-     * @deprecated use {@link #supplyPukReportPinResult(String puk, String pin)} instead.
-     *
-     * @hide */
+    /** @hide */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    @Deprecated
     public int[] supplyPukReportResult(String puk, String pin) {
         try {
             ITelephony telephony = getITelephony();
