@@ -35,7 +35,7 @@ namespace os {
 namespace statsd {
 
 // A MetricsManager is responsible for managing metrics from one single config source.
-class MetricsManager : public virtual android::RefBase {
+class MetricsManager : public virtual android::RefBase, public virtual PullUidProvider {
 public:
     MetricsManager(const ConfigKey& configKey, const StatsdConfig& config, const int64_t timeBaseNs,
                    const int64_t currentTimeNs, const sp<UidMap>& uidMap,
@@ -68,6 +68,10 @@ public:
     void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid);
 
     void onUidMapReceived(const int64_t& eventTimeNs);
+
+    void init();
+
+    vector<int32_t> getPullAtomUids(int32_t atomId) override;
 
     bool shouldWriteToDisk() const {
         return mNoReportMetricIds.size() != mAllMetricProducers.size();
@@ -159,6 +163,8 @@ private:
     int64_t mLastReportTimeNs;
     int64_t mLastReportWallClockNs;
 
+    sp<StatsPullerManager> mPullerManager;
+
     // The uid log sources from StatsdConfig.
     std::vector<int32_t> mAllowedUid;
 
@@ -169,13 +175,27 @@ private:
     // Logs from uids that are not in the list will be ignored to avoid spamming.
     std::set<int32_t> mAllowedLogSources;
 
+    // To guard access to mAllowedLogSources
+    mutable std::mutex mAllowedLogSourcesMutex;
+
+    // We can pull any atom from these uids.
+    std::set<int32_t> mDefaultPullUids;
+
+    // Uids that specific atoms can pull from.
+    // This is a map<atom id, set<uids>>
+    std::map<int32_t, std::set<int32_t>> mPullAtomUids;
+
+    // Packages that specific atoms can be pulled from.
+    std::map<int32_t, std::set<std::string>> mPullAtomPackages;
+
+    // All uids to pull for this atom. NOTE: Does not include the default uids for memory.
+    std::map<int32_t, std::set<int32_t>> mCombinedPullAtomUids;
+
     // Contains the annotations passed in with StatsdConfig.
     std::list<std::pair<const int64_t, const int32_t>> mAnnotations;
 
     const bool mShouldPersistHistory;
 
-    // To guard access to mAllowedLogSources
-    mutable std::mutex mAllowedLogSourcesMutex;
 
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;
@@ -238,6 +258,8 @@ private:
 
     void initLogSourceWhiteList();
 
+    void initPullAtomSources();
+
     // The metrics that don't need to be uploaded or even reported.
     std::set<int64_t> mNoReportMetricIds;
 
@@ -274,6 +296,8 @@ private:
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
+
+    FRIEND_TEST(MetricsManagerTest, TestLogSources);
 
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
