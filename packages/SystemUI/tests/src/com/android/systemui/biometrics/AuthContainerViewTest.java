@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -89,6 +90,8 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_USER_CANCELED);
+        verify(mCallback).onSystemEvent(eq(
+                BiometricConstants.BIOMETRIC_SYSTEM_EVENT_EARLY_USER_CANCEL));
         verify(mCallback).onDismissed(
                 eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
                 eq(null) /* credentialAttestation */);

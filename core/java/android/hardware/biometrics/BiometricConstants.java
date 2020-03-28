@@ -204,4 +204,18 @@ public interface BiometricConstants {
      * @hide
      */
     int BIOMETRIC_ACQUIRED_VENDOR_BASE = 1000;
+
+    //
+    // Internal messages.
+    //
+
+    /**
+     * See {@link BiometricPrompt.Builder#setReceiveSystemEvents(boolean)}. This message is sent
+     * immediately when the user cancels authentication for example by tapping the back button or
+     * tapping the scrim. This is before {@link #BIOMETRIC_ERROR_USER_CANCELED}, which is sent when
+     * dismissal animation completes.
+     * @hide
+     */
+    int BIOMETRIC_SYSTEM_EVENT_EARLY_USER_CANCEL = 1;
+
 }

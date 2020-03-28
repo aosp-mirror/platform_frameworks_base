@@ -30,4 +30,6 @@ oneway interface IBiometricServiceReceiver {
     void onAcquired(int acquiredInfo, String message);
     // Notifies that the SystemUI dialog has been dismissed.
     void onDialogDismissed(int reason);
+    // Notifies the client that an internal event, e.g. back button has occurred.
+    void onSystemEvent(int event);
 }
