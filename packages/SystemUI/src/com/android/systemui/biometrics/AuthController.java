@@ -165,6 +165,19 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
+    public void onSystemEvent(int event) {
+        if (mReceiver == null) {
+            Log.e(TAG, "onSystemEvent(" + event + "): Receiver is null");
+            return;
+        }
+        try {
+            mReceiver.onSystemEvent(event);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException when sending system event", e);
+        }
+    }
+
+    @Override
     public void onDismissed(@DismissedReason int reason, @Nullable byte[] credentialAttestation) {
         switch (reason) {
             case AuthDialogCallback.DISMISSED_USER_CANCELED:
