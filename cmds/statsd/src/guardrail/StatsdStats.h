@@ -119,6 +119,8 @@ public:
 
     const static int kMaxLogSourceCount = 50;
 
+    const static int kMaxPullAtomPackages = 100;
+
     // Max memory allowed for storing metrics per configuration. If this limit is exceeded, statsd
     // drops the metrics data in memory.
     static const size_t kMaxMetricsBytesPerConfig = 2 * 1024 * 1024;
