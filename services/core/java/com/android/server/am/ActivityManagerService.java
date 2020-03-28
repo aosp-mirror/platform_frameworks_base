@@ -636,6 +636,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     String mDeviceOwnerName;
 
+    private int mDeviceOwnerUid = Process.INVALID_UID;
+
     final UserController mUserController;
     @VisibleForTesting
     public final PendingIntentController mPendingIntentController;
@@ -19489,6 +19491,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.mServices.showWhileInUseDebugToastLocked(
                         uid, op, mode);
+            }
+        }
+
+        @Override
+        public void setDeviceOwnerUid(int uid) {
+            synchronized (ActivityManagerService.this) {
+                mDeviceOwnerUid = uid;
+            }
+        }
+
+        @Override
+        public boolean isDeviceOwner(int uid) {
+            synchronized (ActivityManagerService.this) {
+                return uid >= 0 && mDeviceOwnerUid == uid;
             }
         }
     }
