@@ -1725,7 +1725,7 @@ message BluetoothEnabledStateChanged {
  * Logged from:
  *    packages/apps/Bluetooth/src/com/android/bluetooth/btservice/RemoteDevices.java
  *
- * Next Tag: 5
+ * Next Tag: 6
  */
 message BluetoothConnectionStateChanged {
     // The state of the connection.
@@ -1747,6 +1747,15 @@ message BluetoothConnectionStateChanged {
     // Size: 32 byte
     // Default: null or empty if the device identifier is not known
     optional bytes new_obfuscated_id = 4 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 5;
 }
 
 /**
@@ -1755,7 +1764,7 @@ message BluetoothConnectionStateChanged {
  * Logged from:
  *    packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterProperties.java
  *
- * Next Tag: 3
+ * Next Tag: 4
  */
 message BluetoothAclConnectionStateChanged {
     // An identifier that can be used to match events for this device.
@@ -1768,6 +1777,15 @@ message BluetoothAclConnectionStateChanged {
     // The state of the connection.
     // Eg: CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED.
     optional android.bluetooth.ConnectionStateEnum state = 2;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 3;
 }
 
 /**
@@ -1777,7 +1795,7 @@ message BluetoothAclConnectionStateChanged {
  *    packages/apps/Bluetooth/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
  *    packages/apps/Bluetooth/src/com/android/bluetooth/hfp/HeadsetClientStateMachine.java
  *
- * Next Tag: 4
+ * Next Tag: 5
  */
 message BluetoothScoConnectionStateChanged {
     // An identifier that can be used to match events for this device.
@@ -1793,6 +1811,15 @@ message BluetoothScoConnectionStateChanged {
     // Codec used for this SCO connection
     // Default: UNKNOWN
     optional android.bluetooth.hfp.ScoCodec codec = 3;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 4;
 }
 
 /**
@@ -1814,6 +1841,15 @@ message BluetoothActiveDeviceChanged {
     // Size: 32 byte
     // Default: null or empty if there is no active device for this profile
     optional bytes obfuscated_id = 2 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 3;
 }
 
 // Logs when there is an event affecting Bluetooth device's link layer connection.
@@ -1897,6 +1933,15 @@ message BluetoothLinkLayerConnectionEvent {
     // HCI reason code associated with this event
     // Default: STATUS_UNKNOWN
     optional android.bluetooth.hci.StatusEnum reason_code = 9;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 10;
 }
 
 /**
@@ -1955,6 +2000,15 @@ message BluetoothA2dpPlaybackStateChanged {
     // Current audio coding mode
     // Default: AUDIO_CODING_MODE_UNKNOWN
     optional android.bluetooth.a2dp.AudioCodingModeEnum audio_coding_mode = 3;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 4;
 }
 
 /**
@@ -1993,6 +2047,15 @@ message BluetoothA2dpCodecConfigChanged {
     optional int64 codec_specific_2 = 8;
     optional int64 codec_specific_3 = 9;
     optional int64 codec_specific_4 = 10;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 11;
 }
 
 /**
@@ -2035,6 +2098,15 @@ message BluetoothA2dpCodecCapabilityChanged {
     optional int64 codec_specific_2 = 8;
     optional int64 codec_specific_3 = 9;
     optional int64 codec_specific_4 = 10;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 11;
 }
 
 /**
@@ -2058,6 +2130,15 @@ message BluetoothA2dpAudioUnderrunReported {
     // Number of bytes of PCM data that could not be read from the source
     // Default: 0
     optional int32 num_missing_pcm_bytes = 3;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 4;
 }
 
 /**
@@ -2088,6 +2169,15 @@ message BluetoothA2dpAudioOverrunReported {
     // Number of encoded bytes dropped in this event
     // Default: 0
     optional int32 num_dropped_encoded_bytes = 5;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 6;
 }
 
 /**
@@ -2119,6 +2209,15 @@ message BluetoothDeviceRssiReported {
     //   Units: dBm
     // Invalid when an out of range value is reported
     optional int32 rssi = 4;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 5;
 }
 
 /**
@@ -2146,6 +2245,15 @@ message BluetoothDeviceFailedContactCounterReported {
     // Range: uint16_t, 0-0xFFFF
     // Default: 0xFFFFF
     optional int32 failed_contact_counter = 4;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 5;
 }
 
 /**
@@ -2173,6 +2281,15 @@ message BluetoothDeviceTxPowerLevelReported {
     // Units: dBm
     // Invalid when an out of range value is reported
     optional int32 transmit_power_level = 4;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 5;
 }
 
 /**
@@ -2302,6 +2419,15 @@ message BluetoothDeviceInfoReported {
     optional string hardware_version = 6;
     // Software version of this device
     optional string software_version = 7;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 8;
 }
 
 /**
@@ -2355,6 +2481,15 @@ message BluetoothSdpAttributeReported {
     optional int32 attribute_id = 3;
     // Attribute value for the particular attribute
     optional bytes attribute_value = 4 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 5;
 }
 
 /**
@@ -2387,6 +2522,15 @@ message BluetoothBondStateChanged {
     // Unbond Reason
     // Default: UNBOND_REASON_UNKNOWN
     optional android.bluetooth.UnbondReasonEnum unbond_reason = 6;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 7;
 }
 
 /**
@@ -2422,6 +2566,15 @@ message BluetoothClassicPairingEventReported {
     // A status value related to this specific event
     // Default: 0
     optional int64 event_value = 7;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 8;
 }
 
 /**
@@ -2447,6 +2600,15 @@ message BluetoothSmpPairingEventReported {
     // SMP failure reason code
     // Default: PAIRING_FAIL_REASON_DEFAULT
     optional android.bluetooth.smp.PairingFailReasonEnum smp_fail_reason = 4;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 5;
 }
 
 /**
@@ -2485,6 +2647,15 @@ message BluetoothSocketConnectionStateChanged {
     optional int32 server_port = 8;
     // Whether this is a server listener socket
     optional android.bluetooth.SocketRoleEnum is_server = 9;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 10;
 }
 
 /**
@@ -2508,6 +2679,15 @@ message BluetoothClassOfDeviceReported {
     // Also defined in: https://developer.android.com/reference/android/bluetooth/BluetoothClass
     // Default: 0
     optional int32 class_of_device = 2;
+    // An identifier that can be used to match events for this device.
+    // The incremental identifier is locally generated and guaranteed not derived
+    // from any globally unique hardware id.
+    // For paired devices, it stays consistent between Bluetooth toggling for the
+    // same remote device.
+    // For unpaired devices, it stays consistent within the same Bluetooth adapter
+    // session for the same remote device.
+    // Default: 0 if the device's metric id is unknown.
+    optional int32 metric_id = 3;
 }
 
 /**
