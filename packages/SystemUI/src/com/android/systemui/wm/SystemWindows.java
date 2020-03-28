@@ -256,12 +256,13 @@ public class SystemWindows {
                 Rect outVisibleInsets, Rect outStableInsets,
                 DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
                 SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-                Point outSurfaceSize, SurfaceControl outBLASTSurfaceControl) {
+                InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
+                SurfaceControl outBLASTSurfaceControl) {
             int res = super.relayout(window, seq, attrs, requestedWidth, requestedHeight,
                     viewVisibility, flags, frameNumber, outFrame, outOverscanInsets,
                     outContentInsets, outVisibleInsets, outStableInsets,
                     cutout, mergedConfiguration, outSurfaceControl, outInsetsState,
-                    outSurfaceSize, outBLASTSurfaceControl);
+                    outActiveControls, outSurfaceSize, outBLASTSurfaceControl);
             if (res != 0) {
                 return res;
             }

@@ -3477,6 +3477,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
+    boolean isClientLocal() {
+        return mClient instanceof IWindow.Stub;
+    }
+
     void updateLocationInParentDisplayIfNeeded() {
         final int embeddedDisplayContentsSize = mEmbeddedDisplayContents.size();
         // If there is any embedded display which is re-parented to this window, we need to

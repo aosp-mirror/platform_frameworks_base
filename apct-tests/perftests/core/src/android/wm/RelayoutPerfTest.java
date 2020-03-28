@@ -30,6 +30,7 @@ import android.util.MergedConfiguration;
 import android.view.DisplayCutout;
 import android.view.IWindow;
 import android.view.IWindowSession;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -120,6 +121,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase {
                 new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
         final MergedConfiguration mOutMergedConfiguration = new MergedConfiguration();
         final InsetsState mOutInsetsState = new InsetsState();
+        final InsetsSourceControl[] mOutControls = new InsetsSourceControl[0];
         final IWindow mWindow;
         final View mView;
         final WindowManager.LayoutParams mParams;
@@ -152,7 +154,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase {
                         mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrame,
                         mOutContentInsets, mOutVisibleInsets, mOutStableInsets,
                         mOutBackDropFrame, mOutDisplayCutout, mOutMergedConfiguration,
-                        mOutSurfaceControl, mOutInsetsState, mOutSurfaceSize,
+                        mOutSurfaceControl, mOutInsetsState, mOutControls, mOutSurfaceSize,
                         mOutBlastSurfaceControl);
             }
         }
