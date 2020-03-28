@@ -4939,7 +4939,8 @@ public final class ActiveServices {
                             + r.mRecentCallingPackage
                             + "; intent:" + r.intent.getIntent()
                             + "] affected while-in-use permission:"
-                            + AppOpsManager.opToPublicName(op);
+                            + AppOpsManager.opToPublicName(op)
+                            + "; targetSdkVersion:" + r.appInfo.targetSdkVersion;
                     Slog.wtf(TAG, msg);
                 }
             }
