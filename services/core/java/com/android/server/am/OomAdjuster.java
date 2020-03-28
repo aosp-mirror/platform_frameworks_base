@@ -151,10 +151,14 @@ public final class OomAdjuster {
     @EnabledAfter(targetSdkVersion=android.os.Build.VERSION_CODES.Q)
     static final long CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID = 136219221L;
 
-    //TODO: remove this when development is done.
-    private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 31;
-    private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_CAMERA = 1 << 30;
-    private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 29;
+    // TODO: remove this when development is done.
+    // These are debug flags used between OomAdjuster and AppOpsService to detect and report absence
+    // of the real flags.
+    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q = 1 << 27;
+    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q = 1 << 28;
+    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 29;
+    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA = 1 << 30;
+    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 31;
 
     /**
      * For some direct access we need to power manager.
@@ -1501,7 +1505,7 @@ public final class OomAdjuster {
                     //TODO: remove this block when development is done.
                     capabilityFromFGS |=
                             (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
-                                    != 0 ? TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
+                                    != 0 ? DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
                 }
                 if (s.mAllowWhileInUsePermissionInFgs) {
                     boolean enabled = false;
@@ -1514,22 +1518,22 @@ public final class OomAdjuster {
                         capabilityFromFGS |=
                                 (fgsType & FOREGROUND_SERVICE_TYPE_CAMERA)
                                         != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                                        : TEMP_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+                                        : DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
                         capabilityFromFGS |=
                                 (fgsType & FOREGROUND_SERVICE_TYPE_MICROPHONE)
                                         != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
-                                        : TEMP_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+                                        : DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
                     } else {
                         // Remove fgsType check and assign PROCESS_CAPABILITY_FOREGROUND_CAMERA
                         // and MICROPHONE when finish debugging.
                         capabilityFromFGS |=
                                 (fgsType & FOREGROUND_SERVICE_TYPE_CAMERA)
                                         != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                                        : TEMP_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+                                        : DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q;
                         capabilityFromFGS |=
                                 (fgsType & FOREGROUND_SERVICE_TYPE_MICROPHONE)
                                         != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
-                                        : TEMP_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+                                        : DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q;
                     }
                 }
             }
