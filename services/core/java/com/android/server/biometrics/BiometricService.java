@@ -112,6 +112,7 @@ public class BiometricService extends SystemService {
     private static final int MSG_CANCEL_AUTHENTICATION = 10;
     private static final int MSG_ON_AUTHENTICATION_TIMED_OUT = 11;
     private static final int MSG_ON_DEVICE_CREDENTIAL_PRESSED = 12;
+    private static final int MSG_ON_SYSTEM_EVENT = 13;
 
     /**
      * Authentication either just called and we have not transitioned to the CALLED state, or
@@ -357,6 +358,11 @@ public class BiometricService extends SystemService {
 
                 case MSG_ON_DEVICE_CREDENTIAL_PRESSED: {
                     handleOnDeviceCredentialPressed();
+                    break;
+                }
+
+                case MSG_ON_SYSTEM_EVENT: {
+                    handleOnSystemEvent((int) msg.obj);
                     break;
                 }
 
@@ -631,6 +637,11 @@ public class BiometricService extends SystemService {
         @Override
         public void onDeviceCredentialPressed() {
             mHandler.sendEmptyMessage(MSG_ON_DEVICE_CREDENTIAL_PRESSED);
+        }
+
+        @Override
+        public void onSystemEvent(int event) {
+            mHandler.obtainMessage(MSG_ON_SYSTEM_EVENT, event).sendToTarget();
         }
     };
 
@@ -1577,6 +1588,27 @@ public class BiometricService extends SystemService {
                 false /* fromClient */);
 
         mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+    }
+
+    private void handleOnSystemEvent(int event) {
+        final boolean shouldReceive = mCurrentAuthSession.mBundle
+                .getBoolean(BiometricPrompt.KEY_RECEIVE_SYSTEM_EVENTS, false);
+        Slog.d(TAG, "onSystemEvent: " + event + ", shouldReceive: " + shouldReceive);
+
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "Auth session null");
+            return;
+        }
+
+        if (!shouldReceive) {
+            return;
+        }
+
+        try {
+            mCurrentAuthSession.mClientReceiver.onSystemEvent(event);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException", e);
+        }
     }
 
     /**
