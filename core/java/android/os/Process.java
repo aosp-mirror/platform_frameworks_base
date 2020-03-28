@@ -607,9 +607,6 @@ public class Process {
      *                             started.
      * @param pkgDataInfoMap Map from related package names to private data directory
      *                       volume UUID and inode number.
-     * @param whitelistedDataInfoMap Map from whitelisted package names to private data directory
-     *                       volume UUID and inode number.
-     * @param bindMountAppsData whether zygote needs to mount CE and DE data.
      * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
@@ -634,17 +631,13 @@ public class Process {
                                            @Nullable long[] disabledCompatChanges,
                                            @Nullable Map<String, Pair<String, Long>>
                                                    pkgDataInfoMap,
-                                           @Nullable Map<String, Pair<String, Long>>
-                                                   whitelistedDataInfoMap,
-                                           boolean bindMountAppsData,
                                            boolean bindMountAppStorageDirs,
                                            @Nullable String[] zygoteArgs) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
                     zygotePolicyFlags, isTopApp, disabledCompatChanges,
-                    pkgDataInfoMap, whitelistedDataInfoMap, bindMountAppsData,
-                    bindMountAppStorageDirs, zygoteArgs);
+                    pkgDataInfoMap, bindMountAppStorageDirs, zygoteArgs);
     }
 
     /** @hide */
@@ -668,8 +661,7 @@ public class Process {
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
                     /*zygotePolicyFlags=*/ ZYGOTE_POLICY_FLAG_EMPTY, /*isTopApp=*/ false,
-                disabledCompatChanges, /* pkgDataInfoMap */ null,
-                /* whitelistedDataInfoMap */ null, false, false, zygoteArgs);
+                disabledCompatChanges, /* pkgDataInfoMap */ null, false, zygoteArgs);
     }
 
     /**
