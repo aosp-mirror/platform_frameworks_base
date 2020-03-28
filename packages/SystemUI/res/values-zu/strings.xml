@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Zama ukuthatha isithombe-skrini futhi"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Ayikwazi ukulondoloza isithombe-skrini ngenxa yesikhala sesitoreji esikhawulelwe"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ukuthatha izithombe-skrini akuvunyelwe uhlelo lokusebenza noma inhlangano yakho"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Cashisa isithombe-skrini"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"Vula isithombe-skrini"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Irekhoda yesikrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Isaziso esiqhubekayo seseshini yokurekhoda isikrini"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Qala ukurekhoda?"</string>
@@ -152,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Iphethini engalungile"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Iphasiwedi engalungile"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Imizamo eminingi kakhulu engalungile.\nZama futhi kumasekhondi angu-<xliff:g id="NUMBER">%d</xliff:g>."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Zama futhi. Umzamo ongu-<xliff:g id="ATTEMPTS_0">%1$d</xliff:g> kwengu-<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Imizamo eminingi kakhulu engalungile. Le datha yedivayisi izosuswa."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Imizamo eminingi kakhulu engalungile. Lo msebenzisi uzosuswa."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Imizamo eminingi kakhulu engalungile. Le phrofayela yomsebenzi nedatha yayo kuzosuswa."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Cashisa"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Thinta inzwa yesigxivizo zeminwe"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Isithonjana sezigxivizo zeminwe"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Kufunwa wena…"</string>
@@ -223,7 +230,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Vula imininingwane yebhethri"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Iphesenti <xliff:g id="NUMBER">%d</xliff:g> lebhethri"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Amaphesenti ebhethri ngu-<xliff:g id="PERCENTAGE">%1$s</xliff:g>, cishe kusele okungu-<xliff:g id="TIME">%2$s</xliff:g> kusukela ekusetshenzisweni kwakho"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Ibhethri liyashaja, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> iphesenti."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Ibhethri liyashaja, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Izilungiselelo zesistimu"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Izaziso"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Bona zonke izaziso"</string>
@@ -558,6 +565,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Iphrofayela yakho yomsebenzi iphethwe i-<xliff:g id="ORGANIZATION">%1$s</xliff:g>. Iphrofayela ixhumeke ku-<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, engaqapha umsebenzi wakho wenethiwekhi, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi.\n\nFuthi uxhumeke ku-<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, engaqapha umsebenzi wakho siqu wenethiwekhi."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Igcinwa ivuliwe ngo-TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Idivayisi izohlala ikhiyekile uze uyivule ngokwenza"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Thola izaziso ngokushesha"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Ibone ngaphambi kokuthi uyivule"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Cha ngiyabonga"</string>
@@ -693,8 +701,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ikusiza ukuthi ugxile ngaphandle komsindo noma ukudlidliza."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Ithola ukunaka kwakho ngomsindo noma ukudlidliza."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Igcina ukunaka kwakho ngesinqamuleli esintantayo kulokhu okuqukethwe."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Kubonakala esigabeni esiphezulu sengxoxo futhi kuvela njengebhamuza"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Zonke izingxoxo ezivela ku-<xliff:g id="APP_NAME_0">%1$s</xliff:g> ziba yibhamuza ngokuzenzakalelayo. Phatha ku-<xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Izilungiselelo"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Okubalulekile"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Awekho amabhamuza akamuva"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Amabhamuza akamuva namabhamuza asusiwe azobonakala lapha."</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Amabhamuza akamuva namabhamuza asusiwe azobonakala lapha."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Lezi zaziso azikwazi ukushintshwa."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Leli qembu lezaziso alikwazi ukulungiselelwa lapha"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Isaziso sommeli"</string>
@@ -964,13 +976,8 @@
     <string name="device_services" msgid="1549944177856658705">"Amasevisi edivayisi"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Asikho isihloko"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Thepha ukuze uqale kabusha lolu hlelo lokusebenza uphinde uye kusikrini esigcwele."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Vula i-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Izilungiselelo zamabhamuza e-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Vumela amabhamuza kusukela ku-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Phatha"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Yenqaba"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Vumela"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Ngibuze ngesinye isikhathi"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"I-<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> kusuka ku-<xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"I-<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> kusukela ku-<xliff:g id="APP_NAME">%2$s</xliff:g> nokungu-<xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> ngaphezulu"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Hambisa"</string>
@@ -979,29 +986,49 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Hambisa inkinobho ngakwesokunxele"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Hambisa inkinobho ngakwesokudla"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Cashisa"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ungayibhamuzi ingxoxo"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Xoxa usebenzisa amabhamuza"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Izingxoxo ezintsha zivela njengezithonjana ezintantayo, noma amabhamuza. Thepha ukuze uvule ibhamuza. Hudula ukuze ulihambise."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Lawula amabhamuza noma nini"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Thepha okuthi Phatha ukuvala amabhamuza kusuka kulolu hlelo lokusebenza"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Ngiyezwa"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Ukuzulazula kwesistimu kubuyekeziwe. Ukuze wenze ushintsho, hamba kokuthi Izilungiselelo."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Hamba kuzilungiselelo ukuze ubuyekeze ukuzulazula kwesistimu"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ilindile"</string>
-    <string name="magnification_overlay_title" msgid="6584179429612427958">"Iwindi Lembondela Lesikhulisi"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Iwindi Lesikhulisi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Izilawuli Zewindi Lesikhulisi"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"Izilawuli Ezisheshayo"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"Engeza Izilawuli"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Khetha uhlelo lokusebenza ozongeza kulo izilawuli"</string>
+    <string name="quick_controls_title" msgid="1686913115679255053">"Izilawuli ezisheshayo"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Engeza izilawuli zedivayisi yakho exhunyiwe"</string>
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Setha izilawuli ezisheshayo"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Bamba inkinobho yamandla ukufinyelela kwizilawuli"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Khetha uhlelo lokusebenza ukwengeza izilawuli"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> ukulawulwa okwengeziwe.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> ukulawulwa okwengeziwe.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Izilawuli"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Khetha izilawuli mayelana nokufinyelela okusheshayo"</string>
-    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"Izintandokazi"</string>
-    <string name="controls_favorite_header_all" msgid="7507855973418969992">"Konke"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Khetha izilawuli ukuze ufinyelele kusuka kumenyu yamandla"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Bamba futhi uhudule isilawuli ukuze usihambise"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Uhlu lwazo zonke izilawuli alilayishekanga."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Okunye"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"Engeza kuzilawuli ezisheshayo"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"Engeza kuzintandokazi"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"I-<xliff:g id="APP">%s</xliff:g> iphakamise lokhu kulawula ukwengeza kuzintandokazi zakho."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Izilawuli zibuyekeziwe"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Iphinikhodi iqukethe amaletha namasimbui"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Qinisekisa i-<xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"Iyaqinisekisa…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Faka i-PIN"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Zama enye Iphinikhodi"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Iyaqinisekisa…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Qinisekisa ushintsho lwe-<xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swayipha ukuze ubone okuningi"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Ilayisha izincomo"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"Vala leseshini yemidiya"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Akusebenzi, hlola uhlelo lokusebenza"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Iphutha, zama futhi"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"Iyaqhubeka"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"Bamba Inkinobho yamandla ukuze ubone izilawuli ezintsha"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Engeza Izilawuli"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Hlela izilawuli"</string>
 </resources>
