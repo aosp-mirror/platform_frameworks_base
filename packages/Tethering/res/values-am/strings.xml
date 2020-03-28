@@ -1,8 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="3146694234398202601">"መሰካት ወይም ገባሪ ድረስ ነጥብ"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"ለማዋቀር መታ ያድርጉ።"</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"እንደ ሞደም መሰካት ተሰናክሏል"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"ለዝርዝሮች የእርስዎን አስተዳዳሪ ያነጋግሩ"</string>
+    <string name="tethered_notification_title" msgid="6426563586025792944">"እንደ ሞደም መሰካት ወይም መገናኛ ነጥብ ገባሪ"</string>
+    <string name="tethered_notification_message" msgid="64800879503420696">"ለማዋቀር መታ ያድርጉ።"</string>
+    <!-- no translation found for tethered_notification_title_with_client_number (1786826735091081282) -->
+    <string name="disable_tether_notification_title" msgid="3004509127903564191">"እንደ ሞደም መሰካት ተሰናክሏል"</string>
+    <string name="disable_tether_notification_message" msgid="6717523799293901476">"ለዝርዝሮች የእርስዎን አስተዳዳሪ ያነጋግሩ"</string>
+    <string name="notification_channel_tethering_status" msgid="2663463891530932727">"መገናኛ ነጥብ እና እንደ ሞደም የመሰካት ሁኔታ"</string>
+    <string name="no_upstream_notification_title" msgid="1204601824631788482"></string>
+    <string name="no_upstream_notification_message" msgid="8586582938243032621"></string>
+    <string name="no_upstream_notification_disable_button" msgid="8800919436924640822"></string>
+    <string name="upstream_roaming_notification_title" msgid="4772373823198997030"></string>
+    <string name="upstream_roaming_notification_message" msgid="3985577843181551650"></string>
+    <string name="upstream_roaming_notification_continue_button" msgid="9050110597328860509"></string>
 </resources>
