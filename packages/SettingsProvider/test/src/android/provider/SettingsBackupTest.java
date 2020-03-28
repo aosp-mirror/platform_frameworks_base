@@ -267,6 +267,7 @@ public class SettingsBackupTest {
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
+                    Settings.Global.ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT,
                     Settings.Global.ENHANCED_CONNECTIVITY_ENABLED,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
