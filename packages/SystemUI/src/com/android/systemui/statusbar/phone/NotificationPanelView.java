@@ -106,7 +106,7 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
 
-import com.revengeos.internal.util.PowerUtils;
+import com.conquer.internal.util.PowerUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
