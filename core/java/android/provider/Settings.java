@@ -13068,6 +13068,18 @@ public final class Settings {
                 "chained_battery_attribution_enabled";
 
         /**
+         * Toggle to enable/disable the incremental ADB installation by default.
+         * If not set, default adb installations are incremental; set to zero to use full ones.
+         * Note: only ADB uses it, no usages in the Framework code.
+         * <p>
+         * Type: int (0 to disable, 1 to enable)
+         *
+         * @hide
+         */
+        public static final String ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT =
+                "enable_adb_incremental_install_default";
+
+        /**
          * The packages whitelisted to be run in autofill compatibility mode. The list
          * of packages is {@code ":"} colon delimited, and each entry has the name of the
          * package and an optional list of url bar resource ids (the list is delimited by
