@@ -7,12 +7,3 @@ package android.os.ext {
 
 }
 
-package android.os.ext.test {
-
-  @Deprecated public class Test {
-    method @Deprecated public void testF();
-    method @Deprecated public void testG();
-  }
-
-}
-
