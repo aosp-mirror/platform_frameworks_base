@@ -21,6 +21,7 @@ import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsSourceConsumer.ShowResult.IME_SHOW_DELAYED;
 import static android.view.InsetsSourceConsumer.ShowResult.SHOW_IMMEDIATELY;
+import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -88,7 +89,6 @@ import java.util.concurrent.CountDownLatch;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class InsetsControllerTest {
-
     private InsetsController mController;
     private SurfaceSession mSession = new SurfaceSession();
     private SurfaceControl mLeash;
@@ -663,6 +663,26 @@ public class InsetsControllerTest {
                     mController.getState().getSource(ITYPE_IME).getVisibleFrame());
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testCaptionInsetsStateAssemble() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mController.onFrameChanged(new Rect(0, 0, 100, 300));
+            final InsetsState state = new InsetsState(mController.getState(), true);
+            final Rect captionFrame = new Rect(0, 0, 100, 100);
+            mController.setCaptionInsetsHeight(100);
+            mController.onStateChanged(state);
+            final InsetsState currentState = new InsetsState(mController.getState());
+            // The caption bar source should be synced with the info in mAttachInfo.
+            assertEquals(captionFrame, currentState.peekSource(ITYPE_CAPTION_BAR).getFrame());
+            assertTrue(currentState.equals(state, true /* excludingCaptionInsets*/));
+            mController.setCaptionInsetsHeight(0);
+            mController.onStateChanged(state);
+            // The caption bar source should not be there at all, because we don't add empty
+            // caption to the state from the server.
+            assertNull(mController.getState().peekSource(ITYPE_CAPTION_BAR));
+        });
     }
 
     private void waitUntilNextFrame() throws Exception {

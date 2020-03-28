@@ -187,6 +187,7 @@ public final class NotificationRecord {
     private boolean mSuggestionsGeneratedByAssistant;
     private boolean mEditChoicesBeforeSending;
     private boolean mHasSeenSmartReplies;
+    private boolean mFlagBubbleRemoved;
     private boolean mPostSilently;
     /**
      * Whether this notification (and its channels) should be considered user locked. Used in
@@ -1199,6 +1200,19 @@ public final class NotificationRecord {
      */
     public boolean hasBeenVisiblyExpanded() {
         return stats.hasBeenVisiblyExpanded();
+    }
+
+    /**
+     * When the bubble state on a notif changes due to user action (e.g. dismiss a bubble) then
+     * this value is set until an update or bubble change event due to user action (e.g. create
+     * bubble from sysui)
+     **/
+    public boolean isFlagBubbleRemoved() {
+        return mFlagBubbleRemoved;
+    }
+
+    public void setFlagBubbleRemoved(boolean flagBubbleRemoved) {
+        mFlagBubbleRemoved = flagBubbleRemoved;
     }
 
     public void setSystemGeneratedSmartActions(

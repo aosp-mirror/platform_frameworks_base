@@ -22,7 +22,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.util.Size;
+import android.graphics.Rect;
 import android.widget.TextView;
 
 import androidx.test.filters.LargeTest;
@@ -55,9 +55,9 @@ public class ScaleGestureDetectorTest {
 
         // Specify start and end coordinates with respect to the window size.
         final WindowManager wm = mScaleGestureActivity.getSystemService(WindowManager.class);
-        final Size windowSize = wm.getCurrentWindowMetrics().getSize();
-        final int windowWidth = windowSize.getWidth();
-        final int windowHeight = windowSize.getHeight();
+        final Rect windowBounds = wm.getCurrentWindowMetrics().getBounds();
+        final int windowWidth = windowBounds.width();
+        final int windowHeight = windowBounds.height();
 
         // Obtain coordinates to perform pinch and zoom from the center, to 75% of the display.
         final int centerX = windowWidth / 2;

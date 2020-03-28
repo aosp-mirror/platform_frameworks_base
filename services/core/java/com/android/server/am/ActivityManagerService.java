@@ -185,8 +185,6 @@ import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
-import android.app.WindowConfiguration.ActivityType;
-import android.app.WindowConfiguration.WindowingMode;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
@@ -6510,13 +6508,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public List<RunningTaskInfo> getTasks(int maxNum) {
         return mActivityTaskManager.getTasks(maxNum);
-    }
-
-    @Override
-    public List<RunningTaskInfo> getFilteredTasks(int maxNum, @ActivityType int ignoreActivityType,
-            @WindowingMode int ignoreWindowingMode) {
-        return mActivityTaskManager.getFilteredTasks(
-                maxNum, ignoreActivityType, ignoreWindowingMode);
     }
 
     @Override

@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -56,11 +57,13 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -91,13 +94,14 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     private Handler mHandler;
     @Mock
     private KeyguardSecurityModel mKeyguardSecurityModel;
-
+    @Rule
+    public MockitoRule mRule = MockitoJUnit.rule();
+    private ViewGroup mRootView;
     private KeyguardBouncer mBouncer;
 
     @Before
     public void setup() {
         allowTestableLooperAsMainThread();
-        MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor);
         mDependency.injectTestDependency(KeyguardSecurityModel.class, mKeyguardSecurityModel);
         mDependency.injectMockDependency(KeyguardStateController.class);
@@ -115,6 +119,8 @@ public class KeyguardBouncerTest extends SysuiTestCase {
             protected void inflateView() {
                 super.inflateView();
                 mKeyguardView = mKeyguardHostView;
+                mRoot = spy(mRoot);
+                mRootView = mRoot;
             }
         };
     }
@@ -217,6 +223,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
         mBouncer.setExpansion(0);
         verify(mKeyguardHostView).onResume();
+        verify(mRootView).announceForAccessibility(any());
     }
 
     @Test

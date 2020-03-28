@@ -24,7 +24,6 @@ import android.content.pm.PackageInstaller;
 import android.os.ParcelFileDescriptor;
 import android.os.ShellCommand;
 import android.service.dataloader.DataLoaderService;
-import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -114,6 +113,74 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
         }
     }
 
+    static class Metadata {
+        /**
+         * Full files read from stdin.
+         */
+        static final byte STDIN = 0;
+        /**
+         * Full files read from local file.
+         */
+        static final byte LOCAL_FILE = 1;
+        /**
+         * Signature tree read from stdin, data streamed.
+         */
+        static final byte DATA_ONLY_STREAMING = 2;
+        /**
+         * Everything streamed.
+         */
+        static final byte STREAMING = 3;
+
+        private final byte mMode;
+        private final String mData;
+
+        static Metadata forStdIn(String fileId) {
+            return new Metadata(STDIN, fileId);
+        }
+
+        static Metadata forLocalFile(String filePath) {
+            return new Metadata(LOCAL_FILE, filePath);
+        }
+
+        static Metadata forDataOnlyStreaming(String fileId) {
+            return new Metadata(DATA_ONLY_STREAMING, fileId);
+        }
+
+        static Metadata forStreaming(String fileId) {
+            return new Metadata(STREAMING, fileId);
+        }
+
+        private Metadata(byte mode, String data) {
+            this.mMode = mode;
+            this.mData = (data == null) ? "" : data;
+        }
+
+        static Metadata fromByteArray(byte[] bytes) throws IOException {
+            if (bytes == null || bytes.length == 0) {
+                return null;
+            }
+            byte mode = bytes[0];
+            String data = new String(bytes, 1, bytes.length - 1, StandardCharsets.UTF_8);
+            return new Metadata(mode, data);
+        }
+
+        byte[] toByteArray() {
+            byte[] dataBytes = this.mData.getBytes(StandardCharsets.UTF_8);
+            byte[] result = new byte[1 + dataBytes.length];
+            result[0] = this.mMode;
+            System.arraycopy(dataBytes, 0, result, 1, dataBytes.length);
+            return result;
+        }
+
+        byte getMode() {
+            return this.mMode;
+        }
+
+        String getData() {
+            return this.mData;
+        }
+    }
+
     private static class DataLoader implements DataLoaderService.DataLoader {
         private DataLoaderParams mParams = null;
         private FileSystemConnector mConnector = null;
@@ -136,19 +203,31 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
             }
             try {
                 for (InstallationFile file : addedFiles) {
-                    String filePath = new String(file.getMetadata(), StandardCharsets.UTF_8);
-                    if (TextUtils.isEmpty(filePath) || filePath.startsWith(STDIN_PATH)) {
-                        final ParcelFileDescriptor inFd = getStdInPFD(shellCommand);
-                        mConnector.writeData(file.getName(), 0, file.getLengthBytes(), inFd);
-                    } else {
-                        ParcelFileDescriptor incomingFd = null;
-                        try {
-                            incomingFd = getLocalFile(shellCommand, filePath);
-                            mConnector.writeData(file.getName(), 0, incomingFd.getStatSize(),
-                                    incomingFd);
-                        } finally {
-                            IoUtils.closeQuietly(incomingFd);
+                    Metadata metadata = Metadata.fromByteArray(file.getMetadata());
+                    if (metadata == null) {
+                        Slog.e(TAG, "Invalid metadata for file: " + file.getName());
+                        return false;
+                    }
+                    switch (metadata.getMode()) {
+                        case Metadata.STDIN: {
+                            final ParcelFileDescriptor inFd = getStdInPFD(shellCommand);
+                            mConnector.writeData(file.getName(), 0, file.getLengthBytes(), inFd);
+                            break;
                         }
+                        case Metadata.LOCAL_FILE: {
+                            ParcelFileDescriptor incomingFd = null;
+                            try {
+                                incomingFd = getLocalFile(shellCommand, metadata.getData());
+                                mConnector.writeData(file.getName(), 0, incomingFd.getStatSize(),
+                                        incomingFd);
+                            } finally {
+                                IoUtils.closeQuietly(incomingFd);
+                            }
+                            break;
+                        }
+                        default:
+                            Slog.e(TAG, "Unsupported metadata mode: " + metadata.getMode());
+                            return false;
                     }
                 }
                 return true;

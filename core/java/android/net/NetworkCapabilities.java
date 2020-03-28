@@ -1122,7 +1122,7 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     private boolean satisfiedBySpecifier(NetworkCapabilities nc) {
-        return mNetworkSpecifier == null || mNetworkSpecifier.satisfiedBy(nc.mNetworkSpecifier)
+        return mNetworkSpecifier == null || mNetworkSpecifier.canBeSatisfiedBy(nc.mNetworkSpecifier)
                 || nc.mNetworkSpecifier instanceof MatchAllNetworkSpecifier;
     }
 

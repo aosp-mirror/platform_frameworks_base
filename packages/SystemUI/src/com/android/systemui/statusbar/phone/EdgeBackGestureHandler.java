@@ -110,8 +110,6 @@ public class EdgeBackGestureHandler implements DisplayListener,
     private final float mTouchSlop;
     // Duration after which we consider the event as longpress.
     private final int mLongPressTimeout;
-    // The back gesture type
-    private int mBackType;
 
     private final PointF mDownPoint = new PointF();
     private final PointF mEndPoint = new PointF();

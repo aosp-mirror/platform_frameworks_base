@@ -58,4 +58,11 @@ public interface AuthDialogCallback {
      * Invoked when the "use password" button is clicked
      */
     void onDeviceCredentialPressed();
+
+    /**
+     * See {@link android.hardware.biometrics.BiometricPrompt.Builder
+     * #setReceiveSystemEvents(boolean)}
+     * @param event
+     */
+    void onSystemEvent(int event);
 }

@@ -3014,11 +3014,12 @@
       <!-- @hide @SystemApi -->
       <public name="minExtensionVersion" />
       <public name="allowNativeHeapPointerTagging" />
+      <!-- @hide no longer used, kept to preserve padding -->
+      <public name="allowAutoRevokePermissionsExemption"/>
       <public name="autoRevokePermissions" />
       <public name="preserveLegacyExternalStorage" />
       <public name="mimeGroup" />
       <public name="gwpAsanMode" />
-      <public name="actor" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">

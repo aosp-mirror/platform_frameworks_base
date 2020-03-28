@@ -17,7 +17,6 @@
 package android.hardware.soundtrigger;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
@@ -37,6 +36,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.app.ISoundTriggerService;
 
+import org.mockito.MockitoAnnotations;
+
 import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -44,8 +45,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.UUID;
-
-import org.mockito.MockitoAnnotations;
 
 public class GenericSoundModelTest extends AndroidTestCase {
     static final int MSG_DETECTION_ERROR = -1;
@@ -96,11 +95,11 @@ public class GenericSoundModelTest extends AndroidTestCase {
 
         // Update sound model
         soundTriggerService.updateSoundModel(model);
-        loadedModelUuids.add(model.uuid);
+        loadedModelUuids.add(model.getUuid());
 
         // Confirm it was updated
         GenericSoundModel returnedModel =
-                soundTriggerService.getSoundModel(new ParcelUuid(model.uuid));
+                soundTriggerService.getSoundModel(new ParcelUuid(model.getUuid()));
         assertEquals(model, returnedModel);
     }
 
@@ -110,15 +109,15 @@ public class GenericSoundModelTest extends AndroidTestCase {
 
         // Update sound model
         soundTriggerService.updateSoundModel(model);
-        loadedModelUuids.add(model.uuid);
+        loadedModelUuids.add(model.getUuid());
 
         // Delete sound model
-        soundTriggerService.deleteSoundModel(new ParcelUuid(model.uuid));
-        loadedModelUuids.remove(model.uuid);
+        soundTriggerService.deleteSoundModel(new ParcelUuid(model.getUuid()));
+        loadedModelUuids.remove(model.getUuid());
 
         // Confirm it was deleted
         GenericSoundModel returnedModel =
-                soundTriggerService.getSoundModel(new ParcelUuid(model.uuid));
+                soundTriggerService.getSoundModel(new ParcelUuid(model.getUuid()));
         assertEquals(null, returnedModel);
     }
 
@@ -134,14 +133,14 @@ public class GenericSoundModelTest extends AndroidTestCase {
 
         // Update and start sound model recognition
         soundTriggerService.updateSoundModel(model);
-        loadedModelUuids.add(model.uuid);
-        int r = soundTriggerService.startRecognition(new ParcelUuid(model.uuid), spyCallback,
+        loadedModelUuids.add(model.getUuid());
+        int r = soundTriggerService.startRecognition(new ParcelUuid(model.getUuid()), spyCallback,
                 config);
         assertEquals("Could Not Start Recognition with code: " + r,
                 android.hardware.soundtrigger.SoundTrigger.STATUS_OK, r);
 
         // Stop recognition
-        r = soundTriggerService.stopRecognition(new ParcelUuid(model.uuid), spyCallback);
+        r = soundTriggerService.stopRecognition(new ParcelUuid(model.getUuid()), spyCallback);
         assertEquals("Could Not Stop Recognition with code: " + r,
                 android.hardware.soundtrigger.SoundTrigger.STATUS_OK, r);
     }
@@ -158,13 +157,13 @@ public class GenericSoundModelTest extends AndroidTestCase {
 
         // Update and start sound model
         soundTriggerService.updateSoundModel(model);
-        loadedModelUuids.add(model.uuid);
-        soundTriggerService.startRecognition(new ParcelUuid(model.uuid), spyCallback, config);
+        loadedModelUuids.add(model.getUuid());
+        soundTriggerService.startRecognition(new ParcelUuid(model.getUuid()), spyCallback, config);
 
         // Send trigger to stub HAL
         Socket socket = new Socket(InetAddress.getLocalHost(), 14035);
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-        out.writeBytes("trig " + model.uuid.toString() + "\r\n");
+        out.writeBytes("trig " + model.getUuid().toString() + "\r\n");
         out.flush();
         socket.close();
 
@@ -227,11 +226,12 @@ public class GenericSoundModelTest extends AndroidTestCase {
             if (operation == 0 && modelInfo.status == STATUS_UNLOADED) {
                 // Update and start sound model
                 soundTriggerService.updateSoundModel(modelInfo.model);
-                loadedModelUuids.add(modelInfo.model.uuid);
+                loadedModelUuids.add(modelInfo.model.getUuid());
                 modelInfo.status = STATUS_LOADED;
             } else if (operation == 1 && modelInfo.status == STATUS_LOADED) {
                 // Start the sound model
-                int r = soundTriggerService.startRecognition(new ParcelUuid(modelInfo.model.uuid),
+                int r = soundTriggerService.startRecognition(new ParcelUuid(
+                                modelInfo.model.getUuid()),
                         spyCallback, config);
                 assertEquals("Could Not Start Recognition with code: " + r,
                         android.hardware.soundtrigger.SoundTrigger.STATUS_OK, r);
@@ -240,7 +240,7 @@ public class GenericSoundModelTest extends AndroidTestCase {
                 // Send trigger to stub HAL
                 Socket socket = new Socket(InetAddress.getLocalHost(), 14035);
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-                out.writeBytes("trig " + modelInfo.model.uuid + "\r\n");
+                out.writeBytes("trig " + modelInfo.model.getUuid() + "\r\n");
                 out.flush();
                 socket.close();
 
@@ -249,19 +249,20 @@ public class GenericSoundModelTest extends AndroidTestCase {
                 reset(spyCallback);
             } else if (operation == 3 && modelInfo.status == STATUS_STARTED) {
                 // Stop recognition
-                int r = soundTriggerService.stopRecognition(new ParcelUuid(modelInfo.model.uuid),
+                int r = soundTriggerService.stopRecognition(new ParcelUuid(
+                                modelInfo.model.getUuid()),
                         spyCallback);
                 assertEquals("Could Not Stop Recognition with code: " + r,
                         android.hardware.soundtrigger.SoundTrigger.STATUS_OK, r);
                 modelInfo.status = STATUS_LOADED;
             } else if (operation == 4 && modelInfo.status != STATUS_UNLOADED) {
                 // Delete sound model
-                soundTriggerService.deleteSoundModel(new ParcelUuid(modelInfo.model.uuid));
-                loadedModelUuids.remove(modelInfo.model.uuid);
+                soundTriggerService.deleteSoundModel(new ParcelUuid(modelInfo.model.getUuid()));
+                loadedModelUuids.remove(modelInfo.model.getUuid());
 
                 // Confirm it was deleted
-                GenericSoundModel returnedModel =
-                        soundTriggerService.getSoundModel(new ParcelUuid(modelInfo.model.uuid));
+                GenericSoundModel returnedModel = soundTriggerService.getSoundModel(
+                        new ParcelUuid(modelInfo.model.getUuid()));
                 assertEquals(null, returnedModel);
                 modelInfo.status = STATUS_UNLOADED;
             }

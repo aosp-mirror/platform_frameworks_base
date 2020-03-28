@@ -60,7 +60,6 @@ import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
-import android.util.Size;
 import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -1480,8 +1479,8 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public int getMaxWidth() {
         final WindowManager windowManager = getSystemService(WindowManager.class);
-        final Size windowSize = windowManager.getCurrentWindowMetrics().getSize();
-        return windowSize.getWidth();
+        final Rect windowBounds = windowManager.getCurrentWindowMetrics().getBounds();
+        return windowBounds.width();
     }
     
     /**

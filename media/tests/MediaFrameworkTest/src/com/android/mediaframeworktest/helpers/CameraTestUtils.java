@@ -2210,14 +2210,14 @@ public class CameraTestUtils extends Assert {
     }
 
     public static Size getPreviewSizeBound(WindowManager windowManager, Size bound) {
-        Size windowSize = windowManager.getCurrentWindowMetrics().getSize();
+        Rect windowBounds = windowManager.getCurrentWindowMetrics().getBounds();
 
-        int width = windowSize.getWidth();
-        int height = windowSize.getHeight();
+        int width = windowBounds.width();
+        int height = windowBounds.height();
 
         if (height > width) {
             height = width;
-            width = windowSize.getHeight();
+            width = windowBounds.height();
         }
 
         if (bound.getWidth() <= width &&

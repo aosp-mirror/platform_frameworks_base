@@ -705,6 +705,36 @@ public class ConnectivityManager {
     @Deprecated
     public static final int TYPE_TEST = 18; // TODO: Remove this once NetworkTypes are unused.
 
+    /**
+     * @deprecated Use {@link NetworkCapabilities} instead.
+     * @hide
+     */
+    @Deprecated
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "TYPE_" }, value = {
+                TYPE_NONE,
+                TYPE_MOBILE,
+                TYPE_WIFI,
+                TYPE_MOBILE_MMS,
+                TYPE_MOBILE_SUPL,
+                TYPE_MOBILE_DUN,
+                TYPE_MOBILE_HIPRI,
+                TYPE_WIMAX,
+                TYPE_BLUETOOTH,
+                TYPE_DUMMY,
+                TYPE_ETHERNET,
+                TYPE_MOBILE_FOTA,
+                TYPE_MOBILE_IMS,
+                TYPE_MOBILE_CBS,
+                TYPE_WIFI_P2P,
+                TYPE_MOBILE_IA,
+                TYPE_MOBILE_EMERGENCY,
+                TYPE_PROXY,
+                TYPE_VPN,
+                TYPE_TEST
+    })
+    public @interface LegacyNetworkType {}
+
     // Deprecated constants for return values of startUsingNetworkFeature. They used to live
     // in com.android.internal.telephony.PhoneConstants until they were made inaccessible.
     private static final int DEPRECATED_PHONE_CONSTANT_APN_ALREADY_ACTIVE = 0;

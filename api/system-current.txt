@@ -3575,23 +3575,23 @@ package android.hardware.soundtrigger {
 
   public static final class SoundTrigger.Keyphrase implements android.os.Parcelable {
     ctor public SoundTrigger.Keyphrase(int, int, @NonNull java.util.Locale, @NonNull String, @Nullable int[]);
+    method public int getId();
+    method @NonNull public java.util.Locale getLocale();
+    method public int getRecognitionModes();
+    method @NonNull public String getText();
+    method @NonNull public int[] getUsers();
     method @NonNull public static android.hardware.soundtrigger.SoundTrigger.Keyphrase readFromParcel(@NonNull android.os.Parcel);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.Keyphrase> CREATOR;
-    field public final int id;
-    field @NonNull public final java.util.Locale locale;
-    field public final int recognitionModes;
-    field @NonNull public final String text;
-    field @NonNull public final int[] users;
   }
 
   public static final class SoundTrigger.KeyphraseSoundModel extends android.hardware.soundtrigger.SoundTrigger.SoundModel implements android.os.Parcelable {
     ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[], int);
     ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[]);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.Keyphrase[] getKeyphrases();
     method @NonNull public static android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel readFromParcel(@NonNull android.os.Parcel);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel> CREATOR;
-    field @NonNull public final android.hardware.soundtrigger.SoundTrigger.Keyphrase[] keyphrases;
   }
 
   public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
@@ -3603,26 +3603,26 @@ package android.hardware.soundtrigger {
 
   public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
     method public int describeContents();
+    method public int getAudioCapabilities();
+    method @NonNull public String getDescription();
+    method public int getId();
+    method @NonNull public String getImplementor();
+    method public int getMaxBufferMillis();
+    method public int getMaxKeyphrases();
+    method public int getMaxSoundModels();
+    method public int getMaxUsers();
+    method public int getPowerConsumptionMw();
+    method public int getRecognitionModes();
+    method @NonNull public String getSupportedModelArch();
+    method @NonNull public java.util.UUID getUuid();
+    method public int getVersion();
+    method public boolean isCaptureTransitionSupported();
+    method public boolean isConcurrentCaptureSupported();
+    method public boolean isTriggerReturnedInEvent();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
     field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> CREATOR;
-    field public final int audioCapabilities;
-    field @NonNull public final String description;
-    field public final int id;
-    field @NonNull public final String implementor;
-    field public final int maxBufferMs;
-    field public final int maxKeyphrases;
-    field public final int maxSoundModels;
-    field public final int maxUsers;
-    field public final int powerConsumptionMw;
-    field public final int recognitionModes;
-    field public final boolean returnsTriggerInEvent;
-    field @NonNull public final String supportedModelArch;
-    field public final boolean supportsCaptureTransition;
-    field public final boolean supportsConcurrentCapture;
-    field @NonNull public final java.util.UUID uuid;
-    field public final int version;
   }
 
   public static class SoundTrigger.RecognitionEvent {
@@ -3633,13 +3633,13 @@ package android.hardware.soundtrigger {
   }
 
   public static class SoundTrigger.SoundModel {
+    method @NonNull public byte[] getData();
+    method public int getType();
+    method @NonNull public java.util.UUID getUuid();
+    method @NonNull public java.util.UUID getVendorUuid();
+    method public int getVersion();
     field public static final int TYPE_GENERIC_SOUND = 1; // 0x1
     field public static final int TYPE_KEYPHRASE = 0; // 0x0
-    field @NonNull public final byte[] data;
-    field public final int type;
-    field @NonNull public final java.util.UUID uuid;
-    field @NonNull public final java.util.UUID vendorUuid;
-    field public final int version;
   }
 
 }
@@ -4178,11 +4178,11 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDeviceForStrategyChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener) throws java.lang.SecurityException;
     method public void clearAudioServerStateCallback();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
-    method @IntRange(from=0) public int getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
+    method @IntRange(from=0) public long getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioProductStrategy> getAudioProductStrategies();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioVolumeGroup> getAudioVolumeGroups();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
-    method @IntRange(from=0) public int getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
+    method @IntRange(from=0) public long getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDeviceAttributes getPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
@@ -4197,7 +4197,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int requestAudioFocus(@NonNull android.media.AudioFocusRequest, @Nullable android.media.audiopolicy.AudioPolicy);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo, @IntRange(from=0) int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo, @IntRange(from=0) long);
     method public void setAudioServerStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.AudioServerStateCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAttributes);
@@ -4272,15 +4272,9 @@ package android.media {
   }
 
   public static class AudioTrack.TunerConfiguration {
+    ctor @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public AudioTrack.TunerConfiguration(@IntRange(from=1) int, @IntRange(from=1) int);
     method @IntRange(from=1) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getContentId();
     method @IntRange(from=1) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getSyncId();
-  }
-
-  public static class AudioTrack.TunerConfiguration.Builder {
-    ctor public AudioTrack.TunerConfiguration.Builder();
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioTrack.TunerConfiguration build();
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioTrack.TunerConfiguration.Builder setContentId(@IntRange(from=1) int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioTrack.TunerConfiguration.Builder setSyncId(@IntRange(from=1) int);
   }
 
   public class HwAudioSource {
@@ -6183,7 +6177,6 @@ package android.net {
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public MatchAllNetworkSpecifier();
     method public int describeContents();
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.MatchAllNetworkSpecifier> CREATOR;
   }
@@ -6204,21 +6197,21 @@ package android.net {
   public abstract class NetworkAgent {
     ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, int, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
     method @Nullable public android.net.Network getNetwork();
+    method public void markConnected();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
     method public void onNetworkUnwanted();
     method public void onRemoveKeepalivePacketFilter(int);
     method public void onSaveAcceptUnvalidated(boolean);
     method public void onSignalStrengthThresholdsUpdated(@NonNull int[]);
-    method public void onStartSocketKeepalive(int, int, @NonNull android.net.KeepalivePacketData);
+    method public void onStartSocketKeepalive(int, @NonNull java.time.Duration, @NonNull android.net.KeepalivePacketData);
     method public void onStopSocketKeepalive(int);
-    method public void onValidationStatus(int, @Nullable String);
+    method public void onValidationStatus(int, @Nullable android.net.Uri);
     method @NonNull public android.net.Network register();
-    method public void sendLinkProperties(@NonNull android.net.LinkProperties);
-    method public void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
-    method public void sendNetworkScore(int);
-    method public void sendSocketKeepaliveEvent(int, int);
-    method public void setConnected();
+    method public final void sendLinkProperties(@NonNull android.net.LinkProperties);
+    method public final void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
+    method public final void sendNetworkScore(@IntRange(from=0, to=99) int);
+    method public final void sendSocketKeepaliveEvent(int, int);
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
     field public static final int VALIDATION_STATUS_VALID = 1; // 0x1
@@ -6235,7 +6228,7 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkAgentConfig> CREATOR;
   }
 
-  public static class NetworkAgentConfig.Builder {
+  public static final class NetworkAgentConfig.Builder {
     ctor public NetworkAgentConfig.Builder();
     method @NonNull public android.net.NetworkAgentConfig build();
     method @NonNull public android.net.NetworkAgentConfig.Builder setExplicitlySelected(boolean);
@@ -6289,8 +6282,8 @@ package android.net {
     ctor public NetworkProvider(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void declareNetworkRequestUnfulfillable(@NonNull android.net.NetworkRequest);
     method public int getProviderId();
-    method public void onNetworkRequested(@NonNull android.net.NetworkRequest, int, int);
-    method public void onRequestWithdrawn(@NonNull android.net.NetworkRequest);
+    method public void onNetworkRequestWithdrawn(@NonNull android.net.NetworkRequest);
+    method public void onNetworkRequested(@NonNull android.net.NetworkRequest, @IntRange(from=0, to=99) int, int);
     field public static final int ID_NONE = -1; // 0xffffffff
   }
 
@@ -6303,7 +6296,6 @@ package android.net {
   public class NetworkRequest implements android.os.Parcelable {
     method @Nullable public String getRequestorPackageName();
     method public int getRequestorUid();
-    method public boolean satisfiedBy(@Nullable android.net.NetworkCapabilities);
   }
 
   public static class NetworkRequest.Builder {
@@ -6338,8 +6330,8 @@ package android.net {
   }
 
   public abstract class NetworkSpecifier {
+    method public boolean canBeSatisfiedBy(@Nullable android.net.NetworkSpecifier);
     method @Nullable public android.net.NetworkSpecifier redact();
-    method public abstract boolean satisfiedBy(@Nullable android.net.NetworkSpecifier);
   }
 
   public class NetworkStack {
@@ -6440,10 +6432,6 @@ package android.net {
     method @NonNull public android.net.StaticIpConfiguration.Builder setDomains(@Nullable String);
     method @NonNull public android.net.StaticIpConfiguration.Builder setGateway(@Nullable java.net.InetAddress);
     method @NonNull public android.net.StaticIpConfiguration.Builder setIpAddress(@Nullable android.net.LinkAddress);
-  }
-
-  public final class TelephonyNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
   }
 
   public final class TetheredClient implements android.os.Parcelable {
@@ -7432,10 +7420,6 @@ package android.net.wifi {
     field public int numUsage;
   }
 
-  public final class WifiNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
-  }
-
   public final class WifiNetworkSuggestion implements android.os.Parcelable {
     method @NonNull public android.net.wifi.WifiConfiguration getWifiConfiguration();
   }
@@ -7624,10 +7608,6 @@ package android.net.wifi.aware {
 
   public class DiscoverySession implements java.lang.AutoCloseable {
     method @Deprecated public android.net.NetworkSpecifier createNetworkSpecifierPmk(@NonNull android.net.wifi.aware.PeerHandle, @NonNull byte[]);
-  }
-
-  public final class WifiAwareNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
-    method public boolean satisfiedBy(android.net.NetworkSpecifier);
   }
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
@@ -8394,12 +8374,12 @@ package android.os {
 
   public class RecoverySystem {
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void cancelScheduledUpdate(android.content.Context) throws java.io.IOException;
-    method @RequiresPermission(android.Manifest.permission.RECOVERY) public static boolean clearPrepareForUnattendedUpdate(@NonNull android.content.Context) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void clearPrepareForUnattendedUpdate(@NonNull android.content.Context) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void installPackage(android.content.Context, java.io.File, boolean) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void prepareForUnattendedUpdate(@NonNull android.content.Context, @NonNull String, @Nullable android.content.IntentSender) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void processPackage(android.content.Context, java.io.File, android.os.RecoverySystem.ProgressListener, android.os.Handler) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void processPackage(android.content.Context, java.io.File, android.os.RecoverySystem.ProgressListener) throws java.io.IOException;
-    method @RequiresPermission(android.Manifest.permission.RECOVERY) public static boolean rebootAndApply(@NonNull android.content.Context, @NonNull String, @NonNull String) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void rebootAndApply(@NonNull android.content.Context, @NonNull String, @NonNull String) throws java.io.IOException;
     method @RequiresPermission(allOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static void rebootWipeAb(android.content.Context, java.io.File, String) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void scheduleUpdateOnBoot(android.content.Context, java.io.File) throws java.io.IOException;
     method public static boolean verifyPackageCompatibility(java.io.File) throws java.io.IOException;
@@ -11340,9 +11320,9 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoiceActivationState(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void shutdownAllRadios();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPin(String);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPinReportResult(String);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPinReportResult(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPuk(String, String);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPukReportResult(String, String);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPukReportResult(String, String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateOtaEmergencyNumberDbFilePath(@NonNull android.os.ParcelFileDescriptor);
@@ -12712,9 +12692,6 @@ package android.view.contentcapture {
 
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
-  }
-
-  public abstract class ContentCaptureSession implements java.lang.AutoCloseable {
     field public static final int NO_SESSION_ID = 0; // 0x0
   }
 

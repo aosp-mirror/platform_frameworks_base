@@ -307,6 +307,8 @@ public class ConnectivityServiceTest {
 
     private static final long TIMESTAMP = 1234L;
 
+    private static final int NET_ID = 110;
+
     private static final String CLAT_PREFIX = "v4-";
     private static final String MOBILE_IFNAME = "test_rmnet_data0";
     private static final String WIFI_IFNAME = "test_wlan0";
@@ -1015,6 +1017,7 @@ public class ConnectivityServiceTest {
         private int mVpnType = VpnManager.TYPE_VPN_SERVICE;
 
         private VpnInfo mVpnInfo;
+        private Network[] mUnderlyingNetworks;
 
         public MockVpn(int userId) {
             super(startHandlerThreadAndReturnLooper(), mServiceContext, mNetworkManagementService,
@@ -1104,8 +1107,20 @@ public class ConnectivityServiceTest {
             return super.getVpnInfo();
         }
 
-        private void setVpnInfo(VpnInfo vpnInfo) {
+        private synchronized void setVpnInfo(VpnInfo vpnInfo) {
             mVpnInfo = vpnInfo;
+        }
+
+        @Override
+        public synchronized Network[] getUnderlyingNetworks() {
+            if (mUnderlyingNetworks != null) return mUnderlyingNetworks;
+
+            return super.getUnderlyingNetworks();
+        }
+
+        /** Don't override behavior for {@link Vpn#setUnderlyingNetworks}. */
+        private synchronized void overrideUnderlyingNetworks(Network[] underlyingNetworks) {
+            mUnderlyingNetworks = underlyingNetworks;
         }
     }
 
@@ -2896,7 +2911,7 @@ public class ConnectivityServiceTest {
         class ConfidentialMatchAllNetworkSpecifier extends NetworkSpecifier implements
                 Parcelable {
             @Override
-            public boolean satisfiedBy(NetworkSpecifier other) {
+            public boolean canBeSatisfiedBy(NetworkSpecifier other) {
                 return true;
             }
 
@@ -2924,7 +2939,7 @@ public class ConnectivityServiceTest {
             }
 
             @Override
-            public boolean satisfiedBy(NetworkSpecifier other) {
+            public boolean canBeSatisfiedBy(NetworkSpecifier other) {
                 if (other instanceof LocalStringNetworkSpecifier) {
                     return TextUtils.equals(mString,
                             ((LocalStringNetworkSpecifier) other).mString);
@@ -3045,7 +3060,10 @@ public class ConnectivityServiceTest {
         });
 
         class NonParcelableSpecifier extends NetworkSpecifier {
-            public boolean satisfiedBy(NetworkSpecifier other) { return false; }
+            @Override
+            public boolean canBeSatisfiedBy(NetworkSpecifier other) {
+                return false;
+            }
         };
         class ParcelableSpecifier extends NonParcelableSpecifier implements Parcelable {
             @Override public int describeContents() { return 0; }
@@ -6795,15 +6813,11 @@ public class ConnectivityServiceTest {
 
         mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
 
-        try {
-            assertFalse(
-                    "Mismatched uid/package name should not pass the location permission check",
-                    mService.checkConnectivityDiagnosticsPermissions(
-                            Process.myPid() + 1, Process.myUid() + 1, naiWithoutUid,
-                            mContext.getOpPackageName()));
-        } catch (SecurityException e) {
-            fail("checkConnectivityDiagnosticsPermissions shouldn't surface a SecurityException");
-        }
+        assertFalse(
+                "Mismatched uid/package name should not pass the location permission check",
+                mService.checkConnectivityDiagnosticsPermissions(
+                        Process.myPid() + 1, Process.myUid() + 1, naiWithoutUid,
+                        mContext.getOpPackageName()));
     }
 
     @Test
@@ -6824,9 +6838,10 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testCheckConnectivityDiagnosticsPermissionsActiveVpn() throws Exception {
+        final Network network = new Network(NET_ID);
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
-                        null, null, null, null, null, new NetworkCapabilities(), 0,
+                        null, null, network, null, null, new NetworkCapabilities(), 0,
                         mServiceContext, null, null, mService, null, null, null, 0);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
@@ -6839,8 +6854,16 @@ public class ConnectivityServiceTest {
         info.ownerUid = Process.myUid();
         info.vpnIface = "interface";
         mMockVpn.setVpnInfo(info);
+        mMockVpn.overrideUnderlyingNetworks(new Network[] {network});
         assertTrue(
                 "Active VPN permission not applied",
+                mService.checkConnectivityDiagnosticsPermissions(
+                        Process.myPid(), Process.myUid(), naiWithoutUid,
+                        mContext.getOpPackageName()));
+
+        mMockVpn.overrideUnderlyingNetworks(null);
+        assertFalse(
+                "VPN shouldn't receive callback on non-underlying network",
                 mService.checkConnectivityDiagnosticsPermissions(
                         Process.myPid(), Process.myUid(), naiWithoutUid,
                         mContext.getOpPackageName()));

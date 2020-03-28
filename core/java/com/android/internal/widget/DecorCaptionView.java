@@ -17,7 +17,6 @@
 package com.android.internal.widget;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.AttributeSet;
@@ -53,8 +52,7 @@ import java.util.ArrayList;
  * <li>..</li>
  * </ul>
  *
- * Although this ViewGroup has only two direct sub-Views, its behavior is more complex due to
- * overlaying caption on the content and drawing.
+ * Here describe the behavior of overlaying caption on the content and drawing.
  *
  * First, no matter where the content View gets added, it will always be the first child and the
  * caption will be the second. This way the caption will always be drawn on top of the content when
@@ -66,11 +64,9 @@ import java.util.ArrayList;
  * <li>DecorCaptionView.onInterceptTouchEvent() will try intercepting the touch events if the
  * down action is performed on top close or maximize buttons; the reason for that is we want these
  * buttons to always work.</li>
- * <li>The content View will receive the touch event. Mind that content is actually underneath the
- * caption, so we need to introduce our own dispatch ordering. We achieve this by overriding
- * {@link #buildTouchDispatchChildList()}.</li>
- * <li>If the touch event is not consumed by the content View, it will go to the caption View
- * and the dragging logic will be executed.</li>
+ * <li>The caption view will try to consume the event to apply the dragging logic.</li>
+ * <li>If the touch event is not consumed by the caption, the content View will receive the touch
+ * event</li>
  * </ul>
  */
 public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
@@ -137,11 +133,6 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
         mOwner = owner;
         mShow = show;
         mOverlayWithAppContent = owner.isOverlayWithDecorCaptionEnabled();
-        if (mOverlayWithAppContent) {
-            // The caption is covering the content, so we make its background transparent to make
-            // the content visible.
-            mCaption.setBackgroundColor(Color.TRANSPARENT);
-        }
         updateCaptionVisibility();
         // By changing the outline provider to BOUNDS, the window can remove its
         // background without removing the shadow.
@@ -233,18 +224,6 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
                 return !mCheckForDragging;
         }
         return mDragging || mCheckForDragging;
-    }
-
-    @Override
-    public ArrayList<View> buildTouchDispatchChildList() {
-        mTouchDispatchList.ensureCapacity(3);
-        if (mCaption != null) {
-            mTouchDispatchList.add(mCaption);
-        }
-        if (mContent != null) {
-            mTouchDispatchList.add(mContent);
-        }
-        return mTouchDispatchList;
     }
 
     @Override
