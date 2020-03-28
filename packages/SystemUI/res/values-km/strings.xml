@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"អនុញ្ញាត"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"មិនអនុញ្ញាតការកែកំហុសតាម USB ទេ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"អ្នកប្រើ​ដែលបច្ចុប្បន្ន​បានចូលគណនី​នៅលើឧបករណ៍នេះ​មិនអាចបើកការកែកំហុស USB បានទេ។ ដើម្បីប្រើមុខងារនេះ សូមប្តូរទៅអ្នកប្រើចម្បង។"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"អនុញ្ញាត​ការជួសជុល​ដោយឥតខ្សែ​នៅលើ​បណ្ដាញ​នេះ​ឬ?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"ឈ្មោះបណ្ដាញ (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nអាសយដ្ឋាន Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"អនុញ្ញាត​នៅលើ​បណ្ដាញ​នេះ​ជានិច្ច"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"អនុញ្ញាត"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"មិន​អនុញ្ញាត​ការជួសជុល​ដោយឥតខ្សែ​ទេ"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"អ្នក​ប្រើប្រាស់​ដែលបច្ចុប្បន្ន​បាន​ចូលគណនី​នៅលើ​ឧបករណ៍​នេះ​មិនអាច​បើក​ការជួសជុល​ដោយឥតខ្សែ​បានទេ។ ដើម្បី​ប្រើ​មុខងារ​នេះ សូម​ប្ដូរ​ទៅ​អ្នក​ប្រើប្រាស់​ចម្បង។"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"បានបិទរន្ធ USB"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"ដើម្បី​ការពារ​ឧបករណ៍​របស់អ្នកកុំឱ្យ​ចូលទឹក ឬ​កម្ទេចផ្សេងៗ រន្ធ USB ត្រូវបានបិទ ហើយ​នឹង​មិនស្គាល់​គ្រឿង​បរិក្ខារ​នោះទេ។\n\nអ្នកនឹង​ទទួលបាន​ការជូនដំណឺង នៅពេល​អ្នកអាច​ប្រើប្រាស់​រន្ធ USB ម្ដងទៀត។"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"បាន​បើក​រន្ធ USB ដើម្បី​សម្គាល់​ឆ្នាំងសាក និងគ្រឿងផ្សេងៗ"</string>
@@ -80,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"សាកល្បង​ថតរូបថត​អេក្រង់​ម្តងទៀត"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"មិនអាច​រក្សាទុក​រូបថតអេក្រង់​បានទេ ​ដោយសារ​ទំហំផ្ទុក​មានកម្រិតទាប"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ការថត​រូបអេក្រង់​មិនត្រូវ​បាន​អនុញ្ញាត​ដោយ​កម្មវិធី​នេះ ឬ​ស្ថាប័ន​របស់អ្នក"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ច្រានចោល​រូបថត​អេក្រង់"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"បើក​រូបថត​អេក្រង់"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"កម្មវិធីថត​អេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ចាប់ផ្តើម​ថត​ឬ?"</string>
@@ -146,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"លំនាំមិនត្រឹមត្រូវ"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"ការព្យាយាម​ចូលខុស​ច្រើនដងពេក។\nសូមព្យាយាម​ម្តងទៀត​ក្នុងរយៈពេល <xliff:g id="NUMBER">%d</xliff:g> វិនាទី។"</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"សូមព្យាយាម​ម្តងទៀត។ ការព្យាយាម <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> នៃ <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> ដង។"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"ដោយសារ​មានការព្យាយាម​ដោះសោ​មិនត្រឹមត្រូវ​ច្រើនដងពេក ទិន្នន័យ​របស់​ឧបករណ៍នេះ​នឹងត្រូវបាន​លុប។"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"ដោយសារ​មានការព្យាយាម​ដោះសោ​មិនត្រឹមត្រូវ​ច្រើនដងពេក អ្នកប្រើប្រាស់នេះ​នឹងត្រូវបាន​ដកចេញ។"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"ដោយសារមានការព្យាយាមដោះសោមិនត្រឹមត្រូវច្រើនដងពេក កម្រងព័ត៌មានការងារនេះ និងទិន្នន័យរបស់វានឹងត្រូវបានលុប។"</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ច្រានចោល"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ប៉ះ​ឧបករណ៍​ចាប់ស្នាម​ម្រាមដៃ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"រូប​ស្នាម​ម្រាមដៃ"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"កំពុងស្វែងរកអ្នក…"</string>
@@ -488,6 +501,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"គ្រប់គ្រង"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ប្រវត្តិ"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"ការជូនដំណឹង​ស្ងាត់"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"ការជូនដំណឹង​ញ័រ ឬរោទ៍"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ការសន្ទនា"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"សម្អាត​ការជូនដំណឹង​ស្ងាត់ទាំងអស់"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ការជូនដំណឹង​បានផ្អាក​ដោយ​មុខងារកុំរំខាន"</string>
@@ -551,6 +565,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​ស្ថិតក្រោម​គ្រប់គ្រង​របស់ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ។ កម្រង​ព័ត៌មាននេះ​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។\n\nអ្នកក៏ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​ផ្ទាល់ខ្លួន​របស់​អ្នក។"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"បាន​ដោះសោ​ដោយភ្នាក់ងារ​​ទុកចិត្ត"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"ឧបករណ៍​នឹង​ចាក់​សោ​រហូត​ដល់​អ្នក​ដោះ​សោ​ដោយ​ដៃ"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"ទទួល​បាន​ការ​ជូន​ដំណឹង​កាន់តែ​លឿន"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"ឃើញ​ពួកវា​មុន​ពេល​ដោះ​សោ"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"ទេ អរគុណ!"</string>
@@ -686,10 +701,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ជួយឱ្យ​អ្នក​ផ្តោតអារម្មណ៍ ដោយមិនឮសំឡេង ឬ​ការញ័រ។"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ធ្វើឱ្យ​អ្នក​ចាប់អារម្មណ៍​តាមរយៈ​សំឡេង ឬ​ការញ័រ។"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ធ្វើឱ្យអ្នក​ចាប់អារម្មណ៍​ដោយប្រើ​ផ្លូវកាត់​អណ្ដែត​សម្រាប់ខ្លឹមសារនេះ។"</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"បង្ហាញ​នៅខាងលើ​ផ្នែកនៃ​ការសន្ទនា និង​បង្ហាញជា​សារលេចឡើង។"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"ការសន្ទនា​ទាំងអស់​ពី <xliff:g id="APP_NAME_0">%1$s</xliff:g> បង្ហាញជា​សារលេចឡើង​តាមលំនាំដើម។ គ្រប់គ្រង​នៅក្នុង <xliff:g id="APP_NAME_1">%2$s</xliff:g>។"</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ការកំណត់"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"អាទិភាព"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"មិនមាន​សារលេចឡើង​ថ្មីៗ​ទេ"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"សារលេចឡើង​ដែលបានច្រានចោល និង​សារលេចឡើង​ថ្មីៗ​នឹង​បង្ហាញ​នៅទីនេះ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"មិនអាច​កំណត់​រចនាសម្ព័ន្ធ​ក្រុមការជូនដំណឹងនេះ​នៅទីនេះ​បានទេ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ការជូនដំណឹង​ជា​ប្រូកស៊ី"</string>
@@ -959,13 +976,8 @@
     <string name="device_services" msgid="1549944177856658705">"សេវាកម្មឧបករណ៍"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"គ្មាន​ចំណងជើង"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ចុចដើម្បី​ចាប់ផ្ដើម​កម្មវិធី​នេះឡើងវិញ រួចចូលប្រើ​ពេញអេក្រង់។"</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"បើក <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"ការកំណត់​សម្រាប់សារលេចឡើង <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"អនុញ្ញាត​សារលេចឡើង​ពី <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"គ្រប់គ្រង"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"បដិសេធ"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"អនុញ្ញាត"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"សួរខ្ញុំនៅពេលក្រោយ"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ពី <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ពី <xliff:g id="APP_NAME">%2$s</xliff:g> និង <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> ទៀត"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ផ្លាស់ទី"</string>
@@ -974,25 +986,54 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ផ្លាស់ទីទៅផ្នែកខាងក្រោមខាងឆ្វេង​"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ផ្លាស់ទីទៅផ្នែកខាងក្រោម​ខាងស្ដាំ"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"ច្រានចោល"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"កុំបង្ហាញ​ការសន្ទនា​ជាសារលេចឡើង"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"ជជែក​ដោយប្រើ​សារលេចឡើង"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"ការសន្ទនាថ្មីៗ​បង្ហាញជា​សារលេចឡើង ឬរូបអណ្ដែត។ ចុច ដើម្បីបើក​សារលេចឡើង។ អូស ដើម្បី​ផ្លាស់ទី​សារលេចឡើង​នេះ។"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"គ្រប់គ្រង​សារលេចឡើង​បានគ្រប់ពេល"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ចុច \"គ្រប់គ្រង\" ដើម្បីបិទ​សារលេចឡើង​ពីកម្មវិធីនេះ"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"យល់ហើយ"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"បានធ្វើ​បច្ចុប្បន្នភាព​ការរុករកក្នុង​ប្រព័ន្ធ។ ដើម្បីធ្វើការផ្លាស់ប្ដូរ សូមចូលទៅ​កាន់ការកំណត់។"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ចូល​ទៅកាន់​ការកំណត់ ដើម្បី​ធ្វើបច្ចុប្បន្នភាព​ការរុករក​ក្នុង​ប្រព័ន្ធ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ផ្អាក​ដំណើរការ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"វិនដូ​ត្រួតគ្នា​លើ​ការពង្រីក"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"វិនដូ​ការពង្រីក"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"វិនដូគ្រប់គ្រង​​ការពង្រីក"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"ការគ្រប់គ្រង​រហ័ស"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"បញ្ចូល​ការគ្រប់គ្រង"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"ជ្រើសរើសកម្មវិធី​ដើម្បីបញ្ចូល​ការគ្រប់គ្រង"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other">សំណព្វបច្ចុប្បន្ន <xliff:g id="NUMBER_1">%s</xliff:g>។</item>
-      <item quantity="one">សំណព្វបច្ចុប្បន្ន <xliff:g id="NUMBER_0">%s</xliff:g>។</item>
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"បញ្ចូល​ការគ្រប់គ្រង​សម្រាប់​ឧបករណ៍​របស់អ្នក​ដែលបានភ្ជាប់"</string>
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other">បានបញ្ចូល​ការគ្រប់គ្រង <xliff:g id="NUMBER_1">%s</xliff:g>។</item>
+      <item quantity="one">បានបញ្ចូល​ការគ្រប់គ្រង <xliff:g id="NUMBER_0">%s</xliff:g>។</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ការគ្រប់គ្រង"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"ជ្រើសរើស​ការគ្រប់គ្រង​សម្រាប់ការចូលប្រើ​ប្រាស់រហ័ស"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ជ្រើសរើស​ការគ្រប់គ្រង ដើម្បី​ចូលប្រើ​ពីម៉ឺនុយ​ថាមពល"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"សង្កត់​ការគ្រប់គ្រង​ឱ្យជាប់ ដើម្បី​ផ្លាស់ទី​វា"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"មិនអាច​ផ្ទុក​បញ្ជី​នៃការគ្រប់គ្រង​ទាំងអស់​បានទេ។"</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ផ្សេងៗ"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"បញ្ចូលទៅក្នុងការគ្រប់គ្រងរហ័ស"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"បញ្ចូល​​ទៅ​ក្នុងសំណព្វ"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> បានណែនាំឱ្យបញ្ចូល​ការគ្រប់គ្រងនេះទៅក្នុងសំណព្វរបស់អ្នក។"</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"បានធ្វើបច្ចុប្បន្នភាពការគ្រប់គ្រង"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"កូដ PIN មាន​អក្សរ ឬនិមិត្តសញ្ញា"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"ផ្ទៀងផ្ទាត់ <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"កំពុង​ផ្ទៀងផ្ទាត់…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"បញ្ចូល​កូដ PIN"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"សាកល្បងប្រើ​កូដ PIN ផ្សេងទៀត"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"កំពុង​បញ្ជាក់…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"បញ្ជាក់​ការផ្លាស់ប្ដូរ​សម្រាប់ <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"អូសដើម្បី​មើលច្រើនទៀត"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"កំពុងផ្ទុក​ការណែនាំ"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"បិទវគ្គ​មេឌៀ​នេះ"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"អសកម្ម ពិនិត្យមើល​កម្មវិធី"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"មានបញ្ហា សូម​ព្យាយាម​ម្តងទៀត"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"កំពុងដំណើរការ"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"សង្កត់​ប៊ូតុង​ថាមពល ដើម្បី​មើលឃើញ​ការគ្រប់គ្រង​ថ្មីៗ"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"បញ្ចូល​ការគ្រប់គ្រង"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"កែ​ការគ្រប់គ្រង"</string>
 </resources>
