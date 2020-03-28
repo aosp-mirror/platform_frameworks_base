@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManagerInternal;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
@@ -112,6 +113,7 @@ class Owners {
     private final UserManagerInternal mUserManagerInternal;
     private final PackageManagerInternal mPackageManagerInternal;
     private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
+    private final ActivityManagerInternal mActivityManagerInternal;
 
     private boolean mSystemReady;
 
@@ -138,9 +140,10 @@ class Owners {
     public Owners(UserManager userManager,
             UserManagerInternal userManagerInternal,
             PackageManagerInternal packageManagerInternal,
-            ActivityTaskManagerInternal activityTaskManagerInternal) {
+            ActivityTaskManagerInternal activityTaskManagerInternal,
+            ActivityManagerInternal activitykManagerInternal) {
         this(userManager, userManagerInternal, packageManagerInternal,
-                activityTaskManagerInternal, new Injector());
+                activityTaskManagerInternal, activitykManagerInternal, new Injector());
     }
 
     @VisibleForTesting
@@ -148,11 +151,13 @@ class Owners {
             UserManagerInternal userManagerInternal,
             PackageManagerInternal packageManagerInternal,
             ActivityTaskManagerInternal activityTaskManagerInternal,
+            ActivityManagerInternal activityManagerInternal,
             Injector injector) {
         mUserManager = userManager;
         mUserManagerInternal = userManagerInternal;
         mPackageManagerInternal = packageManagerInternal;
         mActivityTaskManagerInternal = activityTaskManagerInternal;
+        mActivityManagerInternal = activityManagerInternal;
         mInjector = injector;
     }
 
@@ -220,6 +225,7 @@ class Owners {
                 PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES, mDeviceOwnerUserId)
                 : Process.INVALID_UID;
         mActivityTaskManagerInternal.setDeviceOwnerUid(uid);
+        mActivityManagerInternal.setDeviceOwnerUid(uid);
     }
 
     String getDeviceOwnerPackageName() {

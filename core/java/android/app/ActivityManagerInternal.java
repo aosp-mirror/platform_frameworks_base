@@ -394,4 +394,13 @@ public abstract class ActivityManagerInternal {
      */
     // TODO: remove this toast after feature development is done
     public abstract void showWhileInUseDebugToast(int uid, int op, int mode);
+
+
+    /** Is this a device owner app? */
+    public abstract boolean isDeviceOwner(int uid);
+
+    /**
+     * Called by DevicePolicyManagerService to set the uid of the device owner.
+     */
+    public abstract void setDeviceOwnerUid(int uid);
 }

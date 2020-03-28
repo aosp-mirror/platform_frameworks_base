@@ -4898,6 +4898,12 @@ public final class ActiveServices {
             return true;
         }
 
+        // Is the calling UID a device owner app?
+        final boolean isDeviceOwner = mAm.mInternal.isDeviceOwner(callingUid);
+        if (isDeviceOwner) {
+            return true;
+        }
+
         r.mInfoDenyWhileInUsePermissionInFgs =
                 "Background FGS start while-in-use permission restriction [callingPackage: "
                 + callingPackage
@@ -4933,7 +4939,8 @@ public final class ActiveServices {
                             + r.mRecentCallingPackage
                             + "; intent:" + r.intent.getIntent()
                             + "] affected while-in-use permission:"
-                            + AppOpsManager.opToPublicName(op);
+                            + AppOpsManager.opToPublicName(op)
+                            + "; targetSdkVersion:" + r.appInfo.targetSdkVersion;
                     Slog.wtf(TAG, msg);
                 }
             }
