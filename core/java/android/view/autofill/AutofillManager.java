@@ -41,7 +41,9 @@ import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -63,6 +65,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityWindowInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -2444,6 +2447,44 @@ public final class AutofillManager {
         }
     }
 
+    private void requestShowSoftInput(@NonNull AutofillId id) {
+        if (sVerbose) Log.v(TAG, "requestShowSoftInput(" + id + ")");
+        final AutofillClient client = getClient();
+        if (client == null) {
+            return;
+        }
+        final View view = client.autofillClientFindViewByAutofillIdTraversal(id);
+        if (view == null) {
+            if (sVerbose) Log.v(TAG, "View is not found");
+            return;
+        }
+        final Handler handler = view.getHandler();
+        if (handler == null) {
+            if (sVerbose) Log.v(TAG, "Ignoring requestShowSoftInput due to no handler in view");
+            return;
+        }
+        if (handler.getLooper() != Looper.myLooper()) {
+            // The view is running on a different thread than our own, so we need to reschedule
+            // our work for over there.
+            if (sVerbose) Log.v(TAG, "Scheduling showSoftInput() on the view UI thread");
+            handler.post(() -> requestShowSoftInputInViewThread(view));
+        } else {
+            requestShowSoftInputInViewThread(view);
+        }
+    }
+
+    // This method must be called from within the View thread.
+    private static void requestShowSoftInputInViewThread(@NonNull View view) {
+        if (!view.isFocused()) {
+            Log.w(TAG, "Ignoring requestShowSoftInput() due to non-focused view");
+            return;
+        }
+        final InputMethodManager inputMethodManager = view.getContext().getSystemService(
+                InputMethodManager.class);
+        boolean ret = inputMethodManager.showSoftInput(view, /*flags=*/ 0);
+        if (sVerbose) Log.v(TAG, " InputMethodManager.showSoftInput returns " + ret);
+    }
+
     /** @hide */
     public void requestHideFillUi() {
         requestHideFillUi(mIdShownFillUi, true);
@@ -3366,6 +3407,14 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> afm.getAugmentedAutofillClient(result));
+            }
+        }
+
+        @Override
+        public void requestShowSoftInput(@NonNull AutofillId id) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.requestShowSoftInput(id));
             }
         }
     }
