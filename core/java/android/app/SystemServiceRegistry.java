@@ -1300,7 +1300,7 @@ public final class SystemServiceRegistry {
                             throws ServiceNotFoundException {
                         IBinder b = ServiceManager.getServiceOrThrow(
                                 Context.FILE_INTEGRITY_SERVICE);
-                        return new FileIntegrityManager(
+                        return new FileIntegrityManager(ctx.getOuterContext(),
                                 IFileIntegrityService.Stub.asInterface(b));
                     }});
         //CHECKSTYLE:ON IndentationCheck
