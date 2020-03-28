@@ -64,9 +64,7 @@ public:
             const int64_t startTimeNs, const sp<StatsPullerManager>& pullerManager,
             const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap = {},
             const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
-                    eventDeactivationMap = {},
-            const vector<int>& slicedStateAtoms = {},
-            const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap = {});
+                    eventDeactivationMap = {});
 
     virtual ~GaugeMetricProducer();
 
@@ -128,6 +126,8 @@ private:
 
     void flushCurrentBucketLocked(const int64_t& eventTimeNs,
                                   const int64_t& nextBucketStartTimeNs) override;
+
+    void prepareFirstBucketLocked() override;
 
     void pullAndMatchEventsLocked(const int64_t timestampNs);
 

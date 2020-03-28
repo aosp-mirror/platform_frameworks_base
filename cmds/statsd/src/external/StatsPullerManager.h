@@ -19,15 +19,16 @@
 #include <aidl/android/os/IPullAtomCallback.h>
 #include <aidl/android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
-#include <utils/threads.h>
 
 #include <list>
 #include <vector>
 
 #include "PullDataReceiver.h"
+#include "PullUidProvider.h"
 #include "StatsPuller.h"
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
+#include "packages/UidMap.h"
 
 using aidl::android::os::IPullAtomCallback;
 using aidl::android::os::IStatsCompanionService;
@@ -67,11 +68,20 @@ public:
 
     // Registers a receiver for tagId. It will be pulled on the nextPullTimeNs
     // and then every intervalNs thereafter.
-    virtual void RegisterReceiver(int tagId, wp<PullDataReceiver> receiver, int64_t nextPullTimeNs,
+    virtual void RegisterReceiver(int tagId, const ConfigKey& configKey,
+                                  wp<PullDataReceiver> receiver, int64_t nextPullTimeNs,
                                   int64_t intervalNs);
 
     // Stop listening on a tagId.
-    virtual void UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver);
+    virtual void UnRegisterReceiver(int tagId, const ConfigKey& configKey,
+                                    wp<PullDataReceiver> receiver);
+
+    // Registers a pull uid provider for the config key. When pulling atoms, it will be used to
+    // determine which atoms to pull from.
+    virtual void RegisterPullUidProvider(const ConfigKey& configKey, wp<PullUidProvider> provider);
+
+    // Unregister a pull uid provider.
+    virtual void UnregisterPullUidProvider(const ConfigKey& configKey);
 
     // Verify if we know how to pull for this matcher
     bool PullerForMatcherExists(int tagId) const;
@@ -85,9 +95,16 @@ public:
     // Returns false when
     //   1) the pull fails
     //   2) pull takes longer than mPullTimeoutNs (intrinsic to puller)
+    //   3) Either a PullUidProvider was not registered for the config, or the there was no puller
+    //      registered for any of the uids for this atom.
     // If the metric wants to make any change to the data, like timestamps, they
     // should make a copy as this data may be shared with multiple metrics.
-    virtual bool Pull(int tagId, vector<std::shared_ptr<LogEvent>>* data);
+    virtual bool Pull(int tagId, const ConfigKey& configKey,
+                      vector<std::shared_ptr<LogEvent>>* data, bool useUids = false);
+
+    // Same as above, but directly specify the allowed uids to pull from.
+    virtual bool Pull(int tagId, const vector<int32_t>& uids,
+                      vector<std::shared_ptr<LogEvent>>* data, bool useUids = false);
 
     // Clear pull data cache immediately.
     int ForceClearPullerCache();
@@ -99,7 +116,8 @@ public:
 
     void RegisterPullAtomCallback(const int uid, const int32_t atomTag, const int64_t coolDownNs,
                                   const int64_t timeoutNs, const vector<int32_t>& additiveFields,
-                                  const shared_ptr<IPullAtomCallback>& callback);
+                                  const shared_ptr<IPullAtomCallback>& callback,
+                                  bool useUid = false);
 
     void UnregisterPullAtomCallback(const int uid, const int32_t atomTag);
 
@@ -108,19 +126,36 @@ public:
 private:
     shared_ptr<IStatsCompanionService> mStatsCompanionService = nullptr;
 
+    // A struct containing an atom id and a Config Key
+    typedef struct ReceiverKey {
+        const int atomTag;
+        const ConfigKey configKey;
+
+        inline bool operator<(const ReceiverKey& that) const {
+            return atomTag == that.atomTag ? configKey < that.configKey : atomTag < that.atomTag;
+        }
+    } ReceiverKey;
+
     typedef struct {
         int64_t nextPullTimeNs;
         int64_t intervalNs;
         wp<PullDataReceiver> receiver;
     } ReceiverInfo;
 
-    // mapping from simple matcher tagId to receivers
-    std::map<int, std::list<ReceiverInfo>> mReceivers;
+    // mapping from Receiver Key to receivers
+    std::map<ReceiverKey, std::list<ReceiverInfo>> mReceivers;
 
-    bool PullLocked(int tagId, vector<std::shared_ptr<LogEvent>>* data);
+    // mapping from Config Key to the PullUidProvider for that config
+    std::map<ConfigKey, wp<PullUidProvider>> mPullUidProviders;
+
+    bool PullLocked(int tagId, const ConfigKey& configKey, vector<std::shared_ptr<LogEvent>>* data,
+                    bool useUids = false);
+
+    bool PullLocked(int tagId, const vector<int32_t>& uids, vector<std::shared_ptr<LogEvent>>* data,
+                    bool useUids);
 
     // locks for data receiver and StatsCompanionService changes
-    Mutex mLock;
+    std::mutex mLock;
 
     void updateAlarmLocked();
 
