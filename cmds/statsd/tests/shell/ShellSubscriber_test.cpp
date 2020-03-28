@@ -187,8 +187,10 @@ TEST(ShellSubscriberTest, testPulledSubscription) {
     sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-    EXPECT_CALL(*pullerManager, Pull(10016, _))
-            .WillRepeatedly(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+    const vector<int32_t> uids = {AID_SYSTEM};
+    EXPECT_CALL(*pullerManager, Pull(10016, uids, _, _))
+            .WillRepeatedly(Invoke([](int tagId, const vector<int32_t>&,
+                                      vector<std::shared_ptr<LogEvent>>* data, bool) {
                 data->clear();
                 data->push_back(makeCpuActiveTimeAtom(/*uid=*/kUid1, /*timeMillis=*/kCpuTime1));
                 data->push_back(makeCpuActiveTimeAtom(/*uid=*/kUid2, /*timeMillis=*/kCpuTime2));

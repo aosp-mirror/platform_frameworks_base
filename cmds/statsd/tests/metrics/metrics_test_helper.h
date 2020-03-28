@@ -33,15 +33,24 @@ public:
 
 class MockStatsPullerManager : public StatsPullerManager {
 public:
-    MOCK_METHOD4(RegisterReceiver, void(int tagId, wp<PullDataReceiver> receiver,
-                                        int64_t nextPulltimeNs, int64_t intervalNs));
-    MOCK_METHOD2(UnRegisterReceiver, void(int tagId, wp<PullDataReceiver> receiver));
-    MOCK_METHOD2(Pull, bool(const int pullCode, vector<std::shared_ptr<LogEvent>>* data));
+    MOCK_METHOD5(RegisterReceiver,
+                 void(int tagId, const ConfigKey& key, wp<PullDataReceiver> receiver,
+                      int64_t nextPulltimeNs, int64_t intervalNs));
+    MOCK_METHOD3(UnRegisterReceiver,
+                 void(int tagId, const ConfigKey& key, wp<PullDataReceiver> receiver));
+    MOCK_METHOD4(Pull, bool(const int pullCode, const ConfigKey& key,
+                            vector<std::shared_ptr<LogEvent>>* data, bool useUids));
+    MOCK_METHOD4(Pull, bool(const int pullCode, const vector<int32_t>& uids,
+                            vector<std::shared_ptr<LogEvent>>* data, bool useUids));
+    MOCK_METHOD2(RegisterPullUidProvider,
+                 void(const ConfigKey& configKey, wp<PullUidProvider> provider));
+    MOCK_METHOD1(UnregisterPullUidProvider, void(const ConfigKey& configKey));
 };
 
 class MockUidMap : public UidMap {
  public:
   MOCK_CONST_METHOD1(getHostUidOrSelf, int(int uid));
+  MOCK_CONST_METHOD1(getAppUid, std::set<int32_t>(const string& package));
 };
 
 HashableDimensionKey getMockedDimensionKey(int tagId, int key, std::string value);
