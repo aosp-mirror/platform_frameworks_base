@@ -279,6 +279,8 @@ public class IorapForwardingService extends SystemService {
             (IIorap remote) -> remote.setTaskListener(new RemoteTaskListener()) );
         registerInProcessListenersLocked();
 
+        Log.i(TAG, "Connected to iorapd native service.");
+
         return true;
     }
 
