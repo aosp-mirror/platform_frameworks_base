@@ -5577,6 +5577,10 @@ public class TelephonyManager {
      * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
      * {@link SecurityException} will be thrown otherwise.
      *
+     * This API should be used sparingly -- large numbers of listeners will cause system
+     * instability. If a process has registered too many listeners without unregistering them, it
+     * may encounter an {@link IllegalStateException} when trying to register more listeners.
+     *
      * @param listener The {@link PhoneStateListener} object to register
      *                 (or unregister)
      * @param events The telephony state(s) of interest to the listener,

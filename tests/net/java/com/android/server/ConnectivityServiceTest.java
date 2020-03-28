@@ -205,6 +205,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.security.KeyStore;
 import android.system.Os;
+import android.telephony.TelephonyManager;
 import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -347,6 +348,7 @@ public class ConnectivityServiceTest {
     @Mock IBinder mIBinder;
     @Mock LocationManager mLocationManager;
     @Mock AppOpsManager mAppOpsManager;
+    @Mock TelephonyManager mTelephonyManager;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
             ArgumentCaptor.forClass(ResolverParamsParcel.class);
@@ -433,6 +435,7 @@ public class ConnectivityServiceTest {
             if (Context.ALARM_SERVICE.equals(name)) return mAlarmManager;
             if (Context.LOCATION_SERVICE.equals(name)) return mLocationManager;
             if (Context.APP_OPS_SERVICE.equals(name)) return mAppOpsManager;
+            if (Context.TELEPHONY_SERVICE.equals(name)) return mTelephonyManager;
             return super.getSystemService(name);
         }
 
