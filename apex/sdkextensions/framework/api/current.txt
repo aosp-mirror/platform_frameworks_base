@@ -1,10 +1,1 @@
 // Signature format: 2.0
-package android.os.ext.test {
-
-  @Deprecated public class Test {
-    ctor @Deprecated public Test();
-    method @Deprecated public void testE();
-  }
-
-}
-
