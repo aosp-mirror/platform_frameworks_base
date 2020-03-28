@@ -24,6 +24,7 @@ import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/app/settings_enums.proto";
+import "frameworks/base/core/proto/android/app/tvsettings_enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/a2dp/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hci/enums.proto";
@@ -416,6 +417,7 @@ message Atom {
         AppStandbyBucketChanged app_standby_bucket_changed = 258 [(module) = "framework"];
         SharesheetStarted sharesheet_started = 259 [(module) = "framework"];
         RankingSelected ranking_selected = 260 [(module) = "framework"];
+        TvSettingsUIInteracted tvsettings_ui_interacted = 261;
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
@@ -9190,6 +9192,23 @@ message RankingSelected {
     optional int32 instance_id = 3;
     // Which of the ranked targets got picked, default starting position 0.
     optional int32 position_picked = 4;
+}
+
+/**
+ * Logs when TvSettings UI is interacted at.
+ *
+ * Logged from: packages/apps/TvSettings
+ */
+message TvSettingsUIInteracted {
+
+    /** The UI action category */
+    optional android.app.tvsettings.Action action = 1;
+
+    /** The ID of the entry that the users actioned on */
+    optional android.app.tvsettings.ItemId item_id = 2;
+
+    /** Additional information (e.g., navigation direction on page focused) */
+    optional string additional_info = 3;
 }
 
 /**
