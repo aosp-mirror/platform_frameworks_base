@@ -1870,7 +1870,8 @@ public class NotificationManagerService extends SystemService {
             ActivityTaskManagerInternal atm, UsageStatsManagerInternal appUsageStats,
             DevicePolicyManagerInternal dpm, IUriGrantsManager ugm,
             UriGrantsManagerInternal ugmInternal, AppOpsManager appOps, UserManager userManager,
-            NotificationHistoryManager historyManager, StatsManager statsManager) {
+            NotificationHistoryManager historyManager, StatsManager statsManager,
+            TelephonyManager telephonyManager) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2013,7 +2014,15 @@ public class NotificationManagerService extends SystemService {
         mInterruptionFilter = mZenModeHelper.getZenModeListenerInterruptionFilter();
 
         mUserProfiles.updateCache(getContext());
-        listenForCallState();
+
+        telephonyManager.listen(new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String incomingNumber) {
+                if (mCallState == state) return;
+                if (DBG) Slog.d(TAG, "Call state changed: " + callStateToString(state));
+                mCallState = state;
+            }
+        }, PhoneStateListener.LISTEN_CALL_STATE);
 
         mSettingsObserver = new SettingsObserver(mHandler);
 
@@ -2083,7 +2092,8 @@ public class NotificationManagerService extends SystemService {
                 getContext().getSystemService(UserManager.class),
                 new NotificationHistoryManager(getContext(), handler),
                 mStatsManager = (StatsManager) getContext().getSystemService(
-                        Context.STATS_MANAGER));
+                        Context.STATS_MANAGER),
+                getContext().getSystemService(TelephonyManager.class));
 
         // register for various Intents
         IntentFilter filter = new IntentFilter();
@@ -8356,17 +8366,6 @@ public class NotificationManagerService extends SystemService {
             case TelephonyManager.CALL_STATE_OFFHOOK: return "CALL_STATE_OFFHOOK";
             default: return "CALL_STATE_UNKNOWN_" + state;
         }
-    }
-
-    private void listenForCallState() {
-        getContext().getSystemService(TelephonyManager.class).listen(new PhoneStateListener() {
-            @Override
-            public void onCallStateChanged(int state, String incomingNumber) {
-                if (mCallState == state) return;
-                if (DBG) Slog.d(TAG, "Call state changed: " + callStateToString(state));
-                mCallState = state;
-            }
-        }, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
     /**
