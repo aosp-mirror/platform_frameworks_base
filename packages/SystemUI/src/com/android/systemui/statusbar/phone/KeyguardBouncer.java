@@ -248,6 +248,7 @@ public class KeyguardBouncer {
             if (mExpansion == EXPANSION_VISIBLE) {
                 mKeyguardView.onResume();
                 mKeyguardView.resetSecurityContainer();
+                showPromptReason(mBouncerPromptReason);
             }
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
                     SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);

@@ -51,11 +51,13 @@ public class AuthCredentialPasswordView extends AuthCredentialView
         super.onFinishInflate();
         mPasswordField = findViewById(R.id.lockPassword);
         mPasswordField.setOnEditorActionListener(this);
+        // TODO: De-dupe the logic with AuthContainerView
         mPasswordField.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode != KeyEvent.KEYCODE_BACK) {
                 return false;
             }
             if (event.getAction() == KeyEvent.ACTION_UP) {
+                mContainerView.sendEarlyUserCanceled();
                 mContainerView.animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
             }
             return true;

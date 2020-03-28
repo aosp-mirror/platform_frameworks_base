@@ -16,15 +16,17 @@
 
 #pragma once
 
-#include "logd/LogEvent.h"
-
 #include <android/util/ProtoOutputStream.h>
+#include <private/android_filesystem_config.h>
+
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+
 #include "external/StatsPullerManager.h"
 #include "frameworks/base/cmds/statsd/src/shell/shell_config.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "logd/LogEvent.h"
 #include "packages/UidMap.h"
 
 namespace android {
@@ -66,12 +68,19 @@ public:
 
 private:
     struct PullInfo {
-        PullInfo(const SimpleAtomMatcher& matcher, int64_t interval)
-            : mPullerMatcher(matcher), mInterval(interval), mPrevPullElapsedRealtimeMs(0) {
+        PullInfo(const SimpleAtomMatcher& matcher, int64_t interval,
+                 const std::vector<std::string>& packages, const std::vector<int32_t>& uids)
+            : mPullerMatcher(matcher),
+              mInterval(interval),
+              mPrevPullElapsedRealtimeMs(0),
+              mPullPackages(packages),
+              mPullUids(uids) {
         }
         SimpleAtomMatcher mPullerMatcher;
         int64_t mInterval;
         int64_t mPrevPullElapsedRealtimeMs;
+        std::vector<std::string> mPullPackages;
+        std::vector<int32_t> mPullUids;
     };
 
     struct SubscriptionInfo {
@@ -109,6 +118,8 @@ private:
     std::shared_ptr<SubscriptionInfo> mSubscriptionInfo = nullptr;
 
     int mToken = 0;
+
+    const int32_t DEFAULT_PULL_UID = AID_SYSTEM;
 };
 
 }  // namespace statsd

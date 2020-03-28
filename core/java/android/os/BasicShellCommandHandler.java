@@ -264,6 +264,16 @@ public abstract class BasicShellCommandHandler {
     }
 
     /**
+     * Returns number of arguments that haven't been processed yet.
+     */
+    public int getRemainingArgsCount() {
+        if (mArgPos >= mArgs.length) {
+            return 0;
+        }
+        return mArgs.length - mArgPos;
+    }
+
+    /**
      * Return the next argument on the command line, whatever it is; if there are
      * no arguments left, throws an IllegalArgumentException to report this to the user.
      */
