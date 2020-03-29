@@ -54,6 +54,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -360,6 +362,9 @@ public final class ContentCaptureManager {
     @NonNull
     private final IContentCaptureManager mService;
 
+    @GuardedBy("mLock")
+    private final LocalDataShareAdapterResourceManager mDataShareAdapterResourceManager;
+
     @NonNull
     final ContentCaptureOptions mOptions;
 
@@ -399,6 +404,8 @@ public final class ContentCaptureManager {
         // do, then we should optimize it to run the tests after the Choreographer finishes the most
         // important steps of the frame.
         mHandler = Handler.createAsync(Looper.getMainLooper());
+
+        mDataShareAdapterResourceManager = new LocalDataShareAdapterResourceManager();
     }
 
     /**
@@ -681,7 +688,8 @@ public final class ContentCaptureManager {
 
         try {
             mService.shareData(request,
-                    new DataShareAdapterDelegate(executor, dataShareWriteAdapter));
+                    new DataShareAdapterDelegate(executor, dataShareWriteAdapter,
+                            mDataShareAdapterResourceManager));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -737,40 +745,53 @@ public final class ContentCaptureManager {
 
     private static class DataShareAdapterDelegate extends IDataShareWriteAdapter.Stub {
 
-        private final WeakReference<DataShareWriteAdapter> mAdapterReference;
-        private final WeakReference<Executor> mExecutorReference;
+        private final WeakReference<LocalDataShareAdapterResourceManager> mResourceManagerReference;
 
-        private DataShareAdapterDelegate(Executor executor, DataShareWriteAdapter adapter) {
+        private DataShareAdapterDelegate(Executor executor, DataShareWriteAdapter adapter,
+                LocalDataShareAdapterResourceManager resourceManager) {
             Preconditions.checkNotNull(executor);
             Preconditions.checkNotNull(adapter);
+            Preconditions.checkNotNull(resourceManager);
 
-            mExecutorReference = new WeakReference<>(executor);
-            mAdapterReference = new WeakReference<>(adapter);
+            resourceManager.initializeForDelegate(this, adapter, executor);
+            mResourceManagerReference = new WeakReference<>(resourceManager);
         }
 
         @Override
         public void write(ParcelFileDescriptor destination)
                 throws RemoteException {
             executeAdapterMethodLocked(adapter -> adapter.onWrite(destination), "onWrite");
+
+            // Client app and Service successfully connected, so this object would be kept alive
+            // until the session has finished.
+            clearHardReferences();
         }
 
         @Override
         public void error(int errorCode) throws RemoteException {
             executeAdapterMethodLocked(adapter -> adapter.onError(errorCode), "onError");
+            clearHardReferences();
         }
 
         @Override
         public void rejected() throws RemoteException {
             executeAdapterMethodLocked(DataShareWriteAdapter::onRejected, "onRejected");
+            clearHardReferences();
         }
 
         private void executeAdapterMethodLocked(Consumer<DataShareWriteAdapter> adapterFn,
                 String methodName) {
-            DataShareWriteAdapter adapter = mAdapterReference.get();
-            Executor executor = mExecutorReference.get();
+            LocalDataShareAdapterResourceManager resourceManager = mResourceManagerReference.get();
+            if (resourceManager == null) {
+                Slog.w(TAG, "Can't execute " + methodName + "(), resource manager has been GC'ed");
+                return;
+            }
+
+            DataShareWriteAdapter adapter = resourceManager.getAdapter(this);
+            Executor executor = resourceManager.getExecutor(this);
 
             if (adapter == null || executor == null) {
-                Slog.w(TAG, "Can't execute " + methodName + "(), references have been GC'ed");
+                Slog.w(TAG, "Can't execute " + methodName + "(), references are null");
                 return;
             }
 
@@ -780,6 +801,51 @@ public final class ContentCaptureManager {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        private void clearHardReferences() {
+            LocalDataShareAdapterResourceManager resourceManager = mResourceManagerReference.get();
+            if (resourceManager == null) {
+                Slog.w(TAG, "Can't clear references, resource manager has been GC'ed");
+                return;
+            }
+
+            resourceManager.clearHardReferences(this);
+        }
+    }
+
+    /**
+     * Wrapper class making sure dependencies on the current application stay in the application
+     * context.
+     */
+    private static class LocalDataShareAdapterResourceManager {
+
+        // Keeping hard references to the remote objects in the current process (static context)
+        // to prevent them to be gc'ed during the lifetime of the application. This is an
+        // artifact of only operating with weak references remotely: there has to be at least 1
+        // hard reference in order for this to not be killed.
+        private Map<DataShareAdapterDelegate, DataShareWriteAdapter> mWriteAdapterHardReferences =
+                new HashMap<>();
+        private Map<DataShareAdapterDelegate, Executor> mExecutorHardReferences =
+                new HashMap<>();
+
+        void initializeForDelegate(DataShareAdapterDelegate delegate, DataShareWriteAdapter adapter,
+                Executor executor) {
+            mWriteAdapterHardReferences.put(delegate, adapter);
+            mExecutorHardReferences.remove(delegate, executor);
+        }
+
+        Executor getExecutor(DataShareAdapterDelegate delegate) {
+            return mExecutorHardReferences.get(delegate);
+        }
+
+        DataShareWriteAdapter getAdapter(DataShareAdapterDelegate delegate) {
+            return mWriteAdapterHardReferences.get(delegate);
+        }
+
+        void clearHardReferences(DataShareAdapterDelegate delegate) {
+            mWriteAdapterHardReferences.remove(delegate);
+            mExecutorHardReferences.remove(delegate);
         }
     }
 }
