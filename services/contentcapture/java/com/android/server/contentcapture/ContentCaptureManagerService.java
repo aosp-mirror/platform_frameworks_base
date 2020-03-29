@@ -89,7 +89,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -919,35 +918,24 @@ public final class ContentCaptureManagerService extends
     private static class DataShareCallbackDelegate extends IDataShareCallback.Stub {
 
         @NonNull private final DataShareRequest mDataShareRequest;
-        @NonNull private final WeakReference<IDataShareWriteAdapter> mClientAdapterReference;
-        @NonNull private final WeakReference<ContentCaptureManagerService> mParentServiceReference;
+        @NonNull private final IDataShareWriteAdapter mClientAdapter;
+        @NonNull private final ContentCaptureManagerService mParentService;
 
         DataShareCallbackDelegate(@NonNull DataShareRequest dataShareRequest,
                 @NonNull IDataShareWriteAdapter clientAdapter,
                 ContentCaptureManagerService parentService) {
             mDataShareRequest = dataShareRequest;
-            mClientAdapterReference = new WeakReference<>(clientAdapter);
-            mParentServiceReference = new WeakReference<>(parentService);
+            mClientAdapter = clientAdapter;
+            mParentService = parentService;
         }
 
         @Override
         public void accept(IDataShareReadAdapter serviceAdapter) throws RemoteException {
             Slog.i(TAG, "Data share request accepted by Content Capture service");
 
-            final ContentCaptureManagerService parentService = mParentServiceReference.get();
-            final IDataShareWriteAdapter clientAdapter = mClientAdapterReference.get();
-            if (parentService == null || clientAdapter == null) {
-                Slog.w(TAG, "Can't fulfill accept() request, because remote objects have been "
-                        + "GC'ed");
-                return;
-            }
-
-            final WeakReference<IDataShareReadAdapter> serviceAdapterReference =
-                    new WeakReference<>(serviceAdapter);
-
             Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
             if (clientPipe == null) {
-                clientAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                mClientAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                 serviceAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                 return;
             }
@@ -959,7 +947,7 @@ public final class ContentCaptureManagerService extends
             if (servicePipe == null) {
                 bestEffortCloseFileDescriptors(sourceIn, sinkIn);
 
-                clientAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                mClientAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                 serviceAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                 return;
             }
@@ -967,9 +955,9 @@ public final class ContentCaptureManagerService extends
             ParcelFileDescriptor sourceOut = servicePipe.second;
             ParcelFileDescriptor sinkOut = servicePipe.first;
 
-            parentService.mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
+            mParentService.mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
 
-            clientAdapter.write(sourceIn);
+            mClientAdapter.write(sourceIn);
             serviceAdapter.start(sinkOut);
 
             // File descriptor received by the client app will be a copy of the current one. Close
@@ -977,7 +965,7 @@ public final class ContentCaptureManagerService extends
             // current pipe.
             bestEffortCloseFileDescriptor(sourceIn);
 
-            parentService.mDataShareExecutor.execute(() -> {
+            mParentService.mDataShareExecutor.execute(() -> {
                 try (InputStream fis =
                              new ParcelFileDescriptor.AutoCloseInputStream(sinkIn);
                      OutputStream fos =
@@ -996,23 +984,23 @@ public final class ContentCaptureManagerService extends
                 } catch (IOException e) {
                     Slog.e(TAG, "Failed to pipe client and service streams", e);
 
-                    sendErrorSignal(mClientAdapterReference, serviceAdapterReference,
+                    sendErrorSignal(mClientAdapter, serviceAdapter,
                             ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                 } finally {
-                    synchronized (parentService.mLock) {
-                        parentService.mPackagesWithShareRequests
+                    synchronized (mParentService.mLock) {
+                        mParentService.mPackagesWithShareRequests
                                 .remove(mDataShareRequest.getPackageName());
                     }
                 }
             });
 
-            parentService.mHandler.postDelayed(() ->
+            mParentService.mHandler.postDelayed(() ->
                     enforceDataSharingTtl(
                             sourceIn,
                             sinkIn,
                             sourceOut,
                             sinkOut,
-                            serviceAdapterReference),
+                            serviceAdapter),
                     MAX_DATA_SHARE_FILE_DESCRIPTORS_TTL_MS);
         }
 
@@ -1020,31 +1008,17 @@ public final class ContentCaptureManagerService extends
         public void reject() throws RemoteException {
             Slog.i(TAG, "Data share request rejected by Content Capture service");
 
-            IDataShareWriteAdapter clientAdapter = mClientAdapterReference.get();
-            if (clientAdapter == null) {
-                Slog.w(TAG, "Can't fulfill reject() request, because remote objects have been "
-                        + "GC'ed");
-                return;
-            }
-
-            clientAdapter.rejected();
+            mClientAdapter.rejected();
         }
 
         private void enforceDataSharingTtl(ParcelFileDescriptor sourceIn,
                 ParcelFileDescriptor sinkIn,
                 ParcelFileDescriptor sourceOut,
                 ParcelFileDescriptor sinkOut,
-                WeakReference<IDataShareReadAdapter> serviceAdapterReference) {
+                IDataShareReadAdapter serviceAdapter) {
 
-            final ContentCaptureManagerService parentService = mParentServiceReference.get();
-            if (parentService == null) {
-                Slog.w(TAG, "Can't enforce data sharing TTL, because remote objects have been "
-                        + "GC'ed");
-                return;
-            }
-
-            synchronized (parentService.mLock) {
-                parentService.mPackagesWithShareRequests
+            synchronized (mParentService.mLock) {
+                mParentService.mPackagesWithShareRequests
                         .remove(mDataShareRequest.getPackageName());
 
                 // Interaction finished successfully <=> all data has been written to Content
@@ -1069,7 +1043,7 @@ public final class ContentCaptureManagerService extends
                 bestEffortCloseFileDescriptors(sourceIn, sinkIn, sourceOut, sinkOut);
 
                 if (!finishedSuccessfully) {
-                    sendErrorSignal(mClientAdapterReference, serviceAdapterReference,
+                    sendErrorSignal(mClientAdapter, serviceAdapter,
                             ContentCaptureManager.DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED);
                 }
             }
@@ -1115,19 +1089,9 @@ public final class ContentCaptureManagerService extends
         }
 
         private static void sendErrorSignal(
-                WeakReference<IDataShareWriteAdapter> clientAdapterReference,
-                WeakReference<IDataShareReadAdapter> serviceAdapterReference,
+                IDataShareWriteAdapter clientAdapter,
+                IDataShareReadAdapter serviceAdapter,
                 int errorCode) {
-
-            final IDataShareWriteAdapter clientAdapter = clientAdapterReference.get();
-            final IDataShareReadAdapter serviceAdapter = serviceAdapterReference.get();
-
-            if (clientAdapter == null || serviceAdapter == null) {
-                Slog.w(TAG, "Can't propagate error() to read/write data share adapters, because "
-                        + "remote objects have been GC'ed");
-                return;
-            }
-
             try {
                 clientAdapter.error(errorCode);
             } catch (RemoteException e) {
