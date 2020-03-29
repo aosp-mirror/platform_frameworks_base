@@ -78,7 +78,7 @@ public class DisplayAreaProviderTest {
         @Override
         public DisplayAreaPolicy instantiate(WindowManagerService wmService, DisplayContent content,
                 DisplayArea.Root root, DisplayArea<? extends WindowContainer> imeContainer,
-                DisplayContent.TaskContainers taskContainers) {
+                TaskContainers taskContainers) {
             throw new RuntimeException("test stub");
         }
     }
