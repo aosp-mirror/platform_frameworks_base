@@ -164,22 +164,23 @@ private:
 
 class MockIncFs : public IncFsWrapper {
 public:
+    MOCK_CONST_METHOD3(createControl, Control(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs));
     MOCK_CONST_METHOD5(makeFile,
-                       ErrorCode(Control control, std::string_view path, int mode, FileId id,
+                       ErrorCode(const Control& control, std::string_view path, int mode, FileId id,
                                  NewFileParams params));
-    MOCK_CONST_METHOD3(makeDir, ErrorCode(Control control, std::string_view path, int mode));
-    MOCK_CONST_METHOD2(getMetadata, RawMetadata(Control control, FileId fileid));
-    MOCK_CONST_METHOD2(getMetadata, RawMetadata(Control control, std::string_view path));
-    MOCK_CONST_METHOD2(getFileId, FileId(Control control, std::string_view path));
+    MOCK_CONST_METHOD3(makeDir, ErrorCode(const Control& control, std::string_view path, int mode));
+    MOCK_CONST_METHOD2(getMetadata, RawMetadata(const Control& control, FileId fileid));
+    MOCK_CONST_METHOD2(getMetadata, RawMetadata(const Control& control, std::string_view path));
+    MOCK_CONST_METHOD2(getFileId, FileId(const Control& control, std::string_view path));
     MOCK_CONST_METHOD3(link,
-                       ErrorCode(Control control, std::string_view from, std::string_view to));
-    MOCK_CONST_METHOD2(unlink, ErrorCode(Control control, std::string_view path));
-    MOCK_CONST_METHOD2(openWrite, base::unique_fd(Control control, FileId id));
+                       ErrorCode(const Control& control, std::string_view from, std::string_view to));
+    MOCK_CONST_METHOD2(unlink, ErrorCode(const Control& control, std::string_view path));
+    MOCK_CONST_METHOD2(openWrite, base::unique_fd(const Control& control, FileId id));
     MOCK_CONST_METHOD1(writeBlocks, ErrorCode(Span<const DataBlock> blocks));
 
     void makeFileFails() { ON_CALL(*this, makeFile(_, _, _, _, _)).WillByDefault(Return(-1)); }
     void makeFileSuccess() { ON_CALL(*this, makeFile(_, _, _, _, _)).WillByDefault(Return(0)); }
-    RawMetadata getMountInfoMetadata(Control control, std::string_view path) {
+    RawMetadata getMountInfoMetadata(const Control& control, std::string_view path) {
         metadata::Mount m;
         m.mutable_storage()->set_id(100);
         m.mutable_loader()->set_package_name("com.test");
@@ -189,13 +190,13 @@ public:
         m.mutable_loader()->release_package_name();
         return {metadata.begin(), metadata.end()};
     }
-    RawMetadata getStorageMetadata(Control control, std::string_view path) {
+    RawMetadata getStorageMetadata(const Control& control, std::string_view path) {
         metadata::Storage st;
         st.set_id(100);
         auto metadata = st.SerializeAsString();
         return {metadata.begin(), metadata.end()};
     }
-    RawMetadata getBindPointMetadata(Control control, std::string_view path) {
+    RawMetadata getBindPointMetadata(const Control& control, std::string_view path) {
         metadata::BindPoint bp;
         std::string destPath = "dest";
         std::string srcPath = "src";
