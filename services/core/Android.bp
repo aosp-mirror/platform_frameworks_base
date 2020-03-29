@@ -130,10 +130,6 @@ java_library_static {
         "netd_event_listener_interface-java",
         "overlayable_policy_aidl-java",
     ],
-
-    plugins: [
-        "compat-changeid-annotation-processor",
-    ],
 }
 
 java_genrule {
