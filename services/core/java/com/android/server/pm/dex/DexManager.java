@@ -563,7 +563,7 @@ public class DexManager {
             boolean newUpdate = mPackageDexUsage.record(searchResult.mOwningPackageName,
                     dexPath, userId, isa, isUsedByOtherApps, /*primaryOrSplit*/ false,
                     searchResult.mOwningPackageName,
-                    PackageDexUsage.UNKNOWN_CLASS_LOADER_CONTEXT);
+                    PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT);
             update |= newUpdate;
         }
         if (update) {

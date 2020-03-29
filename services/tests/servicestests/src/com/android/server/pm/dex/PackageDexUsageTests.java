@@ -421,44 +421,18 @@ public class PackageDexUsageTests {
     }
 
     @Test
-    public void testRecordClassLoaderContextTransitionFromUnknown() {
-        // Record a secondary dex file.
-        TestData unknownContext = mFooSecondary1User0.updateClassLoaderContext(
-                PackageDexUsage.UNKNOWN_CLASS_LOADER_CONTEXT);
-        assertTrue(record(unknownContext));
-
-        assertPackageDexUsage(null, unknownContext);
-        writeAndReadBack();
-        assertPackageDexUsage(null, unknownContext);
-
-        // Now update the secondary dex record with a class loader context. This simulates the
-        // version 2 to version 3 upgrade.
-
-        assertTrue(record(mFooSecondary1User0));
-
-        assertPackageDexUsage(null, mFooSecondary1User0);
-        writeAndReadBack();
-        assertPackageDexUsage(null, mFooSecondary1User0);
-    }
-
-    @Test
     public void testDexUsageClassLoaderContext() {
         final boolean isUsedByOtherApps = false;
         final int userId = 0;
         PackageDexUsage.DexUseInfo validContext = new DexUseInfo(isUsedByOtherApps, userId,
                 "valid_context", "arm");
-        assertFalse(validContext.isUnknownClassLoaderContext());
+        assertFalse(validContext.isUnsupportedClassLoaderContext());
         assertFalse(validContext.isVariableClassLoaderContext());
 
         PackageDexUsage.DexUseInfo variableContext = new DexUseInfo(isUsedByOtherApps, userId,
                 PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT, "arm");
-        assertFalse(variableContext.isUnknownClassLoaderContext());
+        assertFalse(variableContext.isUnsupportedClassLoaderContext());
         assertTrue(variableContext.isVariableClassLoaderContext());
-
-        PackageDexUsage.DexUseInfo unknownContext = new DexUseInfo(isUsedByOtherApps, userId,
-                PackageDexUsage.UNKNOWN_CLASS_LOADER_CONTEXT, "arm");
-        assertTrue(unknownContext.isUnknownClassLoaderContext());
-        assertFalse(unknownContext.isVariableClassLoaderContext());
     }
 
     @Test
@@ -480,80 +454,6 @@ public class PackageDexUsageTests {
 
         assertPackageDexUsage(mFooBaseUser0, mFooSecondary1User0);
         assertPackageDexUsage(mBarBaseUser0);
-    }
-
-    @Test
-    public void testReadVersion1() {
-        String isa = VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]);
-        // Equivalent to
-        //   record(mFooSplit2UsedByOtherApps0);
-        //   record(mFooSecondary1User0);
-        //   record(mFooSecondary2UsedByOtherApps0);
-        //   record(mBarBaseUser0);
-        //   record(mBarSecondary1User0);
-        String content = "PACKAGE_MANAGER__PACKAGE_DEX_USAGE__1\n"
-                + "com.google.foo,1\n"
-                + "#/data/user/0/com.google.foo/sec-1.dex\n"
-                + "0,0," + isa + "\n"
-                + "#/data/user/0/com.google.foo/sec-2.dex\n"
-                + "0,1," + isa + "\n"
-                + "com.google.bar,0\n"
-                + "#/data/user/0/com.google.bar/sec-1.dex\n"
-                + "0,0," + isa + "\n";
-
-        PackageDexUsage packageDexUsage = new PackageDexUsage();
-        try {
-            packageDexUsage.read(new StringReader(content));
-        } catch (IOException e) {
-            fail();
-        }
-
-        // After the read we must sync the data to fill the missing information on the code paths.
-        Map<String, Set<Integer>> packageToUsersMap = new HashMap<>();
-        Map<String, Set<String>> packageToCodePaths = new HashMap<>();
-
-        // Handle foo package.
-        packageToUsersMap.put(mFooSplit2UsedByOtherApps0.mPackageName,
-            new HashSet<>(Arrays.asList(mFooSplit2UsedByOtherApps0.mOwnerUserId)));
-        packageToCodePaths.put(mFooSplit2UsedByOtherApps0.mPackageName,
-            new HashSet<>(Arrays.asList(mFooSplit2UsedByOtherApps0.mDexFile,
-                mFooSplit1User0.mDexFile, mFooBaseUser0.mDexFile)));
-        // Handle bar package.
-        packageToUsersMap.put(mBarBaseUser0.mPackageName,
-            new HashSet<>(Arrays.asList(mBarBaseUser0.mOwnerUserId)));
-        packageToCodePaths.put(mBarBaseUser0.mPackageName,
-            new HashSet<>(Arrays.asList(mBarBaseUser0.mDexFile)));
-
-        // Sync the data.
-        packageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
-
-        // Update the class loaders to unknown before asserting if needed. Before version 2 we
-        // didn't have any.
-        String unknown = PackageDexUsage.UNKNOWN_CLASS_LOADER_CONTEXT;
-        TestData fooBaseUser0 = mFooBaseUser0.updateClassLoaderContext(unknown);
-        TestData fooSplit1User0 = mFooSplit1User0.updateClassLoaderContext(unknown);
-        TestData fooSplit2UsedByOtherApps0 =
-            mFooSplit2UsedByOtherApps0.updateClassLoaderContext(unknown);
-        TestData fooSecondary1User0 = mFooSecondary1User0.updateClassLoaderContext(unknown);
-        TestData fooSecondary2UsedByOtherApps0 =
-            mFooSecondary2UsedByOtherApps0.updateClassLoaderContext(unknown);
-        TestData barBaseUser0 = mBarBaseUser0.updateClassLoaderContext(unknown);
-        TestData barSecondary1User0 = mBarSecondary1User0.updateClassLoaderContext(unknown);
-
-        // Assert foo code paths. Note that we ignore the users during upgrade.
-        final Set<String> ignoredUsers = null;
-        assertPackageDexUsage(packageDexUsage, ignoredUsers,
-            fooSplit2UsedByOtherApps0, fooSecondary1User0, fooSecondary2UsedByOtherApps0);
-        // Because fooSplit2UsedByOtherApps0 is used by others, all the other code paths must
-        // share the same data.
-        assertPackageDexUsage(packageDexUsage, ignoredUsers,
-            fooSplit1User0.updateUseByOthers(true),
-            fooSecondary1User0, fooSecondary2UsedByOtherApps0);
-        assertPackageDexUsage(packageDexUsage, ignoredUsers, fooBaseUser0.updateUseByOthers(true),
-            fooSecondary1User0, fooSecondary2UsedByOtherApps0);
-
-        // Assert bar code paths. Note that we ignore the users during upgrade.
-        assertPackageDexUsage(packageDexUsage, ignoredUsers, barBaseUser0, barSecondary1User0);
     }
 
     private void assertPackageDexUsage(TestData primary, TestData... secondaries) {
