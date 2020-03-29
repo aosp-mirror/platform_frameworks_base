@@ -66,15 +66,17 @@ public:
 class IncFsWrapper {
 public:
     virtual ~IncFsWrapper() = default;
-    virtual ErrorCode makeFile(Control control, std::string_view path, int mode, FileId id,
+    virtual Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs) const = 0;
+    virtual ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                                NewFileParams params) const = 0;
-    virtual ErrorCode makeDir(Control control, std::string_view path, int mode) const = 0;
-    virtual RawMetadata getMetadata(Control control, FileId fileid) const = 0;
-    virtual RawMetadata getMetadata(Control control, std::string_view path) const = 0;
-    virtual FileId getFileId(Control control, std::string_view path) const = 0;
-    virtual ErrorCode link(Control control, std::string_view from, std::string_view to) const = 0;
-    virtual ErrorCode unlink(Control control, std::string_view path) const = 0;
-    virtual base::unique_fd openWrite(Control control, FileId id) const = 0;
+    virtual ErrorCode makeDir(const Control& control, std::string_view path, int mode) const = 0;
+    virtual RawMetadata getMetadata(const Control& control, FileId fileid) const = 0;
+    virtual RawMetadata getMetadata(const Control& control, std::string_view path) const = 0;
+    virtual FileId getFileId(const Control& control, std::string_view path) const = 0;
+    virtual ErrorCode link(const Control& control, std::string_view from,
+                           std::string_view to) const = 0;
+    virtual ErrorCode unlink(const Control& control, std::string_view path) const = 0;
+    virtual base::unique_fd openWrite(const Control& control, FileId id) const = 0;
     virtual ErrorCode writeBlocks(Span<const DataBlock> blocks) const = 0;
 };
 
@@ -149,29 +151,33 @@ class RealIncFs : public IncFsWrapper {
 public:
     RealIncFs() = default;
     ~RealIncFs() = default;
-    ErrorCode makeFile(Control control, std::string_view path, int mode, FileId id,
+    Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs) const override {
+        return incfs::createControl(cmd, pendingReads, logs);
+    }
+    ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                        NewFileParams params) const override {
         return incfs::makeFile(control, path, mode, id, params);
     }
-    ErrorCode makeDir(Control control, std::string_view path, int mode) const override {
+    ErrorCode makeDir(const Control& control, std::string_view path, int mode) const override {
         return incfs::makeDir(control, path, mode);
     }
-    RawMetadata getMetadata(Control control, FileId fileid) const override {
+    RawMetadata getMetadata(const Control& control, FileId fileid) const override {
         return incfs::getMetadata(control, fileid);
     }
-    RawMetadata getMetadata(Control control, std::string_view path) const override {
+    RawMetadata getMetadata(const Control& control, std::string_view path) const override {
         return incfs::getMetadata(control, path);
     }
-    FileId getFileId(Control control, std::string_view path) const override {
+    FileId getFileId(const Control& control, std::string_view path) const override {
         return incfs::getFileId(control, path);
     }
-    ErrorCode link(Control control, std::string_view from, std::string_view to) const override {
+    ErrorCode link(const Control& control, std::string_view from,
+                   std::string_view to) const override {
         return incfs::link(control, from, to);
     }
-    ErrorCode unlink(Control control, std::string_view path) const override {
+    ErrorCode unlink(const Control& control, std::string_view path) const override {
         return incfs::unlink(control, path);
     }
-    base::unique_fd openWrite(Control control, FileId id) const override {
+    base::unique_fd openWrite(const Control& control, FileId id) const override {
         return base::unique_fd{incfs::openWrite(control, id)};
     }
     ErrorCode writeBlocks(Span<const DataBlock> blocks) const override {
