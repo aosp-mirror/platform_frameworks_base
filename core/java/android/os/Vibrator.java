@@ -32,6 +32,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 /**
@@ -71,6 +72,37 @@ public abstract class Vibrator {
      * @hide
      */
     public static final int VIBRATION_INTENSITY_HIGH = 3;
+
+    /**
+     * Vibration effect support: unknown
+     *
+     * The hardware doesn't report it's supported effects, so we can't determine whether the
+     * effect is supported or not.
+     */
+    public static final int VIBRATION_EFFECT_SUPPORT_UNKNOWN = 0;
+
+    /**
+     * Vibration effect support: supported
+     *
+     * This effect is supported by the underlying hardware.
+     */
+    public static final int VIBRATION_EFFECT_SUPPORT_YES = 1;
+
+    /**
+     * Vibration effect support: unsupported
+     *
+     * This effect is <b>not</b> supported by the underlying hardware.
+     */
+    public static final int VIBRATION_EFFECT_SUPPORT_NO = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"VIBRATION_EFFECT_SUPPORT_"}, value = {
+            VIBRATION_EFFECT_SUPPORT_UNKNOWN,
+            VIBRATION_EFFECT_SUPPORT_YES,
+            VIBRATION_EFFECT_SUPPORT_NO,
+    })
+    public @interface VibrationEffectSupport {}
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -318,47 +350,61 @@ public abstract class Vibrator {
     /**
      * Query whether the vibrator supports the given effects.
      *
-     * If the returned array is {@code null}, the hardware doesn't support querying its supported
-     * effects. It may support any or all effects, but there's no way to programmatically know
-     * whether a {@link #vibrate} call will be successful.
+     * Not all hardware reports its effect capabilities, so the system may not necessarily know
+     * whether an effect is supported or not.
      *
-     * If the returned array is non-null, then it will be the same length as the query array and
-     * the value at a given index will contain whether the effect at that same index in the
-     * querying array is supported or not.
+     * The returned array will be the same length as the query array and the value at a given index
+     * will contain {@link #VIBRATION_EFFECT_SUPPORT_YES} if the effect at that same index in the
+     * querying array is supported, {@link #VIBRATION_EFFECT_SUPPORT_NO} if it isn't supported, or
+     * {@link #VIBRATION_EFFECT_SUPPORT_UNKNOWN} if the system can't determine whether it's
+     * supported or not.
      *
      * @param effectIds Which effects to query for.
-     * @return Whether the effects are supported. Null when the hardware doesn't tell us what it
-     *         supports.
+     * @return An array containing the systems current knowledge about whether the given effects
+     * are supported or not.
      */
-    @Nullable
-    public boolean[] areEffectsSupported(
+    @NonNull
+    @VibrationEffectSupport
+    public int[] areEffectsSupported(
             @NonNull @VibrationEffect.EffectType int... effectIds) {
-        return new boolean[effectIds.length];
+        final int[] support = new int[effectIds.length];
+        Arrays.fill(support, VIBRATION_EFFECT_SUPPORT_NO);
+        return support;
     }
 
     /**
      * Query whether the vibrator supports all of the given effects.
      *
-     * If the result is {@code null}, the hardware doesn't support querying its supported
-     * effects. It may support any or all effects, but there's no way to programmatically know
-     * whether a {@link #vibrate} call will be successful.
+     * Not all hardware reports its effect capabilities, so the system may not necessarily know
+     * whether an effect is supported or not.
      *
-     * If the returned array is non-null, then it will return whether all of the effects are
+     * If the result is {@link #VIBRATION_EFFECT_SUPPORT_YES}, all effects in the query are
      * supported by the hardware.
      *
+     * If the result is {@link #VIBRATION_EFFECT_SUPPORT_NO}, at least one of the effects in the
+     * query is not supported.
+     *
+     * If the result is {@link #VIBRATION_EFFECT_SUPPORT_UNKNOWN}, the system doesn't know whether
+     * all of the effects are supported. It may support any or all of the queried effects,
+     * but there's no way to programmatically know whether a {@link #vibrate} call will successfully
+     * cause a vibration. It's guaranteed, however, that none of the queried effects are
+     * definitively unsupported by the hardware.
+     *
      * @param effectIds Which effects to query for.
-     * @return Whether the effects are supported. {@code null} when the hardware doesn't tell us
-     *         what it supports.
+     * @return Whether all of the effects are supported.
      */
-    @Nullable
-    public Boolean areAllEffectsSupported(
+    @VibrationEffectSupport
+    public final int areAllEffectsSupported(
             @NonNull @VibrationEffect.EffectType int... effectIds) {
-        for (boolean supported : areEffectsSupported(effectIds)) {
-            if (!supported) {
-                return false;
+        int support = VIBRATION_EFFECT_SUPPORT_YES;
+        for (int supported : areEffectsSupported(effectIds)) {
+            if (supported == VIBRATION_EFFECT_SUPPORT_NO) {
+                return VIBRATION_EFFECT_SUPPORT_NO;
+            } else if (supported == VIBRATION_EFFECT_SUPPORT_UNKNOWN) {
+                support = VIBRATION_EFFECT_SUPPORT_UNKNOWN;
             }
         }
-        return true;
+        return support;
     }
 
 
@@ -384,7 +430,7 @@ public abstract class Vibrator {
      * @param primitiveIds Which primitives to query for.
      * @return Whether primitives effects are supported.
      */
-    public boolean areAllPrimitivesSupported(
+    public final boolean areAllPrimitivesSupported(
             @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
         for (boolean supported : arePrimitivesSupported(primitiveIds)) {
             if (!supported) {

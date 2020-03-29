@@ -47,8 +47,7 @@ class Guarded {
   static_assert(!std::is_pointer<T>::value, "T must not be a raw pointer");
 
  public:
-  template <typename ...Args>
-  explicit Guarded(Args&& ...args) : guarded_(std::forward<Args>(args)...) {
+  explicit Guarded() : guarded_() {
   }
 
   template <typename U = T>

@@ -65,12 +65,7 @@ java_library {
 
 stubs_defaults {
     name: "framework-tethering-stubs-defaults",
-    srcs: [
-        "src/android/net/TetheredClient.java",
-        "src/android/net/TetheringManager.java",
-        "src/android/net/TetheringConstants.java",
-    ],
-    libs: ["tethering-aidl-interfaces-java"],
+    srcs: [":framework-tethering-srcs"],
 }
 
 filegroup {

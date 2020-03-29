@@ -89,7 +89,7 @@ stubs_defaults {
 droidstubs {
     name: "framework-statsd-stubs-srcs-publicapi",
     defaults: [
-        "framework-module-stubs-defaults-systemapi",
+        "framework-module-stubs-defaults-publicapi",
         "framework-statsd-stubs-srcs-defaults",
     ],
 }

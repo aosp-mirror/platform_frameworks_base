@@ -494,6 +494,7 @@ public class EditorCursorDragTest {
         simulateDrag(tv, events, true);
     }
 
+    @Suppress // b/152574363
     @Test
     public void testLineChangeSlop() throws Throwable {
         TextView tv = mActivity.findViewById(R.id.textview);

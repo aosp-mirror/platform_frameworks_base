@@ -7967,10 +7967,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return false;
         }
 
+        final Network[] underlyingNetworks;
         synchronized (mVpns) {
-            if (getVpnIfOwner(callbackUid) != null) {
-                return true;
-            }
+            final Vpn vpn = getVpnIfOwner(callbackUid);
+            underlyingNetworks = (vpn == null) ? null : vpn.getUnderlyingNetworks();
+        }
+        if (underlyingNetworks != null) {
+            if (Arrays.asList(underlyingNetworks).contains(nai.network)) return true;
         }
 
         // Administrator UIDs also contains the Owner UID

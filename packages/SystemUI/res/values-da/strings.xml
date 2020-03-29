@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Tillad"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB-fejlretning er ikke tilladt"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Den bruger, der i øjeblikket er logget ind på denne enhed, kan ikke aktivere USB-fejlretning. Skift til den primære bruger for at bruge denne funktion."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Vil du tillade trådløs fejlretning på dette netværk?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Netværksnavn (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi-adresse (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Tillad altid på dette netværk"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Tillad"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Trådløs fejlretning er ikke tilladt"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Den bruger, der i øjeblikket er logget ind på denne enhed, kan ikke aktivere trådløs fejlretning. Skift til den primære bruger for at bruge denne funktion."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB-porten er deaktiveret"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"USB-porten er blevet deaktiveret for at beskytte din enhed mod væske og snavs. Den kan derfor ikke registrere noget tilbehør.\n\nDu får besked, når du kan bruge USB-porten igen."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB-porten er aktiveret for at registrere opladere og tilbehør"</string>
@@ -80,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Prøv at tage et screenshot igen"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Screenshottet kan ikke gemmes, fordi der er begrænset lagerplads"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller din organisation tillader ikke, at du tager screenshots"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Luk screenshot"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"Åbn screenshot"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skærmoptager"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Konstant notifikation om skærmoptagelse"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Vil du starte optagelse?"</string>
@@ -146,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Forkert mønster"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Forkert adgangskode"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"For mange mislykkede forsøg. \nPrøv igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Prøv igen. <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>. forsøg ud af <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"For mange forkerte forsøg. Dataene på denne enhed slettes."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"For mange forkerte forsøg. Denne bruger slettes."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"For mange forkerte forsøg. Denne arbejdsprofil og de tilhørende data slettes."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Afvis"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sæt fingeren på fingeraftrykslæseren"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon for fingeraftryk"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Forsøger at finde dig…"</string>
@@ -488,6 +501,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Administrer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historik"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Lydløse notifikationer"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Notifikationer med vibration eller lyd"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Samtaler"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Ryd alle lydløse notifikationer"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notifikationer er sat på pause af Forstyr ikke"</string>
@@ -551,6 +565,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Din arbejdsprofil administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profilen har forbindelse til <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites.\n\nDu har også forbindelse til <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan overvåge din personlige netværksaktivitet."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Holdes oplåst af TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Enheden vil forblive låst, indtil du manuelt låser den op"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Modtag notifikationer hurtigere"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Se dem, før du låser op"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Nej tak"</string>
@@ -686,10 +701,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ingen lyde eller vibrationer, der forstyrrer dig."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Fanger din opmærksomhed med lyd eller vibration."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Fastholder din opmærksomhed med en svævende genvej til indholdet."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Vises som en boble øverst i samtalesektionen."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Alle samtaler fra <xliff:g id="APP_NAME_0">%1$s</xliff:g> vises som standard i bobler. Administrer i <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Indstillinger"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ingen seneste bobler"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Nye bobler og afviste bobler vises her"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Disse notifikationer kan ikke redigeres."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Du kan ikke konfigurere denne gruppe notifikationer her"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Proxyforbundet notifikation"</string>
@@ -959,13 +976,8 @@
     <string name="device_services" msgid="1549944177856658705">"Enhedstjenester"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ingen titel"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Tryk for at genstarte denne app, og gå til fuld skærm."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Åbn <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Indstillinger for <xliff:g id="APP_NAME">%1$s</xliff:g>-bobler"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Vil du tillade bobler fra <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Administrer"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Afvis"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Tillad"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Spørg mig senere"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> fra <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> fra <xliff:g id="APP_NAME">%2$s</xliff:g> og <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> andre"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Flyt"</string>
@@ -974,25 +986,54 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Flyt ned til venstre"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Flyt ned til højre"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Afvis"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Vis ikke samtaler i bobler"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chat ved hjælp af bobler"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nye samtaler vises som svævende ikoner eller bobler. Tryk for at åbne boblen. Træk for at flytte den."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Styr bobler når som helst"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tryk på Administrer for at deaktivere bobler fra denne app"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigationen blev opdateret. Gå til Indstillinger for at foretage ændringer."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gå til Indstillinger for at opdatere systemnavigationen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Vindue med overlejret forstørrelse"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Vindue med forstørrelse"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Vindue med forstørrelsesstyring"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"Hurtig betjening"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"Tilføj betjeningselementer"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Vælg en app at tilføje betjeningselementer fra"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> aktuel favorit.</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> aktuelle favoritter.</item>
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Tilføj betjeningselementer på dine tilsluttede enheder"</string>
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> styringselement er tilføjet.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> styringselementer er tilføjet.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Betjeningselementer"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Vælg betjeningselementer til hurtig adgang"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Vælg, hvilke betjeningselementer der skal være adgang til fra afbryderknappens menu"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Hold et betjeningselement nede, og træk for at flytte det"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Listen over styringselementer kunne ikke indlæses."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Andre"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"Føj til Hurtig betjening"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"Føj til favoritter"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> har foreslået, at du føjer denne funktion til dine favoritter."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Betjeningselementerne er opdateret"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Pinkoden indeholder bogstaver eller symboler"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Bekræft <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"Bekræfter…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Angiv pinkode"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Prøv en anden pinkode"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Bekræfter…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Bekræft ændring på <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"Stryg for at se mere"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Indlæser anbefalinger"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"Luk denne mediesession"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv. Tjek appen"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Der opstod en fejl. Prøv igen"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"I gang"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"Hold afbryderknappen nede for at se nye betjeningselementer"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Tilføj betjeningselementer"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Rediger betjeningselementer"</string>
 </resources>

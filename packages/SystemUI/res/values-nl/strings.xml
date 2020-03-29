@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Toestaan"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB-foutopsporing niet toegestaan"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"De gebruiker die momenteel is ingelogd op dit apparaat, kan USB-foutopsporing niet inschakelen. Als je deze functie wilt gebruiken, schakel je naar de primaire gebruiker."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Draadloze foutopsporing toestaan in dit netwerk?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Netwerknaam (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWifi-adres (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Altijd toestaan in dit netwerk"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Toestaan"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Draadloze foutopsporing niet toegestaan"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"De gebruiker die momenteel is ingelogd op dit apparaat, kan draadloze foutopsporing niet inschakelen. Als je deze functie wilt gebruiken, schakel je over naar de primaire gebruiker."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB-poort uitgeschakeld"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"De USB-poort is uitgeschakeld en detecteert geen accessoires, zodat je apparaat wordt beschermd tegen vloeistof en vuil.\n\nJe ontvangt een melding wanneer je de USB-poort weer kunt gebruiken."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB-poort kan opladers en accessoires detecteren"</string>
@@ -80,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Probeer opnieuw een screenshot te maken"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Kan screenshot niet opslaan vanwege beperkte opslagruimte"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Het maken van screenshots wordt niet toegestaan door de app of je organisatie"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Screenshot sluiten"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"Screenshot openen"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Schermrecorder"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Doorlopende melding voor een schermopname-sessie"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Opname starten?"</string>
@@ -146,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Onjuist patroon"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Onjuist wachtwoord"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Te veel onjuiste pogingen.\nProbeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Probeer het opnieuw. Poging <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> van <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Te veel onjuiste pogingen. De gegevens van dit apparaat worden verwijderd."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Te veel onjuiste pogingen. Deze gebruiker wordt verwijderd."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Te veel onjuiste pogingen. Dit werkprofiel en de bijbehorende gegevens worden verwijderd."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Sluiten"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Raak de vingerafdruksensor aan"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Vingerafdrukpictogram"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Jouw gezicht zoeken…"</string>
@@ -488,6 +501,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Beheren"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Geschiedenis"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Stille meldingen"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Meldingen met waarschuwing"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Gesprekken"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Alle stille meldingen wissen"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Meldingen onderbroken door \'Niet storen\'"</string>
@@ -551,6 +565,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Het profiel is verbonden met <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, waarmee je werkgerelateerde netwerkactiviteit (waaronder e-mails, apps en websites) kan worden bijgehouden.\n\nJe bent ook verbonden met <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, waarmee je persoonlijke netwerkactiviteit kan worden bijgehouden."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Ontgrendeld gehouden door TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Het apparaat blijft vergrendeld totdat u het handmatig ontgrendelt"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Sneller meldingen ontvangen"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Weergeven voordat u ontgrendelt"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Nee, bedankt"</string>
@@ -686,8 +701,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Helpt je focussen zonder geluid of trilling."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Trekt je aandacht met geluid of trillingen."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Trekt de aandacht met een zwevende snelkoppeling naar deze content."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Wordt bovenaan het gedeelte met gesprekken weergegeven en als een bubbel."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Alle gesprekken uit <xliff:g id="APP_NAME_0">%1$s</xliff:g> worden standaard als bubbels weergegeven. Beheer dit in <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellingen"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Geen recente ballonnen"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="3106801169793396894">"Onlangs gesloten ballonnen worden hier weergegeven zodat je ze gemakkelijk kunt terughalen."</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Recente bubbels en gesloten bubbels worden hier weergegeven"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Deze meldingen kunnen niet worden aangepast."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Deze groep meldingen kan hier niet worden geconfigureerd"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Melding via proxy"</string>
@@ -957,13 +976,8 @@
     <string name="device_services" msgid="1549944177856658705">"Apparaatservices"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Geen titel"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Tik om deze app opnieuw te starten en te openen op het volledige scherm."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> openen"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Instellingen voor <xliff:g id="APP_NAME">%1$s</xliff:g>-ballonnen"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Ballonnen van <xliff:g id="APP_NAME">%1$s</xliff:g> toestaan?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Beheren"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Weigeren"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Toestaan"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Later vragen"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> van <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> van <xliff:g id="APP_NAME">%2$s</xliff:g> en nog <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Verplaatsen"</string>
@@ -972,22 +986,50 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Naar linksonder verplaatsen"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Naar rechtsonder verplaatsen"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Sluiten"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Gesprekken niet in bubbels weergeven"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatten met bubbels"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nieuwe gesprekken worden weergegeven als zwevende iconen of \'bubbels\'. Tik om een bubbel te openen. Sleep om de bubbel te verplaatsen."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Beheer bubbels wanneer je wilt"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tik op Beheren om bubbels van deze app uit te schakelen"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systeemnavigatie geüpdatet. Als je wijzigingen wilt aanbrengen, ga je naar Instellingen."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ga naar Instellingen om de systeemnavigatie te updaten"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stand-by"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Overlay voor vergrotingsvenster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrotingsvenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Bediening van vergrotingsvenster"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"Snelle bedieningselementen"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"Bedieningselementen toevoegen"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Kies een app waaruit je bedieningselementen wilt toevoegen"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> huidige favorieten.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> huidige favoriet.</item>
+    <string name="quick_controls_title" msgid="1686913115679255053">"Snelle bedieningselementen"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Bedieningselementen voor je gekoppelde apparaten toevoegen"</string>
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Snelle bedieningselementen instellen"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Houd de aan/uit-knop ingedrukt voor toegang tot de bedieningselementen"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Kies de app waaraan je bedieningselementen wilt toevoegen"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> bedieningselementen toegevoegd.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> bedieningselement toegevoegd.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Kies bedieningselementen voor snelle toegang"</string>
-    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"Favorieten"</string>
-    <string name="controls_favorite_header_all" msgid="7507855973418969992">"Alle"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Kies bedieningselementen die je vanaf het menu Voeding wilt kunnen gebruiken"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Houd een bedieningselement vast en sleep om het te verplaatsen"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Kan lijst met alle bedieningselementen niet laden."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Overig"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"Toevoegen aan snelle bedieningselementen"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"Toevoegen aan favorieten"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> heeft voorgesteld dit bedieningselement toe te voegen aan je favorieten."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Bedieningselementen geüpdated"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Pincode bevat letters of symbolen"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> verifiëren"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"Verifiëren…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Geef de pincode op"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Een andere pincode proberen"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Bevestigen…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Bevestig de wijziging voor <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swipe om meer te zien"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Aanbevelingen laden"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"Deze mediasessie sluiten"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Inactief, check de app"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Fout, probeer het opnieuw"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"Bezig"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"Houd de aan/uit-knop ingedrukt om nieuwe bedieningselementen te bekijken"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Bedieningselementen toevoegen"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Bedieningselementen bewerken"</string>
 </resources>

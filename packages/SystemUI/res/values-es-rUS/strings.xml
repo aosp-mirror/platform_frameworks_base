@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"No tienes permitida la depuración por USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"El usuario al que accediste en este dispositivo no puede activar la depuración por USB. Para usar esta función, debes cambiar al usuario principal."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"¿Quieres permitir la depuración inalámbrica en esta red?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Nombre de red (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nDirección Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Permitir siempre en esta red"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Permitir"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"No tienes permitida la depuración inalámbrica"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"El usuario al que accediste en este dispositivo no puede activar la depuración inalámbrica. Para usar esta función, debes cambiar al usuario principal."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Puerto USB inhabilitado"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Para proteger tu dispositivo de líquidos o suciedad, el puerto USB está inhabilitado y no detectará ningún accesorio.\n\nTe avisaremos cuando puedas usar el puerto USB de nuevo."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Se habilitó el puerto USB para detectar cargadores y accesorios"</string>
@@ -80,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Vuelve a hacer una captura de pantalla"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"No se puede guardar la captura de pantalla debido a que no hay suficiente espacio de almacenamiento"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"La app o tu organización no permiten las capturas de pantalla"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Descartar captura de pantalla"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"Abrir captura de pantalla"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Grabadora de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación constante para una sesión de grabación de pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"¿Comenzar grabación?"</string>
@@ -146,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Patrón incorrecto"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Contraseña incorrecta"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Demasiados intentos incorrectos.\nVuelve a intentarlo en <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Vuelve a intentarlo. Intento <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> de <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Hubo demasiados intentos incorrectos. Se borrarán los datos del dispositivo."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Hubo demasiados intentos incorrectos. Se borrará este usuario."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Hubo demasiados intentos incorrectos. Se borrarán este perfil de trabajo y sus datos."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Ignorar"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas digitales"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícono de huella digital"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Autenticando tu rostro…"</string>
@@ -217,7 +230,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Abrir detalles de la batería"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batería <xliff:g id="NUMBER">%d</xliff:g> por ciento"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batería: <xliff:g id="PERCENTAGE">%1$s</xliff:g> por ciento; tiempo restante: aproximadamente <xliff:g id="TIME">%2$s</xliff:g> en función del uso"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Cargando batería: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%"</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batería cargando: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Configuración del sistema"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Notificaciones"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Ver todas las notificaciones"</string>
@@ -425,7 +438,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Esta acción bloquea TODOS los sonidos y las vibraciones, incluso los que provienen de alarmas, música, videos y juegos."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Notificaciones menos urgentes abajo"</string>
-    <string name="notification_tap_again" msgid="4477318164947497249">"Presionar de nuevo para abrir"</string>
+    <string name="notification_tap_again" msgid="4477318164947497249">"Presiona de nuevo para abrir"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volver a intentarlo"</string>
     <string name="do_disclosure_generic" msgid="2388094207542706440">"Tu organización administra este dispositivo"</string>
@@ -488,6 +501,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Administrar"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historial"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notificaciones silenciosas"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Notificaciones que alertan"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversaciones"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas las notificaciones silenciosas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificaciones pausadas por el modo \"No interrumpir\""</string>
@@ -551,6 +565,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> administra tu perfil de red. El perfil está conectado a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que puede controlar tu actividad de red de trabajo, incluidos los correos electrónicos, las apps y los sitios web.\n\nTambién estás conectado a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que puede controlar tu actividad de red personal."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent lo mantiene desbloqueado"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"El dispositivo permanecerá bloqueado hasta que lo desbloquees manualmente."</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Recibe notificaciones más rápido"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Ver antes de desbloquear"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"No, gracias"</string>
@@ -686,10 +701,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Te ayuda a concentrarte sin sonar ni vibrar."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Capta tu atención con sonido o vibración."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Retiene tu atención con un acceso directo flotante a este contenido."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Aparece como una burbuja en la parte superior de la sección de conversación."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Todas las conversaciones de <xliff:g id="APP_NAME_0">%1$s</xliff:g> se muestran como burbujas de forma predeterminada. Administra esta opción en <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hay burbujas recientes"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Las burbujas recientes y las descartadas aparecerán aquí"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"No se pueden modificar estas notificaciones."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"No se puede configurar aquí este grupo de notificaciones"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notificación almacenada en proxy"</string>
@@ -716,8 +733,8 @@
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"No es una conversación importante"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"Silenciada"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Activar alertas"</string>
-    <string name="notification_conversation_bubble" msgid="2242180995373949022">"Mostrar cuadro"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Quitar cuadros"</string>
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"Mostrar burbuja"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Quitar burbujas"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Agregar a la pantalla principal"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"controles de notificación"</string>
@@ -959,13 +976,8 @@
     <string name="device_services" msgid="1549944177856658705">"Servicios del dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sin título"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Presiona para reiniciar esta app y acceder al modo de pantalla completa."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Abrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Configuración para cuadros de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"¿Quieres permitir cuadros de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Administrar"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Denegar"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Permitir"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Preguntarme más tarde"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g> y <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> más"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Mover"</string>
@@ -974,25 +986,50 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Ubicar abajo a la izquierda"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Ubicar abajo a la derecha"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ignorar"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"No colocar la conversación en burbuja"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chat mediante burbujas"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Las conversaciones nuevas aparecen como íconos flotantes o burbujas. Pulsa para abrir la burbuja. Arrástrala para moverla."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controla las burbujas en todo momento"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Presiona Administrar para desactivar las burbujas de esta app"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Entendido"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Se actualizó el sistema de navegación. Para hacer cambios, ve a Configuración."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ve a Configuración para actualizar la navegación del sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"En espera"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Ventana superpuesta de ampliación"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventana de ampliación"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controles de ampliación de la ventana"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"Controles rápidos"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"Agregar controles"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Elige una app desde la cual agregar controles"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> favoritos actuales</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> favorito actual</item>
+    <string name="quick_controls_title" msgid="1686913115679255053">"Controles rápidos"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Agrega controles para los dispositivos conectados"</string>
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Configura los controles rápidos"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Mantén presionado el botón de encendido para acceder a los controles"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Elige la app para agregar los controles"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other">Se agregaron <xliff:g id="NUMBER_1">%s</xliff:g> controles.</item>
+      <item quantity="one">Se agregó <xliff:g id="NUMBER_0">%s</xliff:g> control.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Elige los controles de acceso rápido"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Elige los controles a los que quieres acceder desde el menú de encendido"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Mantén presionado un control y arrástralo para moverlo"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"No se cargó la lista completa de controles."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Otros"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"Agregar a controles rápidos"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"Agregar a favoritos"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"La app <xliff:g id="APP">%s</xliff:g> sugirió que agregaras este control a favoritos."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Controles actualizados"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"El PIN contiene letras o símbolos"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Verificar <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"Verificando…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Ingresa el PIN"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Probar con otro PIN"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Confirmando…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Confirmar cambio para <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"Desliza el dedo para ver más elementos"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendaciones"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"Cerrar esta sesión multimedia"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, verifica la app"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Se produjo un error, vuelve a intentarlo."</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"En curso"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantén pulsado el botón de encendido para ver los nuevos controles"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Agregar controles"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Editar controles"</string>
 </resources>

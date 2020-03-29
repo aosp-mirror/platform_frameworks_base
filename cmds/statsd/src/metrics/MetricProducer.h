@@ -207,6 +207,11 @@ public:
         return clearPastBucketsLocked(dumpTimeNs);
     }
 
+    void prepareFirstBucket() {
+        std::lock_guard<std::mutex> lock(mMutex);
+        prepareFirstBucketLocked();
+    }
+
     // Returns the memory in bytes currently used to store this metric's data. Does not change
     // state.
     size_t byteSize() const {
@@ -344,6 +349,7 @@ protected:
                                     std::set<string> *str_set,
                                     android::util::ProtoOutputStream* protoOutput) = 0;
     virtual void clearPastBucketsLocked(const int64_t dumpTimeNs) = 0;
+    virtual void prepareFirstBucketLocked(){};
     virtual size_t byteSizeLocked() const = 0;
     virtual void dumpStatesLocked(FILE* out, bool verbose) const = 0;
     virtual void dropDataLocked(const int64_t dropTimeNs) = 0;

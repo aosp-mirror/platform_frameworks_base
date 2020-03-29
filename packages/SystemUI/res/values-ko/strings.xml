@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"허용"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB 디버깅이 허용되지 않음"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"현재 이 기기에 로그인한 사용자는 USB 디버깅을 사용 설정할 수 없습니다. 이 기능을 사용하려면 기본 사용자로 전환하세요."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"이 네트워크에서 무선 디버깅을 허용하시겠습니까?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"네트워크 이름(SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi 주소(BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"이 네트워크에서 항상 허용"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"허용"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"무선 디버깅이 허용되지 않음"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"현재 이 기기에 로그인한 사용자는 무선 디버깅을 사용 설정할 수 없습니다. 이 기능을 사용하려면 기본 사용자로 전환하세요."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB 포트 비활성화됨"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"기기를 액체나 이물질로부터 보호하기 위해 USB 포트가 사용 중지되었으며 액세서리를 연결할 수 없습니다.\n\nUSB 포트를 다시 안전하게 사용할 수 있게 되면 알려 드리겠습니다."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"충전기와 액세서리를 감지할 수 있도록 USB 포트가 사용 설정됨"</string>
@@ -80,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"스크린샷을 다시 찍어 보세요."</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"저장용량이 부족하여 스크린샷을 저장할 수 없습니다"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"앱이나 조직에서 스크린샷 촬영을 허용하지 않습니다."</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"스크린샷 닫기"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"스크린샷 열기"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"화면 녹화"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"화면 녹화 세션에 관한 지속적인 알림"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"녹화를 시작하시겠습니까?"</string>
@@ -146,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"잘못된 패턴"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"잘못된 비밀번호"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"잘못된 시도 횟수가 너무 많습니다.\n<xliff:g id="NUMBER">%d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"다시 시도하세요. <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>회 중 <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>번째 시도입니다."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"잘못된 시도 횟수가 너무 많습니다. 이 기기의 데이터가 삭제됩니다."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"잘못된 시도 횟수가 너무 많습니다. 이 사용자가 삭제됩니다."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"잘못된 시도 횟수가 너무 많습니다. 이 직장 프로필 및 관련 데이터가 삭제됩니다."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"닫기"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"지문 센서를 터치하세요."</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"지문 아이콘"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"찾는 중..."</string>
@@ -488,6 +501,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"관리"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"기록"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"무음 알림"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"주의를 끄는 알림"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"대화"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"무음 알림 모두 삭제"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"방해 금지 모드로 일시중지된 알림"</string>
@@ -551,6 +565,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다. 이 프로필은 <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>에 연결되어 이메일, 앱, 웹사이트와 같은 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n개인 네트워크 활동을 모니터링할 수 있는 <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>에도 연결됩니다."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent가 잠금 해제함"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"수동으로 잠금 해제할 때까지 기기가 잠금 상태로 유지됩니다."</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"알림을 더욱 빠르게 받기"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"잠금 해제하기 전에 알림을 봅니다."</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"사용 안함"</string>
@@ -686,10 +701,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"소리나 진동 없이 집중할 수 있도록 도와줍니다"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"소리나 진동으로 알립니다."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"이 콘텐츠로 연결되는 플로팅 바로가기로 사용자의 주의를 끕니다."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"대화 섹션 상단에 버블로 표시"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"기본적으로 <xliff:g id="APP_NAME_0">%1$s</xliff:g>의 모든 대화가 버블로 표시됩니다. <xliff:g id="APP_NAME_1">%2$s</xliff:g>에서 관리하세요."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"설정"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"최근에 닫은 도움말 풍선 없음"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"최근 버블과 내가 닫은 버블이 여기 표시됩니다."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"이 알림은 수정할 수 없습니다."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"프록시를 통한 알림"</string>
@@ -959,13 +976,8 @@
     <string name="device_services" msgid="1549944177856658705">"기기 서비스"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"제목 없음"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"탭하여 이 앱을 다시 시작하고 전체 화면으로 이동합니다."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> 열기"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 풍선 설정"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 알림 풍선을 허용하시겠습니까?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"관리"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"거부"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"허용"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"나중에 알림"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g>의 <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> 외 <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>개의 <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"이동"</string>
@@ -974,25 +986,54 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"왼쪽 하단으로 이동"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"오른쪽 하단으로 이동"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"닫기"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"대화를 버블로 표시하지 않음"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"버블을 사용하여 채팅하세요"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"새로운 대화가 플로팅 아이콘인 버블로 표시됩니다. 버블을 열려면 탭하세요. 드래그하여 이동할 수 있습니다."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"언제든지 버블을 제어하세요"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"이 앱에서 버블을 사용 중지하려면 관리를 탭하세요."</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"확인"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"시스템 탐색이 업데이트되었습니다. 변경하려면 설정으로 이동하세요."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"설정으로 이동하여 시스템 탐색을 업데이트하세요."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"대기"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"확대 오버레이 창"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"확대 창"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"확대 창 컨트롤"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"빠른 컨트롤"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"컨트롤 추가"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"컨트롤을 추가할 앱을 선택하세요."</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other">현재 즐겨찾는 항목 <xliff:g id="NUMBER_1">%s</xliff:g>개 있음</item>
-      <item quantity="one">현재 즐겨찾는 항목 <xliff:g id="NUMBER_0">%s</xliff:g>개 있음</item>
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"연결된 기기의 컨트롤을 추가합니다."</string>
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other">제어 기능 <xliff:g id="NUMBER_1">%s</xliff:g>개가 추가되었습니다.</item>
+      <item quantity="one">제어 기능 <xliff:g id="NUMBER_0">%s</xliff:g>개가 추가되었습니다.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"제어"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"빠른 액세스를 위한 컨트롤을 선택하세요."</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"전원 메뉴에서 액세스할 컨트롤을 선택합니다."</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"컨트롤을 길게 터치하고 드래그하여 이동"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"전체 컨트롤 목록을 로드할 수 없습니다."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"기타"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"빠른 컨트롤에 추가"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"즐겨찾기에 추가"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g>에서 이 제어 기능을 즐겨찾기에 추가할 것을 제안합니다."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"컨트롤 업데이트됨"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN에 문자나 기호가 포함됨"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> 확인"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"확인 중…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN 입력"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"다른 PIN으로 다시 시도"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"확인 중…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> 변경 확인"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"자세히 보려면 스와이프하세요."</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"추천 제어 기능 로드 중"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"이 미디어 세션 닫기"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"비활성. 앱을 확인하세요."</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"오류. 다시 시도하세요."</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"진행 중"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"새 컨트롤을 보려면 전원 버튼을 길게 누르세요."</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"컨트롤 추가"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"컨트롤 수정"</string>
 </resources>

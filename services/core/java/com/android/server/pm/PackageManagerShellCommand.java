@@ -105,6 +105,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
+import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
 
 import dalvik.system.DexFile;
 
@@ -118,7 +119,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -1278,42 +1278,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 pw.println("Success");
                 return 0;
             }
-
-            long timeoutMs = params.timeoutMs <= 0
-                    ? DEFAULT_WAIT_MS
-                    : params.timeoutMs;
-            PackageInstaller.SessionInfo si = mInterface.getPackageInstaller()
-                    .getSessionInfo(sessionId);
-            long currentTime = System.currentTimeMillis();
-            long endTime = currentTime + timeoutMs;
-            // Using a loop instead of BroadcastReceiver since we can receive session update
-            // broadcast only if packageInstallerName is "android". We can't always force
-            // "android" as packageIntallerName, e.g, rollback auto implies
-            // "-i com.android.shell".
-            while (currentTime < endTime) {
-                if (si != null
-                        && (si.isStagedSessionReady() || si.isStagedSessionFailed())) {
-                    break;
-                }
-                SystemClock.sleep(Math.min(endTime - currentTime, 100));
-                currentTime = System.currentTimeMillis();
-                si = mInterface.getPackageInstaller().getSessionInfo(sessionId);
-            }
-            if (si == null) {
-                pw.println("Failure [failed to retrieve SessionInfo]");
-                return 1;
-            }
-            if (!si.isStagedSessionReady() && !si.isStagedSessionFailed()) {
-                pw.println("Failure [timed out after " + timeoutMs + " ms]");
-                return 1;
-            }
-            if (!si.isStagedSessionReady()) {
-                pw.println("Error [" + si.getStagedSessionErrorCode() + "] ["
-                        + si.getStagedSessionErrorMessage() + "]");
-                return 1;
-            }
-            pw.println("Success. Reboot device to apply staged session");
-            return 0;
+            return doWaitForStagedSessionRead(sessionId, params.timeoutMs, pw);
         } finally {
             if (abandonSession) {
                 try {
@@ -1324,14 +1289,92 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
+    private int doWaitForStagedSessionRead(int sessionId, long timeoutMs, PrintWriter pw)
+              throws RemoteException {
+        if (timeoutMs <= 0) {
+            timeoutMs = DEFAULT_WAIT_MS;
+        }
+        PackageInstaller.SessionInfo si = mInterface.getPackageInstaller()
+                .getSessionInfo(sessionId);
+        if (si == null) {
+            pw.println("Failure [Unknown session " + sessionId + "]");
+            return 1;
+        }
+        if (!si.isStaged()) {
+            pw.println("Failure [Session " + sessionId + " is not a staged session]");
+            return 1;
+        }
+        long currentTime = System.currentTimeMillis();
+        long endTime = currentTime + timeoutMs;
+        // Using a loop instead of BroadcastReceiver since we can receive session update
+        // broadcast only if packageInstallerName is "android". We can't always force
+        // "android" as packageIntallerName, e.g, rollback auto implies
+        // "-i com.android.shell".
+        while (currentTime < endTime) {
+            if (si != null && (si.isStagedSessionReady() || si.isStagedSessionFailed())) {
+                break;
+            }
+            SystemClock.sleep(Math.min(endTime - currentTime, 100));
+            currentTime = System.currentTimeMillis();
+            si = mInterface.getPackageInstaller().getSessionInfo(sessionId);
+        }
+        if (si == null) {
+            pw.println("Failure [failed to retrieve SessionInfo]");
+            return 1;
+        }
+        if (!si.isStagedSessionReady() && !si.isStagedSessionFailed()) {
+            pw.println("Failure [timed out after " + timeoutMs + " ms]");
+            return 1;
+        }
+        if (!si.isStagedSessionReady()) {
+            pw.println("Error [" + si.getStagedSessionErrorCode() + "] ["
+                    + si.getStagedSessionErrorMessage() + "]");
+            return 1;
+        }
+        pw.println("Success. Reboot device to apply staged session");
+        return 0;
+    }
+
     private int runInstallAbandon() throws RemoteException {
         final int sessionId = Integer.parseInt(getNextArg());
         return doAbandonSession(sessionId, true /*logSuccess*/);
     }
 
     private int runInstallCommit() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        String opt;
+        boolean waitForStagedSessionReady = true;
+        long timeoutMs = -1;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--wait":
+                    waitForStagedSessionReady = true;
+                    // If there is only one remaining argument, then it represents the sessionId, we
+                    // shouldn't try to parse it as timeoutMs.
+                    if (getRemainingArgsCount() > 1) {
+                        try {
+                            timeoutMs = Long.parseLong(peekNextArg());
+                            getNextArg();
+                        } catch (NumberFormatException ignore) {
+                        }
+                    }
+                    break;
+                case "--no-wait":
+                    waitForStagedSessionReady = false;
+                    break;
+            }
+        }
         final int sessionId = Integer.parseInt(getNextArg());
-        return doCommitSession(sessionId, true /*logSuccess*/);
+        if (doCommitSession(sessionId, false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
+            return 1;
+        }
+        final PackageInstaller.SessionInfo si = mInterface.getPackageInstaller()
+                .getSessionInfo(sessionId);
+        if (si == null || !si.isStaged() || !waitForStagedSessionReady) {
+            pw.println("Success");
+            return 0;
+        }
+        return doWaitForStagedSessionRead(sessionId, timeoutMs, pw);
     }
 
     private int runInstallCreate() throws RemoteException {
@@ -3025,9 +3068,9 @@ class PackageManagerShellCommand extends ShellCommand {
             // 1. Single file from stdin.
             if (args.isEmpty() || STDIN_PATH.equals(args.get(0))) {
                 final String name = "base." + (isApex ? "apex" : "apk");
-                final String metadata = "-" + name;
+                final Metadata metadata = Metadata.forStdIn(name);
                 session.addFile(LOCATION_DATA_APP, name, sessionSizeBytes,
-                        metadata.getBytes(StandardCharsets.UTF_8), null);
+                        metadata.toByteArray(), null);
                 return 0;
             }
 
@@ -3056,9 +3099,10 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int processArgForStdin(String arg, PackageInstaller.Session session) {
         final String[] fileDesc = arg.split(":");
-        String name, metadata;
+        String name, fileId;
         long sizeBytes;
         byte[] signature = null;
+        int streamingVersion = 0;
 
         try {
             if (fileDesc.length < 2) {
@@ -3067,13 +3111,21 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             name = fileDesc[0];
             sizeBytes = Long.parseUnsignedLong(fileDesc[1]);
-            metadata = name;
+            fileId = name;
 
             if (fileDesc.length > 2 && !TextUtils.isEmpty(fileDesc[2])) {
-                metadata = fileDesc[2];
+                fileId = fileDesc[2];
             }
             if (fileDesc.length > 3) {
                 signature = Base64.getDecoder().decode(fileDesc[3]);
+            }
+            if (fileDesc.length > 4) {
+                streamingVersion = Integer.parseUnsignedInt(fileDesc[4]);
+                if (streamingVersion < 0 || streamingVersion > 1) {
+                    getErrPrintWriter().println(
+                            "Unsupported streaming version: " + streamingVersion);
+                    return 1;
+                }
             }
         } catch (IllegalArgumentException e) {
             getErrPrintWriter().println(
@@ -3086,9 +3138,14 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
+        final Metadata metadata;
+
         if (signature != null) {
-            // Streaming/adb mode.
-            metadata = "+" + metadata;
+            // Streaming/adb mode. Versions:
+            // 0: data only streaming, tree has to be fully available,
+            // 1: tree and data streaming.
+            metadata = (streamingVersion == 0) ? Metadata.forDataOnlyStreaming(fileId)
+                    : Metadata.forStreaming(fileId);
             try {
                 if (V4Signature.readFrom(signature) == null) {
                     getErrPrintWriter().println("V4 signature is invalid in: " + arg);
@@ -3101,11 +3158,10 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         } else {
             // Single-shot read from stdin.
-            metadata = "-" + metadata;
+            metadata = Metadata.forStdIn(fileId);
         }
 
-        session.addFile(LOCATION_DATA_APP, name, sizeBytes,
-                metadata.getBytes(StandardCharsets.UTF_8), signature);
+        session.addFile(LOCATION_DATA_APP, name, sizeBytes, metadata.toByteArray(), signature);
         return 0;
     }
 
@@ -3115,7 +3171,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final File file = new File(inPath);
         final String name = file.getName();
         final long size = file.length();
-        final byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
+        final Metadata metadata = Metadata.forLocalFile(inPath);
 
         byte[] v4signatureBytes = null;
         // Try to load the v4 signature file for the APK; it might not exist.
@@ -3132,7 +3188,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         }
 
-        session.addFile(LOCATION_DATA_APP, name, size, metadata, v4signatureBytes);
+        session.addFile(LOCATION_DATA_APP, name, size, metadata.toByteArray(), v4signatureBytes);
     }
 
     private int doWriteSplits(int sessionId, ArrayList<String> splitPaths, long sessionSizeBytes,

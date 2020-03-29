@@ -2079,7 +2079,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Owners newOwners() {
             return new Owners(getUserManager(), getUserManagerInternal(),
-                    getPackageManagerInternal(), getActivityTaskManagerInternal());
+                    getPackageManagerInternal(), getActivityTaskManagerInternal(),
+                    getActivityManagerInternal());
         }
 
         UserManager getUserManager() {
@@ -9184,8 +9185,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return true;
         }
 
-        Log.w(LOG_TAG, String.format("Package %s (uid=%d, pid=%d) cannot access Device IDs",
-                    packageName, uid, pid));
         return false;
     }
 
@@ -15742,9 +15741,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
 
+        final int suspendedState = suspended
+                ? PERSONAL_APPS_SUSPENDED_EXPLICITLY
+                : PERSONAL_APPS_NOT_SUSPENDED;
         mInjector.binderWithCleanCallingIdentity(
-                () -> applyPersonalAppsSuspension(
-                        callingUserId, PERSONAL_APPS_SUSPENDED_EXPLICITLY));
+                () -> applyPersonalAppsSuspension(callingUserId, suspendedState));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PERSONAL_APPS_SUSPENDED)

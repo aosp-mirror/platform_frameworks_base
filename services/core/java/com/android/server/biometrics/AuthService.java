@@ -158,7 +158,8 @@ public class AuthService extends SystemService {
                     || bundle.getCharSequence(
                             BiometricPrompt.KEY_DEVICE_CREDENTIAL_SUBTITLE) != null
                     || bundle.getCharSequence(
-                            BiometricPrompt.KEY_DEVICE_CREDENTIAL_DESCRIPTION) != null) {
+                            BiometricPrompt.KEY_DEVICE_CREDENTIAL_DESCRIPTION) != null
+                    || bundle.getBoolean(BiometricPrompt.KEY_RECEIVE_SYSTEM_EVENTS, false)) {
                 checkInternalPermission();
             }
 

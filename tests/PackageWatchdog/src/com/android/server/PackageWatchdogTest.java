@@ -1123,6 +1123,28 @@ public class PackageWatchdogTest {
         assertThat(testController.getSyncRequests()).isEqualTo(expectedSyncRequests);
     }
 
+    /**
+     * Ensure that the failure history of a package is preserved when making duplicate calls to
+     * observe the package.
+     */
+    @Test
+    public void testFailureHistoryIsPreserved() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+        watchdog.startObservingHealth(observer, List.of(APP_A), SHORT_DURATION);
+        for (int i = 0; i < PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT - 1; i++) {
+            watchdog.onPackageFailure(List.of(new VersionedPackage(APP_A, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
+        }
+        mTestLooper.dispatchAll();
+        assertThat(observer.mMitigatedPackages).isEmpty();
+        watchdog.startObservingHealth(observer, List.of(APP_A), LONG_DURATION);
+        watchdog.onPackageFailure(List.of(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
+        mTestLooper.dispatchAll();
+        assertThat(observer.mMitigatedPackages).isEqualTo(List.of(APP_A));
+    }
+
     private void adoptShellPermissions(String... permissions) {
         InstrumentationRegistry
                 .getInstrumentation()

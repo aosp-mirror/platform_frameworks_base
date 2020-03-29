@@ -227,56 +227,40 @@ static inline unique_fd convertPfdToFdAndDup(JNIEnv* env, const JniIds& jni, job
     return result;
 }
 
+enum MetadataMode : int8_t {
+    STDIN = 0,
+    LOCAL_FILE = 1,
+    DATA_ONLY_STREAMING = 2,
+    STREAMING = 3,
+};
+
 struct InputDesc {
     unique_fd fd;
     IncFsSize size;
     IncFsBlockKind kind = INCFS_BLOCK_KIND_DATA;
     bool waitOnEof = false;
     bool streaming = false;
+    MetadataMode mode = STDIN;
 };
 using InputDescs = std::vector<InputDesc>;
 
-static inline InputDescs openInputs(JNIEnv* env, const JniIds& jni, jobject shellCommand,
-                                    IncFsSize size, IncFsSpan metadata) {
+template <class T>
+std::optional<T> read(IncFsSpan& data) {
+    if (data.size < (int32_t)sizeof(T)) {
+        return {};
+    }
+    T res;
+    memcpy(&res, data.data, sizeof(res));
+    data.data += sizeof(res);
+    data.size -= sizeof(res);
+    return res;
+}
+
+static inline InputDescs openLocalFile(JNIEnv* env, const JniIds& jni, jobject shellCommand,
+                                       IncFsSize size, const std::string& filePath) {
     InputDescs result;
     result.reserve(2);
 
-    if (metadata.size == 0 || *metadata.data == '-') {
-        // stdin
-        auto fd = convertPfdToFdAndDup(
-                env, jni,
-                env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
-                                            jni.pmscdGetStdInPFD, shellCommand));
-        if (fd.ok()) {
-            result.push_back(InputDesc{
-                    .fd = std::move(fd),
-                    .size = size,
-                    .waitOnEof = true,
-            });
-        }
-        return result;
-    }
-    if (*metadata.data == '+') {
-        // verity tree from stdin, rest is streaming
-        auto fd = convertPfdToFdAndDup(
-                env, jni,
-                env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
-                                            jni.pmscdGetStdInPFD, shellCommand));
-        if (fd.ok()) {
-            auto treeSize = verityTreeSizeForFile(size);
-            result.push_back(InputDesc{
-                    .fd = std::move(fd),
-                    .size = treeSize,
-                    .kind = INCFS_BLOCK_KIND_HASH,
-                    .waitOnEof = true,
-                    .streaming = true,
-            });
-        }
-        return result;
-    }
-
-    // local file and possibly signature
-    const std::string filePath(metadata.data, metadata.size);
     const std::string idsigPath = filePath + ".idsig";
 
     auto idsigFd = convertPfdToFdAndDup(
@@ -311,6 +295,59 @@ static inline InputDescs openInputs(JNIEnv* env, const JniIds& jni, jobject shel
         });
     }
 
+    return result;
+}
+
+static inline InputDescs openInputs(JNIEnv* env, const JniIds& jni, jobject shellCommand,
+                                    IncFsSize size, IncFsSpan metadata) {
+    auto mode = read<int8_t>(metadata).value_or(STDIN);
+    if (mode == LOCAL_FILE) {
+        // local file and possibly signature
+        return openLocalFile(env, jni, shellCommand, size,
+                             std::string(metadata.data, metadata.size));
+    }
+
+    auto fd = convertPfdToFdAndDup(
+            env, jni,
+            env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
+                                        jni.pmscdGetStdInPFD, shellCommand));
+    if (!fd.ok()) {
+        return {};
+    }
+
+    InputDescs result;
+    switch (mode) {
+        case STDIN: {
+            result.push_back(InputDesc{
+                    .fd = std::move(fd),
+                    .size = size,
+                    .waitOnEof = true,
+            });
+            break;
+        }
+        case DATA_ONLY_STREAMING: {
+            // verity tree from stdin, rest is streaming
+            auto treeSize = verityTreeSizeForFile(size);
+            result.push_back(InputDesc{
+                    .fd = std::move(fd),
+                    .size = treeSize,
+                    .kind = INCFS_BLOCK_KIND_HASH,
+                    .waitOnEof = true,
+                    .streaming = true,
+                    .mode = DATA_ONLY_STREAMING,
+            });
+            break;
+        }
+        case STREAMING: {
+            result.push_back(InputDesc{
+                    .fd = std::move(fd),
+                    .size = 0,
+                    .streaming = true,
+                    .mode = STREAMING,
+            });
+            break;
+        }
+    }
     return result;
 }
 
@@ -390,6 +427,7 @@ private:
         blocks.reserve(BLOCKS_COUNT);
 
         unique_fd streamingFd;
+        MetadataMode streamingMode;
         for (auto&& file : addedFiles) {
             auto inputs = openInputs(env, jni, shellCommand, file.size, file.metadata);
             if (inputs.empty()) {
@@ -411,6 +449,7 @@ private:
             for (auto&& input : inputs) {
                 if (input.streaming && !streamingFd.ok()) {
                     streamingFd.reset(dup(input.fd));
+                    streamingMode = input.mode;
                 }
                 if (!copyToIncFs(incfsFd, input.size, input.kind, input.fd, input.waitOnEof,
                                  &buffer, &blocks)) {
@@ -425,7 +464,7 @@ private:
 
         if (streamingFd.ok()) {
             ALOGE("onPrepareImage: done, proceeding to streaming.");
-            return initStreaming(std::move(streamingFd));
+            return initStreaming(std::move(streamingFd), streamingMode);
         }
 
         ALOGE("onPrepareImage: done.");
@@ -564,7 +603,7 @@ private:
     }
 
     // Streaming.
-    bool initStreaming(unique_fd inout) {
+    bool initStreaming(unique_fd inout, MetadataMode mode) {
         mEventFd.reset(eventfd(0, EFD_CLOEXEC));
         if (mEventFd < 0) {
             ALOGE("Failed to create eventfd.");
@@ -591,8 +630,8 @@ private:
             }
         }
 
-        mReceiverThread =
-                std::thread([this, io = std::move(inout)]() mutable { receiver(std::move(io)); });
+        mReceiverThread = std::thread(
+                [this, io = std::move(inout), mode]() mutable { receiver(std::move(io), mode); });
         ALOGI("Started streaming...");
         return true;
     }
@@ -624,7 +663,7 @@ private:
         }
     }
 
-    void receiver(unique_fd inout) {
+    void receiver(unique_fd inout, MetadataMode mode) {
         std::vector<uint8_t> data;
         std::vector<IncFsDataBlock> instructions;
         std::unordered_map<FileIdx, unique_fd> writeFds;
@@ -667,7 +706,7 @@ private:
                     break;
                 }
                 const FileIdx fileIdx = header.fileIdx;
-                const android::dataloader::FileId fileId = convertFileIndexToFileId(fileIdx);
+                const android::dataloader::FileId fileId = convertFileIndexToFileId(mode, fileIdx);
                 if (!android::incfs::isValidFileId(fileId)) {
                     ALOGE("Unknown data destination for file ID %d. "
                           "Ignore.",
@@ -679,7 +718,7 @@ private:
                 if (writeFd < 0) {
                     writeFd.reset(this->mIfs->openWrite(fileId));
                     if (writeFd < 0) {
-                        ALOGE("Failed to open file %d for writing (%d). Aboring.", header.fileIdx,
+                        ALOGE("Failed to open file %d for writing (%d). Aborting.", header.fileIdx,
                               -writeFd);
                         break;
                     }
@@ -716,9 +755,11 @@ private:
     }
 
     FileIdx convertFileIdToFileIndex(android::dataloader::FileId fileId) {
-        // FileId is a string in format '+FileIdx\0'.
+        // FileId has format '\2FileIdx'.
         const char* meta = (const char*)&fileId;
-        if (*meta != '+') {
+
+        int8_t mode = *meta;
+        if (mode != DATA_ONLY_STREAMING && mode != STREAMING) {
             return -1;
         }
 
@@ -732,10 +773,10 @@ private:
         return FileIdx(fileIdx);
     }
 
-    android::dataloader::FileId convertFileIndexToFileId(FileIdx fileIdx) {
+    android::dataloader::FileId convertFileIndexToFileId(MetadataMode mode, FileIdx fileIdx) {
         IncFsFileId fileId = {};
         char* meta = (char*)&fileId;
-        *meta = '+';
+        *meta = mode;
         if (auto [p, ec] = std::to_chars(meta + 1, meta + sizeof(fileId), fileIdx);
             ec != std::errc()) {
             return {};

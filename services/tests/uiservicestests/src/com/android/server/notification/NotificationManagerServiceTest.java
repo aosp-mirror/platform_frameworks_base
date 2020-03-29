@@ -78,6 +78,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.IActivityManager;
@@ -131,6 +132,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenPolicy;
+import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
@@ -154,6 +156,7 @@ import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiServiceTestCase;
@@ -380,12 +383,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         MockitoAnnotations.initMocks(this);
 
+        DeviceIdleInternal deviceIdleInternal = mock(DeviceIdleInternal.class);
+        when(deviceIdleInternal.getNotificationWhitelistDuration()).thenReturn(3000L);
+        ActivityManagerInternal activityManagerInternal = mock(ActivityManagerInternal.class);
+
         LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
         LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
         LocalServices.addService(StatusBarManagerInternal.class, mStatusBar);
+        LocalServices.removeServiceForTest(DeviceIdleInternal.class);
+        LocalServices.addService(DeviceIdleInternal.class, deviceIdleInternal);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class, activityManagerInternal);
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
@@ -457,7 +468,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
                 mGroupHelper, mAm, mAtm, mAppUsageStats,
                 mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
-                mAppOpsManager, mUm, mHistoryManager, mStatsManager);
+                mAppOpsManager, mUm, mHistoryManager, mStatsManager,
+                mock(TelephonyManager.class));
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);
@@ -5589,6 +5601,67 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifsAfter.length);
         assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
+    }
+
+    @Test
+    public void testNotificationBubbleIsFlagRemoved_resetOnUpdate() throws Exception {
+        // Bubbles are allowed!
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
+        // Notif with bubble metadata
+        NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
+                "testNotificationBubbleIsFlagRemoved_resetOnUpdate");
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        // Flag shouldn't be modified
+        NotificationRecord recordToCheck = mService.getNotificationRecord(nr.getSbn().getKey());
+        assertFalse(recordToCheck.isFlagBubbleRemoved());
+
+        // Notify we're not a bubble
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false);
+        waitForIdle();
+        // Flag should be modified
+        recordToCheck = mService.getNotificationRecord(nr.getSbn().getKey());
+        assertTrue(recordToCheck.isFlagBubbleRemoved());
+
+
+        // Update the notif
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        // And the flag is reset
+        recordToCheck = mService.getNotificationRecord(nr.getSbn().getKey());
+        assertFalse(recordToCheck.isFlagBubbleRemoved());
+    }
+
+    @Test
+    public void testNotificationBubbleIsFlagRemoved_resetOnBubbleChangedTrue() throws Exception {
+        // Bubbles are allowed!
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
+        // Notif with bubble metadata
+        NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
+                "testNotificationBubbleIsFlagRemoved_trueOnBubbleChangedTrue");
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        // Flag shouldn't be modified
+        NotificationRecord recordToCheck = mService.getNotificationRecord(nr.getSbn().getKey());
+        assertFalse(recordToCheck.isFlagBubbleRemoved());
+
+        // Notify we're not a bubble
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false);
+        waitForIdle();
+        // Flag should be modified
+        recordToCheck = mService.getNotificationRecord(nr.getSbn().getKey());
+        assertTrue(recordToCheck.isFlagBubbleRemoved());
+
+        // Notify we are a bubble
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true);
+        waitForIdle();
+        // And the flag is reset
+        assertFalse(recordToCheck.isFlagBubbleRemoved());
     }
 
     @Test

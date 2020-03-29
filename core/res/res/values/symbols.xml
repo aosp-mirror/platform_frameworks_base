@@ -365,6 +365,7 @@
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="string" name="config_recentsComponentName" />
   <java-symbol type="string" name="config_systemUIServiceComponent" />
+  <java-symbol type="string" name="config_controlsPackage" />
   <java-symbol type="string" name="config_screenRecorderComponent" />
   <java-symbol type="string" name="config_somnambulatorComponent" />
   <java-symbol type="string" name="config_screenshotServiceComponent" />
@@ -3953,4 +3954,7 @@
 
   <!-- Set to true to enable the user switcher on the keyguard. -->
   <java-symbol type="bool" name="config_keyguardUserSwitcher" />
+
+  <!-- Set to true to make assistant show in front of the dream/screensaver. -->
+  <java-symbol type="bool" name="config_assistantOnTopOfDream"/>
 </resources>

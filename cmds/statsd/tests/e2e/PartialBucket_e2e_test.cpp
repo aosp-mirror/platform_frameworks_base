@@ -71,6 +71,7 @@ StatsdConfig MakeConfig() {
 StatsdConfig MakeValueMetricConfig(int64_t minTime) {
     StatsdConfig config;
     config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+    config.add_default_pull_packages("AID_ROOT");  // Fake puller is registered with root.
 
     auto pulledAtomMatcher =
             CreateSimpleAtomMatcher("TestMatcher", util::SUBSYSTEM_SLEEP_STATE);
@@ -94,6 +95,7 @@ StatsdConfig MakeValueMetricConfig(int64_t minTime) {
 StatsdConfig MakeGaugeMetricConfig(int64_t minTime) {
     StatsdConfig config;
     config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+    config.add_default_pull_packages("AID_ROOT");  // Fake puller is registered with root.
 
     auto pulledAtomMatcher =
                 CreateSimpleAtomMatcher("TestMatcher", util::SUBSYSTEM_SLEEP_STATE);

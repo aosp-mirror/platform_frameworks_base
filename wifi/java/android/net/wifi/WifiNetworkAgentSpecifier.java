@@ -74,7 +74,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
     }
 
     @Override
-    public boolean satisfiedBy(@Nullable NetworkSpecifier other) {
+    public boolean canBeSatisfiedBy(@Nullable NetworkSpecifier other) {
         if (this == other) {
             return true;
         }

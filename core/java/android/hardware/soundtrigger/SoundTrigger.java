@@ -104,76 +104,37 @@ public class SoundTrigger {
 
         /**
          * If set the underlying module supports AEC.
-         * Describes bit field {@link ModuleProperties#audioCapabilities}
+         * Describes bit field {@link ModuleProperties#mAudioCapabilities}
          */
         public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 0x1;
         /**
          * If set, the underlying module supports noise suppression.
-         * Describes bit field {@link ModuleProperties#audioCapabilities}
+         * Describes bit field {@link ModuleProperties#mAudioCapabilities}
          */
         public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 0x2;
 
-        /** Unique module ID provided by the native service */
-        public final int id;
-
-        /** human readable voice detection engine implementor */
+        private final int mId;
         @NonNull
-        public final String implementor;
-
-        /** human readable voice detection engine description */
+        private final String mImplementor;
         @NonNull
-        public final String description;
-
-        /** Unique voice engine Id (changes with each version) */
+        private final String mDescription;
         @NonNull
-        public final UUID uuid;
-
-        /** Voice detection engine version */
-        public final int version;
-
-        /**
-         * String naming the architecture used for running the supported models.
-         * (eg. a platform running models on a DSP could implement this string to convey the DSP
-         * architecture used)
-         */
+        private final UUID mUuid;
+        private final int mVersion;
         @NonNull
-        public final String supportedModelArch;
-
-        /** Maximum number of active sound models */
-        public final int maxSoundModels;
-
-        /** Maximum number of key phrases */
-        public final int maxKeyphrases;
-
-        /** Maximum number of users per key phrase */
-        public final int maxUsers;
-
-        /** Supported recognition modes (bit field, RECOGNITION_MODE_VOICE_TRIGGER ...) */
+        private final String mSupportedModelArch;
+        private final int mMaxSoundModels;
+        private final int mMaxKeyphrases;
+        private final int mMaxUsers;
         @RecognitionModes
-        public final int recognitionModes;
-
-        /** Supports seamless transition to capture mode after recognition */
-        public final boolean supportsCaptureTransition;
-
-        /** Maximum buffering capacity in ms if supportsCaptureTransition() is true */
-        public final int maxBufferMs;
-
-        /** Supports capture by other use cases while detection is active */
-        public final boolean supportsConcurrentCapture;
-
-        /** Rated power consumption when detection is active with TDB silence/sound/speech ratio */
-        public final int powerConsumptionMw;
-
-        /** Returns the trigger (key phrase) capture in the binary data of the
-         * recognition callback event */
-        public final boolean returnsTriggerInEvent;
-
-        /**
-         * Bit field encoding of the AudioCapabilities
-         * supported by the firmware.
-         */
+        private final int mRecognitionModes;
+        private final boolean mSupportsCaptureTransition;
+        private final int mMaxBufferMillis;
+        private final boolean mSupportsConcurrentCapture;
+        private final int mPowerConsumptionMw;
+        private final boolean mReturnsTriggerInEvent;
         @AudioCapabilities
-        public final int audioCapabilities;
+        private final int mAudioCapabilities;
 
         ModuleProperties(int id, @NonNull String implementor, @NonNull String description,
                 @NonNull String uuid, int version, @NonNull String supportedModelArch,
@@ -181,22 +142,116 @@ public class SoundTrigger {
                 @RecognitionModes int recognitionModes, boolean supportsCaptureTransition,
                 int maxBufferMs, boolean supportsConcurrentCapture, int powerConsumptionMw,
                 boolean returnsTriggerInEvent, int audioCapabilities) {
-            this.id = id;
-            this.implementor = requireNonNull(implementor);
-            this.description = requireNonNull(description);
-            this.uuid = UUID.fromString(requireNonNull(uuid));
-            this.version = version;
-            this.supportedModelArch = requireNonNull(supportedModelArch);
-            this.maxSoundModels = maxSoundModels;
-            this.maxKeyphrases = maxKeyphrases;
-            this.maxUsers = maxUsers;
-            this.recognitionModes = recognitionModes;
-            this.supportsCaptureTransition = supportsCaptureTransition;
-            this.maxBufferMs = maxBufferMs;
-            this.supportsConcurrentCapture = supportsConcurrentCapture;
-            this.powerConsumptionMw = powerConsumptionMw;
-            this.returnsTriggerInEvent = returnsTriggerInEvent;
-            this.audioCapabilities = audioCapabilities;
+            this.mId = id;
+            this.mImplementor = requireNonNull(implementor);
+            this.mDescription = requireNonNull(description);
+            this.mUuid = UUID.fromString(requireNonNull(uuid));
+            this.mVersion = version;
+            this.mSupportedModelArch = requireNonNull(supportedModelArch);
+            this.mMaxSoundModels = maxSoundModels;
+            this.mMaxKeyphrases = maxKeyphrases;
+            this.mMaxUsers = maxUsers;
+            this.mRecognitionModes = recognitionModes;
+            this.mSupportsCaptureTransition = supportsCaptureTransition;
+            this.mMaxBufferMillis = maxBufferMs;
+            this.mSupportsConcurrentCapture = supportsConcurrentCapture;
+            this.mPowerConsumptionMw = powerConsumptionMw;
+            this.mReturnsTriggerInEvent = returnsTriggerInEvent;
+            this.mAudioCapabilities = audioCapabilities;
+        }
+
+        /** Unique module ID provided by the native service */
+        public int getId() {
+            return mId;
+        }
+
+        /** human readable voice detection engine implementor */
+        @NonNull
+        public String getImplementor() {
+            return mImplementor;
+        }
+
+        /** human readable voice detection engine description */
+        @NonNull
+        public String getDescription() {
+            return mDescription;
+        }
+
+        /** Unique voice engine Id (changes with each version) */
+        @NonNull
+        public UUID getUuid() {
+            return mUuid;
+        }
+
+        /** Voice detection engine version */
+        public int getVersion() {
+            return mVersion;
+        }
+
+        /**
+         * String naming the architecture used for running the supported models.
+         * (eg. a platform running models on a DSP could implement this string to convey the DSP
+         * architecture used)
+         */
+        @NonNull
+        public String getSupportedModelArch() {
+            return mSupportedModelArch;
+        }
+
+        /** Maximum number of active sound models */
+        public int getMaxSoundModels() {
+            return mMaxSoundModels;
+        }
+
+        /** Maximum number of key phrases */
+        public int getMaxKeyphrases() {
+            return mMaxKeyphrases;
+        }
+
+        /** Maximum number of users per key phrase */
+        public int getMaxUsers() {
+            return mMaxUsers;
+        }
+
+        /** Supported recognition modes (bit field, RECOGNITION_MODE_VOICE_TRIGGER ...) */
+        @RecognitionModes
+        public int getRecognitionModes() {
+            return mRecognitionModes;
+        }
+
+        /** Supports seamless transition to capture mode after recognition */
+        public boolean isCaptureTransitionSupported() {
+            return mSupportsCaptureTransition;
+        }
+
+        /** Maximum buffering capacity in ms if supportsCaptureTransition() is true */
+        public int getMaxBufferMillis() {
+            return mMaxBufferMillis;
+        }
+
+        /** Supports capture by other use cases while detection is active */
+        public boolean isConcurrentCaptureSupported() {
+            return mSupportsConcurrentCapture;
+        }
+
+        /** Rated power consumption when detection is active with TDB silence/sound/speech ratio */
+        public int getPowerConsumptionMw() {
+            return mPowerConsumptionMw;
+        }
+
+        /** Returns the trigger (key phrase) capture in the binary data of the
+         * recognition callback event */
+        public boolean isTriggerReturnedInEvent() {
+            return mReturnsTriggerInEvent;
+        }
+
+        /**
+         * Bit field encoding of the AudioCapabilities
+         * supported by the firmware.
+         */
+        @AudioCapabilities
+        public int getAudioCapabilities() {
+            return mAudioCapabilities;
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<ModuleProperties> CREATOR
@@ -235,22 +290,22 @@ public class SoundTrigger {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(id);
-            dest.writeString(implementor);
-            dest.writeString(description);
-            dest.writeString(uuid.toString());
-            dest.writeInt(version);
-            dest.writeString(supportedModelArch);
-            dest.writeInt(maxSoundModels);
-            dest.writeInt(maxKeyphrases);
-            dest.writeInt(maxUsers);
-            dest.writeInt(recognitionModes);
-            dest.writeByte((byte) (supportsCaptureTransition ? 1 : 0));
-            dest.writeInt(maxBufferMs);
-            dest.writeByte((byte) (supportsConcurrentCapture ? 1 : 0));
-            dest.writeInt(powerConsumptionMw);
-            dest.writeByte((byte) (returnsTriggerInEvent ? 1 : 0));
-            dest.writeInt(audioCapabilities);
+            dest.writeInt(getId());
+            dest.writeString(getImplementor());
+            dest.writeString(getDescription());
+            dest.writeString(getUuid().toString());
+            dest.writeInt(getVersion());
+            dest.writeString(getSupportedModelArch());
+            dest.writeInt(getMaxSoundModels());
+            dest.writeInt(getMaxKeyphrases());
+            dest.writeInt(getMaxUsers());
+            dest.writeInt(getRecognitionModes());
+            dest.writeByte((byte) (isCaptureTransitionSupported() ? 1 : 0));
+            dest.writeInt(getMaxBufferMillis());
+            dest.writeByte((byte) (isConcurrentCaptureSupported() ? 1 : 0));
+            dest.writeInt(getPowerConsumptionMw());
+            dest.writeByte((byte) (isTriggerReturnedInEvent() ? 1 : 0));
+            dest.writeInt(getAudioCapabilities());
         }
 
         @Override
@@ -260,16 +315,17 @@ public class SoundTrigger {
 
         @Override
         public String toString() {
-            return "ModuleProperties [id=" + id + ", implementor=" + implementor + ", description="
-                    + description + ", uuid=" + uuid + ", version=" + version
-                    + " , supportedModelArch=" + supportedModelArch + ", maxSoundModels="
-                    + maxSoundModels + ", maxKeyphrases=" + maxKeyphrases + ", maxUsers="
-                    + maxUsers + ", recognitionModes=" + recognitionModes
-                    + ", supportsCaptureTransition=" + supportsCaptureTransition + ", maxBufferMs="
-                    + maxBufferMs + ", supportsConcurrentCapture=" + supportsConcurrentCapture
-                    + ", powerConsumptionMw=" + powerConsumptionMw
-                    + ", returnsTriggerInEvent=" + returnsTriggerInEvent
-                    + ", audioCapabilities=" + audioCapabilities + "]";
+            return "ModuleProperties [id=" + getId() + ", implementor=" + getImplementor()
+                    + ", description=" + getDescription() + ", uuid=" + getUuid()
+                    + ", version=" + getVersion() + " , supportedModelArch="
+                    + getSupportedModelArch() + ", maxSoundModels=" + getMaxSoundModels()
+                    + ", maxKeyphrases=" + getMaxKeyphrases() + ", maxUsers=" + getMaxUsers()
+                    + ", recognitionModes=" + getRecognitionModes() + ", supportsCaptureTransition="
+                    + isCaptureTransitionSupported() + ", maxBufferMs=" + getMaxBufferMillis()
+                    + ", supportsConcurrentCapture=" + isConcurrentCaptureSupported()
+                    + ", powerConsumptionMw=" + getPowerConsumptionMw()
+                    + ", returnsTriggerInEvent=" + isTriggerReturnedInEvent()
+                    + ", audioCapabilities=" + getAudioCapabilities() + "]";
         }
     }
 
@@ -305,44 +361,64 @@ public class SoundTrigger {
          */
         public static final int TYPE_GENERIC_SOUND = 1;
 
-        /** Unique sound model identifier */
         @NonNull
-        public final UUID uuid;
-
-        /** Sound model type (e.g. TYPE_KEYPHRASE); */
+        private final UUID mUuid;
         @SoundModelType
-        public final int type;
-
-        /** Unique sound model vendor identifier */
+        private final int mType;
         @NonNull
-        public final UUID vendorUuid;
-
-        /** vendor specific version number of the model */
-        public final int version;
-
-        /** Opaque data. For use by vendor implementation and enrollment application */
+        private final UUID mVendorUuid;
+        private final int mVersion;
         @NonNull
-        public final byte[] data;
+        private final byte[] mData;
 
         /** @hide */
         public SoundModel(@NonNull UUID uuid, @Nullable UUID vendorUuid, @SoundModelType int type,
                 @Nullable byte[] data, int version) {
-            this.uuid = requireNonNull(uuid);
-            this.vendorUuid = vendorUuid != null ? vendorUuid : new UUID(0, 0);
-            this.type = type;
-            this.version = version;
-            this.data = data != null ? data : new byte[0];
+            this.mUuid = requireNonNull(uuid);
+            this.mVendorUuid = vendorUuid != null ? vendorUuid : new UUID(0, 0);
+            this.mType = type;
+            this.mVersion = version;
+            this.mData = data != null ? data : new byte[0];
+        }
+
+        /** Unique sound model identifier */
+        @NonNull
+        public UUID getUuid() {
+            return mUuid;
+        }
+
+        /** Sound model type (e.g. TYPE_KEYPHRASE); */
+        @SoundModelType
+        public int getType() {
+            return mType;
+        }
+
+        /** Unique sound model vendor identifier */
+        @NonNull
+        public UUID getVendorUuid() {
+            return mVendorUuid;
+        }
+
+        /** vendor specific version number of the model */
+        public int getVersion() {
+            return mVersion;
+        }
+
+        /** Opaque data. For use by vendor implementation and enrollment application */
+        @NonNull
+        public byte[] getData() {
+            return mData;
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + version;
-            result = prime * result + Arrays.hashCode(data);
-            result = prime * result + type;
-            result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-            result = prime * result + ((vendorUuid == null) ? 0 : vendorUuid.hashCode());
+            result = prime * result + getVersion();
+            result = prime * result + Arrays.hashCode(getData());
+            result = prime * result + getType();
+            result = prime * result + ((getUuid() == null) ? 0 : getUuid().hashCode());
+            result = prime * result + ((getVendorUuid() == null) ? 0 : getVendorUuid().hashCode());
             return result;
         }
 
@@ -358,27 +434,27 @@ public class SoundTrigger {
                 return false;
             }
             SoundModel other = (SoundModel) obj;
-            if (type != other.type) {
+            if (getType() != other.getType()) {
                 return false;
             }
-            if (uuid == null) {
-                if (other.uuid != null) {
+            if (getUuid() == null) {
+                if (other.getUuid() != null) {
                     return false;
                 }
-            } else if (!uuid.equals(other.uuid)) {
+            } else if (!getUuid().equals(other.getUuid())) {
                 return false;
             }
-            if (vendorUuid == null) {
-                if (other.vendorUuid != null) {
+            if (getVendorUuid() == null) {
+                if (other.getVendorUuid() != null) {
                     return false;
                 }
-            } else if (!vendorUuid.equals(other.vendorUuid)) {
+            } else if (!getVendorUuid().equals(other.getVendorUuid())) {
                 return false;
             }
-            if (!Arrays.equals(data, other.data)) {
+            if (!Arrays.equals(getData(), other.getData())) {
                 return false;
             }
-            if (version != other.version) {
+            if (getVersion() != other.getVersion()) {
                 return false;
             }
             return true;
@@ -390,34 +466,16 @@ public class SoundTrigger {
      * {@link KeyphraseSoundModel}
      */
     public static final class Keyphrase implements Parcelable {
-        /** Unique identifier for this keyphrase */
-        public final int id;
 
-        /**
-         * Recognition modes supported for this key phrase in the model
-         *
-         * @see #RECOGNITION_MODE_VOICE_TRIGGER
-         * @see #RECOGNITION_MODE_USER_IDENTIFICATION
-         * @see #RECOGNITION_MODE_USER_AUTHENTICATION
-         * @see #RECOGNITION_MODE_GENERIC
-         */
+        private final int mId;
         @RecognitionModes
-        public final int recognitionModes;
-
-        /** Locale of the keyphrase. */
+        private final int mRecognitionModes;
         @NonNull
-        public final Locale locale;
-
-        /** Key phrase text */
+        private final Locale mLocale;
         @NonNull
-        public final String text;
-
-        /**
-         * Users this key phrase has been trained for. countains sound trigger specific user IDs
-         * derived from system user IDs {@link android.os.UserHandle#getIdentifier()}.
-         */
+        private final String mText;
         @NonNull
-        public final int[] users;
+        private final int[] mUsers;
 
         /**
          * Constructor for Keyphrase describes a key phrase that can be detected by a
@@ -432,11 +490,50 @@ public class SoundTrigger {
          */
         public Keyphrase(int id, @RecognitionModes int recognitionModes, @NonNull Locale locale,
                 @NonNull String text, @Nullable int[] users) {
-            this.id = id;
-            this.recognitionModes = recognitionModes;
-            this.locale = requireNonNull(locale);
-            this.text = requireNonNull(text);
-            this.users = users != null ? users : new int[0];
+            this.mId = id;
+            this.mRecognitionModes = recognitionModes;
+            this.mLocale = requireNonNull(locale);
+            this.mText = requireNonNull(text);
+            this.mUsers = users != null ? users : new int[0];
+        }
+
+        /** Unique identifier for this keyphrase */
+        public int getId() {
+            return mId;
+        }
+
+        /**
+         * Recognition modes supported for this key phrase in the model
+         *
+         * @see #RECOGNITION_MODE_VOICE_TRIGGER
+         * @see #RECOGNITION_MODE_USER_IDENTIFICATION
+         * @see #RECOGNITION_MODE_USER_AUTHENTICATION
+         * @see #RECOGNITION_MODE_GENERIC
+         */
+        @RecognitionModes
+        public int getRecognitionModes() {
+            return mRecognitionModes;
+        }
+
+        /** Locale of the keyphrase. */
+        @NonNull
+        public Locale getLocale() {
+            return mLocale;
+        }
+
+        /** Key phrase text */
+        @NonNull
+        public String getText() {
+            return mText;
+        }
+
+        /**
+         * Users this key phrase has been trained for. countains sound trigger specific user IDs
+         * derived from system user IDs {@link android.os.UserHandle#getIdentifier()}.
+         */
+        @NonNull
+        public int[] getUsers() {
+            return mUsers;
         }
 
         public static final @NonNull Parcelable.Creator<Keyphrase> CREATOR =
@@ -472,13 +569,13 @@ public class SoundTrigger {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeInt(id);
-            dest.writeInt(recognitionModes);
-            dest.writeString(locale.toLanguageTag());
-            dest.writeString(text);
-            if (users != null) {
-                dest.writeInt(users.length);
-                dest.writeIntArray(users);
+            dest.writeInt(getId());
+            dest.writeInt(getRecognitionModes());
+            dest.writeString(getLocale().toLanguageTag());
+            dest.writeString(getText());
+            if (getUsers() != null) {
+                dest.writeInt(getUsers().length);
+                dest.writeIntArray(getUsers());
             } else {
                 dest.writeInt(-1);
             }
@@ -494,11 +591,11 @@ public class SoundTrigger {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((text == null) ? 0 : text.hashCode());
-            result = prime * result + id;
-            result = prime * result + ((locale == null) ? 0 : locale.hashCode());
-            result = prime * result + recognitionModes;
-            result = prime * result + Arrays.hashCode(users);
+            result = prime * result + ((getText() == null) ? 0 : getText().hashCode());
+            result = prime * result + getId();
+            result = prime * result + ((getLocale() == null) ? 0 : getLocale().hashCode());
+            result = prime * result + getRecognitionModes();
+            result = prime * result + Arrays.hashCode(getUsers());
             return result;
         }
 
@@ -514,27 +611,27 @@ public class SoundTrigger {
                 return false;
             }
             Keyphrase other = (Keyphrase) obj;
-            if (text == null) {
-                if (other.text != null) {
+            if (getText() == null) {
+                if (other.getText() != null) {
                     return false;
                 }
-            } else if (!text.equals(other.text)) {
+            } else if (!getText().equals(other.getText())) {
                 return false;
             }
-            if (id != other.id) {
+            if (getId() != other.getId()) {
                 return false;
             }
-            if (locale == null) {
-                if (other.locale != null) {
+            if (getLocale() == null) {
+                if (other.getLocale() != null) {
                     return false;
                 }
-            } else if (!locale.equals(other.locale)) {
+            } else if (!getLocale().equals(other.getLocale())) {
                 return false;
             }
-            if (recognitionModes != other.recognitionModes) {
+            if (getRecognitionModes() != other.getRecognitionModes()) {
                 return false;
             }
-            if (!Arrays.equals(users, other.users)) {
+            if (!Arrays.equals(getUsers(), other.getUsers())) {
                 return false;
             }
             return true;
@@ -542,9 +639,9 @@ public class SoundTrigger {
 
         @Override
         public String toString() {
-            return "Keyphrase [id=" + id + ", recognitionModes=" + recognitionModes
-                    + ", locale=" + locale.toLanguageTag() + ", text=" + text
-                    + ", users=" + Arrays.toString(users) + "]";
+            return "Keyphrase [id=" + getId() + ", recognitionModes=" + getRecognitionModes()
+                    + ", locale=" + getLocale().toLanguageTag() + ", text=" + getText()
+                    + ", users=" + Arrays.toString(getUsers()) + "]";
         }
     }
 
@@ -554,20 +651,26 @@ public class SoundTrigger {
      * and the list of corresponding {@link Keyphrase} descriptors.
      */
     public static final class KeyphraseSoundModel extends SoundModel implements Parcelable {
-        /** Key phrases in this sound model */
+
         @NonNull
-        public final Keyphrase[] keyphrases; // keyword phrases in model
+        private final Keyphrase[] mKeyphrases;
 
         public KeyphraseSoundModel(
                 @NonNull UUID uuid, @NonNull UUID vendorUuid, @Nullable byte[] data,
                 @Nullable Keyphrase[] keyphrases, int version) {
             super(uuid, vendorUuid, TYPE_KEYPHRASE, data, version);
-            this.keyphrases = keyphrases != null ? keyphrases : new Keyphrase[0];
+            this.mKeyphrases = keyphrases != null ? keyphrases : new Keyphrase[0];
         }
 
         public KeyphraseSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
                 @Nullable byte[] data, @Nullable Keyphrase[] keyphrases) {
             this(uuid, vendorUuid, data, keyphrases, -1);
+        }
+
+        /** Key phrases in this sound model */
+        @NonNull
+        public Keyphrase[] getKeyphrases() {
+            return mKeyphrases;
         }
 
         public static final @NonNull Parcelable.Creator<KeyphraseSoundModel> CREATOR =
@@ -608,32 +711,32 @@ public class SoundTrigger {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeString(uuid.toString());
-            if (vendorUuid == null) {
+            dest.writeString(getUuid().toString());
+            if (getVendorUuid() == null) {
                 dest.writeInt(-1);
             } else {
-                dest.writeInt(vendorUuid.toString().length());
-                dest.writeString(vendorUuid.toString());
+                dest.writeInt(getVendorUuid().toString().length());
+                dest.writeString(getVendorUuid().toString());
             }
-            dest.writeInt(version);
-            dest.writeBlob(data);
-            dest.writeTypedArray(keyphrases, flags);
+            dest.writeInt(getVersion());
+            dest.writeBlob(getData());
+            dest.writeTypedArray(getKeyphrases(), flags);
         }
 
         @Override
         public String toString() {
-            return "KeyphraseSoundModel [keyphrases=" + Arrays.toString(keyphrases)
-                    + ", uuid=" + uuid + ", vendorUuid=" + vendorUuid
-                    + ", type=" + type
-                    + ", data=" + (data == null ? 0 : data.length)
-                    + ", version=" + version + "]";
+            return "KeyphraseSoundModel [keyphrases=" + Arrays.toString(getKeyphrases())
+                    + ", uuid=" + getUuid() + ", vendorUuid=" + getVendorUuid()
+                    + ", type=" + getType()
+                    + ", data=" + (getData() == null ? 0 : getData().length)
+                    + ", version=" + getVersion() + "]";
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = super.hashCode();
-            result = prime * result + Arrays.hashCode(keyphrases);
+            result = prime * result + Arrays.hashCode(getKeyphrases());
             return result;
         }
 
@@ -649,7 +752,7 @@ public class SoundTrigger {
                 return false;
             }
             KeyphraseSoundModel other = (KeyphraseSoundModel) obj;
-            if (!Arrays.equals(keyphrases, other.keyphrases)) {
+            if (!Arrays.equals(getKeyphrases(), other.getKeyphrases())) {
                 return false;
             }
             return true;
@@ -706,23 +809,23 @@ public class SoundTrigger {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(uuid.toString());
-            if (vendorUuid == null) {
+            dest.writeString(getUuid().toString());
+            if (getVendorUuid() == null) {
                 dest.writeInt(-1);
             } else {
-                dest.writeInt(vendorUuid.toString().length());
-                dest.writeString(vendorUuid.toString());
+                dest.writeInt(getVendorUuid().toString().length());
+                dest.writeString(getVendorUuid().toString());
             }
-            dest.writeBlob(data);
-            dest.writeInt(version);
+            dest.writeBlob(getData());
+            dest.writeInt(getVersion());
         }
 
         @Override
         public String toString() {
-            return "GenericSoundModel [uuid=" + uuid + ", vendorUuid=" + vendorUuid
-                    + ", type=" + type
-                    + ", data=" + (data == null ? 0 : data.length)
-                    + ", version=" + version + "]";
+            return "GenericSoundModel [uuid=" + getUuid() + ", vendorUuid=" + getVendorUuid()
+                    + ", type=" + getType()
+                    + ", data=" + (getData() == null ? 0 : getData().length)
+                    + ", version=" + getVersion() + "]";
         }
     }
 
@@ -1825,7 +1928,7 @@ public class SoundTrigger {
     /**
      * Get an interface on a hardware module to control sound models and recognition on
      * this module.
-     * @param moduleId Sound module system identifier {@link ModuleProperties#id}. mandatory.
+     * @param moduleId Sound module system identifier {@link ModuleProperties#mId}. mandatory.
      * @param listener {@link StatusListener} interface. Mandatory.
      * @param handler the Handler that will receive the callabcks. Can be null if default handler
      *                is OK.

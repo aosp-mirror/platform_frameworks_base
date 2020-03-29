@@ -41,10 +41,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -738,6 +742,41 @@ public class AppLaunch extends InstrumentationTestCase {
         return total.contains("root");
     }
 
+    private void stopIorapd() {
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand("stop iorapd");
+        sleep(100);  // give it extra time to fully stop.
+    }
+
+    private void startIorapd() {
+        String logcatTimeNow = getTimeNowForLogcat();
+        Log.v(TAG, "startIorapd, logcat time: " + logcatTimeNow);
+
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand("start iorapd");
+
+        int maxAttempts = 100;
+        int attempt = 0;
+        do {
+            // Ensure that IorapForwardingService fully reconnects to iorapd before proceeding.
+            String needle = "Connected to iorapd native service";
+            String logcatLines = getLogcatSinceTime(logcatTimeNow);
+
+            if (logcatLines.contains(needle)) {
+                break;
+            }
+
+            sleep(1000);
+            attempt++;
+        } while (attempt < maxAttempts);
+
+        if (attempt == maxAttempts) {
+            Log.e(TAG, "Timed out after waiting for iorapd to start");
+        }
+        // Wait a little bit longer for iorapd to settle.
+        sleep(1000);
+    }
+
     // Delete all db rows and files associated with a package in iorapd.
     // Effectively deletes any raw or compiled trace files, unoptimizing the package in iorap.
     private void purgeIorapPackage(String packageName) {
@@ -749,15 +788,65 @@ public class AppLaunch extends InstrumentationTestCase {
             throw new AssertionError(e);
         }
 
-        getInstrumentation().getUiAutomation()
-                .executeShellCommand("stop iorapd");
-        sleep(100);  // give iorapd enough time to stop.
+        Log.v(TAG, "Purge iorap package: " + packageName);
+        stopIorapd();
         getInstrumentation().getUiAutomation()
                 .executeShellCommand(String.format(IORAP_MAINTENANCE_CMD, packageName));
         Log.v(TAG, "Executed: " + String.format(IORAP_MAINTENANCE_CMD, packageName));
-        getInstrumentation().getUiAutomation()
-                .executeShellCommand("start iorapd");
-        sleep(2000);  // give iorapd enough time to start up.
+        startIorapd();
+    }
+
+    String executeShellCommandWithTempFile(String cmd) {
+        Log.v(TAG, "executeShellCommandWithTempFile, cmd: " + cmd);
+        try {
+            //File outputDir =
+            //       InstrumentationRegistry.getInstrumentation().getContext().getCacheDir();
+            File outputFile = File.createTempFile("exec_shell_command", ".sh");
+
+            try {
+                outputFile.setWritable(true);
+                outputFile.setExecutable(true, /*ownersOnly*/false);
+
+                String scriptPath = outputFile.toString();
+
+                // If this works correctly, the next log-line will print 'Success'.
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(scriptPath))) {
+                    writer.write(cmd);
+                }
+
+                String resultString = "";
+                try (ParcelFileDescriptor result = getInstrumentation().getUiAutomation().
+                        executeShellCommand(scriptPath);
+                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                                new FileInputStream(result.getFileDescriptor())))) {
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        resultString += line + "\n";
+                    }
+                }
+
+                return resultString;
+            } finally {
+                outputFile.delete();
+            }
+        } catch (IOException e) {
+            throw new AssertionError("Failed to execute shell command: " + cmd, e);
+        }
+    }
+
+    // Get the 'now' timestamp usable with $(adb logcat -v utc -T "time string")
+    String getTimeNowForLogcat() {
+        ZonedDateTime utc = ZonedDateTime.now(ZoneOffset.UTC);
+
+        // YYYY-MM-DD hh:mm:ss.mmm
+        return utc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+    }
+
+    String getLogcatSinceTime(String logcatTime) {
+        // The time has spaces in it but must be passed as a single arg.
+        // Therefore use a temp script file.
+        return executeShellCommandWithTempFile(
+                String.format("logcat -d -v threadtime -v utc -T '%s'", logcatTime));
     }
 
     /**
@@ -784,15 +873,12 @@ public class AppLaunch extends InstrumentationTestCase {
             throw new AssertionError(e);
         }
 
-        getInstrumentation().getUiAutomation()
-                .executeShellCommand("stop iorapd");
+        stopIorapd();
         getInstrumentation().getUiAutomation()
                 .executeShellCommand(String.format("setprop iorapd.perfetto.enable %b", enable));
         getInstrumentation().getUiAutomation()
                 .executeShellCommand(String.format("setprop iorapd.readahead.enable %b", enable));
-        getInstrumentation().getUiAutomation()
-                .executeShellCommand("start iorapd");
-        sleep(3000);  // give enough time for iorapd to start back up.
+        startIorapd();
 
         if (enable) {
             mIorapStatus = IorapStatus.ENABLED;

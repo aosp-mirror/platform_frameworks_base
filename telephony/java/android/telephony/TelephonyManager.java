@@ -5577,6 +5577,10 @@ public class TelephonyManager {
      * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
      * {@link SecurityException} will be thrown otherwise.
      *
+     * This API should be used sparingly -- large numbers of listeners will cause system
+     * instability. If a process has registered too many listeners without unregistering them, it
+     * may encounter an {@link IllegalStateException} when trying to register more listeners.
+     *
      * @param listener The {@link PhoneStateListener} object to register
      *                 (or unregister)
      * @param events The telephony state(s) of interest to the listener,
@@ -8679,13 +8683,9 @@ public class TelephonyManager {
         return false;
     }
 
-    /**
-     * @deprecated use {@link #supplyPinReportPinResult(String pin)} instead.
-     *
-     * @hide */
+    /** @hide */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    @Deprecated
     public int[] supplyPinReportResult(String pin) {
         try {
             ITelephony telephony = getITelephony();
@@ -8697,13 +8697,9 @@ public class TelephonyManager {
         return new int[0];
     }
 
-    /**
-     * @deprecated use {@link #supplyPukReportPinResult(String puk, String pin)} instead.
-     *
-     * @hide */
+    /** @hide */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    @Deprecated
     public int[] supplyPukReportResult(String puk, String pin) {
         try {
             ITelephony telephony = getITelephony();
@@ -12266,6 +12262,17 @@ public class TelephonyManager {
      */
     public static final String EXTRA_NETWORK_COUNTRY =
             "android.telephony.extra.NETWORK_COUNTRY";
+
+    /**
+     * The extra used with an {@link #ACTION_NETWORK_COUNTRY_CHANGED} to specify the
+     * last known the country code in ISO-3166-1 alpha-2 format.
+     * <p class="note">
+     * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_LAST_KNOWN_NETWORK_COUNTRY =
+            "android.telephony.extra.LAST_KNOWN_NETWORK_COUNTRY";
 
     /**
      * Indicate if the user is allowed to use multiple SIM cards at the same time to register

@@ -26,6 +26,20 @@ mainline_stubs_args =
     "--hide Typo " +
     "--hide UnavailableSymbol "
 
+// TODO: modularize this so not every module has the same whitelist
+framework_packages_to_document = [
+    "android",
+    "dalvik",
+    "java",
+    "javax",
+    "junit",
+    "org.apache.http",
+    "org.json",
+    "org.w3c.dom",
+    "org.xml.sax",
+    "org.xmlpull",
+]
+
 // TODO: remove the hiding when server classes are cleaned up.
 mainline_framework_stubs_args =
     mainline_stubs_args +
@@ -54,6 +68,7 @@ stubs_defaults {
     args: mainline_framework_stubs_args,
     installable: false,
     sdk_version: "current",
+    filter_packages: framework_packages_to_document,
     check_api: {
         current: {
             api_file: "api/current.txt",
@@ -72,6 +87,7 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "system_current",
+    filter_packages: framework_packages_to_document,
     check_api: {
         current: {
             api_file: "api/system-current.txt",
@@ -88,18 +104,30 @@ java_defaults {
     name: "framework-module-stubs-lib-defaults-publicapi",
     installable: false,
     sdk_version: "module_current",
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/public",
+    },
 }
 
 java_defaults {
     name: "framework-module-stubs-lib-defaults-systemapi",
     installable: false,
     sdk_version: "module_current",
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system",
+    },
 }
 
 java_defaults {
     name: "framework-module-stubs-lib-defaults-module_libs_api",
     installable: false,
     sdk_version: "module_current",
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/module-lib",
+    },
 }
 
 // The defaults for module_libs comes in two parts - defaults for API checks
@@ -113,6 +141,7 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    filter_packages: framework_packages_to_document,
     check_api: {
         current: {
             api_file: "api/module-lib-current.txt",
@@ -131,12 +160,14 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    filter_packages: framework_packages_to_document,
 }
 
 stubs_defaults {
     name: "service-module-stubs-srcs-defaults",
     args: mainline_service_stubs_args,
     installable: false,
+    filter_packages: ["com.android."],
     check_api: {
         current: {
             api_file: "api/current.txt",
@@ -153,4 +184,8 @@ stubs_defaults {
 // module java_library system_server stub libs.
 java_defaults {
     name: "service-module-stubs-defaults",
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system-server",
+    },
 }

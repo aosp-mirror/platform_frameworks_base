@@ -47,6 +47,7 @@ import org.mockito.MockitoAnnotations;
 public class BubbleExtractorTest extends UiServiceTestCase {
 
     @Mock RankingConfig mConfig;
+    @Mock BubbleExtractor.BubbleChecker mBubbleChecker;
     BubbleExtractor mBubbleExtractor;
 
     private String mPkg = "com.android.server.notification";
@@ -140,5 +141,34 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         mBubbleExtractor.process(r);
 
         assertFalse(r.canBubble());
+    }
+
+    @Test
+    public void testFlagBubble_true() {
+        when(mConfig.bubblesEnabled()).thenReturn(true);
+        when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(true);
+        NotificationRecord r = getNotificationRecord(true, IMPORTANCE_UNSPECIFIED);
+
+        mBubbleExtractor.setBubbleChecker(mBubbleChecker);
+        when(mBubbleChecker.isNotificationAppropriateToBubble(r)).thenReturn(true);
+        mBubbleExtractor.process(r);
+
+        assertTrue(r.canBubble());
+        assertTrue(r.getNotification().isBubbleNotification());
+    }
+
+    @Test
+    public void testFlagBubble_noFlag_previouslyRemoved() {
+        when(mConfig.bubblesEnabled()).thenReturn(true);
+        when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(true);
+        NotificationRecord r = getNotificationRecord(true, IMPORTANCE_UNSPECIFIED);
+        r.setFlagBubbleRemoved(true);
+
+        mBubbleExtractor.setBubbleChecker(mBubbleChecker);
+        when(mBubbleChecker.isNotificationAppropriateToBubble(r)).thenReturn(true);
+        mBubbleExtractor.process(r);
+
+        assertTrue(r.canBubble());
+        assertFalse(r.getNotification().isBubbleNotification());
     }
 }

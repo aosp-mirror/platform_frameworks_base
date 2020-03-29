@@ -203,6 +203,7 @@ public class KeyguardBouncer {
             Log.wtf(TAG, "onFullyShown when view was null");
         } else {
             mKeyguardView.onResume();
+            mRoot.announceForAccessibility(mKeyguardView.getAccessibilityTitleForCurrentMode());
         }
     }
 
@@ -247,6 +248,7 @@ public class KeyguardBouncer {
             if (mExpansion == EXPANSION_VISIBLE) {
                 mKeyguardView.onResume();
                 mKeyguardView.resetSecurityContainer();
+                showPromptReason(mBouncerPromptReason);
             }
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
                     SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);
@@ -438,7 +440,6 @@ public class KeyguardBouncer {
         mStatusBarHeight = mRoot.getResources().getDimensionPixelOffset(
                 com.android.systemui.R.dimen.status_bar_height);
         mRoot.setVisibility(View.INVISIBLE);
-        mRoot.setAccessibilityPaneTitle(mKeyguardView.getAccessibilityTitleForCurrentMode());
 
         final WindowInsets rootInsets = mRoot.getRootWindowInsets();
         if (rootInsets != null) {

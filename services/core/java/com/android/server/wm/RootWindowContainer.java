@@ -36,7 +36,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
@@ -796,10 +795,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return leakedSurface || killedApps;
     }
 
-    void performSurfacePlacement(boolean recoveringMemory) {
+    void performSurfacePlacement() {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "performSurfacePlacement");
         try {
-            performSurfacePlacementNoTrace(recoveringMemory);
+            performSurfacePlacementNoTrace();
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -807,7 +806,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     // "Something has changed!  Let's make it correct now."
     // TODO: Super crazy long method that should be broken down...
-    void performSurfacePlacementNoTrace(boolean recoveringMemory) {
+    void performSurfacePlacementNoTrace() {
         if (DEBUG_WINDOW_TRACE) Slog.v(TAG, "performSurfacePlacementInner: entry. Called by "
                 + Debug.getCallers(3));
 
@@ -842,7 +841,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "applySurfaceChanges");
         mWmService.openSurfaceTransaction();
         try {
-            applySurfaceChangesTransaction(recoveringMemory);
+            applySurfaceChangesTransaction();
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
@@ -1042,7 +1041,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    private void applySurfaceChangesTransaction(boolean recoveringMemory) {
+    private void applySurfaceChangesTransaction() {
         mHoldScreenWindow = null;
         mObscuringWindow = null;
 
@@ -1065,7 +1064,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final int count = mChildren.size();
         for (int j = 0; j < count; ++j) {
             final DisplayContent dc = mChildren.get(j);
-            dc.applySurfaceChangesTransaction(recoveringMemory);
+            dc.applySurfaceChangesTransaction();
         }
 
         // Give the display manager a chance to adjust properties like display rotation if it needs
@@ -1138,7 +1137,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // While a dream or keyguard is showing, obscure ordinary application content on
                 // secondary displays (by forcibly enabling mirroring unless there is other content
                 // we want to show) but still allow opaque keyguard dialogs to be shown.
-                if (type == TYPE_DREAM || mWmService.mPolicy.isKeyguardShowing()) {
+                if (w.isDreamWindow() || mWmService.mPolicy.isKeyguardShowing()) {
                     mObscureApplicationContentOnSecondaryDisplays = true;
                 }
                 displayHasContent = true;
@@ -2289,6 +2288,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                                 TRANSIT_SHOW_SINGLE_TASK_DISPLAY, false);
                     }
                     stack.awakeFromSleepingLocked();
+                    if (display.isSingleTaskInstance()) {
+                        display.executeAppTransition();
+                    }
                     if (stack.isFocusedStackOnDisplay()
                             && !mStackSupervisor.getKeyguardController()
                             .isKeyguardOrAodShowing(display.mDisplayId)) {

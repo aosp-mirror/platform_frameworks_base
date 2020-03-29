@@ -552,7 +552,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
 
     /** @hide */
     @Override
-    public boolean satisfiedBy(NetworkSpecifier other) {
+    public boolean canBeSatisfiedBy(NetworkSpecifier other) {
         if (this == other) {
             return true;
         }

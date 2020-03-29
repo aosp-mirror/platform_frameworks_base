@@ -6589,11 +6589,9 @@ public final class Settings {
                 "accessibility_shortcut_target_service";
 
         /**
-         * Setting specifying the accessibility services, accessibility shortcut targets,
-         * or features to be toggled via the accessibility button in the navigation bar.
-         *
-         * <p> This is a colon-separated string list which contains the flattened
-         * {@link ComponentName} and the class name of a system class implementing a supported
+         * Setting specifying the accessibility service or feature to be toggled via the
+         * accessibility button in the navigation bar. This is either a flattened
+         * {@link ComponentName} or the class name of a system class implementing a supported
          * accessibility feature.
          * @hide
          */
@@ -6602,15 +6600,14 @@ public final class Settings {
 
         /**
          * Setting specifying the accessibility services, accessibility shortcut targets,
-         * or features to be toggled via the long press accessibility button in the navigation bar.
+         * or features to be toggled via the accessibility button in the navigation bar.
          *
          * <p> This is a colon-separated string list which contains the flattened
          * {@link ComponentName} and the class name of a system class implementing a supported
          * accessibility feature.
          * @hide
          */
-        public static final String ACCESSIBILITY_BUTTON_LONG_PRESS_TARGETS =
-                "accessibility_button_long_press_targets";
+        public static final String ACCESSIBILITY_BUTTON_TARGETS = "accessibility_button_targets";
 
         /**
          * The system class name of magnification controller which is a target to be toggled via
@@ -6775,8 +6772,8 @@ public final class Settings {
          * zoom in the display content and is targeted to low vision users. The current
          * magnification scale is controlled by {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE}.
          *
-         * @deprecated Use {@link #ACCESSIBILITY_BUTTON_TARGET_COMPONENT} instead.
-         * {@link #ACCESSIBILITY_BUTTON_TARGET_COMPONENT} holds the magnification system class name
+         * @deprecated Use {@link #ACCESSIBILITY_BUTTON_TARGETS} instead.
+         * {@link #ACCESSIBILITY_BUTTON_TARGETS} holds the magnification system class name
          * when navigation bar magnification is enabled.
          * @hide
          */
@@ -8572,6 +8569,16 @@ public final class Settings {
          * @hide
          */
         public static final String QS_TILES = "sysui_qs_tiles";
+
+        /**
+         * Whether this user has enabled Quick controls.
+         *
+         * 0 indicates disabled and 1 indicates enabled. A non existent value should be treated as
+         * enabled.
+         *
+         * @hide
+         */
+        public static final String CONTROLS_ENABLED = "controls_enabled";
 
         /**
          * Specifies whether the web action API is enabled.
@@ -13059,6 +13066,18 @@ public final class Settings {
          */
         public static final String CHAINED_BATTERY_ATTRIBUTION_ENABLED =
                 "chained_battery_attribution_enabled";
+
+        /**
+         * Toggle to enable/disable the incremental ADB installation by default.
+         * If not set, default adb installations are incremental; set to zero to use full ones.
+         * Note: only ADB uses it, no usages in the Framework code.
+         * <p>
+         * Type: int (0 to disable, 1 to enable)
+         *
+         * @hide
+         */
+        public static final String ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT =
+                "enable_adb_incremental_install_default";
 
         /**
          * The packages whitelisted to be run in autofill compatibility mode. The list
