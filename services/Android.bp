@@ -75,10 +75,6 @@ java_library {
         "framework-tethering-stubs-module_libs_api",
     ],
 
-    plugins: [
-        "compat-changeid-annotation-processor",
-    ],
-
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
     //javacflags: ["-Xlint"],
 
@@ -94,8 +90,8 @@ cc_library_shared {
 }
 
 platform_compat_config {
-    name: "services-platform-compat-config",
-    src: ":services",
+   name: "services-platform-compat-config",
+   src: ":services",
 }
 
 filegroup {
