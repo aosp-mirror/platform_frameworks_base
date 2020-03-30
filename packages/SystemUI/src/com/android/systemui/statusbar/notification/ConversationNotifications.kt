@@ -19,17 +19,21 @@ package com.android.systemui.statusbar.notification
 import android.app.Notification
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.service.notification.NotificationListenerService.Ranking
+import android.service.notification.NotificationListenerService.RankingMap
 import com.android.internal.statusbar.NotificationVisibility
 import com.android.internal.widget.ConversationLayout
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
+import com.android.systemui.statusbar.notification.row.NotificationContentView
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Populates additional information in conversation notifications */
 class ConversationNotificationProcessor @Inject constructor(
     private val launcherApps: LauncherApps,
-    private val unreadConversationBadgeManager: UnreadConversationBadgeManager
+    private val conversationNotificationManager: ConversationNotificationManager
 ) {
     fun processNotification(entry: NotificationEntry, recoveredBuilder: Notification.Builder) {
         val messagingStyle = recoveredBuilder.style as? Notification.MessagingStyle ?: return
@@ -45,12 +49,16 @@ class ConversationNotificationProcessor @Inject constructor(
             }
         }
         messagingStyle.unreadMessageCount =
-                unreadConversationBadgeManager.getUnreadCount(entry, recoveredBuilder)
+                conversationNotificationManager.getUnreadCount(entry, recoveredBuilder)
     }
 }
 
+/**
+ * Tracks state related to conversation notifications, and updates the UI of existing notifications
+ * when necessary.
+ */
 @Singleton
-class UnreadConversationBadgeManager @Inject constructor(
+class ConversationNotificationManager @Inject constructor(
     private val notificationEntryManager: NotificationEntryManager,
     private val context: Context
 ) {
@@ -62,6 +70,24 @@ class UnreadConversationBadgeManager @Inject constructor(
 
     init {
         notificationEntryManager.addNotificationEntryListener(object : NotificationEntryListener {
+
+            override fun onNotificationRankingUpdated(rankingMap: RankingMap) {
+                fun getLayouts(view: NotificationContentView) =
+                        sequenceOf(view.contractedChild, view.expandedChild, view.headsUpChild)
+                val ranking = Ranking()
+                states.keys.asSequence()
+                        .mapNotNull { notificationEntryManager.getActiveNotificationUnfiltered(it) }
+                        .forEach { entry ->
+                            if (rankingMap.getRanking(entry.sbn.key, ranking) &&
+                                    ranking.isConversation) {
+                                val important = ranking.channel.isImportantConversation
+                                entry.row?.layouts?.asSequence()
+                                        ?.flatMap(::getLayouts)
+                                        ?.mapNotNull { it as? ConversationLayout }
+                                        ?.forEach { it.setIsImportantConversation(important) }
+                            }
+                        }
+            }
 
             override fun onEntryInflated(entry: NotificationEntry) {
                 if (!entry.ranking.isConversation) return

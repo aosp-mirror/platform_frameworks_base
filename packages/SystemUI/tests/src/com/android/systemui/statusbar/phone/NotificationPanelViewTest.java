@@ -64,10 +64,10 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.UnreadConversationBadgeManager;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -171,7 +171,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private ConfigurationController mConfigurationController;
     @Mock
-    private UnreadConversationBadgeManager mUnreadConversationBadgeManager;
+    private ConversationNotificationManager mConversationNotificationManager;
     private FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
 
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -227,7 +227,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mMetricsLogger, mActivityManager, mZenModeController, mConfigurationController,
                 mFlingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
-                mUnreadConversationBadgeManager);
+                mConversationNotificationManager);
         mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
                 mNotificationShelf, mNotificationAreaController, mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
