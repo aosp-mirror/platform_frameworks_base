@@ -163,24 +163,13 @@ class PinnedStackController {
     }
 
     /**
-     * Saves the current snap fraction for re-entry of the current activity into PiP.
+     * Activity is hidden (either stopped or removed), resets the last saved snap fraction
+     * so that the default bounds will be returned for the next session.
      */
-    void saveReentryBounds(final ComponentName componentName, final Rect stackBounds) {
+    void onActivityHidden(ComponentName componentName) {
         if (mPinnedStackListener == null) return;
         try {
-            mPinnedStackListener.onSaveReentryBounds(componentName, stackBounds);
-        } catch (RemoteException e) {
-            Slog.e(TAG_WM, "Error delivering save reentry fraction event.", e);
-        }
-    }
-
-    /**
-     * Resets the last saved snap fraction so that the default bounds will be returned.
-     */
-    void resetReentryBounds(ComponentName componentName) {
-        if (mPinnedStackListener == null) return;
-        try {
-            mPinnedStackListener.onResetReentryBounds(componentName);
+            mPinnedStackListener.onActivityHidden(componentName);
         } catch (RemoteException e) {
             Slog.e(TAG_WM, "Error delivering reset reentry fraction event.", e);
         }
