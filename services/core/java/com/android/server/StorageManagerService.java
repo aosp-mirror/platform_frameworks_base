@@ -4459,9 +4459,8 @@ class StorageManagerService extends IStorageManager.Stub
                             String.format("/storage/emulated/%d/Android/data/%s/",
                                     userId, pkg);
 
-                    int appUid =
-                            UserHandle.getUid(userId, mPmInternal.getPackage(pkg).getUid());
                     // Create package obb and data dir if it doesn't exist.
+                    int appUid = UserHandle.getUid(userId, mPmInternal.getPackage(pkg).getUid());
                     File file = new File(packageObbDir);
                     if (!file.exists()) {
                         vold.setupAppDir(packageObbDir, appUid);
