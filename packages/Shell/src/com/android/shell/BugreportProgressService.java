@@ -817,6 +817,7 @@ public class BugreportProgressService extends Service {
                 Log.i(TAG, "Cancelling bugreport service (ID=" + id + ") on user's request");
                 mBugreportManager.cancelBugreport();
                 info.deleteScreenshots();
+                info.deleteBugreportFile();
             }
             stopProgressLocked(id);
         }
@@ -1965,6 +1966,14 @@ public class BugreportProgressService extends Service {
                 Log.i(TAG, "Deleting screenshot file " + file);
                 file.delete();
             }
+        }
+
+        /**
+         * Deletes bugreport file for a given bugreport.
+         */
+        private void deleteBugreportFile() {
+            Log.i(TAG, "Deleting bugreport file " + bugreportFile);
+            bugreportFile.delete();
         }
 
         /**
