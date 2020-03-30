@@ -19,8 +19,6 @@ package com.android.server.wm;
 import android.content.res.Resources;
 import android.text.TextUtils;
 
-import com.android.server.wm.DisplayContent.TaskContainers;
-
 /**
  * Policy that manages DisplayAreas.
  */
