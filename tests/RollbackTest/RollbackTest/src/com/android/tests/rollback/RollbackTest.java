@@ -487,23 +487,24 @@ public class RollbackTest {
                 // Wait until rollback for app A has expired
                 // This will trigger an expiration run that should expire app A but not B
                 Thread.sleep(expirationTime / 2);
-                RollbackInfo rollback =
+                RollbackInfo rollbackA =
                         getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TestApp.A);
-                assertThat(rollback).isNull();
+                Log.i(TAG, "Checking if the rollback for TestApp.A is null");
 
                 // Rollback for app B should not be expired
-                rollback = getUniqueRollbackInfoForPackage(
+                RollbackInfo rollbackB1 = getUniqueRollbackInfoForPackage(
                         rm.getAvailableRollbacks(), TestApp.B);
-                assertThat(rollback).isNotNull();
-                assertThat(rollback).packagesContainsExactly(
-                        Rollback.from(TestApp.B2).to(TestApp.B1));
 
                 // Wait until rollback for app B has expired
                 Thread.sleep(expirationTime / 2);
-                rollback = getUniqueRollbackInfoForPackage(
+                RollbackInfo rollbackB2 = getUniqueRollbackInfoForPackage(
                         rm.getAvailableRollbacks(), TestApp.B);
-                // Rollback should be expired by now
-                assertThat(rollback).isNull();
+
+                assertThat(rollbackA).isNull();
+                assertThat(rollbackB1).isNotNull();
+                assertThat(rollbackB1).packagesContainsExactly(
+                        Rollback.from(TestApp.B2).to(TestApp.B1));
+                assertThat(rollbackB2).isNull();
             } finally {
                 RollbackUtils.forwardTimeBy(-expirationTime);
             }
