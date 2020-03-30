@@ -445,14 +445,20 @@ public class LinkPropertiesTest {
         // Check comparisons work.
         LinkProperties lp2 = new LinkProperties(lp);
         assertAllRoutesHaveInterface("wlan0", lp2);
-        assertEquals(0, lp.compareAllRoutes(lp2).added.size());
-        assertEquals(0, lp.compareAllRoutes(lp2).removed.size());
+        // LinkProperties#compareAllRoutes exists both in R and before R, but the return type
+        // changed in R, so a test compiled with the R version of LinkProperties cannot run on Q.
+        if (isAtLeastR()) {
+            assertEquals(0, lp.compareAllRoutes(lp2).added.size());
+            assertEquals(0, lp.compareAllRoutes(lp2).removed.size());
+        }
 
         lp2.setInterfaceName("p2p0");
         assertAllRoutesHaveInterface("p2p0", lp2);
         assertAllRoutesNotHaveInterface("wlan0", lp2);
-        assertEquals(3, lp.compareAllRoutes(lp2).added.size());
-        assertEquals(3, lp.compareAllRoutes(lp2).removed.size());
+        if (isAtLeastR()) {
+            assertEquals(3, lp.compareAllRoutes(lp2).added.size());
+            assertEquals(3, lp.compareAllRoutes(lp2).removed.size());
+        }
 
         // Remove route with incorrect interface, no route removed.
         lp.removeRoute(new RouteInfo(prefix2, null, null));
@@ -936,7 +942,7 @@ public class LinkPropertiesTest {
 
     }
 
-    @Test
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
     public void testCompareResult() {
         // Either adding or removing items
         compareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(1),
