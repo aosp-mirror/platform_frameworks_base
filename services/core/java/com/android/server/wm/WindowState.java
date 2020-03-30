@@ -4981,7 +4981,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    boolean isAnimating(int flags) {
+    boolean isAnimating(int flags, int typesToCheck) {
 
         // If we are an inset provider, all our animations are driven by the inset client, so we
         // aren't really animating.
@@ -4989,7 +4989,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mControllableInsetProvider != null) {
             return false;
         }
-        return super.isAnimating(flags);
+        return super.isAnimating(flags, typesToCheck);
     }
 
     void startAnimation(Animation anim) {
