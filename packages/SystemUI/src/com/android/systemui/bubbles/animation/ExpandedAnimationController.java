@@ -364,6 +364,7 @@ public class ExpandedAnimationController
     /** Resets bubble drag out gesture flags. */
     public void onGestureFinished() {
         mBubbleDraggedOutEnough = false;
+        mMagnetizedBubbleDraggingOut = null;
         updateBubblePositions();
     }
 
