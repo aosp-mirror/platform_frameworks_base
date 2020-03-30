@@ -41,6 +41,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -87,7 +88,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
                 0 /* systemUiVisibility */, false /* isTranslucent */);
         mSurface = new TaskSnapshotSurface(mWm, new Window(), new SurfaceControl(), snapshot, "Test",
                 createTaskDescription(Color.WHITE, Color.RED, Color.BLUE), sysuiVis, windowFlags, 0,
-                taskBounds, ORIENTATION_PORTRAIT, null /* insetsState */);
+                taskBounds, ORIENTATION_PORTRAIT, new InsetsState());
     }
 
     private static TaskDescription createTaskDescription(int background, int statusBar,
