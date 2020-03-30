@@ -112,7 +112,7 @@ public abstract class GnssAntennaInfoProvider
         foreach((IGnssAntennaInfoListener listener, CallerIdentity callerIdentity) -> {
             if (!hasPermission(mContext, callerIdentity)) {
                 logPermissionDisabledEventNotReported(
-                        TAG, callerIdentity.mPackageName, "GNSS antenna info");
+                        TAG, callerIdentity.packageName, "GNSS antenna info");
                 return;
             }
             listener.onGnssAntennaInfoReceived(gnssAntennaInfos);
