@@ -2409,7 +2409,6 @@ package android.os {
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public android.os.IncidentManager.IncidentReport getIncidentReport(android.net.Uri);
     method @NonNull @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public java.util.List<android.net.Uri> getIncidentReportList(String);
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public java.util.List<android.os.IncidentManager.PendingReport> getPendingReports();
-    method public void registerSection(int, @NonNull String, @NonNull android.os.IncidentManager.DumpCallback);
     method public void registerSection(int, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.os.IncidentManager.DumpCallback);
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void reportIncident(android.os.IncidentReportArgs);
     method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void requestAuthorization(int, String, int, android.os.IncidentManager.AuthListener);

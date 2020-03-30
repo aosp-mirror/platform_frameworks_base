@@ -567,27 +567,11 @@ public class IncidentManager {
     }
 
     /**
-     * Register a callback to dump an extended incident report section with the given id and name.
+     * Register a callback to dump an extended incident report section with the given id and name,
+     * running on the supplied executor.
      *
      * Calling <code>registerSection</code> with a duplicate id will override previous registration.
      * However, the request must come from the same calling uid.
-     *
-     * @param id       the ID of the extended section. It should be unique system-wide, and be
-     *                 different from IDs of all existing section in
-     *                 frameworks/base/core/proto/android/os/incident.proto.
-     *                 Also see incident.proto for other rules about the ID.
-     * @param name     the name to display in logs and/or stderr when taking an incident report
-     *                 containing this section, mainly for debugging purpose
-     * @param callback the callback function to be invoked when an incident report with all sections
-     *                 or sections matching the given id is being taken
-     */
-    public void registerSection(int id, @NonNull String name, @NonNull DumpCallback callback) {
-        registerSection(id, name, mContext.getMainExecutor(), callback);
-    }
-
-    /**
-     * Register a callback to dump an extended incident report section with the given id and name,
-     * running on the supplied executor.
      *
      * @param id       the ID of the extended section. It should be unique system-wide, and be
      *                 different from IDs of all existing section in
