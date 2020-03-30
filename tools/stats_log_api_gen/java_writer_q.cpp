@@ -53,9 +53,8 @@ void write_java_q_logging_constants(FILE* out, const string& indent) {
     fprintf(out, "%sprivate static final int LIST_TYPE_OVERHEAD = 2;\n", indent.c_str());
 }
 
-int write_java_methods_q_schema(
-        FILE* out, const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
-        const AtomDecl& attributionDecl, const string& indent) {
+int write_java_methods_q_schema(FILE* out, const SignatureInfoMap& signatureInfoMap,
+                                const AtomDecl& attributionDecl, const string& indent) {
     int requiredHelpers = 0;
     for (auto signatureInfoMapIt = signatureInfoMap.begin();
          signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
