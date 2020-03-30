@@ -257,8 +257,8 @@ class ResetTargetTaskHelper {
             }
             if (targetTask == null) {
                 if (alwaysCreateTask) {
-                    targetTask = display.getOrCreateStack(windowingMode, activityType,
-                            false /* onTop */);
+                    targetTask = display.mTaskContainers.getOrCreateStack(windowingMode,
+                            activityType, false /* onTop */);
                 } else {
                     targetTask = mTargetStack.reuseOrCreateTask(r.info, null /*intent*/,
                             false /*toTop*/);
