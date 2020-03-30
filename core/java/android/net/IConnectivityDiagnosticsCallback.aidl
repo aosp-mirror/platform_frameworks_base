@@ -22,7 +22,7 @@ import android.net.Network;
 
 /** @hide */
 oneway interface IConnectivityDiagnosticsCallback {
-    void onConnectivityReport(in ConnectivityDiagnosticsManager.ConnectivityReport report);
+    void onConnectivityReportAvailable(in ConnectivityDiagnosticsManager.ConnectivityReport report);
     void onDataStallSuspected(in ConnectivityDiagnosticsManager.DataStallReport report);
     void onNetworkConnectivityReported(in Network n, boolean hasConnectivity);
 }

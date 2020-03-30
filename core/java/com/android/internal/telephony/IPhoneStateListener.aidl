@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import android.telephony.BarringInfo;
 import android.telephony.CallAttributes;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
@@ -66,4 +67,5 @@ oneway interface IPhoneStateListener {
     void onImsCallDisconnectCauseChanged(in ImsReasonInfo imsReasonInfo);
     void onRegistrationFailed(in CellIdentity cellIdentity,
              String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
+    void onBarringInfoChanged(in BarringInfo barringInfo);
 }

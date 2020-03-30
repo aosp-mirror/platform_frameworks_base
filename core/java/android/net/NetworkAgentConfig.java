@@ -108,6 +108,7 @@ public final class NetworkAgentConfig implements Parcelable {
     /**
      *
      * @return whether the sign in to network notification is enabled by this configuration.
+     * @hide
      */
     public boolean isProvisioningNotificationEnabled() {
         return !provisioningNotificationDisabled;
@@ -122,6 +123,7 @@ public final class NetworkAgentConfig implements Parcelable {
 
     /**
      * @return the subscriber ID, or null if none.
+     * @hide
      */
     @Nullable
     public String getSubscriberId() {
@@ -138,6 +140,7 @@ public final class NetworkAgentConfig implements Parcelable {
 
     /**
      * @return whether NAT64 prefix detection is enabled.
+     * @hide
      */
     public boolean isNat64DetectionEnabled() {
         return !skip464xlat;
@@ -247,6 +250,7 @@ public final class NetworkAgentConfig implements Parcelable {
          * Sets the subscriber ID for this network.
          *
          * @return this builder, to facilitate chaining.
+         * @hide
          */
         @NonNull
         public Builder setSubscriberId(@Nullable String subscriberId) {
@@ -259,6 +263,7 @@ public final class NetworkAgentConfig implements Parcelable {
          * and reduce idle traffic on networks that are known to be IPv6-only without a NAT64.
          *
          * @return this builder, to facilitate chaining.
+         * @hide
          */
         @NonNull
         public Builder disableNat64Detection() {
@@ -271,6 +276,7 @@ public final class NetworkAgentConfig implements Parcelable {
          * perform its own carrier-specific provisioning procedure.
          *
          * @return this builder, to facilitate chaining.
+         * @hide
          */
         @NonNull
         public Builder disableProvisioningNotification() {

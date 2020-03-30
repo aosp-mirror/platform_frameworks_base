@@ -64,16 +64,26 @@ public final class TetheredClient implements Parcelable {
         dest.writeInt(mTetheringType);
     }
 
+    /**
+     * Get the MAC address used to identify the client.
+     */
     @NonNull
     public MacAddress getMacAddress() {
         return mMacAddress;
     }
 
+    /**
+     * Get information on the list of addresses that are associated with the client.
+     */
     @NonNull
     public List<AddressInfo> getAddresses() {
         return new ArrayList<>(mAddresses);
     }
 
+    /**
+     * Get the type of tethering used by the client.
+     * @return one of the {@code TetheringManager#TETHERING_*} constants.
+     */
     public int getTetheringType() {
         return mTetheringType;
     }
@@ -115,45 +125,47 @@ public final class TetheredClient implements Parcelable {
         private final LinkAddress mAddress;
         @Nullable
         private final String mHostname;
-        // TODO: use LinkAddress expiration time once it is supported
-        private final long mExpirationTime;
 
         /** @hide */
         public AddressInfo(@NonNull LinkAddress address, @Nullable String hostname) {
-            this(address, hostname, 0);
-        }
-
-        /** @hide */
-        public AddressInfo(@NonNull LinkAddress address, String hostname, long expirationTime) {
             this.mAddress = address;
             this.mHostname = hostname;
-            this.mExpirationTime = expirationTime;
         }
 
         private AddressInfo(Parcel in) {
-            this(in.readParcelable(null),  in.readString(), in.readLong());
+            this(in.readParcelable(null),  in.readString());
         }
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeParcelable(mAddress, flags);
             dest.writeString(mHostname);
-            dest.writeLong(mExpirationTime);
         }
 
+        /**
+         * Get the link address (including prefix length and lifetime) used by the client.
+         *
+         * This may be an IPv4 or IPv6 address.
+         */
         @NonNull
         public LinkAddress getAddress() {
             return mAddress;
         }
 
+        /**
+         * Get the hostname that was advertised by the client when obtaining its address, if any.
+         */
         @Nullable
         public String getHostname() {
             return mHostname;
         }
 
-        /** @hide TODO: use expiration time in LinkAddress */
+        /**
+         * Get the expiration time of the address assigned to the client.
+         * @hide
+         */
         public long getExpirationTime() {
-            return mExpirationTime;
+            return mAddress.getExpirationTime();
         }
 
         @Override
@@ -163,7 +175,7 @@ public final class TetheredClient implements Parcelable {
 
         @Override
         public int hashCode() {
-            return Objects.hash(mAddress, mHostname, mExpirationTime);
+            return Objects.hash(mAddress, mHostname);
         }
 
         @Override
@@ -173,8 +185,7 @@ public final class TetheredClient implements Parcelable {
             // Use .equals() for addresses as all changes, including address expiry changes,
             // should be included.
             return other.mAddress.equals(mAddress)
-                    && Objects.equals(mHostname, other.mHostname)
-                    && mExpirationTime == other.mExpirationTime;
+                    && Objects.equals(mHostname, other.mHostname);
         }
 
         @NonNull

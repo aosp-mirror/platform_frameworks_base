@@ -29,7 +29,7 @@ android_app {
         "services.net",
     ],
 
-    libs: ["ike-stubs"],
+    libs: ["android.net.ipsec.ike.stubs.system"],
 }
 
 //##################################################################

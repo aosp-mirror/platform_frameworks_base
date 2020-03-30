@@ -33,6 +33,8 @@ import static com.android.testutils.MiscAssertsKt.assertContainsAll;
 import static com.android.testutils.MiscAssertsKt.assertThrows;
 import static com.android.testutils.NetworkStatsUtilsKt.orderInsensitiveEquals;
 
+import static junit.framework.Assert.assertNotNull;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -61,8 +63,7 @@ import android.net.LinkProperties;
 import android.net.NetworkStats;
 import android.net.NetworkStats.Entry;
 import android.net.RouteInfo;
-import android.net.netstats.provider.AbstractNetworkStatsProvider;
-import android.net.netstats.provider.NetworkStatsProviderCallback;
+import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.Looper;
@@ -108,12 +109,10 @@ public class OffloadControllerTest {
     @Mock private ApplicationInfo mApplicationInfo;
     @Mock private Context mContext;
     @Mock private NetworkStatsManager mStatsManager;
-    @Mock private NetworkStatsProviderCallback mTetherStatsProviderCb;
+    @Mock private INetworkStatsProviderCallback mTetherStatsProviderCb;
+    private OffloadController.OffloadTetheringStatsProvider mTetherStatsProvider;
     private final ArgumentCaptor<ArrayList> mStringArrayCaptor =
             ArgumentCaptor.forClass(ArrayList.class);
-    private final ArgumentCaptor<OffloadController.OffloadTetheringStatsProvider>
-            mTetherStatsProviderCaptor =
-            ArgumentCaptor.forClass(OffloadController.OffloadTetheringStatsProvider.class);
     private final ArgumentCaptor<OffloadHardwareInterface.ControlCallback> mControlCallbackCaptor =
             ArgumentCaptor.forClass(OffloadHardwareInterface.ControlCallback.class);
     private MockContentResolver mContentResolver;
@@ -126,8 +125,6 @@ public class OffloadControllerTest {
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         FakeSettingsProvider.clearSettingsProvider();
-        when(mStatsManager.registerNetworkStatsProvider(anyString(), any()))
-                .thenReturn(mTetherStatsProviderCb);
     }
 
     @After public void tearDown() throws Exception {
@@ -154,8 +151,14 @@ public class OffloadControllerTest {
     private OffloadController makeOffloadController() throws Exception {
         OffloadController offload = new OffloadController(new Handler(Looper.getMainLooper()),
                 mHardware, mContentResolver, mStatsManager, new SharedLog("test"));
+        final ArgumentCaptor<OffloadController.OffloadTetheringStatsProvider>
+                tetherStatsProviderCaptor =
+                ArgumentCaptor.forClass(OffloadController.OffloadTetheringStatsProvider.class);
         verify(mStatsManager).registerNetworkStatsProvider(anyString(),
-                mTetherStatsProviderCaptor.capture());
+                tetherStatsProviderCaptor.capture());
+        mTetherStatsProvider = tetherStatsProviderCaptor.getValue();
+        assertNotNull(mTetherStatsProvider);
+        mTetherStatsProvider.setProviderCallbackBinder(mTetherStatsProviderCb);
         return offload;
     }
 
@@ -413,9 +416,6 @@ public class OffloadControllerTest {
         final OffloadController offload = makeOffloadController();
         offload.start();
 
-        final OffloadController.OffloadTetheringStatsProvider provider =
-                mTetherStatsProviderCaptor.getValue();
-
         final String ethernetIface = "eth1";
         final String mobileIface = "rmnet_data0";
 
@@ -443,15 +443,15 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, times(1)).getForwardedStats(eq(mobileIface));
 
         // Verify that the fetched stats are stored.
-        final NetworkStats ifaceStats = provider.getTetherStats(STATS_PER_IFACE);
-        final NetworkStats uidStats = provider.getTetherStats(STATS_PER_UID);
+        final NetworkStats ifaceStats = mTetherStatsProvider.getTetherStats(STATS_PER_IFACE);
+        final NetworkStats uidStats = mTetherStatsProvider.getTetherStats(STATS_PER_UID);
         final NetworkStats expectedIfaceStats = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_IFACE, mobileIface, 999, 99999))
-                .addValues(buildTestEntry(STATS_PER_IFACE, ethernetIface, 12345, 54321));
+                .addEntry(buildTestEntry(STATS_PER_IFACE, mobileIface, 999, 99999))
+                .addEntry(buildTestEntry(STATS_PER_IFACE, ethernetIface, 12345, 54321));
 
         final NetworkStats expectedUidStats = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_UID, mobileIface, 999, 99999))
-                .addValues(buildTestEntry(STATS_PER_UID, ethernetIface, 12345, 54321));
+                .addEntry(buildTestEntry(STATS_PER_UID, mobileIface, 999, 99999))
+                .addEntry(buildTestEntry(STATS_PER_UID, ethernetIface, 12345, 54321));
 
         assertTrue(orderInsensitiveEquals(expectedIfaceStats, ifaceStats));
         assertTrue(orderInsensitiveEquals(expectedUidStats, uidStats));
@@ -462,12 +462,11 @@ public class OffloadControllerTest {
                 NetworkStats.class);
 
         // Force pushing stats update to verify the stats reported.
-        provider.pushTetherStats();
-        verify(mTetherStatsProviderCb, times(1)).onStatsUpdated(anyInt(),
-                ifaceStatsCaptor.capture(), uidStatsCaptor.capture());
+        mTetherStatsProvider.pushTetherStats();
+        verify(mTetherStatsProviderCb, times(1))
+                .notifyStatsUpdated(anyInt(), ifaceStatsCaptor.capture(), uidStatsCaptor.capture());
         assertTrue(orderInsensitiveEquals(expectedIfaceStats, ifaceStatsCaptor.getValue()));
         assertTrue(orderInsensitiveEquals(expectedUidStats, uidStatsCaptor.getValue()));
-
 
         when(mHardware.getForwardedStats(eq(ethernetIface))).thenReturn(
                 new ForwardedStats(100000, 100000));
@@ -483,31 +482,31 @@ public class OffloadControllerTest {
         inOrder.verifyNoMoreInteractions();
 
         // Verify that the stored stats is accumulated.
-        final NetworkStats ifaceStatsAccu = provider.getTetherStats(STATS_PER_IFACE);
-        final NetworkStats uidStatsAccu = provider.getTetherStats(STATS_PER_UID);
+        final NetworkStats ifaceStatsAccu = mTetherStatsProvider.getTetherStats(STATS_PER_IFACE);
+        final NetworkStats uidStatsAccu = mTetherStatsProvider.getTetherStats(STATS_PER_UID);
         final NetworkStats expectedIfaceStatsAccu = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_IFACE, mobileIface, 999, 99999))
-                .addValues(buildTestEntry(STATS_PER_IFACE, ethernetIface, 112345, 154321));
+                .addEntry(buildTestEntry(STATS_PER_IFACE, mobileIface, 999, 99999))
+                .addEntry(buildTestEntry(STATS_PER_IFACE, ethernetIface, 112345, 154321));
 
         final NetworkStats expectedUidStatsAccu = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_UID, mobileIface, 999, 99999))
-                .addValues(buildTestEntry(STATS_PER_UID, ethernetIface, 112345, 154321));
+                .addEntry(buildTestEntry(STATS_PER_UID, mobileIface, 999, 99999))
+                .addEntry(buildTestEntry(STATS_PER_UID, ethernetIface, 112345, 154321));
 
         assertTrue(orderInsensitiveEquals(expectedIfaceStatsAccu, ifaceStatsAccu));
         assertTrue(orderInsensitiveEquals(expectedUidStatsAccu, uidStatsAccu));
 
         // Verify that only diff of stats is reported.
         reset(mTetherStatsProviderCb);
-        provider.pushTetherStats();
+        mTetherStatsProvider.pushTetherStats();
         final NetworkStats expectedIfaceStatsDiff = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_IFACE, mobileIface, 0, 0))
-                .addValues(buildTestEntry(STATS_PER_IFACE, ethernetIface, 100000, 100000));
+                .addEntry(buildTestEntry(STATS_PER_IFACE, mobileIface, 0, 0))
+                .addEntry(buildTestEntry(STATS_PER_IFACE, ethernetIface, 100000, 100000));
 
         final NetworkStats expectedUidStatsDiff = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_UID, mobileIface, 0, 0))
-                .addValues(buildTestEntry(STATS_PER_UID, ethernetIface, 100000, 100000));
-        verify(mTetherStatsProviderCb, times(1)).onStatsUpdated(anyInt(),
-                ifaceStatsCaptor.capture(), uidStatsCaptor.capture());
+                .addEntry(buildTestEntry(STATS_PER_UID, mobileIface, 0, 0))
+                .addEntry(buildTestEntry(STATS_PER_UID, ethernetIface, 100000, 100000));
+        verify(mTetherStatsProviderCb, times(1))
+                .notifyStatsUpdated(anyInt(), ifaceStatsCaptor.capture(), uidStatsCaptor.capture());
         assertTrue(orderInsensitiveEquals(expectedIfaceStatsDiff, ifaceStatsCaptor.getValue()));
         assertTrue(orderInsensitiveEquals(expectedUidStatsDiff, uidStatsCaptor.getValue()));
     }
@@ -529,19 +528,18 @@ public class OffloadControllerTest {
         lp.setInterfaceName(ethernetIface);
         offload.setUpstreamLinkProperties(lp);
 
-        AbstractNetworkStatsProvider provider = mTetherStatsProviderCaptor.getValue();
         final InOrder inOrder = inOrder(mHardware);
         when(mHardware.setUpstreamParameters(any(), any(), any(), any())).thenReturn(true);
         when(mHardware.setDataLimit(anyString(), anyLong())).thenReturn(true);
 
         // Applying an interface quota to the current upstream immediately sends it to the hardware.
-        provider.setLimit(ethernetIface, ethernetLimit);
+        mTetherStatsProvider.onSetLimit(ethernetIface, ethernetLimit);
         waitForIdle();
         inOrder.verify(mHardware).setDataLimit(ethernetIface, ethernetLimit);
         inOrder.verifyNoMoreInteractions();
 
         // Applying an interface quota to another upstream does not take any immediate action.
-        provider.setLimit(mobileIface, mobileLimit);
+        mTetherStatsProvider.onSetLimit(mobileIface, mobileLimit);
         waitForIdle();
         inOrder.verify(mHardware, never()).setDataLimit(anyString(), anyLong());
 
@@ -554,7 +552,7 @@ public class OffloadControllerTest {
 
         // Setting a limit of ITetheringStatsProvider.QUOTA_UNLIMITED causes the limit to be set
         // to Long.MAX_VALUE.
-        provider.setLimit(mobileIface, ITetheringStatsProvider.QUOTA_UNLIMITED);
+        mTetherStatsProvider.onSetLimit(mobileIface, ITetheringStatsProvider.QUOTA_UNLIMITED);
         waitForIdle();
         inOrder.verify(mHardware).setDataLimit(mobileIface, Long.MAX_VALUE);
 
@@ -562,7 +560,7 @@ public class OffloadControllerTest {
         when(mHardware.setUpstreamParameters(any(), any(), any(), any())).thenReturn(false);
         lp.setInterfaceName(ethernetIface);
         offload.setUpstreamLinkProperties(lp);
-        provider.setLimit(mobileIface, mobileLimit);
+        mTetherStatsProvider.onSetLimit(mobileIface, mobileLimit);
         waitForIdle();
         inOrder.verify(mHardware, never()).setDataLimit(anyString(), anyLong());
 
@@ -571,7 +569,7 @@ public class OffloadControllerTest {
         when(mHardware.setDataLimit(anyString(), anyLong())).thenReturn(false);
         lp.setInterfaceName(mobileIface);
         offload.setUpstreamLinkProperties(lp);
-        provider.setLimit(mobileIface, mobileLimit);
+        mTetherStatsProvider.onSetLimit(mobileIface, mobileLimit);
         waitForIdle();
         inOrder.verify(mHardware).getForwardedStats(ethernetIface);
         inOrder.verify(mHardware).stopOffloadControl();
@@ -587,7 +585,7 @@ public class OffloadControllerTest {
 
         OffloadHardwareInterface.ControlCallback callback = mControlCallbackCaptor.getValue();
         callback.onStoppedLimitReached();
-        verify(mTetherStatsProviderCb, times(1)).onStatsUpdated(anyInt(), any(), any());
+        verify(mTetherStatsProviderCb, times(1)).notifyStatsUpdated(anyInt(), any(), any());
     }
 
     @Test
@@ -691,7 +689,7 @@ public class OffloadControllerTest {
         verify(mHardware, times(1)).getForwardedStats(eq(RMNET0));
         verify(mHardware, times(1)).getForwardedStats(eq(WLAN0));
         // TODO: verify the exact stats reported.
-        verify(mTetherStatsProviderCb, times(1)).onStatsUpdated(anyInt(), any(), any());
+        verify(mTetherStatsProviderCb, times(1)).notifyStatsUpdated(anyInt(), any(), any());
         verifyNoMoreInteractions(mTetherStatsProviderCb);
         verifyNoMoreInteractions(mHardware);
     }
@@ -756,7 +754,7 @@ public class OffloadControllerTest {
         // Verify forwarded stats behaviour.
         verify(mHardware, times(1)).getForwardedStats(eq(RMNET0));
         verify(mHardware, times(1)).getForwardedStats(eq(WLAN0));
-        verify(mTetherStatsProviderCb, times(1)).onStatsUpdated(anyInt(), any(), any());
+        verify(mTetherStatsProviderCb, times(1)).notifyStatsUpdated(anyInt(), any(), any());
         verifyNoMoreInteractions(mTetherStatsProviderCb);
 
         // TODO: verify local prefixes and downstreams are also pushed to the HAL.

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ಟೆಥರಿಂಗ್ ಅಥವಾ ಹಾಟ್‌ಸ್ಪಾಟ್ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ಟೆಥರಿಂಗ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"ವಿವರಗಳಿಗಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ"</string>
-</resources>

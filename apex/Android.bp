@@ -43,13 +43,45 @@ stubs_defaults {
     name: "framework-module-stubs-defaults-publicapi",
     args: mainline_stubs_args,
     installable: false,
+    sdk_version: "current",
+    check_api: {
+        current: {
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
+        },
+    },
 }
 
 stubs_defaults {
     name: "framework-module-stubs-defaults-systemapi",
     args: mainline_stubs_args + priv_apps,
-    srcs: [":framework-annotations"],
+    libs: ["framework-annotations-lib"],
     installable: false,
+    sdk_version: "system_current",
+    check_api: {
+        current: {
+            api_file: "api/system-current.txt",
+            removed_api_file: "api/system-removed.txt",
+        },
+    },
+}
+
+java_defaults {
+    name: "framework-module-stubs-lib-defaults-publicapi",
+    installable: false,
+    sdk_version: "module_current",
+}
+
+java_defaults {
+    name: "framework-module-stubs-lib-defaults-systemapi",
+    installable: false,
+    sdk_version: "module_current",
+}
+
+java_defaults {
+    name: "framework-module-stubs-lib-defaults-module_libs_api",
+    installable: false,
+    sdk_version: "module_current",
 }
 
 // The defaults for module_libs comes in two parts - defaults for API checks
@@ -60,13 +92,21 @@ stubs_defaults {
 stubs_defaults {
     name: "framework-module-api-defaults-module_libs_api",
     args: mainline_stubs_args + module_libs,
-    srcs: [":framework-annotations"],
+    libs: ["framework-annotations-lib"],
     installable: false,
+    sdk_version: "module_current",
+    check_api: {
+        current: {
+            api_file: "api/module-lib-current.txt",
+            removed_api_file: "api/module-lib-removed.txt",
+        },
+    },
 }
 
 stubs_defaults {
     name: "framework-module-stubs-defaults-module_libs_api",
     args: mainline_stubs_args + module_libs + priv_apps,
-    srcs: [":framework-annotations"],
+    libs: ["framework-annotations-lib"],
     installable: false,
+    sdk_version: "module_current",
 }

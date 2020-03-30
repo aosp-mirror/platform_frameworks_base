@@ -20,11 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
+import android.util.ArraySet;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * CellIdentity is to represent a unique TD-SCDMA cell
@@ -50,7 +51,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
     private final int mUarfcn;
 
     // a list of additional PLMN-IDs reported for this cell
-    private final List<String> mAdditionalPlmns;
+    private final ArraySet<String> mAdditionalPlmns;
 
     private ClosedSubscriberGroupInfo mCsgInfo;
 
@@ -63,7 +64,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
         mCid = CellInfo.UNAVAILABLE;
         mCpid = CellInfo.UNAVAILABLE;
         mUarfcn = CellInfo.UNAVAILABLE;
-        mAdditionalPlmns = Collections.emptyList();
+        mAdditionalPlmns = new ArraySet<>();
         mCsgInfo = null;
     }
 
@@ -85,13 +86,14 @@ public final class CellIdentityTdscdma extends CellIdentity {
      */
     public CellIdentityTdscdma(@Nullable String mcc, @Nullable String mnc, int lac, int cid,
             int cpid, int uarfcn, @Nullable String alphal, @Nullable String alphas,
-            @NonNull List<String> additionalPlmns, @Nullable ClosedSubscriberGroupInfo csgInfo) {
+            @NonNull Collection<String> additionalPlmns,
+            @Nullable ClosedSubscriberGroupInfo csgInfo) {
         super(TAG, CellInfo.TYPE_TDSCDMA, mcc, mnc, alphal, alphas);
         mLac = inRangeOrUnavailable(lac, 0, MAX_LAC);
         mCid = inRangeOrUnavailable(cid, 0, MAX_CID);
         mCpid = inRangeOrUnavailable(cpid, 0, MAX_CPID);
         mUarfcn = inRangeOrUnavailable(uarfcn, 0, MAX_UARFCN);
-        mAdditionalPlmns = new ArrayList<>(additionalPlmns.size());
+        mAdditionalPlmns = new ArraySet<>(additionalPlmns.size());
         for (String plmn : additionalPlmns) {
             if (isValidPlmn(plmn)) {
                 mAdditionalPlmns.add(plmn);
@@ -208,8 +210,8 @@ public final class CellIdentityTdscdma extends CellIdentity {
      * @return a list of additional PLMN IDs supported by this cell.
      */
     @NonNull
-    public List<String> getAdditionalPlmns() {
-        return mAdditionalPlmns;
+    public Set<String> getAdditionalPlmns() {
+        return Collections.unmodifiableSet(mAdditionalPlmns);
     }
 
     /**
@@ -289,7 +291,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
         dest.writeInt(mCid);
         dest.writeInt(mCpid);
         dest.writeInt(mUarfcn);
-        dest.writeList(mAdditionalPlmns);
+        dest.writeArraySet(mAdditionalPlmns);
         dest.writeParcelable(mCsgInfo, flags);
     }
 
@@ -300,7 +302,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
         mCid = in.readInt();
         mCpid = in.readInt();
         mUarfcn = in.readInt();
-        mAdditionalPlmns = in.readArrayList(null);
+        mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
         mCsgInfo = in.readParcelable(null);
         if (DBG) log(toString());
     }

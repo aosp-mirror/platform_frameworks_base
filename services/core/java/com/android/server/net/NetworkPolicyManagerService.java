@@ -75,7 +75,7 @@ import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.TrafficStats.MB_IN_BYTES;
-import static android.net.netstats.provider.AbstractNetworkStatsProvider.QUOTA_UNLIMITED;
+import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.provider.Settings.Global.NETPOLICY_OVERRIDE_ENABLED;
 import static android.provider.Settings.Global.NETPOLICY_QUOTA_ENABLED;
@@ -1869,8 +1869,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mNetIdToSubId.put(state.network.netId, parseSubId(state));
             }
             if (state.networkInfo != null && state.networkInfo.isConnected()) {
+                // Policies matched by NPMS only match by subscriber ID or by ssid. Thus subtype
+                // in the object created here is never used and its value doesn't matter, so use
+                // NETWORK_TYPE_UNKNOWN.
                 final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state,
-                        true);
+                        true, TelephonyManager.NETWORK_TYPE_UNKNOWN /* subType */);
                 identified.put(state, ident);
             }
         }
@@ -3088,29 +3091,62 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void enforceSubscriptionPlanValidity(SubscriptionPlan[] plans) {
         // nothing to check if no plans
         if (plans.length == 0) {
+            Log.d(TAG, "Received empty plans list. Clearing existing SubscriptionPlans.");
             return;
         }
 
-        long applicableNetworkTypes = 0;
-        boolean allNetworks = false;
-        for (SubscriptionPlan plan : plans) {
-            if (plan.getNetworkTypes() == null) {
-                allNetworks = true;
+        final int[] allNetworkTypes = TelephonyManager.getAllNetworkTypes();
+        final ArraySet<Integer> allNetworksSet = new ArraySet<>();
+        addAll(allNetworksSet, allNetworkTypes);
+
+        final ArraySet<Integer> applicableNetworkTypes = new ArraySet<>();
+        boolean hasGeneralPlan = false;
+        for (int i = 0; i < plans.length; i++) {
+            final int[] planNetworkTypes = plans[i].getNetworkTypes();
+            final ArraySet<Integer> planNetworksSet = new ArraySet<>();
+            for (int j = 0; j < planNetworkTypes.length; j++) {
+                // ensure all network types are valid
+                if (allNetworksSet.contains(planNetworkTypes[j])) {
+                    // ensure no duplicate network types in the same SubscriptionPlan
+                    if (!planNetworksSet.add(planNetworkTypes[j])) {
+                        throw new IllegalArgumentException(
+                                "Subscription plan contains duplicate network types.");
+                    }
+                } else {
+                    throw new IllegalArgumentException("Invalid network type: "
+                            + planNetworkTypes[j]);
+                }
+            }
+
+            if (planNetworkTypes.length == allNetworkTypes.length) {
+                hasGeneralPlan = true;
             } else {
-                if ((applicableNetworkTypes & plan.getNetworkTypesBitMask()) != 0) {
+                // ensure no network type applies to multiple plans
+                if (!addAll(applicableNetworkTypes, planNetworkTypes)) {
                     throw new IllegalArgumentException(
                             "Multiple subscription plans defined for a single network type.");
-                } else {
-                    applicableNetworkTypes |= plan.getNetworkTypesBitMask();
                 }
             }
         }
 
         // ensure at least one plan applies for every network type
-        if (!allNetworks) {
+        if (!hasGeneralPlan) {
             throw new IllegalArgumentException(
                     "No generic subscription plan that applies to all network types.");
         }
+    }
+
+    /**
+     * Adds all of the {@code elements} to the {@code set}.
+     *
+     * @return {@code false} if any element is not added because the set already has the value.
+     */
+    private static boolean addAll(@NonNull ArraySet<Integer> set, @NonNull int... elements) {
+        boolean result = true;
+        for (int i = 0; i < elements.length; i++) {
+            result &= set.add(elements[i]);
+        }
+        return result;
     }
 
     @Override

@@ -25,6 +25,9 @@ import android.os.ResultReceiver;
 import android.telephony.TelephonyRegistryManager;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * A service that exposes carrier-specific functionality to the system.
  * <p>
@@ -155,6 +158,11 @@ public abstract class CarrierService extends Service {
                 Log.e(LOG_TAG, "Error in onLoadConfig: " + e.getMessage(), e);
                 result.send(RESULT_ERROR, null);
             }
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            CarrierService.this.dump(fd, pw, args);
         }
     }
 }

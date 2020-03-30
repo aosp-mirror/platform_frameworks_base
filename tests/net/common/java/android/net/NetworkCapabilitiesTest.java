@@ -48,9 +48,11 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.os.Build;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 
+import androidx.core.os.BuildCompat;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -63,6 +65,13 @@ import java.util.Set;
 public class NetworkCapabilitiesTest {
     private static final String TEST_SSID = "TEST_SSID";
     private static final String DIFFERENT_TEST_SSID = "DIFFERENT_TEST_SSID";
+
+    private boolean isAtLeastR() {
+        // BuildCompat.isAtLeastR() is used to check the Android version before releasing Android R.
+        // Build.VERSION.SDK_INT > Build.VERSION_CODES.Q is used to check the Android version after
+        // releasing Android R.
+        return BuildCompat.isAtLeastR() || Build.VERSION.SDK_INT > Build.VERSION_CODES.Q;
+    }
 
     @Test
     public void testMaybeMarkCapabilitiesRestricted() {
@@ -269,25 +278,36 @@ public class NetworkCapabilitiesTest {
             .setUids(uids)
             .addCapability(NET_CAPABILITY_EIMS)
             .addCapability(NET_CAPABILITY_NOT_METERED);
-        netCap.setOwnerUid(123);
+        if (isAtLeastR()) {
+            netCap.setOwnerUid(123);
+        }
         assertParcelingIsLossless(netCap);
         netCap.setSSID(TEST_SSID);
-        assertParcelSane(netCap, 15);
+        testParcelSane(netCap);
     }
 
     @Test
     public void testParcelNetworkCapabilitiesWithRequestorUidAndPackageName() {
         final NetworkCapabilities netCap = new NetworkCapabilities()
                 .addCapability(NET_CAPABILITY_INTERNET)
-                .setRequestorUid(9304)
-                .setRequestorPackageName("com.android.test")
                 .addCapability(NET_CAPABILITY_EIMS)
                 .addCapability(NET_CAPABILITY_NOT_METERED);
+        if (isAtLeastR()) {
+            netCap.setRequestorPackageName("com.android.test");
+            netCap.setRequestorUid(9304);
+        }
         assertParcelingIsLossless(netCap);
         netCap.setSSID(TEST_SSID);
-        assertParcelSane(netCap, 15);
+        testParcelSane(netCap);
     }
 
+    private void testParcelSane(NetworkCapabilities cap) {
+        if (isAtLeastR()) {
+            assertParcelSane(cap, 15);
+        } else {
+            assertParcelSane(cap, 11);
+        }
+    }
 
     @Test
     public void testOemPaid() {
@@ -443,7 +463,9 @@ public class NetworkCapabilitiesTest {
 
         nc1.setSSID(TEST_SSID);
         nc2.combineCapabilities(nc1);
-        assertTrue(TEST_SSID.equals(nc2.getSSID()));
+        if (isAtLeastR()) {
+            assertTrue(TEST_SSID.equals(nc2.getSsid()));
+        }
 
         // Because they now have the same SSID, the following call should not throw
         nc2.combineCapabilities(nc1);
@@ -581,12 +603,16 @@ public class NetworkCapabilitiesTest {
         // from nc2.
         assertFalse(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(TEST_SSID.equals(nc2.getSSID()));
+        if (isAtLeastR()) {
+            assertTrue(TEST_SSID.equals(nc2.getSsid()));
+        }
 
         nc1.setSSID(DIFFERENT_TEST_SSID);
         nc2.set(nc1);
         assertEquals(nc1, nc2);
-        assertTrue(DIFFERENT_TEST_SSID.equals(nc2.getSSID()));
+        if (isAtLeastR()) {
+            assertTrue(DIFFERENT_TEST_SSID.equals(nc2.getSsid()));
+        }
 
         nc1.setUids(uidRange(10, 13));
         nc2.set(nc1);  // Overwrites, as opposed to combineCapabilities

@@ -72,11 +72,7 @@ java_library {
 
     libs: [
         "android.hidl.manager-V1.0-java",
-        "framework-tethering-stubs",
-    ],
-
-    plugins: [
-        "compat-changeid-annotation-processor",
+        "framework-tethering-stubs-module_libs_api",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
@@ -94,8 +90,8 @@ cc_library_shared {
 }
 
 platform_compat_config {
-    name: "services-platform-compat-config",
-    src: ":services",
+   name: "services-platform-compat-config",
+   src: ":services",
 }
 
 filegroup {
@@ -110,6 +106,7 @@ droidstubs {
     name: "services-stubs.sources",
     srcs: [":services-sources"],
     installable: false,
+    api_tag_name: "SYSTEM_SERVER",
     args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)" +
         " --hide-annotation android.annotation.Hide" +
         " --hide InternalClasses" + // com.android.* classes are okay in this interface
@@ -138,7 +135,8 @@ droidstubs {
 }
 
 java_library {
-    name: "services-stubs",
+    name: "android_system_server_stubs_current",
     srcs: [":services-stubs.sources"],
     installable: false,
+    static_libs: ["android_module_lib_stubs_current"],
 }

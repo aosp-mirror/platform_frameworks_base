@@ -106,10 +106,12 @@ public class NetworkProvider {
     }
 
     // TODO: consider adding a register() method so ConnectivityManager does not need to call this.
+    /** @hide */
     public @Nullable Messenger getMessenger() {
         return mMessenger;
     }
 
+    /** @hide */
     public @NonNull String getName() {
         return mName;
     }

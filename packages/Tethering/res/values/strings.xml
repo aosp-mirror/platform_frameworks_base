@@ -13,12 +13,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Shown when the device is tethered -->
     <!-- String for tethered notification title [CHAR LIMIT=200] -->
     <string name="tethered_notification_title">Tethering or hotspot active</string>
     <!-- String for tethered notification message [CHAR LIMIT=200] -->
     <string name="tethered_notification_message">Tap to set up.</string>
+    <!-- String for tethered notification title with client number info. -->
+    <plurals name="tethered_notification_title_with_client_number">
+    </plurals>
 
     <!-- This notification is shown when tethering has been disabled on a user's device.
     The device is managed by the user's employer. Tethering can't be turned on unless the
@@ -32,4 +35,18 @@
     Internet" settings page. That is currently the tether_settings_title_all string. -->
     <!-- String for tether notification channel name [CHAR LIMIT=200] -->
     <string name="notification_channel_tethering_status">Hotspot &amp; tethering status</string>
+
+    <!-- String for no upstream notification title [CHAR LIMIT=200] -->
+    <string name="no_upstream_notification_title"></string>
+    <!-- String for no upstream notification message [CHAR LIMIT=200] -->
+    <string name="no_upstream_notification_message"></string>
+    <!-- String for cellular roaming notification disable button [CHAR LIMIT=200]  -->
+    <string name="no_upstream_notification_disable_button"></string>
+
+    <!-- String for cellular roaming notification title [CHAR LIMIT=200]  -->
+    <string name="upstream_roaming_notification_title"></string>
+    <!-- String for cellular roaming notification message [CHAR LIMIT=500]  -->
+    <string name="upstream_roaming_notification_message"></string>
+    <!-- String for cellular roaming notification continue button [CHAR LIMIT=200]  -->
+    <string name="upstream_roaming_notification_continue_button"></string>
 </resources>

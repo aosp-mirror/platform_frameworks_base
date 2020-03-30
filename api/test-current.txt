@@ -62,7 +62,6 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
   }
 
   public static interface ActivityManager.OnUidImportanceListener {
@@ -658,7 +657,6 @@ package android.content {
     field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
     field public static final String ETHERNET_SERVICE = "ethernet";
-    field public static final String NETWORK_STACK_SERVICE = "network_stack";
     field public static final String PERMISSION_SERVICE = "permission";
     field public static final String ROLLBACK_SERVICE = "rollback";
     field public static final String STATUS_BAR_SERVICE = "statusbar";
@@ -1442,6 +1440,7 @@ package android.net {
 
   public class EthernetManager {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
+    method public void setIncludeTestInterfaces(boolean);
   }
 
   public static interface EthernetManager.TetheredInterfaceCallback {
@@ -1478,6 +1477,7 @@ package android.net {
 
   public final class LinkProperties implements android.os.Parcelable {
     ctor public LinkProperties(@Nullable android.net.LinkProperties);
+    ctor public LinkProperties(@Nullable android.net.LinkProperties, boolean);
     method public boolean addDnsServer(@NonNull java.net.InetAddress);
     method public boolean addLinkAddress(@NonNull android.net.LinkAddress);
     method @Nullable public android.net.Uri getCaptivePortalApiUrl();
@@ -1492,7 +1492,6 @@ package android.net {
     method public boolean isIpv6Provisioned();
     method public boolean isProvisioned();
     method public boolean isReachable(@NonNull java.net.InetAddress);
-    method @NonNull public android.net.LinkProperties makeSensitiveFieldsParcelingCopy();
     method public boolean removeDnsServer(@NonNull java.net.InetAddress);
     method public boolean removeLinkAddress(@NonNull android.net.LinkAddress);
     method public boolean removeRoute(@NonNull android.net.RouteInfo);
@@ -1507,17 +1506,42 @@ package android.net {
 
   public class Network implements android.os.Parcelable {
     ctor public Network(@NonNull android.net.Network);
+    method public int getNetId();
     method @NonNull public android.net.Network getPrivateDnsBypassingCopy();
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
+    method @NonNull public int[] getAdministratorUids();
     method public int[] getCapabilities();
+    method @Nullable public String getSsid();
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
     field public static final int TRANSPORT_TEST = 7; // 0x7
   }
 
+  public static class NetworkCapabilities.Builder {
+    ctor public NetworkCapabilities.Builder();
+    ctor public NetworkCapabilities.Builder(@NonNull android.net.NetworkCapabilities);
+    method @NonNull public android.net.NetworkCapabilities.Builder addCapability(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder addTransportType(int);
+    method @NonNull public android.net.NetworkCapabilities build();
+    method @NonNull public android.net.NetworkCapabilities.Builder removeCapability(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder removeTransportType(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setAdministratorUids(@NonNull int[]);
+    method @NonNull public android.net.NetworkCapabilities.Builder setLinkDownstreamBandwidthKbps(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder setLinkUpstreamBandwidthKbps(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder setNetworkSpecifier(@Nullable android.net.NetworkSpecifier);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setOwnerUid(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setRequestorPackageName(@Nullable String);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setRequestorUid(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP") public android.net.NetworkCapabilities.Builder setSignalStrength(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setSsid(@Nullable String);
+    method @NonNull public android.net.NetworkCapabilities.Builder setTransportInfo(@Nullable android.net.TransportInfo);
+  }
+
   public class NetworkStack {
+    method @Nullable public static android.os.IBinder getService();
+    method public static void setServiceForTest(@Nullable android.os.IBinder);
     field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
   }
 
@@ -1591,7 +1615,6 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.TetheringEventCallback);
     method @RequiresPermission(anyOf={"android.permission.TETHER_PRIVILEGED", android.Manifest.permission.WRITE_SETTINGS}) public void requestLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.OnTetheringEntitlementResultListener);
     method @RequiresPermission(anyOf={"android.permission.TETHER_PRIVILEGED", android.Manifest.permission.WRITE_SETTINGS}) public void startTethering(@NonNull android.net.TetheringManager.TetheringRequest, @NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.StartTetheringCallback);
-    method @RequiresPermission(anyOf={"android.permission.TETHER_PRIVILEGED", android.Manifest.permission.WRITE_SETTINGS}) public void startTethering(int, @NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.StartTetheringCallback);
     method @RequiresPermission(anyOf={"android.permission.TETHER_PRIVILEGED", android.Manifest.permission.WRITE_SETTINGS}) public void stopAllTethering();
     method @RequiresPermission(anyOf={"android.permission.TETHER_PRIVILEGED", android.Manifest.permission.WRITE_SETTINGS}) public void stopTethering(int);
     method @RequiresPermission(anyOf={"android.permission.TETHER_PRIVILEGED", android.Manifest.permission.ACCESS_NETWORK_STATE}) public void unregisterTetheringEventCallback(@NonNull android.net.TetheringManager.TetheringEventCallback);
@@ -1608,19 +1631,20 @@ package android.net {
     field public static final int TETHERING_WIFI = 0; // 0x0
     field public static final int TETHERING_WIFI_P2P = 3; // 0x3
     field public static final int TETHER_ERROR_DHCPSERVER_ERROR = 12; // 0xc
-    field public static final int TETHER_ERROR_DISABLE_NAT_ERROR = 9; // 0x9
-    field public static final int TETHER_ERROR_ENABLE_NAT_ERROR = 8; // 0x8
+    field public static final int TETHER_ERROR_DISABLE_FORWARDING_ERROR = 9; // 0x9
+    field public static final int TETHER_ERROR_ENABLE_FORWARDING_ERROR = 8; // 0x8
     field public static final int TETHER_ERROR_ENTITLEMENT_UNKNOWN = 13; // 0xd
     field public static final int TETHER_ERROR_IFACE_CFG_ERROR = 10; // 0xa
-    field public static final int TETHER_ERROR_MASTER_ERROR = 5; // 0x5
+    field public static final int TETHER_ERROR_INTERNAL_ERROR = 5; // 0x5
     field public static final int TETHER_ERROR_NO_ACCESS_TETHERING_PERMISSION = 15; // 0xf
     field public static final int TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION = 14; // 0xe
     field public static final int TETHER_ERROR_NO_ERROR = 0; // 0x0
-    field public static final int TETHER_ERROR_PROVISION_FAILED = 11; // 0xb
+    field public static final int TETHER_ERROR_PROVISIONING_FAILED = 11; // 0xb
     field public static final int TETHER_ERROR_SERVICE_UNAVAIL = 2; // 0x2
     field public static final int TETHER_ERROR_TETHER_IFACE_ERROR = 6; // 0x6
     field public static final int TETHER_ERROR_UNAVAIL_IFACE = 4; // 0x4
     field public static final int TETHER_ERROR_UNKNOWN_IFACE = 1; // 0x1
+    field public static final int TETHER_ERROR_UNKNOWN_TYPE = 16; // 0x10
     field public static final int TETHER_ERROR_UNSUPPORTED = 3; // 0x3
     field public static final int TETHER_ERROR_UNTETHER_IFACE_ERROR = 7; // 0x7
     field public static final int TETHER_HARDWARE_OFFLOAD_FAILED = 2; // 0x2
@@ -1632,40 +1656,35 @@ package android.net {
     method public void onTetheringEntitlementResult(int);
   }
 
-  public abstract static class TetheringManager.StartTetheringCallback {
-    ctor public TetheringManager.StartTetheringCallback();
-    method public void onTetheringFailed(int);
-    method public void onTetheringStarted();
+  public static interface TetheringManager.StartTetheringCallback {
+    method public default void onTetheringFailed(int);
+    method public default void onTetheringStarted();
   }
 
-  public abstract static class TetheringManager.TetheringEventCallback {
-    ctor public TetheringManager.TetheringEventCallback();
-    method public void onClientsChanged(@NonNull java.util.Collection<android.net.TetheredClient>);
-    method public void onError(@NonNull String, int);
-    method public void onOffloadStatusChanged(int);
-    method @Deprecated public void onTetherableInterfaceRegexpsChanged(@NonNull android.net.TetheringManager.TetheringInterfaceRegexps);
-    method public void onTetherableInterfacesChanged(@NonNull java.util.List<java.lang.String>);
-    method public void onTetheredInterfacesChanged(@NonNull java.util.List<java.lang.String>);
-    method public void onTetheringSupported(boolean);
-    method public void onUpstreamChanged(@Nullable android.net.Network);
-  }
-
-  @Deprecated public static class TetheringManager.TetheringInterfaceRegexps {
-    ctor @Deprecated public TetheringManager.TetheringInterfaceRegexps(@NonNull String[], @NonNull String[], @NonNull String[]);
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getTetherableBluetoothRegexs();
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getTetherableUsbRegexs();
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getTetherableWifiRegexs();
+  public static interface TetheringManager.TetheringEventCallback {
+    method public default void onClientsChanged(@NonNull java.util.Collection<android.net.TetheredClient>);
+    method public default void onError(@NonNull String, int);
+    method public default void onOffloadStatusChanged(int);
+    method public default void onTetherableInterfacesChanged(@NonNull java.util.List<java.lang.String>);
+    method public default void onTetheredInterfacesChanged(@NonNull java.util.List<java.lang.String>);
+    method public default void onTetheringSupported(boolean);
+    method public default void onUpstreamChanged(@Nullable android.net.Network);
   }
 
   public static class TetheringManager.TetheringRequest {
+    method @Nullable public android.net.LinkAddress getClientStaticIpv4Address();
+    method @Nullable public android.net.LinkAddress getLocalIpv4Address();
+    method public boolean getShouldShowEntitlementUi();
+    method public int getTetheringType();
+    method public boolean isExemptFromEntitlementCheck();
   }
 
   public static class TetheringManager.TetheringRequest.Builder {
     ctor public TetheringManager.TetheringRequest.Builder(int);
     method @NonNull public android.net.TetheringManager.TetheringRequest build();
     method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setExemptFromEntitlementCheck(boolean);
-    method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setSilentProvisioning(boolean);
-    method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder useStaticIpv4Addresses(@NonNull android.net.LinkAddress);
+    method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setShouldShowEntitlementUi(boolean);
+    method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setStaticIpv4Addresses(@NonNull android.net.LinkAddress, @NonNull android.net.LinkAddress);
   }
 
   public class TrafficStats {
@@ -3096,6 +3115,15 @@ package android.telephony {
     field public static final int FREQUENCY_RANGE_GROUP_UNKNOWN = 0; // 0x0
   }
 
+  public final class BarringInfo implements android.os.Parcelable {
+    ctor public BarringInfo();
+    ctor public BarringInfo(@Nullable android.telephony.CellIdentity, @NonNull android.util.SparseArray<android.telephony.BarringInfo.BarringServiceInfo>);
+  }
+
+  public static final class BarringInfo.BarringServiceInfo implements android.os.Parcelable {
+    ctor public BarringInfo.BarringServiceInfo(int, boolean, int, int);
+  }
+
   public final class CallQuality implements android.os.Parcelable {
     ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int);
     ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int, boolean, boolean, boolean);
@@ -3182,6 +3210,7 @@ package android.telephony {
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setCellIdentity(@Nullable android.telephony.CellIdentity);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setDomain(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setEmergencyOnly(boolean);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegisteredPlmn(@Nullable String);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegistrationState(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRejectCause(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setTransportType(int);
@@ -3220,7 +3249,8 @@ package android.telephony {
 
   public final class SmsManager {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int checkSmsShortCodeDestination(String, String);
-    method public void sendMultipartTextMessage(@NonNull String, @NonNull String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String);
+    method @Deprecated public void sendMultipartTextMessage(@NonNull String, @NonNull String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String);
+    method public void sendMultipartTextMessage(@NonNull String, @NonNull String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String, @Nullable String);
     field public static final int SMS_CATEGORY_FREE_SHORT_CODE = 1; // 0x1
     field public static final int SMS_CATEGORY_NOT_SHORT_CODE = 0; // 0x0
     field public static final int SMS_CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE = 3; // 0x3
@@ -3247,7 +3277,6 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getEmergencyNumberDbVersion();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
-    method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getNetworkCountryIso(int);
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
     method public boolean modifyDevicePolicyOverrideApn(@NonNull android.content.Context, int, @NonNull android.telephony.data.ApnSetting);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
@@ -3320,7 +3349,7 @@ package android.telephony.ims {
     method public int getEmergencyServiceCategories();
     method @NonNull public java.util.List<java.lang.String> getEmergencyUrns();
     method public android.telephony.ims.ImsStreamMediaProfile getMediaProfile();
-    method @Nullable public android.os.Bundle getProprietaryCallExtras();
+    method @NonNull public android.os.Bundle getProprietaryCallExtras();
     method public int getRestrictCause();
     method public int getServiceType();
     method public static int getVideoStateFromCallType(int);
@@ -3482,7 +3511,6 @@ package android.telephony.ims {
   }
 
   public class ImsManager {
-    method @NonNull public android.telephony.ims.ImsRcsManager getImsRcsManager(int);
     field public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION = "com.android.internal.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
   }
 
@@ -3508,10 +3536,6 @@ package android.telephony.ims {
 
   @Deprecated public static class ImsMmTelManager.RegistrationCallback extends android.telephony.ims.RegistrationManager.RegistrationCallback {
     ctor @Deprecated public ImsMmTelManager.RegistrationCallback();
-  }
-
-  public class ImsRcsManager implements android.telephony.ims.RegistrationManager {
-    method @NonNull public android.telephony.ims.RcsUceAdapter getUceAdapter();
   }
 
   public class ImsService extends android.app.Service {
@@ -3778,8 +3802,8 @@ package android.telephony.ims {
     field public static final int KEY_RCS_CAPABILITY_DISCOVERY_ENABLED = 17; // 0x11
     field public static final int KEY_RCS_CAPABILITY_POLL_LIST_SUB_EXP_SEC = 23; // 0x17
     field public static final int KEY_RCS_MAX_NUM_ENTRIES_IN_RCL = 22; // 0x16
+    field public static final int KEY_RCS_PUBLISH_OFFLINE_AVAILABILITY_TIMER_SEC = 16; // 0x10
     field public static final int KEY_RCS_PUBLISH_SOURCE_THROTTLE_MS = 21; // 0x15
-    field public static final int KEY_RCS_PUBLISH_TIMER_EXTENDED_SEC = 16; // 0x10
     field public static final int KEY_RCS_PUBLISH_TIMER_SEC = 15; // 0xf
     field public static final int KEY_REGISTRATION_DOMAIN_NAME = 12; // 0xc
     field public static final int KEY_REGISTRATION_RETRY_BASE_TIME_SEC = 33; // 0x21
@@ -3886,7 +3910,6 @@ package android.telephony.ims {
   }
 
   public class RcsUceAdapter {
-    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public boolean isUceSettingEnabled() throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUceSettingEnabled(boolean) throws android.telephony.ims.ImsException;
   }
 

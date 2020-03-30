@@ -175,9 +175,11 @@ public class ImsRegistrationImplBase {
      */
     public final void onDeregistered(ImsReasonInfo info) {
         updateToDisconnectedState(info);
+        // ImsReasonInfo should never be null.
+        final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
         mCallbacks.broadcastAction((c) -> {
             try {
-                c.onDeregistered(info);
+                c.onDeregistered(reasonInfo);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + " " + "onRegistrationDisconnected() - Skipping " +
                         "callback.");
@@ -194,9 +196,10 @@ public class ImsRegistrationImplBase {
      */
     public final void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
             ImsReasonInfo info) {
+        final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
         mCallbacks.broadcastAction((c) -> {
             try {
-                c.onTechnologyChangeFailed(imsRadioTech, info);
+                c.onTechnologyChangeFailed(imsRadioTech, reasonInfo);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + " " + "onRegistrationChangeFailed() - Skipping " +
                         "callback.");

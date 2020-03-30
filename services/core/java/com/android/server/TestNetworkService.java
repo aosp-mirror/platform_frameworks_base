@@ -16,7 +16,8 @@
 
 package com.android.server;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
+import static android.net.TestNetworkManager.TEST_TAP_PREFIX;
+import static android.net.TestNetworkManager.TEST_TUN_PREFIX;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,14 +56,13 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** @hide */
 class TestNetworkService extends ITestNetworkManager.Stub {
     @NonNull private static final String TAG = TestNetworkService.class.getSimpleName();
     @NonNull private static final String TEST_NETWORK_TYPE = "TEST_NETWORK";
-    @NonNull private static final String TEST_TUN_PREFIX = "testtun";
-    @NonNull private static final String TEST_TAP_PREFIX = "testtap";
     @NonNull private static final AtomicInteger sTestTunIndex = new AtomicInteger();
 
     @NonNull private final Context mContext;
@@ -82,9 +82,9 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
 
-        mContext = checkNotNull(context, "missing Context");
-        mNMS = checkNotNull(netManager, "missing INetworkManagementService");
-        mNetd = checkNotNull(NetdService.getInstance(), "could not get netd instance");
+        mContext = Objects.requireNonNull(context, "missing Context");
+        mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
+        mNetd = Objects.requireNonNull(NetdService.getInstance(), "could not get netd instance");
     }
 
     /**
@@ -96,7 +96,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
     private TestNetworkInterface createInterface(boolean isTun, LinkAddress[] linkAddrs) {
         enforceTestNetworkPermissions(mContext);
 
-        checkNotNull(linkAddrs, "missing linkAddrs");
+        Objects.requireNonNull(linkAddrs, "missing linkAddrs");
 
         String ifacePrefix = isTun ? TEST_TUN_PREFIX : TEST_TAP_PREFIX;
         String iface = ifacePrefix + sTestTunIndex.getAndIncrement();
@@ -231,10 +231,11 @@ class TestNetworkService extends ITestNetworkManager.Stub {
             @Nullable LinkProperties lp,
             boolean isMetered,
             int callingUid,
+            @NonNull int[] administratorUids,
             @NonNull IBinder binder)
             throws RemoteException, SocketException {
-        checkNotNull(looper, "missing Looper");
-        checkNotNull(context, "missing Context");
+        Objects.requireNonNull(looper, "missing Looper");
+        Objects.requireNonNull(context, "missing Context");
         // iface and binder validity checked by caller
 
         // Build network info with special testing type
@@ -249,6 +250,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED);
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
         nc.setNetworkSpecifier(new StringNetworkSpecifier(iface));
+        nc.setAdministratorUids(administratorUids);
         if (!isMetered) {
             nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
         }
@@ -267,7 +269,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         // Find the currently assigned addresses, and add them to LinkProperties
         boolean allowIPv4 = false, allowIPv6 = false;
         NetworkInterface netIntf = NetworkInterface.getByName(iface);
-        checkNotNull(netIntf, "No such network interface found: " + netIntf);
+        Objects.requireNonNull(netIntf, "No such network interface found: " + netIntf);
 
         for (InterfaceAddress intfAddr : netIntf.getInterfaceAddresses()) {
             lp.addLinkAddress(
@@ -302,11 +304,12 @@ class TestNetworkService extends ITestNetworkManager.Stub {
             @NonNull String iface,
             @Nullable LinkProperties lp,
             boolean isMetered,
+            @NonNull int[] administratorUids,
             @NonNull IBinder binder) {
         enforceTestNetworkPermissions(mContext);
 
-        checkNotNull(iface, "missing Iface");
-        checkNotNull(binder, "missing IBinder");
+        Objects.requireNonNull(iface, "missing Iface");
+        Objects.requireNonNull(binder, "missing IBinder");
 
         if (!(iface.startsWith(INetd.IPSEC_INTERFACE_PREFIX)
                 || iface.startsWith(TEST_TUN_PREFIX))) {
@@ -336,6 +339,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
                                             lp,
                                             isMetered,
                                             callingUid,
+                                            administratorUids,
                                             binder);
 
                             mTestNetworkTracker.put(agent.getNetwork().netId, agent);

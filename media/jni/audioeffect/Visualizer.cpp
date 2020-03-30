@@ -120,8 +120,9 @@ status_t Visualizer::setCaptureCallBack(capture_cbk_t cbk, void* user, uint32_t 
     }
 
     if (mCaptureThread != 0) {
+        sp<CaptureThread> t = mCaptureThread;
         mCaptureLock.unlock();
-        mCaptureThread->requestExitAndWait();
+        t->requestExitAndWait();
         mCaptureLock.lock();
     }
 

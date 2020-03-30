@@ -8612,7 +8612,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
         public static final String CARRIER_APPS_HANDLED = "carrier_apps_handled";
 
         /**
@@ -10197,6 +10196,8 @@ public final class Settings {
        public static final String NETSTATS_SAMPLE_ENABLED = "netstats_sample_enabled";
        /** {@hide} */
        public static final String NETSTATS_AUGMENT_ENABLED = "netstats_augment_enabled";
+       /** {@hide} */
+       public static final String NETSTATS_COMBINE_SUBTYPE_ENABLED = "netstats_combine_subtype_enabled";
 
        /** {@hide} */
        public static final String NETSTATS_DEV_BUCKET_DURATION = "netstats_dev_bucket_duration";
@@ -13407,12 +13408,12 @@ public final class Settings {
          * <p>
          * Type: int (0 for false, 1 for true)
          * @hide
-         * @deprecated Use {@link android.provider.Telephony.SimInfo#ENHANCED_4G_MODE_ENABLED}
-         * instead.
+         * @deprecated Use
+         * {@link android.provider.Telephony.SimInfo#COLUMN_ENHANCED_4G_MODE_ENABLED} instead.
          */
         @Deprecated
         public static final String ENHANCED_4G_MODE_ENABLED =
-                Telephony.SimInfo.ENHANCED_4G_MODE_ENABLED;
+                Telephony.SimInfo.COLUMN_ENHANCED_4G_MODE_ENABLED;
 
         /**
          * Whether VT (Video Telephony over IMS) is enabled
@@ -13420,10 +13421,10 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
-         * @deprecated Use {@link android.provider.Telephony.SimInfo#VT_IMS_ENABLED} instead.
+         * @deprecated Use {@link android.provider.Telephony.SimInfo#COLUMN_VT_IMS_ENABLED} instead.
          */
         @Deprecated
-        public static final String VT_IMS_ENABLED = Telephony.SimInfo.VT_IMS_ENABLED;
+        public static final String VT_IMS_ENABLED = Telephony.SimInfo.COLUMN_VT_IMS_ENABLED;
 
         /**
          * Whether WFC is enabled
@@ -13431,10 +13432,11 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
-         * @deprecated Use {@link android.provider.Telephony.SimInfo#WFC_IMS_ENABLED} instead.
+         * @deprecated Use
+         * {@link android.provider.Telephony.SimInfo#COLUMN_WFC_IMS_ENABLED} instead.
          */
         @Deprecated
-        public static final String WFC_IMS_ENABLED = Telephony.SimInfo.WFC_IMS_ENABLED;
+        public static final String WFC_IMS_ENABLED = Telephony.SimInfo.COLUMN_WFC_IMS_ENABLED;
 
         /**
          * WFC mode on home/non-roaming network.
@@ -13442,10 +13444,10 @@ public final class Settings {
          * Type: int - 2=Wi-Fi preferred, 1=Cellular preferred, 0=Wi-Fi only
          *
          * @hide
-         * @deprecated Use {@link android.provider.Telephony.SimInfo#WFC_IMS_MODE} instead.
+         * @deprecated Use {@link android.provider.Telephony.SimInfo#COLUMN_WFC_IMS_MODE} instead.
          */
         @Deprecated
-        public static final String WFC_IMS_MODE = Telephony.SimInfo.WFC_IMS_MODE;
+        public static final String WFC_IMS_MODE = Telephony.SimInfo.COLUMN_WFC_IMS_MODE;
 
         /**
          * WFC mode on roaming network.
@@ -13453,11 +13455,12 @@ public final class Settings {
          * Type: int - see {@link #WFC_IMS_MODE} for values
          *
          * @hide
-         * @deprecated Use {@link android.provider.Telephony.SimInfo#WFC_IMS_ROAMING_MODE}
+         * @deprecated Use {@link android.provider.Telephony.SimInfo#COLUMN_WFC_IMS_ROAMING_MODE}
          * instead.
          */
         @Deprecated
-        public static final String WFC_IMS_ROAMING_MODE = Telephony.SimInfo.WFC_IMS_ROAMING_MODE;
+        public static final String WFC_IMS_ROAMING_MODE =
+                Telephony.SimInfo.COLUMN_WFC_IMS_ROAMING_MODE;
 
         /**
          * Whether WFC roaming is enabled
@@ -13465,12 +13468,12 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
-         * @deprecated Use {@link android.provider.Telephony.SimInfo#WFC_IMS_ROAMING_ENABLED}
+         * @deprecated Use {@link android.provider.Telephony.SimInfo#COLUMN_WFC_IMS_ROAMING_ENABLED}
          * instead
          */
         @Deprecated
         public static final String WFC_IMS_ROAMING_ENABLED =
-                Telephony.SimInfo.WFC_IMS_ROAMING_ENABLED;
+                Telephony.SimInfo.COLUMN_WFC_IMS_ROAMING_ENABLED;
 
         /**
          * Whether user can enable/disable LTE as a preferred network. A carrier might control

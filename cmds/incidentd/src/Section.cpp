@@ -512,8 +512,8 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
     // Open log buffer and getting logs since last retrieved time if any.
     unique_ptr<logger_list, void (*)(logger_list*)> loggers(
             gLastLogsRetrieved.find(mLogID) == gLastLogsRetrieved.end()
-                    ? android_logger_list_alloc(ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK, 0, 0)
-                    : android_logger_list_alloc_time(ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK,
+                    ? android_logger_list_alloc(ANDROID_LOG_NONBLOCK, 0, 0)
+                    : android_logger_list_alloc_time(ANDROID_LOG_NONBLOCK,
                                                      gLastLogsRetrieved[mLogID], 0),
             android_logger_list_free);
 

@@ -74,6 +74,19 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         ipTtl = tcpDetails.ttl;
     }
 
+    private TcpKeepalivePacketData(final InetAddress srcAddress, int srcPort,
+            final InetAddress dstAddress, int dstPort, final byte[] data, int tcpSeq,
+            int tcpAck, int tcpWnd, int tcpWndScale, int ipTos, int ipTtl)
+            throws InvalidPacketException {
+        super(srcAddress, srcPort, dstAddress, dstPort, data);
+        this.tcpSeq = tcpSeq;
+        this.tcpAck = tcpAck;
+        this.tcpWnd = tcpWnd;
+        this.tcpWndScale = tcpWndScale;
+        this.ipTos = ipTos;
+        this.ipTtl = ipTtl;
+    }
+
     /**
      * Factory method to create tcp keepalive packet structure.
      */
@@ -139,10 +152,12 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
     public boolean equals(@Nullable final Object o) {
         if (!(o instanceof TcpKeepalivePacketData)) return false;
         final TcpKeepalivePacketData other = (TcpKeepalivePacketData) o;
-        return this.srcAddress.equals(other.srcAddress)
-                && this.dstAddress.equals(other.dstAddress)
-                && this.srcPort == other.srcPort
-                && this.dstPort == other.dstPort
+        final InetAddress srcAddress = getSrcAddress();
+        final InetAddress dstAddress = getDstAddress();
+        return srcAddress.equals(other.getSrcAddress())
+                && dstAddress.equals(other.getDstAddress())
+                && getSrcPort() == other.getSrcPort()
+                && getDstPort() == other.getDstPort()
                 && this.tcpAck == other.tcpAck
                 && this.tcpSeq == other.tcpSeq
                 && this.tcpWnd == other.tcpWnd
@@ -153,8 +168,8 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
 
     @Override
     public int hashCode() {
-        return Objects.hash(srcAddress, dstAddress, srcPort, dstPort, tcpAck, tcpSeq, tcpWnd,
-                tcpWndScale, ipTos, ipTtl);
+        return Objects.hash(getSrcAddress(), getDstAddress(), getSrcPort(), getDstPort(),
+                tcpAck, tcpSeq, tcpWnd, tcpWndScale, ipTos, ipTtl);
     }
 
     /**
@@ -169,7 +184,11 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
 
     /** Write to parcel. */
     public void writeToParcel(Parcel out, int flags) {
-        super.writeToParcel(out, flags);
+        out.writeString(getSrcAddress().getHostAddress());
+        out.writeString(getDstAddress().getHostAddress());
+        out.writeInt(getSrcPort());
+        out.writeInt(getDstPort());
+        out.writeByteArray(getPacket());
         out.writeInt(tcpSeq);
         out.writeInt(tcpAck);
         out.writeInt(tcpWnd);
@@ -178,21 +197,32 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         out.writeInt(ipTtl);
     }
 
-    private TcpKeepalivePacketData(Parcel in) {
-        super(in);
-        tcpSeq = in.readInt();
-        tcpAck = in.readInt();
-        tcpWnd = in.readInt();
-        tcpWndScale = in.readInt();
-        ipTos = in.readInt();
-        ipTtl = in.readInt();
+    private static TcpKeepalivePacketData readFromParcel(Parcel in) throws InvalidPacketException {
+        InetAddress srcAddress = InetAddresses.parseNumericAddress(in.readString());
+        InetAddress dstAddress = InetAddresses.parseNumericAddress(in.readString());
+        int srcPort = in.readInt();
+        int dstPort = in.readInt();
+        byte[] packet = in.createByteArray();
+        int tcpSeq = in.readInt();
+        int tcpAck = in.readInt();
+        int tcpWnd = in.readInt();
+        int tcpWndScale = in.readInt();
+        int ipTos = in.readInt();
+        int ipTtl = in.readInt();
+        return new TcpKeepalivePacketData(srcAddress, srcPort, dstAddress, dstPort, packet, tcpSeq,
+                tcpAck, tcpWnd, tcpWndScale, ipTos, ipTtl);
     }
 
     /** Parcelable Creator. */
     public static final @NonNull Parcelable.Creator<TcpKeepalivePacketData> CREATOR =
             new Parcelable.Creator<TcpKeepalivePacketData>() {
                 public TcpKeepalivePacketData createFromParcel(Parcel in) {
-                    return new TcpKeepalivePacketData(in);
+                    try {
+                        return readFromParcel(in);
+                    } catch (InvalidPacketException e) {
+                        throw new IllegalArgumentException(
+                                "Invalid NAT-T keepalive data: " + e.getError());
+                    }
                 }
 
                 public TcpKeepalivePacketData[] newArray(int size) {
@@ -206,10 +236,12 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
     @NonNull
     public TcpKeepalivePacketDataParcelable toStableParcelable() {
         final TcpKeepalivePacketDataParcelable parcel = new TcpKeepalivePacketDataParcelable();
+        final InetAddress srcAddress = getSrcAddress();
+        final InetAddress dstAddress = getDstAddress();
         parcel.srcAddress = srcAddress.getAddress();
-        parcel.srcPort = srcPort;
+        parcel.srcPort = getSrcPort();
         parcel.dstAddress = dstAddress.getAddress();
-        parcel.dstPort = dstPort;
+        parcel.dstPort = getDstPort();
         parcel.seq = tcpSeq;
         parcel.ack = tcpAck;
         parcel.rcvWnd = tcpWnd;
@@ -221,10 +253,10 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
 
     @Override
     public String toString() {
-        return "saddr: " + srcAddress
-                + " daddr: " + dstAddress
-                + " sport: " + srcPort
-                + " dport: " + dstPort
+        return "saddr: " + getSrcAddress()
+                + " daddr: " + getDstAddress()
+                + " sport: " + getSrcPort()
+                + " dport: " + getDstPort()
                 + " seq: " + tcpSeq
                 + " ack: " + tcpAck
                 + " wnd: " + tcpWnd
