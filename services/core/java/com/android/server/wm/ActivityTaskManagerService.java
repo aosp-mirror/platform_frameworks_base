@@ -4978,6 +4978,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             printedAnything = true;
             mStackSupervisor.dump(pw, "  ");
+            mTaskOrganizerController.dump(pw, "  ");
         }
 
         if (!printedAnything) {
