@@ -70,19 +70,26 @@ public class UiModeManager {
      * also monitor this Intent in order to be informed of mode changes or
      * prevent the normal car UI from being displayed by setting the result
      * of the broadcast to {@link Activity#RESULT_CANCELED}.
+     * <p>
+     * This intent is broadcast when {@link #getCurrentModeType()} transitions to
+     * {@link Configuration#UI_MODE_TYPE_CAR} from some other ui mode.
      */
     public static String ACTION_ENTER_CAR_MODE = "android.app.action.ENTER_CAR_MODE";
 
     /**
-     * Broadcast sent when the device's UI has switched to car mode, either by being placed in a car
-     * dock or explicit action of the user.
+     * Broadcast sent when an app has entered car mode using either {@link #enableCarMode(int)} or
+     * {@link #enableCarMode(int, int)}.
      * <p>
-     * In addition to the behavior for {@link #ACTION_ENTER_CAR_MODE}, this broadcast includes the
-     * package name of the app which requested to enter car mode in the
-     * {@link #EXTRA_CALLING_PACKAGE}.  If an app requested to enter car mode using
-     * {@link #enableCarMode(int, int)} and specified a priority this will be specified in the
+     * Unlike {@link #ACTION_ENTER_CAR_MODE}, which is only sent when the global car mode state
+     * (i.e. {@link #getCurrentModeType()}) transitions to {@link Configuration#UI_MODE_TYPE_CAR},
+     * this intent is sent any time an app declares it has entered car mode.  Thus, this intent is
+     * intended for use by a component which needs to know not only when the global car mode state
+     * changed, but also when the highest priority app declaring car mode has changed.
+     * <p>
+     * This broadcast includes the package name of the app which requested to enter car mode in
+     * {@link #EXTRA_CALLING_PACKAGE}.  The priority the app entered car mode at is specified in
      * {@link #EXTRA_PRIORITY}.
-     *
+     * <p>
      * This is primarily intended to be received by other components of the Android OS.
      * <p>
      * Receiver requires permission: {@link android.Manifest.permission.HANDLE_CAR_MODE_CHANGES}
@@ -96,17 +103,25 @@ public class UiModeManager {
      * Broadcast sent when the device's UI has switch away from car mode back
      * to normal mode.  Typically used by a car mode app, to dismiss itself
      * when the user exits car mode.
+     * <p>
+     * This intent is broadcast when {@link #getCurrentModeType()} transitions from
+     * {@link Configuration#UI_MODE_TYPE_CAR} to some other ui mode.
      */
     public static String ACTION_EXIT_CAR_MODE = "android.app.action.EXIT_CAR_MODE";
 
     /**
-     * Broadcast sent when the device's UI has switched away from car mode back to normal mode.
-     * Typically used by a car mode app, to dismiss itself when the user exits car mode.
+     * Broadcast sent when an app has exited car mode using {@link #disableCarMode(int)}.
      * <p>
-     * In addition to the behavior for {@link #ACTION_EXIT_CAR_MODE}, this broadcast includes the
-     * package name of the app which requested to exit car mode in {@link #EXTRA_CALLING_PACKAGE}.
-     * If an app requested to enter car mode using {@link #enableCarMode(int, int)} and specified a
-     * priority this will be specified in the {@link #EXTRA_PRIORITY} when exiting car mode.
+     * Unlike {@link #ACTION_EXIT_CAR_MODE}, which is only sent when the global car mode state
+     * (i.e. {@link #getCurrentModeType()}) transitions to a non-car mode state such as
+     * {@link Configuration#UI_MODE_TYPE_NORMAL}, this intent is sent any time an app declares it
+     * has exited car mode.  Thus, this intent is intended for use by a component which needs to
+     * know not only when the global car mode state changed, but also when the highest priority app
+     * declaring car mode has changed.
+     * <p>
+     * This broadcast includes the package name of the app which requested to exit car mode in
+     * {@link #EXTRA_CALLING_PACKAGE}.  The priority the app originally entered car mode at is
+     * specified in {@link #EXTRA_PRIORITY}.
      * <p>
      * If {@link #DISABLE_CAR_MODE_ALL_PRIORITIES} is used when disabling car mode (i.e. this is
      * initiated by the user via the persistent car mode notification), this broadcast is sent once
@@ -251,9 +266,7 @@ public class UiModeManager {
      * An app may request to enter car mode when the system is already in car mode.  The app may
      * specify a "priority" when entering car mode.  The device will remain in car mode
      * (i.e. {@link #getCurrentModeType()} is {@link Configuration#UI_MODE_TYPE_CAR}) as long as
-     * there is a priority level at which car mode have been enabled.  For example assume app A
-     * enters car mode at priority level 100, and then app B enters car mode at the default priority
-     * (0).  If app A exits car mode, the device will remain in car mode until app B exits car mode.
+     * there is a priority level at which car mode have been enabled.
      * <p>
      * Specifying a priority level when entering car mode is important in cases where multiple apps
      * on a device implement a car-mode {@link android.telecom.InCallService} (see
@@ -266,18 +279,28 @@ public class UiModeManager {
      * correct conditions exist for that app to be in car mode.  The device maker should ensure that
      * where multiple apps exist on the device which can potentially enter car mode, appropriate
      * priorities are used to ensure that calls delivered by the
-     * {@link android.telecom.InCallService} API are delivered to the highest priority app.
-     * If app A and app B can both potentially enable car mode, and it is desired that app B is the
-     * one which should receive call information, the priority for app B should be higher than the
-     * one for app A.
+     * {@link android.telecom.InCallService} API are sent to the highest priority app given the
+     * desired behavior of the car mode experience on the device.
      * <p>
-     * When an app uses a priority to enable car mode, they can disable car mode at the specified
+     * If app A and app B both meet their own criteria to enable car mode, and it is desired that
+     * app B should be the one which should receive call information in that scenario, the priority
+     * for app B should be higher than the one for app A.  The higher priority of app B compared to
+     * A means it will be bound to during calls and app A will not.  When app B no longer meets its
+     * criteria for providing a car mode experience it uses {@link #disableCarMode(int)} to disable
+     * car mode at its priority level.  The system will then unbind from app B and bind to app A as
+     * it has the next highest priority.
+     * <p>
+     * When an app enables car mode at a certain priority, it can disable car mode at the specified
      * priority level using {@link #disableCarMode(int)}.  An app may only enable car mode at a
      * single priority.
      * <p>
-     * Public apps are assumed to enter/exit car mode at {@link #DEFAULT_PRIORITY}.
+     * Public apps are assumed to enter/exit car mode at the lowest priority,
+     * {@link #DEFAULT_PRIORITY}.
      *
-     * @param priority The declared priority for the caller.
+     * @param priority The declared priority for the caller, where {@link #DEFAULT_PRIORITY} (0) is
+     *                 the lowest priority and higher numbers represent a higher priority.
+     *                 The priorities apps declare when entering car mode is determined by the
+     *                 device manufacturer based on the desired car mode experience.
      * @param flags Car mode flags.
      * @hide
      */
@@ -322,11 +345,11 @@ public class UiModeManager {
     /**
      * The default priority used for entering car mode.
      * <p>
-     * Callers of the {@link UiModeManager#enableCarMode(int)} priority will be assigned the
-     * default priority.
+     * Callers of the {@link #enableCarMode(int)} priority will be assigned the default priority.
+     * This is considered the lowest possible priority for enabling car mode.
      * <p>
      * System apps can specify a priority other than the default priority when using
-     * {@link UiModeManager#enableCarMode(int, int)} to enable car mode.
+     * {@link #enableCarMode(int, int)} to enable car mode.
      * @hide
      */
     @SystemApi
