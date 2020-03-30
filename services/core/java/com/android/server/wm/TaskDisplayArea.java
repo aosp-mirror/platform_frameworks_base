@@ -755,7 +755,11 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
      */
     ActivityStack getOrCreateStack(int windowingMode, int activityType, boolean onTop,
             Intent intent, Task candidateTask) {
-        if (!alwaysCreateStack(windowingMode, activityType)) {
+        // Need to pass in a determined windowing mode to see if a new stack should be created,
+        // so use its parent's windowing mode if it is undefined.
+        if (!alwaysCreateStack(
+                windowingMode != WINDOWING_MODE_UNDEFINED ? windowingMode : getWindowingMode(),
+                activityType)) {
             ActivityStack stack = getStack(windowingMode, activityType);
             if (stack != null) {
                 return stack;
