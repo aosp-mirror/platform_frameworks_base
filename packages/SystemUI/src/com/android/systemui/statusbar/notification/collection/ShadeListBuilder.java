@@ -273,8 +273,6 @@ public class ShadeListBuilder implements Dumpable {
      * if we detect that behavior, we should crash instantly.
      */
     private void buildList() {
-        mLogger.logStartBuildList(mIterationCount);
-
         mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
         mPipelineState.setState(STATE_BUILD_STARTED);
 
@@ -321,16 +319,16 @@ public class ShadeListBuilder implements Dumpable {
         freeEmptyGroups();
 
         // Step 8: Dispatch the new list, first to any listeners and then to the view layer
-        if (mIterationCount % 10 == 0) {
-            mLogger.logFinalList(mNotifList);
-        }
         dispatchOnBeforeRenderList(mReadOnlyNotifList);
         if (mOnRenderListListener != null) {
             mOnRenderListListener.onRenderList(mReadOnlyNotifList);
         }
 
         // Step 9: We're done!
-        mLogger.logEndBuildList(mIterationCount);
+        mLogger.logEndBuildList(mIterationCount, mReadOnlyNotifList.size());
+        if (mIterationCount % 10 == 0) {
+            mLogger.logFinalList(mNotifList);
+        }
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
     }
@@ -439,6 +437,7 @@ public class ShadeListBuilder implements Dumpable {
                         group.setSummary(entry);
                     } else {
                         mLogger.logDuplicateSummary(
+                                mIterationCount,
                                 group.getKey(),
                                 existingSummary.getKey(),
                                 entry.getKey());
@@ -460,7 +459,7 @@ public class ShadeListBuilder implements Dumpable {
 
                 final String topLevelKey = entry.getKey();
                 if (mGroups.containsKey(topLevelKey)) {
-                    mLogger.logDuplicateTopLevelKey(topLevelKey);
+                    mLogger.logDuplicateTopLevelKey(mIterationCount, topLevelKey);
                 } else {
                     entry.setParent(ROOT_ENTRY);
                     out.add(entry);
@@ -626,6 +625,7 @@ public class ShadeListBuilder implements Dumpable {
         for (NotificationEntry entry : mAllEntries) {
             if (entry.mExcludingFilter != entry.mPreviousExcludingFilter) {
                 mLogger.logFilterChanged(
+                        mIterationCount,
                         entry.getKey(),
                         entry.mPreviousExcludingFilter,
                         entry.mExcludingFilter);
@@ -637,6 +637,7 @@ public class ShadeListBuilder implements Dumpable {
         for (NotificationEntry entry : mAllEntries) {
             if (entry.getParent() != entry.getPreviousParent()) {
                 mLogger.logParentChanged(
+                        mIterationCount,
                         entry.getKey(),
                         entry.getPreviousParent() == null
                                 ? null : entry.getPreviousParent().getKey(),
@@ -647,6 +648,7 @@ public class ShadeListBuilder implements Dumpable {
         for (GroupEntry group : mGroups.values()) {
             if (group.getParent() != group.getPreviousParent()) {
                 mLogger.logParentChanged(
+                        mIterationCount,
                         group.getKey(),
                         group.getPreviousParent() == null
                                 ? null : group.getPreviousParent().getKey(),
@@ -720,6 +722,7 @@ public class ShadeListBuilder implements Dumpable {
 
         if (promoter != entry.mNotifPromoter) {
             mLogger.logPromoterChanged(
+                    mIterationCount,
                     entry.getKey(),
                     entry.mNotifPromoter != null ? entry.mNotifPromoter.getName() : null,
                     promoter != null ? promoter.getName() : null);
@@ -746,6 +749,7 @@ public class ShadeListBuilder implements Dumpable {
 
         if (section != entry.mNotifSection) {
             mLogger.logSectionChanged(
+                    mIterationCount,
                     entry.getKey(),
                     entry.mNotifSection != null ? entry.mNotifSection.getName() : null,
                     entry.getSection(),

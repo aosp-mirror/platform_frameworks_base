@@ -36,19 +36,12 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
-    fun logStartBuildList(iterationCount: Int) {
+    fun logEndBuildList(iterationCount: Int, listLength: Int) {
         buffer.log(TAG, INFO, {
             int1 = iterationCount
+            int2 = listLength
         }, {
-            "Starting to build shade list (run #$int1)"
-        })
-    }
-
-    fun logEndBuildList(iterationCount: Int) {
-        buffer.log(TAG, INFO, {
-            int1 = iterationCount
-        }, {
-            "Finished building shade list (run #$int1)"
+            "(Build $int1) Finished building shade list ($int2 top-level entries)"
         })
     }
 
@@ -97,63 +90,71 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
-    fun logDuplicateSummary(groupKey: String, existingKey: String, newKey: String) {
+    fun logDuplicateSummary(buildId: Int, groupKey: String, existingKey: String, newKey: String) {
         buffer.log(TAG, WARNING, {
+            int1 = buildId
             str1 = groupKey
             str2 = existingKey
             str3 = newKey
         }, {
-            """Duplicate summary for group "$str1": "$str2" vs. "$str3""""
+            """(Build $int1) Duplicate summary for group "$str1": "$str2" vs. "$str3""""
         })
     }
 
-    fun logDuplicateTopLevelKey(topLevelKey: String) {
+    fun logDuplicateTopLevelKey(buildId: Int, topLevelKey: String) {
         buffer.log(TAG, WARNING, {
+            int1 = buildId
             str1 = topLevelKey
         }, {
-            "Duplicate top-level key: $str1"
+            "(Build $int1) Duplicate top-level key: $str1"
         })
     }
 
-    fun logParentChanged(key: String, prevParent: String?, newParent: String?) {
+    fun logParentChanged(buildId: Int, key: String, prevParent: String?, newParent: String?) {
         buffer.log(TAG, INFO, {
+            int1 = buildId
             str1 = key
             str2 = prevParent
             str3 = newParent
         }, {
-            "Parent change for $str1: $str2 -> $str3"
+            "(Build $int1) Parent change for $str1: $str2 -> $str3"
         })
     }
 
     fun logFilterChanged(
+        buildId: Int,
         key: String,
         prevFilter: NotifFilter?,
         newFilter: NotifFilter?
     ) {
         buffer.log(TAG, INFO, {
+            int1 = buildId
             str1 = key
             str2 = prevFilter?.name
             str3 = newFilter?.name
         }, {
-            "Filter changed for $str1: $str2 -> $str3"
+            "(Build $int1) Filter changed for $str1: $str2 -> $str3"
         })
     }
 
     fun logPromoterChanged(
+        buildId: Int,
         key: String,
         prevPromoter: String?,
         newPromoter: String?
     ) {
         buffer.log(TAG, INFO, {
+            int1 = buildId
             str1 = key
             str2 = prevPromoter
             str3 = newPromoter
         }, {
-            "Promoter changed for $str1: $str2 -> $str3"
+            "(Build $int1) Promoter changed for $str1: $str2 -> $str3"
         })
     }
 
     fun logSectionChanged(
+        buildId: Int,
         key: String,
         prevSection: String?,
         prevIndex: Int,
@@ -161,6 +162,7 @@ class ShadeListBuilderLogger @Inject constructor(
         index: Int
     ) {
         buffer.log(TAG, INFO, {
+            long1 = buildId.toLong()
             str1 = key
             str2 = section
             int1 = index
@@ -168,19 +170,14 @@ class ShadeListBuilderLogger @Inject constructor(
             int2 = prevIndex
         }, {
             if (str3 == null) {
-                "Section assigned for $str1: '$str2' (#$int1)"
+                "(Build $long1) Section assigned for $str1: '$str2' (#$int1)"
             } else {
-                "Section changed for $str1: '$str3' (#$int2) -> '$str2' (#$int1)"
+                "(Build $long1) Section changed for $str1: '$str3' (#$int2) -> '$str2' (#$int1)"
             }
         })
     }
 
     fun logFinalList(entries: List<ListEntry>) {
-        buffer.log(TAG, DEBUG, {
-            int1 = entries.size
-        }, {
-            "List is finalized ($int1 top-level entries):"
-        })
         if (entries.isEmpty()) {
             buffer.log(TAG, DEBUG, {}, { "(empty list)" })
         }
