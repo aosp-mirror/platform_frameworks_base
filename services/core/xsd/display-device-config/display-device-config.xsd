@@ -25,7 +25,10 @@
     <xs:element name="displayConfiguration">
         <xs:complexType>
             <xs:sequence>
-                <xs:element type="nitsMap" name="screenBrightnessMap"/>
+                <xs:element type="nitsMap" name="screenBrightnessMap">
+                    <xs:annotation name="nonnull"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -34,15 +37,23 @@
 
     <xs:complexType name="nitsMap">
         <xs:sequence>
-            <xs:element name="point" type="point" maxOccurs="unbounded" minOccurs="2"/>
-            <xs:element name="highBrightnessStart" minOccurs="0" type="nonNegativeDecimal"/>
+            <xs:element name="point" type="point" maxOccurs="unbounded" minOccurs="2">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="point">
         <xs:sequence>
-            <xs:element type="nonNegativeDecimal" name="value"/>
-            <xs:element type="nonNegativeDecimal" name="nits"/>
+            <xs:element type="nonNegativeDecimal" name="value">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="nits">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
 
