@@ -32,7 +32,6 @@ import static org.mockito.Mockito.verify;
 import static java.lang.Thread.sleep;
 
 import android.app.AppOpsManager;
-import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -61,8 +60,6 @@ public class AppOpsControllerTest extends SysuiTestCase {
     @Mock
     private AppOpsManager mAppOpsManager;
     @Mock
-    private PackageManager mPackageManager;
-    @Mock
     private AppOpsController.Callback mCallback;
     @Mock
     private AppOpsControllerImpl.H mMockHandler;
@@ -78,10 +75,6 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
 
         getContext().addMockSystemService(AppOpsManager.class, mAppOpsManager);
-
-        // All permissions of TEST_UID and TEST_UID_OTHER are user sensitive. None of
-        // TEST_UID_NON_USER_SENSITIVE are user sensitive.
-        getContext().setMockPackageManager(mPackageManager);
 
         mController =
                 new AppOpsControllerImpl(mContext, mTestableLooper.getLooper(), mDumpManager);
