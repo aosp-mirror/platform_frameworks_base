@@ -41,9 +41,6 @@
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
-            <xs:element name="highBrightnessStart" minOccurs="0" type="nonNegativeDecimal">
-                <xs:annotation name="final"/>
-            </xs:element>
         </xs:sequence>
     </xs:complexType>
 
