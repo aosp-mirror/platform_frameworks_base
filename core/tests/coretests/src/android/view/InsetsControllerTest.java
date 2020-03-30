@@ -32,7 +32,6 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -639,31 +638,7 @@ public class InsetsControllerTest {
         });
     }
 
-    @Test
-    public void testFrameUpdateDuringAnimation() {
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
 
-            mController.onControlsChanged(createSingletonControl(ITYPE_IME));
-
-            // Pretend IME is calling
-            mController.show(ime(), true /* fromIme */);
-
-            InsetsState copy = new InsetsState(mController.getState(), true /* copySources */);
-            copy.getSource(ITYPE_IME).setFrame(0, 1, 2, 3);
-            copy.getSource(ITYPE_IME).setVisibleFrame(new Rect(4, 5, 6, 7));
-            mController.onStateChanged(copy);
-            assertNotEquals(new Rect(0, 1, 2, 3),
-                    mController.getState().getSource(ITYPE_IME).getFrame());
-            assertNotEquals(new Rect(4, 5, 6, 7),
-                    mController.getState().getSource(ITYPE_IME).getVisibleFrame());
-            mController.cancelExistingAnimation();
-            assertEquals(new Rect(0, 1, 2, 3),
-                    mController.getState().getSource(ITYPE_IME).getFrame());
-            assertEquals(new Rect(4, 5, 6, 7),
-                    mController.getState().getSource(ITYPE_IME).getVisibleFrame());
-        });
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-    }
 
     @Test
     public void testCaptionInsetsStateAssemble() {
