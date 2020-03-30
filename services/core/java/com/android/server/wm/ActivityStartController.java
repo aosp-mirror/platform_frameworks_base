@@ -190,8 +190,8 @@ public class ActivityStartController {
         final ActivityStack homeStack;
         try {
             // Make sure home stack exist on display.
-            homeStack = display.getOrCreateStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME,
-                    ON_TOP);
+            homeStack = display.mTaskContainers.getOrCreateStack(WINDOWING_MODE_FULLSCREEN,
+                    ACTIVITY_TYPE_HOME, ON_TOP);
         } finally {
             mSupervisor.endDeferResume();
         }
