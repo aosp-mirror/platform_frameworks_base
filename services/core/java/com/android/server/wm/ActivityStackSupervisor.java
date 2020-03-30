@@ -2009,6 +2009,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         pw.println();
         pw.println("ActivityStackSupervisor state:");
         mRootWindowContainer.dump(pw, prefix);
+        getKeyguardController().dump(pw, prefix);
+        mService.getLockTaskController().dump(pw, prefix);
         pw.print(prefix);
         pw.println("mCurTaskIdForUser=" + mCurTaskIdForUser);
         pw.println(prefix + "mUserStackInFront=" + mRootWindowContainer.mUserStackInFront);
@@ -2019,10 +2021,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             }
         }
         pw.print(prefix); pw.print("isHomeRecentsComponent=");
-        pw.print(mRecentTasks.isRecentsComponentHomeActivity(mRootWindowContainer.mCurrentUser));
-
-        getKeyguardController().dump(pw, prefix);
-        mService.getLockTaskController().dump(pw, prefix);
+        pw.println(mRecentTasks.isRecentsComponentHomeActivity(mRootWindowContainer.mCurrentUser));
+        pw.println();
     }
 
     static boolean printThisActivity(PrintWriter pw, ActivityRecord activity, String dumpPackage,
