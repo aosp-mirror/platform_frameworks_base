@@ -116,10 +116,11 @@ class IdmapDaemon {
         }
     }
 
-    boolean verifyIdmap(String overlayPath, int policies, boolean enforce, int userId)
+    boolean verifyIdmap(String targetPath, String overlayPath, int policies, boolean enforce,
+             int userId)
             throws Exception {
         try (Connection connection = connect()) {
-            return mService.verifyIdmap(overlayPath, policies, enforce, userId);
+            return mService.verifyIdmap(targetPath, overlayPath, policies, enforce, userId);
         }
     }
 
