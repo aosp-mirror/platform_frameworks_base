@@ -18,11 +18,13 @@ package com.android.server.wm.flicker;
 
 import static com.android.server.wm.flicker.CommonTransitions.exitPipModeToApp;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
 import com.android.server.wm.flicker.helpers.PipAppHelper;
 
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -35,6 +37,8 @@ import org.junit.runners.Parameterized;
 @LargeTest
 @RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 152738416)
+@Ignore("Waiting bug feedback")
 public class PipToAppTest extends PipTestBase {
     public PipToAppTest(String beginRotationName, int beginRotation) {
         super(beginRotationName, beginRotation);
