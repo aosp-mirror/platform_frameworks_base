@@ -1352,5 +1352,14 @@
     <string name="user_need_lock_message">Before you can create a restricted profile, you\u2019ll need to set up a screen lock to protect your apps and personal data.</string>
     <!-- User settings dialog button to set screen lock [CHAR LIMIT=25] -->
     <string name="user_set_lock_button">Set lock</string>
+    <!-- Label for switching to other user in the user switcher [CHAR LIMIT=35] -->
+    <string name="user_switch_to_user">Switch to <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
+
+    <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
+    <string name="guest_new_guest">Add guest</string>
+    <!-- Label for exiting and removing the guest session in the user switcher [CHAR LIMIT=35] -->
+    <string name="guest_exit_guest">Remove guest</string>
+    <!-- Name for the guest user [CHAR LIMIT=35] -->
+    <string name="guest_nickname">Guest</string>
 
 </resources>
