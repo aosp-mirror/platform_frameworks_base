@@ -66,6 +66,8 @@
         <include layout="@layout/ambient_indication"
             android:id="@+id/ambient_indication_container" />
 
+        <include layout="@layout/photo_preview_overlay" />
+
         <ViewStub
             android:id="@+id/keyguard_user_switcher"
             android:layout="@layout/keyguard_user_switcher"
