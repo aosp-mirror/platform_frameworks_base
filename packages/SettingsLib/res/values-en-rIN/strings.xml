@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP address &amp; port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scan QR code"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Pair device over Wi‑Fi by scanning a QR code"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Please connect to a Wi‑Fi network"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Bug report shortcut"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Show a button in the power menu for taking a bug report"</string>
@@ -432,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Should last until about <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Until <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Battery may run out by <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Less than <xliff:g id="THRESHOLD">%1$s</xliff:g> remaining"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Less than <xliff:g id="THRESHOLD">%1$s</xliff:g> remaining (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"More than <xliff:g id="TIME_REMAINING">%1$s</xliff:g> remaining (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -511,26 +509,42 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Phone speaker"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem connecting. Turn device off and back on"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Wired audio device"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
+    <string name="help_label" msgid="3528360748637781274">"Help and feedback"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Storage"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Shared data"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"View and modify shared data"</string>
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
     <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
     <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <string name="blob_id_text" msgid="8680078988996308061">"Shared data ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Expires on <xliff:g id="DATE">%s</xliff:g>"</string>
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
     <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"Apps sharing data"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"No description provided by the app."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Lease expires on <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Delete shared data"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Are you sure that you want to delete this shared data?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Users have their own apps and content"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"You can restrict access to apps and content from your account"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"User"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Restricted profile"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Add new user?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"You can share this device with other people by creating additional users. Each user has their own space, which they can customise with apps, wallpaper and so on. Users can also adjust device settings such as Wi‑Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Set up user now?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Make sure that the person is available to take the device and set up their space."</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Set up profile now?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Set up now"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Not now"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Add"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"New user"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"New profile"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"User info"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profile info"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Before you can create a restricted profile, you\'ll need to set up a screen lock to protect your apps and personal data."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Set lock"</string>
 </resources>

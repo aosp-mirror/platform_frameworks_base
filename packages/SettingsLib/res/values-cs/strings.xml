@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP adresa a port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Naskenování QR kódu"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Párovat zařízení přes Wi-Fi naskenováním QR kódu"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Připojte se k síti Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ladění, vývoj"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Zástupce hlášení chyb"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Zobrazit v hlavní nabídce tlačítko k vygenerování chybového hlášení"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomálie (červená a zelená)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomálie (modrá a žlutá)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korekce barev"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Korekce barev umožňuje upravit zobrazování barev na zařízení"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Přepsáno nastavením <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Zbývá asi <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Vydrží asi do <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Vydrží asi do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Baterie se může vybít do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Zbývá méně než <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Zbývá méně než <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Zbývá více než <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -514,26 +511,42 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Reproduktor telefonu"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problém s připojením. Vypněte zařízení a znovu jej zapněte"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Kabelové audiozařízení"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
+    <string name="help_label" msgid="3528360748637781274">"Nápověda a zpětná vazba"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Úložiště"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Sdílená data"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Zobrazit a upravit sdílená data"</string>
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
     <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
     <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <string name="blob_id_text" msgid="8680078988996308061">"ID sdílených dat: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Platnost vyprší <xliff:g id="DATE">%s</xliff:g>"</string>
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
     <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"Aplikace, které sdílejí data"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Aplikace neposkytuje žádný popis."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Pronájem vyprší <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Vymazat sdílená data"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Opravdu tato sdílená data chcete vymazat?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Uživatelé mají své vlastní aplikace a obsah."</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Můžete omezit přístup k aplikacím a obsahu ze svého účtu"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Uživatel"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Omezený profil"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Přidat nového uživatele?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Vytvořením dalších uživatelů můžete toto zařízení sdílet s jinými lidmi. Každý uživatel má svůj prostor, který si může přizpůsobit instalací aplikací, přidáním tapety apod. Uživatelé také mohou upravit nastavení zařízení (např. Wi-Fi), která ovlivní všechny uživatele.\n\nKaždý nově přidaný uživatel si musí nastavit vlastní prostor.\n\nKaždý uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Když přidáte nového uživatele, musí si nastavit vlastní prostor.\n\nJakýkoli uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Nastavit uživatele?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Ujistěte se, že je uživatel k dispozici a může si v zařízení nastavit svůj prostor"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Nastavit profil?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Nastavit"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Teď ne"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Přidat"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Nový uživatel"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Nový profil"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Info o uživateli"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Informace o profilu"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Před vytvořením omezeného profilu je nutné nejprve nastavit zámek obrazovky k ochraně aplikací a dat."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Nastavit zámek"</string>
 </resources>

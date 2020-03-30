@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-cím és port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR-kód beolvasása"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Párosítsa az eszközt Wi-Fi-n keresztül QR-kód beolvasásával"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Csatlakozzon Wi-Fi-hálózathoz"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Hibabejelentési gomb"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Gomb megjelenítése a bekapcsolási menüben hibajelentés készítéséhez"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomália (piros– zöld)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomália (kék–sárga)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Színkorrekció"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"A színkorrekcióval módosíthatja a színek megjelenítésének módját az eszközön"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Felülírva erre: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Körülbelül <xliff:g id="TIME_REMAINING">%1$s</xliff:g> maradt hátra"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Nagyjából még ennyit bír: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Nagyjából még ennyit bír: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Eddig: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Az akkumulátor lemerülhet a következő időpontig: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Kevesebb mint <xliff:g id="THRESHOLD">%1$s</xliff:g> van hátra"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Kevesebb mint <xliff:g id="THRESHOLD">%1$s</xliff:g> van hátra (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Kevesebb mint <xliff:g id="TIME_REMAINING">%1$s</xliff:g> van hátra (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,42 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefon hangszórója"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Sikertelen csatlakozás. Kapcsolja ki az eszközt, majd kapcsolja be újra."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Vezetékes audioeszköz"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
+    <string name="help_label" msgid="3528360748637781274">"Súgó és visszajelzés"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Tárhely"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Megosztott adatok"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Megosztott adatok megtekintése és módosítása"</string>
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
     <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
     <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <string name="blob_id_text" msgid="8680078988996308061">"Megosztott adat azonosítója: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Lejárat időpontja: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
     <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"Adatokat megosztó alkalmazások"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Nincs megadva leírás az alkalmazásnál."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"A bérlet a következő időpontban jár le: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Megosztott adat törlése"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Biztosan törli ezt a megosztott adatot?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"A felhasználóknak saját alkalmazásaik és tartalmaik vannak"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Korlátozhatja az alkalmazásokhoz és tartalmakhoz való hozzáférést a fiókjából"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Felhasználó"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Korlátozott profil"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Hozzáad új felhasználót?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"További felhasználók létrehozásával megoszthatja ezt az eszközt másokkal. Minden felhasználó saját felülettel rendelkezik, amelyet személyre szabhat saját alkalmazásaival, háttérképével stb. A felhasználók módosíthatják az eszköz beállításait is, például a Wi‑Fi használatát, amely mindenkit érint.\n\nHa új felhasználót ad hozzá, az illetőnek be kell állítania saját felületét.\n\nBármely felhasználó frissítheti az alkalmazásokat valamennyi felhasználó számára. Előfordulhat, hogy a kisegítő lehetőségekkel kapcsolatos beállításokat és szolgáltatásokat nem viszi át a rendszer az új felhasználóhoz."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Ha új felhasználót ad hozzá, az illetőnek be kell állítania saját tárterületét.\n\nBármely felhasználó frissítheti az alkalmazásokat valamennyi felhasználó számára."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Beállít most egy felhasználót?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Győződjön meg arról, hogy a személy hozzá tud férni az eszközhöz, hogy beállíthassa a területét"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Létrehoz most egy profilt?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Beállítás most"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Most nem"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Hozzáadás"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Új felhasználó"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Új profil"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Felhasználói adatok"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profiladatok"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Mielőtt létrehozhatna egy korlátozott profilt, be kell állítania egy képernyőzárat, hogy megvédje alkalmazásait és személyes adatait."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Képernyőzár beállítása"</string>
 </resources>

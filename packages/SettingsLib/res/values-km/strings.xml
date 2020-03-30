@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"អាសយដ្ឋាន IP និងច្រក"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"ស្កេន​កូដ QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"ផ្គូផ្គង​ឧបករណ៍​តាមរយៈ Wi‑Fi ដោយស្កេន​កូដ QR"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"សូម​ភ្ជាប់ទៅ​បណ្តាញ Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ជួសជុល, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ផ្លូវកាត់រាយការណ៍​កំហុស"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"បង្ហាញ​​ប៊ូតុង​ក្នុង​ម៉ឺនុយ​ប៊ូតុង​ថាមពល​​​សម្រាប់​ការ​ទទួល​យក​របាយការណ៍​កំហុស"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (ក្រហម​ពណ៌​បៃតង​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (ពណ៌​ខៀវ​-លឿង​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ការ​កែ​ពណ៌"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"ការកែតម្រូវ​ពណ៌​អនុញ្ញាតឱ្យ​អ្នក​កែតម្រូវ​របៀប​បង្ហាញ​ពណ៌​នៅលើ​ឧបករណ៍​របស់អ្នក"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"គួរ​តែ​អាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"គួរ​តែ​អាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"រហូតដល់​ម៉ោង <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"អាចនឹង​អស់ថ្ម​ត្រឹមម៉ោង <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"នៅ​សល់​តិច​ជាង <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"នៅសល់​តិចជាង <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"នៅសល់​ច្រើនជាង <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,42 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ឧបករណ៍​បំពង​សំឡេង​ទូរសព្ទ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"មាន​បញ្ហា​ក្នុងការ​ភ្ជាប់។ បិទ រួច​បើក​ឧបករណ៍​វិញ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ឧបករណ៍​សំឡេងប្រើខ្សែ"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
+    <string name="help_label" msgid="3528360748637781274">"ជំនួយ និងមតិកែលម្អ"</string>
+    <string name="storage_category" msgid="2287342585424631813">"ទំហំផ្ទុក"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"ទិន្នន័យ​ដែលបាន​ចែករំលែក"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"មើល និង​កែទិន្នន័យ​ដែលបាន​ចែករំលែក"</string>
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
     <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
     <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <string name="blob_id_text" msgid="8680078988996308061">"លេខសម្គាល់​ទិន្នន័យ​ដែលបាន​ចែករំលែក៖ <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"ផុតកំណត់​នៅថ្ងៃទី <xliff:g id="DATE">%s</xliff:g>"</string>
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
     <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"កម្មវិធី​ដែលកំពុង​ចែករំលែក​ទិន្នន័យ"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"គ្មាន​ការពណ៌នា​ដែលផ្ដល់ដោយ​កម្មវិធីទេ។"</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"ការជួល​ផុតកំណត់​នៅថ្ងៃទី <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"លុបទិន្នន័យ​ដែលបាន​ចែករំលែក"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"តើអ្នក​ប្រាកដថា​ចង់លុប​ទិន្នន័យ​ដែលបាន​ចែករំលែកនេះ​ដែរទេ?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"អ្នក​ប្រើ​មាន​កម្មវិធី និង​មាតិកា​ផ្ទាល់​របស់​ពួកគេ"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"អ្នក​អាច​ដាក់កម្រិត​ចូល​ដំណើរការ​កម្មវិធី និង​មាតិកា​ពី​គណនី​របស់​អ្នក"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"អ្នក​ប្រើ"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"ប្រវត្តិ​បាន​ដាក់កម្រិត"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"បញ្ចូល​​អ្នកប្រើ​ប្រាស់​ថ្មី?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"អ្នកអាច​ចែករំលែក​ឧបករណ៍​នេះ​ជាមួយ​មនុស្ស​ផ្សេងទៀតបានដោយ​បង្កើត​អ្នកប្រើប្រាស់​បន្ថែម។ អ្នក​ប្រើប្រាស់​ម្នាក់ៗ​មាន​ទំហំផ្ទុក​ផ្ទាល់ខ្លួន​របស់​គេ ដែលពួកគេ​អាច​ប្ដូរតាម​បំណង​សម្រាប់​កម្មវិធី ផ្ទាំង​រូបភាព និង​អ្វីៗ​ផ្សេង​ទៀត។ អ្នក​ប្រើប្រាស់​ក៏អាច​កែសម្រួល​ការកំណត់​ឧបករណ៍​ដូចជា Wi‑Fi ដែល​ប៉ះពាល់​ដល់​អ្នកប្រើប្រាស់​ផ្សេង​ទៀត​ផងដែរ។\n\nនៅពេល​ដែលអ្នក​បញ្ចូល​អ្នកប្រើប្រាស់​ថ្មី បុគ្គល​នោះត្រូវតែ​រៀបចំទំហំ​ផ្ទុក​​របស់​គេ។\n\nអ្នកប្រើប្រាស់​ណាក៏​អាច​ដំឡើង​កំណែ​កម្មវិធី​សម្រាប់​អ្នក​ប្រើប្រាស់​ទាំងអស់​ផ្សេង​ទៀត​បាន​ដែរ។ ការកំណត់​ភាព​ងាយស្រួល និង​សេវាកម្ម​មិនអាច​ផ្ទេរទៅកាន់​អ្នកប្រើប្រាស់​ថ្មី​បានទេ។"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"ពេល​អ្នក​បញ្ចូល​​អ្នកប្រើប្រាស់​​ថ្មី អ្នកប្រើ​ប្រាស់​នោះ​ត្រូវ​កំណត់​ទំហំ​ផ្ទាល់​របស់​គេ។\n\nអ្នកប្រើ​ប្រាស់​ណាក៏​​​អាច​ដំឡើងជំនាន់​​កម្មវិធី​សម្រាប់​អ្នកប្រើប្រាស់​​ផ្សេង​ទាំងអស់បានដែរ។"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"រៀបចំ​អ្នក​ប្រើ​ប្រាស់ឥឡូវនេះ?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"សូម​ប្រាកដ​ថា​​អ្នក​ប្រើ​ប្រាស់នេះ​អាច​យក​​ឧបករណ៍ ​និង​រៀបចំ​​ទំហំ​ផ្ទុករបស់​គេបាន"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"រៀបចំ​ប្រវត្តិរូប​ឥឡូវ?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"រៀបចំ​ឥឡូវ"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"កុំអាល"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"បន្ថែម"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"អ្នក​ប្រើថ្មី"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"ប្រវត្តិរូប​ថ្មី"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"ព័ត៌មាន​អ្នកប្រើ"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"ព័ត៌មាន​ប្រវត្តិរូប"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"មុន​ពេល​អ្នក​អាច​បង្កើត​ប្រវត្តិ​រូប​បាន​ដាក់​កម្រិត អ្នក​ត្រូវ​រៀបចំ​ការ​ចាក់​សោ​អេក្រង់ ដើម្បី​ការពារ​កម្មវិធី និង​ទិន្នន័យ​ផ្ទាល់ខ្លួន​របស់​អ្នក។"</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"កំណត់​ការ​ចាក់​សោ"</string>
 </resources>

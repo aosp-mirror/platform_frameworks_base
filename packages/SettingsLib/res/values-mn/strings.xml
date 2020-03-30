@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP хаяг ба порт"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Хурдан хариу үйлдлийн кодыг скан хийх"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Хурдан хариу үйлдлийн кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi сүлжээнд холбогдоно уу"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, дебаг хийх, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Алдаа мэдээлэх товчлол"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Цэсэнд алдааны мэдэгдэл авахад зориулсан товчийг харуулах"</string>
@@ -432,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> хүртэл барих ёстой (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> хүртэл барих ёстой"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> хүртэл"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Батерейн цэнэг <xliff:g id="TIME">%1$s</xliff:g> гээд дуусаж болзошгүй"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага хугацаа үлдсэн"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага хугацаа үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их хугацаа үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -511,26 +509,42 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Утасны чанга яригч"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Холбогдоход асуудал гарлаа. Төхөөрөмжийг унтраагаад дахин асаана уу"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Утастай аудио төхөөрөмж"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
+    <string name="help_label" msgid="3528360748637781274">"Тусламж, санал хүсэлт"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Хадгалах сан"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Хуваалцсан өгөгдөл"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Хуваалцсан өгөгдлийг харах, өөрчлөх"</string>
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
     <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
     <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <string name="blob_id_text" msgid="8680078988996308061">"Хуваалцсан өгөгдлийн ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Хугацаа нь <xliff:g id="DATE">%s</xliff:g>-д дуусна"</string>
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
     <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"Аппуудын хуваалцсан өгөгдөл"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Аппаас ямар ч тайлбар өгөөгүй."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Түрээсийн хугацаа <xliff:g id="DATE">%s</xliff:g>-д дуусна"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Хуваалцсан өгөгдлийг устгах уу?"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Та хуваалцсан энэ өгөгдлийг устгахдаа итгэлтэй байна уу?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Хэрэглэгчид өөрийн апп-ууд болон контенттэй"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Та өөрийн бүртгэлийн апп-ууд болон контентэд хандалт хийхийг хязгаарлаж болно"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Хэрэглэгч"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Хязгаарлагдсан профайл"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Шинэ хэрэглэгч нэмэх үү?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Та нэмэлт хэрэглэгч үүсгэх замаар бусад хүмүүстэй энэ төхөөрөмжийг хуваалцаж болно. Хэрэглэгч тус бүр апп, ханын цаас болон бусад зүйлээ өөрчлөх боломжтой хувийн орон зайтай байдаг. Түүнчлэн хэрэглэгч нь бүх хэрэглэгчид нөлөөлөх боломжтой Wi-Fi зэрэг төхөөрөмжийн тохиргоог өөрчлөх боломжтой.\n\nХэрэв та шинэ хэрэглэгч нэмэх бол тухайн хүн хувийн орон зайгаа бүрдүүлэх ёстой.\n\nХэрэглэгч бүр бусад бүх хэрэглэгчийн өмнөөс апп шинэчилж болно. Хүртээмжийн тохиргоо болон үйлчилгээг шинэ хэрэглэгчид шилжүүлэх боломжгүй байж болзошгүй."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Хэрэглэгчийг одоо тохируулах уу?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Хэрэглэгч төхөөрөмжийг авч өөрийн профайлыг тохируулах боломжтой эсэхийг шалгана уу"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайлыг одоо тохируулах уу?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Одоо тохируулах"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Одоо биш"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Нэмэх"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Шинэ хэрэглэгч"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Шинэ профайл"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Хэрэглэгчийн мэдээлэл"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Профайлын мэдээлэл"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Та хязгаарлагдсан профайл үүсгэхийн өмнө өөрийн апп-ууд болон хувийн өгөгдлийг хамгаалахын тулд дэлгэцийн түгжээг тохируулах шаардлагатай."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Түгжээг тохируулах"</string>
 </resources>
