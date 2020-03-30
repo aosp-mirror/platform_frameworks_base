@@ -20,6 +20,7 @@ import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChang
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.PasswordMetrics;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.weaver.V1_0.IWeaver;
@@ -97,6 +98,7 @@ public class SyntheticPasswordManager {
     private static final int SECDISCARDABLE_LENGTH = 16 * 1024;
     private static final String PASSWORD_DATA_NAME = "pwd";
     private static final String WEAVER_SLOT_NAME = "weaver";
+    private static final String PASSWORD_METRICS_NAME = "metrics";
 
     public static final long DEFAULT_HANDLE = 0L;
     private static final byte[] DEFAULT_PASSWORD = "default-password".getBytes();
@@ -132,6 +134,7 @@ public class SyntheticPasswordManager {
     private static final byte[] PERSONALISATION_WEAVER_PASSWORD = "weaver-pwd".getBytes();
     private static final byte[] PERSONALISATION_WEAVER_KEY = "weaver-key".getBytes();
     private static final byte[] PERSONALISATION_WEAVER_TOKEN = "weaver-token".getBytes();
+    private static final byte[] PERSONALIZATION_PASSWORD_METRICS = "password-metrics".getBytes();
     private static final byte[] PERSONALISATION_CONTEXT =
         "android-synthetic-password-personalization-context".getBytes();
 
@@ -210,6 +213,11 @@ public class SyntheticPasswordManager {
 
         public byte[] derivePasswordHashFactor() {
             return derivePassword(PERSONALIZATION_PASSWORD_HASH);
+        }
+
+        /** Derives key used to encrypt password metrics */
+        public byte[] deriveMetricsKey() {
+            return derivePassword(PERSONALIZATION_PASSWORD_METRICS);
         }
 
         /**
@@ -778,7 +786,7 @@ public class SyntheticPasswordManager {
             synchronizeFrpPassword(pwd, 0, userId);
         }
         saveState(PASSWORD_DATA_NAME, pwd.toBytes(), handle, userId);
-
+        savePasswordMetrics(credential, authToken, handle, userId);
         createSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_PASSWORD_BASED, authToken,
                 applicationId, sid, userId);
         return handle;
@@ -1061,6 +1069,12 @@ public class SyntheticPasswordManager {
 
         // Perform verifyChallenge to refresh auth tokens for GK if user password exists.
         result.gkResponse = verifyChallenge(gatekeeper, result.authToken, 0L, userId);
+
+        // Upgrade case: store the metrics if the device did not have stored metrics before, should
+        // only happen once on old synthetic password blobs.
+        if (result.authToken != null && !hasPasswordMetrics(handle, userId)) {
+            savePasswordMetrics(credential, result.authToken, handle, userId);
+        }
         return result;
     }
 
@@ -1216,6 +1230,7 @@ public class SyntheticPasswordManager {
         destroySyntheticPassword(handle, userId);
         destroyState(SECDISCARDABLE_NAME, handle, userId);
         destroyState(PASSWORD_DATA_NAME, handle, userId);
+        destroyState(PASSWORD_METRICS_NAME, handle, userId);
     }
 
     private void destroySyntheticPassword(long handle, int userId) {
@@ -1256,6 +1271,34 @@ public class SyntheticPasswordManager {
 
     private byte[] loadSecdiscardable(long handle, int userId) {
         return loadState(SECDISCARDABLE_NAME, handle, userId);
+    }
+
+    /**
+     * Retrieves the saved password metrics associated with a SP handle. Only meaningful to be
+     * called on the handle of a password-based synthetic password. A valid AuthenticationToken for
+     * the target user is required in order to be able to decrypt the encrypted password metrics on
+     * disk.
+     */
+    public @Nullable PasswordMetrics getPasswordMetrics(AuthenticationToken authToken, long handle,
+            int userId) {
+        final byte[] encrypted = loadState(PASSWORD_METRICS_NAME, handle, userId);
+        if (encrypted == null) return null;
+        final byte[] decrypted = SyntheticPasswordCrypto.decrypt(authToken.deriveMetricsKey(),
+                /* personalization= */ new byte[0], encrypted);
+        if (decrypted == null) return null;
+        return VersionedPasswordMetrics.deserialize(decrypted).getMetrics();
+    }
+
+    private void savePasswordMetrics(LockscreenCredential credential, AuthenticationToken authToken,
+            long handle, int userId) {
+        final byte[] encrypted = SyntheticPasswordCrypto.encrypt(authToken.deriveMetricsKey(),
+                /* personalization= */ new byte[0],
+                new VersionedPasswordMetrics(credential).serialize());
+        saveState(PASSWORD_METRICS_NAME, encrypted, handle, userId);
+    }
+
+    private boolean hasPasswordMetrics(long handle, int userId) {
+        return hasState(PASSWORD_METRICS_NAME, handle, userId);
     }
 
     private boolean hasState(String stateName, long handle, int userId) {
