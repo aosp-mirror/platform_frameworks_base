@@ -255,9 +255,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     return null;
                 }
 
-                final Task task = display.getOrCreateStack(windowingMode, ACTIVITY_TYPE_UNDEFINED,
-                        false /* onTop */, new Intent(), null /* candidateTask */,
-                        true /* createdByOrganizer */);
+                final Task task = display.mTaskContainers.getOrCreateStack(windowingMode,
+                        ACTIVITY_TYPE_UNDEFINED, false /* onTop */, new Intent(),
+                        null /* candidateTask */, true /* createdByOrganizer */);
                 RunningTaskInfo out = task.getTaskInfo();
                 mLastSentTaskInfos.put(task, out);
                 return out;
