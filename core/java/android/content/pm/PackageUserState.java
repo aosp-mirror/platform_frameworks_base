@@ -74,6 +74,7 @@ public class PackageUserState {
     public int appLinkGeneration;
     public int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
     public int installReason;
+    public @PackageManager.UninstallReason int uninstallReason;
     public String harmfulAppWarning;
 
     public ArraySet<String> disabledComponents;
@@ -92,6 +93,7 @@ public class PackageUserState {
         domainVerificationStatus =
                 PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
         installReason = PackageManager.INSTALL_REASON_UNKNOWN;
+        uninstallReason = PackageManager.UNINSTALL_REASON_UNKNOWN;
     }
 
     @VisibleForTesting
@@ -112,6 +114,7 @@ public class PackageUserState {
         appLinkGeneration = o.appLinkGeneration;
         categoryHint = o.categoryHint;
         installReason = o.installReason;
+        uninstallReason = o.uninstallReason;
         disabledComponents = ArrayUtils.cloneOrNull(o.disabledComponents);
         enabledComponents = ArrayUtils.cloneOrNull(o.enabledComponents);
         overlayPaths =
@@ -353,6 +356,9 @@ public class PackageUserState {
         if (installReason != oldState.installReason) {
             return false;
         }
+        if (uninstallReason != oldState.uninstallReason) {
+            return false;
+        }
         if ((disabledComponents == null && oldState.disabledComponents != null)
                 || (disabledComponents != null && oldState.disabledComponents == null)) {
             return false;
@@ -407,6 +413,7 @@ public class PackageUserState {
         hashCode = 31 * hashCode + appLinkGeneration;
         hashCode = 31 * hashCode + categoryHint;
         hashCode = 31 * hashCode + installReason;
+        hashCode = 31 * hashCode + uninstallReason;
         hashCode = 31 * hashCode + Objects.hashCode(disabledComponents);
         hashCode = 31 * hashCode + Objects.hashCode(enabledComponents);
         hashCode = 31 * hashCode + Objects.hashCode(harmfulAppWarning);
