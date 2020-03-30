@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <array>
+#include <regex>
 
 #include "text/Unicode.h"
 #include "text/Utf8Iterator.h"
@@ -65,14 +66,26 @@ void AnnotationProcessor::AppendCommentLine(std::string comment) {
 
   // Treat deprecated specially, since we don't remove it from the source comment.
   if (comment.find(sDeprecated) != std::string::npos) {
-    annotation_bit_mask_ |= AnnotationRule::kDeprecated;
+    annotation_parameter_map_[AnnotationRule::kDeprecated] = "";
   }
 
   for (const AnnotationRule& rule : sAnnotationRules) {
     std::string::size_type idx = comment.find(rule.doc_str.data());
     if (idx != std::string::npos) {
-      annotation_bit_mask_ |= rule.bit_mask;
-      comment.erase(comment.begin() + idx, comment.begin() + idx + rule.doc_str.size());
+      // Captures all parameters associated with the specified annotation rule
+      // by matching the first pair of parantheses after the rule.
+      std::regex re(rule.doc_str.to_string() + "\\s*\\((.+)\\)");
+      std::smatch match_result;
+      const bool is_match = std::regex_search(comment, match_result, re);
+      // We currently only capture and preserve parameters for SystemApi.
+      if (is_match && rule.bit_mask == AnnotationRule::kSystemApi) {
+        annotation_parameter_map_[rule.bit_mask] = match_result[1].str();
+        comment.erase(comment.begin() + match_result.position(),
+                      comment.begin() + match_result.position() + match_result.length());
+      } else {
+        annotation_parameter_map_[rule.bit_mask] = "";
+        comment.erase(comment.begin() + idx, comment.begin() + idx + rule.doc_str.size());
+      }
     }
   }
 
@@ -119,13 +132,19 @@ void AnnotationProcessor::Print(Printer* printer) const {
     printer->Println(" */");
   }
 
-  if (annotation_bit_mask_ & AnnotationRule::kDeprecated) {
+  if (annotation_parameter_map_.find(AnnotationRule::kDeprecated) !=
+        annotation_parameter_map_.end()) {
     printer->Println("@Deprecated");
   }
 
   for (const AnnotationRule& rule : sAnnotationRules) {
-    if (annotation_bit_mask_ & rule.bit_mask) {
-      printer->Println(rule.annotation);
+    const auto& it = annotation_parameter_map_.find(rule.bit_mask);
+    if (it != annotation_parameter_map_.end()) {
+      printer->Print(rule.annotation);
+      if (!it->second.empty()) {
+        printer->Print("(").Print(it->second).Print(")");
+      }
+      printer->Print("\n");
     }
   }
 }
