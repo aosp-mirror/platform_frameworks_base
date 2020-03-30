@@ -108,6 +108,14 @@ public class PendingInsetsController implements WindowInsetsController {
     }
 
     @Override
+    public boolean isRequestedVisible(int type) {
+
+        // Method is only used once real insets controller is attached, so no need to traverse
+        // requests here.
+        return InsetsState.getDefaultVisibility(type);
+    }
+
+    @Override
     public void addOnControllableInsetsChangedListener(
             OnControllableInsetsChangedListener listener) {
         if (mReplayedInsetsController != null) {
