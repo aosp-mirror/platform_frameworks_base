@@ -26,6 +26,7 @@ import android.net.util.NetUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Pair;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -524,6 +525,30 @@ public final class RouteInfo implements Parcelable {
                 Objects.equals(mGateway, target.getGateway()) &&
                 Objects.equals(mInterface, target.getInterface()) &&
                 mType == target.getType() && mMtu == target.getMtu();
+    }
+
+    /**
+     * A helper class that contains the destination and the gateway in a {@code RouteInfo},
+     * used by {@link ConnectivityService#updateRoutes} or
+     * {@link LinkProperties#addRoute} to calculate the list to be updated.
+     *
+     * @hide
+     */
+    public static class RouteKey extends Pair<IpPrefix, InetAddress> {
+        RouteKey(@NonNull IpPrefix destination, @Nullable InetAddress gateway) {
+            super(destination, gateway);
+        }
+    }
+
+    /**
+     * Get {@code RouteKey} of this {@code RouteInfo}.
+     * @return a {@code RouteKey} object.
+     *
+     * @hide
+     */
+    @NonNull
+    public RouteKey getRouteKey() {
+        return new RouteKey(mDestination, mGateway);
     }
 
     /**

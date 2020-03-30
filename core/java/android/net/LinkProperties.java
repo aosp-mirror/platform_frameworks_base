@@ -167,7 +167,19 @@ public final class LinkProperties implements Parcelable {
         this(source, false /* parcelSensitiveFields */);
     }
 
-    private LinkProperties(@Nullable LinkProperties source, boolean parcelSensitiveFields) {
+    /**
+     * Create a copy of a {@link LinkProperties} that may preserve fields that were set
+     * based on the permissions of the process that originally received it.
+     *
+     * <p>By default {@link LinkProperties} does not preserve such fields during parceling, as
+     * they should not be shared outside of the process that receives them without appropriate
+     * checks.
+     * @param parcelSensitiveFields Whether the sensitive fields should be kept when parceling
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public LinkProperties(@Nullable LinkProperties source, boolean parcelSensitiveFields) {
         mParcelSensitiveFields = parcelSensitiveFields;
         if (source == null) return;
         mIfaceName = source.mIfaceName;
@@ -674,17 +686,29 @@ public final class LinkProperties implements Parcelable {
             route.getDestination(),
             route.getGateway(),
             mIfaceName,
-            route.getType());
+            route.getType(),
+            route.getMtu());
+    }
+
+    private int findRouteIndexByRouteKey(RouteInfo route) {
+        for (int i = 0; i < mRoutes.size(); i++) {
+            if (mRoutes.get(i).getRouteKey().equals(route.getRouteKey())) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
-     * Adds a {@link RouteInfo} to this {@code LinkProperties}, if not present. If the
-     * {@link RouteInfo} had an interface name set and that differs from the interface set for this
-     * {@code LinkProperties} an {@link IllegalArgumentException} will be thrown.  The proper
-     * course is to add either un-named or properly named {@link RouteInfo}.
+     * Adds a {@link RouteInfo} to this {@code LinkProperties}, if a {@link RouteInfo}
+     * with the same {@link RouteInfo.RouteKey} with different properties
+     * (e.g., different MTU), it will be updated. If the {@link RouteInfo} had an
+     * interface name set and that differs from the interface set for this
+     * {@code LinkProperties} an {@link IllegalArgumentException} will be thrown.
+     * The proper course is to add either un-named or properly named {@link RouteInfo}.
      *
      * @param route A {@link RouteInfo} to add to this object.
-     * @return {@code false} if the route was already present, {@code true} if it was added.
+     * @return {@code true} was added or updated, false otherwise.
      */
     public boolean addRoute(@NonNull RouteInfo route) {
         String routeIface = route.getInterface();
@@ -694,11 +718,20 @@ public final class LinkProperties implements Parcelable {
                             + " vs. " + mIfaceName);
         }
         route = routeWithInterface(route);
-        if (!mRoutes.contains(route)) {
+
+        int i = findRouteIndexByRouteKey(route);
+        if (i == -1) {
+            // Route was not present. Add it.
             mRoutes.add(route);
             return true;
+        } else if (mRoutes.get(i).equals(route)) {
+            // Route was present and has same properties. Do nothing.
+            return false;
+        } else {
+            // Route was present and has different properties. Update it.
+            mRoutes.set(i, route);
+            return true;
         }
-        return false;
     }
 
     /**
@@ -706,6 +739,7 @@ public final class LinkProperties implements Parcelable {
      * specify an interface and the interface must match the interface of this
      * {@code LinkProperties}, or it will not be removed.
      *
+     * @param route A {@link RouteInfo} specifying the route to remove.
      * @return {@code true} if the route was removed, {@code false} if it was not present.
      *
      * @hide
@@ -1558,22 +1592,6 @@ public final class LinkProperties implements Parcelable {
     @Nullable
     public CaptivePortalData getCaptivePortalData() {
         return mCaptivePortalData;
-    }
-
-    /**
-     * Create a copy of this {@link LinkProperties} that will preserve fields that were set
-     * based on the permissions of the process that received this {@link LinkProperties}.
-     *
-     * <p>By default {@link LinkProperties} does not preserve such fields during parceling, as
-     * they should not be shared outside of the process that receives them without appropriate
-     * checks.
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    @NonNull
-    public LinkProperties makeSensitiveFieldsParcelingCopy() {
-        return new LinkProperties(this, true /* parcelSensitiveFields */);
     }
 
     /**

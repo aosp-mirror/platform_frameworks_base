@@ -16,9 +16,7 @@
 
 java_defaults {
     name: "TetheringAndroidLibraryDefaults",
-    // TODO (b/146757305): change to module API once available
-    // TODO (b/148190005): change to module-libs-api-stubs-current once it is ready.
-    sdk_version: "core_platform",
+    sdk_version: "module_current",
     srcs: [
         "src/**/*.java",
         ":framework-tethering-shared-srcs",
@@ -35,15 +33,8 @@ java_defaults {
         "net-utils-framework-common",
     ],
     libs: [
-        // Order matters: framework-tethering needs to be before the system stubs, otherwise
-        // hidden fields in the framework-tethering classes (which are also used to generate stubs)
-        // will not be found.
         "framework-tethering",
-        "android_system_stubs_current",
-        "framework-res",
         "unsupportedappusage",
-        "android_system_stubs_current",
-        "framework-res",
     ],
     plugins: ["java_api_finder"],
     manifest: "AndroidManifestBase.xml",
@@ -91,9 +82,7 @@ cc_library {
 // Common defaults for compiling the actual APK.
 java_defaults {
     name: "TetheringAppDefaults",
-    // TODO (b/146757305): change to module API once available
-    // TODO (b/148190005): change to module-libs-api-stubs-current once it is ready.
-    sdk_version: "core_platform",
+    sdk_version: "module_current",
     privileged: true,
     jni_libs: [
         "libtetherutilsjni",
@@ -102,12 +91,7 @@ java_defaults {
         "res",
     ],
     libs: [
-        // Order matters: framework-tethering needs to be before the system stubs, otherwise
-        // hidden fields in the framework-tethering classes (which are also used to generate stubs)
-        // will not be found.
         "framework-tethering",
-        "android_system_stubs_current",
-        "framework-res",
     ],
     jarjar_rules: "jarjar-rules.txt",
     optimize: {

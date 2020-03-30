@@ -21,7 +21,6 @@ import static android.os.Process.CLAT_UID;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
@@ -58,9 +57,12 @@ import java.util.function.Predicate;
 public final class NetworkStats implements Parcelable {
     private static final String TAG = "NetworkStats";
 
-    /** {@link #iface} value when interface details unavailable. */
-    @SuppressLint("CompileTimeConstant")
+    /**
+     * {@link #iface} value when interface details unavailable.
+     * @hide
+     */
     @Nullable public static final String IFACE_ALL = null;
+
     /**
      * Virtual network interface for video telephony. This is for VT data usage counting
      * purpose.
@@ -248,7 +250,13 @@ public final class NetworkStats implements Parcelable {
     @UnsupportedAppUsage
     private long[] operations;
 
-    /** @hide */
+    /**
+     * Basic element of network statistics. Contains the number of packets and number of bytes
+     * transferred on both directions in a given set of conditions. See
+     * {@link Entry#Entry(String, int, int, int, int, int, int, long, long, long, long, long)}.
+     *
+     * @hide
+     */
     @SystemApi
     public static class Entry {
         /** @hide */
@@ -319,6 +327,35 @@ public final class NetworkStats implements Parcelable {
                     rxBytes, rxPackets, txBytes, txPackets, operations);
         }
 
+        /**
+         * Construct a {@link Entry} object by giving statistics of packet and byte transferred on
+         * both direction, and associated with a set of given conditions.
+         *
+         * @param iface interface name of this {@link Entry}. Or null if not specified.
+         * @param uid uid of this {@link Entry}. {@link #UID_TETHERING} if this {@link Entry} is
+         *            for tethering. Or {@link #UID_ALL} if this {@link NetworkStats} is only
+         *            counting iface stats.
+         * @param set usage state of this {@link Entry}. Should be one of the following
+         *            values: {@link #SET_DEFAULT}, {@link #SET_FOREGROUND}.
+         * @param tag tag of this {@link Entry}.
+         * @param metered metered state of this {@link Entry}. Should be one of the following
+         *                values: {link #METERED_YES}, {link #METERED_NO}.
+         * @param roaming roaming state of this {@link Entry}. Should be one of the following
+         *                values: {link #ROAMING_YES}, {link #ROAMING_NO}.
+         * @param defaultNetwork default network status of this {@link Entry}. Should be one
+         *                       of the following values: {link #DEFAULT_NETWORK_YES},
+         *                       {link #DEFAULT_NETWORK_NO}.
+         * @param rxBytes Number of bytes received for this {@link Entry}. Statistics should
+         *                represent the contents of IP packets, including IP headers.
+         * @param rxPackets Number of packets received for this {@link Entry}. Statistics should
+         *                  represent the contents of IP packets, including IP headers.
+         * @param txBytes Number of bytes transmitted for this {@link Entry}. Statistics should
+         *                represent the contents of IP packets, including IP headers.
+         * @param txPackets Number of bytes transmitted for this {@link Entry}. Statistics should
+         *                  represent the contents of IP packets, including IP headers.
+         * @param operations count of network operations performed for this {@link Entry}. This can
+         *                   be used to derive bytes-per-operation.
+         */
         public Entry(@Nullable String iface, int uid, @State int set, int tag,
                 @Meteredness int metered, @Roaming int roaming, @DefaultNetwork int defaultNetwork,
                 long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
@@ -466,7 +503,7 @@ public final class NetworkStats implements Parcelable {
         NetworkStats.Entry entry = null;
         for (int i = 0; i < size; i++) {
             entry = getValues(i, entry);
-            clone.addEntry(entry);
+            clone.insertEntry(entry);
         }
         return clone;
     }
@@ -493,26 +530,26 @@ public final class NetworkStats implements Parcelable {
 
     /** @hide */
     @VisibleForTesting
-    public NetworkStats addIfaceValues(
+    public NetworkStats insertEntry(
             String iface, long rxBytes, long rxPackets, long txBytes, long txPackets) {
-        return addEntry(
+        return insertEntry(
                 iface, UID_ALL, SET_DEFAULT, TAG_NONE, rxBytes, rxPackets, txBytes, txPackets, 0L);
     }
 
     /** @hide */
     @VisibleForTesting
-    public NetworkStats addEntry(String iface, int uid, int set, int tag, long rxBytes,
+    public NetworkStats insertEntry(String iface, int uid, int set, int tag, long rxBytes,
             long rxPackets, long txBytes, long txPackets, long operations) {
-        return addEntry(new Entry(
+        return insertEntry(new Entry(
                 iface, uid, set, tag, rxBytes, rxPackets, txBytes, txPackets, operations));
     }
 
     /** @hide */
     @VisibleForTesting
-    public NetworkStats addEntry(String iface, int uid, int set, int tag, int metered, int roaming,
-            int defaultNetwork, long rxBytes, long rxPackets, long txBytes, long txPackets,
-            long operations) {
-        return addEntry(new Entry(
+    public NetworkStats insertEntry(String iface, int uid, int set, int tag, int metered,
+            int roaming, int defaultNetwork, long rxBytes, long rxPackets, long txBytes,
+            long txPackets, long operations) {
+        return insertEntry(new Entry(
                 iface, uid, set, tag, metered, roaming, defaultNetwork, rxBytes, rxPackets,
                 txBytes, txPackets, operations));
     }
@@ -522,7 +559,7 @@ public final class NetworkStats implements Parcelable {
      * object can be recycled across multiple calls.
      * @hide
      */
-    public NetworkStats addEntry(Entry entry) {
+    public NetworkStats insertEntry(Entry entry) {
         if (size >= capacity) {
             final int newLength = Math.max(size, 10) * 3 / 2;
             iface = Arrays.copyOf(iface, newLength);
@@ -665,7 +702,7 @@ public final class NetworkStats implements Parcelable {
                 entry.roaming, entry.defaultNetwork);
         if (i == -1) {
             // only create new entry when positive contribution
-            addEntry(entry);
+            insertEntry(entry);
         } else {
             rxBytes[i] += entry.rxBytes;
             rxPackets[i] += entry.rxPackets;
@@ -684,7 +721,7 @@ public final class NetworkStats implements Parcelable {
      * @param entry the {@link Entry} to add.
      * @return a new constructed {@link NetworkStats} object that contains the result.
      */
-    public @NonNull NetworkStats addValues(@NonNull Entry entry) {
+    public @NonNull NetworkStats addEntry(@NonNull Entry entry) {
         return this.clone().combineValues(entry);
     }
 
@@ -1003,7 +1040,7 @@ public final class NetworkStats implements Parcelable {
                 entry.operations = Math.max(entry.operations, 0);
             }
 
-            result.addEntry(entry);
+            result.insertEntry(entry);
         }
 
         return result;

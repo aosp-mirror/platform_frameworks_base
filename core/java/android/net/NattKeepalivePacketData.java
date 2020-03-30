@@ -20,6 +20,7 @@ import static android.net.InvalidPacketException.ERROR_INVALID_IP_ADDRESS;
 import static android.net.InvalidPacketException.ERROR_INVALID_PORT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.util.IpUtils;
 import android.os.Parcel;
@@ -30,6 +31,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Objects;
 
 /** @hide */
 @SystemApi
@@ -92,10 +94,10 @@ public final class NattKeepalivePacketData extends KeepalivePacketData implement
 
     /** Write to parcel */
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        out.writeString(srcAddress.getHostAddress());
-        out.writeString(dstAddress.getHostAddress());
-        out.writeInt(srcPort);
-        out.writeInt(dstPort);
+        out.writeString(getSrcAddress().getHostAddress());
+        out.writeString(getDstAddress().getHostAddress());
+        out.writeInt(getSrcPort());
+        out.writeInt(getDstPort());
     }
 
     /** Parcelable Creator */
@@ -113,7 +115,7 @@ public final class NattKeepalivePacketData extends KeepalivePacketData implement
                                     dstAddress, dstPort);
                     } catch (InvalidPacketException e) {
                         throw new IllegalArgumentException(
-                                "Invalid NAT-T keepalive data: " + e.error);
+                                "Invalid NAT-T keepalive data: " + e.getError());
                     }
                 }
 
@@ -121,4 +123,21 @@ public final class NattKeepalivePacketData extends KeepalivePacketData implement
                     return new NattKeepalivePacketData[size];
                 }
             };
+
+    @Override
+    public boolean equals(@Nullable final Object o) {
+        if (!(o instanceof NattKeepalivePacketData)) return false;
+        final NattKeepalivePacketData other = (NattKeepalivePacketData) o;
+        final InetAddress srcAddress = getSrcAddress();
+        final InetAddress dstAddress = getDstAddress();
+        return srcAddress.equals(other.getSrcAddress())
+            && dstAddress.equals(other.getDstAddress())
+            && getSrcPort() == other.getSrcPort()
+            && getDstPort() == other.getDstPort();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSrcAddress(), getDstAddress(), getSrcPort(), getDstPort());
+    }
 }

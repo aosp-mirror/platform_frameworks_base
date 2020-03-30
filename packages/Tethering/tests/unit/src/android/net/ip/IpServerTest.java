@@ -21,7 +21,7 @@ import static android.net.TetheringManager.TETHERING_BLUETOOTH;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
 import static android.net.TetheringManager.TETHERING_WIFI_P2P;
-import static android.net.TetheringManager.TETHER_ERROR_ENABLE_NAT_ERROR;
+import static android.net.TetheringManager.TETHER_ERROR_ENABLE_FORWARDING_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_TETHER_IFACE_ERROR;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
@@ -448,7 +448,7 @@ public class IpServerTest {
         usbTeardownOrder.verify(mNetd, times(2)).interfaceSetCfg(
                 argThat(cfg -> IFACE_NAME.equals(cfg.ifName)));
         usbTeardownOrder.verify(mCallback).updateInterfaceState(
-                mIpServer, STATE_AVAILABLE, TETHER_ERROR_ENABLE_NAT_ERROR);
+                mIpServer, STATE_AVAILABLE, TETHER_ERROR_ENABLE_FORWARDING_ERROR);
         usbTeardownOrder.verify(mCallback).updateLinkProperties(
                 eq(mIpServer), mLinkPropertiesCaptor.capture());
         assertNoAddressesNorRoutes(mLinkPropertiesCaptor.getValue());

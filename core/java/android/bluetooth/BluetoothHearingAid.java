@@ -162,13 +162,11 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * the state. Users can get the connection state of the profile
      * from this intent.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     * permission.
-     *
      * @param device Remote Bluetooth Device
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothHearingAid service = getService();
@@ -202,13 +200,11 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * {@link #STATE_DISCONNECTING} can be used to distinguish between the
      * two scenarios.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     * permission.
-     *
      * @param device Remote Bluetooth Device
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothHearingAid service = getService();
@@ -327,15 +323,12 @@ public final class BluetoothHearingAid implements BluetoothProfile {
     /**
      * Get the connected physical Hearing Aid devices that are active
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
-     * permission.
-     *
      * @return the list of active devices. The first element is the left active
      * device; the second element is the right active device. If either or both side
      * is not active, it will be null on that position. Returns empty list on error.
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public @NonNull List<BluetoothDevice> getActiveDevices() {
         if (VDBG) log("getActiveDevices()");
@@ -363,7 +356,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
         return setConnectionPolicy(device, BluetoothAdapter.priorityToConnectionPolicy(priority));
@@ -382,10 +375,11 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
+        verifyDeviceNotNull(device, "setConnectionPolicy");
         final IBluetoothHearingAid service = getService();
         try {
             if (service != null && isEnabled()
@@ -414,7 +408,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
         return BluetoothAdapter.connectionPolicyToPriority(getConnectionPolicy(device));
@@ -432,9 +426,10 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
+        verifyDeviceNotNull(device, "getConnectionPolicy");
         final IBluetoothHearingAid service = getService();
         try {
             if (service != null && isEnabled()
@@ -496,18 +491,22 @@ public final class BluetoothHearingAid implements BluetoothProfile {
     }
 
     /**
-     * Get the CustomerId of the device.
+     * Get the HiSyncId (unique hearing aid device identifier) of the device.
+     *
+     * <a href=https://source.android.com/devices/bluetooth/asha#hisyncid>HiSyncId documentation
+     * can be found here</a>
      *
      * @param device Bluetooth device
-     * @return the CustomerId of the device
+     * @return the HiSyncId of the device
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public long getHiSyncId(@Nullable BluetoothDevice device) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public long getHiSyncId(@NonNull BluetoothDevice device) {
         if (VDBG) {
-            log("getCustomerId(" + device + ")");
+            log("getHiSyncId(" + device + ")");
         }
+        verifyDeviceNotNull(device, "getConnectionPolicy");
         final IBluetoothHearingAid service = getService();
         try {
             if (service == null) {
@@ -579,6 +578,13 @@ public final class BluetoothHearingAid implements BluetoothProfile {
     private boolean isEnabled() {
         if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
         return false;
+    }
+
+    private void verifyDeviceNotNull(BluetoothDevice device, String methodName) {
+        if (device == null) {
+            Log.e(TAG, methodName + ": device param is null");
+            throw new IllegalArgumentException("Device cannot be null");
+        }
     }
 
     private boolean isValidDevice(BluetoothDevice device) {

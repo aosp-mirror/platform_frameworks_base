@@ -249,6 +249,28 @@ public class CompatConfigTest {
     }
 
     @Test
+    public void testAllowRemoveOverrideNoOverride() throws Exception {
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1234L)
+                .addLoggingOnlyChangeWithId(2L)
+                .build();
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("com.some.package")
+                .build();
+        when(mPackageManager.getApplicationInfo(eq("com.some.package"), anyInt()))
+                .thenReturn(applicationInfo);
+
+        // Reject all override attempts.
+        // Force the validator to prevent overriding the change by using a user build.
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+        // Try to remove a non existing override, and it doesn't fail.
+        assertThat(compatConfig.removeOverride(1234L, "com.some.package")).isFalse();
+        assertThat(compatConfig.removeOverride(2L, "com.some.package")).isFalse();
+        compatConfig.removePackageOverrides("com.some.package");
+    }
+
+    @Test
     public void testRemovePackageOverride() throws Exception {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1234L)

@@ -29,7 +29,7 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.TetheredClient.AddressInfo> CREATOR;
   }
 
-  public class TetheringConstants {
+  public final class TetheringConstants {
     field public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
     field public static final String EXTRA_PROVISION_CALLBACK = "extraProvisionCallback";
     field public static final String EXTRA_REM_TETHER_TYPE = "extraRemTetherType";
@@ -72,19 +72,20 @@ package android.net {
     field public static final int TETHERING_WIFI = 0; // 0x0
     field public static final int TETHERING_WIFI_P2P = 3; // 0x3
     field public static final int TETHER_ERROR_DHCPSERVER_ERROR = 12; // 0xc
-    field public static final int TETHER_ERROR_DISABLE_NAT_ERROR = 9; // 0x9
-    field public static final int TETHER_ERROR_ENABLE_NAT_ERROR = 8; // 0x8
+    field public static final int TETHER_ERROR_DISABLE_FORWARDING_ERROR = 9; // 0x9
+    field public static final int TETHER_ERROR_ENABLE_FORWARDING_ERROR = 8; // 0x8
     field public static final int TETHER_ERROR_ENTITLEMENT_UNKNOWN = 13; // 0xd
     field public static final int TETHER_ERROR_IFACE_CFG_ERROR = 10; // 0xa
-    field public static final int TETHER_ERROR_MASTER_ERROR = 5; // 0x5
+    field public static final int TETHER_ERROR_INTERNAL_ERROR = 5; // 0x5
     field public static final int TETHER_ERROR_NO_ACCESS_TETHERING_PERMISSION = 15; // 0xf
     field public static final int TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION = 14; // 0xe
     field public static final int TETHER_ERROR_NO_ERROR = 0; // 0x0
-    field public static final int TETHER_ERROR_PROVISION_FAILED = 11; // 0xb
+    field public static final int TETHER_ERROR_PROVISIONING_FAILED = 11; // 0xb
     field public static final int TETHER_ERROR_SERVICE_UNAVAIL = 2; // 0x2
     field public static final int TETHER_ERROR_TETHER_IFACE_ERROR = 6; // 0x6
     field public static final int TETHER_ERROR_UNAVAIL_IFACE = 4; // 0x4
     field public static final int TETHER_ERROR_UNKNOWN_IFACE = 1; // 0x1
+    field public static final int TETHER_ERROR_UNKNOWN_TYPE = 16; // 0x10
     field public static final int TETHER_ERROR_UNSUPPORTED = 3; // 0x3
     field public static final int TETHER_ERROR_UNTETHER_IFACE_ERROR = 7; // 0x7
     field public static final int TETHER_HARDWARE_OFFLOAD_FAILED = 2; // 0x2
@@ -96,40 +97,42 @@ package android.net {
     method public void onTetheringEntitlementResult(int);
   }
 
-  public abstract static class TetheringManager.StartTetheringCallback {
-    ctor public TetheringManager.StartTetheringCallback();
-    method public void onTetheringFailed(int);
-    method public void onTetheringStarted();
+  public static interface TetheringManager.StartTetheringCallback {
+    method public default void onTetheringFailed(int);
+    method public default void onTetheringStarted();
   }
 
-  public abstract static class TetheringManager.TetheringEventCallback {
-    ctor public TetheringManager.TetheringEventCallback();
-    method public void onClientsChanged(@NonNull java.util.Collection<android.net.TetheredClient>);
-    method public void onError(@NonNull String, int);
-    method public void onOffloadStatusChanged(int);
-    method @Deprecated public void onTetherableInterfaceRegexpsChanged(@NonNull android.net.TetheringManager.TetheringInterfaceRegexps);
-    method public void onTetherableInterfacesChanged(@NonNull java.util.List<java.lang.String>);
-    method public void onTetheredInterfacesChanged(@NonNull java.util.List<java.lang.String>);
-    method public void onTetheringSupported(boolean);
-    method public void onUpstreamChanged(@Nullable android.net.Network);
+  public static interface TetheringManager.TetheringEventCallback {
+    method public default void onClientsChanged(@NonNull java.util.Collection<android.net.TetheredClient>);
+    method public default void onError(@NonNull String, int);
+    method public default void onOffloadStatusChanged(int);
+    method public default void onTetherableInterfaceRegexpsChanged(@NonNull android.net.TetheringManager.TetheringInterfaceRegexps);
+    method public default void onTetherableInterfacesChanged(@NonNull java.util.List<java.lang.String>);
+    method public default void onTetheredInterfacesChanged(@NonNull java.util.List<java.lang.String>);
+    method public default void onTetheringSupported(boolean);
+    method public default void onUpstreamChanged(@Nullable android.net.Network);
   }
 
-  @Deprecated public static class TetheringManager.TetheringInterfaceRegexps {
-    ctor @Deprecated public TetheringManager.TetheringInterfaceRegexps(@NonNull String[], @NonNull String[], @NonNull String[]);
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getTetherableBluetoothRegexs();
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getTetherableUsbRegexs();
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getTetherableWifiRegexs();
+  public static class TetheringManager.TetheringInterfaceRegexps {
+    method @NonNull public java.util.List<java.lang.String> getTetherableBluetoothRegexs();
+    method @NonNull public java.util.List<java.lang.String> getTetherableUsbRegexs();
+    method @NonNull public java.util.List<java.lang.String> getTetherableWifiRegexs();
   }
 
   public static class TetheringManager.TetheringRequest {
+    method @Nullable public android.net.LinkAddress getClientStaticIpv4Address();
+    method @Nullable public android.net.LinkAddress getLocalIpv4Address();
+    method public boolean getShouldShowEntitlementUi();
+    method public int getTetheringType();
+    method public boolean isExemptFromEntitlementCheck();
   }
 
   public static class TetheringManager.TetheringRequest.Builder {
     ctor public TetheringManager.TetheringRequest.Builder(int);
     method @NonNull public android.net.TetheringManager.TetheringRequest build();
     method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setExemptFromEntitlementCheck(boolean);
-    method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setSilentProvisioning(boolean);
-    method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder useStaticIpv4Addresses(@NonNull android.net.LinkAddress);
+    method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setShouldShowEntitlementUi(boolean);
+    method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setStaticIpv4Addresses(@NonNull android.net.LinkAddress, @NonNull android.net.LinkAddress);
   }
 
 }

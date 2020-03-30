@@ -151,6 +151,15 @@ public final class CompatChange extends CompatibilityChangeInfo {
         return true;
     }
 
+    /**
+     * Checks whether a change has an override for a package.
+     * @param packageName name of the package
+     * @return true if there is such override
+     */
+    boolean hasOverride(String packageName) {
+        return mPackageOverrides != null && mPackageOverrides.containsKey(packageName);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ChangeId(")

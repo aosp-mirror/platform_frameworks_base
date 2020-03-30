@@ -196,7 +196,6 @@ static void captureCallback(void* user,
                 callbackInfo->visualizer_ref,
                 NATIVE_EVENT_PCM_CAPTURE,
                 samplingrate,
-                0,
                 jArray);
         }
     }
@@ -217,7 +216,6 @@ static void captureCallback(void* user,
                 callbackInfo->visualizer_ref,
                 NATIVE_EVENT_FFT_CAPTURE,
                 samplingrate,
-                0,
                 jArray);
         }
     }
@@ -286,7 +284,7 @@ android_media_visualizer_native_init(JNIEnv *env)
     // Get the postEvent method
     fields.midPostNativeEvent = env->GetStaticMethodID(
             fields.clazzEffect,
-            "postEventFromNative", "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+            "postEventFromNative", "(Ljava/lang/Object;II[B)V");
     if (fields.midPostNativeEvent == NULL) {
         ALOGE("Can't find Visualizer.%s", "postEventFromNative");
         return;
@@ -343,7 +341,7 @@ static void android_media_visualizer_effect_callback(int32_t event,
             fields.midPostNativeEvent,
             callbackInfo->visualizer_ref,
             NATIVE_EVENT_SERVER_DIED,
-            0, 0, NULL);
+            0, NULL);
     }
 }
 

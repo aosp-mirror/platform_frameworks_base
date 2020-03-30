@@ -176,7 +176,6 @@ public class PhoneStateListener {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
-    @SystemApi
     public static final int LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH          = 0x00000200;
 
     /**
@@ -426,6 +425,17 @@ public class PhoneStateListener {
      */
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int LISTEN_REGISTRATION_FAILURE = 0x40000000;
+
+    /**
+     * Listen for Barring Information for the current registered / camped cell.
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
+     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * @see #onBarringInfoChanged()
+     */
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    public static final int LISTEN_BARRING_INFO = 0x80000000;
 
     /*
      * Subscription used to listen to the phone state changes
@@ -1036,6 +1046,20 @@ public class PhoneStateListener {
     }
 
     /**
+     * Report updated barring information for the current camped/registered cell.
+     *
+     * <p>Barring info is provided for all services applicable to the current camped/registered
+     * cell, for the registered PLMN and current access class/access category.
+     *
+     * @param barringInfo for all services on the current cell.
+     *
+     * @see android.telephony.BarringInfo
+     */
+    public void onBarringInfoChanged(@NonNull BarringInfo barringInfo) {
+        // default implementation empty
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      *
@@ -1327,6 +1351,14 @@ public class PhoneStateListener {
                     () -> mExecutor.execute(() -> psl.onRegistrationFailed(
                             cellIdentity, chosenPlmn, domain, causeCode, additionalCauseCode)));
             // default implementation empty
+        }
+
+        public void onBarringInfoChanged(BarringInfo barringInfo) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onBarringInfoChanged(barringInfo)));
         }
     }
 

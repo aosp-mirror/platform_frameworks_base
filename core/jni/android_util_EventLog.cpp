@@ -44,7 +44,7 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz ATTRIBUT
         return;
     }
 
-    ELog::readEvents(env, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK, tags, 0, out);
+    ELog::readEvents(env, ANDROID_LOG_NONBLOCK, tags, 0, out);
  }
 /*
  * In class android.util.EventLog:
@@ -60,8 +60,7 @@ static void android_util_EventLog_readEventsOnWrapping(JNIEnv* env, jobject claz
         jniThrowNullPointerException(env, NULL);
         return;
     }
-    ELog::readEvents(env, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK | ANDROID_LOG_WRAP, tags,
-            timestamp, out);
+    ELog::readEvents(env, ANDROID_LOG_NONBLOCK | ANDROID_LOG_WRAP, tags, timestamp, out);
 }
 
 /*

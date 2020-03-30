@@ -611,8 +611,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
          * If a connect was attempted earlier without any UUID, we will do the connect now.
          * Otherwise, allow the connect on UUID change.
          */
-        if (!mProfiles.isEmpty()
-                && ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime())) {
+        if ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
+            Log.d(TAG, "onUuidChanged: triggering connectAllEnabledProfiles");
             connectAllEnabledProfiles();
         }
 

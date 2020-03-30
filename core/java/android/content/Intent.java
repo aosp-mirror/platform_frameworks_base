@@ -3622,9 +3622,7 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @SystemApi
+    @UnsupportedAppUsage
     public static final String ACTION_USER_SWITCHED =
             "android.intent.action.USER_SWITCHED";
 

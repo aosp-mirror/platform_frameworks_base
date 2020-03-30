@@ -319,33 +319,33 @@ public class NetworkStatsCollectionTest {
             assertEntry(18322, 75, 15031, 75, history.getValues(i++, null));
             assertEntry(527798, 761, 78570, 652, history.getValues(i++, null));
             assertEntry(527797, 760, 78570, 651, history.getValues(i++, null));
-            assertEntry(10747, 50, 16838, 55, history.getValues(i++, null));
-            assertEntry(10747, 49, 16838, 54, history.getValues(i++, null));
+            assertEntry(10747, 50, 16839, 55, history.getValues(i++, null));
+            assertEntry(10747, 49, 16837, 54, history.getValues(i++, null));
             assertEntry(89191, 151, 18021, 140, history.getValues(i++, null));
             assertEntry(89190, 150, 18020, 139, history.getValues(i++, null));
-            assertEntry(3821, 22, 4525, 26, history.getValues(i++, null));
-            assertEntry(3820, 22, 4524, 26, history.getValues(i++, null));
-            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
-            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
-            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
-            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
+            assertEntry(3821, 23, 4525, 26, history.getValues(i++, null));
+            assertEntry(3820, 21, 4524, 26, history.getValues(i++, null));
+            assertEntry(91686, 159, 18576, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18574, 146, history.getValues(i++, null));
+            assertEntry(8289, 36, 6864, 39, history.getValues(i++, null));
+            assertEntry(8289, 34, 6862, 37, history.getValues(i++, null));
             assertEntry(113914, 174, 18364, 157, history.getValues(i++, null));
             assertEntry(113913, 173, 18364, 157, history.getValues(i++, null));
-            assertEntry(11378, 49, 9261, 49, history.getValues(i++, null));
-            assertEntry(11377, 48, 9261, 49, history.getValues(i++, null));
-            assertEntry(201765, 328, 41808, 291, history.getValues(i++, null));
-            assertEntry(201765, 328, 41807, 290, history.getValues(i++, null));
-            assertEntry(106106, 218, 39917, 201, history.getValues(i++, null));
-            assertEntry(106105, 217, 39917, 201, history.getValues(i++, null));
+            assertEntry(11378, 49, 9261, 50, history.getValues(i++, null));
+            assertEntry(11377, 48, 9261, 48, history.getValues(i++, null));
+            assertEntry(201766, 328, 41808, 291, history.getValues(i++, null));
+            assertEntry(201764, 328, 41807, 290, history.getValues(i++, null));
+            assertEntry(106106, 219, 39918, 202, history.getValues(i++, null));
+            assertEntry(106105, 216, 39916, 200, history.getValues(i++, null));
             assertEquals(history.size(), i);
 
             // Slice from middle should be untouched
             history = getHistory(collection, plan, TIME_B - HOUR_IN_MILLIS,
                     TIME_B + HOUR_IN_MILLIS); i = 0;
-            assertEntry(3821, 22, 4525, 26, history.getValues(i++, null));
-            assertEntry(3820, 22, 4524, 26, history.getValues(i++, null));
-            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
-            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(3821, 23, 4525, 26, history.getValues(i++, null));
+            assertEntry(3820, 21, 4524, 26, history.getValues(i++, null));
+            assertEntry(91686, 159, 18576, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18574, 146, history.getValues(i++, null));
             assertEquals(history.size(), i);
         }
 
@@ -373,25 +373,25 @@ public class NetworkStatsCollectionTest {
             assertEntry(527797, 760, 78570, 651, history.getValues(i++, null));
             // Cycle point; start data normalization
             assertEntry(7507, 0, 11763, 0, history.getValues(i++, null));
-            assertEntry(7507, 0, 11763, 0, history.getValues(i++, null));
+            assertEntry(7507, 0, 11762, 0, history.getValues(i++, null));
             assertEntry(62309, 0, 12589, 0, history.getValues(i++, null));
             assertEntry(62309, 0, 12588, 0, history.getValues(i++, null));
             assertEntry(2669, 0, 3161, 0, history.getValues(i++, null));
             assertEntry(2668, 0, 3160, 0, history.getValues(i++, null));
             // Anchor point; end data normalization
-            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
-            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
-            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
-            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
+            assertEntry(91686, 159, 18576, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18574, 146, history.getValues(i++, null));
+            assertEntry(8289, 36, 6864, 39, history.getValues(i++, null));
+            assertEntry(8289, 34, 6862, 37, history.getValues(i++, null));
             assertEntry(113914, 174, 18364, 157, history.getValues(i++, null));
             assertEntry(113913, 173, 18364, 157, history.getValues(i++, null));
             // Cycle point
-            assertEntry(11378, 49, 9261, 49, history.getValues(i++, null));
-            assertEntry(11377, 48, 9261, 49, history.getValues(i++, null));
-            assertEntry(201765, 328, 41808, 291, history.getValues(i++, null));
-            assertEntry(201765, 328, 41807, 290, history.getValues(i++, null));
-            assertEntry(106106, 218, 39917, 201, history.getValues(i++, null));
-            assertEntry(106105, 217, 39917, 201, history.getValues(i++, null));
+            assertEntry(11378, 49, 9261, 50, history.getValues(i++, null));
+            assertEntry(11377, 48, 9261, 48, history.getValues(i++, null));
+            assertEntry(201766, 328, 41808, 291, history.getValues(i++, null));
+            assertEntry(201764, 328, 41807, 290, history.getValues(i++, null));
+            assertEntry(106106, 219, 39918, 202, history.getValues(i++, null));
+            assertEntry(106105, 216, 39916, 200, history.getValues(i++, null));
             assertEquals(history.size(), i);
 
             // Slice from middle should be augmented
@@ -399,8 +399,8 @@ public class NetworkStatsCollectionTest {
                     TIME_B + HOUR_IN_MILLIS); i = 0;
             assertEntry(2669, 0, 3161, 0, history.getValues(i++, null));
             assertEntry(2668, 0, 3160, 0, history.getValues(i++, null));
-            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
-            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(91686, 159, 18576, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18574, 146, history.getValues(i++, null));
             assertEquals(history.size(), i);
         }
 
@@ -427,34 +427,34 @@ public class NetworkStatsCollectionTest {
             assertEntry(527798, 761, 78570, 652, history.getValues(i++, null));
             assertEntry(527797, 760, 78570, 651, history.getValues(i++, null));
             // Cycle point; start data normalization
-            assertEntry(15015, 0, 23526, 0, history.getValues(i++, null));
-            assertEntry(15015, 0, 23526, 0, history.getValues(i++, null));
+            assertEntry(15015, 0, 23527, 0, history.getValues(i++, null));
+            assertEntry(15015, 0, 23524, 0, history.getValues(i++, null));
             assertEntry(124619, 0, 25179, 0, history.getValues(i++, null));
             assertEntry(124618, 0, 25177, 0, history.getValues(i++, null));
             assertEntry(5338, 0, 6322, 0, history.getValues(i++, null));
             assertEntry(5337, 0, 6320, 0, history.getValues(i++, null));
             // Anchor point; end data normalization
-            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
-            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
-            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
-            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
+            assertEntry(91686, 159, 18576, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18574, 146, history.getValues(i++, null));
+            assertEntry(8289, 36, 6864, 39, history.getValues(i++, null));
+            assertEntry(8289, 34, 6862, 37, history.getValues(i++, null));
             assertEntry(113914, 174, 18364, 157, history.getValues(i++, null));
             assertEntry(113913, 173, 18364, 157, history.getValues(i++, null));
             // Cycle point
-            assertEntry(11378, 49, 9261, 49, history.getValues(i++, null));
-            assertEntry(11377, 48, 9261, 49, history.getValues(i++, null));
-            assertEntry(201765, 328, 41808, 291, history.getValues(i++, null));
-            assertEntry(201765, 328, 41807, 290, history.getValues(i++, null));
-            assertEntry(106106, 218, 39917, 201, history.getValues(i++, null));
-            assertEntry(106105, 217, 39917, 201, history.getValues(i++, null));
+            assertEntry(11378, 49, 9261, 50, history.getValues(i++, null));
+            assertEntry(11377, 48, 9261, 48, history.getValues(i++, null));
+            assertEntry(201766, 328, 41808, 291, history.getValues(i++, null));
+            assertEntry(201764, 328, 41807, 290, history.getValues(i++, null));
+            assertEntry(106106, 219, 39918, 202, history.getValues(i++, null));
+            assertEntry(106105, 216, 39916, 200, history.getValues(i++, null));
 
             // Slice from middle should be augmented
             history = getHistory(collection, plan, TIME_B - HOUR_IN_MILLIS,
                     TIME_B + HOUR_IN_MILLIS); i = 0;
             assertEntry(5338, 0, 6322, 0, history.getValues(i++, null));
             assertEntry(5337, 0, 6320, 0, history.getValues(i++, null));
-            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
-            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(91686, 159, 18576, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18574, 146, history.getValues(i++, null));
             assertEquals(history.size(), i);
         }
     }

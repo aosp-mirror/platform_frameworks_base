@@ -249,11 +249,67 @@ public class EuiccManager {
      * Key for an extra set on {@link PendingIntent} result callbacks providing a detailed result
      * code.
      *
-     * <p>This code is an implementation detail of the embedded subscription manager and is only
-     * intended for logging or debugging purposes.
+     * <p>The value of this key is an integer and contains two portions. The first byte is
+     * OperationCode and the reaming three bytes is the ErrorCode.
+     *
+     * OperationCode is the first byte of the result code and is a categorization which defines what
+     * type of operation took place when an error occurred. e.g {@link #OPERATION_DOWNLOAD} means
+     * the error is related to download.Since the OperationCode only uses at most one byte, the
+     * maximum allowed quantity is 255(0xFF).
+     *
+     * ErrorCode is the remaining three bytes of the result code, and it denotes what happened.
+     * e.g a combination of {@link #OPERATION_DOWNLOAD} and {@link #ERROR_TIME_OUT} will suggest the
+     * download operation has timed out. The only exception here is
+     * {@link #OPERATION_SMDX_SUBJECT_REASON_CODE}, where instead of ErrorCode, SubjectCode[5.2.6.1
+     * from GSMA (SGP.22 v2.2) and ReasonCode[5.2.6.2] from GSMA (SGP.22 v2.2) are encoded. @see
+     * {@link #EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_SUBJECT_CODE} and
+     * {@link #EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_REASON_CODE}
+     *
+     * In the case where ErrorCode contains a value of 0, it means it's an unknown error. E.g Intent
+     * only contains {@link #OPERATION_DOWNLOAD} and ErrorCode is 0 implies this is an unknown
+     * Download error.
+     *
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_OPERATION_CODE}
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_ERROR_CODE}
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_SUBJECT_CODE}
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_REASON_CODE}
      */
     public static final String EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE =
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DETAILED_CODE";
+
+    /**
+     * Key for an extra set on {@link PendingIntent} result callbacks providing a
+     * OperationCode of {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE},
+     * value will be an int.
+     */
+    public static final String EXTRA_EMBEDDED_SUBSCRIPTION_OPERATION_CODE =
+            "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_OPERATION_CODE";
+
+    /**
+     * Key for an extra set on {@link PendingIntent} result callbacks providing a
+     * ErrorCode of {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE},
+     * value will be an int.
+     */
+    public static final String EXTRA_EMBEDDED_SUBSCRIPTION_ERROR_CODE =
+            "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_ERROR_CODE";
+
+    /**
+     * Key for an extra set on {@link PendingIntent} result callbacks providing a
+     * SubjectCode[5.2.6.1] from GSMA (SGP.22 v2.2) decoded from
+     * {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}.
+     * The value of this extra will be a String.
+     */
+    public static final String EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_SUBJECT_CODE =
+            "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_SMDX_SUBJECT_CODE";
+
+    /**
+     * Key for an extra set on {@link PendingIntent} result callbacks providing a
+     * ReasonCode[5.2.6.2] from GSMA (SGP.22 v2.2) decoded from
+     * {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}.
+     * The value of this extra will be a String.
+     */
+    public static final String EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_REASON_CODE =
+            "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_SMDX_REASON_CODE";
 
     /**
      * Key for an extra set on {@code #getDownloadableSubscriptionMetadata} PendingIntent result
@@ -493,6 +549,259 @@ public class EuiccManager {
      */
     @SystemApi
     public static final int EUICC_OTA_STATUS_UNAVAILABLE = 5;
+
+    /**
+     * List of OperationCode corresponding to {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}'s
+     * value, an integer. @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"OPERATION_"}, value = {
+            OPERATION_SYSTEM,
+            OPERATION_SIM_SLOT,
+            OPERATION_EUICC_CARD,
+            OPERATION_SWITCH,
+            OPERATION_DOWNLOAD,
+            OPERATION_METADATA,
+            OPERATION_EUICC_GSMA,
+            OPERATION_APDU,
+            OPERATION_SMDX,
+            OPERATION_HTTP,
+            OPERATION_SMDX_SUBJECT_REASON_CODE,
+    })
+    public @interface OperationCode {
+    }
+
+    /**
+     * Internal system error.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_SYSTEM = 1;
+
+    /**
+     * SIM slot error. Failed to switch slot, failed to access the physical slot etc.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_SIM_SLOT = 2;
+
+    /**
+     * eUICC card error.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_EUICC_CARD = 3;
+
+    /**
+     * Generic switching profile error
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_SWITCH = 4;
+
+    /**
+     * Download profile error.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_DOWNLOAD = 5;
+
+    /**
+     * Subscription's metadata error
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_METADATA = 6;
+
+    /**
+     * eUICC returned an error defined in GSMA (SGP.22 v2.2) while running one of the ES10x
+     * functions.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_EUICC_GSMA = 7;
+
+    /**
+     * The exception of failing to execute an APDU command. It can be caused by an error
+     * happening on opening the basic or logical channel, or the response of the APDU command is
+     * not success (0x9000).
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_APDU = 8;
+
+    /**
+     * SMDX(SMDP/SMDS) error
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_SMDX = 9;
+
+    /**
+     * SubjectCode[5.2.6.1] and ReasonCode[5.2.6.2] error from GSMA (SGP.22 v2.2)
+     * When {@link #OPERATION_SMDX_SUBJECT_REASON_CODE} is used as the
+     * {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}, the remaining three bytes of the integer
+     * result from {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} will be used to stored the
+     * SubjectCode and ReasonCode from the GSMA spec and NOT ErrorCode.
+     *
+     * The encoding will follow the format of:
+     * 1. The first byte of the result will be 255(0xFF).
+     * 2. Remaining three bytes(24 bits) will be split into six sections, 4 bits in each section.
+     * 3. A SubjectCode/ReasonCode will take 12 bits each.
+     * 4. The maximum number can be represented per section is 15, as that is the maximum number
+     * allowed to be stored into 4 bits
+     * 5. Maximum supported nested category from GSMA is three layers. E.g 8.11.1.2 is not
+     * supported.
+     *
+     * E.g given SubjectCode(8.11.1) and ReasonCode(5.1)
+     *
+     * Base10:  0       10      8       11      1       0       5       1
+     * Base2:   0000    1010    1000    1011    0001    0000    0101    0001
+     * Base16:  0       A       8       B       1       0       5       1
+     *
+     * Thus the integer stored in {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} is
+     * 0xA8B1051(176885841)
+     *
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_SMDX_SUBJECT_REASON_CODE = 10;
+
+    /**
+     * HTTP error
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int OPERATION_HTTP = 11;
+
+    /**
+     * List of ErrorCode corresponding to {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"ERROR_"}, value = {
+            ERROR_CARRIER_LOCKED,
+            ERROR_INVALID_ACTIVATION_CODE,
+            ERROR_INVALID_CONFIRMATION_CODE,
+            ERROR_INCOMPATIBLE_CARRIER,
+            ERROR_EUICC_INSUFFICIENT_MEMORY,
+            ERROR_TIME_OUT,
+            ERROR_EUICC_MISSING,
+            ERROR_UNSUPPORTED_VERSION,
+            ERROR_SIM_MISSING,
+            ERROR_INSTALL_PROFILE,
+            ERROR_DISALLOWED_BY_PPR,
+            ERROR_ADDRESS_MISSING,
+            ERROR_CERTIFICATE_ERROR,
+            ERROR_NO_PROFILES_AVAILABLE,
+            ERROR_CONNECTION_ERROR,
+            ERROR_INVALID_RESPONSE,
+            ERROR_OPERATION_BUSY,
+    })
+    public @interface ErrorCode{}
+
+    /**
+     * Operation such as downloading/switching to another profile failed due to device being
+     * carrier locked.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_CARRIER_LOCKED = 10000;
+
+    /**
+     * The activation code(SGP.22 v2.2 section[4.1]) is invalid.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_INVALID_ACTIVATION_CODE = 10001;
+
+    /**
+     * The confirmation code(SGP.22 v2.2 section[4.7]) is invalid.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_INVALID_CONFIRMATION_CODE = 10002;
+
+    /**
+     * The profile's carrier is incompatible with the LPA.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_INCOMPATIBLE_CARRIER = 10003;
+
+    /**
+     * There is no more space available on the eUICC for new profiles.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_EUICC_INSUFFICIENT_MEMORY = 10004;
+
+    /**
+     * Timed out while waiting for an operation to complete. i.e restart, disable,
+     * switch reset etc.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_TIME_OUT = 10005;
+
+    /**
+     * eUICC is missing or defective on the device.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_EUICC_MISSING = 10006;
+
+    /**
+     * The eUICC card(hardware) version is incompatible with the software
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_UNSUPPORTED_VERSION = 10007;
+
+    /**
+     * No SIM card is available in the device.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_SIM_MISSING = 10008;
+
+    /**
+     * Failure to load the profile onto the eUICC card. e.g
+     * 1. iccid of the profile already exists on the eUICC.
+     * 2. GSMA(.22 v2.2) Profile Install Result - installFailedDueToDataMismatch
+     * 3. operation was interrupted
+     * 4. SIMalliance error in PEStatus(SGP.22 v2.2 section 2.5.6.1)
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_INSTALL_PROFILE = 10009;
+
+    /**
+     * Failed to load profile onto eUICC due to Profile Poicly Rules.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_DISALLOWED_BY_PPR = 10010;
+
+
+    /**
+     * Address is missing e.g SMDS/SMDP address is missing.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_ADDRESS_MISSING = 10011;
+
+    /**
+     * Certificate needed for authentication is not valid or missing. E.g  SMDP/SMDS authentication
+     * failed.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_CERTIFICATE_ERROR = 10012;
+
+
+    /**
+     * No profiles available.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_NO_PROFILES_AVAILABLE = 10013;
+
+    /**
+     * Failure to create a connection.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_CONNECTION_ERROR = 10014;
+
+    /**
+     * Response format is invalid. e.g SMDP/SMDS response contains invalid json, header or/and ASN1.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_INVALID_RESPONSE = 10015;
+
+    /**
+     * The operation is currently busy, try again later.
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
+     */
+    public static final int ERROR_OPERATION_BUSY = 10016;
 
     private final Context mContext;
     private int mCardId;

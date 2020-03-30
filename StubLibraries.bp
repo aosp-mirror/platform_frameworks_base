@@ -41,14 +41,15 @@ packages_to_document = [
 ]
 
 stubs_defaults {
-    name: "metalava-non-updatable-api-stubs-default",
+    name: "metalava-base-api-stubs-default",
     srcs: [
         ":framework-non-updatable-sources",
         "core/java/**/*.logtags",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
-        ":core-current-stubs-source",
-        ":core_public_api_files",
+        ":art-module-public-api-stubs-source",
+        ":conscrypt-module-public-api-stubs-source",
+        ":android_icu4j_public_api_files",
     ],
     libs: ["framework-internal-utils"],
     installable: false,
@@ -57,19 +58,22 @@ stubs_defaults {
     merge_annotations_dirs: [
         "metalava-manual",
     ],
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
+    api_levels_annotations_enabled: false,
     filter_packages: packages_to_document,
 }
 
 stubs_defaults {
-    name: "metalava-api-stubs-default",
-    defaults: ["metalava-non-updatable-api-stubs-default"],
+    name: "metalava-full-api-stubs-default",
+    defaults: ["metalava-base-api-stubs-default"],
     srcs: [":framework-updatable-sources"],
     sdk_version: "core_platform",
+}
+
+stubs_defaults {
+    name: "metalava-non-updatable-api-stubs-default",
+    defaults: ["metalava-base-api-stubs-default"],
+    sdk_version: "core_platform",
+    libs: ["framework-all"],
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -81,7 +85,7 @@ stubs_defaults {
 // modules
 droidstubs {
     name: "api-stubs-docs",
-    defaults: ["metalava-api-stubs-default"],
+    defaults: ["metalava-full-api-stubs-default"],
     api_filename: "public_api.txt",
     private_api_filename: "private.txt",
     removed_api_filename: "removed.txt",
@@ -120,11 +124,10 @@ module_libs = " " +
 
 droidstubs {
     name: "system-api-stubs-docs",
-    defaults: ["metalava-api-stubs-default"],
+    defaults: ["metalava-full-api-stubs-default"],
     api_tag_name: "SYSTEM",
     api_filename: "system-api.txt",
     private_api_filename: "system-private.txt",
-    private_dex_api_filename: "system-private-dex.txt",
     removed_api_filename: "system-removed.txt",
     arg_files: [
         "core/res/AndroidManifest.xml",
@@ -151,7 +154,7 @@ droidstubs {
 
 droidstubs {
     name: "test-api-stubs-docs",
-    defaults: ["metalava-api-stubs-default"],
+    defaults: ["metalava-full-api-stubs-default"],
     api_tag_name: "TEST",
     api_filename: "test-api.txt",
     removed_api_filename: "test-removed.txt",
@@ -184,7 +187,8 @@ droidstubs {
 
 droidstubs {
     name: "module-lib-api",
-    defaults: ["metalava-api-stubs-default"],
+    defaults: ["metalava-full-api-stubs-default"],
+    api_tag_name: "MODULE_LIB",
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args + module_libs,
     check_api: {
@@ -212,7 +216,7 @@ droidstubs {
 
 droidstubs {
     name: "module-lib-api-stubs-docs",
-    defaults: ["metalava-api-stubs-default"],
+    defaults: ["metalava-non-updatable-api-stubs-default"],
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args + priv_apps + module_libs,
 }
@@ -225,16 +229,18 @@ droidstubs {
 java_defaults {
     name: "framework-stubs-default",
     libs: [ "stub-annotations" ],
-    static_libs: [ "private-stub-annotations-jar" ],
+    static_libs: [
+        "private-stub-annotations-jar",
+
+        // License notices from art module
+        "art-notices-for-framework-stubs-jar",
+    ],
     sdk_version: "core_current",
     errorprone: {
         javacflags: [
             "-XepDisableAllChecks",
         ],
     },
-    java_resources: [
-        ":notices-for-framework-stubs",
-    ],
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,
@@ -262,6 +268,7 @@ java_library_static {
     name: "android_module_lib_stubs_current",
     srcs: [ ":module-lib-api-stubs-docs" ],
     defaults: ["framework-stubs-default"],
+    libs: ["android_system_stubs_current"],
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -313,12 +320,10 @@ java_library_static {
 
 droidstubs {
     name: "hiddenapi-lists-docs",
-    defaults: ["metalava-api-stubs-default"],
+    defaults: ["metalava-full-api-stubs-default"],
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    dex_api_filename: "public-dex.txt",
-    private_dex_api_filename: "private-dex.txt",
     removed_dex_api_filename: "removed-dex.txt",
     args: metalava_framework_docs_args +
         " --show-unannotated " +
@@ -328,7 +333,7 @@ droidstubs {
 
 droidstubs {
     name: "hiddenapi-mappings",
-    defaults: ["metalava-api-stubs-default"],
+    defaults: ["metalava-full-api-stubs-default"],
     srcs: [
         ":opt-telephony-common-srcs",
     ],

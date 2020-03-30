@@ -294,6 +294,17 @@ filegroup {
     ]
 }
 
+java_library {
+    name: "framework-updatable-stubs-module_libs_api",
+    static_libs: [
+        "framework-sdkextensions-stubs-module_libs_api",
+        "framework-tethering-stubs-module_libs_api",
+        "updatable_media_stubs",
+    ],
+    sdk_version: "module_current",
+    visibility: [":__pkg__"],
+}
+
 filegroup {
     name: "framework-all-sources",
     srcs: [
@@ -324,9 +335,11 @@ java_defaults {
             "rs/java",
             "sax/java",
             "telecomm/java",
-            "telephony/java",
             "wifi/java",
             "wifi/aidl-export",
+
+            // TODO(b/147699819): remove this
+            "telephony/java",
         ],
     },
 }
@@ -396,7 +409,6 @@ java_defaults {
         "app-compat-annotations",
         "ext",
         "unsupportedappusage",
-        "updatable_media_stubs",
     ],
 
     jarjar_rules: ":framework-jarjar-rules",
@@ -455,9 +467,6 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
-    libs: [
-        "framework-tethering-stubs",
-    ],
     installable: true,
     javac_shard_size: 150,
     required: [
@@ -465,6 +474,7 @@ java_library {
         "libcore-platform-compat-config",
         "services-platform-compat-config",
     ],
+    libs: ["framework-updatable-stubs-module_libs_api"],
     static_libs: [
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
@@ -494,9 +504,7 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
-        "updatable_media_stubs",
-        "framework-sdkextensions-stubs-systemapi",
-        "framework-tethering-stubs",
+        "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
@@ -507,52 +515,22 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
+    static_libs: [
+        // Additional dependencies needed to build the ike API classes.
+        "ike-internals",
+    ],
     apex_available: ["//apex_available:platform"],
     visibility: [
         // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
         "//external/robolectric-shadows:__subpackages__",
-        "//frameworks/base/packages/Tethering/common/TetheringLib:__subpackages__",
+        "//frameworks/base",
         "//frameworks/layoutlib:__subpackages__",
-        "//frameworks/opt/net/ike:__subpackages__",
-    ],
-}
-
-java_library {
-    name: "framework-annotation-proc",
-    defaults: ["framework-defaults"],
-    srcs: [":framework-all-sources"],
-    libs: [
-        "app-compat-annotations",
-        "unsupportedappusage",
-    ],
-    installable: false,
-    plugins: [
-        "compat-changeid-annotation-processor",
     ],
 }
 
 platform_compat_config {
-    name: "framework-platform-compat-config",
-    src: ":framework-annotation-proc",
-}
-
-// A library including just UnsupportedAppUsage.java classes.
-//
-// Provided for target so that libraries can use it without depending on
-// the whole of framework or the core platform API.
-//
-// Built for host so that the annotation processor can also use this annotation.
-java_library {
-    name: "unsupportedappusage-annotation",
-    host_supported: true,
-    srcs: [
-        "core/java/android/annotation/IntDef.java",
-    ],
-    static_libs: [
-        "art.module.api.annotations",
-    ],
-
-    sdk_version: "core_current",
+   name: "framework-platform-compat-config",
+   src: ":framework-minus-apex",
 }
 
 // A temporary build target that is conditionally included on the bootclasspath if
@@ -614,6 +592,7 @@ gensrcs {
 filegroup {
     name: "framework-annotations",
     srcs: [
+        "core/java/android/annotation/Hide.java",
         "core/java/android/annotation/NonNull.java",
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/IntDef.java",
@@ -638,6 +617,7 @@ filegroup {
     srcs: [
         "core/java/android/annotation/StringDef.java",
         "core/java/android/net/annotations/PolicyDirection.java",
+        "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
@@ -664,6 +644,18 @@ filegroup {
         "core/java/com/android/internal/util/WakeupMessage.java",
         "core/java/com/android/internal/util/TokenBucket.java",
         "core/java/android/net/shared/*.java",
+    ],
+}
+
+filegroup {
+    name: "framework-services-net-module-wifi-shared-srcs",
+    srcs: [
+        "core/java/android/net/DhcpResults.java",
+        "core/java/android/net/shared/Inet4AddressUtils.java",
+        "core/java/android/net/shared/InetAddressUtils.java",
+        "core/java/android/net/util/IpUtils.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/com/android/internal/util/Preconditions.java",
     ],
 }
 
@@ -999,16 +991,6 @@ aidl_mapping {
     name: "framework-aidl-mappings",
     srcs: [":framework-all-sources"],
     output: "framework-aidl-mappings.txt",
-}
-
-genrule {
-    name: "framework-annotation-proc-index",
-    srcs: [":framework-annotation-proc"],
-    cmd: "unzip -qp $(in) unsupportedappusage/unsupportedappusage_index.csv > $(out)",
-    out: ["unsupportedappusage_index.csv"],
-    dist: {
-        targets: ["droidcore"],
-    },
 }
 
 filegroup {

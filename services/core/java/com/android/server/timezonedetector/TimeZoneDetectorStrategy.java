@@ -22,8 +22,11 @@ import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import java.io.PrintWriter;
 
 /**
- * The interface for the class that implement the time detection algorithm used by the
+ * The interface for the class that implements the time detection algorithm used by the
  * {@link TimeZoneDetectorService}.
+ *
+ * <p>The strategy uses suggestions to decide whether to modify the device's time zone setting
+ * and what to set it to.
  *
  * <p>Most calls will be handled by a single thread but that is not true for all calls. For example
  * {@link #dump(PrintWriter, String[])}) may be called on a different thread so implementations must
@@ -33,7 +36,9 @@ import java.io.PrintWriter;
  */
 public interface TimeZoneDetectorStrategy {
 
-    /** Process the suggested manually-entered (i.e. user sourced) time zone. */
+    /**
+     * Suggests a time zone for the device using manually-entered (i.e. user sourced) information.
+     */
     void suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion suggestion);
 
     /**
@@ -41,8 +46,7 @@ public interface TimeZoneDetectorStrategy {
      * {@link TelephonyTimeZoneSuggestion#getZoneId()} is {@code null}. The suggestion is scoped to
      * a specific {@link TelephonyTimeZoneSuggestion#getSlotIndex() slotIndex}.
      * See {@link TelephonyTimeZoneSuggestion} for an explanation of the metadata associated with a
-     * suggestion. The strategy uses suggestions to decide whether to modify the device's time zone
-     * setting and what to set it to.
+     * suggestion.
      */
     void suggestTelephonyTimeZone(@NonNull TelephonyTimeZoneSuggestion suggestion);
 

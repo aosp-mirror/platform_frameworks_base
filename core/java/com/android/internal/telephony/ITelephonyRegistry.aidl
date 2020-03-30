@@ -19,6 +19,7 @@ package com.android.internal.telephony;
 import android.content.Intent;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
+import android.telephony.BarringInfo;
 import android.telephony.CallQuality;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
@@ -102,4 +103,5 @@ interface ITelephonyRegistry {
     void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);
     void notifyRegistrationFailed(int slotIndex, int subId, in CellIdentity cellIdentity,
             String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
+    void notifyBarringInfoChanged(int slotIndex, int subId, in BarringInfo barringInfo);
 }

@@ -792,6 +792,17 @@ public class Handler {
     }
 
     /**
+     * Remove any pending posts of messages with code 'what' and whose obj is
+     * 'object' that are in the message queue.  If <var>object</var> is null,
+     * all messages will be removed.
+     *
+     *@hide
+     */
+    public final void removeEqualMessages(int what, @Nullable Object object) {
+        mQueue.removeEqualMessages(this, what, object);
+    }
+
+    /**
      * Remove any pending posts of callbacks and sent messages whose
      * <var>obj</var> is <var>token</var>.  If <var>token</var> is null,
      * all callbacks and messages will be removed.
@@ -800,6 +811,16 @@ public class Handler {
         mQueue.removeCallbacksAndMessages(this, token);
     }
 
+    /**
+     * Remove any pending posts of callbacks and sent messages whose
+     * <var>obj</var> is <var>token</var>.  If <var>token</var> is null,
+     * all callbacks and messages will be removed.
+     *
+     *@hide
+     */
+    public final void removeCallbacksAndEqualMessages(@Nullable Object token) {
+        mQueue.removeCallbacksAndEqualMessages(this, token);
+    }
     /**
      * Check if there are any pending posts of messages with code 'what' in
      * the message queue.
@@ -822,6 +843,16 @@ public class Handler {
      */
     public final boolean hasMessages(int what, @Nullable Object object) {
         return mQueue.hasMessages(this, what, object);
+    }
+
+    /**
+     * Check if there are any pending posts of messages with code 'what' and
+     * whose obj is 'object' in the message queue.
+     *
+     *@hide
+     */
+    public final boolean hasEqualMessages(int what, @Nullable Object object) {
+        return mQueue.hasEqualMessages(this, what, object);
     }
 
     /**

@@ -95,7 +95,6 @@ public final class PreciseDataConnectionState implements Parcelable {
      *        if there is no valid APN setting for the specific type, then this will be null
      * @hide
      */
-    @SystemApi
     public PreciseDataConnectionState(@DataState int state,
                                       @NetworkType int networkType,
                                       @ApnType int apnTypes, @NonNull String apn,
@@ -265,10 +264,10 @@ public final class PreciseDataConnectionState implements Parcelable {
     /**
      * Return the APN Settings for this data connection.
      *
-     * Returns the ApnSetting that was used to configure this data connection.
+     * @return the ApnSetting that was used to configure this data connection.
      */
     // FIXME: This shouldn't be nullable; update once the ApnSetting is supplied correctly
-    @Nullable ApnSetting getApnSetting() {
+    public @Nullable ApnSetting getApnSetting() {
         return mApnSetting;
     }
 

@@ -136,7 +136,7 @@ public class ConnectivityDiagnosticsManager {
          * {@link #NETWORK_VALIDATION_RESULT_PARTIALLY_VALID},
          * {@link #NETWORK_VALIDATION_RESULT_SKIPPED}.
          *
-         * @see android.net.NetworkCapabilities#CAPABILITY_VALIDATED
+         * @see android.net.NetworkCapabilities#NET_CAPABILITY_VALIDATED
          */
         @NetworkValidationResult
         public static final String KEY_NETWORK_VALIDATION_RESULT = "networkValidationResult";
@@ -233,8 +233,8 @@ public class ConnectivityDiagnosticsManager {
          * Constructor for ConnectivityReport.
          *
          * <p>Apps should obtain instances through {@link
-         * ConnectivityDiagnosticsCallback#onConnectivityReport} instead of instantiating their own
-         * instances (unless for testing purposes).
+         * ConnectivityDiagnosticsCallback#onConnectivityReportAvailable} instead of instantiating
+         * their own instances (unless for testing purposes).
          *
          * @param network The Network for which this ConnectivityReport applies
          * @param reportTimestamp The timestamp for the report
@@ -368,7 +368,14 @@ public class ConnectivityDiagnosticsManager {
 
     /** Class that includes information for a suspected data stall on a specific Network */
     public static final class DataStallReport implements Parcelable {
+        /**
+         * Indicates that the Data Stall was detected using DNS events.
+         */
         public static final int DETECTION_METHOD_DNS_EVENTS = 1;
+
+        /**
+         * Indicates that the Data Stall was detected using TCP metrics.
+         */
         public static final int DETECTION_METHOD_TCP_METRICS = 2;
 
         /** @hide */
@@ -615,10 +622,10 @@ public class ConnectivityDiagnosticsManager {
 
         /** @hide */
         @VisibleForTesting
-        public void onConnectivityReport(@NonNull ConnectivityReport report) {
+        public void onConnectivityReportAvailable(@NonNull ConnectivityReport report) {
             Binder.withCleanCallingIdentity(() -> {
                 mExecutor.execute(() -> {
-                    mCb.onConnectivityReport(report);
+                    mCb.onConnectivityReportAvailable(report);
                 });
             });
         }
@@ -659,7 +666,7 @@ public class ConnectivityDiagnosticsManager {
          *
          * @param report The ConnectivityReport containing information about a connectivity check
          */
-        public void onConnectivityReport(@NonNull ConnectivityReport report) {}
+        public void onConnectivityReportAvailable(@NonNull ConnectivityReport report) {}
 
         /**
          * Called when the platform suspects a data stall on some Network.

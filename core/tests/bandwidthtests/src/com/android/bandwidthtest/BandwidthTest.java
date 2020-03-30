@@ -268,7 +268,7 @@ public class BandwidthTest extends InstrumentationTestCase {
         File snd_stat = new File (root_filepath + "tcp_snd");
         int tx = BandwidthTestUtil.parseIntValueFromFile(snd_stat);
         NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
-        stats.addEntry(NetworkStats.IFACE_ALL, uid, NetworkStats.SET_DEFAULT,
+        stats.insertEntry(NetworkStats.IFACE_ALL, uid, NetworkStats.SET_DEFAULT,
                 NetworkStats.TAG_NONE, rx, 0, tx, 0, 0);
         return stats;
     }

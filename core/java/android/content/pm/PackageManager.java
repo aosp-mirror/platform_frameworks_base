@@ -548,7 +548,6 @@ public abstract class PackageManager {
      * Internal {@link PackageInfo} flag used to indicate that a package is a hidden system app.
      * @hide
      */
-    @SystemApi
     public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS =  0x20000000;
 
     /**
@@ -1424,7 +1423,7 @@ public abstract class PackageManager {
 
     /**
      * Installation failed return code: a new staged session was attempted to be committed while
-     * there is already one in-progress.
+     * there is already one in-progress or new session has package that is already staged.
      *
      * @hide
      */

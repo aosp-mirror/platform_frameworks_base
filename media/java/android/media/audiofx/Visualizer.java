@@ -20,8 +20,9 @@ import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.lang.ref.WeakReference;
 
@@ -158,6 +159,7 @@ public class Visualizer {
     /**
      * Indicates the state of the Visualizer instance
      */
+    @GuardedBy("mStateLock")
     private int mState = STATE_UNINITIALIZED;
     /**
      * Lock to synchronize access to mState
@@ -166,6 +168,7 @@ public class Visualizer {
     /**
      * System wide unique Identifier of the visualizer engine used by this Visualizer instance
      */
+    @GuardedBy("mStateLock")
     @UnsupportedAppUsage
     private int mId;
 
@@ -176,19 +179,24 @@ public class Visualizer {
     /**
      * Handler for events coming from the native code
      */
-    private NativeEventHandler mNativeEventHandler = null;
+    @GuardedBy("mListenerLock")
+    private Handler mNativeEventHandler = null;
     /**
      *  PCM and FFT capture listener registered by client
      */
+    @GuardedBy("mListenerLock")
     private OnDataCaptureListener mCaptureListener = null;
     /**
      *  Server Died listener registered by client
      */
+    @GuardedBy("mListenerLock")
     private OnServerDiedListener mServerDiedListener = null;
 
     // accessed by native methods
-    private long mNativeVisualizer;
-    private long mJniData;
+    private long mNativeVisualizer;  // guarded by a static lock in native code
+    private long mJniData;  // set in native_setup, _release;
+                            // get in native_release, _setEnabled, _setPeriodicCapture
+                            // thus, effectively guarded by mStateLock
 
     //--------------------------------------------------------------------------
     // Constructor, Finalize
@@ -244,7 +252,9 @@ public class Visualizer {
 
     @Override
     protected void finalize() {
-        native_finalize();
+        synchronized (mStateLock) {
+            native_finalize();
+        }
     }
 
     /**
@@ -601,25 +611,28 @@ public class Visualizer {
      */
     public int setDataCaptureListener(OnDataCaptureListener listener,
             int rate, boolean waveform, boolean fft) {
-        synchronized (mListenerLock) {
-            mCaptureListener = listener;
-        }
         if (listener == null) {
             // make sure capture callback is stopped in native code
             waveform = false;
             fft = false;
         }
-        int status = native_setPeriodicCapture(rate, waveform, fft);
+        int status;
+        synchronized (mStateLock) {
+            status = native_setPeriodicCapture(rate, waveform, fft);
+        }
         if (status == SUCCESS) {
-            if ((listener != null) && (mNativeEventHandler == null)) {
-                Looper looper;
-                if ((looper = Looper.myLooper()) != null) {
-                    mNativeEventHandler = new NativeEventHandler(this, looper);
-                } else if ((looper = Looper.getMainLooper()) != null) {
-                    mNativeEventHandler = new NativeEventHandler(this, looper);
-                } else {
-                    mNativeEventHandler = null;
-                    status = ERROR_NO_INIT;
+            synchronized (mListenerLock) {
+                mCaptureListener = listener;
+                if ((listener != null) && (mNativeEventHandler == null)) {
+                    Looper looper;
+                    if ((looper = Looper.myLooper()) != null) {
+                        mNativeEventHandler = new Handler(looper);
+                    } else if ((looper = Looper.getMainLooper()) != null) {
+                        mNativeEventHandler = new Handler(looper);
+                    } else {
+                        mNativeEventHandler = null;
+                        status = ERROR_NO_INIT;
+                    }
                 }
             }
         }
@@ -663,112 +676,61 @@ public class Visualizer {
         return SUCCESS;
     }
 
-    /**
-     * Helper class to handle the forwarding of native events to the appropriate listeners
-     */
-    private class NativeEventHandler extends Handler
-    {
-        private Visualizer mVisualizer;
-
-        public NativeEventHandler(Visualizer v, Looper looper) {
-            super(looper);
-            mVisualizer = v;
-        }
-
-        private void handleCaptureMessage(Message msg) {
-            OnDataCaptureListener l = null;
-            synchronized (mListenerLock) {
-                l = mVisualizer.mCaptureListener;
-            }
-
-            if (l != null) {
-                byte[] data = (byte[])msg.obj;
-                int samplingRate = msg.arg1;
-
-                switch(msg.what) {
-                case NATIVE_EVENT_PCM_CAPTURE:
-                    l.onWaveFormDataCapture(mVisualizer, data, samplingRate);
-                    break;
-                case NATIVE_EVENT_FFT_CAPTURE:
-                    l.onFftDataCapture(mVisualizer, data, samplingRate);
-                    break;
-                default:
-                    Log.e(TAG,"Unknown native event in handleCaptureMessge: "+msg.what);
-                    break;
-                }
-            }
-        }
-
-        private void handleServerDiedMessage(Message msg) {
-            OnServerDiedListener l = null;
-            synchronized (mListenerLock) {
-                l = mVisualizer.mServerDiedListener;
-            }
-
-            if (l != null)
-                l.onServerDied();
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (mVisualizer == null) {
-                return;
-            }
-
-            switch(msg.what) {
-            case NATIVE_EVENT_PCM_CAPTURE:
-            case NATIVE_EVENT_FFT_CAPTURE:
-                handleCaptureMessage(msg);
-                break;
-            case NATIVE_EVENT_SERVER_DIED:
-                handleServerDiedMessage(msg);
-                break;
-            default:
-                Log.e(TAG,"Unknown native event: "+msg.what);
-                break;
-            }
-        }
-    }
-
     //---------------------------------------------------------
     // Interface definitions
     //--------------------
 
     private static native final void native_init();
 
+    @GuardedBy("mStateLock")
     private native final int native_setup(Object audioeffect_this,
                                           int audioSession,
                                           int[] id,
                                           String opPackageName);
 
+    @GuardedBy("mStateLock")
     private native final void native_finalize();
 
+    @GuardedBy("mStateLock")
     private native final void native_release();
 
+    @GuardedBy("mStateLock")
     private native final int native_setEnabled(boolean enabled);
 
+    @GuardedBy("mStateLock")
     private native final boolean native_getEnabled();
 
+    @GuardedBy("mStateLock")
     private native final int native_setCaptureSize(int size);
 
+    @GuardedBy("mStateLock")
     private native final int native_getCaptureSize();
 
+    @GuardedBy("mStateLock")
     private native final int native_setScalingMode(int mode);
 
+    @GuardedBy("mStateLock")
     private native final int native_getScalingMode();
 
+    @GuardedBy("mStateLock")
     private native final int native_setMeasurementMode(int mode);
 
+    @GuardedBy("mStateLock")
     private native final int native_getMeasurementMode();
 
+    @GuardedBy("mStateLock")
     private native final int native_getSamplingRate();
 
+    @GuardedBy("mStateLock")
     private native final int native_getWaveForm(byte[] waveform);
 
+    @GuardedBy("mStateLock")
     private native final int native_getFft(byte[] fft);
 
+    @GuardedBy("mStateLock")
     private native final int native_getPeakRms(MeasurementPeakRms measurement);
 
+    @GuardedBy("mStateLock")
     private native final int native_setPeriodicCapture(int rate, boolean waveForm, boolean fft);
 
     //---------------------------------------------------------
@@ -776,17 +738,47 @@ public class Visualizer {
     //--------------------
     @SuppressWarnings("unused")
     private static void postEventFromNative(Object effect_ref,
-            int what, int arg1, int arg2, Object obj) {
-        Visualizer visu = (Visualizer)((WeakReference)effect_ref).get();
-        if (visu == null) {
-            return;
-        }
+            int what, int samplingRate, byte[] data) {
+        final Visualizer visualizer = (Visualizer) ((WeakReference) effect_ref).get();
+        if (visualizer == null) return;
 
-        if (visu.mNativeEventHandler != null) {
-            Message m = visu.mNativeEventHandler.obtainMessage(what, arg1, arg2, obj);
-            visu.mNativeEventHandler.sendMessage(m);
+        final Handler handler;
+        synchronized (visualizer.mListenerLock) {
+            handler = visualizer.mNativeEventHandler;
         }
+        if (handler == null) return;
 
+        switch (what) {
+            case NATIVE_EVENT_PCM_CAPTURE:
+            case NATIVE_EVENT_FFT_CAPTURE:
+                handler.post(() -> {
+                    final OnDataCaptureListener l;
+                    synchronized (visualizer.mListenerLock) {
+                        l = visualizer.mCaptureListener;
+                    }
+                    if (l != null) {
+                        if (what == NATIVE_EVENT_PCM_CAPTURE) {
+                            l.onWaveFormDataCapture(visualizer, data, samplingRate);
+                        } else { // what == NATIVE_EVENT_FFT_CAPTURE
+                            l.onFftDataCapture(visualizer, data, samplingRate);
+                        }
+                    }
+                });
+                break;
+            case NATIVE_EVENT_SERVER_DIED:
+                handler.post(() -> {
+                    final OnServerDiedListener l;
+                    synchronized (visualizer.mListenerLock) {
+                        l = visualizer.mServerDiedListener;
+                    }
+                    if (l != null) {
+                        l.onServerDied();
+                    }
+                });
+                break;
+            default:
+                Log.e(TAG, "Unknown native event in postEventFromNative: " + what);
+                break;
+        }
     }
 }
-

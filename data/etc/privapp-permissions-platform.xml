@@ -39,11 +39,6 @@ applications that come with the platform
         <permission name="android.permission.CRYPT_KEEPER"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.captiveportallogin">
-        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
-        <permission name="android.permission.NETWORK_BYPASS_PRIVATE_DNS"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.cellbroadcastreceiver">
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
@@ -238,6 +233,7 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.networkstack.tethering">
+        <permission name="android.permission.BLUETOOTH_PRIVILEGED" />
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
@@ -332,6 +328,7 @@ applications that come with the platform
         <permission name="android.permission.SUSPEND_APPS" />
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
+        <permission name="android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.STATUS_BAR_SERVICE"/>
@@ -358,6 +355,8 @@ applications that come with the platform
         <!-- Permission required to test lights control APIs. -->
         <permission name="android.permission.CONTROL_DEVICE_LIGHTS" />
         <permission name="android.permission.REBOOT"/>
+        <!-- Permission required for testing system audio effect APIs. -->
+        <permission name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

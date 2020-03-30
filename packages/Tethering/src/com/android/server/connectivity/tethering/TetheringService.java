@@ -33,6 +33,7 @@ import android.net.ITetheringConnector;
 import android.net.ITetheringEventCallback;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.NetworkStack;
 import android.net.TetheringRequestParcel;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
@@ -79,6 +80,7 @@ public class TetheringService extends Service {
         mContext = mDeps.getContext();
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mTethering = makeTethering(mDeps);
+        mTethering.startStateMachineUpdaters();
     }
 
     /**
@@ -364,8 +366,7 @@ public class TetheringService extends Service {
                     IBinder connector;
                     try {
                         final long before = System.currentTimeMillis();
-                        while ((connector = (IBinder) mContext.getSystemService(
-                                Context.NETWORK_STACK_SERVICE)) == null) {
+                        while ((connector = NetworkStack.getService()) == null) {
                             if (System.currentTimeMillis() - before > NETWORKSTACK_TIMEOUT_MS) {
                                 Log.wtf(TAG, "Timeout, fail to get INetworkStackConnector");
                                 return null;

@@ -160,10 +160,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Whether a captive portal was found during the last network validation attempt.
     public boolean lastCaptivePortalDetected;
 
-    // Indicates the captive portal app was opened to show a login UI to the user, but the network
-    // has not validated yet.
-    public volatile boolean captivePortalValidationPending;
-
     // Set to true when partial connectivity was detected.
     public boolean partialConnectivity;
 
@@ -625,23 +621,23 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
     }
 
-    // TODO: Print shorter members first and only print the boolean variable which value is true
-    // to improve readability.
     public String toString() {
-        return "NetworkAgentInfo{ ni{" + networkInfo + "}  "
-                + "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  "
-                + "lp{" + linkProperties + "}  "
-                + "nc{" + networkCapabilities + "}  Score{" + getCurrentScore() + "}  "
-                + "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  "
-                + "created{" + created + "} lingering{" + isLingering() + "} "
-                + "explicitlySelected{" + networkAgentConfig.explicitlySelected + "} "
-                + "acceptUnvalidated{" + networkAgentConfig.acceptUnvalidated + "} "
-                + "everCaptivePortalDetected{" + everCaptivePortalDetected + "} "
-                + "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} "
-                + "captivePortalValidationPending{" + captivePortalValidationPending + "} "
-                + "partialConnectivity{" + partialConnectivity + "} "
-                + "acceptPartialConnectivity{" + networkAgentConfig.acceptPartialConnectivity + "} "
-                + "clat{" + clatd + "} "
+        return "NetworkAgentInfo{"
+                + "network{" + network + "}  handle{" + network.getNetworkHandle() + "}  ni{"
+                + networkInfo.toShortString() + "} "
+                + "  Score{" + getCurrentScore() + "} "
+                + (isLingering() ? " lingering" : "")
+                + (everValidated ? " everValidated" : "")
+                + (lastValidated ? " lastValidated" : "")
+                + (partialConnectivity ? " partialConnectivity" : "")
+                + (everCaptivePortalDetected ? " everCaptivePortal" : "")
+                + (lastCaptivePortalDetected ? " isCaptivePortal" : "")
+                + (networkAgentConfig.explicitlySelected ? " explicitlySelected" : "")
+                + (networkAgentConfig.acceptUnvalidated ? " acceptUnvalidated" : "")
+                + (networkAgentConfig.acceptPartialConnectivity ? " acceptPartialConnectivity" : "")
+                + (clatd.isStarted() ? " clat{" + clatd + "} " : "")
+                + "  lp{" + linkProperties + "}"
+                + "  nc{" + networkCapabilities + "}"
                 + "}";
     }
 

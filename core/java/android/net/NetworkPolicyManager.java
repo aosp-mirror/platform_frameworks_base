@@ -21,7 +21,6 @@ import static android.content.pm.PackageManager.GET_SIGNATURES;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.ActivityManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -56,7 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @hide
  */
 @SystemService(Context.NETWORK_POLICY_SERVICE)
-@SystemApi
 public class NetworkPolicyManager {
 
     /* POLICY_* are masks and can be ORed, although currently they are not.*/
@@ -162,11 +160,13 @@ public class NetworkPolicyManager {
 
     /**
      * Mask used to check if an override value is marked as unmetered.
+     * @hide
      */
     public static final int SUBSCRIPTION_OVERRIDE_UNMETERED = 1 << 0;
 
     /**
      * Mask used to check if an override value is marked as congested.
+     * @hide
      */
     public static final int SUBSCRIPTION_OVERRIDE_CONGESTED = 1 << 1;
 
@@ -294,7 +294,6 @@ public class NetworkPolicyManager {
 
     /** @hide */
     @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
-    @SystemApi
     public void registerSubscriptionCallback(@NonNull SubscriptionCallback callback) {
         if (callback == null) {
             throw new NullPointerException("Callback cannot be null.");
@@ -309,7 +308,6 @@ public class NetworkPolicyManager {
 
     /** @hide */
     @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
-    @SystemApi
     public void unregisterSubscriptionCallback(@NonNull SubscriptionCallback callback) {
         if (callback == null) {
             throw new NullPointerException("Callback cannot be null.");
@@ -373,6 +371,7 @@ public class NetworkPolicyManager {
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first
      * @param callingPackage the name of the package making the call.
+     * @hide
      */
     public void setSubscriptionOverride(int subId, @SubscriptionOverrideMask int overrideMask,
             @SubscriptionOverrideMask int overrideValue, long timeoutMillis,
@@ -391,6 +390,7 @@ public class NetworkPolicyManager {
      * @param subId the subscriber this relationship applies to.
      * @param plans the list of plans.
      * @param callingPackage the name of the package making the call
+     * @hide
      */
     public void setSubscriptionPlans(int subId, @NonNull SubscriptionPlan[] plans,
             @NonNull String callingPackage) {
@@ -406,6 +406,7 @@ public class NetworkPolicyManager {
      *
      * @param subId the subscriber to get the subscription plans for.
      * @param callingPackage the name of the package making the call.
+     * @hide
      */
     @NonNull
     public SubscriptionPlan[] getSubscriptionPlans(int subId, @NonNull String callingPackage) {
@@ -549,7 +550,6 @@ public class NetworkPolicyManager {
     }
 
     /** @hide */
-    @SystemApi
     public static class SubscriptionCallback {
         /**
          * Notify clients of a new override about a given subscription.

@@ -35,6 +35,7 @@ import android.net.ipmemorystore.IOnStatusListener;
 import android.net.ipmemorystore.NetworkAttributes;
 import android.net.ipmemorystore.NetworkAttributesParcelable;
 import android.net.ipmemorystore.Status;
+import android.net.networkstack.ModuleNetworkStackClient;
 import android.os.RemoteException;
 
 import androidx.test.filters.SmallTest;
@@ -67,7 +68,7 @@ public class IpMemoryStoreTest {
     @Mock
     Context mMockContext;
     @Mock
-    NetworkStackClient mNetworkStackClient;
+    ModuleNetworkStackClient mModuleNetworkStackClient;
     @Mock
     IIpMemoryStore mMockService;
     @Mock
@@ -90,14 +91,14 @@ public class IpMemoryStoreTest {
                 ((IIpMemoryStoreCallbacks) invocation.getArgument(0))
                         .onIpMemoryStoreFetched(mMockService);
                 return null;
-            }).when(mNetworkStackClient).fetchIpMemoryStore(any());
+            }).when(mModuleNetworkStackClient).fetchIpMemoryStore(any());
         } else {
-            doNothing().when(mNetworkStackClient).fetchIpMemoryStore(mCbCaptor.capture());
+            doNothing().when(mModuleNetworkStackClient).fetchIpMemoryStore(mCbCaptor.capture());
         }
         mStore = new IpMemoryStore(mMockContext) {
             @Override
-            protected NetworkStackClient getNetworkStackClient() {
-                return mNetworkStackClient;
+            protected ModuleNetworkStackClient getModuleNetworkStackClient(Context ctx) {
+                return mModuleNetworkStackClient;
             }
         };
     }

@@ -735,7 +735,6 @@
   <java-symbol type="string" name="capability_title_canControlMagnification" />
   <java-symbol type="string" name="capability_desc_canPerformGestures" />
   <java-symbol type="string" name="capability_title_canPerformGestures" />
-  <java-symbol type="string" name="captive_portal_logged_in_detailed" />
   <java-symbol type="string" name="cfTemplateForwarded" />
   <java-symbol type="string" name="cfTemplateForwardedTime" />
   <java-symbol type="string" name="cfTemplateNotForwarded" />
@@ -2635,6 +2634,7 @@
   <java-symbol type="bool" name="config_device_wfc_ims_available" />
   <java-symbol type="bool" name="config_carrier_wfc_ims_available" />
   <java-symbol type="bool" name="config_use_voip_mode_for_ims" />
+  <java-symbol type="bool" name="config_allow_ussd_over_ims" />
   <java-symbol type="attr" name="touchscreenBlocksFocus" />
   <java-symbol type="layout" name="resolver_list_with_default" />
   <java-symbol type="string" name="activity_resolver_set_always" />

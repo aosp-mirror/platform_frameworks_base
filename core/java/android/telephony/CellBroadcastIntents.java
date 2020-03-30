@@ -46,7 +46,11 @@ public class CellBroadcastIntents {
 
     /**
      * Broadcast intent action for notifying area information has been updated. The information
-     * can be retrieved by {@link CellBroadcastService#getCellBroadcastAreaInfo(int)}
+     * can be retrieved by {@link CellBroadcastService#getCellBroadcastAreaInfo(int)}. The
+     * associated SIM slot index of updated area information can be retrieved through the extra
+     * {@link SubscriptionManager#EXTRA_SLOT_INDEX}.
+     *
+     * @see SubscriptionManager#EXTRA_SLOT_INDEX
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_AREA_INFO_UPDATED =
