@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP adresas ir prievadas"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR kodo nuskaitymas"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Susiekite įrenginį „Wi‑Fi“ ryšiu nuskaitydami QR kodą"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Prisijunkite prie „Wi-Fi“ tinklo"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, derinti, kūrėjas"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Pranešimo apie riktą spartusis klavišas"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Rodyti pranešimo apie riktą mygtuką maitinimo meniu"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalija (raudona, žalia)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalija (mėlyna, geltona)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Spalvų taisymas"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Spalvų taisymo funkcija padės koreguoti, kaip spalvos rodomos jūsų įrenginyje"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Nepaisyta naudojant nuostatą „<xliff:g id="TITLE">%1$s</xliff:g>“"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Liko maždaug <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Turėtų išsikrauti maždaug po <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Turėtų išsikrauti maždaug po <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Iki <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Akumuliatoriaus energija gali išsekti <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Liko mažiau nei <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Liko mažiau nei <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Liko daugiau nei <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -514,26 +511,42 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefono garsiakalbis"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Prisijungiant kilo problema. Išjunkite įrenginį ir vėl jį įjunkite"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Laidinis garso įrenginys"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
+    <string name="help_label" msgid="3528360748637781274">"Pagalba ir atsiliepimai"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Saugykla"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Bendrinami duomenys"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Peržiūrėti ir keisti bendrinamus duomenis"</string>
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
     <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
     <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <string name="blob_id_text" msgid="8680078988996308061">"Bendrinamų duomenų ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Galiojimas baigiasi <xliff:g id="DATE">%s</xliff:g>"</string>
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
     <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"Duomenis bendrinančios programos"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Programa nepateikė jokio aprašo."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Nuomos laikas baigiasi <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Ištrinti bendrinamus duomenis"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Ar tikrai norite ištrinti šiuos bendrinamus duomenis?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Naudotojai turi savo programas ir turinį"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Galite apriboti prieigą prie paskyros programų ir turinio"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Naudotojas"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Ribotas profilis"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Pridėti naują naudotoją?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Galite bendrinti šį įrenginį su kitais žmonėmis sukūrę papildomų naudotojų. Kiekvienam naudotojui suteikiama atskira erdvė, kurią jie gali tinkinti naudodami programas, ekrano foną ir kt. Be to, naudotojai gali koreguoti įrenginio nustatymus, pvz., „Wi‑Fi“, kurie taikomi visiems.\n\nKai pridedate naują naudotoją, šis asmuo turi nusistatyti savo erdvę.\n\nBet kuris naudotojas gali atnaujinti visų kitų naudotojų programas. Pasiekiamumo nustatymai ir paslaugos gali nebūti perkeltos naujam naudotojui."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Kai pridedate naują naudotoją, šis asmuo turi nustatyti savo vietą.\n\nBet kuris naudotojas gali atnaujinti visų kitų naudotojų programas."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Nustatyti naudotoją dabar?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Įsitikinkite, kad asmuo gali paimti įrenginį ir nustatyti savo vietą"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Nustatyti profilį dabar?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Nustatyti dabar"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Ne dabar"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Pridėti"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Naujas naudotojas"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Naujas profilis"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Naudotojo inform."</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profilio informacija"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Prieš kuriant apribotą profilį reikės nustatyti ekrano užraktą, kad apsaugotumėte programas ir asmeninius duomenis."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Nustatyti užraktą"</string>
 </resources>

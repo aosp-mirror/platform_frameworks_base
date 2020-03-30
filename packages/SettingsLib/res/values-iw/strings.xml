@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏יציאה וכתובת IP"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"‏סריקת קוד QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"‏יש לסרוק קוד QR כדי להתאים מכשיר באמצעות Wi‑Fi"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏יש להתחבר לרשת Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb, ניפוי באגים, פיתוח"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"קיצור של דוח באגים"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"כדי ליצור דוח באגים, הצג לחצן בתפריט לניהול צריכת החשמל"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"פרוטנומליה (אדום-ירוק)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"טריטנומליה (כחול-צהוב)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"תיקון צבע"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"תיקון צבעים מאפשר לשנות את האופן שבו צבעים מוצגים במכשיר שלך"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"נעקף על ידי <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"הזמן הנותר: בערך <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"אמורה להחזיק מעמד בערך עד <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"אמורה להחזיק מעמד בערך עד <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"עד <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ייתכן שהסוללה תתרוקן עד <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"נותרו פחות מ-<xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"נותרו פחות מ-<xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"נותרו יותר מ-<xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -514,26 +511,42 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"רמקול של טלפון"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"יש בעיה בחיבור. עליך לכבות את המכשיר ולהפעיל אותו מחדש"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"התקן אודיו חוטי"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
+    <string name="help_label" msgid="3528360748637781274">"עזרה ומשוב"</string>
+    <string name="storage_category" msgid="2287342585424631813">"אחסון"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"נתונים משותפים"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"הצגה ושינוי של נתונים משותפים"</string>
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
     <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
     <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <string name="blob_id_text" msgid="8680078988996308061">"מזהה נתונים משותפים: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"התוקף יפוג ב-<xliff:g id="DATE">%s</xliff:g>"</string>
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
     <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"אפליקציות שמשתפות נתונים"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"האפליקציה לא סיפקה תיאור."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"‏תוקף החכירה (lease) יפוג ב-<xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"מחיקת הנתונים המשותפים"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"הנתונים המשותפים יימחקו. להמשיך?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"למשתמשים יש אפליקציות ותוכן משלהם"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"ניתן להגביל את הגישה לאפליקציות ולתוכן מהחשבון שלך"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"משתמש"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"פרופיל מוגבל"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"האם להוסיף משתמש חדש?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏ניתן לשתף מכשיר זה עם אנשים אחרים על ידי יצירת משתמשים נוספים. לכל משתמש מרחב משלו, שאותו אפשר להתאים אישית בעזרת אפליקציות, טפט ופריטים נוספים. המשתמשים יכולים גם להתאים הגדרות של המכשיר כגון Wi‑Fi, שמשפיעות על כולם.\n\nכשמוסיפים משתמש חדש, על משתמש זה להגדיר את המרחב שלו.\n\nכל אחד מהמשתמשים יכול לעדכן אפליקציות לכל שאר המשתמשים. ייתכן שהגדרות ושירותים של נגישות לא יועברו למשתמש החדש."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"בעת הוספת משתמש חדש, על משתמש זה להגדיר את השטח שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"האם להגדיר משתמש עכשיו?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"כדאי לוודא שהמשתמש זמין ויכול לקחת את המכשיר ולהגדיר את המרחב שלו"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"האם להגדיר פרופיל עכשיו?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"הגדרה"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"לא עכשיו"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"הוספה"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"משתמש חדש"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"פרופיל חדש"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"פרטי משתמש"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"פרטי פרופיל"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"לפני שתוכל ליצור פרופיל מוגבל, תצטרך להגדיר נעילת מסך כדי להגן על האפליקציות ועל הנתונים האישיים שלך."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"הגדרת נעילה"</string>
 </resources>

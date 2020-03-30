@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP helbidea eta ataka"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Eskaneatu QR kodea"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Parekatu gailua wifi-sare baten bidez QR kode bat eskaneatuta"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Konektatu wifi-sare batera"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, araztu, gailua"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Akatsen txostenerako lasterbidea"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Bateriaren menuan, erakutsi akatsen txostena sortzeko botoia"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopia (urdin-horia)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koloreen zuzenketa"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Koloreen zuzenketaren bidez, gailuan koloreak bistaratzen diren modua doi dezakezu"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> inguru gelditzen dira"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> arte"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Baliteke bateria ordu honetan agortzea: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> baino gutxiago gelditzen dira"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> baino gutxiago gelditzen da (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> baino gehiago gelditzen da (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,42 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonoaren bozgorailua"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazoren bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
+    <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritzia"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Memoria"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Partekatutako datuak"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Ikusi eta aldatu partekatutako datuak"</string>
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
     <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
     <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <string name="blob_id_text" msgid="8680078988996308061">"Partekatutako datuen IDa: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Iraungitze-data: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
     <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"Datuak partekatzen dituzten aplikazioak"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Aplikazioak ez du azalpenik eman."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Alokatzearen iraungitze-data: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Ezabatu partekatutako datuak"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Ziur partekatutako datuak ezabatu nahi dituzula?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Erabiltzaileek euren aplikazioak eta edukia dituzte."</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Aplikazioetarako eta edukirako sarbidea muga dezakezu zure kontutik."</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Erabiltzailea"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profil murriztua"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Beste erabiltzaile bat gehitu nahi duzu?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Gailu hau beste pertsona batzuekin partekatzeko, sortu erabiltzaile gehiago. Erabiltzaile bakoitzak bere eremua izango du eta, bertan, aplikazioak, horma-papera eta antzekoak pertsonalizatu ahal izango ditu. Horrez gain, erabiltzaile guztiei eragin diezaieketen ezarpen batzuk ere doi daitezke; adibidez, wifi-konexioarena.\n\nErabiltzaile bat gehitzen duzunean, pertsona horrek berak konfiguratu beharko du bere eremua.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak. Baliteke erabilerraztasun-ezarpenak eta -zerbitzuak ez transferitzea erabiltzaile berriei."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Erabiltzaile bat gehitzen duzunean, erabiltzaile horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Erabiltzailea konfiguratu?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Ziurtatu pertsona horrek gailua hartu eta bere eremua konfigura dezakeela"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Profila konfiguratu?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Konfiguratu"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Orain ez"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Gehitu"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Erabiltzaile berria"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Profil berria"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Erabiltzaile-info."</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profileko informazioa"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Profil murriztua sortu aurretik, aplikazioak eta datu pertsonalak babesteko, pantaila blokeatzeko metodo bat konfiguratu beharko duzu."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Ezarri blokeoa"</string>
 </resources>

@@ -519,9 +519,17 @@
     <skip />
     <!-- no translation found for shared_data_summary (5516326713822885652) -->
     <skip />
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
+    <skip />
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
+    <skip />
     <!-- no translation found for blob_id_text (8680078988996308061) -->
     <skip />
     <!-- no translation found for blob_expires_text (7882727111491739331) -->
+    <skip />
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
+    <skip />
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
     <!-- no translation found for accessor_info_title (8289823651512477787) -->
     <skip />
@@ -533,4 +541,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"વપરાશકર્તાઓ પાસે તેઓની પોતાની ઍપ્લિકેશનો અને કન્ટેન્ટ છે"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"તમે તમારા એકાઉન્ટથી ઍપ્લિકેશનો અને સામગ્રીની અ‍ૅક્સેસને નિયંત્રિત કરી શકો છો"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"વપરાશકર્તા"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"પ્રતિબંધિત પ્રોફાઇલ"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"તમે વધારાના વપરાશકર્તાઓ બનાવીને અન્ય લોકો સાથે આ ઉપકરણને શેર કરી શકો છો. દરેક વપરાશકર્તા પાસે તેમની પોતાની સ્પેસ છે, જેને તેઓ ઍપ, વૉલપેપર, વગેરે સાથે કસ્ટમાઇઝ કરી શકે છે. વપરાશકર્તાઓ પ્રત્યેક વ્યક્તિને અસર કરતી હોય તેવી ઉપકરણ સેટિંગ જેમ કે વાઇ-ફાઇને પણ સમાયોજિત કરી શકે છે.\n\nજ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમની સ્પેસ સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા અન્ય બધા વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે. નવા વપરાશકર્તાને ઍક્સેસિબિલિટી સેટિંગ અને સેવાઓ ટ્રાન્સફર ન પણ થાય."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ અપ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે એપ્લિકેશન્સને અપડેટ કરી શકે છે."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"અત્યારે જ વપરાશકર્તાને સેટ અપ કરીએ?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"ખાતરી કરો કે વ્યક્તિ ઉપકરણ લેવા અને તેમના સ્થાનનું સેટ અપ કરવા માટે ઉપલબ્ધ છે"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"હવે પ્રોફાઇલ સેટ કરીએ?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"હવે સેટ કરો"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"હમણાં નહીં"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"ઉમેરો"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"નવો વપરાશકર્તા"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"નવી પ્રોફાઇલ"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"વપરાશકર્તા માહિતી"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"પ્રોફાઇલ માહિતી"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"તમે પ્રતિબંધિત પ્રોફાઇલ બનાવી શકો તે પહેલાં, તમારે તમારી ઍપ્લિકેશનો અને વ્યક્તિગત ડેટાની સુરક્ષા માટે એક લૉક સ્ક્રીન સેટ કરવાની જરૂર પડશે."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"લૉક સેટ કરો"</string>
 </resources>
