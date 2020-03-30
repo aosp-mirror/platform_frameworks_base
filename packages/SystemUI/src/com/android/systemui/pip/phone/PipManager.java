@@ -364,6 +364,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 animatingBounds, fromImeAdjustment, fromShelfAdjustment,
                 mTmpDisplayInfo.rotation);
+        mPipTaskOrganizer.mayUpdateCurrentAnimationOnRotationChange();
     }
 
     public void dump(PrintWriter pw) {
