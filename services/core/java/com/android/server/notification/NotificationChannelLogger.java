@@ -184,14 +184,14 @@ public interface NotificationChannelLogger {
      * @return Small hash of the channel ID, if present, or 0 otherwise.
      */
     static int getIdHash(@NonNull NotificationChannel channel) {
-        return NotificationRecordLogger.smallHash(channel.getId());
+        return SmallHash.hash(channel.getId());
     }
 
     /**
      * @return Small hash of the channel ID, if present, or 0 otherwise.
      */
     static int getIdHash(@NonNull NotificationChannelGroup group) {
-        return NotificationRecordLogger.smallHash(group.getId());
+        return SmallHash.hash(group.getId());
     }
 
     /**
