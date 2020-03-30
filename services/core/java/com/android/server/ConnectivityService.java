@@ -7892,12 +7892,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ensureRunningOnConnectivityServiceThread();
         final IBinder iCb = cb.asBinder();
 
-        if (!mConnectivityDiagnosticsCallbacks.containsKey(iCb)) {
+        final ConnectivityDiagnosticsCallbackInfo cbInfo =
+                mConnectivityDiagnosticsCallbacks.remove(iCb);
+        if (cbInfo == null) {
             if (VDBG) log("Removing diagnostics callback that is not currently registered");
             return;
         }
 
-        final NetworkRequestInfo nri = mConnectivityDiagnosticsCallbacks.get(iCb).mRequestInfo;
+        final NetworkRequestInfo nri = cbInfo.mRequestInfo;
 
         if (uid != nri.mUid) {
             if (VDBG) loge("Different uid than registrant attempting to unregister cb");
@@ -7909,8 +7911,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // enforceRequestCountLimit().
         decrementNetworkRequestPerUidCount(nri);
 
-        final ConnectivityDiagnosticsCallbackInfo cbInfo =
-                mConnectivityDiagnosticsCallbacks.remove(iCb);
         iCb.unlinkToDeath(cbInfo, 0);
     }
 
