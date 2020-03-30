@@ -45,6 +45,9 @@ import android.view.ViewGroup;
  * under the hosting window which could be useful in some cases, e.g. animating transitions.
  * At this point the inlined content will not be interactive and the touch events would
  * be delivered to your app.
+ *
+ * @hide
+ * @removed
  */
 public class InlineContentView extends ViewGroup {
 
