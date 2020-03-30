@@ -21,6 +21,7 @@ apex {
 apex_defaults {
     name: "com.android.permission-defaults",
     updatable: true,
+    min_sdk_version: "R",
     key: "com.android.permission.key",
     certificate: ":com.android.permission.certificate",
     java_libs: [
