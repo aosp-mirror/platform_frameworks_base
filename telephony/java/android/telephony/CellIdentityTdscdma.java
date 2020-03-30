@@ -66,6 +66,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
         mUarfcn = CellInfo.UNAVAILABLE;
         mAdditionalPlmns = new ArraySet<>();
         mCsgInfo = null;
+        mGlobalCellId = null;
     }
 
     /**
@@ -100,6 +101,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
             }
         }
         mCsgInfo = csgInfo;
+        updateGlobalCellId();
     }
 
     private CellIdentityTdscdma(@NonNull CellIdentityTdscdma cid) {
@@ -140,6 +142,18 @@ public final class CellIdentityTdscdma extends CellIdentity {
 
     @NonNull CellIdentityTdscdma copy() {
         return new CellIdentityTdscdma(this);
+    }
+
+    /** @hide */
+    @Override
+    protected void updateGlobalCellId() {
+        mGlobalCellId = null;
+        String plmn = getPlmn();
+        if (plmn == null) return;
+
+        if (mLac == CellInfo.UNAVAILABLE || mCid == CellInfo.UNAVAILABLE) return;
+
+        mGlobalCellId = plmn + String.format("%04x%04x", mLac, mCid);
     }
 
     /**
