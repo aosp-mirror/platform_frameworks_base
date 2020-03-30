@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.List;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -50,7 +49,6 @@ public class DisplayDeviceConfig {
 
     private float[] mNits;
     private float[] mBrightness;
-    private BigDecimal mHighBrightnessModeStart;
 
     private DisplayDeviceConfig() {
     }
@@ -86,18 +84,6 @@ public class DisplayDeviceConfig {
      */
     public float[] getBrightness() {
         return mBrightness;
-    }
-
-    /**
-     * Returns the point along the brightness value range {@link #getBrightness()} that
-     * high-brightness-mode begins. If high-brightness-mode is not supported, then
-     * Float.NaN is returned.
-     *
-     * @return The high brightness mode threshold, or Float.NaN if not supported.
-     */
-    public float getHighBrightnessModeStart() {
-        return mHighBrightnessModeStart != null
-                ? mHighBrightnessModeStart.floatValue() : HIGH_BRIGHTNESS_MODE_UNSUPPORTED;
     }
 
     private void initFromFile(File configFile) {
@@ -148,9 +134,6 @@ public class DisplayDeviceConfig {
             }
             ++i;
         }
-        final BigDecimal hbmStart = map.getHighBrightnessStart();
-
-        mHighBrightnessModeStart = hbmStart;
         mNits = nits;
         mBrightness = backlight;
     }
