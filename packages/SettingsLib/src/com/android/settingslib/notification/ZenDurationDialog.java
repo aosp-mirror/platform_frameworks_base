@@ -25,6 +25,7 @@ import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -228,39 +229,40 @@ public class ZenDurationDialog {
     }
 
     private void updateButtons(ConditionTag tag, View row, int rowIndex) {
-        // minus button
-        final ImageView button1 = (ImageView) row.findViewById(android.R.id.button1);
-        button1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickTimeButton(row, tag, false /*down*/, rowIndex);
-                tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-            }
-        });
-
-        // plus button
-        final ImageView button2 = (ImageView) row.findViewById(android.R.id.button2);
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickTimeButton(row, tag, true /*up*/, rowIndex);
-                tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-            }
-        });
-
+        final ImageView minusButton = (ImageView) row.findViewById(android.R.id.button1);
+        final ImageView plusButton = (ImageView) row.findViewById(android.R.id.button2);
         final long time = tag.countdownZenDuration;
         if (rowIndex == COUNTDOWN_CONDITION_INDEX) {
-            button1.setVisibility(View.VISIBLE);
-            button2.setVisibility(View.VISIBLE);
+            minusButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onClickTimeButton(row, tag, false /*down*/, rowIndex);
+                    tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+                }
+            });
 
-            button1.setEnabled(time > MIN_BUCKET_MINUTES);
-            button2.setEnabled(tag.countdownZenDuration != MAX_BUCKET_MINUTES);
+            plusButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onClickTimeButton(row, tag, true /*up*/, rowIndex);
+                    tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+                }
+            });
+            minusButton.setVisibility(View.VISIBLE);
+            plusButton.setVisibility(View.VISIBLE);
 
-            button1.setAlpha(button1.isEnabled() ? 1f : .5f);
-            button2.setAlpha(button2.isEnabled() ? 1f : .5f);
+            minusButton.setEnabled(time > MIN_BUCKET_MINUTES);
+            plusButton.setEnabled(tag.countdownZenDuration != MAX_BUCKET_MINUTES);
+
+            minusButton.setAlpha(minusButton.isEnabled() ? 1f : .5f);
+            plusButton.setAlpha(plusButton.isEnabled() ? 1f : .5f);
         } else {
-            button1.setVisibility(View.GONE);
-            button2.setVisibility(View.GONE);
+            if (minusButton != null) {
+                ((ViewGroup) row).removeView(minusButton);
+            }
+            if (plusButton != null) {
+                ((ViewGroup) row).removeView(plusButton);
+            }
         }
     }
 
