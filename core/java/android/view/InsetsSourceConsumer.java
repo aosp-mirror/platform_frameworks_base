@@ -112,12 +112,12 @@ public class InsetsSourceConsumer {
                     hideTypes[0] |= toPublicType(getType());
                 }
             } else {
-              // We are gaining control, but don't need to run an animation.
-              // However make sure that the leash visibility is still up to date.
-              if (applyLocalVisibilityOverride()) {
-                  mController.notifyVisibilityChanged();
-              }
-              applyHiddenToControl();
+                // We are gaining control, but don't need to run an animation.
+                // However make sure that the leash visibility is still up to date.
+                if (applyLocalVisibilityOverride()) {
+                    mController.notifyVisibilityChanged();
+                    applyHiddenToControl();
+                }
             }
         }
         if (lastControl != null) {
