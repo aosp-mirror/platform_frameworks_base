@@ -72,7 +72,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 /**
  * Offers the ability to install, upgrade, and remove applications on the
@@ -589,9 +588,15 @@ public class PackageInstaller {
      *      * {@link SessionInfo#isStagedSessionActive()}.
      */
     public @NonNull List<SessionInfo> getActiveStagedSessions() {
-        return getStagedSessions().stream()
-                .filter(s -> s.isStagedSessionActive())
-                .collect(Collectors.toList());
+        final List<SessionInfo> activeStagedSessions = new ArrayList<>();
+        final List<SessionInfo> stagedSessions = getStagedSessions();
+        for (int i = 0; i < stagedSessions.size(); i++) {
+            final SessionInfo sessionInfo = stagedSessions.get(i);
+            if (sessionInfo.isStagedSessionActive()) {
+                activeStagedSessions.add(sessionInfo);
+            }
+        }
+        return activeStagedSessions;
     }
 
     /**
