@@ -14,26 +14,29 @@
   ~ limitations under the License.
   -->
 <merge
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <androidx.constraintlayout.widget.ConstraintLayout
+  <LinearLayout
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="@dimen/controls_top_margin">
+      android:layout_height="match_parent"
+      android:orientation="horizontal"
+      android:layout_marginTop="@dimen/controls_top_margin"
+      android:layout_marginEnd="@dimen/controls_header_side_margin"
+      android:layout_marginStart="@dimen/controls_header_side_margin">
+
+    <!-- make sure the header stays centered in the layout by adding a spacer -->
+    <Space
+        android:layout_width="@dimen/controls_header_menu_size"
+        android:layout_height="1dp" />
 
     <LinearLayout
         android:id="@+id/controls_header"
         android:orientation="horizontal"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/controls_header_side_margin"
-        android:layout_marginEnd="@dimen/controls_header_side_margin"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        android:layout_gravity="center"
+        android:gravity="center">
 
       <ImageView
           android:id="@+id/app_icon"
@@ -54,16 +57,14 @@
     <ImageView
         android:id="@+id/controls_more"
         android:src="@drawable/ic_more_vert"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/controls_header_menu_size"
+        android:layout_height="@dimen/controls_header_menu_size"
         android:padding="12dp"
-        android:layout_marginEnd="@dimen/controls_list_side_margin"
         android:tint="@color/control_more_vert"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-  </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_gravity="center"
+        android:contentDescription="@string/accessibility_menu"
+        android:background="?android:attr/selectableItemBackgroundBorderless" />
+  </LinearLayout>
 
   <LinearLayout
       android:id="@+id/global_actions_controls_list"
