@@ -157,5 +157,16 @@ public final class TunerUtils {
         throw new RuntimeException("Unexpected result " + r + ".  " + msg);
     }
 
+    /**
+     * Checks the state of a resource instance.
+     *
+     * @throws IllegalStateException if the resource has already been closed.
+     */
+    public static void checkResourceState(String name, boolean closed) {
+        if (closed) {
+            throw new IllegalStateException(name + " has been closed");
+        }
+    }
+
     private TunerUtils() {}
 }
