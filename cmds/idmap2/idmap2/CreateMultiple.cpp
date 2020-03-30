@@ -22,6 +22,7 @@
 #include <ostream>
 #include <vector>
 
+#include "Commands.h"
 #include "android-base/stringprintf.h"
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/CommandLineOptions.h"
@@ -30,7 +31,6 @@
 #include "idmap2/Policies.h"
 #include "idmap2/PolicyUtils.h"
 #include "idmap2/SysTrace.h"
-#include "Commands.h"
 
 using android::ApkAssets;
 using android::base::StringPrintf;
