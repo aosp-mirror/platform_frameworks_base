@@ -39,10 +39,12 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -118,7 +120,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
      *         has been seen before.
      */
     /* package */ boolean record(String owningPackageName, String dexPath, int ownerUserId,
-            String loaderIsa, boolean isUsedByOtherApps, boolean primaryOrSplit,
+            String loaderIsa, boolean primaryOrSplit,
             String loadingPackageName, String classLoaderContext) {
         if (!PackageManagerServiceUtils.checkISA(loaderIsa)) {
             throw new IllegalArgumentException("loaderIsa " + loaderIsa + " is unsupported");
@@ -127,20 +129,22 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
             throw new IllegalArgumentException("Null classLoaderContext");
         }
         if (classLoaderContext.equals(UNSUPPORTED_CLASS_LOADER_CONTEXT)) {
+            Slog.e(TAG, "Unsupported context?");
             return false;
         }
+
+        boolean isUsedByOtherApps = !owningPackageName.equals(loadingPackageName);
 
         synchronized (mPackageUseInfoMap) {
             PackageUseInfo packageUseInfo = mPackageUseInfoMap.get(owningPackageName);
             if (packageUseInfo == null) {
                 // This is the first time we see the package.
-                packageUseInfo = new PackageUseInfo();
+                packageUseInfo = new PackageUseInfo(owningPackageName);
                 if (primaryOrSplit) {
                     // If we have a primary or a split apk, set isUsedByOtherApps.
                     // We do not need to record the loaderIsa or the owner because we compile
                     // primaries for all users and all ISAs.
-                    packageUseInfo.mergeCodePathUsedByOtherApps(dexPath, isUsedByOtherApps,
-                            owningPackageName, loadingPackageName);
+                    packageUseInfo.mergePrimaryCodePaths(dexPath, loadingPackageName);
                 } else {
                     // For secondary dex files record the loaderISA and the owner. We'll need
                     // to know under which user to compile and for what ISA.
@@ -156,9 +160,8 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
                 // We already have data on this package. Amend it.
                 if (primaryOrSplit) {
                     // We have a possible update on the primary apk usage. Merge
-                    // isUsedByOtherApps information and return if there was an update.
-                    return packageUseInfo.mergeCodePathUsedByOtherApps(
-                            dexPath, isUsedByOtherApps, owningPackageName, loadingPackageName);
+                    // dex path information and return if there was an update.
+                    return packageUseInfo.mergePrimaryCodePaths(dexPath, loadingPackageName);
                 } else {
                     DexUseInfo newData = new DexUseInfo(
                             isUsedByOtherApps, ownerUserId, classLoaderContext, loaderIsa);
@@ -273,7 +276,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
 
             // Write the code paths used by other apps.
             for (Map.Entry<String, Set<String>> codeEntry :
-                    packageUseInfo.mCodePathsUsedByOtherApps.entrySet()) {
+                    packageUseInfo.mPrimaryCodePaths.entrySet()) {
                 String codePath = codeEntry.getKey();
                 Set<String> loadingPackages = codeEntry.getValue();
                 fpw.println(CODE_PATH_LINE_CHAR + codePath);
@@ -408,11 +411,11 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
                 //    @loading_packages
                 String codePath = line.substring(CODE_PATH_LINE_CHAR.length());
                 Set<String> loadingPackages = readLoadingPackages(in, version);
-                currentPackageData.mCodePathsUsedByOtherApps.put(codePath, loadingPackages);
+                currentPackageData.mPrimaryCodePaths.put(codePath, loadingPackages);
             } else {
                 // This is a package line.
                 currentPackage = line;
-                currentPackageData = new PackageUseInfo();
+                currentPackageData = new PackageUseInfo(currentPackage);
                 data.put(currentPackage, currentPackageData);
             }
         }
@@ -499,7 +502,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
                     // Sync the code paths.
                     Set<String> codePaths = packageToCodePaths.get(packageName);
                     Iterator<Map.Entry<String, Set<String>>> codeIt =
-                        packageUseInfo.mCodePathsUsedByOtherApps.entrySet().iterator();
+                            packageUseInfo.mPrimaryCodePaths.entrySet().iterator();
                     while (codeIt.hasNext()) {
                         if (!codePaths.contains(codeIt.next().getKey())) {
                             codeIt.remove();
@@ -667,22 +670,26 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
      * Stores data on how a package and its dex files are used.
      */
     public static class PackageUseInfo {
+        // The name of the package this info belongs to.
+        private final String mPackageName;
         // The app's code paths that are used by other apps.
         // The key is the code path and the value is the set of loading packages.
-        private final Map<String, Set<String>> mCodePathsUsedByOtherApps;
+        private final Map<String, Set<String>> mPrimaryCodePaths;
         // Map dex paths to their data (isUsedByOtherApps, owner id, loader isa).
         private final Map<String, DexUseInfo> mDexUseInfoMap;
 
-        /*package*/ PackageUseInfo() {
-            mCodePathsUsedByOtherApps = new HashMap<>();
+        /*package*/ PackageUseInfo(String packageName) {
+            mPrimaryCodePaths = new HashMap<>();
             mDexUseInfoMap = new HashMap<>();
+            mPackageName = packageName;
         }
 
         // Creates a deep copy of the `other`.
         private PackageUseInfo(PackageUseInfo other) {
-            mCodePathsUsedByOtherApps = new HashMap<>();
-            for (Map.Entry<String, Set<String>> e : other.mCodePathsUsedByOtherApps.entrySet()) {
-                mCodePathsUsedByOtherApps.put(e.getKey(), new HashSet<>(e.getValue()));
+            mPackageName = other.mPackageName;
+            mPrimaryCodePaths = new HashMap<>();
+            for (Map.Entry<String, Set<String>> e : other.mPrimaryCodePaths.entrySet()) {
+                mPrimaryCodePaths.put(e.getKey(), new HashSet<>(e.getValue()));
             }
 
             mDexUseInfoMap = new HashMap<>();
@@ -691,28 +698,29 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
             }
         }
 
-        private boolean mergeCodePathUsedByOtherApps(String codePath, boolean isUsedByOtherApps,
-                String owningPackageName, String loadingPackage) {
-            if (!isUsedByOtherApps) {
-                // Nothing to update if the the code path is not used by other apps.
-                return false;
-            }
-
-            boolean newCodePath = false;
-            Set<String> loadingPackages = mCodePathsUsedByOtherApps.get(codePath);
+        private boolean mergePrimaryCodePaths(String codePath, String loadingPackage) {
+            Set<String> loadingPackages = mPrimaryCodePaths.get(codePath);
             if (loadingPackages == null) {
                 loadingPackages = new HashSet<>();
-                mCodePathsUsedByOtherApps.put(codePath, loadingPackages);
-                newCodePath = true;
+                mPrimaryCodePaths.put(codePath, loadingPackages);
             }
-            boolean newLoadingPackage = loadingPackage != null
-                    && !loadingPackage.equals(owningPackageName)
-                    && loadingPackages.add(loadingPackage);
-            return newCodePath || newLoadingPackage;
+            return loadingPackages.add(loadingPackage);
         }
 
         public boolean isUsedByOtherApps(String codePath) {
-            return mCodePathsUsedByOtherApps.containsKey(codePath);
+            if (mPrimaryCodePaths.containsKey(codePath)) {
+                Set<String> loadingPackages = mPrimaryCodePaths.get(codePath);
+                if (loadingPackages.contains(mPackageName)) {
+                    // If the owning package is in the list then this code path
+                    // is used by others if there are other packages in the list.
+                    return loadingPackages.size() > 1;
+                } else {
+                    // The owning package is not in the loading packages. So if
+                    // the list is non-empty then the code path is used by others.
+                    return !loadingPackages.isEmpty();
+                }
+            }
+            return false;
         }
 
         public Map<String, DexUseInfo> getDexUseInfoMap() {
@@ -720,11 +728,11 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         }
 
         public Set<String> getLoadingPackages(String codePath) {
-            return mCodePathsUsedByOtherApps.getOrDefault(codePath, null);
+            return mPrimaryCodePaths.getOrDefault(codePath, null);
         }
 
         public boolean isAnyCodePathUsedByOtherApps() {
-            return !mCodePathsUsedByOtherApps.isEmpty();
+            return !mPrimaryCodePaths.isEmpty();
         }
 
         /**
@@ -732,12 +740,16 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
          * Returns whether or not there was an update.
          */
         /*package*/ boolean clearCodePathUsedByOtherApps() {
-            if (mCodePathsUsedByOtherApps.isEmpty()) {
-                return false;
-            } else {
-                mCodePathsUsedByOtherApps.clear();
-                return true;
+            boolean updated = false;
+            List<String> retainOnlyOwningPackage = new ArrayList<>(1);
+            retainOnlyOwningPackage.add(mPackageName);
+            for (Map.Entry<String, Set<String>> entry : mPrimaryCodePaths.entrySet()) {
+                // Remove or loading packages but the owning one.
+                if (entry.getValue().retainAll(retainOnlyOwningPackage)) {
+                    updated = true;
+                }
             }
+            return updated;
         }
     }
 
