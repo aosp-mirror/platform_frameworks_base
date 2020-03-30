@@ -1088,7 +1088,7 @@ public class DisplayContentTests extends WindowTestsBase {
         }
         assertNull(defaultDisplay.getRootHomeTask());
 
-        assertNotNull(defaultDisplay.getOrCreateRootHomeTask());
+        assertNotNull(defaultDisplay.mTaskContainers.getOrCreateRootHomeTask());
     }
 
     @Test
@@ -1104,7 +1104,7 @@ public class DisplayContentTests extends WindowTestsBase {
         }
         assertNull(display.getRootHomeTask());
 
-        assertNotNull(display.getOrCreateRootHomeTask());
+        assertNotNull(display.mTaskContainers.getOrCreateRootHomeTask());
     }
 
     @Test
@@ -1113,7 +1113,7 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(false).when(display).supportsSystemDecorations();
 
         assertNull(display.getRootHomeTask());
-        assertNull(display.getOrCreateRootHomeTask());
+        assertNull(display.mTaskContainers.getOrCreateRootHomeTask());
     }
 
     @Test
@@ -1122,7 +1122,7 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(display).isUntrustedVirtualDisplay();
 
         assertNull(display.getRootHomeTask());
-        assertNull(display.getOrCreateRootHomeTask());
+        assertNull(display.mTaskContainers.getOrCreateRootHomeTask());
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {
