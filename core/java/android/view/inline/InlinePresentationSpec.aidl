@@ -16,4 +16,8 @@
 
 package android.view.inline;
 
+/**
+ * @hide
+ * @removed
+ */
 parcelable InlinePresentationSpec;

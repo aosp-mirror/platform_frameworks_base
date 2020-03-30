@@ -35,11 +35,11 @@ import android.view.SurfaceControlViewHost;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
-import android.view.inline.InlinePresentationSpec;
 import android.view.inputmethod.InlineSuggestion;
 import android.view.inputmethod.InlineSuggestionInfo;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
+import android.widget.inline.InlinePresentationSpec;
 
 import com.android.internal.view.inline.IInlineContentCallback;
 import com.android.internal.view.inline.IInlineContentProvider;
@@ -263,7 +263,7 @@ public final class InlineSuggestionFactory {
     private static InlinePresentation mergedInlinePresentation(
             @NonNull InlineSuggestionsRequest request,
             int index, @NonNull InlinePresentation inlinePresentation) {
-        final List<InlinePresentationSpec> specs = request.getPresentationSpecs();
+        final List<InlinePresentationSpec> specs = request.getInlinePresentationSpecs();
         if (specs.isEmpty()) {
             return inlinePresentation;
         }
