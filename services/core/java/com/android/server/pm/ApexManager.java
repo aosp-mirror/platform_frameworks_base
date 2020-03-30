@@ -30,7 +30,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.os.Binder;
 import android.os.Environment;
@@ -137,7 +137,8 @@ public abstract class ApexManager {
     /**
      * Called by package manager service to scan apex package files when device boots up.
      *
-     * @param packageParser The package parser which supports caches.
+     * @param packageParser The package parser to support apex package parsing and caching parsed
+     *                      results.
      * @param executorService An executor to support parallel package parsing.
      */
     abstract void scanApexPackagesTraced(@NonNull PackageParser2 packageParser,
@@ -505,7 +506,13 @@ public abstract class ApexManager {
                         }
                         factoryPackagesSet.add(packageInfo.packageName);
                     }
-                } else if (throwable instanceof PackageParser.PackageParserException) {
+                } else if (throwable instanceof PackageParserException) {
+                    final PackageParserException e = (PackageParserException) throwable;
+                    // Skip parsing non-coreApp apex file if system is in minimal boot state.
+                    if (e.error == PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED) {
+                        Slog.w(TAG, "Scan apex failed, not a coreApp:" + ai.modulePath);
+                        continue;
+                    }
                     throw new IllegalStateException("Unable to parse: " + ai.modulePath, throwable);
                 } else {
                     throw new IllegalStateException("Unexpected exception occurred while parsing "

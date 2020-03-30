@@ -1542,6 +1542,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_PROCESS_NOT_DEFINED = -122;
 
+    /**
+     * Installation parse return code: system is in a minimal boot state, and the parser only
+     * allows the package with {@code coreApp} manifest attribute to be a valid application.
+     *
+     * @hide
+     */
+    public static final int INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED = -123;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,

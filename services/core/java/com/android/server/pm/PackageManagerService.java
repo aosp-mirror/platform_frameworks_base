@@ -417,6 +417,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -3436,7 +3437,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            mInstallerService = new PackageInstallerService(mContext, this);
+            // Prepare a supplier of package parser for the staging manager to parse apex file
+            // during the staging installation.
+            final Supplier<PackageParser2> apexParserSupplier = () -> new PackageParser2(
+                    mSeparateProcesses, mOnlyCore, mMetrics, mCacheDir, mPackageParserCallback);
+            mInstallerService = new PackageInstallerService(mContext, this, apexParserSupplier);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
