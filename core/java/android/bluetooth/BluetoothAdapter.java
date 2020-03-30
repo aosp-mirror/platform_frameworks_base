@@ -916,23 +916,11 @@ public final class BluetoothAdapter {
         if (!isBleScanAlwaysAvailable()) {
             return false;
         }
-
-        int state = getLeState();
-        if (state == BluetoothAdapter.STATE_ON || state == BluetoothAdapter.STATE_BLE_ON) {
-            String packageName = ActivityThread.currentPackageName();
-            if (DBG) {
-                Log.d(TAG, "disableBLE(): de-registering " + packageName);
-            }
-            try {
-                mManagerService.updateBleAppCount(mToken, false, packageName);
-            } catch (RemoteException e) {
-                Log.e(TAG, "", e);
-            }
-            return true;
-        }
-
-        if (DBG) {
-            Log.d(TAG, "disableBLE(): Already disabled");
+        String packageName = ActivityThread.currentPackageName();
+        try {
+            return mManagerService.disableBle(packageName, mToken);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
         }
         return false;
     }
@@ -973,20 +961,9 @@ public final class BluetoothAdapter {
         if (!isBleScanAlwaysAvailable()) {
             return false;
         }
-
+        String packageName = ActivityThread.currentPackageName();
         try {
-            String packageName = ActivityThread.currentPackageName();
-            mManagerService.updateBleAppCount(mToken, true, packageName);
-            if (isLeEnabled()) {
-                if (DBG) {
-                    Log.d(TAG, "enableBLE(): Bluetooth already enabled");
-                }
-                return true;
-            }
-            if (DBG) {
-                Log.d(TAG, "enableBLE(): Calling enable");
-            }
-            return mManagerService.enable(packageName);
+            return mManagerService.enableBle(packageName, mToken);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
