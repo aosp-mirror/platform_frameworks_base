@@ -75,7 +75,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             synchronized (mGlobalLock) {
                 final TaskOrganizerState state = mTaskOrganizerStates.remove(
                         mTaskOrganizer.asBinder());
-                state.dispose();
+                if (state != null) {
+                    state.dispose();
+                }
             }
         }
     };
@@ -216,9 +218,20 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     @Override
     public void unregisterTaskOrganizer(ITaskOrganizer organizer) {
-        final TaskOrganizerState state = mTaskOrganizerStates.remove(organizer.asBinder());
-        state.unlinkDeath();
-        state.dispose();
+        enforceStackPermission("unregisterTaskOrganizer()");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final TaskOrganizerState state = mTaskOrganizerStates.remove(organizer.asBinder());
+                if (state == null) {
+                    return;
+                }
+                state.unlinkDeath();
+                state.dispose();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     ITaskOrganizer getTaskOrganizer(int windowingMode) {
