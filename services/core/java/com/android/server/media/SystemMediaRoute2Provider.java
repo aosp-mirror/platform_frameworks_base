@@ -103,6 +103,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
         updateDeviceRoute(newAudioRoutes);
 
+        // .getInstance returns null if there is no bt adapter available
         mBtRouteProvider = BluetoothRouteProvider.getInstance(context, (routes) -> {
             publishProviderState();
 
@@ -116,10 +117,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         mContext.registerReceiver(new VolumeChangeReceiver(),
                 new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION));
 
-        mHandler.post(() -> {
-            mBtRouteProvider.start();
-            notifyProviderState();
-        });
+        if (mBtRouteProvider != null) {
+            mHandler.post(() -> {
+                mBtRouteProvider.start();
+                notifyProviderState();
+            });
+        }
     }
 
     @Override
@@ -153,10 +156,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     @Override
     public void transferToRoute(long requestId, String sessionId, String routeId) {
-        if (TextUtils.equals(routeId, mDeviceRoute.getId())) {
-            mBtRouteProvider.transferTo(null);
-        } else {
-            mBtRouteProvider.transferTo(routeId);
+        if (mBtRouteProvider != null) {
+            if (TextUtils.equals(routeId, mDeviceRoute.getId())) {
+                mBtRouteProvider.transferTo(null);
+            } else {
+                mBtRouteProvider.transferTo(routeId);
+            }
         }
     }
 
@@ -294,7 +299,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     mDeviceRoute = new MediaRoute2Info.Builder(mDeviceRoute)
                             .setVolume(newVolume)
                             .build();
-                } else {
+                } else if (mBtRouteProvider != null) {
                     mBtRouteProvider.setSelectedRouteVolume(newVolume);
                 }
                 publishProviderState();
