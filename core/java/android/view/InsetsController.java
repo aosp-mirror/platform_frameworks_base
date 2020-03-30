@@ -456,6 +456,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         return mState;
     }
 
+    @Override
+    public boolean isRequestedVisible(int type) {
+        return getSourceConsumer(type).isRequestedVisible();
+    }
+
     public InsetsState getLastDispatchedState() {
         return mLastDispachedState;
     }

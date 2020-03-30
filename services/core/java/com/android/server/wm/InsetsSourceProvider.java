@@ -259,10 +259,13 @@ class InsetsSourceProvider {
         if (target == null) {
             // Cancelling the animation will invoke onAnimationCancelled, resetting all the fields.
             mWin.cancelAnimation();
+            setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
             return;
         }
         mAdapter = new ControlAdapter();
-        setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
+        if (getSource().getType() == ITYPE_IME) {
+            setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
+        }
         final Transaction t = mDisplayContent.getPendingTransaction();
         mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
                 ANIMATION_TYPE_INSETS_CONTROL, null /* animationFinishedCallback */);
