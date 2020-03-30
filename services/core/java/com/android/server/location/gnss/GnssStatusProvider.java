@@ -16,6 +16,7 @@
 
 package com.android.server.location.gnss;
 
+import android.location.GnssStatus;
 import android.location.IGnssStatusListener;
 import android.location.util.identity.CallerIdentity;
 import android.os.IBinder;
@@ -128,18 +129,10 @@ public class GnssStatusProvider extends GnssListenerManager<Void, IGnssStatusLis
     /**
      * Called by GnssLocationProvider.
      */
-    public void onSvStatusChanged(
-            final int svCount,
-            final int[] prnWithFlags,
-            final float[] cn0s,
-            final float[] elevations,
-            final float[] azimuths,
-            final float[] carrierFreqs,
-            final float[] basebandCn0s) {
+    public void onSvStatusChanged(GnssStatus gnssStatus) {
         deliverToListeners((listener) -> {
             try {
-                listener.onSvStatusChanged(svCount, prnWithFlags, cn0s, elevations, azimuths,
-                        carrierFreqs, basebandCn0s);
+                listener.onSvStatusChanged(gnssStatus);
             } catch (RemoteException e) {
                 // ignore - the listener will get cleaned up later anyways
             }

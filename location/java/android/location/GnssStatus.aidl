@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008, The Android Open Source Project
+ * Copyright (C) 2020, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,4 @@
 
 package android.location;
 
-import android.location.GnssStatus;
-
-/**
- * {@hide}
- */
-oneway interface IGnssStatusListener
-{
-    void onGnssStarted();
-    void onGnssStopped();
-    void onFirstFix(int ttff);
-    void onSvStatusChanged(in GnssStatus gnssStatus);
-    void onNmeaReceived(long timestamp, String nmea);
-}
+parcelable GnssStatus;

@@ -20,6 +20,10 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,7 +38,7 @@ import java.util.Objects;
  * @see LocationManager#registerGnssStatusCallback
  * @see GnssStatus.Callback
  */
-public final class GnssStatus {
+public final class GnssStatus implements Parcelable {
 
     // These must match the definitions in GNSS HAL.
     //
@@ -128,6 +132,13 @@ public final class GnssStatus {
     public static GnssStatus wrap(int svCount, int[] svidWithFlags, float[] cn0DbHzs,
             float[] elevations, float[] azimuths, float[] carrierFrequencies,
             float[] basebandCn0DbHzs) {
+        Preconditions.checkState(svCount >= 0);
+        Preconditions.checkState(svidWithFlags.length >= svCount);
+        Preconditions.checkState(elevations.length >= svCount);
+        Preconditions.checkState(azimuths.length >= svCount);
+        Preconditions.checkState(carrierFrequencies.length >= svCount);
+        Preconditions.checkState(basebandCn0DbHzs.length >= svCount);
+
         return new GnssStatus(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
                 carrierFrequencies, basebandCn0DbHzs);
     }
@@ -368,6 +379,73 @@ public final class GnssStatus {
         return result;
     }
 
+    public static final @NonNull Creator<GnssStatus> CREATOR = new Creator<GnssStatus>() {
+        @Override
+        public GnssStatus createFromParcel(Parcel in) {
+            int svCount = in.readInt();
+            int[] svidWithFlags = new int[svCount];
+            float[] cn0DbHzs = new float[svCount];
+            float[] elevations = new float[svCount];
+            float[] azimuths = new float[svCount];
+            float[] carrierFrequencies = new float[svCount];
+            float[] basebandCn0DbHzs = new float[svCount];
+            for (int i = 0; i < svCount; i++) {
+                svidWithFlags[i] = in.readInt();
+            }
+            for (int i = 0; i < svCount; i++) {
+                cn0DbHzs[i] = in.readFloat();
+            }
+            for (int i = 0; i < svCount; i++) {
+                elevations[i] = in.readFloat();
+            }
+            for (int i = 0; i < svCount; i++) {
+                azimuths[i] = in.readFloat();
+            }
+            for (int i = 0; i < svCount; i++) {
+                carrierFrequencies[i] = in.readFloat();
+            }
+            for (int i = 0; i < svCount; i++) {
+                basebandCn0DbHzs[i] = in.readFloat();
+            }
+
+            return new GnssStatus(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
+                    carrierFrequencies, basebandCn0DbHzs);
+        }
+
+        @Override
+        public GnssStatus[] newArray(int size) {
+            return new GnssStatus[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
+        parcel.writeInt(mSvCount);
+        for (int i = 0; i < mSvCount; i++) {
+            parcel.writeInt(mSvidWithFlags[i]);
+        }
+        for (int i = 0; i < mSvCount; i++) {
+            parcel.writeFloat(mCn0DbHzs[i]);
+        }
+        for (int i = 0; i < mSvCount; i++) {
+            parcel.writeFloat(mElevations[i]);
+        }
+        for (int i = 0; i < mSvCount; i++) {
+            parcel.writeFloat(mAzimuths[i]);
+        }
+        for (int i = 0; i < mSvCount; i++) {
+            parcel.writeFloat(mCarrierFrequencies[i]);
+        }
+        for (int i = 0; i < mSvCount; i++) {
+            parcel.writeFloat(mBasebandCn0DbHzs[i]);
+        }
+    }
+
     /**
      * Builder class to help create new GnssStatus instances.
      */
@@ -451,7 +529,7 @@ public final class GnssStatus {
                 basebandCn0DbHzs[i] = mSatellites.get(i).mBasebandCn0DbHz;
             }
 
-            return wrap(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
+            return new GnssStatus(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
                     carrierFrequencies, basebandCn0DbHzs);
         }
     }
