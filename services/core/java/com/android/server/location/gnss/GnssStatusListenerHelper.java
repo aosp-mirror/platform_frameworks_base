@@ -79,7 +79,7 @@ public abstract class GnssStatusListenerHelper extends
             final float[] basebandCn0s) {
         foreach((IGnssStatusListener listener, CallerIdentity callerIdentity) -> {
             if (!hasPermission(mContext, callerIdentity)) {
-                logPermissionDisabledEventNotReported(TAG, callerIdentity.mPackageName,
+                logPermissionDisabledEventNotReported(TAG, callerIdentity.packageName,
                         "GNSS status");
                 return;
             }
@@ -91,7 +91,7 @@ public abstract class GnssStatusListenerHelper extends
     public void onNmeaReceived(final long timestamp, final String nmea) {
         foreach((IGnssStatusListener listener, CallerIdentity callerIdentity) -> {
             if (!hasPermission(mContext, callerIdentity)) {
-                logPermissionDisabledEventNotReported(TAG, callerIdentity.mPackageName, "NMEA");
+                logPermissionDisabledEventNotReported(TAG, callerIdentity.packageName, "NMEA");
                 return;
             }
             listener.onNmeaReceived(timestamp, nmea);
