@@ -1250,6 +1250,12 @@
     <dimen name="control_base_item_margin">2dp</dimen>
     <dimen name="control_status_padding">3dp</dimen>
 
+    <!-- Home Controls activity view detail panel-->
+    <dimen name="controls_activity_view_top_padding">25dp</dimen>
+    <dimen name="controls_activity_view_side_padding">12dp</dimen>
+    <dimen name="controls_activity_view_top_offset">200dp</dimen>
+    <dimen name="controls_activity_view_text_size">17sp</dimen>
+
     <!-- Home Controls management screens -->
     <dimen name="controls_management_top_padding">48dp</dimen>
     <dimen name="controls_management_side_padding">8dp</dimen>
