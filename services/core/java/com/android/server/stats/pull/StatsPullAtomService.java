@@ -3016,7 +3016,7 @@ public class StatsPullAtomService extends SystemService {
             e.setAtomId(atomTag);
             e.writeInt(message.getUid());
             e.writeString(message.getPackageName());
-            e.writeString(message.getOp());
+            e.writeString("");
             if (message.getAttributionTag() == null) {
                 e.writeString("");
             } else {
@@ -3024,6 +3024,7 @@ public class StatsPullAtomService extends SystemService {
             }
             e.writeString(message.getMessage());
             e.writeInt(message.getSamplingStrategy());
+            e.writeInt(AppOpsManager.strOpToOp(message.getOp()));
 
             pulledData.add(e.build());
         } catch (Throwable t) {

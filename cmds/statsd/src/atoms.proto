@@ -8697,13 +8697,12 @@ message RuntimeAppOpAccess {
     // Name of the package accessing app op
     optional string package_name = 2;
 
-    // operation string id per OPSTR_ constants in AppOpsManager.java
-    optional string op = 3;
+    // deprecated - set to empty string
+    optional string op_deprecated = 3 [deprecated = true];
 
     // attribution_tag; provided by developer when accessing related API, limited at 50 chars by
-    // API.
-    // Attributions must be provided through manifest using <attribution> tag available in R and
-    // above.
+    // API. Attributions must be provided through manifest using <attribution> tag available in R
+    // and above.
     optional string attribution_tag = 4;
 
     // message related to app op access, limited to 600 chars by API
@@ -8718,6 +8717,9 @@ message RuntimeAppOpAccess {
 
     // sampling strategy used to collect this message
     optional SamplingStrategy sampling_strategy = 6;
+
+    // operation id
+    optional android.app.AppOpEnum op = 7 [default = APP_OP_NONE];
 }
 
 /*
