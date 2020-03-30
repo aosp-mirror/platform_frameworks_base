@@ -82,6 +82,7 @@ public final class CellIdentityNr extends CellIdentity {
                 mAdditionalPlmns.add(plmn);
             }
         }
+        updateGlobalCellId();
     }
 
     /** @hide */
@@ -105,6 +106,17 @@ public final class CellIdentityNr extends CellIdentity {
         return new CellIdentityNr(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mNrArfcn,
                 mBands, mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort,
                 mAdditionalPlmns);
+    }
+
+    /** @hide */
+    protected void updateGlobalCellId() {
+        mGlobalCellId = null;
+        String plmn = getPlmn();
+        if (plmn == null) return;
+
+        if (mNci == CellInfo.UNAVAILABLE_LONG) return;
+
+        mGlobalCellId = plmn + String.format("%09x", mNci);
     }
 
     /**
