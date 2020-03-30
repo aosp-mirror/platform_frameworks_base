@@ -522,7 +522,8 @@ public abstract class ApexManager {
                     "APEX packages have not been scanned");
             boolean matchActive = (flags & MATCH_ACTIVE_PACKAGE) != 0;
             boolean matchFactory = (flags & MATCH_FACTORY_PACKAGE) != 0;
-            for (PackageInfo packageInfo: mAllPackagesCache) {
+            for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
+                final PackageInfo packageInfo = mAllPackagesCache.get(i);
                 if (!packageInfo.packageName.equals(packageName)) {
                     continue;
                 }
@@ -581,7 +582,8 @@ public abstract class ApexManager {
             if (!isApexSupported()) return false;
             Preconditions.checkState(mAllPackagesCache != null,
                     "APEX packages have not been scanned");
-            for (PackageInfo packageInfo : mAllPackagesCache) {
+            for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
+                final PackageInfo packageInfo = mAllPackagesCache.get(i);
                 if (packageInfo.packageName.equals(packageName)) {
                     return true;
                 }
@@ -839,7 +841,8 @@ public abstract class ApexManager {
                 IndentingPrintWriter ipw) {
             ipw.println();
             ipw.increaseIndent();
-            for (PackageInfo pi : packagesCache) {
+            for (int i = 0, size = packagesCache.size(); i < size; i++) {
+                final PackageInfo pi = packagesCache.get(i);
                 if (packageName != null && !packageName.equals(pi.packageName)) {
                     continue;
                 }
