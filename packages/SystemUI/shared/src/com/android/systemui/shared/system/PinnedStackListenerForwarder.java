@@ -74,16 +74,9 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
     }
 
     @Override
-    public void onSaveReentryBounds(ComponentName componentName, Rect bounds) {
+    public void onActivityHidden(ComponentName componentName) {
         for (PinnedStackListener listener : mListeners) {
-            listener.onSaveReentryBounds(componentName, bounds);
-        }
-    }
-
-    @Override
-    public void onResetReentryBounds(ComponentName componentName) {
-        for (PinnedStackListener listener : mListeners) {
-            listener.onResetReentryBounds(componentName);
+            listener.onActivityHidden(componentName);
         }
     }
 
@@ -121,9 +114,7 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
 
         public void onActionsChanged(ParceledListSlice actions) {}
 
-        public void onSaveReentryBounds(ComponentName componentName, Rect bounds) {}
-
-        public void onResetReentryBounds(ComponentName componentName) {}
+        public void onActivityHidden(ComponentName componentName) {}
 
         public void onDisplayInfoChanged(DisplayInfo displayInfo) {}
 

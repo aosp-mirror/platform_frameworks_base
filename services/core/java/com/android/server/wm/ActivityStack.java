@@ -3391,12 +3391,6 @@ class ActivityStack extends Task {
                     "Can't exit pinned mode if it's not pinned already.");
         }
 
-        // give pinned stack a chance to save current bounds, this should happen before reparent.
-        final ActivityRecord top = topRunningNonOverlayTaskActivity();
-        if (top != null && top.isVisible()) {
-            top.savePinnedStackBounds();
-        }
-
         mWmService.inSurfaceTransaction(() -> {
             final Task task = getBottomMostTask();
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
