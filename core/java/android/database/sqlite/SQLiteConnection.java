@@ -28,6 +28,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Log;
 import android.util.LruCache;
+import android.util.Pair;
 import android.util.Printer;
 
 import dalvik.system.BlockGuard;
@@ -230,6 +231,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         setAutoCheckpointInterval();
         setLocaleFromConfiguration();
         setCustomFunctionsFromConfiguration();
+        executePerConnectionSqlFromConfiguration(0);
     }
 
     private void dispose(boolean finalized) {
@@ -468,6 +470,24 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
+    private void executePerConnectionSqlFromConfiguration(int startIndex) {
+        for (int i = startIndex; i < mConfiguration.perConnectionSql.size(); i++) {
+            final Pair<String, Object[]> statement = mConfiguration.perConnectionSql.get(i);
+            final int type = DatabaseUtils.getSqlStatementType(statement.first);
+            switch (type) {
+                case DatabaseUtils.STATEMENT_SELECT:
+                    executeForString(statement.first, statement.second, null);
+                    break;
+                case DatabaseUtils.STATEMENT_PRAGMA:
+                    execute(statement.first, statement.second, null);
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unsupported configuration statement: " + statement);
+            }
+        }
+    }
+
     private void checkDatabaseWiped() {
         if (!SQLiteGlobal.checkDbWipe()) {
             return;
@@ -513,6 +533,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 .equals(mConfiguration.customScalarFunctions);
         boolean customAggregateFunctionsChanged = !configuration.customAggregateFunctions
                 .equals(mConfiguration.customAggregateFunctions);
+        final int oldSize = mConfiguration.perConnectionSql.size();
+        final int newSize = configuration.perConnectionSql.size();
+        boolean perConnectionSqlChanged = newSize > oldSize;
 
         // Update configuration parameters.
         mConfiguration.updateParametersFrom(configuration);
@@ -531,6 +554,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
         if (customScalarFunctionsChanged || customAggregateFunctionsChanged) {
             setCustomFunctionsFromConfiguration();
+        }
+        if (perConnectionSqlChanged) {
+            executePerConnectionSqlFromConfiguration(oldSize);
         }
     }
 
