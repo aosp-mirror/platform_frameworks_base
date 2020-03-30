@@ -510,15 +510,18 @@ public class AppLaunch extends InstrumentationTestCase {
      * based on status of the compilation command.
      */
     private boolean compileAppForIorap(String appPkgName) throws IOException {
+        String logcatTimestamp = getTimeNowForLogcat();
+
         getInstrumentation().getUiAutomation().
                 executeShellCommand(IORAP_COMPILE_CMD);
 
-        for (int i = 0; i < IORAP_COMPILE_CMD_TIMEOUT; ++i) {
+        int i = 0;
+        for (i = 0; i < IORAP_COMPILE_CMD_TIMEOUT; ++i) {
             IorapCompilationStatus status = waitForIorapCompiled(appPkgName);
             if (status == IorapCompilationStatus.COMPLETE) {
                 Log.v(TAG, "compileAppForIorap: success");
                 logDumpsysIorapd(appPkgName);
-                return true;
+                break;
             } else if (status == IorapCompilationStatus.INSUFFICIENT_TRACES) {
                 Log.e(TAG, "compileAppForIorap: failed due to insufficient traces");
                 logDumpsysIorapd(appPkgName);
@@ -527,8 +530,24 @@ public class AppLaunch extends InstrumentationTestCase {
             sleep(1000);
         }
 
-        Log.e(TAG, "compileAppForIorap: failed due to timeout");
-        logDumpsysIorapd(appPkgName);
+        if (i == IORAP_COMPILE_CMD_TIMEOUT) {
+            Log.e(TAG, "compileAppForIorap: failed due to timeout");
+            logDumpsysIorapd(appPkgName);
+            return false;
+        }
+
+        // Wait for the job to finish completely.
+        // Other packages could be compiled in cyclic runs.
+        int currentAttempt = 0;
+        do {
+            String logcatLines = getLogcatSinceTime(logcatTimestamp);
+            if (logcatLines.contains("IorapForwardingService: Finished background job")) {
+                return true;
+            }
+            sleep(1000);
+        } while (currentAttempt++ < IORAP_COMPILE_CMD_TIMEOUT);
+
+        Log.e(TAG, "compileAppForIorap: failed due to jobscheduler timeout.");
         return false;
     }
 
