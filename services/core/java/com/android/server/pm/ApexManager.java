@@ -61,11 +61,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 /**
  * ApexManager class handles communications with the apex service to perform operation and queries,
@@ -538,30 +536,42 @@ public abstract class ApexManager {
         List<PackageInfo> getActivePackages() {
             Preconditions.checkState(mAllPackagesCache != null,
                     "APEX packages have not been scanned");
-            return mAllPackagesCache
-                    .stream()
-                    .filter(item -> isActive(item))
-                    .collect(Collectors.toList());
+            final List<PackageInfo> activePackages = new ArrayList<>();
+            for (int i = 0; i < mAllPackagesCache.size(); i++) {
+                final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                if (isActive(packageInfo)) {
+                    activePackages.add(packageInfo);
+                }
+            }
+            return activePackages;
         }
 
         @Override
         List<PackageInfo> getFactoryPackages() {
             Preconditions.checkState(mAllPackagesCache != null,
                     "APEX packages have not been scanned");
-            return mAllPackagesCache
-                    .stream()
-                    .filter(item -> isFactory(item))
-                    .collect(Collectors.toList());
+            final List<PackageInfo> factoryPackages = new ArrayList<>();
+            for (int i = 0; i < mAllPackagesCache.size(); i++) {
+                final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                if (isFactory(packageInfo)) {
+                    factoryPackages.add(packageInfo);
+                }
+            }
+            return factoryPackages;
         }
 
         @Override
         List<PackageInfo> getInactivePackages() {
             Preconditions.checkState(mAllPackagesCache != null,
                     "APEX packages have not been scanned");
-            return mAllPackagesCache
-                    .stream()
-                    .filter(item -> !isActive(item))
-                    .collect(Collectors.toList());
+            final List<PackageInfo> inactivePackages = new ArrayList<>();
+            for (int i = 0; i < mAllPackagesCache.size(); i++) {
+                final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                if (!isActive(packageInfo)) {
+                    inactivePackages.add(packageInfo);
+                }
+            }
+            return inactivePackages;
         }
 
         @Override
