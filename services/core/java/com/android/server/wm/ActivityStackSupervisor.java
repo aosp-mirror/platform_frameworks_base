@@ -414,14 +414,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 if (mToDisplay.getDisplayId() != stack.getDisplayId()) {
                     mToDisplay.moveStackToDisplay(stack, mOnTop);
                 } else if (mOnTop) {
-                    mToDisplay.positionStackAtTop(stack, false /* includingParents */);
+                    mToDisplay.mTaskContainers.positionStackAtTop(stack,
+                            false /* includingParents */);
                 } else {
-                    mToDisplay.positionStackAtBottom(stack);
+                    mToDisplay.mTaskContainers.positionStackAtBottom(stack);
                 }
                 return;
             }
 
-            final ActivityStack toStack = mToDisplay.getOrCreateStack(
+            final ActivityStack toStack = mToDisplay.mTaskContainers.getOrCreateStack(
                     null, mTmpOptions, task, task.getActivityType(), mOnTop);
             if (task == toStack) {
                 // The task was reused as the root task.
@@ -1458,7 +1459,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 || (focusedStack != null && focusedStack.isActivityTypeRecents())) {
             // We move home stack to front when we are on a fullscreen display and caller has
             // requested the home activity to move with it. Or the previous stack is recents.
-            display.moveHomeStackToFront(reason);
+            display.mTaskContainers.moveHomeStackToFront(reason);
         }
     }
 
@@ -1877,7 +1878,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mStoppingActivities.remove(r);
 
         final ActivityStack stack = r.getRootTask();
-        if (stack.getDisplay().allResumedActivitiesComplete()) {
+        if (stack.getDisplay().mTaskContainers.allResumedActivitiesComplete()) {
             mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             // Make sure activity & window visibility should be identical
             // for all displays in this stage.
@@ -2241,7 +2242,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final boolean isSecondaryDisplayPreferred =
                 (preferredDisplayId != DEFAULT_DISPLAY && preferredDisplayId != INVALID_DISPLAY);
         final boolean inSplitScreenMode = actualStack != null
-                && actualStack.getDisplay().isSplitScreenModeActivated();
+                && actualStack.getDisplay().mTaskContainers.isSplitScreenModeActivated();
         if (((!inSplitScreenMode && preferredWindowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
                 && !isSecondaryDisplayPreferred) || !task.isActivityTypeStandardOrUndefined()) {
             return;
@@ -2289,12 +2290,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
             final DisplayContent display = task.getStack().getDisplay();
-            if (display.isSplitScreenModeActivated()) {
+            if (display.mTaskContainers.isSplitScreenModeActivated()) {
                 // Display a warning toast that we tried to put an app that doesn't support
                 // split-screen in split-screen.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                display.onSplitScreenModeDismissed();
+                display.mTaskContainers.onSplitScreenModeDismissed();
                 display.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
                         true /* notifyClients */);
             }
@@ -2612,7 +2613,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // from whatever is started from the recents activity, so move the home stack
                 // forward.
                 // TODO (b/115289124): Multi-display supports for recents.
-                mRootWindowContainer.getDefaultDisplay().moveHomeStackToFront(
+                mRootWindowContainer.getDefaultDisplay().mTaskContainers.moveHomeStackToFront(
                         "startActivityFromRecents");
             }
 
