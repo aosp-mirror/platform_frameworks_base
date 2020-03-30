@@ -130,7 +130,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         try {
             CompletableFuture<List<Notification.Action>> smartActionsFuture =
                     ScreenshotSmartActions.getSmartActionsFuture(
-                            mScreenshotId, image, mSmartActionsProvider,
+                            mScreenshotId, mImageFileName, image, mSmartActionsProvider,
                             mSmartActionsEnabled, isManagedProfile(mContext));
 
             // Save the screenshot to the MediaStore
@@ -202,7 +202,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                         1000);
                 smartActions.addAll(buildSmartActions(
                         ScreenshotSmartActions.getSmartActions(
-                                mScreenshotId, smartActionsFuture, timeoutMs,
+                                mScreenshotId, mImageFileName, smartActionsFuture, timeoutMs,
                                 mSmartActionsProvider),
                         mContext));
             }
