@@ -170,8 +170,6 @@ java_library {
     name: "framework-wifi-stubs-publicapi",
     srcs: [":framework-wifi-stubs-srcs-publicapi"],
     defaults: ["framework-module-stubs-lib-defaults-publicapi"],
-    // TODO(b/151134996): remove this
-    sdk_version: "current",
 }
 
 java_library {
