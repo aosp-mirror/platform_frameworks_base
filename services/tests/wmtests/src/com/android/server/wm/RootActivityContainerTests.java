@@ -325,7 +325,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         mSupervisor.findTaskToMoveToFront(targetTask, 0, ActivityOptions.makeBasic(), reason,
                 false);
 
-        verify(display).moveHomeStackToFront(contains(reason));
+        final TaskContainers taskContainers = display.mTaskContainers;
+        verify(taskContainers).moveHomeStackToFront(contains(reason));
     }
 
     /**
@@ -352,7 +353,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         mSupervisor.findTaskToMoveToFront(targetTask, 0, ActivityOptions.makeBasic(), reason,
                 false);
 
-        verify(display, never()).moveHomeStackToFront(contains(reason));
+        final TaskContainers taskContainers = display.mTaskContainers;
+        verify(taskContainers, never()).moveHomeStackToFront(contains(reason));
     }
 
     /**
@@ -367,7 +369,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 ACTIVITY_TYPE_STANDARD, false /* onTop */));
         final Task task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
         final ActivityRecord activity = new ActivityBuilder(mService).setTask(task).build();
-        display.positionStackAtBottom(targetStack);
+        display.mTaskContainers.positionStackAtBottom(targetStack);
 
         // Assume the stack is not at the topmost position (e.g. behind always-on-top stacks) but it
         // is the current top focused stack.
@@ -470,7 +472,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         final Task task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
         final ActivityRecord activity = new ActivityBuilder(mService).setTask(task).build();
         activity.setState(ActivityState.RESUMED, "test");
-        display.positionStackAtBottom(targetStack);
+        display.mTaskContainers.positionStackAtBottom(targetStack);
 
         // Assume the stack is at the topmost position
         assertFalse(targetStack.isTopStackOnDisplay());
