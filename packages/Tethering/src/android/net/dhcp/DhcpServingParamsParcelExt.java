@@ -18,9 +18,11 @@ package android.net.dhcp;
 
 import static android.net.shared.Inet4AddressUtils.inet4AddressToIntHTH;
 
-import android.annotation.NonNull;
 import android.net.LinkAddress;
 import android.util.ArraySet;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.net.Inet4Address;
 import java.util.Collection;
@@ -157,6 +159,17 @@ public class DhcpServingParamsParcelExt extends DhcpServingParamsParcel {
      */
     public DhcpServingParamsParcelExt setMetered(boolean metered) {
         this.metered = metered;
+        return this;
+    }
+
+    /**
+     * Set the client address to tell DHCP server only offer this address.
+     * The client's prefix length is the same as server's.
+     *
+     * <p>If not set, the default value is null.
+     */
+    public DhcpServingParamsParcelExt setSingleClientAddr(@Nullable Inet4Address clientAddr) {
+        this.clientAddr = clientAddr == null ? 0 : inet4AddressToIntHTH(clientAddr);
         return this;
     }
 
