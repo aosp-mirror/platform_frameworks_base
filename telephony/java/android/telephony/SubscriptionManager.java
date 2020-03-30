@@ -265,7 +265,8 @@ public class SubscriptionManager {
      * <P>Type: TEXT (String)</P>
      */
     /** @hide */
-    public static final String UNIQUE_KEY_SUBSCRIPTION_ID = SimInfo.UNIQUE_KEY_SUBSCRIPTION_ID;
+    public static final String UNIQUE_KEY_SUBSCRIPTION_ID =
+            SimInfo.COLUMN_UNIQUE_KEY_SUBSCRIPTION_ID;
 
     /**
      * TelephonyProvider column name for a unique identifier for the subscription within the
@@ -274,14 +275,14 @@ public class SubscriptionManager {
      * <P>Type: TEXT (String)</P>
      */
     /** @hide */
-    public static final String ICC_ID = SimInfo.ICC_ID;
+    public static final String ICC_ID = SimInfo.COLUMN_ICC_ID;
 
     /**
      * TelephonyProvider column name for user SIM_SlOT_INDEX
      * <P>Type: INTEGER (int)</P>
      */
     /** @hide */
-    public static final String SIM_SLOT_INDEX = SimInfo.SIM_SLOT_INDEX;
+    public static final String SIM_SLOT_INDEX = SimInfo.COLUMN_SIM_SLOT_INDEX;
 
     /** SIM is not inserted */
     /** @hide */
@@ -300,7 +301,7 @@ public class SubscriptionManager {
      * Default value is 0.
      */
     /** @hide */
-    public static final String SUBSCRIPTION_TYPE = SimInfo.SUBSCRIPTION_TYPE;
+    public static final String SUBSCRIPTION_TYPE = SimInfo.COLUMN_SUBSCRIPTION_TYPE;
 
     /**
      * TelephonyProvider column name data_enabled_override_rules.
@@ -313,7 +314,8 @@ public class SubscriptionManager {
      *
      * @hide
      */
-    public static final String DATA_ENABLED_OVERRIDE_RULES = SimInfo.DATA_ENABLED_OVERRIDE_RULES;
+    public static final String DATA_ENABLED_OVERRIDE_RULES =
+            SimInfo.COLUMN_DATA_ENABLED_OVERRIDE_RULES;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -362,14 +364,14 @@ public class SubscriptionManager {
      * <P>Type: TEXT (String)</P>
      */
     /** @hide */
-    public static final String DISPLAY_NAME = SimInfo.DISPLAY_NAME;
+    public static final String DISPLAY_NAME = SimInfo.COLUMN_DISPLAY_NAME;
 
     /**
      * TelephonyProvider column name for the service provider name for the SIM.
      * <P>Type: TEXT (String)</P>
      */
     /** @hide */
-    public static final String CARRIER_NAME = SimInfo.CARRIER_NAME;
+    public static final String CARRIER_NAME = SimInfo.COLUMN_CARRIER_NAME;
 
     /**
      * Default name resource
@@ -383,13 +385,13 @@ public class SubscriptionManager {
      *
      * @hide
      */
-    public static final String NAME_SOURCE = SimInfo.NAME_SOURCE;
+    public static final String NAME_SOURCE = SimInfo.COLUMN_NAME_SOURCE;
 
     /**
-     * The name_source is the default, which is from the carrier id.
+     * The name_source is from the carrier id.
      * @hide
      */
-    public static final int NAME_SOURCE_DEFAULT = SimInfo.NAME_SOURCE_DEFAULT;
+    public static final int NAME_SOURCE_CARRIER_ID = SimInfo.NAME_SOURCE_CARRIER_ID;
 
     /**
      * The name_source is from SIM EF_SPN.
@@ -420,7 +422,7 @@ public class SubscriptionManager {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"NAME_SOURCE_"},
             value = {
-                    NAME_SOURCE_DEFAULT,
+                    NAME_SOURCE_CARRIER_ID,
                     NAME_SOURCE_SIM_SPN,
                     NAME_SOURCE_USER_INPUT,
                     NAME_SOURCE_CARRIER,
@@ -433,21 +435,21 @@ public class SubscriptionManager {
      * <P>Type: INTEGER (int)</P>
      */
     /** @hide */
-    public static final String COLOR = SimInfo.COLOR;
+    public static final String HUE = SimInfo.COLUMN_COLOR;
 
     /**
      * TelephonyProvider column name for the phone number of a SIM.
      * <P>Type: TEXT (String)</P>
      */
     /** @hide */
-    public static final String NUMBER = SimInfo.NUMBER;
+    public static final String NUMBER = SimInfo.COLUMN_NUMBER;
 
     /**
      * TelephonyProvider column name for whether data roaming is enabled.
      * <P>Type: INTEGER (int)</P>
      */
     /** @hide */
-    public static final String DATA_ROAMING = SimInfo.DATA_ROAMING;
+    public static final String DATA_ROAMING = SimInfo.COLUMN_DATA_ROAMING;
 
     /** Indicates that data roaming is enabled for a subscription */
     public static final int DATA_ROAMING_ENABLE = SimInfo.DATA_ROAMING_ENABLE;
@@ -455,63 +457,60 @@ public class SubscriptionManager {
     /** Indicates that data roaming is disabled for a subscription */
     public static final int DATA_ROAMING_DISABLE = SimInfo.DATA_ROAMING_DISABLE;
 
-    /** @hide */
-    public static final int DATA_ROAMING_DEFAULT = SimInfo.DATA_ROAMING_DEFAULT;
-
     /**
      * TelephonyProvider column name for subscription carrier id.
      * @see TelephonyManager#getSimCarrierId()
      * <p>Type: INTEGER (int) </p>
      * @hide
      */
-    public static final String CARRIER_ID = SimInfo.CARRIER_ID;
+    public static final String CARRIER_ID = SimInfo.COLUMN_CARRIER_ID;
 
     /**
      * @hide A comma-separated list of EHPLMNs associated with the subscription
      * <P>Type: TEXT (String)</P>
      */
-    public static final String EHPLMNS = SimInfo.EHPLMNS;
+    public static final String EHPLMNS = SimInfo.COLUMN_EHPLMNS;
 
     /**
      * @hide A comma-separated list of HPLMNs associated with the subscription
      * <P>Type: TEXT (String)</P>
      */
-    public static final String HPLMNS = SimInfo.HPLMNS;
+    public static final String HPLMNS = SimInfo.COLUMN_HPLMNS;
 
     /**
      * TelephonyProvider column name for the MCC associated with a SIM, stored as a string.
      * <P>Type: TEXT (String)</P>
      * @hide
      */
-    public static final String MCC_STRING = SimInfo.MCC_STRING;
+    public static final String MCC_STRING = SimInfo.COLUMN_MCC_STRING;
 
     /**
      * TelephonyProvider column name for the MNC associated with a SIM, stored as a string.
      * <P>Type: TEXT (String)</P>
      * @hide
      */
-    public static final String MNC_STRING = SimInfo.MNC_STRING;
+    public static final String MNC_STRING = SimInfo.COLUMN_MNC_STRING;
 
     /**
      * TelephonyProvider column name for the MCC associated with a SIM.
      * <P>Type: INTEGER (int)</P>
      * @hide
      */
-    public static final String MCC = SimInfo.MCC;
+    public static final String MCC = SimInfo.COLUMN_MCC;
 
     /**
      * TelephonyProvider column name for the MNC associated with a SIM.
      * <P>Type: INTEGER (int)</P>
      * @hide
      */
-    public static final String MNC = SimInfo.MNC;
+    public static final String MNC = SimInfo.COLUMN_MNC;
 
     /**
      * TelephonyProvider column name for the iso country code associated with a SIM.
      * <P>Type: TEXT (String)</P>
      * @hide
      */
-    public static final String ISO_COUNTRY_CODE = SimInfo.ISO_COUNTRY_CODE;
+    public static final String ISO_COUNTRY_CODE = SimInfo.COLUMN_ISO_COUNTRY_CODE;
 
     /**
      * TelephonyProvider column name for whether a subscription is embedded (that is, present on an
@@ -519,7 +518,7 @@ public class SubscriptionManager {
      * <p>Type: INTEGER (int), 1 for embedded or 0 for non-embedded.
      * @hide
      */
-    public static final String IS_EMBEDDED = SimInfo.IS_EMBEDDED;
+    public static final String IS_EMBEDDED = SimInfo.COLUMN_IS_EMBEDDED;
 
     /**
      * TelephonyProvider column name for SIM card identifier. For UICC card it is the ICCID of the
@@ -527,7 +526,7 @@ public class SubscriptionManager {
      * <P>Type: TEXT (String)</P>
      * @hide
      */
-    public static final String CARD_ID = SimInfo.CARD_ID;
+    public static final String CARD_ID = SimInfo.COLUMN_CARD_ID;
 
     /**
      * TelephonyProvider column name for the encoded {@link UiccAccessRule}s from
@@ -535,7 +534,7 @@ public class SubscriptionManager {
      * <p>TYPE: BLOB
      * @hide
      */
-    public static final String ACCESS_RULES = SimInfo.ACCESS_RULES;
+    public static final String ACCESS_RULES = SimInfo.COLUMN_ACCESS_RULES;
 
     /**
      * TelephonyProvider column name for the encoded {@link UiccAccessRule}s from
@@ -545,7 +544,7 @@ public class SubscriptionManager {
      * @hide
      */
     public static final String ACCESS_RULES_FROM_CARRIER_CONFIGS =
-            SimInfo.ACCESS_RULES_FROM_CARRIER_CONFIGS;
+            SimInfo.COLUMN_ACCESS_RULES_FROM_CARRIER_CONFIGS;
 
     /**
      * TelephonyProvider column name identifying whether an embedded subscription is on a removable
@@ -555,79 +554,82 @@ public class SubscriptionManager {
      * <p>TYPE: INTEGER (int), 1 for removable or 0 for non-removable.
      * @hide
      */
-    public static final String IS_REMOVABLE = SimInfo.IS_REMOVABLE;
+    public static final String IS_REMOVABLE = SimInfo.COLUMN_IS_REMOVABLE;
 
     /**
      *  TelephonyProvider column name for extreme threat in CB settings
      * @hide
      */
-    public static final String CB_EXTREME_THREAT_ALERT = SimInfo.CB_EXTREME_THREAT_ALERT;
+    public static final String CB_EXTREME_THREAT_ALERT =
+            SimInfo.COLUMN_CB_EXTREME_THREAT_ALERT;
 
     /**
      * TelephonyProvider column name for severe threat in CB settings
      *@hide
      */
-    public static final String CB_SEVERE_THREAT_ALERT = SimInfo.CB_SEVERE_THREAT_ALERT;
+    public static final String CB_SEVERE_THREAT_ALERT = SimInfo.COLUMN_CB_SEVERE_THREAT_ALERT;
 
     /**
      * TelephonyProvider column name for amber alert in CB settings
      *@hide
      */
-    public static final String CB_AMBER_ALERT = SimInfo.CB_AMBER_ALERT;
+    public static final String CB_AMBER_ALERT = SimInfo.COLUMN_CB_AMBER_ALERT;
 
     /**
      * TelephonyProvider column name for emergency alert in CB settings
      *@hide
      */
-    public static final String CB_EMERGENCY_ALERT = SimInfo.CB_EMERGENCY_ALERT;
+    public static final String CB_EMERGENCY_ALERT = SimInfo.COLUMN_CB_EMERGENCY_ALERT;
 
     /**
      * TelephonyProvider column name for alert sound duration in CB settings
      *@hide
      */
-    public static final String CB_ALERT_SOUND_DURATION = SimInfo.CB_ALERT_SOUND_DURATION;
+    public static final String CB_ALERT_SOUND_DURATION =
+            SimInfo.COLUMN_CB_ALERT_SOUND_DURATION;
 
     /**
      * TelephonyProvider column name for alert reminder interval in CB settings
      *@hide
      */
-    public static final String CB_ALERT_REMINDER_INTERVAL = SimInfo.CB_ALERT_REMINDER_INTERVAL;
+    public static final String CB_ALERT_REMINDER_INTERVAL =
+            SimInfo.COLUMN_CB_ALERT_REMINDER_INTERVAL;
 
     /**
      * TelephonyProvider column name for enabling vibrate in CB settings
      *@hide
      */
-    public static final String CB_ALERT_VIBRATE = SimInfo.CB_ALERT_VIBRATE;
+    public static final String CB_ALERT_VIBRATE = SimInfo.COLUMN_CB_ALERT_VIBRATE;
 
     /**
      * TelephonyProvider column name for enabling alert speech in CB settings
      *@hide
      */
-    public static final String CB_ALERT_SPEECH = SimInfo.CB_ALERT_SPEECH;
+    public static final String CB_ALERT_SPEECH = SimInfo.COLUMN_CB_ALERT_SPEECH;
 
     /**
      * TelephonyProvider column name for ETWS test alert in CB settings
      *@hide
      */
-    public static final String CB_ETWS_TEST_ALERT = SimInfo.CB_ETWS_TEST_ALERT;
+    public static final String CB_ETWS_TEST_ALERT = SimInfo.COLUMN_CB_ETWS_TEST_ALERT;
 
     /**
      * TelephonyProvider column name for enable channel50 alert in CB settings
      *@hide
      */
-    public static final String CB_CHANNEL_50_ALERT = SimInfo.CB_CHANNEL_50_ALERT;
+    public static final String CB_CHANNEL_50_ALERT = SimInfo.COLUMN_CB_CHANNEL_50_ALERT;
 
     /**
      * TelephonyProvider column name for CMAS test alert in CB settings
      *@hide
      */
-    public static final String CB_CMAS_TEST_ALERT = SimInfo.CB_CMAS_TEST_ALERT;
+    public static final String CB_CMAS_TEST_ALERT = SimInfo.COLUMN_CB_CMAS_TEST_ALERT;
 
     /**
      * TelephonyProvider column name for Opt out dialog in CB settings
      *@hide
      */
-    public static final String CB_OPT_OUT_DIALOG = SimInfo.CB_OPT_OUT_DIALOG;
+    public static final String CB_OPT_OUT_DIALOG = SimInfo.COLUMN_CB_OPT_OUT_DIALOG;
 
     /**
      * TelephonyProvider column name for enable Volte.
@@ -636,44 +638,45 @@ public class SubscriptionManager {
      * {@link CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL}.
      *@hide
      */
-    public static final String ENHANCED_4G_MODE_ENABLED = SimInfo.ENHANCED_4G_MODE_ENABLED;
+    public static final String ENHANCED_4G_MODE_ENABLED =
+            SimInfo.COLUMN_ENHANCED_4G_MODE_ENABLED;
 
     /**
      * TelephonyProvider column name for enable VT (Video Telephony over IMS)
      *@hide
      */
-    public static final String VT_IMS_ENABLED = SimInfo.VT_IMS_ENABLED;
+    public static final String VT_IMS_ENABLED = SimInfo.COLUMN_VT_IMS_ENABLED;
 
     /**
      * TelephonyProvider column name for enable Wifi calling
      *@hide
      */
-    public static final String WFC_IMS_ENABLED = SimInfo.WFC_IMS_ENABLED;
+    public static final String WFC_IMS_ENABLED = SimInfo.COLUMN_WFC_IMS_ENABLED;
 
     /**
      * TelephonyProvider column name for Wifi calling mode
      *@hide
      */
-    public static final String WFC_IMS_MODE = SimInfo.WFC_IMS_MODE;
+    public static final String WFC_IMS_MODE = SimInfo.COLUMN_WFC_IMS_MODE;
 
     /**
      * TelephonyProvider column name for Wifi calling mode in roaming
      *@hide
      */
-    public static final String WFC_IMS_ROAMING_MODE = SimInfo.WFC_IMS_ROAMING_MODE;
+    public static final String WFC_IMS_ROAMING_MODE = SimInfo.COLUMN_WFC_IMS_ROAMING_MODE;
 
     /**
      * TelephonyProvider column name for enable Wifi calling in roaming
      *@hide
      */
-    public static final String WFC_IMS_ROAMING_ENABLED = SimInfo.WFC_IMS_ROAMING_ENABLED;
+    public static final String WFC_IMS_ROAMING_ENABLED = SimInfo.COLUMN_WFC_IMS_ROAMING_ENABLED;
 
     /**
      * Determines if the user has enabled IMS RCS User Capability Exchange (UCE) for this
      * subscription.
      * @hide
      */
-    public static final String IMS_RCS_UCE_ENABLED = SimInfo.IMS_RCS_UCE_ENABLED;
+    public static final String IMS_RCS_UCE_ENABLED = SimInfo.COLUMN_IMS_RCS_UCE_ENABLED;
 
     /**
      * TelephonyProvider column name for whether a subscription is opportunistic, that is,
@@ -682,7 +685,7 @@ public class SubscriptionManager {
      * <p>Type: INTEGER (int), 1 for opportunistic or 0 for non-opportunistic.
      * @hide
      */
-    public static final String IS_OPPORTUNISTIC = SimInfo.IS_OPPORTUNISTIC;
+    public static final String IS_OPPORTUNISTIC = SimInfo.COLUMN_IS_OPPORTUNISTIC;
 
     /**
      * TelephonyProvider column name for group ID. Subscriptions with same group ID
@@ -691,7 +694,7 @@ public class SubscriptionManager {
      *
      * @hide
      */
-    public static final String GROUP_UUID = SimInfo.GROUP_UUID;
+    public static final String GROUP_UUID = SimInfo.COLUMN_GROUP_UUID;
 
     /**
      * TelephonyProvider column name for group owner. It's the package name who created
@@ -699,7 +702,7 @@ public class SubscriptionManager {
      *
      * @hide
      */
-    public static final String GROUP_OWNER = SimInfo.GROUP_OWNER;
+    public static final String GROUP_OWNER = SimInfo.COLUMN_GROUP_OWNER;
 
     /**
      * TelephonyProvider column name for the profile class of a subscription
@@ -707,7 +710,7 @@ public class SubscriptionManager {
      * <P>Type: INTEGER (int)</P>
      * @hide
      */
-    public static final String PROFILE_CLASS = SimInfo.PROFILE_CLASS;
+    public static final String PROFILE_CLASS = SimInfo.COLUMN_PROFILE_CLASS;
 
     /**
      * Profile class of the subscription
@@ -719,7 +722,6 @@ public class SubscriptionManager {
             SimInfo.PROFILE_CLASS_PROVISIONING,
             SimInfo.PROFILE_CLASS_OPERATIONAL,
             SimInfo.PROFILE_CLASS_UNSET,
-            SimInfo.PROFILE_CLASS_DEFAULT
     })
     public @interface ProfileClass {}
 
@@ -765,7 +767,8 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi
-    public static final int PROFILE_CLASS_DEFAULT = SimInfo.PROFILE_CLASS_DEFAULT;
+    @Deprecated
+    public static final int PROFILE_CLASS_DEFAULT = SimInfo.PROFILE_CLASS_UNSET;
 
     /**
      * IMSI (International Mobile Subscriber Identity).
@@ -773,19 +776,19 @@ public class SubscriptionManager {
      * @hide
      */
     //TODO: add @SystemApi
-    public static final String IMSI = SimInfo.IMSI;
+    public static final String IMSI = SimInfo.COLUMN_IMSI;
 
     /**
      * Whether uicc applications is set to be enabled or disabled. By default it's enabled.
      * @hide
      */
-    public static final String UICC_APPLICATIONS_ENABLED = SimInfo.UICC_APPLICATIONS_ENABLED;
+    public static final String UICC_APPLICATIONS_ENABLED = SimInfo.COLUMN_UICC_APPLICATIONS_ENABLED;
 
     /**
      * Indicate which network type is allowed. By default it's enabled.
      * @hide
      */
-    public static final String ALLOWED_NETWORK_TYPES = SimInfo.ALLOWED_NETWORK_TYPES;
+    public static final String ALLOWED_NETWORK_TYPES = SimInfo.COLUMN_ALLOWED_NETWORK_TYPES;
 
     /**
      * Broadcast Action: The user has changed one of the default subs related to

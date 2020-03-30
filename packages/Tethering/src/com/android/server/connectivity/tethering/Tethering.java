@@ -303,31 +303,26 @@ public class Tethering {
 
         final UserManager userManager = (UserManager) mContext.getSystemService(
                 Context.USER_SERVICE);
-        mTetheringRestriction = new UserRestrictionActionListener(userManager, this);
+        mTetheringRestriction = new UserRestrictionActionListener(
+                userManager, this, mNotificationUpdater);
         mExecutor = new TetheringThreadExecutor(mHandler);
         mActiveDataSubIdListener = new ActiveDataSubIdListener(mExecutor);
+        mNetdCallback = new NetdCallback();
 
         // Load tethering configuration.
         updateConfiguration();
-        // NetdCallback should be registered after updateConfiguration() to ensure
-        // TetheringConfiguration is created.
-        mNetdCallback = new NetdCallback();
+    }
+
+    /**
+     * Start to register callbacks.
+     * Call this function when tethering is ready to handle callback events.
+     */
+    public void startStateMachineUpdaters() {
         try {
             mNetd.registerUnsolicitedEventListener(mNetdCallback);
         } catch (RemoteException e) {
             mLog.e("Unable to register netd UnsolicitedEventListener");
         }
-
-        startStateMachineUpdaters(mHandler);
-        startTrackDefaultNetwork();
-
-        final WifiManager wifiManager = getWifiManager();
-        if (wifiManager != null) {
-            wifiManager.registerSoftApCallback(mExecutor, new TetheringSoftApCallback());
-        }
-    }
-
-    private void startStateMachineUpdaters(Handler handler) {
         mCarrierConfigChange.startListening();
         mContext.getSystemService(TelephonyManager.class).listen(mActiveDataSubIdListener,
                 PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
@@ -340,7 +335,14 @@ public class Tethering {
         filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         filter.addAction(UserManager.ACTION_USER_RESTRICTIONS_CHANGED);
         filter.addAction(ACTION_RESTRICT_BACKGROUND_CHANGED);
-        mContext.registerReceiver(mStateReceiver, filter, null, handler);
+        mContext.registerReceiver(mStateReceiver, filter, null, mHandler);
+
+        final WifiManager wifiManager = getWifiManager();
+        if (wifiManager != null) {
+            wifiManager.registerSoftApCallback(mExecutor, new TetheringSoftApCallback());
+        }
+
+        startTrackDefaultNetwork();
     }
 
     private class TetheringThreadExecutor implements Executor {
@@ -369,9 +371,10 @@ public class Tethering {
 
             mActiveDataSubId = subId;
             updateConfiguration();
+            mNotificationUpdater.onActiveDataSubscriptionIdChanged(subId);
             // To avoid launching unexpected provisioning checks, ignore re-provisioning
             // when no CarrierConfig loaded yet. Assume reevaluateSimCardProvisioning()
-            // ill be triggered again when CarrierConfig is loaded.
+            // will be triggered again when CarrierConfig is loaded.
             if (mEntitlementMgr.getCarrierConfig(mConfig) != null) {
                 mEntitlementMgr.reevaluateSimCardProvisioning(mConfig);
             } else {
@@ -431,9 +434,7 @@ public class Tethering {
         // Called by wifi when the number of soft AP clients changed.
         @Override
         public void onConnectedClientsChanged(final List<WifiClient> clients) {
-            if (mConnectedClientsTracker.updateConnectedClients(mForwardedDownstreams, clients)) {
-                reportTetherClientsChanged(mConnectedClientsTracker.getLastTetheredClients());
-            }
+            updateConnectedClients(clients);
         }
     }
 
@@ -635,7 +636,10 @@ public class Tethering {
                 Context.ETHERNET_SERVICE);
         synchronized (mPublicSync) {
             if (enable) {
-                if (mEthernetCallback != null) return TETHER_ERROR_NO_ERROR;
+                if (mEthernetCallback != null) {
+                    Log.d(TAG, "Ethernet tethering already started");
+                    return TETHER_ERROR_NO_ERROR;
+                }
 
                 mEthernetCallback = new EthernetCallback();
                 mEthernetIfaceRequest = em.requestTetheredInterface(mExecutor, mEthernetCallback);
@@ -996,11 +1000,14 @@ public class Tethering {
     protected static class UserRestrictionActionListener {
         private final UserManager mUserManager;
         private final Tethering mWrapper;
+        private final TetheringNotificationUpdater mNotificationUpdater;
         public boolean mDisallowTethering;
 
-        public UserRestrictionActionListener(UserManager um, Tethering wrapper) {
+        public UserRestrictionActionListener(@NonNull UserManager um, @NonNull Tethering wrapper,
+                @NonNull TetheringNotificationUpdater updater) {
             mUserManager = um;
             mWrapper = wrapper;
+            mNotificationUpdater = updater;
             mDisallowTethering = false;
         }
 
@@ -1019,13 +1026,21 @@ public class Tethering {
                 return;
             }
 
-            // TODO: Add user restrictions notification.
-            final boolean isTetheringActiveOnDevice = (mWrapper.getTetheredIfaces().length != 0);
-
-            if (newlyDisallowed && isTetheringActiveOnDevice) {
-                mWrapper.untetherAll();
-                // TODO(b/148139325): send tetheringSupported on restriction change
+            if (!newlyDisallowed) {
+                // Clear the restricted notification when user is allowed to have tethering
+                // function.
+                mNotificationUpdater.tetheringRestrictionLifted();
+                return;
             }
+
+            // Restricted notification is shown when tethering function is disallowed on
+            // user's device.
+            mNotificationUpdater.notifyTetheringDisabledByRestriction();
+
+            // Untether from all downstreams since tethering is disallowed.
+            mWrapper.untetherAll();
+
+            // TODO(b/148139325): send tetheringSupported on restriction change
         }
     }
 
@@ -1494,7 +1509,7 @@ public class Tethering {
             } else {
                 dnsServers = mConfig.defaultIPv4DNS;
             }
-            final int netId = (network != null) ? network.netId : NETID_UNSET;
+            final int netId = (network != null) ? network.getNetId() : NETID_UNSET;
             try {
                 mNetd.tetherDnsSet(netId, dnsServers);
                 mLog.log(String.format(
@@ -1559,6 +1574,7 @@ public class Tethering {
             mIPv6TetheringCoordinator.removeActiveDownstream(who);
             mOffload.excludeDownstreamInterface(who.interfaceName());
             mForwardedDownstreams.remove(who);
+            updateConnectedClients(null /* wifiClients */);
 
             // If this is a Wi-Fi interface, tell WifiManager of any errors
             // or the inactive serving state.
@@ -2141,6 +2157,12 @@ public class Tethering {
         return false;
     }
 
+    private void updateConnectedClients(final List<WifiClient> wifiClients) {
+        if (mConnectedClientsTracker.updateConnectedClients(mForwardedDownstreams, wifiClients)) {
+            reportTetherClientsChanged(mConnectedClientsTracker.getLastTetheredClients());
+        }
+    }
+
     private IpServer.Callback makeControlCallback() {
         return new IpServer.Callback() {
             @Override
@@ -2155,10 +2177,7 @@ public class Tethering {
 
             @Override
             public void dhcpLeasesChanged() {
-                if (mConnectedClientsTracker.updateConnectedClients(
-                        mForwardedDownstreams, null /* wifiClients */)) {
-                    reportTetherClientsChanged(mConnectedClientsTracker.getLastTetheredClients());
-                }
+                updateConnectedClients(null /* wifiClients */);
             }
         };
     }

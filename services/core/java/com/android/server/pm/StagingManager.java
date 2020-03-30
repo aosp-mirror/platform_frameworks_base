@@ -539,25 +539,95 @@ public class StagingManager {
         mPreRebootVerificationHandler.startPreRebootVerification(session.sessionId);
     }
 
-    @Nullable
-    PackageInstallerSession getActiveSession() {
+    /**
+     * <p> Check if the session provided is non-overlapping with the active staged sessions.
+     *
+     * <p> A session is non-overlapping if it meets one of the following conditions: </p>
+     * <ul>
+     *     <li>It is a parent session</li>
+     *     <li>It is already one of the active sessions</li>
+     *     <li>Its package name is not same as any of the active sessions</li>
+     * </ul>
+     * @throws PackageManagerException if session fails the check
+     */
+    void checkNonOverlappingWithStagedSessions(@NonNull PackageInstallerSession session)
+            throws PackageManagerException {
+        if (session.isMultiPackage()) {
+            // We cannot say a parent session overlaps until we process its children
+            return;
+        }
+        if (session.getPackageName() == null) {
+            throw new PackageManagerException(PackageManager.INSTALL_FAILED_INVALID_APK,
+                    "Cannot stage session " + session.sessionId + " with package name null");
+        }
+
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
-                final PackageInstallerSession session = mStagedSessions.valueAt(i);
-                if (!session.isCommitted()) {
+                final PackageInstallerSession stagedSession = mStagedSessions.valueAt(i);
+                if (!stagedSession.isCommitted() || stagedSession.isStagedAndInTerminalState()) {
                     continue;
                 }
-                if (session.hasParentSessionId()) {
-                    // Staging manager will finalize only parent session. Ignore child sessions
-                    // picking the active.
+                if (stagedSession.isMultiPackage()) {
+                    // This active parent staged session is useless as it doesn't have a package
+                    // name and the session we are checking is not a parent session either.
                     continue;
                 }
-                if (!session.isStagedSessionApplied() && !session.isStagedSessionFailed()) {
-                    return session;
+
+                // From here on, stagedSession is a non-parent active staged session
+
+                // Check if stagedSession has an active parent session or not
+                if (stagedSession.hasParentSessionId()) {
+                    int parentId = stagedSession.getParentSessionId();
+                    PackageInstallerSession parentSession = mStagedSessions.get(parentId);
+                    if (parentSession == null || parentSession.isStagedAndInTerminalState()) {
+                        // Parent session has been abandoned or terminated already
+                        continue;
+                    }
+                }
+
+                // Check if session is one of the active sessions
+                if (session.sessionId == stagedSession.sessionId) {
+                    Slog.w(TAG, "Session " + session.sessionId + " is already staged");
+                    continue;
+                }
+
+                // If session is not among the active sessions, then it cannot have same package
+                // name as any of the active sessions.
+                if (session.getPackageName().equals(stagedSession.getPackageName())) {
+                    throw new PackageManagerException(
+                            PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
+                            "Package: " + session.getPackageName() + " in session: "
+                                    + session.sessionId + " has been staged already by session: "
+                                    + stagedSession.sessionId, null);
+                }
+
+                // TODO(b/141843321): Add support for staging multiple sessions in apexd
+                // Since apexd doesn't support multiple staged sessions yet, we have to careful how
+                // we handle apex sessions. We want to allow a set of apex sessions under the same
+                // parent to be staged when there is no previously staged apex sessions.
+                if (isApexSession(session) && isApexSession(stagedSession)) {
+                    // session is apex and it can co-exist with stagedSession only if they are from
+                    // same parent
+                    final boolean coExist;
+                    if (!session.hasParentSessionId() && !stagedSession.hasParentSessionId()) {
+                        // Both single package apex sessions. Cannot co-exist.
+                        coExist = false;
+                    } else {
+                        // At least one of the session has parent. Both must be from same parent.
+                        coExist =
+                                session.getParentSessionId() == stagedSession.getParentSessionId();
+                    }
+                    if (!coExist) {
+                        throw new PackageManagerException(
+                                PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
+                                "Package: " + session.getPackageName() + " in session: "
+                                        + session.sessionId + " cannot be staged as there is "
+                                        + "already another apex staged session: "
+                                        + stagedSession.sessionId, null);
+                    }
                 }
             }
         }
-        return null;
     }
 
     void createSession(@NonNull PackageInstallerSession sessionInfo) {
@@ -584,7 +654,8 @@ public class StagingManager {
             ApexSessionInfo apexSession = mApexManager.getStagedSessionInfo(session.sessionId);
             if (apexSession == null || isApexSessionFinalized(apexSession)) {
                 Slog.w(TAG,
-                        "Cannot abort session because it is not active or APEXD is not reachable");
+                        "Cannot abort session " + session.sessionId
+                                + " because it is not active or APEXD is not reachable");
                 return;
             }
             mApexManager.abortActiveSession();

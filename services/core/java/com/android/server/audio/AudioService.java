@@ -672,7 +672,7 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = defaultCallVolume;
         } else {
             AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] =
-                    (maxCallVolume * 3) / 4;
+                    (MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] * 3) / 4;
         }
 
         int maxMusicVolume = SystemProperties.getInt("ro.config.media_vol_steps", -1);
@@ -4318,6 +4318,7 @@ public class AudioService extends IAudioService.Stub
     public void setWiredDeviceConnectionState(int type,
             @ConnectionState int state, String address, String name,
             String caller) {
+        enforceModifyAudioRoutingPermission();
         if (state != CONNECTION_STATE_CONNECTED
                 && state != CONNECTION_STATE_DISCONNECTED) {
             throw new IllegalArgumentException("Invalid state " + state);

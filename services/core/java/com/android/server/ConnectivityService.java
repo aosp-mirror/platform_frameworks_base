@@ -40,6 +40,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
@@ -48,10 +49,9 @@ import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
 import static android.system.OsConstants.IPPROTO_UDP;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import static java.util.Map.Entry;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -63,6 +63,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.CaptivePortal;
@@ -236,7 +237,6 @@ import java.util.SortedSet;
 import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 /**
  * @hide
@@ -928,7 +928,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
          * @see IpConnectivityMetrics.Logger
          */
         public IpConnectivityMetrics.Logger getMetricsLogger() {
-            return checkNotNull(LocalServices.getService(IpConnectivityMetrics.Logger.class),
+            return Objects.requireNonNull(LocalServices.getService(IpConnectivityMetrics.Logger.class),
                     "no IpConnectivityMetrics service");
         }
 
@@ -957,10 +957,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             IDnsResolver dnsresolver, IpConnectivityLog logger, INetd netd, Dependencies deps) {
         if (DBG) log("ConnectivityService starting up");
 
-        mDeps = checkNotNull(deps, "missing Dependencies");
+        mDeps = Objects.requireNonNull(deps, "missing Dependencies");
         mSystemProperties = mDeps.getSystemProperties();
         mNetIdManager = mDeps.makeNetIdManager();
-        mContext = checkNotNull(context, "missing Context");
+        mContext = Objects.requireNonNull(context, "missing Context");
 
         mMetricsLog = logger;
         mDefaultRequest = createDefaultInternetRequestForTransport(-1, NetworkRequest.Type.REQUEST);
@@ -990,13 +990,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mLingerDelayMs = mSystemProperties.getInt(LINGER_DELAY_PROPERTY, DEFAULT_LINGER_DELAY_MS);
 
-        mNMS = checkNotNull(netManager, "missing INetworkManagementService");
-        mStatsService = checkNotNull(statsService, "missing INetworkStatsService");
-        mPolicyManager = checkNotNull(policyManager, "missing INetworkPolicyManager");
-        mPolicyManagerInternal = checkNotNull(
+        mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
+        mStatsService = Objects.requireNonNull(statsService, "missing INetworkStatsService");
+        mPolicyManager = Objects.requireNonNull(policyManager, "missing INetworkPolicyManager");
+        mPolicyManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(NetworkPolicyManagerInternal.class),
                 "missing NetworkPolicyManagerInternal");
-        mDnsResolver = checkNotNull(dnsresolver, "missing IDnsResolver");
+        mDnsResolver = Objects.requireNonNull(dnsresolver, "missing IDnsResolver");
         mProxyTracker = mDeps.makeProxyTracker(mContext, mHandler);
 
         mNetd = netd;
@@ -2696,9 +2696,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             switch (msg.what) {
                 case NetworkAgent.EVENT_NETWORK_CAPABILITIES_CHANGED: {
-                    final NetworkCapabilities networkCapabilities = (NetworkCapabilities) msg.obj;
+                    NetworkCapabilities networkCapabilities = (NetworkCapabilities) msg.obj;
                     if (networkCapabilities.hasConnectivityManagedCapability()) {
                         Slog.wtf(TAG, "BUG: " + nai + " has CS-managed capability.");
+                    }
+                    if (networkCapabilities.hasTransport(TRANSPORT_TEST)) {
+                        // Make sure the original object is not mutated. NetworkAgent normally
+                        // makes a copy of the capabilities when sending the message through
+                        // the Messenger, but if this ever changes, not making a defensive copy
+                        // here will give attack vectors to clients using this code path.
+                        networkCapabilities = new NetworkCapabilities(networkCapabilities);
+                        networkCapabilities.restrictCapabilitesForTestNetwork();
                     }
                     updateCapabilities(nai.getCurrentScore(), nai, networkCapabilities);
                     break;
@@ -5324,7 +5332,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // specific SSID/SignalStrength, or the calling app has permission to do so.
     private void ensureSufficientPermissionsForRequest(NetworkCapabilities nc,
             int callerPid, int callerUid, String callerPackageName) {
-        if (null != nc.getSSID() && !checkSettingsPermission(callerPid, callerUid)) {
+        if (null != nc.getSsid() && !checkSettingsPermission(callerPid, callerUid)) {
             throw new SecurityException("Insufficient permissions to request a specific SSID");
         }
 
@@ -5389,12 +5397,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private boolean checkUnsupportedStartingFrom(int version, String callingPackageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        final int userId = UserHandle.getCallingUserId();
+        try {
+            final int callingVersion = pm.getApplicationInfoAsUser(
+                    callingPackageName, 0 /* flags */, userId).targetSdkVersion;
+            if (callingVersion < version) return false;
+        } catch (PackageManager.NameNotFoundException e) { }
+        return true;
+    }
+
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType,
             @NonNull String callingPackageName) {
         if (legacyType != TYPE_NONE && !checkNetworkStackPermission()) {
-            throw new SecurityException("Insufficient permissions to specify legacy type");
+            if (checkUnsupportedStartingFrom(Build.VERSION_CODES.M, callingPackageName)) {
+                throw new SecurityException("Insufficient permissions to specify legacy type");
+            }
         }
         final int callingUid = Binder.getCallingUid();
         final NetworkRequest.Type type = (networkCapabilities == null)
@@ -5499,7 +5520,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public NetworkRequest pendingRequestForNetwork(NetworkCapabilities networkCapabilities,
             PendingIntent operation, @NonNull String callingPackageName) {
-        checkNotNull(operation, "PendingIntent cannot be null.");
+        Objects.requireNonNull(operation, "PendingIntent cannot be null.");
         final int callingUid = Binder.getCallingUid();
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
         enforceNetworkRequestPermissions(networkCapabilities);
@@ -5528,7 +5549,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public void releasePendingNetworkRequest(PendingIntent operation) {
-        checkNotNull(operation, "PendingIntent cannot be null.");
+        Objects.requireNonNull(operation, "PendingIntent cannot be null.");
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT,
                 getCallingUid(), 0, operation));
     }
@@ -5587,7 +5608,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public void pendingListenForNetwork(NetworkCapabilities networkCapabilities,
             PendingIntent operation, @NonNull String callingPackageName) {
-        checkNotNull(operation, "PendingIntent cannot be null.");
+        Objects.requireNonNull(operation, "PendingIntent cannot be null.");
         final int callingUid = Binder.getCallingUid();
         if (!hasWifiNetworkListenPermission(networkCapabilities)) {
             enforceAccessPermission();
@@ -5772,7 +5793,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
             int currentScore, NetworkAgentConfig networkAgentConfig, int providerId) {
-        enforceNetworkFactoryPermission();
+        if (networkCapabilities.hasTransport(TRANSPORT_TEST)) {
+            enforceAnyPermissionOf(Manifest.permission.MANAGE_TEST_NETWORKS);
+            // Strictly, sanitizing here is unnecessary as the capabilities will be sanitized in
+            // the call to mixInCapabilities below anyway, but sanitizing here means the NAI never
+            // sees capabilities that may be malicious, which might prevent mistakes in the future.
+            networkCapabilities = new NetworkCapabilities(networkCapabilities);
+            networkCapabilities.restrictCapabilitesForTestNetwork();
+        } else {
+            enforceNetworkFactoryPermission();
+        }
 
         LinkProperties lp = new LinkProperties(linkProperties);
         lp.ensureDirectlyConnectedRoutes();
@@ -5787,7 +5817,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.getAndSetNetworkCapabilities(mixInCapabilities(nai, nc));
         final String extraInfo = networkInfo.getExtraInfo();
         final String name = TextUtils.isEmpty(extraInfo)
-                ? nai.networkCapabilities.getSSID() : extraInfo;
+                ? nai.networkCapabilities.getSsid() : extraInfo;
         if (DBG) log("registerNetworkAgent " + nai);
         final long token = Binder.clearCallingIdentity();
         try {
@@ -5982,12 +6012,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * @return true if routes changed between oldLp and newLp
      */
     private boolean updateRoutes(LinkProperties newLp, LinkProperties oldLp, int netId) {
-        Function<RouteInfo, IpPrefix> getDestination = (r) -> r.getDestination();
         // compare the route diff to determine which routes have been updated
-        CompareOrUpdateResult<IpPrefix, RouteInfo> routeDiff = new CompareOrUpdateResult<>(
-                oldLp != null ? oldLp.getAllRoutes() : null,
-                newLp != null ? newLp.getAllRoutes() : null,
-                getDestination);
+        final CompareOrUpdateResult<RouteInfo.RouteKey, RouteInfo> routeDiff =
+                new CompareOrUpdateResult<>(
+                        oldLp != null ? oldLp.getAllRoutes() : null,
+                        newLp != null ? newLp.getAllRoutes() : null,
+                        (r) -> r.getRouteKey());
 
         // add routes before removing old in case it helps with continuous connectivity
 

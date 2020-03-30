@@ -47,8 +47,9 @@ stubs_defaults {
         "core/java/**/*.logtags",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
-        ":core-current-stubs-source",
-        ":core_public_api_files",
+        ":art-module-public-api-stubs-source",
+        ":conscrypt-module-public-api-stubs-source",
+        ":android_icu4j_public_api_files",
     ],
     libs: ["framework-internal-utils"],
     installable: false,
@@ -187,6 +188,7 @@ droidstubs {
 droidstubs {
     name: "module-lib-api",
     defaults: ["metalava-full-api-stubs-default"],
+    api_tag_name: "MODULE_LIB",
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args + module_libs,
     check_api: {
@@ -227,16 +229,18 @@ droidstubs {
 java_defaults {
     name: "framework-stubs-default",
     libs: [ "stub-annotations" ],
-    static_libs: [ "private-stub-annotations-jar" ],
+    static_libs: [
+        "private-stub-annotations-jar",
+
+        // License notices from art module
+        "art-notices-for-framework-stubs-jar",
+    ],
     sdk_version: "core_current",
     errorprone: {
         javacflags: [
             "-XepDisableAllChecks",
         ],
     },
-    java_resources: [
-        ":notices-for-framework-stubs",
-    ],
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,

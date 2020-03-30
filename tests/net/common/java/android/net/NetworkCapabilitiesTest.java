@@ -463,7 +463,9 @@ public class NetworkCapabilitiesTest {
 
         nc1.setSSID(TEST_SSID);
         nc2.combineCapabilities(nc1);
-        assertTrue(TEST_SSID.equals(nc2.getSSID()));
+        if (isAtLeastR()) {
+            assertTrue(TEST_SSID.equals(nc2.getSsid()));
+        }
 
         // Because they now have the same SSID, the following call should not throw
         nc2.combineCapabilities(nc1);
@@ -601,12 +603,16 @@ public class NetworkCapabilitiesTest {
         // from nc2.
         assertFalse(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(TEST_SSID.equals(nc2.getSSID()));
+        if (isAtLeastR()) {
+            assertTrue(TEST_SSID.equals(nc2.getSsid()));
+        }
 
         nc1.setSSID(DIFFERENT_TEST_SSID);
         nc2.set(nc1);
         assertEquals(nc1, nc2);
-        assertTrue(DIFFERENT_TEST_SSID.equals(nc2.getSSID()));
+        if (isAtLeastR()) {
+            assertTrue(DIFFERENT_TEST_SSID.equals(nc2.getSsid()));
+        }
 
         nc1.setUids(uidRange(10, 13));
         nc2.set(nc1);  // Overwrites, as opposed to combineCapabilities

@@ -1553,6 +1553,7 @@ public class CarrierConfigManager {
     /**
      * The string is used to compare with operator name.
      * If it matches the pattern then show specific data icon.
+     * @hide
      */
     public static final String KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING =
             "show_carrier_data_icon_pattern_string";
@@ -2967,9 +2968,9 @@ public class CarrierConfigManager {
      * UE wants to display 5G_Plus icon for scenario#1, and 5G icon for scenario#2; otherwise not
      * define.
      * The configuration is: "connected_mmwave:5G_Plus,connected:5G"
+     * @hide
      */
-    public static final String KEY_5G_ICON_CONFIGURATION_STRING =
-            "5g_icon_configuration_string";
+    public static final String KEY_5G_ICON_CONFIGURATION_STRING = "5g_icon_configuration_string";
 
     /**
      * Timeout in seconds for displaying 5G icon, default value is 0 which means the timer is
@@ -2981,12 +2982,14 @@ public class CarrierConfigManager {
      *
      * If 5G is reacquired during this timer, the timer is canceled and restarted when 5G is next
      * lost. Allows us to momentarily lose 5G without blinking the icon.
+     * @hide
      */
     public static final String KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT =
             "5g_icon_display_grace_period_sec_int";
 
     /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
+     * @hide
      */
     public static final String KEY_5G_WATCHDOG_TIME_MS_LONG = "5g_watchdog_time_long";
 
@@ -3723,7 +3726,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_MAP_NON_NUMBER_TO_VOICEMAIL_BOOL, false);
-        sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, false);
+        sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, true);
         sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
         sDefaults.putBoolean(KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL, false);

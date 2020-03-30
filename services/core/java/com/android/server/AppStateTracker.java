@@ -54,7 +54,6 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
 import com.android.server.ForceAppStandbyTrackerProto.ExemptedPackage;
 import com.android.server.ForceAppStandbyTrackerProto.RunAnyInBackgroundRestrictedPackages;
@@ -62,6 +61,7 @@ import com.android.server.ForceAppStandbyTrackerProto.RunAnyInBackgroundRestrict
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Class to keep track of the information related to "force app standby", which includes:
@@ -416,12 +416,12 @@ public class AppStateTracker {
             }
             mStarted = true;
 
-            mIActivityManager = Preconditions.checkNotNull(injectIActivityManager());
-            mActivityManagerInternal = Preconditions.checkNotNull(injectActivityManagerInternal());
-            mAppOpsManager = Preconditions.checkNotNull(injectAppOpsManager());
-            mAppOpsService = Preconditions.checkNotNull(injectIAppOpsService());
-            mPowerManagerInternal = Preconditions.checkNotNull(injectPowerManagerInternal());
-            mUsageStatsManagerInternal = Preconditions.checkNotNull(
+            mIActivityManager = Objects.requireNonNull(injectIActivityManager());
+            mActivityManagerInternal = Objects.requireNonNull(injectActivityManagerInternal());
+            mAppOpsManager = Objects.requireNonNull(injectAppOpsManager());
+            mAppOpsService = Objects.requireNonNull(injectIAppOpsService());
+            mPowerManagerInternal = Objects.requireNonNull(injectPowerManagerInternal());
+            mUsageStatsManagerInternal = Objects.requireNonNull(
                     injectUsageStatsManagerInternal());
 
             mFlagsObserver = new FeatureFlagsObserver();

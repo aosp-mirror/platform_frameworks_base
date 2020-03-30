@@ -690,9 +690,9 @@ public final class LinkProperties implements Parcelable {
             route.getMtu());
     }
 
-    private int findRouteIndexByDestination(RouteInfo route) {
+    private int findRouteIndexByRouteKey(RouteInfo route) {
         for (int i = 0; i < mRoutes.size(); i++) {
-            if (mRoutes.get(i).isSameDestinationAs(route)) {
+            if (mRoutes.get(i).getRouteKey().equals(route.getRouteKey())) {
                 return i;
             }
         }
@@ -701,11 +701,11 @@ public final class LinkProperties implements Parcelable {
 
     /**
      * Adds a {@link RouteInfo} to this {@code LinkProperties}, if a {@link RouteInfo}
-     * with the same destination exists with different properties (e.g., different MTU),
-     * it will be updated. If the {@link RouteInfo} had an interface name set and
-     * that differs from the interface set for this {@code LinkProperties} an
-     * {@link IllegalArgumentException} will be thrown.  The proper
-     * course is to add either un-named or properly named {@link RouteInfo}.
+     * with the same {@link RouteInfo.RouteKey} with different properties
+     * (e.g., different MTU), it will be updated. If the {@link RouteInfo} had an
+     * interface name set and that differs from the interface set for this
+     * {@code LinkProperties} an {@link IllegalArgumentException} will be thrown.
+     * The proper course is to add either un-named or properly named {@link RouteInfo}.
      *
      * @param route A {@link RouteInfo} to add to this object.
      * @return {@code true} was added or updated, false otherwise.
@@ -719,7 +719,7 @@ public final class LinkProperties implements Parcelable {
         }
         route = routeWithInterface(route);
 
-        int i = findRouteIndexByDestination(route);
+        int i = findRouteIndexByRouteKey(route);
         if (i == -1) {
             // Route was not present. Add it.
             mRoutes.add(route);

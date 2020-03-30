@@ -18,7 +18,6 @@ package android.bluetooth;
 
 import android.Manifest;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
@@ -239,7 +238,7 @@ public class BluetoothPbap implements BluetoothProfile {
     @SystemApi
     @Override
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public @BtProfileState int getConnectionState(@Nullable BluetoothDevice device) {
+    public @BtProfileState int getConnectionState(@NonNull BluetoothDevice device) {
         log("getConnectionState: device=" + device);
         try {
             final IBluetoothPbap service = mService;

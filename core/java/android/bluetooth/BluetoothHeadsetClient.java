@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -442,6 +443,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @param device a remote device we want connect to
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise; upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED} intent.
+     *
+     * @hide
      */
     @UnsupportedAppUsage
     public boolean connect(BluetoothDevice device) {
@@ -466,6 +469,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @param device a remote device we want disconnect
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise; upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED} intent.
+     *
+     * @hide
      */
     @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
@@ -564,7 +569,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
         return setConnectionPolicy(device, BluetoothAdapter.priorityToConnectionPolicy(priority));
@@ -583,8 +588,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setConnectionPolicy(BluetoothDevice device,
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
         final IBluetoothHeadsetClient service =
@@ -634,7 +639,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public @ConnectionPolicy int getConnectionPolicy(BluetoothDevice device) {
+    public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         final IBluetoothHeadsetClient service =
                 getService();

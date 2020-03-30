@@ -27,6 +27,7 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.okhttp.internalandroidapi.Dns;
 import com.android.okhttp.internalandroidapi.HttpURLConnectionFactory;
 
@@ -64,15 +65,15 @@ public class Network implements Parcelable {
      * The unique id of the network.
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     public final int netId;
 
     // Objects used to perform per-network operations such as getSocketFactory
     // and openConnection, and a lock to protect access to them.
     private volatile NetworkBoundSocketFactory mNetworkBoundSocketFactory = null;
-    // mLock should be used to control write access to mUrlConnectionFactory.
-    // maybeInitUrlConnectionFactory() must be called prior to reading this field.
-    private volatile HttpURLConnectionFactory mUrlConnectionFactory;
+    // mUrlConnectionFactory is initialized lazily when it is first needed.
+    @GuardedBy("mLock")
+    private HttpURLConnectionFactory mUrlConnectionFactory;
     private final Object mLock = new Object();
 
     // Default connection pool values. These are evaluated at startup, just
@@ -167,6 +168,17 @@ public class Network implements Parcelable {
     @SystemApi
     public @NonNull Network getPrivateDnsBypassingCopy() {
         return new Network(netId, true);
+    }
+
+    /**
+     * Get the unique id of the network.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public int getNetId() {
+        return netId;
     }
 
     /**
@@ -284,36 +296,16 @@ public class Network implements Parcelable {
         return mNetworkBoundSocketFactory;
     }
 
-    // TODO: This creates a connection pool and host resolver for
-    // every Network object, instead of one for every NetId. This is
-    // suboptimal, because an app could potentially have more than one
-    // Network object for the same NetId, causing increased memory footprint
-    // and performance penalties due to lack of connection reuse (connection
-    // setup time, congestion window growth time, etc.).
-    //
-    // Instead, investigate only having one connection pool and host resolver
-    // for every NetId, perhaps by using a static HashMap of NetIds to
-    // connection pools and host resolvers. The tricky part is deciding when
-    // to remove a map entry; a WeakHashMap shouldn't be used because whether
-    // a Network is referenced doesn't correlate with whether a new Network
-    // will be instantiated in the near future with the same NetID. A good
-    // solution would involve purging empty (or when all connections are timed
-    // out) ConnectionPools.
-    private void maybeInitUrlConnectionFactory() {
-        synchronized (mLock) {
-            if (mUrlConnectionFactory == null) {
-                // Set configuration on the HttpURLConnectionFactory that will be good for all
-                // connections created by this Network. Configuration that might vary is left
-                // until openConnection() and passed as arguments.
-                Dns dnsLookup = hostname -> Arrays.asList(Network.this.getAllByName(hostname));
-                HttpURLConnectionFactory urlConnectionFactory = new HttpURLConnectionFactory();
-                urlConnectionFactory.setDns(dnsLookup); // Let traffic go via dnsLookup
-                // A private connection pool just for this Network.
-                urlConnectionFactory.setNewConnectionPool(httpMaxConnections,
-                        httpKeepAliveDurationMs, TimeUnit.MILLISECONDS);
-                mUrlConnectionFactory = urlConnectionFactory;
-            }
-        }
+    private static HttpURLConnectionFactory createUrlConnectionFactory(Dns dnsLookup) {
+        // Set configuration on the HttpURLConnectionFactory that will be good for all
+        // connections created by this Network. Configuration that might vary is left
+        // until openConnection() and passed as arguments.
+        HttpURLConnectionFactory urlConnectionFactory = new HttpURLConnectionFactory();
+        urlConnectionFactory.setDns(dnsLookup); // Let traffic go via dnsLookup
+        // A private connection pool just for this Network.
+        urlConnectionFactory.setNewConnectionPool(httpMaxConnections,
+                httpKeepAliveDurationMs, TimeUnit.MILLISECONDS);
+        return urlConnectionFactory;
     }
 
     /**
@@ -354,9 +346,31 @@ public class Network implements Parcelable {
      */
     public URLConnection openConnection(URL url, java.net.Proxy proxy) throws IOException {
         if (proxy == null) throw new IllegalArgumentException("proxy is null");
-        maybeInitUrlConnectionFactory();
+        // TODO: This creates a connection pool and host resolver for
+        // every Network object, instead of one for every NetId. This is
+        // suboptimal, because an app could potentially have more than one
+        // Network object for the same NetId, causing increased memory footprint
+        // and performance penalties due to lack of connection reuse (connection
+        // setup time, congestion window growth time, etc.).
+        //
+        // Instead, investigate only having one connection pool and host resolver
+        // for every NetId, perhaps by using a static HashMap of NetIds to
+        // connection pools and host resolvers. The tricky part is deciding when
+        // to remove a map entry; a WeakHashMap shouldn't be used because whether
+        // a Network is referenced doesn't correlate with whether a new Network
+        // will be instantiated in the near future with the same NetID. A good
+        // solution would involve purging empty (or when all connections are timed
+        // out) ConnectionPools.
+        final HttpURLConnectionFactory urlConnectionFactory;
+        synchronized (mLock) {
+            if (mUrlConnectionFactory == null) {
+                Dns dnsLookup = hostname -> Arrays.asList(getAllByName(hostname));
+                mUrlConnectionFactory = createUrlConnectionFactory(dnsLookup);
+            }
+            urlConnectionFactory = mUrlConnectionFactory;
+        }
         SocketFactory socketFactory = getSocketFactory();
-        return mUrlConnectionFactory.openConnection(url, socketFactory, proxy);
+        return urlConnectionFactory.openConnection(url, socketFactory, proxy);
     }
 
     /**

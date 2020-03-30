@@ -38,6 +38,7 @@ import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_FAILED;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STARTED;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STOPPED;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
+import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
@@ -209,7 +210,6 @@ public class TetheringTest {
     private Tethering mTethering;
     private PhoneStateListener mPhoneStateListener;
     private InterfaceConfigurationParcel mInterfaceConfiguration;
-
 
     private class TestContext extends BroadcastInterceptingContext {
         TestContext(Context base) {
@@ -485,6 +485,7 @@ public class TetheringTest {
         mServiceContext.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(ACTION_TETHER_STATE_CHANGED));
         mTethering = makeTethering();
+        mTethering.startStateMachineUpdaters();
         verify(mStatsManager, times(1)).registerNetworkStatsProvider(anyString(), any());
         verify(mNetd).registerUnsolicitedEventListener(any());
         final ArgumentCaptor<PhoneStateListener> phoneListenerCaptor =
@@ -1073,13 +1074,15 @@ public class TetheringTest {
         when(mUserManager.getUserRestrictions()).thenReturn(newRestrictions);
 
         final Tethering.UserRestrictionActionListener ural =
-                new Tethering.UserRestrictionActionListener(mUserManager, mockTethering);
+                new Tethering.UserRestrictionActionListener(
+                        mUserManager, mockTethering, mNotificationUpdater);
         ural.mDisallowTethering = currentDisallow;
 
         ural.onUserRestrictionsChanged();
 
-        verify(mockTethering, times(expectedInteractionsWithShowNotification))
-                .untetherAll();
+        verify(mNotificationUpdater, times(expectedInteractionsWithShowNotification))
+                .notifyTetheringDisabledByRestriction();
+        verify(mockTethering, times(expectedInteractionsWithShowNotification)).untetherAll();
     }
 
     @Test
@@ -1087,7 +1090,7 @@ public class TetheringTest {
         final String[] emptyActiveIfacesList = new String[]{};
         final boolean currDisallow = false;
         final boolean nextDisallow = true;
-        final int expectedInteractionsWithShowNotification = 0;
+        final int expectedInteractionsWithShowNotification = 1;
 
         runUserRestrictionsChange(currDisallow, nextDisallow, emptyActiveIfacesList,
                 expectedInteractionsWithShowNotification);
@@ -1399,6 +1402,7 @@ public class TetheringTest {
         mPhoneStateListener.onActiveDataSubscriptionIdChanged(fakeSubId);
         final TetheringConfiguration newConfig = mTethering.getTetheringConfiguration();
         assertEquals(fakeSubId, newConfig.activeDataSubId);
+        verify(mNotificationUpdater, times(1)).onActiveDataSubscriptionIdChanged(eq(fakeSubId));
     }
 
     @Test
@@ -1651,10 +1655,13 @@ public class TetheringTest {
     }
 
     @Test
-    public void testRequestStaticServerIp() throws Exception {
-        final LinkAddress serverLinkAddr = new LinkAddress("192.168.20.1/24");
-        final LinkAddress clientLinkAddr = new LinkAddress("192.168.20.42/24");
-        final String serverAddr = "192.168.20.1";
+    public void testRequestStaticIp() throws Exception {
+        final LinkAddress serverLinkAddr = new LinkAddress("192.168.0.123/24");
+        final LinkAddress clientLinkAddr = new LinkAddress("192.168.0.42/24");
+        final String serverAddr = "192.168.0.123";
+        final int clientAddrParceled = 0xc0a8002a;
+        final ArgumentCaptor<DhcpServingParamsParcel> dhcpParamsCaptor =
+                ArgumentCaptor.forClass(DhcpServingParamsParcel.class);
         mTethering.startTethering(createTetheringRequestParcel(TETHERING_USB,
                   serverLinkAddr, clientLinkAddr), null);
         mLooper.dispatchAll();
@@ -1663,8 +1670,12 @@ public class TetheringTest {
         sendUsbBroadcast(true, true, true, TETHERING_USB);
         mLooper.dispatchAll();
         verify(mNetd).interfaceSetCfg(argThat(cfg -> serverAddr.equals(cfg.ipv4Addr)));
-
-        // TODO: test static client address.
+        verify(mIpServerDependencies, times(1)).makeDhcpServer(any(), dhcpParamsCaptor.capture(),
+                any());
+        final DhcpServingParamsParcel params = dhcpParamsCaptor.getValue();
+        assertEquals(serverAddr, intToInet4AddressHTH(params.serverAddr).getHostAddress());
+        assertEquals(24, params.serverAddrPrefixLength);
+        assertEquals(clientAddrParceled, params.clientAddr);
     }
 
     // TODO: Test that a request for hotspot mode doesn't interfere with an

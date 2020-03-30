@@ -49,7 +49,8 @@ public class ImsUtListener {
      * {@link ImsSsInfo#CLIR_STATUS_TEMPORARILY_RESTRICTED}, and
      * {@link ImsSsInfo#CLIR_STATUS_TEMPORARILY_ALLOWED}.
      * @deprecated Use {@link #onLineIdentificationSupplementaryServiceResponse(int, ImsSsInfo)}
-     * instead.
+     * instead, this key has been added for backwards compatibility with older proprietary
+     * implementations only and is being phased out.
      */
     @Deprecated
     public static final String BUNDLE_KEY_CLIR = "queryClir";
@@ -60,7 +61,8 @@ public class ImsUtListener {
      * response. The value will be an instance of {@link ImsSsInfo}, which contains the response to
      * the query.
      * @deprecated Use {@link #onLineIdentificationSupplementaryServiceResponse(int, ImsSsInfo)}
-     * instead.
+     * instead, this key has been added for backwards compatibility with older proprietary
+     * implementations only and is being phased out.
      */
     @Deprecated
     public static final String BUNDLE_KEY_SSINFO = "imsSsInfo";
@@ -123,7 +125,7 @@ public class ImsUtListener {
         try {
             mServiceInterface.lineIdentificationSupplementaryServiceResponse(id, configuration);
         } catch (RemoteException e) {
-            Log.w(LOG_TAG, "onLineIdentificationSupplementaryServicesResponse: remote exception");
+            e.rethrowFromSystemServer();
         }
     }
 

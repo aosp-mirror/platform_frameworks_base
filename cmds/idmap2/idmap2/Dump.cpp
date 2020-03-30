@@ -39,7 +39,7 @@ using android::idmap2::Unit;
 Result<Unit> Dump(const std::vector<std::string>& args) {
   SYSTRACE << "Dump " << args;
   std::string idmap_path;
-  bool verbose;
+  bool verbose = false;
 
   const CommandLineOptions opts =
       CommandLineOptions("idmap2 dump")
