@@ -19,7 +19,7 @@ package com.android.keyguard;
 
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_ENABLE;
-import static android.telephony.SubscriptionManager.NAME_SOURCE_DEFAULT;
+import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
@@ -79,14 +79,14 @@ public class CarrierTextControllerTest extends SysuiTestCase {
     private static final String TEST_CARRIER_2 = "TEST_CARRIER_2";
     private static final int TEST_CARRIER_ID = 1;
     private static final SubscriptionInfo TEST_SUBSCRIPTION = new SubscriptionInfo(0, "", 0,
-            TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_DEFAULT, 0xFFFFFF, "",
+            TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
             DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", false, null,
             TEST_CARRIER_ID, 0);
     private static final SubscriptionInfo TEST_SUBSCRIPTION_NULL = new SubscriptionInfo(0, "", 0,
-            TEST_CARRIER, null, NAME_SOURCE_DEFAULT, 0xFFFFFF, "", DATA_ROAMING_DISABLE,
+            TEST_CARRIER, null, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "", DATA_ROAMING_DISABLE,
             null, null, null, null, false, null, "");
     private static final SubscriptionInfo TEST_SUBSCRIPTION_ROAMING = new SubscriptionInfo(0, "", 0,
-            TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_DEFAULT, 0xFFFFFF, "",
+            TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
             DATA_ROAMING_ENABLE, null, null, null, null, false, null, "");
     @Mock
     private WifiManager mWifiManager;

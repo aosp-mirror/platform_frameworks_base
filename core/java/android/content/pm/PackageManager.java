@@ -1424,7 +1424,7 @@ public abstract class PackageManager {
 
     /**
      * Installation failed return code: a new staged session was attempted to be committed while
-     * there is already one in-progress.
+     * there is already one in-progress or new session has package that is already staged.
      *
      * @hide
      */

@@ -2204,7 +2204,8 @@ interface ITelephony {
      * Enqueue a pending sms Consumer, which will answer with the user specified selection for an
      * outgoing SmsManager operation.
      */
-    oneway void enqueueSmsPickResult(String callingPackage, IIntegerConsumer subIdResult);
+    oneway void enqueueSmsPickResult(String callingPackage, String callingAttributeTag,
+        IIntegerConsumer subIdResult);
 
     /**
      * Returns the MMS user agent.

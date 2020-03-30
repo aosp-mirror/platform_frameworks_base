@@ -916,23 +916,11 @@ public final class BluetoothAdapter {
         if (!isBleScanAlwaysAvailable()) {
             return false;
         }
-
-        int state = getLeState();
-        if (state == BluetoothAdapter.STATE_ON || state == BluetoothAdapter.STATE_BLE_ON) {
-            String packageName = ActivityThread.currentPackageName();
-            if (DBG) {
-                Log.d(TAG, "disableBLE(): de-registering " + packageName);
-            }
-            try {
-                mManagerService.updateBleAppCount(mToken, false, packageName);
-            } catch (RemoteException e) {
-                Log.e(TAG, "", e);
-            }
-            return true;
-        }
-
-        if (DBG) {
-            Log.d(TAG, "disableBLE(): Already disabled");
+        String packageName = ActivityThread.currentPackageName();
+        try {
+            return mManagerService.disableBle(packageName, mToken);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
         }
         return false;
     }
@@ -973,20 +961,9 @@ public final class BluetoothAdapter {
         if (!isBleScanAlwaysAvailable()) {
             return false;
         }
-
+        String packageName = ActivityThread.currentPackageName();
         try {
-            String packageName = ActivityThread.currentPackageName();
-            mManagerService.updateBleAppCount(mToken, true, packageName);
-            if (isLeEnabled()) {
-                if (DBG) {
-                    Log.d(TAG, "enableBLE(): Bluetooth already enabled");
-                }
-                return true;
-            }
-            if (DBG) {
-                Log.d(TAG, "enableBLE(): Calling enable");
-            }
-            return mManagerService.enable(packageName);
+            return mManagerService.enableBle(packageName, mToken);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1214,7 +1191,7 @@ public final class BluetoothAdapter {
      * @return true to indicate that the config file was successfully cleared
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean factoryReset() {
         try {
@@ -1506,8 +1483,9 @@ public final class BluetoothAdapter {
      * @return true if the scan mode was set, false otherwise
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage(publicAlternatives = "Use {@link #ACTION_REQUEST_DISCOVERABLE}, which "
+            + "shows UI that confirms the user wants to go into discoverable mode.")
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean setScanMode(@ScanMode int mode, long durationMillis) {
         if (getState() != STATE_ON) {
             return false;
@@ -1555,8 +1533,8 @@ public final class BluetoothAdapter {
      * @return true if the scan mode was set, false otherwise
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean setScanMode(@ScanMode int mode) {
         if (getState() != STATE_ON) {
             return false;
@@ -1620,7 +1598,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public long getDiscoveryEndMillis() {
         try {
             mServiceLock.readLock().lock();
@@ -1872,7 +1850,6 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean connectAllEnabledProfiles(@NonNull BluetoothDevice device) {
         try {
@@ -1901,7 +1878,6 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean disconnectAllEnabledProfiles(@NonNull BluetoothDevice device) {
         try {

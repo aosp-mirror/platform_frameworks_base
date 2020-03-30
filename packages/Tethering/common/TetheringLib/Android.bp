@@ -60,6 +60,7 @@ java_library {
     hostdex: true, // for hiddenapi check
     visibility: ["//frameworks/base/packages/Tethering:__subpackages__"],
     apex_available: ["com.android.tethering"],
+    permitted_packages: ["android.net"],
 }
 
 stubs_defaults {
@@ -125,17 +126,17 @@ droidstubs {
 java_library {
     name: "framework-tethering-stubs-publicapi",
     srcs: [":framework-tethering-stubs-srcs-publicapi"],
-    sdk_version: "current",
+    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
 }
 
 java_library {
     name: "framework-tethering-stubs-systemapi",
     srcs: [":framework-tethering-stubs-srcs-systemapi"],
-    sdk_version: "system_current",
+    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
 }
 
 java_library {
     name: "framework-tethering-stubs-module_libs_api",
     srcs: [":framework-tethering-stubs-srcs-module_libs_api"],
-    sdk_version: "module_current",
+    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
 }

@@ -571,9 +571,8 @@ public class TetheringManager {
             /**
              * Configure tethering with static IPv4 assignment.
              *
-             * The clientAddress must be in the localIPv4Address prefix. A DHCP server will be
-             * started, but will only be able to offer the client address. The two addresses must
-             * be in the same prefix.
+             * A DHCP server will be started, but will only be able to offer the client address.
+             * The two addresses must be in the same prefix.
              *
              * @param localIPv4Address The preferred local IPv4 link address to use.
              * @param clientAddress The static client address.
@@ -584,10 +583,7 @@ public class TetheringManager {
                     @NonNull final LinkAddress clientAddress) {
                 Objects.requireNonNull(localIPv4Address);
                 Objects.requireNonNull(clientAddress);
-                if (localIPv4Address.getPrefixLength() != clientAddress.getPrefixLength()
-                        || !localIPv4Address.isIpv4() || !clientAddress.isIpv4()
-                        || !new IpPrefix(localIPv4Address.toString()).equals(
-                        new IpPrefix(clientAddress.toString()))) {
+                if (!checkStaticAddressConfiguration(localIPv4Address, clientAddress)) {
                     throw new IllegalArgumentException("Invalid server or client addresses");
                 }
 
@@ -620,33 +616,53 @@ public class TetheringManager {
             public TetheringRequest build() {
                 return new TetheringRequest(mBuilderParcel);
             }
+        }
 
-            @Nullable
-            public LinkAddress getLocalIpv4Address() {
-                return mBuilderParcel.localIPv4Address;
-            }
+        /**
+         * Get the local IPv4 address, if one was configured with
+         * {@link Builder#setStaticIpv4Addresses}.
+         */
+        @Nullable
+        public LinkAddress getLocalIpv4Address() {
+            return mRequestParcel.localIPv4Address;
+        }
 
-            /** Get static client address. */
-            @Nullable
-            public LinkAddress getClientStaticIpv4Address() {
-                return mBuilderParcel.staticClientAddress;
-            }
+        /**
+         * Get the static IPv4 address of the client, if one was configured with
+         * {@link Builder#setStaticIpv4Addresses}.
+         */
+        @Nullable
+        public LinkAddress getClientStaticIpv4Address() {
+            return mRequestParcel.staticClientAddress;
+        }
 
-            /** Get tethering type. */
-            @TetheringType
-            public int getTetheringType() {
-                return mBuilderParcel.tetheringType;
-            }
+        /** Get tethering type. */
+        @TetheringType
+        public int getTetheringType() {
+            return mRequestParcel.tetheringType;
+        }
 
-            /** Check if exempt from entitlement check. */
-            public boolean isExemptFromEntitlementCheck() {
-                return mBuilderParcel.exemptFromEntitlementCheck;
-            }
+        /** Check if exempt from entitlement check. */
+        public boolean isExemptFromEntitlementCheck() {
+            return mRequestParcel.exemptFromEntitlementCheck;
+        }
 
-            /** Check if show entitlement ui.  */
-            public boolean getShouldShowEntitlementUi() {
-                return mBuilderParcel.showProvisioningUi;
-            }
+        /** Check if show entitlement ui.  */
+        public boolean getShouldShowEntitlementUi() {
+            return mRequestParcel.showProvisioningUi;
+        }
+
+        /**
+         * Check whether the two addresses are ipv4 and in the same prefix.
+         * @hide
+         */
+        public static boolean checkStaticAddressConfiguration(
+                @NonNull final LinkAddress localIPv4Address,
+                @NonNull final LinkAddress clientAddress) {
+            return localIPv4Address.getPrefixLength() == clientAddress.getPrefixLength()
+                    && localIPv4Address.isIpv4() && clientAddress.isIpv4()
+                    && new IpPrefix(localIPv4Address.toString()).equals(
+                    new IpPrefix(clientAddress.toString()));
         }
 
         /**
@@ -732,11 +748,13 @@ public class TetheringManager {
      * @param type The tethering type, on of the {@code TetheringManager#TETHERING_*} constants.
      * @param executor {@link Executor} to specify the thread upon which the callback of
      *         TetheringRequest will be invoked.
+     * @hide
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.TETHER_PRIVILEGED,
             android.Manifest.permission.WRITE_SETTINGS
     })
+    @SystemApi(client = MODULE_LIBRARIES)
     public void startTethering(int type, @NonNull final Executor executor,
             @NonNull final StartTetheringCallback callback) {
         startTethering(new TetheringRequest.Builder(type).build(), executor, callback);

@@ -1934,7 +1934,7 @@ class StorageManagerService extends IStorageManager.Stub
     public void setVolumeNickname(String fsUuid, String nickname) {
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
-        Preconditions.checkNotNull(fsUuid);
+        Objects.requireNonNull(fsUuid);
         synchronized (mLock) {
             final VolumeRecord rec = mRecords.get(fsUuid);
             rec.nickname = nickname;
@@ -1947,7 +1947,7 @@ class StorageManagerService extends IStorageManager.Stub
     public void setVolumeUserFlags(String fsUuid, int flags, int mask) {
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
-        Preconditions.checkNotNull(fsUuid);
+        Objects.requireNonNull(fsUuid);
         synchronized (mLock) {
             final VolumeRecord rec = mRecords.get(fsUuid);
             rec.userFlags = (rec.userFlags & ~mask) | (flags & mask);
@@ -1960,7 +1960,7 @@ class StorageManagerService extends IStorageManager.Stub
     public void forgetVolume(String fsUuid) {
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
-        Preconditions.checkNotNull(fsUuid);
+        Objects.requireNonNull(fsUuid);
 
         synchronized (mLock) {
             final VolumeRecord rec = mRecords.remove(fsUuid);
@@ -2361,7 +2361,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public String getMountedObbPath(String rawPath) {
-        Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
+        Objects.requireNonNull(rawPath, "rawPath cannot be null");
 
         warnOnNotMounted();
 
@@ -2379,7 +2379,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public boolean isObbMounted(String rawPath) {
-        Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
+        Objects.requireNonNull(rawPath, "rawPath cannot be null");
         synchronized (mObbMounts) {
             return mObbPathToStateMap.containsKey(rawPath);
         }
@@ -2388,10 +2388,10 @@ class StorageManagerService extends IStorageManager.Stub
     @Override
     public void mountObb(String rawPath, String canonicalPath, String key,
             IObbActionListener token, int nonce, ObbInfo obbInfo) {
-        Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
-        Preconditions.checkNotNull(canonicalPath, "canonicalPath cannot be null");
-        Preconditions.checkNotNull(token, "token cannot be null");
-        Preconditions.checkNotNull(obbInfo, "obbIfno cannot be null");
+        Objects.requireNonNull(rawPath, "rawPath cannot be null");
+        Objects.requireNonNull(canonicalPath, "canonicalPath cannot be null");
+        Objects.requireNonNull(token, "token cannot be null");
+        Objects.requireNonNull(obbInfo, "obbIfno cannot be null");
 
         final int callingUid = Binder.getCallingUid();
         final ObbState obbState = new ObbState(rawPath, canonicalPath,
@@ -2405,7 +2405,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public void unmountObb(String rawPath, boolean force, IObbActionListener token, int nonce) {
-        Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
+        Objects.requireNonNull(rawPath, "rawPath cannot be null");
 
         final ObbState existingState;
         synchronized (mObbMounts) {

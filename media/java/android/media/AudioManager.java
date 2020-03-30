@@ -4213,6 +4213,7 @@ public class AudioManager {
      * {@hide}
      */
     @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void setWiredDeviceConnectionState(int type, int state, String address, String name) {
         final IAudioService service = getService();
         try {

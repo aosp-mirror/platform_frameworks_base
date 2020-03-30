@@ -586,21 +586,21 @@ public class UpstreamNetworkMonitor {
      */
     @VisibleForTesting
     public static NetworkCapabilities networkCapabilitiesForType(int type) {
-        final NetworkCapabilities nc = new NetworkCapabilities();
+        final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
 
         // Map from type to transports.
         final int notFound = -1;
         final int transport = sLegacyTypeToTransport.get(type, notFound);
         Preconditions.checkArgument(transport != notFound, "unknown legacy type: " + type);
-        nc.addTransportType(transport);
+        builder.addTransportType(transport);
 
         if (type == TYPE_MOBILE_DUN) {
-            nc.addCapability(NetworkCapabilities.NET_CAPABILITY_DUN);
+            builder.addCapability(NetworkCapabilities.NET_CAPABILITY_DUN);
             // DUN is restricted network, see NetworkCapabilities#FORCE_RESTRICTED_CAPABILITIES.
-            nc.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+            builder.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
         } else {
-            nc.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+            builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         }
-        return nc;
+        return builder.build();
     }
 }

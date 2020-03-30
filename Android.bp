@@ -524,42 +524,9 @@ java_library {
     ],
 }
 
-java_library {
-    name: "framework-annotation-proc",
-    defaults: ["framework-defaults"],
-    srcs: [":framework-all-sources"],
-    libs: [
-        "app-compat-annotations",
-        "unsupportedappusage",
-    ],
-    installable: false,
-    plugins: [
-        "compat-changeid-annotation-processor",
-    ],
-}
-
 platform_compat_config {
-    name: "framework-platform-compat-config",
-    src: ":framework-annotation-proc",
-}
-
-// A library including just UnsupportedAppUsage.java classes.
-//
-// Provided for target so that libraries can use it without depending on
-// the whole of framework or the core platform API.
-//
-// Built for host so that the annotation processor can also use this annotation.
-java_library {
-    name: "unsupportedappusage-annotation",
-    host_supported: true,
-    srcs: [
-        "core/java/android/annotation/IntDef.java",
-    ],
-    static_libs: [
-        "art.module.api.annotations",
-    ],
-
-    sdk_version: "core_current",
+   name: "framework-platform-compat-config",
+   src: ":framework-minus-apex",
 }
 
 // A temporary build target that is conditionally included on the bootclasspath if
@@ -646,6 +613,7 @@ filegroup {
     srcs: [
         "core/java/android/annotation/StringDef.java",
         "core/java/android/net/annotations/PolicyDirection.java",
+        "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
@@ -1019,16 +987,6 @@ aidl_mapping {
     name: "framework-aidl-mappings",
     srcs: [":framework-all-sources"],
     output: "framework-aidl-mappings.txt",
-}
-
-genrule {
-    name: "framework-annotation-proc-index",
-    srcs: [":framework-annotation-proc"],
-    cmd: "unzip -qp $(in) unsupportedappusage/unsupportedappusage_index.csv > $(out)",
-    out: ["unsupportedappusage_index.csv"],
-    dist: {
-        targets: ["droidcore"],
-    },
 }
 
 filegroup {

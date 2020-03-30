@@ -226,7 +226,7 @@ public class SubscriptionInfo implements Parcelable {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
                 roaming, icon, mcc, mnc, countryIso, isEmbedded, nativeAccessRules, cardString, -1,
                 false, null, false, TelephonyManager.UNKNOWN_CARRIER_ID,
-                SubscriptionManager.PROFILE_CLASS_DEFAULT,
+                SubscriptionManager.PROFILE_CLASS_UNSET,
                 SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM, null, null, true);
     }
 

@@ -56,10 +56,6 @@ java_library_static {
         "dnsresolver_aidl_interface-V2-java",
         "netd_event_listener_interface-java",
     ],
-
-    plugins: [
-        "compat-changeid-annotation-processor",
-    ],
 }
 
 java_genrule {
