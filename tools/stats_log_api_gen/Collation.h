@@ -110,7 +110,16 @@ struct Annotation {
     }
 };
 
-using FieldNumberToAnnotations = map<int, set<shared_ptr<Annotation>>>;
+struct SharedComparator {
+    template <typename T>
+    inline bool operator()(const shared_ptr<T>& lhs, const shared_ptr<T>& rhs) const {
+        return (*lhs) < (*rhs);
+    }
+};
+
+using AnnotationSet = set<shared_ptr<Annotation>, SharedComparator>;
+
+using FieldNumberToAnnotations = map<int, AnnotationSet>;
 
 /**
  * The name and type for an atom field.
@@ -169,11 +178,19 @@ struct AtomDecl {
     }
 };
 
+using AtomDeclSet = set<shared_ptr<AtomDecl>, SharedComparator>;
+
+// Maps a field number to a set of atoms that have annotation(s) for their field with that field
+// number.
+using FieldNumberToAtomDeclSet = map<int, AtomDeclSet>;
+
+using SignatureInfoMap = map<vector<java_type_t>, FieldNumberToAtomDeclSet>;
+
 struct Atoms {
-    map<vector<java_type_t>, FieldNumberToAnnotations> signatureInfoMap;
-    set<AtomDecl> decls;
-    set<AtomDecl> non_chained_decls;
-    map<vector<java_type_t>, FieldNumberToAnnotations> nonChainedSignatureInfoMap;
+    SignatureInfoMap signatureInfoMap;
+    AtomDeclSet decls;
+    AtomDeclSet non_chained_decls;
+    SignatureInfoMap nonChainedSignatureInfoMap;
     int maxPushedAtomId;
 };
 
