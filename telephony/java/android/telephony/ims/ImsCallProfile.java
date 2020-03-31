@@ -654,7 +654,7 @@ public final class ImsCallProfile implements Parcelable {
         return "{ serviceType=" + mServiceType
                 + ", callType=" + mCallType
                 + ", restrictCause=" + mRestrictCause
-                + ", mediaProfile=" + mMediaProfile.toString()
+                + ", mediaProfile=" + (mMediaProfile != null ? mMediaProfile.toString() : "null")
                 + ", emergencyServiceCategories=" + mEmergencyServiceCategories
                 + ", emergencyUrns=" + mEmergencyUrns
                 + ", emergencyCallRouting=" + mEmergencyCallRouting
