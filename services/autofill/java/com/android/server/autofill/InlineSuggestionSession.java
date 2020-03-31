@@ -113,9 +113,16 @@ final class InlineSuggestionSession {
         mLock = lock;
         mImeStatusListener = new ImeStatusListener() {
             @Override
-            public void onInputMethodStartInputView(AutofillId imeFieldId) {
+            public void onInputMethodStartInput(AutofillId imeFieldId) {
                 synchronized (mLock) {
                     mImeFieldId = imeFieldId;
+                    mImeInputViewStarted = false;
+                }
+            }
+
+            @Override
+            public void onInputMethodStartInputView() {
+                synchronized (mLock) {
                     mImeInputViewStarted = true;
                     AutofillResponse pendingAutofillResponse = mPendingAutofillResponse;
                     if (pendingAutofillResponse != null
@@ -129,10 +136,16 @@ final class InlineSuggestionSession {
             }
 
             @Override
-            public void onInputMethodFinishInputView(AutofillId imeFieldId) {
+            public void onInputMethodFinishInputView() {
                 synchronized (mLock) {
-                    mImeFieldId = imeFieldId;
                     mImeInputViewStarted = false;
+                }
+            }
+
+            @Override
+            public void onInputMethodFinishInput() {
+                synchronized (mLock) {
+                    mImeFieldId = null;
                 }
             }
         };
@@ -155,7 +168,7 @@ final class InlineSuggestionSession {
             mInputMethodManagerInternal.onCreateInlineSuggestionsRequest(
                     mUserId,
                     new InlineSuggestionsRequestInfo(mComponentName, autofillId, new Bundle()),
-                    new InlineSuggestionsRequestCallbackImpl(mPendingImeResponse,
+                    new InlineSuggestionsRequestCallbackImpl(autofillId, mPendingImeResponse,
                             mImeStatusListener, requestConsumer, mHandler, mLock));
         }
     }
@@ -244,6 +257,7 @@ final class InlineSuggestionSession {
             extends IInlineSuggestionsRequestCallback.Stub {
 
         private final Object mLock;
+        private final AutofillId mAutofillId;
         @GuardedBy("mLock")
         private final CompletableFuture<ImeResponse> mResponse;
         @GuardedBy("mLock")
@@ -252,10 +266,12 @@ final class InlineSuggestionSession {
         private final Handler mHandler;
         private final Runnable mTimeoutCallback;
 
-        private InlineSuggestionsRequestCallbackImpl(CompletableFuture<ImeResponse> response,
+        private InlineSuggestionsRequestCallbackImpl(AutofillId autofillId,
+                CompletableFuture<ImeResponse> response,
                 ImeStatusListener imeStatusListener,
                 Consumer<InlineSuggestionsRequest> requestConsumer,
                 Handler handler, Object lock) {
+            mAutofillId = autofillId;
             mResponse = response;
             mImeStatusListener = imeStatusListener;
             mRequestConsumer = requestConsumer;
@@ -290,18 +306,9 @@ final class InlineSuggestionSession {
         @BinderThread
         @Override
         public void onInlineSuggestionsRequest(InlineSuggestionsRequest request,
-                IInlineSuggestionsResponseCallback callback, AutofillId imeFieldId,
-                boolean inputViewStarted) {
-            if (sDebug) {
-                Log.d(TAG,
-                        "onInlineSuggestionsRequest() received: " + request + ", inputViewStarted="
-                                + inputViewStarted + ", imeFieldId=" + imeFieldId);
-            }
-            if (inputViewStarted) {
-                mImeStatusListener.onInputMethodStartInputView(imeFieldId);
-            } else {
-                mImeStatusListener.onInputMethodFinishInputView(imeFieldId);
-            }
+                IInlineSuggestionsResponseCallback callback) {
+            if (sDebug) Log.d(TAG, "onInlineSuggestionsRequest() received: " + request);
+            mImeStatusListener.onInputMethodStartInput(mAutofillId);
             if (request != null && callback != null) {
                 completeIfNot(new ImeResponse(request, callback));
             } else {
@@ -309,25 +316,50 @@ final class InlineSuggestionSession {
             }
         }
 
-        @BinderThread
         @Override
-        public void onInputMethodStartInputView(AutofillId imeFieldId) {
-            if (sDebug) Log.d(TAG, "onInputMethodStartInputView() received on " + imeFieldId);
-            mImeStatusListener.onInputMethodStartInputView(imeFieldId);
+        public void onInputMethodStartInput(AutofillId imeFieldId) throws RemoteException {
+            if (sDebug) Log.d(TAG, "onInputMethodStartInput() received on " + imeFieldId);
+            mImeStatusListener.onInputMethodStartInput(imeFieldId);
+        }
+
+        @Override
+        public void onInputMethodShowInputRequested(boolean requestResult) throws RemoteException {
+            if (sDebug) {
+                Log.d(TAG, "onInputMethodShowInputRequested() received: " + requestResult);
+            }
+            // TODO(b/151123764): use this signal to adjust the timeout on Autofill side waiting for
+            //  IME to show.
         }
 
         @BinderThread
         @Override
-        public void onInputMethodFinishInputView(AutofillId imeFieldId) {
-            if (sDebug) Log.d(TAG, "onInputMethodFinishInputView() received on " + imeFieldId);
-            mImeStatusListener.onInputMethodFinishInputView(imeFieldId);
+        public void onInputMethodStartInputView() {
+            if (sDebug) Log.d(TAG, "onInputMethodStartInputView() received");
+            mImeStatusListener.onInputMethodStartInputView();
+        }
+
+        @BinderThread
+        @Override
+        public void onInputMethodFinishInputView() {
+            if (sDebug) Log.d(TAG, "onInputMethodFinishInputView() received");
+            mImeStatusListener.onInputMethodFinishInputView();
+        }
+
+        @Override
+        public void onInputMethodFinishInput() throws RemoteException {
+            if (sDebug) Log.d(TAG, "onInputMethodFinishInput() received");
+            mImeStatusListener.onInputMethodFinishInput();
         }
     }
 
     private interface ImeStatusListener {
-        void onInputMethodStartInputView(AutofillId imeFieldId);
+        void onInputMethodStartInput(AutofillId imeFieldId);
 
-        void onInputMethodFinishInputView(AutofillId imeFieldId);
+        void onInputMethodStartInputView();
+
+        void onInputMethodFinishInputView();
+
+        void onInputMethodFinishInput();
     }
 
     /**
