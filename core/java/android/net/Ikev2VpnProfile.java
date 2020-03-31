@@ -562,7 +562,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         @NonNull private List<String> mAllowedAlgorithms = new ArrayList<>();
         private boolean mIsBypassable = false;
         private boolean mIsMetered = true;
-        private int mMaxMtu = 1360;
+        private int mMaxMtu = PlatformVpnProfile.MAX_MTU_DEFAULT;
 
         /**
          * Creates a new builder with the basic parameters of an IKEv2/IPsec VPN.
