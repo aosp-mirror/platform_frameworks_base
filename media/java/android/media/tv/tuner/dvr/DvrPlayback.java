@@ -21,12 +21,15 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
+import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.Tuner.Result;
+import android.media.tv.tuner.TunerUtils;
 import android.media.tv.tuner.filter.Filter;
 import android.os.ParcelFileDescriptor;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Digital Video Record (DVR) class which provides playback control on Demux's input buffer.
@@ -70,6 +73,8 @@ public class DvrPlayback implements AutoCloseable {
     public static final int PLAYBACK_STATUS_FULL = Constants.PlaybackStatus.SPACE_FULL;
 
     private long mNativeContext;
+    private OnPlaybackStatusChangedListener mListener;
+    private Executor mExecutor;
 
     private native int nativeAttachFilter(Filter filter);
     private native int nativeDetachFilter(Filter filter);
@@ -83,6 +88,19 @@ public class DvrPlayback implements AutoCloseable {
     private native long nativeRead(byte[] bytes, long offset, long size);
 
     private DvrPlayback() {
+    }
+
+    /** @hide */
+    public void setListener(
+            @NonNull Executor executor, @NonNull OnPlaybackStatusChangedListener listener) {
+        mExecutor = executor;
+        mListener = listener;
+    }
+
+    private void onPlaybackStatusChanged(int status) {
+        if (mExecutor != null && mListener != null) {
+            mExecutor.execute(() -> mListener.onPlaybackStatusChanged(status));
+        }
     }
 
 
@@ -164,7 +182,10 @@ public class DvrPlayback implements AutoCloseable {
      */
     @Override
     public void close() {
-        nativeClose();
+        int res = nativeClose();
+        if (res != Tuner.RESULT_SUCCESS) {
+            TunerUtils.throwExceptionForResult(res, "failed to close DVR playback");
+        }
     }
 
     /**

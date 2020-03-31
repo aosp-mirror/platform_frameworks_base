@@ -19,9 +19,13 @@ package android.media.tv.tuner.dvr;
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.Tuner.Result;
+import android.media.tv.tuner.TunerUtils;
 import android.media.tv.tuner.filter.Filter;
 import android.os.ParcelFileDescriptor;
+
+import java.util.concurrent.Executor;
 
 /**
  * Digital Video Record (DVR) recorder class which provides record control on Demux's output buffer.
@@ -31,6 +35,8 @@ import android.os.ParcelFileDescriptor;
 @SystemApi
 public class DvrRecorder implements AutoCloseable {
     private long mNativeContext;
+    private OnRecordStatusChangedListener mListener;
+    private Executor mExecutor;
 
     private native int nativeAttachFilter(Filter filter);
     private native int nativeDetachFilter(Filter filter);
@@ -44,6 +50,19 @@ public class DvrRecorder implements AutoCloseable {
     private native long nativeWrite(byte[] bytes, long offset, long size);
 
     private DvrRecorder() {
+    }
+
+    /** @hide */
+    public void setListener(
+            @NonNull Executor executor, @NonNull OnRecordStatusChangedListener listener) {
+        mExecutor = executor;
+        mListener = listener;
+    }
+
+    private void onRecordStatusChanged(int status) {
+        if (mExecutor != null && mListener != null) {
+            mExecutor.execute(() -> mListener.onRecordStatusChanged(status));
+        }
     }
 
 
@@ -125,7 +144,10 @@ public class DvrRecorder implements AutoCloseable {
      */
     @Override
     public void close() {
-        nativeClose();
+        int res = nativeClose();
+        if (res != Tuner.RESULT_SUCCESS) {
+            TunerUtils.throwExceptionForResult(res, "failed to close DVR recorder");
+        }
     }
 
     /**
@@ -163,6 +185,10 @@ public class DvrRecorder implements AutoCloseable {
      */
     @BytesLong
     public long write(@NonNull byte[] bytes, @BytesLong long offset, @BytesLong long size) {
+        if (size + offset > bytes.length) {
+            throw new ArrayIndexOutOfBoundsException(
+                    "Array length=" + bytes.length + ", offset=" + offset + ", size=" + size);
+        }
         return nativeWrite(bytes, offset, size);
     }
 }

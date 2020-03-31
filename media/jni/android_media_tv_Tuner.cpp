@@ -151,6 +151,8 @@ struct fields_t {
     jmethodID onFilterEventID;
     jmethodID lnbInitID;
     jmethodID onLnbEventID;
+    jmethodID onDvrRecordStatusID;
+    jmethodID onDvrPlaybackStatusID;
     jmethodID descramblerInitID;
     jmethodID linearBlockInitID;
     jmethodID linearBlockSetInternalStateID;
@@ -198,13 +200,23 @@ sp<ILnb> Lnb::getILnb() {
 }
 
 /////////////// DvrCallback ///////////////////////
-Return<void> DvrCallback::onRecordStatus(RecordStatus /*status*/) {
+Return<void> DvrCallback::onRecordStatus(RecordStatus status) {
     ALOGD("DvrCallback::onRecordStatus");
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(
+            mDvr,
+            gFields.onDvrRecordStatusID,
+            (jint) status);
     return Void();
 }
 
-Return<void> DvrCallback::onPlaybackStatus(PlaybackStatus /*status*/) {
+Return<void> DvrCallback::onPlaybackStatus(PlaybackStatus status) {
     ALOGD("DvrCallback::onPlaybackStatus");
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(
+            mDvr,
+            gFields.onDvrPlaybackStatusID,
+            (jint) status);
     return Void();
 }
 
@@ -214,27 +226,40 @@ void DvrCallback::setDvr(const jobject dvr) {
     mDvr = env->NewWeakGlobalRef(dvr);
 }
 
-/////////////// Dvr ///////////////////////
-
-Dvr::Dvr(sp<IDvr> sp, jweak obj) : mDvrSp(sp), mDvrObj(obj), mDvrMQEventFlag(nullptr) {}
-
-Dvr::~Dvr() {
-    EventFlag::deleteEventFlag(&mDvrMQEventFlag);
+DvrCallback::~DvrCallback() {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (mDvr != NULL) {
+        env->DeleteWeakGlobalRef(mDvr);
+        mDvr = NULL;
+    }
 }
 
-int Dvr::close() {
+/////////////// Dvr ///////////////////////
+
+Dvr::Dvr(sp<IDvr> sp, jobject obj) : mDvrSp(sp), mDvrMQEventFlag(nullptr) {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    mDvrObj = env->NewWeakGlobalRef(obj);
+}
+
+Dvr::~Dvr() {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->DeleteWeakGlobalRef(mDvrObj);
+    mDvrObj = NULL;
+}
+
+jint Dvr::close() {
     Result r = mDvrSp->close();
     if (r == Result::SUCCESS) {
         EventFlag::deleteEventFlag(&mDvrMQEventFlag);
     }
-    return (int)r;
+    return (jint) r;
 }
 
 sp<IDvr> Dvr::getIDvr() {
     return mDvrSp;
 }
 
-DvrMQ& Dvr::getDvrMQ() {
+MQ& Dvr::getDvrMQ() {
     return *mDvrMQ;
 }
 
@@ -558,6 +583,14 @@ void FilterCallback::setFilter(const jobject filter) {
     mFilter = env->NewWeakGlobalRef(filter);
 }
 
+FilterCallback::~FilterCallback() {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (mFilter != NULL) {
+        env->DeleteWeakGlobalRef(mFilter);
+        mFilter = NULL;
+    }
+}
+
 /////////////// Filter ///////////////////////
 
 Filter::Filter(sp<IFilter> sp, jobject obj) : mFilterSp(sp) {
@@ -785,6 +818,7 @@ JTuner::JTuner(JNIEnv *env, jobject thiz)
 JTuner::~JTuner() {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
+    env->DeleteWeakGlobalRef(mObject);
     env->DeleteGlobalRef(mClass);
     mTuner = NULL;
     mClass = NULL;
@@ -1988,10 +2022,14 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
     jclass dvrRecorderClazz = env->FindClass("android/media/tv/tuner/dvr/DvrRecorder");
     gFields.dvrRecorderContext = env->GetFieldID(dvrRecorderClazz, "mNativeContext", "J");
     gFields.dvrRecorderInitID = env->GetMethodID(dvrRecorderClazz, "<init>", "()V");
+    gFields.onDvrRecordStatusID =
+            env->GetMethodID(dvrRecorderClazz, "onRecordStatusChanged", "(I)V");
 
     jclass dvrPlaybackClazz = env->FindClass("android/media/tv/tuner/dvr/DvrPlayback");
     gFields.dvrPlaybackContext = env->GetFieldID(dvrPlaybackClazz, "mNativeContext", "J");
     gFields.dvrPlaybackInitID = env->GetMethodID(dvrPlaybackClazz, "<init>", "()V");
+    gFields.onDvrPlaybackStatusID =
+            env->GetMethodID(dvrRecorderClazz, "onPlaybackStatusChanged", "(I)V");
 
     jclass linearBlockClazz = env->FindClass("android/media/MediaCodec$LinearBlock");
     gFields.linearBlockInitID = env->GetMethodID(linearBlockClazz, "<init>", "()V");
@@ -2485,10 +2523,11 @@ static DemuxFilterSettings getFilterConfiguration(
     return filterSettings;
 }
 
-static jint copyData(JNIEnv *env, sp<Filter> filter, jbyteArray buffer, jlong offset, jlong size) {
+static jint copyData(JNIEnv *env, std::unique_ptr<MQ>& mq, EventFlag* flag, jbyteArray buffer,
+        jlong offset, jlong size) {
     ALOGD("copyData, size=%ld, offset=%ld", (long) size, (long) offset);
 
-    jlong available = filter->mFilterMQ->availableToRead();
+    jlong available = mq->availableToRead();
     ALOGD("copyData, available=%ld", (long) available);
     size = std::min(size, available);
 
@@ -2500,9 +2539,9 @@ static jint copyData(JNIEnv *env, sp<Filter> filter, jbyteArray buffer, jlong of
         return 0;
     }
 
-    if (filter->mFilterMQ->read(reinterpret_cast<unsigned char*>(dst) + offset, size)) {
+    if (mq->read(reinterpret_cast<unsigned char*>(dst) + offset, size)) {
         env->ReleaseByteArrayElements(buffer, dst, 0);
-        filter->mFilterMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
+        flag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
     } else {
         ALOGD("Failed to read FMQ");
         env->ReleaseByteArrayElements(buffer, dst, 0);
@@ -2537,7 +2576,7 @@ static jint android_media_tv_Tuner_configure_filter(
                     ALOGD("getFilterQueueDesc");
                 });
         if (getQueueDescResult == Result::SUCCESS) {
-            filterSp->mFilterMQ = std::make_unique<FilterMQ>(filterMQDesc, true);
+            filterSp->mFilterMQ = std::make_unique<MQ>(filterMQDesc, true);
             EventFlag::createEventFlag(
                     filterSp->mFilterMQ->getEventFlagWord(), &(filterSp->mFilterMQEventFlag));
         }
@@ -2622,7 +2661,7 @@ static jint android_media_tv_Tuner_read_filter_fmq(
         ALOGD("Failed to read filter FMQ: filter not found");
         return (jint) Result::INVALID_STATE;
     }
-    return copyData(env, filterSp, buffer, offset, size);
+    return copyData(env, filterSp->mFilterMQ, filterSp->mFilterMQEventFlag, buffer, offset, size);
 }
 
 static jint android_media_tv_Tuner_close_filter(JNIEnv *env, jobject filter) {
@@ -2781,86 +2820,103 @@ static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv* env, jobject thiz) 
     return tuner->getDemuxCaps();
 }
 
-static int android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
-    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
-    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
-    if (dvrSp == NULL || iFilterSp == NULL) {
-        return false;
-    }
-    Result result = dvrSp->attachFilter(iFilterSp);
-    return (int) result;
-}
-
-static int android_media_tv_Tuner_detach_filter(JNIEnv *env, jobject dvr, jobject filter) {
-    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
-    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
-    if (dvrSp == NULL || iFilterSp == NULL) {
-        return false;
-    }
-    Result result = dvrSp->detachFilter(iFilterSp);
-    return (int) result;
-}
-
-static int android_media_tv_Tuner_configure_dvr(JNIEnv *env, jobject dvr, jobject settings) {
+static jint android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<Dvr> dvrSp = getDvr(env, dvr);
+    if (dvrSp == NULL) {
+        return (jint) Result::NOT_INITIALIZED;
+    }
+    sp<Filter> filterSp = getFilter(env, filter);
+    if (filterSp == NULL) {
+        return (jint) Result::INVALID_ARGUMENT;
+    }
     sp<IDvr> iDvrSp = dvrSp->getIDvr();
+    sp<IFilter> iFilterSp = filterSp->getIFilter();
+    Result result = iDvrSp->attachFilter(iFilterSp);
+    return (jint) result;
+}
+
+static jint android_media_tv_Tuner_detach_filter(JNIEnv *env, jobject dvr, jobject filter) {
+    sp<Dvr> dvrSp = getDvr(env, dvr);
+    if (dvrSp == NULL) {
+        return (jint) Result::NOT_INITIALIZED;
+    }
+    sp<Filter> filterSp = getFilter(env, filter);
+    if (filterSp == NULL) {
+        return (jint) Result::INVALID_ARGUMENT;
+    }
+    sp<IDvr> iDvrSp = dvrSp->getIDvr();
+    sp<IFilter> iFilterSp = filterSp->getIFilter();
+    Result result = iDvrSp->detachFilter(iFilterSp);
+    return (jint) result;
+}
+
+static jint android_media_tv_Tuner_configure_dvr(JNIEnv *env, jobject dvr, jobject settings) {
+    sp<Dvr> dvrSp = getDvr(env, dvr);
     if (dvrSp == NULL) {
         ALOGD("Failed to configure dvr: dvr not found");
-        return (int)Result::INVALID_STATE;
+        return (int)Result::NOT_INITIALIZED;
     }
+    sp<IDvr> iDvrSp = dvrSp->getIDvr();
     Result result = iDvrSp->configure(getDvrSettings(env, settings));
-    MQDescriptorSync<uint8_t> dvrMQDesc;
-    if (result == Result::SUCCESS) {
-        Result getQueueDescResult = Result::UNKNOWN_ERROR;
-        iDvrSp->getQueueDesc(
-                [&](Result r, const MQDescriptorSync<uint8_t>& desc) {
-                    dvrMQDesc = desc;
-                    getQueueDescResult = r;
-                    ALOGD("getDvrQueueDesc");
-                });
-        if (getQueueDescResult == Result::SUCCESS) {
-            dvrSp->mDvrMQ = std::make_unique<DvrMQ>(dvrMQDesc, true);
-            EventFlag::createEventFlag(
-                    dvrSp->mDvrMQ->getEventFlagWord(), &(dvrSp->mDvrMQEventFlag));
-        }
+    if (result != Result::SUCCESS) {
+        return (jint) result;
     }
-    return (int)result;
+    MQDescriptorSync<uint8_t> dvrMQDesc;
+    Result getQueueDescResult = Result::UNKNOWN_ERROR;
+    iDvrSp->getQueueDesc(
+            [&](Result r, const MQDescriptorSync<uint8_t>& desc) {
+                dvrMQDesc = desc;
+                getQueueDescResult = r;
+                ALOGD("getDvrQueueDesc");
+            });
+    if (getQueueDescResult == Result::SUCCESS) {
+        dvrSp->mDvrMQ = std::make_unique<MQ>(dvrMQDesc, true);
+        EventFlag::createEventFlag(
+                dvrSp->mDvrMQ->getEventFlagWord(), &(dvrSp->mDvrMQEventFlag));
+    }
+    return (jint) getQueueDescResult;
 }
 
-static int android_media_tv_Tuner_start_dvr(JNIEnv *env, jobject dvr) {
-
-    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
+static jint android_media_tv_Tuner_start_dvr(JNIEnv *env, jobject dvr) {
+    sp<Dvr> dvrSp = getDvr(env, dvr);
     if (dvrSp == NULL) {
         ALOGD("Failed to start dvr: dvr not found");
-        return false;
+        return (jint) Result::NOT_INITIALIZED;
     }
-
-    Result result = dvrSp->start();
-    return (int) result;
+    sp<IDvr> iDvrSp = dvrSp->getIDvr();
+    Result result = iDvrSp->start();
+    return (jint) result;
 }
 
-static int android_media_tv_Tuner_stop_dvr(JNIEnv *env, jobject dvr) {
-    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
+static jint android_media_tv_Tuner_stop_dvr(JNIEnv *env, jobject dvr) {
+    sp<Dvr> dvrSp = getDvr(env, dvr);
     if (dvrSp == NULL) {
         ALOGD("Failed to stop dvr: dvr not found");
-        return false;
+        return (jint) Result::NOT_INITIALIZED;
     }
-    Result result = dvrSp->stop();
-    return (int) result;
+    sp<IDvr> iDvrSp = dvrSp->getIDvr();
+    Result result = iDvrSp->stop();
+    return (jint) result;
 }
 
-static int android_media_tv_Tuner_flush_dvr(JNIEnv *env, jobject dvr) {
-    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
+static jint android_media_tv_Tuner_flush_dvr(JNIEnv *env, jobject dvr) {
+    sp<Dvr> dvrSp = getDvr(env, dvr);
     if (dvrSp == NULL) {
         ALOGD("Failed to flush dvr: dvr not found");
-        return false;
+        return (jint) Result::NOT_INITIALIZED;
     }
-    Result result = dvrSp->flush();
-    return (int) result;
+    sp<IDvr> iDvrSp = dvrSp->getIDvr();
+    Result result = iDvrSp->flush();
+    return (jint) result;
 }
 
-static int android_media_tv_Tuner_close_dvr(JNIEnv*, jobject) {
-    return 0;
+static jint android_media_tv_Tuner_close_dvr(JNIEnv* env, jobject dvr) {
+    sp<Dvr> dvrSp = getDvr(env, dvr);
+    if (dvrSp == NULL) {
+        ALOGD("Failed to close dvr: dvr not found");
+        return (jint) Result::NOT_INITIALIZED;
+    }
+    return dvrSp->close();
 }
 
 static sp<Lnb> getLnb(JNIEnv *env, jobject lnb) {
@@ -2916,7 +2972,7 @@ static jlong android_media_tv_Tuner_read_dvr(JNIEnv *env, jobject dvr, jlong siz
     long available = dvrSp->mDvrMQ->availableToWrite();
     long write = std::min((long) size, available);
 
-    DvrMQ::MemTransaction tx;
+    MQ::MemTransaction tx;
     long ret = 0;
     if (dvrSp->mDvrMQ->beginWrite(write, &tx)) {
         auto first = tx.getFirstRegion();
@@ -2947,10 +3003,36 @@ static jlong android_media_tv_Tuner_read_dvr(JNIEnv *env, jobject dvr, jlong siz
 }
 
 static jlong android_media_tv_Tuner_read_dvr_from_array(
-        JNIEnv /* *env */, jobject /* dvr */, jbyteArray /* bytes */, jlong /* offset */,
-        jlong /* size */) {
-    //TODO: impl
-    return 0;
+        JNIEnv* env, jobject dvr, jbyteArray buffer, jlong offset, jlong size) {
+    sp<Dvr> dvrSp = getDvr(env, dvr);
+    if (dvrSp == NULL) {
+        ALOGW("Failed to read dvr: dvr not found");
+        return 0;
+    }
+    if (dvrSp->mDvrMQ == NULL) {
+        ALOGW("Failed to read dvr: dvr not configured");
+        return 0;
+    }
+
+    jlong available = dvrSp->mDvrMQ->availableToWrite();
+    size = std::min(size, available);
+
+    jboolean isCopy;
+    jbyte *src = env->GetByteArrayElements(buffer, &isCopy);
+    if (src == nullptr) {
+        ALOGD("Failed to GetByteArrayElements");
+        return 0;
+    }
+
+    if (dvrSp->mDvrMQ->write(reinterpret_cast<unsigned char*>(src) + offset, size)) {
+        env->ReleaseByteArrayElements(buffer, src, 0);
+        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
+    } else {
+        ALOGD("Failed to write FMQ");
+        env->ReleaseByteArrayElements(buffer, src, 0);
+        return 0;
+    }
+    return size;
 }
 
 static jlong android_media_tv_Tuner_write_dvr(JNIEnv *env, jobject dvr, jlong size) {
@@ -2965,13 +3047,13 @@ static jlong android_media_tv_Tuner_write_dvr(JNIEnv *env, jobject dvr, jlong si
         return 0;
     }
 
-    DvrMQ& dvrMq = dvrSp->getDvrMQ();
+    MQ& dvrMq = dvrSp->getDvrMQ();
 
     long available = dvrMq.availableToRead();
     long toRead = std::min((long) size, available);
 
     long ret = 0;
-    DvrMQ::MemTransaction tx;
+    MQ::MemTransaction tx;
     if (dvrMq.beginRead(toRead, &tx)) {
         auto first = tx.getFirstRegion();
         auto data = first.getAddress();
@@ -3001,10 +3083,17 @@ static jlong android_media_tv_Tuner_write_dvr(JNIEnv *env, jobject dvr, jlong si
 }
 
 static jlong android_media_tv_Tuner_write_dvr_to_array(
-        JNIEnv /* *env */, jobject /* dvr */, jbyteArray /* bytes */, jlong /* offset */,
-        jlong /* size */) {
-    //TODO: impl
-    return 0;
+        JNIEnv *env, jobject dvr, jbyteArray buffer, jlong offset, jlong size) {
+    sp<Dvr> dvrSp = getDvr(env, dvr);
+    if (dvrSp == NULL) {
+        ALOGW("Failed to write dvr: dvr not found");
+        return 0;
+    }
+    if (dvrSp->mDvrMQ == NULL) {
+        ALOGW("Failed to write dvr: dvr not configured");
+        return 0;
+    }
+    return copyData(env, dvrSp->mDvrMQ, dvrSp->mDvrMQEventFlag, buffer, offset, size);
 }
 
 static const JNINativeMethod gTunerMethods[] = {
