@@ -2334,32 +2334,30 @@ class Task extends WindowContainer<WindowContainer> {
         return Configuration.reduceScreenLayout(sourceScreenLayout, longSize, shortSize);
     }
 
-    private void resolveOrganizedOverrideConfiguration(Configuration newParentConfig) {
-        super.resolveOverrideConfiguration(newParentConfig);
-        if (!isOrganized()) {
-            return;
-        }
-
-        final Task root = getRootTask();
-        if (root == this) {
-            return;
-        }
-
-        // Ensure to have the same windowing mode for the child tasks that controlled by task org.
-        getResolvedOverrideConfiguration().windowConfiguration
-                .setWindowingMode(root.getWindowingMode());
-    }
-
     @Override
     void resolveOverrideConfiguration(Configuration newParentConfig) {
-        if (!isLeafTask() || mCreatedByOrganizer) {
-            resolveOrganizedOverrideConfiguration(newParentConfig);
-            return;
-        }
         mTmpBounds.set(getResolvedOverrideConfiguration().windowConfiguration.getBounds());
-        resolveOrganizedOverrideConfiguration(newParentConfig);
+        super.resolveOverrideConfiguration(newParentConfig);
+
+        // Resolve override windowing mode to fullscreen for home task (even on freeform
+        // display), or split-screen-secondary if in split-screen mode.
         int windowingMode =
                 getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
+        if (getActivityType() == ACTIVITY_TYPE_HOME && windowingMode == WINDOWING_MODE_UNDEFINED) {
+            windowingMode = inSplitScreenWindowingMode() ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                    : WINDOWING_MODE_FULLSCREEN;
+            getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
+        }
+
+        if (!isLeafTask()) {
+            // Compute configuration overrides for tasks that created by organizer, so that
+            // organizer can get the correct configuration from those tasks.
+            if (mCreatedByOrganizer) {
+                computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
+            }
+            return;
+        }
+
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
             windowingMode = newParentConfig.windowConfiguration.getWindowingMode();
         }
