@@ -1091,6 +1091,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             t.setPosition(mTiles.mHomeAndRecentsSurfaces.get(i),
                     mTiles.mHomeBounds.left - otherTaskRect.left,
                     mTiles.mHomeBounds.top - otherTaskRect.top);
+            t.setWindowCrop(mTiles.mHomeAndRecentsSurfaces.get(i), null);
         }
         final SurfaceControl dividerCtrl = getWindowSurfaceControl();
         if (dividerCtrl != null) {
