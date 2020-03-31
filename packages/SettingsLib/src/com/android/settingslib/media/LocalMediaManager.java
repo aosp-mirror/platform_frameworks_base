@@ -45,6 +45,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class LocalMediaManager implements BluetoothCallback {
     private static final Comparator<MediaDevice> COMPARATOR = Comparator.naturalOrder();
     private static final String TAG = "LocalMediaManager";
+    private static final int MAX_DISCONNECTED_DEVICE_NUM = 5;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({MediaDeviceState.STATE_CONNECTED,
@@ -404,13 +405,18 @@ public class LocalMediaManager implements BluetoothCallback {
                     mLocalBluetoothManager.getCachedDeviceManager();
 
             final List<CachedBluetoothDevice> cachedBluetoothDeviceList = new ArrayList<>();
+            int deviceCount = 0;
             for (BluetoothDevice device : bluetoothDevices) {
                 final CachedBluetoothDevice cachedDevice =
                         cachedDeviceManager.findDevice(device);
                 if (cachedDevice != null) {
                     if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
                             && !cachedDevice.isConnected()) {
+                        deviceCount++;
                         cachedBluetoothDeviceList.add(cachedDevice);
+                        if (deviceCount >= MAX_DISCONNECTED_DEVICE_NUM) {
+                            break;
+                        }
                     }
                 }
             }
