@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity;
 
+import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
 import static android.net.NetworkCapabilities.transportNamesOf;
 
 import android.annotation.NonNull;
@@ -242,6 +243,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     // How many of the satisfied requests are of type BACKGROUND_REQUEST.
     private int mNumBackgroundNetworkRequests = 0;
+
+    // The last ConnectivityReport made available for this network.
+    private ConnectivityReport mConnectivityReport;
 
     public final Messenger messenger;
     public final AsyncChannel asyncChannel;
@@ -621,6 +625,32 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
     }
 
+    /**
+     * Sets the most recent ConnectivityReport for this network.
+     *
+     * <p>This should only be called from the ConnectivityService thread.
+     *
+     * @hide
+     */
+    public void setConnectivityReport(@NonNull ConnectivityReport connectivityReport) {
+        mConnectivityReport = connectivityReport;
+    }
+
+    /**
+     * Returns the most recent ConnectivityReport for this network, or null if none have been
+     * reported yet.
+     *
+     * <p>This should only be called from the ConnectivityService thread.
+     *
+     * @hide
+     */
+    @Nullable
+    public ConnectivityReport getConnectivityReport() {
+        return mConnectivityReport;
+    }
+
+    // TODO: Print shorter members first and only print the boolean variable which value is true
+    // to improve readability.
     public String toString() {
         return "NetworkAgentInfo{"
                 + "network{" + network + "}  handle{" + network.getNetworkHandle() + "}  ni{"

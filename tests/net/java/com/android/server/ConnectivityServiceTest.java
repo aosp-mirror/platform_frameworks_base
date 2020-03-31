@@ -316,6 +316,8 @@ public class ConnectivityServiceTest {
     private static final String TEST_PACKAGE_NAME = "com.android.test.package";
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
+    private static final String INTERFACE_NAME = "interface";
+
     private MockContext mServiceContext;
     private HandlerThread mCsHandlerThread;
     private ConnectivityService mService;
@@ -6907,6 +6909,38 @@ public class ConnectivityServiceTest {
                 mService.checkConnectivityDiagnosticsPermissions(
                         Process.myPid() + 1, Process.myUid() + 1, naiWithUid,
                         mContext.getOpPackageName()));
+    }
+
+    @Test
+    public void testRegisterConnectivityDiagnosticsCallbackCallsOnConnectivityReport()
+            throws Exception {
+        // Set up the Network, which leads to a ConnectivityReport being cached for the network.
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(callback);
+        final LinkProperties linkProperties = new LinkProperties();
+        linkProperties.setInterfaceName(INTERFACE_NAME);
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, linkProperties);
+        mCellNetworkAgent.connect(true);
+        callback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        callback.assertNoCallback();
+
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        when(mConnectivityDiagnosticsCallback.asBinder()).thenReturn(mIBinder);
+
+        mServiceContext.setPermission(
+                android.Manifest.permission.NETWORK_STACK, PERMISSION_GRANTED);
+
+        mService.registerConnectivityDiagnosticsCallback(
+                mConnectivityDiagnosticsCallback, request, mContext.getPackageName());
+
+        // Block until all other events are done processing.
+        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+
+        verify(mConnectivityDiagnosticsCallback)
+                .onConnectivityReportAvailable(argThat(report -> {
+                    return INTERFACE_NAME.equals(report.getLinkProperties().getInterfaceName())
+                            && report.getNetworkCapabilities().hasTransport(TRANSPORT_CELLULAR);
+                }));
     }
 
     private void setUpConnectivityDiagnosticsCallback() throws Exception {
