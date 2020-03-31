@@ -16,6 +16,7 @@
 
 package com.android.systemui.bubbles;
 
+import android.app.INotificationManager;
 import android.content.Context;
 
 import com.android.systemui.dump.DumpManager;
@@ -54,12 +55,14 @@ public class TestableBubbleController extends BubbleController {
             FeatureFlags featureFlags,
             DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator,
-            SysUiState sysUiState) {
+            SysUiState sysUiState,
+            INotificationManager notificationManager) {
         super(context,
                 notificationShadeWindowController, statusBarStateController, shadeController,
                 data, Runnable::run, configurationController, interruptionStateProvider,
                 zenModeController, lockscreenUserManager, groupManager, entryManager,
-                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator, sysUiState);
+                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator, sysUiState,
+                notificationManager);
         setInflateSynchronously(true);
     }
 }

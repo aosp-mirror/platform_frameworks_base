@@ -5548,7 +5548,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertTrue((notifsBefore[0].getNotification().flags & FLAG_BUBBLE) != 0);
 
         // Notify we're not a bubble
-        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false);
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false, 0);
         waitForIdle();
 
         // Make sure we are not a bubble
@@ -5587,7 +5587,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         reset(mListeners);
 
         // Notify we are now a bubble
-        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true);
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true, 0);
         waitForIdle();
 
         // Make sure we are a bubble
@@ -5618,7 +5618,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals((notifsBefore[0].getNotification().flags & FLAG_BUBBLE), 0);
 
         // Notify we are now a bubble
-        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true);
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true, 0);
         waitForIdle();
 
         // We still wouldn't be a bubble because the notification didn't meet requirements
@@ -5646,7 +5646,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertFalse(recordToCheck.isFlagBubbleRemoved());
 
         // Notify we're not a bubble
-        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false);
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false, 0);
         waitForIdle();
         // Flag should be modified
         recordToCheck = mService.getNotificationRecord(nr.getSbn().getKey());
@@ -5681,14 +5681,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertFalse(recordToCheck.isFlagBubbleRemoved());
 
         // Notify we're not a bubble
-        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false);
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false, 0);
         waitForIdle();
         // Flag should be modified
         recordToCheck = mService.getNotificationRecord(nr.getSbn().getKey());
         assertTrue(recordToCheck.isFlagBubbleRemoved());
 
         // Notify we are a bubble
-        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true);
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true, 0);
         waitForIdle();
         // And the flag is reset
         assertFalse(recordToCheck.isFlagBubbleRemoved());

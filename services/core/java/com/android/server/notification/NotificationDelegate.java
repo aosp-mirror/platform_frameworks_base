@@ -51,7 +51,7 @@ public interface NotificationDelegate {
     /**
      * Called when the state of {@link Notification#FLAG_BUBBLE} is changed.
      */
-    void onNotificationBubbleChanged(String key, boolean isBubble);
+    void onNotificationBubbleChanged(String key, boolean isBubble, int flags);
     /**
      * Called when the state of {@link Notification.BubbleMetadata#FLAG_SUPPRESS_NOTIFICATION}
      * changes.
