@@ -110,6 +110,10 @@ public class PipAnimationController {
         return mCurrentAnimator;
     }
 
+    PipTransitionAnimator getCurrentAnimator() {
+        return mCurrentAnimator;
+    }
+
     private PipTransitionAnimator setupPipTransitionAnimator(PipTransitionAnimator animator) {
         animator.setSurfaceTransactionHelper(mSurfaceTransactionHelper);
         animator.setInterpolator(mFastOutSlowInInterpolator);
@@ -239,6 +243,9 @@ public class PipAnimationController {
 
         void setDestinationBounds(Rect destinationBounds) {
             mDestinationBounds.set(destinationBounds);
+            if (mAnimationType == ANIM_TYPE_ALPHA) {
+                onStartTransaction(mLeash, newSurfaceControlTransaction());
+            }
         }
 
         void setCurrentValue(T value) {
