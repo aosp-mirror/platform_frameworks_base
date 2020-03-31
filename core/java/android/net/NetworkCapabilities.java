@@ -920,7 +920,7 @@ public final class NetworkCapabilities implements Parcelable {
      * empty unless the destination is 1) the System Server, or 2) Telephony. In either case, the
      * receiving entity must have the ACCESS_FINE_LOCATION permission and target R+.
      */
-    private int[] mAdministratorUids = new int[0];
+    @NonNull private int[] mAdministratorUids = new int[0];
 
     /**
      * Sets the int[] of UIDs that are administrators of this network.
