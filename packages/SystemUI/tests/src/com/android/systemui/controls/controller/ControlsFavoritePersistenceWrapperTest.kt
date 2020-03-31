@@ -48,7 +48,7 @@ class ControlsFavoritePersistenceWrapperTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
-        if (file.exists() ?: false) {
+        if (file.exists()) {
             file.delete()
         }
     }
