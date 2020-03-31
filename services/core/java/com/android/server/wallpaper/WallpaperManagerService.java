@@ -1904,7 +1904,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     final WallpaperData fallback =
                             new WallpaperData(wallpaper.userId, getWallpaperDir(wallpaper.userId),
                             WALLPAPER_LOCK_ORIG, WALLPAPER_LOCK_CROP);
-                    ensureSaneWallpaperData(fallback, DEFAULT_DISPLAY);
+                    ensureSaneWallpaperData(fallback);
                     bindWallpaperComponentLocked(mImageWallpaper, true, false, fallback, reply);
                     mWaitingForUnlock = true;
                 }
@@ -2425,7 +2425,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (cropHint == null) {
             cropHint = new Rect(0, 0, 0, 0);
         } else {
-            if (cropHint.isEmpty()
+            if (cropHint.width() < 0 || cropHint.height() < 0
                     || cropHint.left < 0
                     || cropHint.top < 0) {
                 throw new IllegalArgumentException("Invalid crop rect supplied: " + cropHint);
@@ -3077,7 +3077,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     wallpaper = new WallpaperData(userId, getWallpaperDir(userId),
                             WALLPAPER_LOCK_ORIG, WALLPAPER_LOCK_CROP);
                     mLockWallpaperMap.put(userId, wallpaper);
-                    ensureSaneWallpaperData(wallpaper, DEFAULT_DISPLAY);
+                    ensureSaneWallpaperData(wallpaper);
                 } else {
                     // sanity fallback: we're in bad shape, but establishing a known
                     // valid system+lock WallpaperData will keep us from dying.
@@ -3085,7 +3085,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     wallpaper = new WallpaperData(userId, getWallpaperDir(userId),
                             WALLPAPER, WALLPAPER_CROP);
                     mWallpaperMap.put(userId, wallpaper);
-                    ensureSaneWallpaperData(wallpaper, DEFAULT_DISPLAY);
+                    ensureSaneWallpaperData(wallpaper);
                 }
             }
         }
@@ -3196,10 +3196,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         ensureSaneWallpaperDisplaySize(wpdData, DEFAULT_DISPLAY);
-        ensureSaneWallpaperData(wallpaper, DEFAULT_DISPLAY);
+        ensureSaneWallpaperData(wallpaper);
         WallpaperData lockWallpaper = mLockWallpaperMap.get(userId);
         if (lockWallpaper != null) {
-            ensureSaneWallpaperData(lockWallpaper, DEFAULT_DISPLAY);
+            ensureSaneWallpaperData(lockWallpaper);
         }
     }
 
@@ -3215,15 +3215,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void ensureSaneWallpaperData(WallpaperData wallpaper, int displayId) {
-        final DisplayData size = getDisplayDataOrCreate(displayId);
-
-        if (displayId == DEFAULT_DISPLAY) {
-            // crop, if not previously specified
-            if (wallpaper.cropHint.width() <= 0
-                    || wallpaper.cropHint.height() <= 0) {
-                wallpaper.cropHint.set(0, 0, size.mWidth, size.mHeight);
-            }
+    private void ensureSaneWallpaperData(WallpaperData wallpaper) {
+        // Only overwrite cropHint if the rectangle is invalid.
+        if (wallpaper.cropHint.width() < 0
+                || wallpaper.cropHint.height() < 0) {
+            wallpaper.cropHint.set(0, 0, 0, 0);
         }
     }
 
