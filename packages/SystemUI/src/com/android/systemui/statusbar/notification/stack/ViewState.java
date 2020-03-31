@@ -393,7 +393,7 @@ public class ViewState implements Dumpable {
                 || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(properties.delay);
         }
-        AnimatorListenerAdapter listener = properties.getAnimationFinishListener();
+        AnimatorListenerAdapter listener = properties.getAnimationFinishListener(View.ALPHA);
         if (listener != null) {
             animator.addListener(listener);
         }
@@ -450,7 +450,8 @@ public class ViewState implements Dumpable {
                 || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(properties.delay);
         }
-        AnimatorListenerAdapter listener = properties.getAnimationFinishListener();
+        AnimatorListenerAdapter listener = properties.getAnimationFinishListener(
+                View.TRANSLATION_Z);
         if (listener != null) {
             animator.addListener(listener);
         }
@@ -515,7 +516,8 @@ public class ViewState implements Dumpable {
                 || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(properties.delay);
         }
-        AnimatorListenerAdapter listener = properties.getAnimationFinishListener();
+        AnimatorListenerAdapter listener = properties.getAnimationFinishListener(
+                View.TRANSLATION_X);
         if (listener != null) {
             animator.addListener(listener);
         }
@@ -580,7 +582,8 @@ public class ViewState implements Dumpable {
                 || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(properties.delay);
         }
-        AnimatorListenerAdapter listener = properties.getAnimationFinishListener();
+        AnimatorListenerAdapter listener = properties.getAnimationFinishListener(
+                View.TRANSLATION_Y);
         if (listener != null) {
             animator.addListener(listener);
         }

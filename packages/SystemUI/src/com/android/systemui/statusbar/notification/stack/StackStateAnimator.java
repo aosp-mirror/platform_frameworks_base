@@ -104,7 +104,7 @@ public class StackStateAnimator {
             }
 
             @Override
-            public AnimatorListenerAdapter getAnimationFinishListener() {
+            public AnimatorListenerAdapter getAnimationFinishListener(Property property) {
                 return getGlobalAnimationFinishedListener();
             }
 
