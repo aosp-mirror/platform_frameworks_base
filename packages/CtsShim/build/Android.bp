@@ -100,6 +100,20 @@ android_app {
 }
 
 //##########################################################
+// Variant: Non Privileged app upgrade which is malformed
+android_app {
+    name: "CtsShimTargetPSdk",
+    sdk_version: "current",
+    optimize: {
+        enabled: false,
+    },
+    dex_preopt: {
+        enabled: false,
+    },
+    manifest: "shim/AndroidManifestTargetPSdk.xml"
+}
+
+//##########################################################
 // Variant: System app
 
 android_app {
