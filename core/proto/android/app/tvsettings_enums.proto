@@ -1,0 +1,917 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.app.tvsettings;
+option java_multiple_files = true;
+option java_outer_classname = "TvSettingsEnums";
+
+/** The performed action types */
+enum Action {
+
+    /**
+     * Denotes an unknown action. It is a filler that should generally be
+     * avoided.
+     */
+    ACTION_UNKNOWN = 0;
+
+    /**
+     * Denotes that a TvSettings page is being focused. (Previewing a page in
+     * two panel settings should NOT be considered as focusing on the page.)
+     */
+    PAGE_FOCUSED = 1;
+
+    /**
+     * Denotes that an entry (typically a leaf node of settings tree) is
+     * selected by a user.
+     */
+    ENTRY_SELECTED = 2;
+
+    /** Denotes that a toggle is clicked by a user. */
+    TOGGLE_INTERACTED = 3;
+
+}
+
+/**
+ * Ids for TvSettings focusable pages or actionable entries
+ *
+ * For details of the scheme, please refer to the "Definition of item_id" and
+ * "Evolve of item_id" sections in go/atv-settings-ww-logging-design.
+ */
+enum ItemId {
+
+    option allow_alias = true;
+
+    // Filler that should be avoided
+    UNKNOWN = 0x00000000;
+
+    // TvSettings
+    TV_SETTINGS_ROOT = 0x00000001;
+
+    // TvSettings unknown/default classic page
+    PAGE_CLASSIC_DEFAULT = 0x00000002;
+
+    // TvSettings unknown/default slice page
+    PAGE_SLICE_DEFAULT = 0x00000003;
+
+    // TvSettings unknown/default entry
+    ENTRY_DEFAULT = 0x00000004;
+
+    // TvSettings > Suggested settings entry
+    SUGGESTED_SETTINGS = 0x00000010;
+
+    // TvSettings > Quick Settings
+    QUICK_SETTINGS = 0x00000011;
+
+    // VERSION 1: Starting with Q
+    // These are ordered in depth-first search manner.
+
+    // TvSettings > Network & Internet
+    NETWORK = 0x11000000;
+
+    // TvSettings > Network & Internet > Wi-Fi (toggle)
+    NETWORK_WIFI_ON_OFF = 0x11100000;
+
+    // TvSettings > Network & Internet >
+    // [A connected network entry in available networks list]
+    NETWORK_AP_INFO = 0x11200000;
+
+    // TvSettings > Network & Internet >
+    // [A connected network entry in available networks list] > Proxy settings
+    NETWORK_AP_INFO_PROXY_SETTINGS = 0x11210000;
+
+    // TvSettings > Network & Internet >
+    // [A connected network entry in available networks list] > IP settings
+    NETWORK_AP_INFO_IP_SETTINGS = 0x11220000;
+
+    // TvSettings > Network & Internet >
+    // [A connected network entry in available networks list] > Forget network
+    NETWORK_AP_INFO_FORGET_NETWORK = 0x11230000;
+
+    // TvSettings > Network & Internet >
+    // [A not connected network entry in available networks list]
+    NETWORK_NOT_CONNECTED_AP = 0x11300000;
+
+    // TvSettings > Network & Internet > See all
+    NETWORK_SEE_ALL = 0x11400000;
+
+    // TvSettings > Network & Internet > See fewer
+    NETWORK_SEE_FEWER = 0x11500000;
+
+    // TvSettings > Network & Internet > Add new network
+    NETWORK_ADD_NEW_NETWORK = 0x11600000;
+
+    // TvSettings > Network & Internet > Scanning always available (toggle)
+    NETWORK_ALWAYS_SCANNING_NETWORKS = 0x11700000;
+
+    // TvSettings > Network & Internet > Proxy settings (in Ethernet category)
+    NETWORK_ETHERNET_PROXY_SETTINGS = 0x11800000;
+
+    // TvSettings > Network & Internet > IP settings (in Ethernet category)
+    NETWORK_ETHERNET_IP_SETTINGS = 0x11900000;
+
+    // TvSettings > Account & Sign In (Slice)
+    ACCOUNT_SLICE = 0x12000000;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account]
+    ACCOUNT_SLICE_REG_ACCOUNT = 0x12100000;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Google Assistant
+    ACCOUNT_SLICE_REG_ACCOUNT_ASSISTANT = 0x12130000;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Google Assistant > SafeSearch filter (toggle)
+    ACCOUNT_SLICE_REG_ACCOUNT_ASSISTANT_SAFE_SEARCH = 0x12131000;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Google Assistant > Block offensive words (toggle)
+    ACCOUNT_SLICE_REG_ACCOUNT_ASSISTANT_BLOCK_OFFENSIVE = 0x12132000;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Google Assistant > Searchable apps
+    ACCOUNT_SLICE_REG_ACCOUNT_ASSISTANT_SEARCHABLE_APPS = 0x12133000;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Google Assistant > Personal results (toggle)
+    ACCOUNT_SLICE_REG_ACCOUNT_ASSISTANT_PERSONAL_RESULTS = 0x12134000;
+
+    // Reserving [0x12140000, 0x12190000] for possible future settings
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] > Remove
+    ACCOUNT_SLICE_REG_ACCOUNT_REMOVE = 0x121A0000;
+
+    // Reserving [0x12200000, 0x12900000] for possible future settings
+
+    // TvSettings > Account & Sign In (Slice) > Add account...
+    ACCOUNT_SLICE_ADD_ACCOUNT = 0x12A00000;
+
+    // TvSettings > Account & Sign In (Classic)
+    ACCOUNT_CLASSIC = 0x13000000;
+
+    // TvSettings > Account & Sign In (Classic) > [A regular account]
+    ACCOUNT_CLASSIC_REG_ACCOUNT = 0x13100000;
+
+    // TvSettings > Account & Sign In (Classic) > [A regular account] > Sync now
+    ACCOUNT_CLASSIC_REG_ACCOUNT_SYNC_NOW = 0x13110000;
+
+    // TvSettings > Account & Sign In (Classic) > [A regular account] >
+    // Remove account
+    ACCOUNT_CLASSIC_REG_ACCOUNT_REMOVE_ACCOUNT = 0x13120000;
+
+    // TvSettings > Account & Sign In (Classic) > [A regular account] >
+    // [Choose synced apps] Calendar (toggle)
+    ACCOUNT_CLASSIC_REG_ACCOUNT_SYNC_CALENDAR = 0x13130000;
+
+    // TvSettings > Account & Sign In (Classic) > [A regular account] >
+    // [Choose synced apps] Contacts (toggle)
+    ACCOUNT_CLASSIC_REG_ACCOUNT_SYNC_CONTACTS = 0x13140000;
+
+    // TvSettings > Account & Sign In (Classic) > [A regular account] >
+    // [Choose synced apps] Google Play Movies & TV (toggle)
+    ACCOUNT_CLASSIC_REG_ACCOUNT_SYNC_GPMT = 0x13150000;
+
+    // TvSettings > Account & Sign In (Classic) > [A regular account] >
+    // [Choose synced apps] Google Play Music (toggle)
+    ACCOUNT_CLASSIC_REG_ACCOUNT_SYNC_GPM = 0x13160000;
+
+    // TvSettings > Account & Sign In (Classic) > [A regular account] >
+    // [Choose synced apps] People details (toggle)
+    ACCOUNT_CLASSIC_REG_ACCOUNT_SYNC_PEOPLE = 0x13170000;
+
+    // Reserving [0x13200000, 0x13900000] for possible future settings
+
+    // TvSettings > Account & Sign In (Classic) > Add account
+    ACCOUNT_CLASSIC_ADD_ACCOUNT = 0x13A00000;
+
+    // TvSettings > Display & Sound
+    DISPLAY_SOUND = 0x15000000;
+
+    // TvSettings > Display & Sound > Advanced display settings
+    DISPLAY_SOUND_ADVANCED_DISPLAY = 0x15100000;
+
+    // TvSettings > Display & Sound > Advanced display settings >
+    // Allow game mode (toggle)
+    DISPLAY_SOUND_ADVANCED_DISPLAY_GAME_MODE = 0x15110000;
+
+    // TvSettings > Display & Sound > System sounds (toggle)
+    DISPLAY_SOUND_SYSTEM_SOUNDS = 0x15200000;
+
+    // TvSettings > Display & Sound > Advanced sound settings
+    DISPLAY_SOUND_ADVANCED_SOUNDS = 0x15300000;
+
+    // TvSettings > Display & Sound > Advanced sound settings > Select formats
+    DISPLAY_SOUND_ADVANCED_SOUNDS_SELECT_FORMATS = 0x15310000;
+
+    // TvSettings > Display & Sound > Advanced sound settings > Select formats >
+    // Auto...
+    DISPLAY_SOUND_ADVANCED_SOUNDS_SELECT_FORMATS_AUTO = 0x15311000;
+
+    // TvSettings > Display & Sound > Advanced sound settings > Select formats >
+    // None...
+    DISPLAY_SOUND_ADVANCED_SOUNDS_SELECT_FORMATS_NONE = 0x15312000;
+
+    // TvSettings > Display & Sound > Advanced sound settings > Select formats >
+    // Manual...
+    DISPLAY_SOUND_ADVANCED_SOUNDS_SELECT_FORMATS_MANUAL = 0x15313000;
+
+    // TvSettings > Display & Sound > Advanced sound settings >
+    // Dolby AC-4 (toggle)
+    DISPLAY_SOUND_ADVANCED_SOUNDS_DAC4 = 0x15320000;
+
+    // TvSettings > Display & Sound > Advanced sound settings >
+    // Dolby Atmos in Dolby Digital Plus (toggle)
+    DISPLAY_SOUND_ADVANCED_SOUNDS_DADDP = 0x15330000;
+
+    // TvSettings > Display & Sound > Advanced sound settings >
+    // Dolby Digital (toggle)
+    DISPLAY_SOUND_ADVANCED_SOUNDS_DD = 0x15340000;
+
+    // TvSettings > Display & Sound > Advanced sound settings >
+    // Dolby Digital Plus (toggle)
+    DISPLAY_SOUND_ADVANCED_SOUNDS_DDP = 0x15350000;
+
+    // TvSettings > Display & Sound > Advanced sound settings > DTS (toggle)
+    DISPLAY_SOUND_ADVANCED_SOUNDS_DTS = 0x15360000;
+
+    // TvSettings > Display & Sound > Advanced sound settings > DTS-HD (toggle)
+    DISPLAY_SOUND_ADVANCED_SOUNDS_DTSHD = 0x15370000;
+
+    // TvSettings > Display & Sound > Advanced sound settings > AAC (toggle)
+    DISPLAY_SOUND_ADVANCED_SOUNDS_AAC = 0x15380000;
+
+    // TvSettings > Display & Sound > Advanced sound settings >
+    // Dolby TrueHD (toggle)
+    DISPLAY_SOUND_ADVANCED_SOUNDS_DTHD = 0x15390000;
+
+    // TvSettings > Apps
+    APPS = 0x16000000;
+
+    // TvSettings > Apps > See all apps
+    APPS_ALL_APPS = 0x16100000;
+
+    // TvSettings > Apps > See all apps > [An app entry]
+    APPS_ALL_APPS_APP_ENTRY = 0x16110000;
+
+    // TvSettings > Apps > See all apps > [An app entry] > Open
+    APPS_ALL_APPS_APP_ENTRY_OPEN = 0x16111000;
+
+    // TvSettings > Apps > See all apps > [An app entry] > Force stop
+    APPS_ALL_APPS_APP_ENTRY_FORCE_STOP = 0x16112000;
+
+    // TvSettings > Apps > See all apps > [An app entry] > Uninstall
+    APPS_ALL_APPS_APP_ENTRY_UNINSTALL = 0x16113000;
+
+    // TvSettings > Apps > See all apps > [An app entry] > Uninstall updates
+    APPS_ALL_APPS_APP_ENTRY_UNINSTALL_UPDATES = 0x16114000;
+
+    // TvSettings > Apps > See all apps > [An app entry] > Disable
+    APPS_ALL_APPS_APP_ENTRY_DISABLE = 0x16115000;
+
+    // TvSettings > Apps > See all apps > [An app entry] > Clear data
+    APPS_ALL_APPS_APP_ENTRY_CLEAR_DATA = 0x16116000;
+
+    // TvSettings > Apps > See all apps > [An app entry] > Clear cache
+    APPS_ALL_APPS_APP_ENTRY_CLEAR_CACHE = 0x16117000;
+
+    // TvSettings > Apps > See all apps > [An app entry] > Clear defaults
+    APPS_ALL_APPS_APP_ENTRY_CLEAR_DEFAULTS = 0x16118000;
+
+    // TvSettings > Apps > See all apps > [An app entry] >
+    // Notifications (toggle)
+    APPS_ALL_APPS_APP_ENTRY_NOTIFICATIONS = 0x16119000;
+
+    // TvSettings > Apps > See all apps > [An app entry] > Permissions
+    APPS_ALL_APPS_APP_ENTRY_PERMISSIONS = 0x1611A000;
+
+    // TvSettings > Apps > See all apps > Show system apps
+    APPS_ALL_APPS_SHOW_SYSTEM_APPS = 0x16120000;
+
+    // TvSettings > Apps > App permissions
+    APPS_APP_PERMISSIONS = 0x16200000;
+
+    // TvSettings > Apps > App permission > Body sensors
+    APPS_APP_PERMISSIONS_BODY_SENSORS = 0x16210000;
+
+    // TvSettings > Apps > App permission > Calendar
+    APPS_APP_PERMISSIONS_CALENDAR = 0x16220000;
+
+    // TvSettings > Apps > App permission > Call logs
+    APPS_APP_PERMISSIONS_CALL_LOGS = 0x16230000;
+
+    // TvSettings > Apps > App permission > Camera
+    APPS_APP_PERMISSIONS_CAMERA = 0x16240000;
+
+    // TvSettings > Apps > App permission > Contacts
+    APPS_APP_PERMISSIONS_CONTACTS = 0x16250000;
+
+    // TvSettings > Apps > App permission > Location
+    APPS_APP_PERMISSIONS_LOCATION = 0x16260000;
+
+    // TvSettings > Apps > App permission > Microphone
+    APPS_APP_PERMISSIONS_MICROPHONE = 0x16270000;
+
+    // TvSettings > Apps > App permission > Phone
+    APPS_APP_PERMISSIONS_PHONE = 0x16280000;
+
+    // TvSettings > Apps > App permission > Physical activity
+    APPS_APP_PERMISSIONS_PHYSICAL_ACTIVITY = 0x16290000;
+
+    // TvSettings > Apps > App permission > SMS
+    APPS_APP_PERMISSIONS_SMS = 0x162A0000;
+
+    // TvSettings > Apps > App permission > Storage
+    APPS_APP_PERMISSIONS_STORAGE = 0x162B0000;
+
+    // TvSettings > Apps > App permission > Additional permissions
+    APPS_APP_PERMISSIONS_ADDITIONAL = 0x162C0000;
+
+    // TvSettings > Apps > App permission > Additional permissions >
+    // real all TV listings
+    APPS_APP_PERMISSIONS_ADDITIONAL_READ_TV_LISTINGS = 0x162C1000;
+
+    // TvSettings > Apps > App permission > Additional permissions >
+    // real instant messages
+    APPS_APP_PERMISSIONS_ADDITIONAL_READ_INSTANT_MESSAGES = 0x162C2000;
+
+    // TvSettings > Apps > App permission > Additional permissions >
+    // write instant messages
+    APPS_APP_PERMISSIONS_ADDITIONAL_WRITE_INSTANT_MESSAGES = 0x162C3000;
+
+    // TvSettings > Apps > Special app access
+    APPS_SPECIAL_APP_ACCESS = 0x16300000;
+
+    // TvSettings > Apps > Special app access > Energy optimization
+    APPS_SPECIAL_APP_ACCESS_ENERGY_OPTIMIZATION = 0x16310000;
+
+    // TvSettings > Apps > Special app access > Usage access
+    APPS_SPECIAL_APP_ACCESS_USAGE_ACCESS = 0x16320000;
+
+    // TvSettings > Apps > Special app access > Notification access
+    APPS_SPECIAL_APP_ACCESS_NOTIFICATION_ACCESS = 0x16330000;
+
+    // TvSettings > Apps > Special app access > Display over other apps
+    APPS_SPECIAL_APP_ACCESS_DISPLAY_OVER_OTHERS = 0x16340000;
+
+    // TvSettings > Apps > Special app access > Modify system settings
+    APPS_SPECIAL_APP_ACCESS_MODIFY_SYSTEM_SETTINGS = 0x16350000;
+
+    // TvSettings > Apps > Special app access > Picture-in-picture
+    APPS_SPECIAL_APP_ACCESS_PICTURE_IN_PICTURE = 0x16360000;
+
+    // TvSettings > Apps > Security & restrictions
+    APPS_SECURITY_RESTRICTIONS = 0x16400000;
+
+    // TvSettings > Apps > Security & restrictions > Unknown sources
+    APPS_SECURITY_RESTRICTIONS_UNKNOWN_SOURCES = 0x16410000;
+
+    // TvSettings > Apps > Security & restrictions > Verify apps (toggle)
+    APPS_SECURITY_RESTRICTIONS_VERIFY_APPS = 0x16420000;
+
+    // TvSettings > Apps > Security & restrictions > Create restricted profile
+    APPS_SECURITY_RESTRICTIONS_CREATE_PROFILE = 0x16430000;
+
+    // TvSettings > Apps > Security & restrictions > Enter restricted profile
+    APPS_SECURITY_RESTRICTIONS_ENTER_PROFILE = 0x16440000;
+
+    // TvSettings > Apps > Security & restrictions >
+    // Allowed apps (Restricted Profile)
+    APPS_SECURITY_RESTRICTIONS_PROFILE_ALLOWED_APPS = 0x16450000;
+
+    // TvSettings > Apps > Security & restrictions >
+    // Change pin (Restricted Profile)
+    APPS_SECURITY_RESTRICTIONS_PROFILE_CHANGE_PIN = 0x16460000;
+
+    // TvSettings > Apps > Security & restrictions >
+    // Delete restricted profile
+    APPS_SECURITY_RESTRICTIONS_DELETE_PROFILE = 0x16470000;
+
+    // TvSettings > Apps > Security & restrictions >
+    // Exit restricted profile
+    APPS_SECURITY_RESTRICTIONS_EXIT_PROFILE = 0x16480000;
+
+    // TvSettings > System (same as TvSettings > Device Preferences)
+    SYSTEM = 0x17000000;
+
+    // TvSettings > System > About
+    SYSTEM_ABOUT = 0x17100000;
+
+    // TvSettings > System > System update
+    SYSTEM_ABOUT_SYSTEM_UPDATE = 0x17110000;
+
+    // TvSettings > System > Device name
+    SYSTEM_ABOUT_DEVICE_NAME = 0x17120000;
+
+    // TvSettings > System > Factory reset
+    SYSTEM_ABOUT_FACTORY_RESET = 0x17130000;
+
+    // TvSettings > System > Status
+    SYSTEM_ABOUT_STATUS = 0x17140000;
+
+    // TvSettings > System > Legal information
+    SYSTEM_ABOUT_LEGAL_INFO = 0x17150000;
+
+    // TvSettings > System > Legal information > Open source licenses
+    SYSTEM_ABOUT_LEGAL_INFO_OPEN_SOURCE = 0x17151000;
+
+    // TvSettings > System > Legal information > Google legal
+    SYSTEM_ABOUT_LEGAL_INFO_GOOGLE_LEGAL = 0x17152000;
+
+    // TvSettings > System > Legal information > System WebView licenses
+    SYSTEM_ABOUT_LEGAL_INFO_SYSTEM_WEBVIEW = 0x17153000;
+
+    // TvSettings > System > Build
+    SYSTEM_ABOUT_BUILD = 0x17160000;
+
+    // TvSettings > System > Date & time
+    SYSTEM_DATE_TIME = 0x17200000;
+
+    // TvSettings > System > Date & time > Automatic data & time
+    SYSTEM_DATE_TIME_AUTOMATIC = 0x17210000;
+
+    // TvSettings > System > Date & time > Automatic data & time >
+    // Use network-provided time
+    SYSTEM_DATE_TIME_AUTOMATIC_USE_NETWORK_TIME = 0x17211000;
+
+    // TvSettings > System > Date & time > Automatic data & time > Off
+    SYSTEM_DATE_TIME_AUTOMATIC_OFF = 0x17212000;
+
+    // TvSettings > System > Date & time > Set date
+    SYSTEM_DATE_TIME_SET_DATE = 0x17220000;
+
+    // TvSettings > System > Date & time > Set time
+    SYSTEM_DATE_TIME_SET_TIME = 0x17230000;
+
+    // TvSettings > System > Date & time > Set time zone
+    SYSTEM_DATE_TIME_SET_TIME_ZONE = 0x17240000;
+
+    // TvSettings > System > Date & time > Set time zone > [A time zone button]
+    SYSTEM_DATE_TIME_SET_TIME_ZONE_BUTTON = 0x17241000;
+
+    // TvSettings > System > Date & time > Use 24-hour format (toggle)
+    SYSTEM_DATE_TIME_USE_24_HOUR_FORMAT = 0x17250000;
+
+    // TvSettings > System > Language
+    SYSTEM_LANGUAGE = 0x17300000;
+
+    // TvSettings > System > Language > [A language button]
+    SYSTEM_LANGUAGE_BUTTON = 0x17310000;
+
+    // TvSettings > System > Keyboard
+    SYSTEM_KEYBOARD = 0x17400000;
+
+    // TvSettings > System > Keyboard > Current keyboard
+    SYSTEM_KEYBOARD_CURRENT_KEYBOARD = 0x17410000;
+
+    // TvSettings > System > Keyboard > Gboard Settings
+    SYSTEM_KEYBOARD_GBOARD_SETTINGS = 0x17420000;
+
+    // TvSettings > System > Keyboard > Gboard Settings > Languages
+    SYSTEM_KEYBOARD_GBOARD_SETTINGS_LANGUAGES = 0x17421000;
+
+    // TvSettings > System > Keyboard > Gboard Settings > Terms of services
+    SYSTEM_KEYBOARD_GBOARD_SETTINGS_TOS = 0x17422000;
+
+    // TvSettings > System > Keyboard > Gboard Settings > Privacy policy
+    SYSTEM_KEYBOARD_GBOARD_SETTINGS_PRIVACY_POLICY = 0x17423000;
+
+    // TvSettings > System > Keyboard > Gboard Settings > Open source licenses
+    SYSTEM_KEYBOARD_GBOARD_SETTINGS_OPEN_SOURCE = 0x17424000;
+
+    // TvSettings > System > Keyboard > Gboard Settings >
+    // Share usage statistics (toggle)
+    SYSTEM_KEYBOARD_GBOARD_SETTINGS_SHARE_USAGE_STATS = 0x17425000;
+
+    // TvSettings > System > Keyboard > Manage keyboards
+    SYSTEM_KEYBOARD_MANAGE_KEYBOARDS = 0x17430000;
+
+    // TvSettings > System > Storage
+    SYSTEM_STORAGE = 0x17500000;
+
+    // TvSettings > System > Internal shared storage
+    SYSTEM_STORAGE_INTERNAL_STORAGE = 0x17510000;
+
+    // TvSettings > System > Internal shared storage > Apps
+    SYSTEM_STORAGE_INTERNAL_STORAGE_APPS = 0x17511000;
+
+    // TvSettings > System > Internal shared storage >
+    // Cached data (brings up "Clear cached data?" dialog upon click)
+    SYSTEM_STORAGE_INTERNAL_STORAGE_CACHED = 0x17512000;
+
+    // TvSettings > System > Energy saver
+    SYSTEM_ENERGYSAVER = 0x17700000;
+
+    // TvSettings > System > Energy saver > Turn off display after
+    SYSTEM_ENERGYSAVER_START_DELAY = 0x17710000;
+
+    // TvSettings > System > Energy saver > Turn off display after > 15 minutes
+    SYSTEM_ENERGYSAVER_START_DELAY_15M = 0x17711000;
+
+    // TvSettings > System > Energy saver > Turn off display after > 30 minutes
+    SYSTEM_ENERGYSAVER_START_DELAY_30M = 0x17712000;
+
+    // TvSettings > System > Energy saver > Turn off display after > 1 hour
+    SYSTEM_ENERGYSAVER_START_DELAY_1H = 0x17713000;
+
+    // TvSettings > System > Energy saver > Turn off display after > 3 hours
+    SYSTEM_ENERGYSAVER_START_DELAY_3H = 0x17714000;
+
+    // TvSettings > System > Energy saver > Turn off display after > 6 hours
+    SYSTEM_ENERGYSAVER_START_DELAY_6H = 0x17715000;
+
+    // TvSettings > System > Energy saver > Turn off display after > 12 hours
+    SYSTEM_ENERGYSAVER_START_DELAY_12H = 0x17716000;
+
+    // TvSettings > System > Energy saver > Turn off display after > Never
+    SYSTEM_ENERGYSAVER_START_DELAY_NEVER = 0x17717000;
+
+    // TvSettings > System > Accessibility
+    SYSTEM_A11Y = 0x17800000;
+
+    // TvSettings > System > Accessibility > Captions
+    SYSTEM_A11Y_CAPTIONS = 0x17810000;
+
+    // TvSettings > System > Accessibility > Captions > Display (toggle)
+    SYSTEM_A11Y_CAPTIONS_DISPLAY_ON_OFF = 0x17811000;
+
+    // TvSettings > System > Accessibility > Captions > Language
+    SYSTEM_A11Y_CAPTIONS_LANGUAGE = 0x17812000;
+
+    // TvSettings > System > Accessibility > Captions > Language > [A language]
+    SYSTEM_A11Y_CAPTIONS_LANGUAGE_BUTTON = 0x17812100;
+
+    // TvSettings > System > Accessibility > Captions > Text size
+    SYSTEM_A11Y_CAPTIONS_TEXT_SIZE = 0x17813000;
+
+    // TvSettings > System > Accessibility > Captions > Text size > Very small
+    SYSTEM_A11Y_CAPTIONS_TEXT_SIZE_VERY_SMALL = 0x17813100;
+
+    // TvSettings > System > Accessibility > Captions > Text size > Small
+    SYSTEM_A11Y_CAPTIONS_TEXT_SIZE_SMALL = 0x17813200;
+
+    // TvSettings > System > Accessibility > Captions > Text size > Normal
+    SYSTEM_A11Y_CAPTIONS_TEXT_SIZE_NORMAL = 0x17813300;
+
+    // TvSettings > System > Accessibility > Captions > Text size > Large
+    SYSTEM_A11Y_CAPTIONS_TEXT_SIZE_LARGE = 0x17813400;
+
+    // TvSettings > System > Accessibility > Captions > Text size > Very large
+    SYSTEM_A11Y_CAPTIONS_TEXT_SIZE_VERY_LARGE = 0x17813500;
+
+    // TvSettings > System > Accessibility > Captions >
+    // White on black (radio button)
+    SYSTEM_A11Y_CAPTIONS_WHITE_ON_BLACK = 0x17814000;
+
+    // TvSettings > System > Accessibility > Captions >
+    // Black on white (radio button)
+    SYSTEM_A11Y_CAPTIONS_BLACK_ON_WHITE = 0x17815000;
+
+    // TvSettings > System > Accessibility > Captions >
+    // Yellow on black (radio button)
+    SYSTEM_A11Y_CAPTIONS_YELLOW_ON_BLACK = 0x17816000;
+
+    // TvSettings > System > Accessibility > Captions >
+    // Yellow on blue (radio button)
+    SYSTEM_A11Y_CAPTIONS_YELLOW_ON_BLUE = 0x17817000;
+
+    // TvSettings > System > Accessibility > Captions > Custom
+    SYSTEM_A11Y_CAPTIONS_CUSTOM = 0x17818000;
+
+    // TvSettings > System > Accessibility > Captions > Custom > Font family
+    SYSTEM_A11Y_CAPTIONS_CUSTOM_FONT = 0x17818100;
+
+    // TvSettings > System > Accessibility > Captions > Custom > Text color
+    SYSTEM_A11Y_CAPTIONS_CUSTOM_TEXT_COLOR = 0x17818200;
+
+    // TvSettings > System > Accessibility > Captions > Custom > Text opacity
+    SYSTEM_A11Y_CAPTIONS_CUSTOM_TEXT_OPACITY = 0x17818300;
+
+    // TvSettings > System > Accessibility > Captions > Custom > Edge type
+    SYSTEM_A11Y_CAPTIONS_CUSTOM_EDGE_TYPE = 0x17818400;
+
+    // TvSettings > System > Accessibility > Captions > Custom > Edge color
+    SYSTEM_A11Y_CAPTIONS_CUSTOM_EDGE_COLOR = 0x17818500;
+
+    // TvSettings > System > Accessibility > Captions > Custom >
+    // Show background (toggle)
+    SYSTEM_A11Y_CAPTIONS_SHOW_BACKGROUND = 0x17818600;
+
+    // TvSettings > System > Accessibility > Captions > Custom >
+    // Background color
+    SYSTEM_A11Y_CAPTIONS_BACKGROUND_COLOR = 0x17818700;
+
+    // TvSettings > System > Accessibility > Captions > Custom >
+    // Background opacity
+    SYSTEM_A11Y_CAPTIONS_BACKGROUND_OPACITY = 0x17818800;
+
+    // TvSettings > System > Accessibility > Captions > Custom >
+    // Show window (toggle)
+    SYSTEM_A11Y_CAPTIONS_SHOW_WINDOW = 0x17818900;
+
+    // TvSettings > System > Accessibility > Captions > Custom > Window color
+    SYSTEM_A11Y_CAPTIONS_WINDOW_COLOR = 0x17818A00;
+
+    // TvSettings > System > Accessibility > Captions > Custom > Window opacity
+    SYSTEM_A11Y_CAPTIONS_WINDOW_OPACITY = 0x17818B00;
+
+    // TvSettings > System > Accessibility > High contrast text (toggle)
+    SYSTEM_A11Y_HIGH_CONTRAST_TEXT = 0x17820000;
+
+    // TvSettings > System > Accessibility > Text to speech
+    SYSTEM_A11Y_TTS = 0x17830000;
+
+    // TvSettings > System > Accessibility > Text to speech > [Select an engine]
+    SYSTEM_A11Y_TTS_ENGINE_SELECT = 0x17831000;
+
+    // TvSettings > System > Accessibility > Text to speech >
+    // Engine configuration
+    SYSTEM_A11Y_TTS_ENGINE_CONFIG = 0x17832000;
+
+    // TvSettings > System > Accessibility > Text to speech >
+    // Engine configuration > Language
+    SYSTEM_A11Y_TTS_ENGINE_CONFIG_LANGUAGE = 0x17832100;
+
+    // TvSettings > System > Accessibility > Text to speech >
+    // Engine configuration > Language > Button
+    SYSTEM_A11Y_TTS_ENGINE_CONFIG_LANGUAGE_CHOOSE_LANGUAGE = 0x17832110;
+
+    // TvSettings > System > Accessibility > Text to speech >
+    // Engine configuration > Settings for Google Text-to-speech Engine
+    SYSTEM_A11Y_TTS_ENGINE_CONFIG_SETTINGS_GTTS_ENGINE = 0x17832200;
+
+    // TvSettings > System > Accessibility > Text to speech >
+    // Engine configuration > Install voice data
+    SYSTEM_A11Y_TTS_ENGINE_CONFIG_INSTALL_VOICE_DATA = 0x17832300;
+
+    // TvSettings > System > Accessibility > Text to speech > Speech rate
+    SYSTEM_A11Y_TTS_SPEECH_RATE = 0x17833000;
+
+    // TvSettings > System > Accessibility > Text to speech >
+    // Listen to an example
+    SYSTEM_A11Y_TTS_LISTEN_EXAMPLE = 0x17834000;
+
+    // TvSettings > System > Accessibility > Accessibility shortcut
+    SYSTEM_A11Y_SHORTCUT = 0x17840000;
+
+    // TvSettings > System > Accessibility > Accessibility shortcut >
+    // Enable (toggle)
+    SYSTEM_A11Y_SHORTCUT_ON_OFF = 0x17841000;
+
+    // TvSettings > System > Accessibility > Accessibility shortcut >
+    // Shortcut services
+    SYSTEM_A11Y_SHORTCUT_SERVICE = 0x17842000;
+
+    // TvSettings > System > Accessibility > TalkBack
+    SYSTEM_A11Y_TALKBACK = 0x17850000;
+
+    // TvSettings > System > Accessibility > TalkBack > Enable (toggle)
+    SYSTEM_A11Y_TALKBACK_ON_OFF = 0x17851000;
+
+    // TvSettings > System > Accessibility > TalkBack > Configuration
+    SYSTEM_A11Y_TALKBACK_CONFIG = 0x17852000;
+
+    // TvSettings > System > Accessibility > Accessibility Menu
+    SYSTEM_A11Y_A11Y_MENU = 0x17860000;
+
+    // TvSettings > System > Accessibility > Accessibility Menu >
+    // Enable (toggle)
+    SYSTEM_A11Y_A11Y_MENU_ON_OFF = 0x17861000;
+
+    // TvSettings > System > Accessibility > Accessibility Menu > Configuration
+    SYSTEM_A11Y_A11Y_MENU_CONFIG = 0x17862000;
+
+    // TvSettings > System > Accessibility > Select to Speak
+    SYSTEM_A11Y_STS = 0x17870000;
+
+    // TvSettings > System > Accessibility > Select to Speak > Enable (toggle)
+    SYSTEM_A11Y_STS_ON_OFF = 0x17871000;
+
+    // TvSettings > System > Accessibility > Select to Speak > Configuration
+    SYSTEM_A11Y_STS_CONFIG = 0x17872000;
+
+    // TvSettings > System > Accessibility > Switch Access
+    SYSTEM_A11Y_SWITCH_ACCESS = 0x17880000;
+
+    // TvSettings > System > Accessibility > Switch Access > Enable (Toggle)
+    SYSTEM_A11Y_SWITCH_ACCESS_ON_OFF = 0x17881000;
+
+    // TvSettings > System > Accessibility > Switch Access > Configuration
+    SYSTEM_A11Y_SWITCH_ACCESS_CONFIG = 0x17882000;
+
+    // TvSettings > System > Reboot
+    SYSTEM_REBOOT = 0x17900000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings)
+    PREFERENCES_HOME_SCREEN = 0x17A00000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Customize channels
+    PREFERENCES_HOME_SCREEN_CUSTOMIZE_CHANNELS = 0x17A10000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Customize channels > Play Next
+    PREFERENCES_HOME_SCREEN_CUSTOMIZE_CHANNELS_PN = 0x17A11000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Customize channels > Play Next > On (toggle)
+    PREFERENCES_HOME_SCREEN_CUSTOMIZE_CHANNELS_PN_ON_OFF = 0x17A11100;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Customize channels > Play Next > Google Play Movies & TV (toggle)
+    PREFERENCES_HOME_SCREEN_CUSTOMIZE_CHANNELS_PN_GPMT = 0x17A11200;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Customize channels > Play Next > Google Play Music (toggle)
+    PREFERENCES_HOME_SCREEN_CUSTOMIZE_CHANNELS_PN_GPM = 0x17A11300;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Customize channels > Play Next > Promotional channels (toggle)
+    PREFERENCES_HOME_SCREEN_CUSTOMIZE_CHANNELS_PN_PROMOTIONAL = 0x17A11400;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Customize channels > Home screen channels
+    PREFERENCES_HOME_SCREEN_CUSTOMIZE_CHANNELS_HOME_SCREEN = 0x17A12000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Customize channels > Promotional channels
+    PREFERENCES_HOME_SCREEN_CUSTOMIZE_CHANNELS_PROMOTIONAL = 0x17A13000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Enable video previews (toggle)
+    PREFERENCES_HOME_SCREEN_VIDEO_PREVIEWS = 0x17A20000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Enable audio previews (toggle)
+    PREFERENCES_HOME_SCREEN_AUDIO_PREVIEWS = 0x17A30000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Reorder apps
+    PREFERENCES_HOME_SCREEN_REORDER_APPS = 0x17A40000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Reorder games
+    PREFERENCES_HOME_SCREEN_REORDER_GAMES = 0x17A50000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Android TV Home open source licenses
+    PREFERENCES_HOME_SCREEN_ATVH_OPEN_SOURCE = 0x17A60000;
+
+    // TvSettings > Device Preferences > Home screen (in classic TvSettings) >
+    // Android TV Core Services open source licenses
+    PREFERENCES_HOME_SCREEN_ATVCS_OPEN_SOURCE = 0x17A70000;
+
+    // TvSettings > Device Preferences > Google Assistant
+    PREFERENCES_ASSISTANT = 0x17B00000;
+
+    // TvSettings > Device Preferences > Google Assistant > Accounts
+    PREFERENCES_ASSISTANT_ACCOUNTS = 0x17B10000;
+
+    // TvSettings > Device Preferences > Google Assistant > Accept permissions
+    PREFERENCES_ASSISTANT_ACCEPT_PERMISSIONS = 0x17B20000;
+
+    // TvSettings > Device Preferences > Google Assistant > View permissions
+    PREFERENCES_ASSISTANT_VIEW_PERMISSIONS = 0x17B30000;
+
+    // TvSettings > Device Preferences > Google Assistant > Searchable apps
+    // (aliasing ACCOUNT_SLICE_REG_ACCOUNT_ASSISTANT_SEARCHABLE_APPS)
+    PREFERENCES_ASSISTANT_SEARCHABLE_APPS = 0x12133000;
+
+    // TvSettings > Device Preferences > Google Assistant > SafeSearch filter
+    // (aliasing ACCOUNT_SLICE_REG_ACCOUNT_ASSISTANT_SAFE_SEARCH)
+    PREFERENCES_ASSISTANT_SAFESEARCH_FILTER = 0x12131000;
+
+    // TvSettings > Device Preferences > Google Assistant >
+    // Block offensive words
+    // (aliasing ACCOUNT_SLICE_REG_ACCOUNT_ASSISTANT_BLOCK_OFFENSIVE)
+    PREFERENCES_ASSISTANT_BLOCK_OFFENSIVE = 0x12132000;
+
+    // TvSettings > Device Preferences > Google Assistant > Open source licenses
+    PREFERENCES_ASSISTANT_OPEN_SOURCE = 0x17B40000;
+
+    // TvSettings > Device Preferences > Chromecast Android Shell
+    PREFERENCES_CHROMECAST_SHELL = 0x17C00000;
+
+    // TvSettings > Device Preferences > Chromecast Android Shell >
+    // Open source licenses
+    PREFERENCES_CHROMECAST_SHELL_OPEN_SOURCE = 0x17C10000;
+
+    // TvSettings > Device Preferences > Screen saver
+    PREFERENCES_SCREENSAVER = 0x17D00000;
+
+    // TvSettings > Device Preferences > Screen saver > Screen saver (chooser)
+    PREFERENCES_SCREENSAVER_CHOOSER = 0x17D10000;
+
+    // TvSettings > Device Preferences > Screen saver > Screen saver (chooser) >
+    // Turn screen off
+    PREFERENCES_SCREENSAVER_CHOOSER_SCREEN_OFF = 0x17D11000;
+
+    // TvSettings > Device Preferences > Screen saver > Screen saver (chooser) >
+    // Backdrop
+    PREFERENCES_SCREENSAVER_CHOOSER_BACKDROP = 0x17D12000;
+
+    // TvSettings > Device Preferences > Screen saver > Screen saver (chooser) >
+    // Colors
+    PREFERENCES_SCREENSAVER_CHOOSER_COLORS = 0x17D13000;
+
+    // TvSettings > Device Preferences > Screen saver > When to start
+    PREFERENCES_SCREENSAVER_START_DELAY = 0x17D20000;
+
+    // TvSettings > Device Preferences > Screen saver > When to start >
+    // 5 minutes
+    PREFERENCES_SCREENSAVER_START_DELAY_5M = 0x17D21000;
+
+    // TvSettings > Device Preferences > Screen saver > When to start >
+    // 15 minutes
+    PREFERENCES_SCREENSAVER_START_DELAY_15M = 0x17D22000;
+
+    // TvSettings > Device Preferences > Screen saver > When to start >
+    // 30 minutes
+    PREFERENCES_SCREENSAVER_START_DELAY_30M = 0x17D23000;
+
+    // TvSettings > Device Preferences > Screen saver > When to start >
+    // 1 hour
+    PREFERENCES_SCREENSAVER_START_DELAY_1H = 0x17D24000;
+
+    // TvSettings > Device Preferences > Screen saver > When to start >
+    // 2 hours
+    PREFERENCES_SCREENSAVER_START_DELAY_2H = 0x17D25000;
+
+    // TvSettings > Device Preferences > Screen saver > Start now
+    PREFERENCES_SCREENSAVER_START_NOW = 0x17D30000;
+
+    // TvSettings > Connected Devices (Slice)
+    CONNECTED_SLICE = 0x18000000;
+
+    // TvSettings > Connected Devices (Slice) > Connect remote or headphones
+    CONNECTED_SLICE_CONNECT_NEW_DEVICES = 0x18100000;
+
+    // TvSettings > Connected Devices (Slice) > [A connected device]
+    CONNECTED_SLICE_DEVICE_ENTRY = 0x18200000;
+
+    // TvSettings > Connected Devices (Slice) > [A connected device] >
+    // Remote update
+    CONNECTED_SLICE_DEVICE_ENTRY_UPDATE = 0x18210000;
+
+    // TvSettings > Connected Devices (Slice) > [A connected device] > Rename
+    CONNECTED_SLICE_DEVICE_ENTRY_RENAME = 0x18220000;
+
+    // TvSettings > Connected Devices (Slice) > [A connected device] > Forget
+    CONNECTED_SLICE_DEVICE_ENTRY_FORGET = 0x18230000;
+
+    // TvSettings > Connected Devices (Slice) > HDMI-CEC
+    CONNECTED_SLICE_HDMICEC = 0x18300000;
+
+    // TvSettings > Connected Devices (Slice) > HDMI-CEC > Enable (toggle)
+    CONNECTED_SLICE_HDMICEC_ON_OFF = 0x18310000;
+
+    // TvSettings > Connected Devices (aliasing CONNECTED_SLICE)
+    CONNECTED_CLASSIC = 0x18000000;
+
+    // TvSettings > Connected Devices > Connect remote
+    // (aliasing CONNECTED_SLICE_CONNECT_NEW_DEVICES)
+    CONNECTED_CLASSIC_CONNECT_REMOTE = 0x18100000;
+
+    // TvSettings > Connected Devices > [A connected device]
+    // (aliasing CONNECTED_SLICE_DEVICE_ENTRY)
+    CONNECTED_CLASSIC_DEVICE_ENTRY = 0x18200000;
+
+    // TvSettings > Connected Devices > [A connected device] > Update
+    // (aliasing CONNECTED_SLICE_DEVICE_ENTRY_UPDATE)
+    CONNECTED_CLASSIC_DEVICE_ENTRY_UPDATE = 0x18210000;
+
+    // TvSettings > Connected Devices > [A connected device] > Rename
+    // (aliasing CONNECTED_SLICE_DEVICE_ENTRY_RENAME)
+    CONNECTED_CLASSIC_DEVICE_ENTRY_RENAME = 0x18220000;
+
+    // TvSettings > Connected Devices > [A connected device] > Forget
+    // (aliasing CONNECTED_SLICE_DEVICE_ENTRY_FORGET)
+    CONNECTED_CLASSIC_DEVICE_ENTRY_FORGET = 0x18230000;
+
+    // TvSettings > Connected Devices > HDMI-CEC
+    // (aliasing CONNECTED_SLICE_HDMICEC)
+    CONNECTED_CLASSIC_HDMICEC = 0x18300000;
+
+    // TvSettings > Connected Devices > HDMI-CEC > Enable (toggle)
+    // (aliasing CONNECTED_SLICE_HDMICEC_ON_OFF)
+    CONNECTED_CLASSIC_HDMICEC_ON_OFF = 0x18310000;
+
+    // TvSettings > Help & Feedback
+    FEEDBACK = 0x19000000;
+
+    // TvSettings > Help & Feedback > Send feedback
+    FEEDBACK_SEND = 0x19100000;
+}
