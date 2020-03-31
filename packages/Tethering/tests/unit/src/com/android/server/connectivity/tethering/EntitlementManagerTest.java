@@ -17,8 +17,10 @@
 package com.android.server.connectivity.tethering;
 
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
+import static android.net.TetheringManager.TETHERING_ETHERNET;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
+import static android.net.TetheringManager.TETHERING_WIFI_P2P;
 import static android.net.TetheringManager.TETHER_ERROR_ENTITLEMENT_UNKNOWN;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_PROVISIONING_FAILED;
@@ -353,6 +355,20 @@ public final class EntitlementManagerTest {
         callbackTimeoutHelper(mCallbacklatch);
         assertEquals(0, mEnMgr.uiProvisionCount);
         mEnMgr.reset();
+        // 8. Test get value for invalid downstream type.
+        mEnMgr.fakeEntitlementResult = TETHER_ERROR_NO_ERROR;
+        receiver = new ResultReceiver(null) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                assertEquals(TETHER_ERROR_ENTITLEMENT_UNKNOWN, resultCode);
+                mCallbacklatch.countDown();
+            }
+        };
+        mEnMgr.requestLatestTetheringEntitlementResult(TETHERING_WIFI_P2P, receiver, true);
+        mLooper.dispatchAll();
+        callbackTimeoutHelper(mCallbacklatch);
+        assertEquals(0, mEnMgr.uiProvisionCount);
+        mEnMgr.reset();
     }
 
     void callbackTimeoutHelper(final CountDownLatch latch) throws Exception {
@@ -471,6 +487,22 @@ public final class EntitlementManagerTest {
         mLooper.dispatchAll();
         assertEquals(0, mEnMgr.uiProvisionCount);
         assertEquals(3, mEnMgr.silentProvisionCount);
+        assertFalse(mEnMgr.isCellularUpstreamPermitted());
+        mEnMgr.reset();
+        // 7. start ui provisioning, upstream is mobile, downstream is ethernet
+        mEnMgr.fakeEntitlementResult = TETHER_ERROR_NO_ERROR;
+        mEnMgr.startProvisioningIfNeeded(TETHERING_ETHERNET, true);
+        mLooper.dispatchAll();
+        assertEquals(1, mEnMgr.uiProvisionCount);
+        assertEquals(0, mEnMgr.silentProvisionCount);
+        assertTrue(mEnMgr.isCellularUpstreamPermitted());
+        mEnMgr.reset();
+        // 8. downstream is invalid
+        mEnMgr.fakeEntitlementResult = TETHER_ERROR_NO_ERROR;
+        mEnMgr.startProvisioningIfNeeded(TETHERING_WIFI_P2P, true);
+        mLooper.dispatchAll();
+        assertEquals(0, mEnMgr.uiProvisionCount);
+        assertEquals(0, mEnMgr.silentProvisionCount);
         mEnMgr.reset();
     }
 
