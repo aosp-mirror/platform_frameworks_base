@@ -902,6 +902,60 @@ void StatsLogProcessor::WriteMetadataToProtoLocked(int64_t currentWallClockTimeN
     }
 }
 
+void StatsLogProcessor::LoadMetadataFromDisk(int64_t currentWallClockTimeNs,
+                                             int64_t systemElapsedTimeNs) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    string file_name = StringPrintf("%s/metadata", STATS_METADATA_DIR);
+    int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
+    if (-1 == fd) {
+        VLOG("Attempt to read %s but failed", file_name.c_str());
+        StorageManager::deleteFile(file_name.c_str());
+        return;
+    }
+    string content;
+    if (!android::base::ReadFdToString(fd, &content)) {
+        ALOGE("Attempt to read %s but failed", file_name.c_str());
+        close(fd);
+        StorageManager::deleteFile(file_name.c_str());
+        return;
+    }
+
+    close(fd);
+
+    metadata::StatsMetadataList statsMetadataList;
+    if (!statsMetadataList.ParseFromString(content)) {
+        ALOGE("Attempt to read %s but failed; failed to metadata", file_name.c_str());
+        StorageManager::deleteFile(file_name.c_str());
+        return;
+    }
+    SetMetadataStateLocked(statsMetadataList, currentWallClockTimeNs, systemElapsedTimeNs);
+    StorageManager::deleteFile(file_name.c_str());
+}
+
+void StatsLogProcessor::SetMetadataState(const metadata::StatsMetadataList& statsMetadataList,
+                                         int64_t currentWallClockTimeNs,
+                                         int64_t systemElapsedTimeNs) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    SetMetadataStateLocked(statsMetadataList, currentWallClockTimeNs, systemElapsedTimeNs);
+}
+
+void StatsLogProcessor::SetMetadataStateLocked(
+        const metadata::StatsMetadataList& statsMetadataList,
+        int64_t currentWallClockTimeNs,
+        int64_t systemElapsedTimeNs) {
+    for (const metadata::StatsMetadata& metadata : statsMetadataList.stats_metadata()) {
+        ConfigKey key(metadata.config_key().uid(), metadata.config_key().config_id());
+        auto it = mMetricsManagers.find(key);
+        if (it == mMetricsManagers.end()) {
+            ALOGE("No config found for configKey %s", key.ToString().c_str());
+            continue;
+        }
+        VLOG("Setting metadata %s", key.ToString().c_str());
+        it->second->loadMetadata(metadata, currentWallClockTimeNs, systemElapsedTimeNs);
+    }
+    VLOG("Successfully loaded %d metadata.", statsMetadataList.stats_metadata_size());
+}
+
 void StatsLogProcessor::WriteActiveConfigsToProtoOutputStream(
         int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);

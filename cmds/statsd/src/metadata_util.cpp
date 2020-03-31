@@ -21,6 +21,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+using google::protobuf::RepeatedPtrField;
+
 void writeValueToProto(metadata::FieldValue* metadataFieldValue, const Value& value) {
     std::string storage_value;
     switch (value.getType()) {
@@ -66,6 +68,53 @@ void writeMetricDimensionKeyToMetadataDimensionKey(
         metadataField->set_field(fieldValue.mField.getField());
         writeValueToProto(metadataFieldValue, fieldValue.mValue);
     }
+}
+
+void writeFieldValuesFromMetadata(
+        const RepeatedPtrField<metadata::FieldValue>& repeatedFieldValueList,
+        std::vector<FieldValue>* fieldValues) {
+    for (const metadata::FieldValue& metadataFieldValue : repeatedFieldValueList) {
+        Field field(metadataFieldValue.field().tag(), metadataFieldValue.field().field());
+        Value value;
+        switch (metadataFieldValue.value_case()) {
+            case metadata::FieldValue::ValueCase::kValueInt:
+                value = Value(metadataFieldValue.value_int());
+                break;
+            case metadata::FieldValue::ValueCase::kValueLong:
+                value = Value(metadataFieldValue.value_long());
+                break;
+            case metadata::FieldValue::ValueCase::kValueFloat:
+                value = Value(metadataFieldValue.value_float());
+                break;
+            case metadata::FieldValue::ValueCase::kValueDouble:
+                value = Value(metadataFieldValue.value_double());
+                break;
+            case metadata::FieldValue::ValueCase::kValueStr:
+                value = Value(metadataFieldValue.value_str());
+                break;
+            case metadata::FieldValue::ValueCase::kValueStorage:
+                value = Value(metadataFieldValue.value_storage());
+                break;
+            default:
+                break;
+        }
+        FieldValue fieldValue(field, value);
+        fieldValues->emplace_back(field, value);
+    }
+}
+
+MetricDimensionKey loadMetricDimensionKeyFromProto(
+        const metadata::MetricDimensionKey& metricDimensionKey) {
+    std::vector<FieldValue> dimKeyInWhatFieldValues;
+    writeFieldValuesFromMetadata(metricDimensionKey.dimension_key_in_what(),
+            &dimKeyInWhatFieldValues);
+    std::vector<FieldValue> stateValuesFieldValues;
+    writeFieldValuesFromMetadata(metricDimensionKey.state_values_key(), &stateValuesFieldValues);
+
+    HashableDimensionKey dimKeyInWhat(dimKeyInWhatFieldValues);
+    HashableDimensionKey stateValues(stateValuesFieldValues);
+    MetricDimensionKey metricKey(dimKeyInWhat, stateValues);
+    return metricKey;
 }
 
 }  // namespace statsd

@@ -298,6 +298,24 @@ bool AnomalyTracker::writeAlertMetadataToProto(int64_t currentWallClockTimeNs,
     return metadataWritten;
 }
 
+void AnomalyTracker::loadAlertMetadata(
+        const metadata::AlertMetadata& alertMetadata,
+        int64_t currentWallClockTimeNs,
+        int64_t systemElapsedTimeNs) {
+    for (const metadata::AlertDimensionKeyedData& keyedData :
+            alertMetadata.alert_dim_keyed_data()) {
+        if ((uint64_t) keyedData.last_refractory_ends_sec() < currentWallClockTimeNs / NS_PER_SEC) {
+            // Do not update the timestamp if it has already expired.
+            continue;
+        }
+        MetricDimensionKey metricKey = loadMetricDimensionKeyFromProto(
+                keyedData.dimension_key());
+        int32_t refractoryPeriodEndsSec = (int32_t) keyedData.last_refractory_ends_sec() -
+                currentWallClockTimeNs / NS_PER_SEC + systemElapsedTimeNs / NS_PER_SEC;
+        mRefractoryPeriodEndsSec[metricKey] = refractoryPeriodEndsSec;
+    }
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

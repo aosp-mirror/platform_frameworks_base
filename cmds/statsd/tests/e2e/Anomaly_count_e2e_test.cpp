@@ -328,6 +328,59 @@ TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk) {
     EXPECT_EQ(dimKeyInWhat.field().field(), fieldValue1.mField.getField());
     EXPECT_EQ(dimKeyInWhat.value_int(), fieldValue1.mValue.int_value);
 }
+
+TEST(AnomalyDetectionE2eTest, TestCountMetric_load_refractory_from_disk) {
+    const int num_buckets = 1;
+    const int threshold = 0;
+    const int refractory_period_sec = 86400 * 365; // 1 year
+    auto config = CreateStatsdConfig(num_buckets, threshold, refractory_period_sec);
+    const int64_t alert_id = config.alert(0).id();
+
+    int64_t bucketStartTimeNs = 10000000000;
+
+    int configUid = 2000;
+    int64_t configId = 1000;
+    ConfigKey cfgKey(configUid, configId);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+    EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
+
+    sp<AnomalyTracker> anomalyTracker =
+            processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers[0];
+
+    std::vector<int> attributionUids1 = {111};
+    std::vector<string> attributionTags1 = {"App1"};
+    std::vector<int> attributionUids2 = {111, 222};
+    std::vector<string> attributionTags2 = {"App1", "GMSCoreModule1"};
+
+    FieldValue fieldValue1(Field(util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
+                           Value((int32_t)111));
+    HashableDimensionKey whatKey1({fieldValue1});
+    MetricDimensionKey dimensionKey1(whatKey1, DEFAULT_DIMENSION_KEY);
+
+    auto event = CreateAcquireWakelockEvent(bucketStartTimeNs + 2, attributionUids1,
+                                            attributionTags1, "wl1");
+    processor->OnLogEvent(event.get());
+    EXPECT_EQ(refractory_period_sec + (bucketStartTimeNs + 2) / NS_PER_SEC + 1,
+              anomalyTracker->getRefractoryPeriodEndsSec(dimensionKey1));
+
+    int64_t mockWallClockNs = 1584991200 * NS_PER_SEC;
+    int64_t mockElapsedTimeNs = bucketStartTimeNs + 5000 * NS_PER_SEC;
+    processor->SaveMetadataToDisk(mockWallClockNs, mockElapsedTimeNs);
+
+    auto processor2 = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+    int64_t mockElapsedTimeSinceBoot = 10 * NS_PER_SEC;
+    processor2->LoadMetadataFromDisk(mockWallClockNs, mockElapsedTimeSinceBoot);
+
+    sp<AnomalyTracker> anomalyTracker2 =
+                processor2->mMetricsManagers.begin()->second->mAllAnomalyTrackers[0];
+    EXPECT_EQ(anomalyTracker2->getRefractoryPeriodEndsSec(dimensionKey1) -
+              mockElapsedTimeSinceBoot / NS_PER_SEC,
+              anomalyTracker->getRefractoryPeriodEndsSec(dimensionKey1) -
+              mockElapsedTimeNs / NS_PER_SEC);
+}
+
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

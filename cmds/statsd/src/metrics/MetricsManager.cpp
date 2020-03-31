@@ -579,6 +579,22 @@ bool MetricsManager::writeMetadataToProto(int64_t currentWallClockTimeNs,
     return metadataWritten;
 }
 
+void MetricsManager::loadMetadata(const metadata::StatsMetadata& metadata,
+                                  int64_t currentWallClockTimeNs,
+                                  int64_t systemElapsedTimeNs) {
+    for (const metadata::AlertMetadata& alertMetadata : metadata.alert_metadata()) {
+        int64_t alertId = alertMetadata.alert_id();
+        auto it = mAlertTrackerMap.find(alertId);
+        if (it == mAlertTrackerMap.end()) {
+            ALOGE("No anomalyTracker found for alertId %lld", (long long) alertId);
+            continue;
+        }
+        mAllAnomalyTrackers[it->second]->loadAlertMetadata(alertMetadata,
+                                                           currentWallClockTimeNs,
+                                                           systemElapsedTimeNs);
+    }
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

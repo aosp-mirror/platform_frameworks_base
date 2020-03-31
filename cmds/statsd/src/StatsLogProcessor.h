@@ -98,6 +98,15 @@ public:
                               int64_t systemElapsedTimeNs,
                               metadata::StatsMetadataList* metadataList);
 
+    /* Load stats metadata for configs and metrics from disk. */
+    void LoadMetadataFromDisk(int64_t currentWallClockTimeNs,
+                              int64_t systemElapsedTimeNs);
+
+    /* Sets the metadata for all configs and metrics */
+    void SetMetadataState(const metadata::StatsMetadataList& statsMetadataList,
+                          int64_t currentWallClockTimeNs,
+                          int64_t systemElapsedTimeNs);
+
     /* Sets the active status/ttl for all configs and metrics to the status in ActiveConfigList. */
     void SetConfigsActiveState(const ActiveConfigList& activeConfigList, int64_t currentTimeNs);
 
@@ -181,6 +190,10 @@ private:
 
     void SetConfigsActiveStateLocked(const ActiveConfigList& activeConfigList,
                                      int64_t currentTimeNs);
+
+    void SetMetadataStateLocked(const metadata::StatsMetadataList& statsMetadataList,
+                                int64_t currentWallClockTimeNs,
+                                int64_t systemElapsedTimeNs);
 
     void WriteMetadataToProtoLocked(int64_t currentWallClockTimeNs,
                                     int64_t systemElapsedTimeNs,
@@ -297,6 +310,7 @@ private:
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_multiple_buckets);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk_no_data_written);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_load_refractory_from_disk);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);

@@ -340,6 +340,7 @@ cc_test {
         "tests/log_event/LogEventQueue_test.cpp",
         "tests/LogEntryMatcher_test.cpp",
         "tests/LogEvent_test.cpp",
+        "tests/metadata_util_test.cpp",
         "tests/metrics/CountMetricProducer_test.cpp",
         "tests/metrics/DurationMetricProducer_test.cpp",
         "tests/metrics/EventMetricProducer_test.cpp",

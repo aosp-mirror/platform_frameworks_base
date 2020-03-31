@@ -24,6 +24,9 @@ namespace statsd {
 void writeMetricDimensionKeyToMetadataDimensionKey(const MetricDimensionKey& metricKey,
                                                    metadata::MetricDimensionKey* metadataMetricKey);
 
+MetricDimensionKey loadMetricDimensionKeyFromProto(
+        const metadata::MetricDimensionKey& metricDimensionKey);
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

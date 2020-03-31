@@ -1042,6 +1042,7 @@ Status StatsService::statsCompanionReady() {
 void StatsService::Startup() {
     mConfigManager->Startup();
     mProcessor->LoadActiveConfigsFromDisk();
+    mProcessor->LoadMetadataFromDisk(getWallClockNs(), getElapsedRealtimeNs());
 }
 
 void StatsService::Terminate() {
@@ -1298,6 +1299,7 @@ void StatsService::statsCompanionServiceDiedImpl() {
                 mProcessor->SetConfigsActiveState(activeConfigs, systemServerRestartNs);
             }
         }
+        mProcessor->SetMetadataState(metadataList, getWallClockNs(), systemServerRestartNs);
     }
     mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
     mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
