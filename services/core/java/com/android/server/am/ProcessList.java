@@ -94,7 +94,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
-import android.provider.DeviceConfig;
 import android.system.Os;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -151,10 +150,6 @@ public final class ProcessList {
     // A system property to control if obb app data isolation is enabled in vold.
     static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.sys.vold_app_data_isolation_enabled";
-
-    // A device config to control the minimum target SDK to enable app data isolation
-    static final String ANDROID_APP_DATA_ISOLATION_MIN_SDK =
-            "android_app_data_isolation_min_sdk";
 
     // The minimum time we allow between crashes, for us to consider this
     // application to be bad and stop and its services and reject broadcasts.
@@ -2124,25 +2119,6 @@ public final class ProcessList {
         }
     }
 
-    private boolean shouldIsolateAppData(ProcessRecord app) {
-        if (!mAppDataIsolationEnabled) {
-            return false;
-        }
-        if (!UserHandle.isApp(app.uid)) {
-            return false;
-        }
-        final int minTargetSdk = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                ANDROID_APP_DATA_ISOLATION_MIN_SDK, Build.VERSION_CODES.R);
-        if (app.info.targetSdkVersion < minTargetSdk) {
-            return false;
-        }
-
-        // TODO(b/147266020): Remove non-standard gating above & switch to isChangeEnabled.
-        mPlatformCompat.reportChange(APP_DATA_DIRECTORY_ISOLATION, app.info);
-
-        return true;
-    }
-
     private Map<String, Pair<String, Long>> getPackageAppDataInfoMap(PackageManagerInternal pmInt,
             String[] packages, int uid) {
         Map<String, Pair<String, Long>> result = new ArrayMap<>(packages.length);
@@ -2188,7 +2164,8 @@ public final class ProcessList {
             final Map<String, Pair<String, Long>> pkgDataInfoMap;
             boolean bindMountAppStorageDirs = false;
 
-            if (shouldIsolateAppData(app)) {
+            if (mAppDataIsolationEnabled && UserHandle.isApp(app.uid)
+                    && mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info)) {
                 // Get all packages belongs to the same shared uid. sharedPackages is empty array
                 // if it doesn't have shared uid.
                 final PackageManagerInternal pmInt = mService.getPackageManagerInternalLocked();
@@ -2198,8 +2175,8 @@ public final class ProcessList {
                         ? new String[]{app.info.packageName} : sharedPackages, uid);
 
                 int userId = UserHandle.getUserId(uid);
-                if (mVoldAppDataIsolationEnabled && UserHandle.isApp(app.uid) &&
-                        !storageManagerInternal.isExternalStorageService(uid)) {
+                if (mVoldAppDataIsolationEnabled
+                        && !storageManagerInternal.isExternalStorageService(uid)) {
                     bindMountAppStorageDirs = true;
                     if (!storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
                             app.processName)) {
