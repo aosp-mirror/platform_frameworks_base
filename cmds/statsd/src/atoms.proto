@@ -8170,6 +8170,9 @@ message TextSelectionEvent {
 
     // Name of source package.
     optional string package_name = 11;
+
+    // Name of the LangID model that is involved in this event.
+    optional string langid_model_name = 12;
 }
 
 /**
@@ -8210,6 +8213,9 @@ message TextLinkifyEvent {
 
     // Name of source package.
     optional string package_name = 11;
+
+    // Name of the LangID model that is involved in this event.
+    optional string langid_model_name = 12;
 }
 
 /**
@@ -8247,6 +8253,9 @@ message ConversationActionsEvent {
 
     // Name of the annotator model that is involved in this event.
     optional string annotator_model_name = 10;
+
+    // Name of the LangID model that is involved in this event.
+    optional string langid_model_name = 11;
 }
 
 /**
