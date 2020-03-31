@@ -42,7 +42,7 @@ class ForegroundServiceDismissalFeatureController @Inject constructor(
 private fun isEnabled(proxy: DeviceConfigProxy): Boolean {
     if (sIsEnabled == null) {
         sIsEnabled = proxy.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI, NOTIFICATIONS_ALLOW_FGS_DISMISSAL, true)
+                DeviceConfig.NAMESPACE_SYSTEMUI, NOTIFICATIONS_ALLOW_FGS_DISMISSAL, false)
     }
 
     return sIsEnabled!!
