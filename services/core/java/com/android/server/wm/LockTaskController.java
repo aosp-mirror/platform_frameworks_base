@@ -917,7 +917,7 @@ public class LockTaskController {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "LockTaskController");
+        pw.println(prefix + "LockTaskController:");
         prefix = prefix + "  ";
         pw.println(prefix + "mLockTaskModeState=" + lockTaskModeToString());
         pw.println(prefix + "mLockTaskModeTasks=");
@@ -929,6 +929,7 @@ public class LockTaskController {
             pw.println(prefix + "  u" + mLockTaskPackages.keyAt(i)
                     + ":" + Arrays.toString(mLockTaskPackages.valueAt(i)));
         }
+        pw.println();
     }
 
     private String lockTaskModeToString() {
