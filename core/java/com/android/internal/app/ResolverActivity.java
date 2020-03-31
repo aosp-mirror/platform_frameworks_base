@@ -994,8 +994,8 @@ public class ResolverActivity extends Activity implements
         if (isAutolaunching() || maybeAutolaunchActivity()) {
             return;
         }
-        if (shouldShowEmptyState(listAdapter)) {
-            mMultiProfilePagerAdapter.showNoAppsAvailableEmptyState(listAdapter);
+        if (isResolverListEmpty(listAdapter)) {
+            mMultiProfilePagerAdapter.showEmptyResolverListEmptyState(listAdapter);
         } else {
             mMultiProfilePagerAdapter.showListView(listAdapter);
         }
@@ -1640,12 +1640,12 @@ public class ResolverActivity extends Activity implements
 
     private void setupViewVisibilities() {
         ResolverListAdapter activeListAdapter = mMultiProfilePagerAdapter.getActiveListAdapter();
-        if (!shouldShowEmptyState(activeListAdapter)) {
+        if (!isResolverListEmpty(activeListAdapter)) {
             addUseDifferentAppLabelIfNecessary(activeListAdapter);
         }
     }
 
-    private boolean shouldShowEmptyState(ResolverListAdapter listAdapter) {
+    private boolean isResolverListEmpty(ResolverListAdapter listAdapter) {
         int count = listAdapter.getUnfilteredCount();
         return count == 0 && listAdapter.getPlaceholderCount() == 0;
     }
