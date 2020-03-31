@@ -407,10 +407,10 @@ class KeyguardController {
             // stack since it will be complicated/risky to try to put the activity on top
             // of the lock screen in the right fullscreen configuration.
             final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
-            if (!display.isSplitScreenModeActivated()) {
+            if (!display.mTaskContainers.isSplitScreenModeActivated()) {
                 return;
             }
-            display.onSplitScreenModeDismissed();
+            display.mTaskContainers.onSplitScreenModeDismissed();
         }
     }
 
@@ -565,6 +565,7 @@ class KeyguardController {
         dumpDisplayStates(pw, prefix);
         pw.println(prefix + "  mDismissalRequested=" + mDismissalRequested);
         pw.println(prefix + "  mVisibilityTransactionDepth=" + mVisibilityTransactionDepth);
+        pw.println();
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {

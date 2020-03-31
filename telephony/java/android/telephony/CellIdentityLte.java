@@ -76,6 +76,7 @@ public final class CellIdentityLte extends CellIdentity {
         mBandwidth = CellInfo.UNAVAILABLE;
         mAdditionalPlmns = new ArraySet<>();
         mCsgInfo = null;
+        mGlobalCellId = null;
     }
 
     /**
@@ -130,6 +131,7 @@ public final class CellIdentityLte extends CellIdentity {
             }
         }
         mCsgInfo = csgInfo;
+        updateGlobalCellId();
     }
 
     /** @hide */
@@ -170,6 +172,18 @@ public final class CellIdentityLte extends CellIdentity {
 
     @NonNull CellIdentityLte copy() {
         return new CellIdentityLte(this);
+    }
+
+    /** @hide */
+    @Override
+    protected void updateGlobalCellId() {
+        mGlobalCellId = null;
+        String plmn = getPlmn();
+        if (plmn == null) return;
+
+        if (mCi == CellInfo.UNAVAILABLE) return;
+
+        mGlobalCellId = plmn + String.format("%07x", mCi);
     }
 
     /**

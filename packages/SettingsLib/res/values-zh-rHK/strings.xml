@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP 位址和連接埠"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"掃瞄二維條碼"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"掃瞄二維條碼即可透過 Wi-Fi 配對裝置"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"請連線至 Wi-Fi 網絡"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, 偵錯, 開發"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"錯誤舉報捷徑"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"在電源選單中顯示提交錯誤舉報的按鈕"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"紅色弱視 (紅綠)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"藍色弱視 (藍黃)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"你可以用色彩校正調整裝置顯示嘅顏色"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已由「<xliff:g id="TITLE">%1$s</xliff:g>」覆寫"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"還有大約 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"電量剩餘約 <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"電量剩餘約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"還可用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"電池電量可能將於<xliff:g id="TIME">%1$s</xliff:g>耗盡"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"剩餘電量時間少於 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"還有少於 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"還有超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,42 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"手機喇叭"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"無法連接，請關閉裝置然後重新開機"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線音響裝置"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
+    <string name="help_label" msgid="3528360748637781274">"說明與意見反映"</string>
+    <string name="storage_category" msgid="2287342585424631813">"儲存空間"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"共用資料"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"查看和修改共用資料"</string>
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
     <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
     <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <string name="blob_id_text" msgid="8680078988996308061">"共用資料 ID：<xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"有效期至 <xliff:g id="DATE">%s</xliff:g>"</string>
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
     <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"應用程式共用資料"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"應用程式未提供描述。"</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"租用到期日：<xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"刪除共用資料"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"確定要刪除此共用資料嗎？"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"使用者擁有自己的應用程式和內容"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"您可以限制透過您的帳戶存取應用程式和內容"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"使用者"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"限制存取的個人檔案"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"新增使用者？"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"您可以建立其他使用者，與他人共用這部裝置。每位使用者都有專屬的空間，並可使用應用程式、桌布等項目自訂個人空間。此外，使用者也可以調整會影響所有人的裝置設定，例如 Wi‑Fi 設定。\n\n新增的使用者需要自行設定個人空間。\n\n任何使用者都可以為所有其他使用者更新應用程式。無障礙功能設定和服務可能無法轉移至新的使用者。"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"新增的使用者需要自行設定個人空間。\n\n任何使用者都可以為其他所有使用者更新應用程式。"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"立即設定使用者？"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"請確定對方現在可以使用裝置設定自己的空間"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"立即設定個人檔案？"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"立即設定"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"暫時不要"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"新增"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"新使用者"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"新個人檔案"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"使用者資訊"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"個人檔案資料"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"建立限制存取的個人檔案前，您必須先設定上鎖畫面來保護您的應用程式和個人資料。"</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"設定上鎖畫面"</string>
 </resources>

@@ -613,7 +613,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Ensure that we don't move the home stack if it is already behind the top fullscreen stack
         int homeStackIndex = mDefaultDisplay.getIndexOf(homeStack);
         assertEquals(fullscreenStack, mDefaultDisplay.getStackAbove(homeStack));
-        mDefaultDisplay.moveStackBehindBottomMostVisibleStack(homeStack);
+        mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(homeStack);
         assertEquals(homeStackIndex, mDefaultDisplay.getIndexOf(homeStack));
     }
 
@@ -632,7 +632,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Ensure that we don't move the home stack if it is already behind the top fullscreen stack
         int homeStackIndex = mDefaultDisplay.getIndexOf(homeStack);
         assertEquals(fullscreenStack, mDefaultDisplay.getStackAbove(homeStack));
-        mDefaultDisplay.moveStackBehindBottomMostVisibleStack(homeStack);
+        mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(homeStack);
         assertEquals(homeStackIndex, mDefaultDisplay.getIndexOf(homeStack));
     }
 
@@ -651,7 +651,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Ensure we don't move the home stack if it is already on top
         int homeStackIndex = mDefaultDisplay.getIndexOf(homeStack);
         assertNull(mDefaultDisplay.getStackAbove(homeStack));
-        mDefaultDisplay.moveStackBehindBottomMostVisibleStack(homeStack);
+        mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(homeStack);
         assertEquals(homeStackIndex, mDefaultDisplay.getIndexOf(homeStack));
     }
 
@@ -677,7 +677,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Ensure that we move the home stack behind the bottom most fullscreen stack, ignoring the
         // pinned stack
         assertEquals(fullscreenStack1, mDefaultDisplay.getStackAbove(homeStack));
-        mDefaultDisplay.moveStackBehindBottomMostVisibleStack(homeStack);
+        mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(homeStack);
         assertEquals(fullscreenStack2, mDefaultDisplay.getStackAbove(homeStack));
     }
 
@@ -702,7 +702,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Ensure that we move the home stack behind the bottom most non-translucent fullscreen
         // stack
         assertEquals(fullscreenStack1, mDefaultDisplay.getStackAbove(homeStack));
-        mDefaultDisplay.moveStackBehindBottomMostVisibleStack(homeStack);
+        mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(homeStack);
         assertEquals(fullscreenStack1, mDefaultDisplay.getStackAbove(homeStack));
     }
 
@@ -725,7 +725,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // Ensure we don't move the home stack behind itself
         int homeStackIndex = mDefaultDisplay.getIndexOf(homeStack);
-        mDefaultDisplay.moveStackBehindStack(homeStack, homeStack);
+        mDefaultDisplay.mTaskContainers.moveStackBehindStack(homeStack, homeStack);
         assertEquals(homeStackIndex, mDefaultDisplay.getIndexOf(homeStack));
     }
 
@@ -748,13 +748,13 @@ public class ActivityStackTests extends ActivityTestsBase {
         final ActivityStack homeStack = createStackForShouldBeVisibleTest(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
 
-        mDefaultDisplay.moveStackBehindStack(homeStack, fullscreenStack1);
+        mDefaultDisplay.mTaskContainers.moveStackBehindStack(homeStack, fullscreenStack1);
         assertEquals(fullscreenStack1, mDefaultDisplay.getStackAbove(homeStack));
-        mDefaultDisplay.moveStackBehindStack(homeStack, fullscreenStack2);
+        mDefaultDisplay.mTaskContainers.moveStackBehindStack(homeStack, fullscreenStack2);
         assertEquals(fullscreenStack2, mDefaultDisplay.getStackAbove(homeStack));
-        mDefaultDisplay.moveStackBehindStack(homeStack, fullscreenStack4);
+        mDefaultDisplay.mTaskContainers.moveStackBehindStack(homeStack, fullscreenStack4);
         assertEquals(fullscreenStack4, mDefaultDisplay.getStackAbove(homeStack));
-        mDefaultDisplay.moveStackBehindStack(homeStack, fullscreenStack2);
+        mDefaultDisplay.mTaskContainers.moveStackBehindStack(homeStack, fullscreenStack2);
         assertEquals(fullscreenStack2, mDefaultDisplay.getStackAbove(homeStack));
     }
 
@@ -845,9 +845,10 @@ public class ActivityStackTests extends ActivityTestsBase {
             // Home stack and activity are created in ActivityTestsBase#setupActivityManagerService
             stack = mDefaultDisplay.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
             if (onTop) {
-                mDefaultDisplay.positionStackAtTop(stack, false /* includingParents */);
+                mDefaultDisplay.mTaskContainers.positionStackAtTop(stack,
+                        false /* includingParents */);
             } else {
-                mDefaultDisplay.positionStackAtBottom(stack);
+                mDefaultDisplay.mTaskContainers.positionStackAtBottom(stack);
             }
         } else {
             stack = new StackBuilder(mRootWindowContainer)
@@ -1090,7 +1091,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         mDefaultDisplay.registerStackOrderChangedListener(listener);
         try {
             mStack.mReparenting = true;
-            mDefaultDisplay.addStack(mStack, 0);
+            mDefaultDisplay.mTaskContainers.addStack(mStack, 0);
         } finally {
             mDefaultDisplay.unregisterStackOrderChangedListener(listener);
         }
@@ -1105,7 +1106,7 @@ public class ActivityStackTests extends ActivityTestsBase {
                     mDefaultDisplay, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
                     true /* onTop */);
             mDefaultDisplay.registerStackOrderChangedListener(listener);
-            mDefaultDisplay.positionStackAtBottom(fullscreenStack1);
+            mDefaultDisplay.mTaskContainers.positionStackAtBottom(fullscreenStack1);
         } finally {
             mDefaultDisplay.unregisterStackOrderChangedListener(listener);
         }

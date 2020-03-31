@@ -171,6 +171,7 @@ public final class PreciseDataConnectionState implements Parcelable {
      *
      * @deprecated use {@link getNetworkType()}
      * @hide
+     * @removed Removed from the R preview SDK but was never part of the stable API surface.
      */
     @Deprecated
     @SystemApi
@@ -222,6 +223,7 @@ public final class PreciseDataConnectionState implements Parcelable {
      *
      * @deprecated use {@link #getLinkProperties()}
      * @hide
+     * @removed Removed from the R preview SDK but was never part of the stable API surface.
      */
     @Deprecated
     @SystemApi

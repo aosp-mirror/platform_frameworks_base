@@ -44,8 +44,9 @@ public class ScreenshotSmartActions {
     private static final String TAG = "ScreenshotSmartActions";
 
     @VisibleForTesting
-    static CompletableFuture<List<Notification.Action>> getSmartActionsFuture(String screenshotId,
-            Bitmap image, ScreenshotNotificationSmartActionsProvider smartActionsProvider,
+    static CompletableFuture<List<Notification.Action>> getSmartActionsFuture(
+            String screenshotId, String screenshotFileName, Bitmap image,
+            ScreenshotNotificationSmartActionsProvider smartActionsProvider,
             boolean smartActionsEnabled, boolean isManagedProfile) {
         if (!smartActionsEnabled) {
             Slog.i(TAG, "Screenshot Intelligence not enabled, returning empty list.");
@@ -68,9 +69,8 @@ public class ScreenshotSmartActions {
                     (runningTask != null && runningTask.topActivity != null)
                             ? runningTask.topActivity
                             : new ComponentName("", "");
-            smartActionsFuture = smartActionsProvider.getActions(screenshotId, image,
-                    componentName,
-                    isManagedProfile);
+            smartActionsFuture = smartActionsProvider.getActions(
+                    screenshotId, screenshotFileName, image, componentName, isManagedProfile);
         } catch (Throwable e) {
             long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
             smartActionsFuture = CompletableFuture.completedFuture(Collections.emptyList());
@@ -84,7 +84,7 @@ public class ScreenshotSmartActions {
     }
 
     @VisibleForTesting
-    static List<Notification.Action> getSmartActions(String screenshotId,
+    static List<Notification.Action> getSmartActions(String screenshotId, String screenshotFileName,
             CompletableFuture<List<Notification.Action>> smartActionsFuture, int timeoutMs,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider) {
         long startTimeMs = SystemClock.uptimeMillis();

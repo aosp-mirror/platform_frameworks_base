@@ -69,11 +69,11 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         stack.moveToFront("moveStackToFront");
         // After moving the stack to front, the previous focused should be the last focused.
         assertTrue(stack.isFocusedStackOnDisplay());
-        assertEquals(prevFocusedStack, display.getLastFocusedStack());
+        assertEquals(prevFocusedStack, display.mTaskContainers.getLastFocusedStack());
 
         stack.moveToBack("moveStackToBack", null /* task */);
         // After moving the stack to back, the stack should be the last focused.
-        assertEquals(stack, display.getLastFocusedStack());
+        assertEquals(stack, display.mTaskContainers.getLastFocusedStack());
     }
 
     /**
@@ -225,7 +225,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(alwaysOnTopStack).build();
         alwaysOnTopStack.setAlwaysOnTop(true);
-        display.positionStackAtTop(alwaysOnTopStack, false /* includingParents */);
+        display.mTaskContainers.positionStackAtTop(alwaysOnTopStack, false /* includingParents */);
         assertTrue(alwaysOnTopStack.isAlwaysOnTop());
         // Ensure always on top state is synced to the children of the stack.
         assertTrue(alwaysOnTopStack.getTopNonFinishingActivity().isAlwaysOnTop());
@@ -239,7 +239,8 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         final ActivityStack anotherAlwaysOnTopStack = display.createStack(
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         anotherAlwaysOnTopStack.setAlwaysOnTop(true);
-        display.positionStackAtTop(anotherAlwaysOnTopStack, false /* includingParents */);
+        display.mTaskContainers.positionStackAtTop(anotherAlwaysOnTopStack,
+                false /* includingParents */);
         assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
         int topPosition = display.getStackCount() - 1;
         // Ensure the new alwaysOnTop stack is put below the pinned stack, but on top of the
@@ -255,7 +256,8 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         assertEquals(nonAlwaysOnTopStack, display.getStackAt(topPosition - 3));
 
         anotherAlwaysOnTopStack.setAlwaysOnTop(false);
-        display.positionStackAtTop(anotherAlwaysOnTopStack, false /* includingParents */);
+        display.mTaskContainers.positionStackAtTop(anotherAlwaysOnTopStack,
+                false /* includingParents */);
         assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
         // Ensure, when always on top is turned off for a stack, the stack is put just below all
         // other always on top stacks.
@@ -300,7 +302,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
 
         // Reordering stacks while removing stacks.
         doAnswer(invocation -> {
-            display.positionStackAtTop(stack3, false);
+            display.mTaskContainers.positionStackAtTop(stack3, false);
             return true;
         }).when(mSupervisor).removeTask(eq(task4), anyBoolean(), anyBoolean(), any());
 

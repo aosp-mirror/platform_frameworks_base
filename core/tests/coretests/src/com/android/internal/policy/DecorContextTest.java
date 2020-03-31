@@ -20,19 +20,24 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertEquals;
 
+import android.app.Activity;
+import android.app.EmptyActivity;
 import android.content.Context;
 import android.hardware.display.DisplayManagerGlobal;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
+import android.view.WindowManager;
+import android.view.WindowManagerImpl;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
+import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
-
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -46,9 +51,13 @@ public final class DecorContextTest {
     private Context mContext;
     private static final int EXTERNAL_DISPLAY = DEFAULT_DISPLAY + 1;
 
+    @Rule
+    public ActivityTestRule<EmptyActivity> mActivityRule =
+            new ActivityTestRule<>(EmptyActivity.class);
+
     @Before
-    public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getContext();
+    public void setUp() {
+        mContext = ApplicationProvider.getApplicationContext();
     }
 
     @Test
@@ -75,5 +84,20 @@ public final class DecorContextTest {
             DecorContext decorContext) {
         Display associatedDisplay = decorContext.getDisplay();
         assertEquals(expectedDisplayId, associatedDisplay.getDisplayId());
+    }
+
+    @Test
+    public void testGetWindowManagerFromVisualDecorContext() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            Activity activity = mActivityRule.getActivity();
+            final DecorContext decorContext = new DecorContext(mContext.getApplicationContext(),
+                    activity);
+            WindowManagerImpl actualWm = (WindowManagerImpl)
+                    decorContext.getSystemService(WindowManager.class);
+            WindowManagerImpl expectedWm = (WindowManagerImpl)
+                    activity.getSystemService(WindowManager.class);
+            // Verify that window manager is from activity not application context.
+            assertEquals(expectedWm.mContext, actualWm.mContext);
+        });
     }
 }

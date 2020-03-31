@@ -2504,7 +2504,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     final DisplayContent display = stack.getDisplay();
                     next = display.topRunningActivity();
                     if (next != null) {
-                        display.positionStackAtTop(next.getRootTask(),
+                        display.mTaskContainers.positionStackAtTop(next.getRootTask(),
                                 false /* includingParents */, "finish-display-top");
                     }
                 }
@@ -2679,7 +2679,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final ActivityRecord next = display.topRunningActivity();
         final boolean isLastStackOverEmptyHome =
                 next == null && stack.isFocusedStackOnDisplay()
-                        && display.getOrCreateRootHomeTask() != null;
+                        && display.mTaskContainers.getOrCreateRootHomeTask() != null;
         if (isLastStackOverEmptyHome) {
             // Don't destroy activity immediately if this is the last activity on the display and
             // the display contains home stack. Although there is no next activity at the moment,
@@ -3160,7 +3160,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Reset the last saved PiP snap fraction on removal.
-        mDisplayContent.mPinnedStackControllerLocked.resetReentryBounds(mActivityComponent);
+        mDisplayContent.mPinnedStackControllerLocked.onActivityHidden(mActivityComponent);
         mWmService.mEmbeddedWindowController.onActivityRemoved(this);
         mRemovingFromDisplay = false;
     }
@@ -4426,7 +4426,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "notifyAppStopped: %s", this);
         mAppStopped = true;
         // Reset the last saved PiP snap fraction on app stop.
-        mDisplayContent.mPinnedStackControllerLocked.resetReentryBounds(mActivityComponent);
+        mDisplayContent.mPinnedStackControllerLocked.onActivityHidden(mActivityComponent);
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
@@ -4477,7 +4477,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // case where this is the top activity in a pinned stack.
         final boolean isTop = this == stack.getTopNonFinishingActivity();
         final boolean isTopNotPinnedStack = stack.isAttached()
-                && stack.getDisplay().isTopNotPinnedStack(stack);
+                && stack.getDisplay().mTaskContainers.isTopNotPinnedStack(stack);
         final boolean visibleIgnoringDisplayStatus = stack.checkKeyguardVisibility(this,
                 visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
 
@@ -6651,17 +6651,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void savePinnedStackBounds() {
-        // Leaving PiP to fullscreen, save the snap fraction based on the pre-animation bounds
-        // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
-        final ActivityStack pinnedStack = mDisplayContent.getRootPinnedTask();
-        if (pinnedStack == null) return;
-        final Rect stackBounds = mTmpRect;
-        pinnedStack.getBounds(stackBounds);
-        mDisplayContent.mPinnedStackControllerLocked.saveReentryBounds(
-                mActivityComponent, stackBounds);
-    }
-
     /** Returns true if the configuration is compatible with this activity. */
     boolean isConfigurationCompatible(Configuration config) {
         final int orientation = getRequestedOrientation();
@@ -7389,7 +7378,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     boolean isResumedActivityOnDisplay() {
         final DisplayContent display = getDisplay();
-        return display != null && this == display.getResumedActivity();
+        return display != null && this == display.mTaskContainers.getResumedActivity();
     }
 
 

@@ -53,6 +53,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
+import java.io.File;
 import java.util.ArrayList;
 
 
@@ -104,7 +105,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     protected void initializeCredentialUnderSP(LockscreenCredential password, int userId)
             throws RemoteException {
         enableSyntheticPassword();
-        mService.setLockCredential(password, nonePassword(), userId);
+        assertTrue(mService.setLockCredential(password, nonePassword(), userId));
         assertEquals(CREDENTIAL_TYPE_PASSWORD, mService.getCredentialType(userId));
         assertTrue(mService.isSyntheticPasswordBasedCredential(userId));
     }
@@ -490,6 +491,44 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 password, 0, PRIMARY_USER_ID)
                         .getResponseCode());
         verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
+    }
+
+    @Test
+    public void testUnlockUserWithToken() throws Exception {
+        LockscreenCredential password = newPassword("password");
+        byte[] token = "some-high-entropy-secure-token".getBytes();
+        initializeCredentialUnderSP(password, PRIMARY_USER_ID);
+        // Disregard any reportPasswordChanged() invocations as part of credential setup.
+        flushHandlerTasks();
+        reset(mDevicePolicyManager);
+
+        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
+        mService.verifyCredential(password, 0, PRIMARY_USER_ID).getResponseCode();
+        assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+
+        mService.onCleanupUser(PRIMARY_USER_ID);
+        assertNull(mLocalService.getUserPasswordMetrics(PRIMARY_USER_ID));
+
+        assertTrue(mLocalService.unlockUserWithToken(handle, token, PRIMARY_USER_ID));
+        assertEquals(PasswordMetrics.computeForCredential(password),
+                mLocalService.getUserPasswordMetrics(PRIMARY_USER_ID));
+    }
+
+    @Test
+    public void testPasswordChange_NoOrphanedFilesLeft() throws Exception {
+        LockscreenCredential password = newPassword("password");
+        initializeCredentialUnderSP(password, PRIMARY_USER_ID);
+        assertTrue(mService.setLockCredential(password, password, PRIMARY_USER_ID));
+
+        String handleString = String.format("%016x",
+                mService.getSyntheticPasswordHandleLocked(PRIMARY_USER_ID));
+        File directory = mStorage.getSyntheticPasswordDirectoryForUser(PRIMARY_USER_ID);
+        for (File file : directory.listFiles()) {
+            String[] parts = file.getName().split("\\.");
+            if (!parts[0].equals(handleString) && !parts[0].equals("0000000000000000")) {
+                fail("Orphaned state left: " + file.getName());
+            }
+        }
     }
 
     // b/62213311
