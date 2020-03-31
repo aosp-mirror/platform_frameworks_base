@@ -20,7 +20,6 @@ import android.content.pm.PackageManager;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.os.storage.StorageManager;
-import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseLongArray;
 
@@ -95,7 +94,7 @@ public class AppDataRollbackHelper {
             int userId, int appId, String seInfo) {
         int storageFlags = Installer.FLAG_STORAGE_DE;
 
-        final IntArray pendingBackups = packageRollbackInfo.getPendingBackups();
+        final List<Integer> pendingBackups = packageRollbackInfo.getPendingBackups();
         final List<RestoreInfo> pendingRestores = packageRollbackInfo.getPendingRestores();
         boolean changedRollback = false;
 
@@ -243,7 +242,7 @@ public class AppDataRollbackHelper {
         for (PackageRollbackInfo info : rollback.info.getPackages()) {
             boolean hasPendingBackup = false;
             boolean hasPendingRestore = false;
-            final IntArray pendingBackupUsers = info.getPendingBackups();
+            final List<Integer> pendingBackupUsers = info.getPendingBackups();
             if (pendingBackupUsers != null) {
                 if (pendingBackupUsers.indexOf(userId) != -1) {
                     hasPendingBackup = true;

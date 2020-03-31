@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
-import android.util.IntArray;
 import android.util.SparseLongArray;
 
 import com.google.common.truth.Correspondence;
@@ -156,8 +155,8 @@ public class RollbackStoreTest {
 
         PackageRollbackInfo pkgInfo1 =
                 new PackageRollbackInfo(new VersionedPackage("com.made.up", 18),
-                        new VersionedPackage("com.something.else", 5), new IntArray(),
-                        new ArrayList<>(), false, false, new IntArray(), new SparseLongArray());
+                        new VersionedPackage("com.something.else", 5), new ArrayList<>(),
+                        new ArrayList<>(), false, false, new ArrayList<>(), new SparseLongArray());
         pkgInfo1.getPendingBackups().add(8);
         pkgInfo1.getPendingBackups().add(888);
         pkgInfo1.getPendingBackups().add(88885);
@@ -176,8 +175,8 @@ public class RollbackStoreTest {
 
         PackageRollbackInfo pkgInfo2 = new PackageRollbackInfo(
                 new VersionedPackage("another.package", 2),
-                new VersionedPackage("com.test.ing", 48888), new IntArray(), new ArrayList<>(),
-                false, false, new IntArray(), new SparseLongArray());
+                new VersionedPackage("com.test.ing", 48888), new ArrayList<>(), new ArrayList<>(),
+                false, false, new ArrayList<>(), new SparseLongArray());
         pkgInfo2.getPendingBackups().add(57);
 
         pkgInfo2.getPendingRestores().add(
@@ -206,8 +205,8 @@ public class RollbackStoreTest {
         expectedRb.info.setCommittedSessionId(45654465);
 
         PackageRollbackInfo pkgInfo1 = new PackageRollbackInfo(new VersionedPackage("blah", 55),
-                new VersionedPackage("blah1", 50), new IntArray(), new ArrayList<>(),
-                false, false, new IntArray(), new SparseLongArray());
+                new VersionedPackage("blah1", 50), new ArrayList<>(), new ArrayList<>(),
+                false, false, new ArrayList<>(), new SparseLongArray());
         pkgInfo1.getPendingBackups().add(59);
         pkgInfo1.getPendingBackups().add(1245);
         pkgInfo1.getPendingBackups().add(124544);
@@ -225,8 +224,8 @@ public class RollbackStoreTest {
         pkgInfo1.getSnapshottedUsers().add(98464);
 
         PackageRollbackInfo pkgInfo2 = new PackageRollbackInfo(new VersionedPackage("chips", 28),
-                new VersionedPackage("com.chips.test", 48), new IntArray(), new ArrayList<>(),
-                false, false, new IntArray(), new SparseLongArray());
+                new VersionedPackage("com.chips.test", 48), new ArrayList<>(), new ArrayList<>(),
+                false, false, new ArrayList<>(), new SparseLongArray());
         pkgInfo2.getPendingBackups().add(5);
 
         pkgInfo2.getPendingRestores().add(
