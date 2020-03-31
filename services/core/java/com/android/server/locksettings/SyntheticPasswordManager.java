@@ -391,7 +391,7 @@ public class SyntheticPasswordManager {
     @VisibleForTesting
     protected IWeaver getWeaverService() throws RemoteException {
         try {
-            return IWeaver.getService();
+            return IWeaver.getService(/* retry */ true);
         } catch (NoSuchElementException e) {
             Slog.i(TAG, "Device does not support weaver");
             return null;
