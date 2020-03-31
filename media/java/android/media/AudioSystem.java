@@ -1233,6 +1233,11 @@ public class AudioSystem
      * Communicate UIDs of active accessibility services to audio policy service.
      */
     public static native int setA11yServicesUids(int[] uids);
+    /**
+     * Communicate UID of current InputMethodService to audio policy service.
+     */
+    public static native int setCurrentImeUid(int uid);
+
 
     /**
      * @see AudioManager#isHapticPlaybackSupported()
