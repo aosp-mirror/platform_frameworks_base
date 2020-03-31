@@ -244,8 +244,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // How many of the satisfied requests are of type BACKGROUND_REQUEST.
     private int mNumBackgroundNetworkRequests = 0;
 
-    // The last ConnectivityReport made available for this network.
-    private ConnectivityReport mConnectivityReport;
+    // The last ConnectivityReport made available for this network. This value is only null before a
+    // report is generated. Once non-null, it will never be null again.
+    @Nullable private ConnectivityReport mConnectivityReport;
 
     public final Messenger messenger;
     public final AsyncChannel asyncChannel;
