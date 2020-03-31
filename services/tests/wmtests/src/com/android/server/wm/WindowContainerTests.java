@@ -21,6 +21,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -438,6 +439,18 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(child.isAnimating(PARENTS));
         assertTrue(child.isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION));
         assertFalse(child.isAnimating(PARENTS, ANIMATION_TYPE_SCREEN_ROTATION));
+
+        final WindowState windowState = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
+                mDisplayContent, "TestWindowState");
+        WindowContainer parent = windowState.getParent();
+        spyOn(windowState.mSurfaceAnimator);
+        doReturn(true).when(windowState.mSurfaceAnimator).isAnimating();
+        doReturn(ANIMATION_TYPE_APP_TRANSITION).when(
+                windowState.mSurfaceAnimator).getAnimationType();
+        assertTrue(parent.isAnimating(CHILDREN));
+
+        windowState.setControllableInsetProvider(mock(InsetsSourceProvider.class));
+        assertFalse(parent.isAnimating(CHILDREN));
     }
 
     @Test
