@@ -575,6 +575,7 @@ public class SettingsBackupTest {
                     Settings.Global.APPOP_HISTORY_MODE,
                     Settings.Global.APPOP_HISTORY_INTERVAL_MULTIPLIER,
                     Settings.Global.APPOP_HISTORY_BASE_INTERVAL_MILLIS,
+                    Settings.Global.AUTO_REVOKE_PARAMETERS,
                     Settings.Global.ENABLE_RADIO_BUG_DETECTION,
                     Settings.Global.RADIO_BUG_WAKELOCK_TIMEOUT_COUNT_THRESHOLD,
                     Settings.Global.RADIO_BUG_SYSTEM_ERROR_COUNT_THRESHOLD,
