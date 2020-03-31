@@ -21,8 +21,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,6 +60,7 @@ import java.io.InputStream;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
+
 public class ApexManagerTest {
     private static final String TEST_APEX_PKG = "com.android.apex.test";
     private static final int TEST_SESSION_ID = 99999999;
@@ -71,7 +74,9 @@ public class ApexManagerTest {
     @Before
     public void setUp() throws RemoteException {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
-        mApexManager = new ApexManager.ApexManagerImpl(mApexService);
+        ApexManager.ApexManagerImpl managerImpl = spy(new ApexManager.ApexManagerImpl());
+        doReturn(mApexService).when(managerImpl).waitForApexService();
+        mApexManager = managerImpl;
         mPackageParser2 = new PackageParser2(null, false, null, null, null);
     }
 
