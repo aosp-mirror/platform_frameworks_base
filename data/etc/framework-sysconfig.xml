@@ -37,6 +37,7 @@
     <allow-implicit-broadcast action="android.telephony.action.CARRIER_CONFIG_CHANGED" />
     <allow-implicit-broadcast action="android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED" />
     <allow-implicit-broadcast action="android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED" />
+    <allow-implicit-broadcast action="android.telephony.action.MULTI_SIM_CONFIG_CHANGED" />
     <allow-implicit-broadcast action="android.telephony.action.SECRET_CODE" />
     <allow-implicit-broadcast action="android.telephony.action.SIM_APPLICATION_STATE_CHANGED" />
     <allow-implicit-broadcast action="android.telephony.action.SIM_CARD_STATE_CHANGED" />
