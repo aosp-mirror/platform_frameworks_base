@@ -495,9 +495,12 @@ public class ActivityStarterTests extends ActivityTestsBase {
     }
 
     private void assertNoTasks(DisplayContent display) {
-        for (int i = display.getStackCount() - 1; i >= 0; --i) {
-            final ActivityStack stack = display.getStackAt(i);
-            assertFalse(stack.hasChild());
+        for (int tdaNdx = display.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
+            final TaskDisplayArea taskDisplayArea = display.getTaskDisplayAreaAt(tdaNdx);
+            for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
+                final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
+                assertFalse(stack.hasChild());
+            }
         }
     }
 
@@ -1042,10 +1045,14 @@ public class ActivityStarterTests extends ActivityTestsBase {
                     // move everything to secondary because test expects this but usually sysui
                     // does it.
                     DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
-                    for (int i = dc.getStackCount() - 1; i >= 0; --i) {
-                        if (!WindowConfiguration.isSplitScreenWindowingMode(
-                                dc.getStackAt(i).getWindowingMode())) {
-                            dc.getStackAt(i).reparent(mSecondary, POSITION_BOTTOM);
+                    for (int tdaNdx = dc.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
+                        final TaskDisplayArea taskDisplayArea = dc.getTaskDisplayAreaAt(tdaNdx);
+                        for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
+                            final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
+                            if (!WindowConfiguration.isSplitScreenWindowingMode(
+                                    stack.getWindowingMode())) {
+                                stack.reparent(mSecondary, POSITION_BOTTOM);
+                            }
                         }
                     }
                 }

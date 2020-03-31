@@ -340,7 +340,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
         // Make leashes for each of the visible/target tasks and add it to the recents animation to
         // be started
-        // TODO(multi-display-area): Support Recents on multiple task display areas
+        // TODO(b/153090560): Support Recents on multiple task display areas
         final ArrayList<Task> visibleTasks = mDisplayContent.getDefaultTaskDisplayArea()
                 .getVisibleTasks();
         final ActivityStack targetStack = mDisplayContent.getDefaultTaskDisplayArea()

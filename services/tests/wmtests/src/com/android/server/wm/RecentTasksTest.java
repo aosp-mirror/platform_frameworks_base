@@ -686,8 +686,8 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(-1 /* min */, 3 /* max */, -1 /* ms */);
 
-        final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
-        final Task alwaysOnTopTask = display.createStack(WINDOWING_MODE_MULTI_WINDOW,
+        final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
+        final Task alwaysOnTopTask = taskDisplayArea.createStack(WINDOWING_MODE_MULTI_WINDOW,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         alwaysOnTopTask.setAlwaysOnTop(true);
 
@@ -862,8 +862,8 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         final ActivityStack homeStack = mTaskContainer.getRootHomeTask();
         final DisplayContent otherDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        final ActivityStack otherDisplayStack = otherDisplay.createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityStack otherDisplayStack = otherDisplay.getDefaultTaskDisplayArea()
+                .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) on each display, ensure that the tasks are not
         // removed
