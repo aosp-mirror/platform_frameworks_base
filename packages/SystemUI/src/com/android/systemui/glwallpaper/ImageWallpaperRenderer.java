@@ -36,6 +36,8 @@ import com.android.systemui.R;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * A GL renderer for image wallpaper.
@@ -47,7 +49,6 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     private static final float SCALE_VIEWPORT_MAX = 1.1f;
     private static final boolean DEBUG = true;
 
-    private final WallpaperManager mWallpaperManager;
     private final ImageGLProgram mProgram;
     private final ImageGLWallpaper mWallpaper;
     private final ImageProcessHelper mImageProcessHelper;
@@ -57,18 +58,18 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     private final Rect mScissor;
     private final Rect mSurfaceSize = new Rect();
     private final Rect mViewport = new Rect();
-    private Bitmap mBitmap;
     private boolean mScissorMode;
     private float mXOffset;
     private float mYOffset;
-    private boolean mWcgContent;
+    private final WallpaperTexture mTexture;
 
     public ImageWallpaperRenderer(Context context, SurfaceProxy proxy) {
-        mWallpaperManager = context.getSystemService(WallpaperManager.class);
-        if (mWallpaperManager == null) {
+        final WallpaperManager wpm = context.getSystemService(WallpaperManager.class);
+        if (wpm == null) {
             Log.w(TAG, "WallpaperManager not available");
         }
 
+        mTexture = new WallpaperTexture(wpm);
         DisplayInfo displayInfo = new DisplayInfo();
         context.getDisplay().getDisplayInfo(displayInfo);
 
@@ -90,15 +91,13 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     }
 
     protected void startProcessingImage() {
-        if (loadBitmap()) {
-            // Compute threshold of the image, this is an async work.
-            mImageProcessHelper.start(mBitmap);
-        }
+        // Compute threshold of the image, this is an async work.
+        mImageProcessHelper.start(mTexture);
     }
 
     @Override
     public boolean isWcgContent() {
-        return mWcgContent;
+        return mTexture.isWcgContent();
     }
 
     @Override
@@ -107,30 +106,12 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
         mProgram.useGLProgram(
                 R.raw.image_wallpaper_vertex_shader, R.raw.image_wallpaper_fragment_shader);
 
-        if (!loadBitmap()) {
-            Log.w(TAG, "reload bitmap failed!");
-        }
-
-        mWallpaper.setup(mBitmap);
-        mBitmap = null;
-    }
-
-    protected boolean loadBitmap() {
-        if (DEBUG) {
-            Log.d(TAG, "loadBitmap: mBitmap=" + mBitmap);
-        }
-        if (mWallpaperManager != null && mBitmap == null) {
-            mBitmap = mWallpaperManager.getBitmap(false /* hardware */);
-            mWcgContent = mWallpaperManager.wallpaperSupportsWcg(WallpaperManager.FLAG_SYSTEM);
-            mWallpaperManager.forgetLoadedWallpaper();
-            if (mBitmap != null) {
-                mSurfaceSize.set(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
+        mTexture.use(bitmap -> {
+            if (bitmap == null) {
+                Log.w(TAG, "reload texture failed!");
             }
-        }
-        if (DEBUG) {
-            Log.d(TAG, "loadBitmap done");
-        }
-        return mBitmap != null;
+            mWallpaper.setup(bitmap);
+        });
     }
 
     @Override
@@ -174,6 +155,8 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
 
     @Override
     public Size reportSurfaceSize() {
+        mTexture.use(null);
+        mSurfaceSize.set(mTexture.getTextureDimensions());
         return new Size(mSurfaceSize.width(), mSurfaceSize.height());
     }
 
@@ -235,7 +218,69 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
         out.print(prefix); out.print("mYOffset="); out.print(mYOffset);
         out.print(prefix); out.print("threshold="); out.print(mImageProcessHelper.getThreshold());
         out.print(prefix); out.print("mReveal="); out.print(mImageRevealHelper.getReveal());
-        out.print(prefix); out.print("mWcgContent="); out.print(mWcgContent);
+        out.print(prefix); out.print("mWcgContent="); out.print(isWcgContent());
         mWallpaper.dump(prefix, fd, out, args);
+    }
+
+    static class WallpaperTexture {
+        private final AtomicInteger mRefCount;
+        private final Rect mDimensions;
+        private final WallpaperManager mWallpaperManager;
+        private Bitmap mBitmap;
+        private boolean mWcgContent;
+
+        private WallpaperTexture(WallpaperManager wallpaperManager) {
+            mWallpaperManager = wallpaperManager;
+            mRefCount = new AtomicInteger();
+            mDimensions = new Rect();
+        }
+
+        public void use(Consumer<Bitmap> consumer) {
+            mRefCount.incrementAndGet();
+            synchronized (mRefCount) {
+                if (mBitmap == null) {
+                    mBitmap = mWallpaperManager.getBitmap(false /* hardware */);
+                    mWcgContent = mWallpaperManager.wallpaperSupportsWcg(
+                            WallpaperManager.FLAG_SYSTEM);
+                    mWallpaperManager.forgetLoadedWallpaper();
+                    if (mBitmap != null) {
+                        mDimensions.set(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
+                    } else {
+                        Log.w(TAG, "Can't get bitmap");
+                    }
+                }
+            }
+            if (consumer != null) {
+                consumer.accept(mBitmap);
+            }
+            synchronized (mRefCount) {
+                final int count = mRefCount.decrementAndGet();
+                if (count == 0 && mBitmap != null) {
+                    if (DEBUG) {
+                        Log.v(TAG, "WallpaperTexture: release 0x" + getHash()
+                                + ", refCount=" + count);
+                    }
+                    mBitmap.recycle();
+                    mBitmap = null;
+                }
+            }
+        }
+
+        private boolean isWcgContent() {
+            return mWcgContent;
+        }
+
+        private String getHash() {
+            return mBitmap != null ? Integer.toHexString(mBitmap.hashCode()) : "null";
+        }
+
+        private Rect getTextureDimensions() {
+            return mDimensions;
+        }
+
+        @Override
+        public String toString() {
+            return "{" + getHash() + ", " + mRefCount.get() + "}";
+        }
     }
 }
