@@ -1047,6 +1047,40 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
+     * Execute the given SQL statement on all connections to this database.
+     * <p>
+     * This statement will be immediately executed on all existing connections,
+     * and will be automatically executed on all future connections.
+     * <p>
+     * Some example usages are changes like {@code PRAGMA trusted_schema=OFF} or
+     * functions like {@code SELECT icu_load_collation()}. If you execute these
+     * statements using {@link #execSQL} then they will only apply to a single
+     * database connection; using this method will ensure that they are
+     * uniformly applied to all current and future connections.
+     *
+     * @param sql The SQL statement to be executed. Multiple statements
+     *            separated by semicolons are not supported.
+     * @param bindArgs The arguments that should be bound to the SQL statement.
+     */
+    public void execPerConnectionSQL(@NonNull String sql, @Nullable Object[] bindArgs)
+            throws SQLException {
+        Objects.requireNonNull(sql);
+
+        synchronized (mLock) {
+            throwIfNotOpenLocked();
+
+            final int index = mConfigurationLocked.perConnectionSql.size();
+            mConfigurationLocked.perConnectionSql.add(Pair.create(sql, bindArgs));
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.perConnectionSql.remove(index);
+                throw ex;
+            }
+        }
+    }
+
+    /**
      * Gets the database version.
      *
      * @return the database version
@@ -1788,6 +1822,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * using "PRAGMA journal_mode'<value>" statement if your app is using
      * {@link #enableWriteAheadLogging()}
      * </p>
+     * <p>
+     * Note that {@code PRAGMA} values which apply on a per-connection basis
+     * should <em>not</em> be configured using this method; you should instead
+     * use {@link #execPerConnectionSQL} to ensure that they are uniformly
+     * applied to all current and future connections.
+     * </p>
      *
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
      * not supported.
@@ -1833,6 +1873,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * automatically managed by this class. So, do not set journal_mode
      * using "PRAGMA journal_mode'<value>" statement if your app is using
      * {@link #enableWriteAheadLogging()}
+     * </p>
+     * <p>
+     * Note that {@code PRAGMA} values which apply on a per-connection basis
+     * should <em>not</em> be configured using this method; you should instead
+     * use {@link #execPerConnectionSQL} to ensure that they are uniformly
+     * applied to all current and future connections.
      * </p>
      *
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are

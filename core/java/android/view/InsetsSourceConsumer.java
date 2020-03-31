@@ -16,13 +16,11 @@
 
 package android.view;
 
-import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsState.toPublicType;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.graphics.Rect;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
@@ -66,8 +64,6 @@ public class InsetsSourceConsumer {
     private final Supplier<Transaction> mTransactionSupplier;
     private @Nullable InsetsSourceControl mSourceControl;
     private boolean mHasWindowFocus;
-    private Rect mPendingFrame;
-    private Rect mPendingVisibleFrame;
 
     public InsetsSourceConsumer(@InternalInsetsType int type, InsetsState state,
             Supplier<Transaction> transactionSupplier, InsetsController controller) {
@@ -112,12 +108,12 @@ public class InsetsSourceConsumer {
                     hideTypes[0] |= toPublicType(getType());
                 }
             } else {
-              // We are gaining control, but don't need to run an animation.
-              // However make sure that the leash visibility is still up to date.
-              if (applyLocalVisibilityOverride()) {
-                  mController.notifyVisibilityChanged();
-              }
-              applyHiddenToControl();
+                // We are gaining control, but don't need to run an animation.
+                // However make sure that the leash visibility is still up to date.
+                if (applyLocalVisibilityOverride()) {
+                    mController.notifyVisibilityChanged();
+                    applyHiddenToControl();
+                }
             }
         }
         if (lastControl != null) {
@@ -217,38 +213,6 @@ public class InsetsSourceConsumer {
      */
     public void removeSurface() {
         // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
-    }
-
-    void updateSource(InsetsSource newSource) {
-        InsetsSource source = mState.peekSource(mType);
-        if (source == null || mController.getAnimationType(mType) == ANIMATION_TYPE_NONE
-                || source.getFrame().equals(newSource.getFrame())) {
-            mState.addSource(newSource);
-            return;
-        }
-
-        // Frame is changing while animating. Keep note of the new frame but keep existing frame
-        // until animaition is finished.
-        newSource = new InsetsSource(newSource);
-        mPendingFrame = new Rect(newSource.getFrame());
-        mPendingVisibleFrame = newSource.getVisibleFrame() != null
-                ? new Rect(newSource.getVisibleFrame())
-                : null;
-        newSource.setFrame(source.getFrame());
-        newSource.setVisibleFrame(source.getVisibleFrame());
-        mState.addSource(newSource);
-    }
-
-    boolean notifyAnimationFinished() {
-        if (mPendingFrame != null) {
-            InsetsSource source = mState.getSource(mType);
-            source.setFrame(mPendingFrame);
-            source.setVisibleFrame(mPendingVisibleFrame);
-            mPendingFrame = null;
-            mPendingVisibleFrame = null;
-            return true;
-        }
-        return false;
     }
 
     /**

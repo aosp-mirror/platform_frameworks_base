@@ -62,11 +62,11 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
     fprintf(out,
             "const std::set<int> "
             "AtomsInfo::kTruncatingTimestampAtomBlackList = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
-         atom++) {
-        if (kTruncatingAtomNames.find(atom->name) != kTruncatingAtomNames.end()) {
-            const string constant = make_constant_name(atom->name);
-            fprintf(out, "    %d, // %s\n", atom->code, constant.c_str());
+    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
+         atomIt++) {
+        if (kTruncatingAtomNames.find((*atomIt)->name) != kTruncatingAtomNames.end()) {
+            const string constant = make_constant_name((*atomIt)->name);
+            fprintf(out, "    %d, // %s\n", (*atomIt)->code, constant.c_str());
         }
     }
 
@@ -74,13 +74,13 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
     fprintf(out, "\n");
 
     fprintf(out, "const std::set<int> AtomsInfo::kAtomsWithAttributionChain = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
-         atom++) {
-        for (vector<AtomField>::const_iterator field = atom->fields.begin();
-             field != atom->fields.end(); field++) {
+    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
+         atomIt++) {
+        for (vector<AtomField>::const_iterator field = (*atomIt)->fields.begin();
+             field != (*atomIt)->fields.end(); field++) {
             if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                const string constant = make_constant_name(atom->name);
-                fprintf(out, "    %d, // %s\n", atom->code, constant.c_str());
+                const string constant = make_constant_name((*atomIt)->name);
+                fprintf(out, "    %d, // %s\n", (*atomIt)->code, constant.c_str());
                 break;
             }
         }
@@ -90,11 +90,11 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
     fprintf(out, "\n");
 
     fprintf(out, "const std::set<int> AtomsInfo::kWhitelistedAtoms = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
-         atom++) {
-        if (atom->whitelisted) {
-            const string constant = make_constant_name(atom->name);
-            fprintf(out, "    %d, // %s\n", atom->code, constant.c_str());
+    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
+         atomIt++) {
+        if ((*atomIt)->whitelisted) {
+            const string constant = make_constant_name((*atomIt)->name);
+            fprintf(out, "    %d, // %s\n", (*atomIt)->code, constant.c_str());
         }
     }
 
@@ -103,17 +103,17 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
 
     fprintf(out, "static std::map<int, int> getAtomUidField() {\n");
     fprintf(out, "    std::map<int, int> uidField;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
-         atom++) {
-        if (atom->uidField == 0) {
+    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
+         atomIt++) {
+        if ((*atomIt)->uidField == 0) {
             continue;
         }
         fprintf(out,
                 "\n    // Adding uid field for atom "
                 "(%d)%s\n",
-                atom->code, atom->name.c_str());
-        fprintf(out, "    uidField[%d /* %s */] = %d;\n", atom->code,
-                make_constant_name(atom->name).c_str(), atom->uidField);
+                (*atomIt)->code, (*atomIt)->name.c_str());
+        fprintf(out, "    uidField[%d /* %s */] = %d;\n", (*atomIt)->code,
+                make_constant_name((*atomIt)->name).c_str(), (*atomIt)->uidField);
     }
 
     fprintf(out, "    return uidField;\n");
@@ -128,35 +128,35 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
             "getStateAtomFieldOptions() {\n");
     fprintf(out, "    std::map<int, StateAtomFieldOptions> options;\n");
     fprintf(out, "    StateAtomFieldOptions* opt;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
-         atom++) {
-        if (atom->primaryFields.size() == 0 && atom->exclusiveField == 0) {
+    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
+         atomIt++) {
+        if ((*atomIt)->primaryFields.size() == 0 && (*atomIt)->exclusiveField == 0) {
             continue;
         }
         fprintf(out,
                 "\n    // Adding primary and exclusive fields for atom "
                 "(%d)%s\n",
-                atom->code, atom->name.c_str());
-        fprintf(out, "    opt = &(options[%d /* %s */]);\n", atom->code,
-                make_constant_name(atom->name).c_str());
-        fprintf(out, "    opt->primaryFields.reserve(%lu);\n", atom->primaryFields.size());
-        for (const auto& field : atom->primaryFields) {
+                (*atomIt)->code, (*atomIt)->name.c_str());
+        fprintf(out, "    opt = &(options[%d /* %s */]);\n", (*atomIt)->code,
+                make_constant_name((*atomIt)->name).c_str());
+        fprintf(out, "    opt->primaryFields.reserve(%lu);\n", (*atomIt)->primaryFields.size());
+        for (const auto& field : (*atomIt)->primaryFields) {
             fprintf(out, "    opt->primaryFields.push_back(%d);\n", field);
         }
 
-        fprintf(out, "    opt->exclusiveField = %d;\n", atom->exclusiveField);
-        if (atom->defaultState != INT_MAX) {
-            fprintf(out, "    opt->defaultState = %d;\n", atom->defaultState);
+        fprintf(out, "    opt->exclusiveField = %d;\n", (*atomIt)->exclusiveField);
+        if ((*atomIt)->defaultState != INT_MAX) {
+            fprintf(out, "    opt->defaultState = %d;\n", (*atomIt)->defaultState);
         } else {
             fprintf(out, "    opt->defaultState = UNSET_VALUE;\n");
         }
 
-        if (atom->resetState != INT_MAX) {
-            fprintf(out, "    opt->resetState = %d;\n", atom->resetState);
+        if ((*atomIt)->resetState != INT_MAX) {
+            fprintf(out, "    opt->resetState = %d;\n", (*atomIt)->resetState);
         } else {
             fprintf(out, "    opt->resetState = UNSET_VALUE;\n");
         }
-        fprintf(out, "    opt->nested = %d;\n", atom->nested);
+        fprintf(out, "    opt->nested = %d;\n", (*atomIt)->nested);
     }
 
     fprintf(out, "    return options;\n");

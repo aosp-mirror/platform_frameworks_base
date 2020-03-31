@@ -84,6 +84,10 @@ public class PackageUserStateTest {
         oldUserState = new PackageUserState();
         oldUserState.suspended = true;
         assertThat(testUserState.equals(oldUserState), is(false));
+
+        oldUserState = new PackageUserState();
+        oldUserState.uninstallReason = PackageManager.UNINSTALL_REASON_USER_TYPE;
+        assertThat(testUserState.equals(oldUserState), is(false));
     }
 
     @Test

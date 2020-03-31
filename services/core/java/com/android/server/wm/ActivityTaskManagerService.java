@@ -2357,7 +2357,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 // Convert some windowing-mode changes into root-task reparents for split-screen.
                 if (stack.inSplitScreenWindowingMode()) {
-                    stack.getDisplay().onSplitScreenModeDismissed();
+                    stack.getDisplay().mTaskContainers.onSplitScreenModeDismissed();
 
                 } else {
                     stack.setWindowingMode(windowingMode);
@@ -2775,7 +2775,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         if (toTop) {
-            display.positionStackAt(POSITION_TOP, primarySplitTask, false /* includingParents */);
+            display.mTaskContainers.positionStackAt(POSITION_TOP, primarySplitTask,
+                    false /* includingParents */);
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.reparent(task.getStack().mRemoteToken, primarySplitTask.mRemoteToken, toTop);
@@ -3244,8 +3245,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 final ActivityStack stack = r.getRootTask();
-                final Task task = stack.getDisplay().createStack(stack.getWindowingMode(),
-                        stack.getActivityType(), !ON_TOP, ainfo, intent,
+                final Task task = stack.getDisplay().mTaskContainers.createStack(
+                        stack.getWindowingMode(), stack.getActivityType(), !ON_TOP, ainfo, intent,
                         false /* createdByOrganizer */);
 
                 if (!mRecentTasks.addToBottom(task)) {
@@ -3308,10 +3309,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     throw new IllegalArgumentException("resizeTask not allowed on task=" + task);
                 }
                 if (bounds == null && stack.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
-                    stack = stack.getDisplay().getOrCreateStack(
+                    stack = stack.getDisplay().mTaskContainers.getOrCreateStack(
                             WINDOWING_MODE_FULLSCREEN, stack.getActivityType(), ON_TOP);
                 } else if (bounds != null && stack.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-                    stack = stack.getDisplay().getOrCreateStack(
+                    stack = stack.getDisplay().mTaskContainers.getOrCreateStack(
                             WINDOWING_MODE_FREEFORM, stack.getActivityType(), ON_TOP);
                 }
 
@@ -4977,6 +4978,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             printedAnything = true;
             mStackSupervisor.dump(pw, "  ");
+            mTaskOrganizerController.dump(pw, "  ");
         }
 
         if (!printedAnything) {

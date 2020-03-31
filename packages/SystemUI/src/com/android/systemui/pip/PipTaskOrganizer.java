@@ -30,6 +30,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
@@ -94,7 +95,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                     final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                    callback.onPipTransitionStarted();
+                    callback.onPipTransitionStarted(mTaskInfo.baseActivity,
+                            animator.getTransitionDirection());
                 }
             });
         }
@@ -105,7 +107,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                     final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                    callback.onPipTransitionFinished();
+                    callback.onPipTransitionFinished(mTaskInfo.baseActivity,
+                            animator.getTransitionDirection());
                 }
             });
             finishResize(tx, animator.getDestinationBounds(), animator.getTransitionDirection());
@@ -116,7 +119,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                     final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                    callback.onPipTransitionCanceled();
+                    callback.onPipTransitionCanceled(mTaskInfo.baseActivity,
+                            animator.getTransitionDirection());
                 }
             });
         }
@@ -199,6 +203,10 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
 
     public Handler getUpdateHandler() {
         return mUpdateHandler;
+    }
+
+    public Rect getLastReportedBounds() {
+        return new Rect(mLastReportedBounds);
     }
 
     /**
@@ -308,29 +316,6 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration,
                 null /* updateBoundsCallback */);
-    }
-
-    /**
-     * TODO(b/152809058): consolidate the display info handling logic in SysUI
-     */
-    @SuppressWarnings("unchecked")
-    public void mayUpdateCurrentAnimationOnRotationChange() {
-        final PipAnimationController.PipTransitionAnimator animator =
-                mPipAnimationController.getCurrentAnimator();
-        if (animator != null && animator.isRunning()
-                && animator.getTransitionDirection() == TRANSITION_DIRECTION_TO_PIP) {
-            final Rect currentDestinationBounds = animator.getDestinationBounds();
-            if (mPipBoundsHandler.getDisplayBounds().contains(currentDestinationBounds)) {
-                return;
-            }
-            final Rect newDestinationBounds = mPipBoundsHandler.getDestinationBounds(
-                    getAspectRatioOrDefault(mTaskInfo.pictureInPictureParams),
-                    null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
-            if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
-                animator.updateEndValue(newDestinationBounds);
-            }
-            animator.setDestinationBounds(newDestinationBounds);
-        }
     }
 
     /**
@@ -555,16 +540,16 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         /**
          * Callback when the pip transition is started.
          */
-        void onPipTransitionStarted();
+        void onPipTransitionStarted(ComponentName activity, int direction);
 
         /**
          * Callback when the pip transition is finished.
          */
-        void onPipTransitionFinished();
+        void onPipTransitionFinished(ComponentName activity, int direction);
 
         /**
          * Callback when the pip transition is cancelled.
          */
-        void onPipTransitionCanceled();
+        void onPipTransitionCanceled(ComponentName activity, int direction);
     }
 }

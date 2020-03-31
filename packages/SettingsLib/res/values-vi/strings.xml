@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Địa chỉ IP và cổng"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Quét mã QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Ghép nối thiết bị qua Wi-Fi bằng cách quét mã QR"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Hãy kết nối mạng Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, gỡ lỗi, nhà phát triển"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Phím tắt báo cáo lỗi"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Hiển thị một nút trong menu nguồn để báo cáo lỗi"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Mù màu đỏ không hoàn toàn (đỏ-xanh lục)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Mù màu (xanh lam-vàng)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Sửa màu"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Với chế độ hiệu chỉnh màu sắc, bạn có thể điều chỉnh cách các màu hiển thị trên thiết bị"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Bị ghi đè bởi <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Cho đến <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Điện thoại có thể hết pin vào <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Còn lại không đến <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Còn lại không đến <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Còn lại hơn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,42 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Loa điện thoại"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Sự cố kết nối. Hãy tắt thiết bị rồi bật lại"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Thiết bị âm thanh có dây"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
+    <string name="help_label" msgid="3528360748637781274">"Trợ giúp và phản hồi"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Bộ nhớ"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Dữ liệu được chia sẻ"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Xem và sửa đổi dữ liệu được chia sẻ"</string>
+    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
     <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
+    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
     <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <string name="blob_id_text" msgid="8680078988996308061">"Mã dữ liệu được chia sẻ: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Hết hạn vào <xliff:g id="DATE">%s</xliff:g>"</string>
+    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
     <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
     <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"Những ứng dụng chia sẻ dữ liệu"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Ứng dụng này không cung cấp thông tin mô tả nào."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Thời gian thuê kết thúc vào ngày <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Xóa dữ liệu được chia sẻ"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Bạn có chắc chắn muốn xóa dữ liệu được chia sẻ này không?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Người dùng có ứng dụng và nội dung riêng của mình"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Bạn có thể hạn chế quyền truy cập vào ứng dụng và nội dung từ tài khoản của bạn"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Người dùng"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Tiểu sử bị hạn chế"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Thêm người dùng mới?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Bạn có thể chia sẻ thiết bị này với người khác bằng cách tạo thêm người dùng. Mỗi người dùng sẽ có không gian riêng của mình. Họ có thể tùy chỉnh không gian riêng đó bằng các ứng dụng, hình nền, v.v. Người dùng cũng có thể điều chỉnh các tùy chọn cài đặt thiết bị có ảnh hưởng đến tất cả mọi người, chẳng hạn như Wi‑Fi.\n\nKhi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác. Các dịch vụ và các tùy chọn cài đặt hỗ trợ tiếp cận có thể không chuyển sang người dùng mới."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Khi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Thiết lập người dùng ngay bây giờ?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Đảm bảo người dùng có mặt để tự thiết lập không gian của mình trên thiết bị"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Thiết lập tiểu sử ngay bây giờ?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Thiết lập ngay"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Không phải bây giờ"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Thêm"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Người dùng mới"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Tiểu sử mới"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Thông tin người dùng"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Thông tin hồ sơ"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Trước khi bạn có thể tạo tiểu sử bị hạn chế, bạn sẽ cần thiết lập một màn hình khóa để bảo vệ các ứng dụng và dữ liệu cá nhân của bạn."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Thiết lập khóa"</string>
 </resources>

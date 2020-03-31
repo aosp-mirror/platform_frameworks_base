@@ -37,6 +37,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -53,6 +54,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationMediaManager.MediaListener;
+import com.android.systemui.util.Assert;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -60,7 +63,7 @@ import java.util.concurrent.Executor;
 /**
  * Base media control panel for System UI
  */
-public class MediaControlPanel implements NotificationMediaManager.MediaListener {
+public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
     private final NotificationMediaManager mMediaManager;
     private final Executor mForegroundExecutor;
@@ -74,6 +77,7 @@ public class MediaControlPanel implements NotificationMediaManager.MediaListener
     private int mForegroundColor;
     private int mBackgroundColor;
     protected ComponentName mRecvComponent;
+    private boolean mIsRegistered = false;
 
     private final int[] mActionIds;
 
@@ -86,12 +90,34 @@ public class MediaControlPanel implements NotificationMediaManager.MediaListener
             com.android.internal.R.id.action4
     };
 
-    private MediaController.Callback mSessionCallback = new MediaController.Callback() {
+    private final MediaController.Callback mSessionCallback = new MediaController.Callback() {
         @Override
         public void onSessionDestroyed() {
             Log.d(TAG, "session destroyed");
             mController.unregisterCallback(mSessionCallback);
             clearControls();
+            makeInactive();
+        }
+    };
+
+    private final MediaListener mMediaListener = new MediaListener() {
+        @Override
+        public void onMetadataOrStateChanged(MediaMetadata metadata, int state) {
+            if (state == PlaybackState.STATE_NONE) {
+                clearControls();
+                makeInactive();
+            }
+        }
+    };
+
+    private final OnAttachStateChangeListener mStateListener = new OnAttachStateChangeListener() {
+        @Override
+        public void onViewAttachedToWindow(View unused) {
+            makeActive();
+        }
+        @Override
+        public void onViewDetachedFromWindow(View unused) {
+            makeInactive();
         }
     };
 
@@ -111,6 +137,12 @@ public class MediaControlPanel implements NotificationMediaManager.MediaListener
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mMediaNotifView = (LinearLayout) inflater.inflate(layoutId, parent, false);
+        // TODO(b/150854549): removeOnAttachStateChangeListener when this doesn't inflate views
+        // mStateListener shouldn't need to be unregistered since this object shares the same
+        // lifecycle with the inflated view. It would be better, however, if this controller used an
+        // attach/detach of views instead of inflating them in the constructor, which would allow
+        // mStateListener to be unregistered in detach.
+        mMediaNotifView.addOnAttachStateChangeListener(mStateListener);
         mMediaManager = manager;
         mActionIds = actionIds;
         mForegroundExecutor = foregroundExecutor;
@@ -236,9 +268,7 @@ public class MediaControlPanel implements NotificationMediaManager.MediaListener
             });
         }
 
-        // Ensure is only added once
-        mMediaManager.removeCallback(this);
-        mMediaManager.addCallback(this);
+        makeActive();
     }
 
     /**
@@ -422,11 +452,20 @@ public class MediaControlPanel implements NotificationMediaManager.MediaListener
         btn.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public void onMetadataOrStateChanged(MediaMetadata metadata, int state) {
-        if (state == PlaybackState.STATE_NONE) {
-            clearControls();
-            mMediaManager.removeCallback(this);
+    private void makeActive() {
+        Assert.isMainThread();
+        if (!mIsRegistered) {
+            mMediaManager.addCallback(mMediaListener);
+            mIsRegistered = true;
         }
     }
+
+    private void makeInactive() {
+        Assert.isMainThread();
+        if (mIsRegistered) {
+            mMediaManager.removeCallback(mMediaListener);
+            mIsRegistered = false;
+        }
+    }
+
 }

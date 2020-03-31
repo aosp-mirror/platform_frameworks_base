@@ -1386,7 +1386,7 @@ class Task extends WindowContainer<WindowContainer> {
         // A rootable task that is now being added to be the child of an organized task. Making
         // sure the stack references is keep updated.
         if (mTaskOrganizer != null && mCreatedByOrganizer && child.asTask() != null) {
-            mDisplayContent.addStackReferenceIfNeeded((ActivityStack) child);
+            mDisplayContent.mTaskContainers.addStackReferenceIfNeeded((ActivityStack) child);
         }
 
         // Make sure the list of display UID whitelists is updated
@@ -1432,7 +1432,7 @@ class Task extends WindowContainer<WindowContainer> {
         // A rootable child task that is now being removed from an organized task. Making sure
         // the stack references is keep updated.
         if (mTaskOrganizer != null && mCreatedByOrganizer && child.asTask() != null) {
-            mDisplayContent.removeStackReferenceIfNeeded((ActivityStack) child);
+            mDisplayContent.mTaskContainers.removeStackReferenceIfNeeded((ActivityStack) child);
         }
         removeChild(child, "removeChild");
     }

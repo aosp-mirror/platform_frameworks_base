@@ -75,13 +75,11 @@ import com.android.server.rollback.WatchdogRollbackLogger;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * This class handles staged install sessions, i.e. install sessions that require packages to
@@ -222,6 +220,7 @@ public class StagingManager {
         // which will be propagated to populate stagedSessionErrorMessage of this session.
         final ApexInfoList apexInfoList = mApexManager.submitStagedSession(apexSessionParams);
         final List<PackageInfo> result = new ArrayList<>();
+        final List<String> apexPackageNames = new ArrayList<>();
         for (ApexInfo apexInfo : apexInfoList.apexInfos) {
             final PackageInfo packageInfo;
             int flags = PackageManager.GET_META_DATA;
@@ -245,9 +244,10 @@ public class StagingManager {
             checkRequiredVersionCode(session, activePackage);
             checkDowngrade(session, activePackage, packageInfo);
             result.add(packageInfo);
+            apexPackageNames.add(packageInfo.packageName);
         }
-        Slog.d(TAG, "Session " + session.sessionId + " has following APEX packages: ["
-                + result.stream().map(p -> p.packageName).collect(Collectors.joining(",")) + "]");
+        Slog.d(TAG, "Session " + session.sessionId + " has following APEX packages: "
+                + apexPackageNames);
         return result;
     }
 
@@ -313,13 +313,16 @@ public class StagingManager {
             return filter.test(session);
         }
         synchronized (mStagedSessions) {
-            return !(Arrays.stream(session.getChildSessionIds())
-                    // Retrieve cached sessions matching ids.
-                    .mapToObj(i -> mStagedSessions.get(i))
-                    // Filter only the ones containing APEX.
-                    .filter(childSession -> filter.test(childSession))
-                    .collect(Collectors.toList())
-                    .isEmpty());
+            final int[] childSessionIds = session.getChildSessionIds();
+            for (int id : childSessionIds) {
+                // Retrieve cached sessions matching ids.
+                final PackageInstallerSession s = mStagedSessions.get(id);
+                // Filter only the ones containing APEX.
+                if (filter.test(s)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -669,15 +672,15 @@ public class StagingManager {
             // contain an APK, and with those then create a new multi-package group of sessions,
             // carrying over all the session parameters and unmarking them as staged. On commit the
             // sessions will be installed atomically.
-            final List<PackageInstallerSession> childSessions;
+            final List<PackageInstallerSession> childSessions = new ArrayList<>();
             synchronized (mStagedSessions) {
-                childSessions =
-                        Arrays.stream(session.getChildSessionIds())
-                                // Retrieve cached sessions matching ids.
-                                .mapToObj(i -> mStagedSessions.get(i))
-                                // Filter only the ones containing APKs.
-                                .filter(childSession -> !isApexSession(childSession))
-                                .collect(Collectors.toList());
+                final int[] childSessionIds = session.getChildSessionIds();
+                for (int id : childSessionIds) {
+                    final PackageInstallerSession s = mStagedSessions.get(id);
+                    if (!isApexSession(s)) {
+                        childSessions.add(s);
+                    }
+                }
             }
             if (childSessions.isEmpty()) {
                 // APEX-only multi-package staged session, nothing to do.
