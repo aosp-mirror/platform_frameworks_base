@@ -199,6 +199,10 @@ public class PipBoundsHandler {
         return mLastDestinationBounds;
     }
 
+    public Rect getDisplayBounds() {
+        return new Rect(0, 0, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+    }
+
     /**
      * Responds to IPinnedStackListener on {@link DisplayInfo} change.
      * It will normally follow up with a
