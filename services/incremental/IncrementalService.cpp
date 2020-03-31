@@ -563,6 +563,36 @@ StorageId IncrementalService::findStorageId(std::string_view path) const {
     return it->second->second.storage;
 }
 
+int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLogs) {
+    const auto ifs = getIfs(storageId);
+    if (!ifs) {
+        return -EINVAL;
+    }
+
+    using unique_fd = ::android::base::unique_fd;
+    ::android::os::incremental::IncrementalFileSystemControlParcel control;
+    control.cmd.reset(unique_fd(dup(ifs->control.cmd())));
+    control.pendingReads.reset(unique_fd(dup(ifs->control.pendingReads())));
+    auto logsFd = ifs->control.logs();
+    if (logsFd >= 0) {
+        control.log.reset(unique_fd(dup(logsFd)));
+    }
+
+    std::lock_guard l(mMountOperationLock);
+    const auto status = mVold->setIncFsMountOptions(control, enableReadLogs);
+    if (!status.isOk()) {
+        LOG(ERROR) << "Calling Vold::setIncFsMountOptions() failed: " << status.toString8();
+        return status.exceptionCode() == binder::Status::EX_SERVICE_SPECIFIC
+                ? status.serviceSpecificErrorCode() > 0 ? -status.serviceSpecificErrorCode()
+                                                        : status.serviceSpecificErrorCode() == 0
+                                ? -EFAULT
+                                : status.serviceSpecificErrorCode()
+                : -EIO;
+    }
+
+    return 0;
+}
+
 void IncrementalService::deleteStorage(StorageId storageId) {
     const auto ifs = getIfs(storageId);
     if (!ifs) {
@@ -737,10 +767,12 @@ int IncrementalService::makeFile(StorageId storage, std::string_view path, int m
     if (auto ifs = getIfs(storage)) {
         std::string normPath = normalizePathToStorage(ifs, storage, path);
         if (normPath.empty()) {
+            LOG(ERROR) << "Internal error: storageId " << storage << " failed to normalize: " << path;
             return -EINVAL;
         }
         auto err = mIncFs->makeFile(ifs->control, normPath, mode, id, params);
         if (err) {
+            LOG(ERROR) << "Internal error: storageId " << storage << " failed to makeFile: " << err;
             return err;
         }
         std::vector<uint8_t> metadataBytes;

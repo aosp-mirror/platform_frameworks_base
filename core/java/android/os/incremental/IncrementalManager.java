@@ -19,11 +19,13 @@ package android.os.incremental;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.IDataLoaderStatusListener;
 import android.os.RemoteException;
+import android.system.ErrnoException;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -317,6 +319,23 @@ public final class IncrementalManager {
      */
     public static @Nullable byte[] unsafeGetFileSignature(@NonNull String path) {
         return nativeUnsafeGetFileSignature(path);
+    }
+
+    /**
+     * Sets storage parameters.
+     *
+     * @param enableReadLogs - enables or disables read logs. Caller has to have a permission.
+     */
+    @RequiresPermission(android.Manifest.permission.LOADER_USAGE_STATS)
+    public void setStorageParams(int storageId, boolean enableReadLogs) throws ErrnoException {
+        try {
+            int res = mService.setStorageParams(storageId, enableReadLogs);
+            if (res < 0) {
+                throw new ErrnoException("setStorageParams", -res);
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /* Native methods */

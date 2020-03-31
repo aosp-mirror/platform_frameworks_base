@@ -392,6 +392,7 @@ private:
         mArgs = params.arguments();
         mIfs = ifs;
         mStatusListener = statusListener;
+        mIfs->setParams({.readLogsEnabled = true});
         return true;
     }
     bool onStart() final { return true; }
