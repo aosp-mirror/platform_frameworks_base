@@ -214,11 +214,10 @@ public class ResourcesManager {
             for (int i = mCachedApkAssets.size() - 1; i >= 0; i--) {
                 final ApkKey key = mCachedApkAssets.keyAt(i);
                 if (key.path.equals(path)) {
-                    WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.remove(key);
+                    WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.removeAt(i);
                     if (apkAssetsRef != null && apkAssetsRef.get() != null) {
                         apkAssetsRef.get().close();
                     }
-                    mCachedApkAssets.remove(key);
                 }
             }
         }
@@ -774,19 +773,21 @@ public class ResourcesManager {
      * Rebases a key's override config on top of the Activity's base override.
      */
     private void rebaseKeyForActivity(IBinder activityToken, ResourcesKey key) {
-        final ActivityResources activityResources =
-                getOrCreateActivityResourcesStructLocked(activityToken);
+        synchronized (this) {
+            final ActivityResources activityResources =
+                    getOrCreateActivityResourcesStructLocked(activityToken);
 
-        // Clean up any dead references so they don't pile up.
-        ArrayUtils.unstableRemoveIf(activityResources.activityResources,
-                sEmptyReferencePredicate);
+            // Clean up any dead references so they don't pile up.
+            ArrayUtils.unstableRemoveIf(activityResources.activityResources,
+                    sEmptyReferencePredicate);
 
-        // Rebase the key's override config on top of the Activity's base override.
-        if (key.hasOverrideConfiguration()
-                && !activityResources.overrideConfig.equals(Configuration.EMPTY)) {
-            final Configuration temp = new Configuration(activityResources.overrideConfig);
-            temp.updateFrom(key.mOverrideConfiguration);
-            key.mOverrideConfiguration.setTo(temp);
+            // Rebase the key's override config on top of the Activity's base override.
+            if (key.hasOverrideConfiguration()
+                    && !activityResources.overrideConfig.equals(Configuration.EMPTY)) {
+                final Configuration temp = new Configuration(activityResources.overrideConfig);
+                temp.updateFrom(key.mOverrideConfiguration);
+                key.mOverrideConfiguration.setTo(temp);
+            }
         }
     }
 
