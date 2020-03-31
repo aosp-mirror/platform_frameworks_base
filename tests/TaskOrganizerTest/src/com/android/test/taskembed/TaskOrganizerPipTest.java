@@ -25,10 +25,10 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.ViewGroup;
-import android.window.ITaskOrganizer;
-import android.window.WindowContainerTransaction;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.window.ITaskOrganizer;
+import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
 public class TaskOrganizerPipTest extends Service {
@@ -51,6 +51,9 @@ public class TaskOrganizerPipTest extends Service {
         public void onTaskVanished(ActivityManager.RunningTaskInfo ti) {
         }
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
+        }
+        @Override
+        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
         }
     }
 
