@@ -41,6 +41,15 @@ public interface TimeZoneDetector {
     }
 
     /**
+     * Suggests the current time zone, determined using the user's manually entered information, to
+     * the detector. The detector may ignore the signal based on system settings.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE)
+    void suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion);
+
+    /**
      * Suggests the current time zone, determined using telephony signals, to the detector. The
      * detector may ignore the signal based on system settings, whether better information is
      * available, and so on.
@@ -49,13 +58,4 @@ public interface TimeZoneDetector {
      */
     @RequiresPermission(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE)
     void suggestTelephonyTimeZone(@NonNull TelephonyTimeZoneSuggestion timeZoneSuggestion);
-
-    /**
-     * Suggests the current time zone, determined for the user's manually information, to the
-     * detector. The detector may ignore the signal based on system settings.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE)
-    void suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion);
 }
