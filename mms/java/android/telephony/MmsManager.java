@@ -32,6 +32,7 @@ import com.android.internal.telephony.IMms;
 /**
  * Manages MMS operations such as sending multimedia messages.
  * Get this object by calling Context#getSystemService(Context#MMS_SERVICE).
+ * @hide
  */
 @SystemService(Context.MMS_SERVICE)
 public class MmsManager {
