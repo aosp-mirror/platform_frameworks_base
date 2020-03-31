@@ -28,6 +28,7 @@ import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 import static android.util.MathUtils.abs;
 import static android.util.MathUtils.constrain;
 
+import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
@@ -744,6 +745,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent.Builder e = StatsEvent.newBuilder();
             e.setAtomId(atomTag);
             e.writeInt(entry.uid);
+            e.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
             if (withFgbg) {
                 e.writeInt(entry.set);
             }
@@ -907,6 +909,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(traffic.getUid())
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeLong(traffic.getRxBytes())
                     .writeLong(traffic.getTxBytes())
                     .build();
@@ -993,6 +996,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(uid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeLong(userTimeUs)
                     .writeLong(systemTimeUs)
                     .build();
@@ -1023,6 +1027,7 @@ public class StatsPullAtomService extends SystemService {
                     StatsEvent e = StatsEvent.newBuilder()
                             .setAtomId(atomTag)
                             .writeInt(uid)
+                            .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                             .writeInt(freqIndex)
                             .writeLong(cpuFreqTimeMs[freqIndex])
                             .build();
@@ -1053,6 +1058,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(uid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeLong(cpuActiveTimesMs)
                     .build();
             pulledData.add(e);
@@ -1081,6 +1087,7 @@ public class StatsPullAtomService extends SystemService {
                 StatsEvent e = StatsEvent.newBuilder()
                         .setAtomId(atomTag)
                         .writeInt(uid)
+                        .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                         .writeInt(i)
                         .writeLong(cpuClusterTimesMs[i])
                         .build();
@@ -1276,6 +1283,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(processMemoryState.uid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeString(processMemoryState.processName)
                     .writeInt(processMemoryState.oomScore)
                     .writeLong(memoryStat.pgfault)
@@ -1318,6 +1326,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(managedProcess.uid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeString(managedProcess.processName)
                     // RSS high-water mark in bytes.
                     .writeLong(snapshot.rssHighWaterMarkInKilobytes * 1024L)
@@ -1337,6 +1346,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(snapshot.uid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeString(processCmdlines.valueAt(i))
                     // RSS high-water mark in bytes.
                     .writeLong(snapshot.rssHighWaterMarkInKilobytes * 1024L)
@@ -1371,6 +1381,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(managedProcess.uid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeString(managedProcess.processName)
                     .writeInt(managedProcess.pid)
                     .writeInt(managedProcess.oomScore)
@@ -1396,6 +1407,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(snapshot.uid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeString(processCmdlines.valueAt(i))
                     .writeInt(pid)
                     .writeInt(-1001)  // Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.
@@ -1468,6 +1480,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(getUidForPid(allocations.pid))
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeString(readCmdlineFromProcfs(allocations.pid))
                     .writeInt((int) (allocations.totalSizeInBytes / 1024))
                     .writeInt(allocations.count)
@@ -1580,6 +1593,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(callStat.workSourceUid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeString(callStat.className)
                     .writeString(callStat.methodName)
                     .writeLong(callStat.callCount)
@@ -1656,6 +1670,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(entry.workSourceUid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeString(entry.handlerClassName)
                     .writeString(entry.threadName)
                     .writeString(entry.messageName)
@@ -2099,6 +2114,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(uid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeLong(fgCharsRead)
                     .writeLong(fgCharsWrite)
                     .writeLong(fgBytesRead)
@@ -2164,6 +2180,7 @@ public class StatsPullAtomService extends SystemService {
                 StatsEvent e = StatsEvent.newBuilder()
                         .setAtomId(atomTag)
                         .writeInt(st.uid)
+                        .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                         .writeString(st.name)
                         .writeLong(st.base_utime)
                         .writeLong(st.base_stime)
@@ -2222,6 +2239,7 @@ public class StatsPullAtomService extends SystemService {
                 StatsEvent.Builder e = StatsEvent.newBuilder();
                 e.setAtomId(atomTag);
                 e.writeInt(processCpuUsage.uid);
+                e.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
                 e.writeInt(processCpuUsage.processId);
                 e.writeInt(threadCpuUsage.threadId);
                 e.writeString(processCpuUsage.processName);
@@ -2313,6 +2331,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(bs.uidObj.getUid())
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                     .writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah))
                     .build();
             pulledData.add(e);
@@ -2517,6 +2536,7 @@ public class StatsPullAtomService extends SystemService {
                         StatsEvent e = StatsEvent.newBuilder()
                                 .setAtomId(atomTag)
                                 .writeInt(pkg.applicationInfo.uid)
+                                .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                                 .writeString(holderName)
                                 .writeString(roleName)
                                 .build();
@@ -2600,6 +2620,7 @@ public class StatsPullAtomService extends SystemService {
                         e.setAtomId(atomTag);
                         e.writeString(permName);
                         e.writeInt(pkg.applicationInfo.uid);
+                        e.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
                         if (atomTag == FrameworkStatsLog.DANGEROUS_PERMISSION_STATE) {
                             e.writeString("");
                         }
@@ -2954,6 +2975,7 @@ public class StatsPullAtomService extends SystemService {
         StatsEvent.Builder e = StatsEvent.newBuilder();
         e.setAtomId(atomTag);
         e.writeInt(uid);
+        e.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
         e.writeString(packageName);
         if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
             e.writeString(attributionTag);
@@ -3002,6 +3024,7 @@ public class StatsPullAtomService extends SystemService {
             StatsEvent.Builder e = StatsEvent.newBuilder();
             e.setAtomId(atomTag);
             e.writeInt(message.getUid());
+            e.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
             e.writeString(message.getPackageName());
             e.writeString(message.getOp());
             if (message.getAttributionTag() == null) {
