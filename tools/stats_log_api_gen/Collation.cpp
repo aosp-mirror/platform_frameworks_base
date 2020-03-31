@@ -454,16 +454,12 @@ bool get_non_chained_node(const Descriptor* atom, AtomDecl* atomDecl,
     return has_attribution_node;
 }
 
-static void populateFieldNumberToAnnotations(const AtomDecl& atomDecl,
-                                             FieldNumberToAnnotations* fieldNumberToAnnotations) {
-    for (FieldNumberToAnnotations::const_iterator it = atomDecl.fieldNumberToAnnotations.begin();
-         it != atomDecl.fieldNumberToAnnotations.end(); it++) {
+static void populateFieldNumberToAtomDeclSet(const shared_ptr<AtomDecl>& atomDecl,
+                                             FieldNumberToAtomDeclSet* fieldNumberToAtomDeclSet) {
+    for (FieldNumberToAnnotations::const_iterator it = atomDecl->fieldNumberToAnnotations.begin();
+         it != atomDecl->fieldNumberToAnnotations.end(); it++) {
         const int fieldNumber = it->first;
-        const set<shared_ptr<Annotation>>& insertAnnotationsSource = it->second;
-        set<shared_ptr<Annotation>>& insertAnnotationsTarget =
-                (*fieldNumberToAnnotations)[fieldNumber];
-        insertAnnotationsTarget.insert(insertAnnotationsSource.begin(),
-                                       insertAnnotationsSource.end());
+        (*fieldNumberToAtomDeclSet)[fieldNumber].insert(atomDecl);
     }
 }
 
@@ -513,18 +509,19 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
         }
 
         const Descriptor* atom = atomField->message_type();
-        AtomDecl atomDecl(atomField->number(), atomField->name(), atom->name());
+        shared_ptr<AtomDecl> atomDecl =
+                make_shared<AtomDecl>(atomField->number(), atomField->name(), atom->name());
 
         if (atomField->options().GetExtension(os::statsd::allow_from_any_uid) == true) {
-            atomDecl.whitelisted = true;
+            atomDecl->whitelisted = true;
             if (dbg) {
                 printf("%s is whitelisted\n", atomField->name().c_str());
             }
         }
 
-        if (atomDecl.code < PULL_ATOM_START_ID &&
+        if (atomDecl->code < PULL_ATOM_START_ID &&
             atomField->options().GetExtension(os::statsd::truncate_timestamp)) {
-            addAnnotationToAtomDecl(&atomDecl, ATOM_ID_FIELD_NUMBER,
+            addAnnotationToAtomDecl(atomDecl.get(), ATOM_ID_FIELD_NUMBER,
                                     ANNOTATION_ID_TRUNCATE_TIMESTAMP, ANNOTATION_TYPE_BOOL,
                                     AnnotationValue(true));
             if (dbg) {
@@ -533,29 +530,33 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
         }
 
         vector<java_type_t> signature;
-        errorCount += collate_atom(atom, &atomDecl, &signature);
-        if (atomDecl.primaryFields.size() != 0 && atomDecl.exclusiveField == 0) {
+        errorCount += collate_atom(atom, atomDecl.get(), &signature);
+        if (atomDecl->primaryFields.size() != 0 && atomDecl->exclusiveField == 0) {
             print_error(atomField, "Cannot have a primary field without an exclusive field: %s\n",
                         atomField->name().c_str());
             errorCount++;
             continue;
         }
 
-        atoms->decls.insert(atomDecl);
-        FieldNumberToAnnotations& fieldNumberToAnnotations = atoms->signatureInfoMap[signature];
-        populateFieldNumberToAnnotations(atomDecl, &fieldNumberToAnnotations);
+        FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet = atoms->signatureInfoMap[signature];
+        populateFieldNumberToAtomDeclSet(atomDecl, &fieldNumberToAtomDeclSet);
 
-        AtomDecl nonChainedAtomDecl(atomField->number(), atomField->name(), atom->name());
+        atoms->decls.insert(atomDecl);
+
+        shared_ptr<AtomDecl> nonChainedAtomDecl =
+                make_shared<AtomDecl>(atomField->number(), atomField->name(), atom->name());
         vector<java_type_t> nonChainedSignature;
-        if (get_non_chained_node(atom, &nonChainedAtomDecl, &nonChainedSignature)) {
-            atoms->non_chained_decls.insert(nonChainedAtomDecl);
-            FieldNumberToAnnotations& fieldNumberToAnnotations =
+        if (get_non_chained_node(atom, nonChainedAtomDecl.get(), &nonChainedSignature)) {
+            FieldNumberToAtomDeclSet& nonChainedFieldNumberToAtomDeclSet =
                     atoms->nonChainedSignatureInfoMap[nonChainedSignature];
-            populateFieldNumberToAnnotations(atomDecl, &fieldNumberToAnnotations);
+            populateFieldNumberToAtomDeclSet(nonChainedAtomDecl,
+                                             &nonChainedFieldNumberToAtomDeclSet);
+
+            atoms->non_chained_decls.insert(nonChainedAtomDecl);
         }
 
-        if (atomDecl.code < PULL_ATOM_START_ID && atomDecl.code > maxPushedAtomId) {
-            maxPushedAtomId = atomDecl.code;
+        if (atomDecl->code < PULL_ATOM_START_ID && atomDecl->code > maxPushedAtomId) {
+            maxPushedAtomId = atomDecl->code;
         }
     }
 
@@ -563,8 +564,7 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
 
     if (dbg) {
         printf("signatures = [\n");
-        for (map<vector<java_type_t>, FieldNumberToAnnotations>::const_iterator it =
-                     atoms->signatureInfoMap.begin();
+        for (SignatureInfoMap::const_iterator it = atoms->signatureInfoMap.begin();
              it != atoms->signatureInfoMap.end(); it++) {
             printf("   ");
             for (vector<java_type_t>::const_iterator jt = it->first.begin(); jt != it->first.end();
