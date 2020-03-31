@@ -20,6 +20,16 @@ package android.app {
     method @Deprecated public void setLatestEventInfo(android.content.Context, CharSequence, CharSequence, android.app.PendingIntent);
   }
 
+  public static final class Notification.BubbleMetadata implements android.os.Parcelable {
+    method @Deprecated @Nullable public android.graphics.drawable.Icon getBubbleIcon();
+    method @Deprecated @Nullable public android.app.PendingIntent getBubbleIntent();
+  }
+
+  public static final class Notification.BubbleMetadata.Builder {
+    method @Deprecated @NonNull public android.app.Notification.BubbleMetadata.Builder createIntentBubble(@NonNull android.app.PendingIntent, @NonNull android.graphics.drawable.Icon);
+    method @Deprecated @NonNull public android.app.Notification.BubbleMetadata.Builder createShortcutBubble(@NonNull String);
+  }
+
   public static class Notification.Builder {
     method @Deprecated public android.app.Notification.Builder setChannel(String);
     method @Deprecated public android.app.Notification.Builder setTimeout(long);

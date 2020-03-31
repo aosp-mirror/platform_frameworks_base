@@ -18,6 +18,7 @@ package com.google.android.test.windowinsetstests;
 
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
+
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -30,7 +31,6 @@ import android.content.Context;
 import android.graphics.Insets;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -44,10 +44,10 @@ import android.view.WindowInsetsController.OnControllableInsetsChangedListener;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 public class WindowInsetsActivity extends AppCompatActivity {
 
@@ -191,40 +191,6 @@ public class WindowInsetsActivity extends AppCompatActivity {
                 mTransitions.forEach(it -> it.onFinish(animation));
             }
         });
-
-        findViewById(R.id.floating_action_button).setOnClickListener(
-                v -> v.getWindowInsetsController().controlWindowInsetsAnimation(ime(), -1,
-                new LinearInterpolator(), null /* cancellationSignal */,
-                new WindowInsetsAnimationControlListener() {
-                    @Override
-                    public void onReady(
-                            WindowInsetsAnimationController controller,
-                            int types) {
-                        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-                        anim.setDuration(1500);
-                        anim.addUpdateListener(animation
-                                -> controller.setInsetsAndAlpha(
-                                controller.getShownStateInsets(),
-                                (float) animation.getAnimatedValue(),
-                                anim.getAnimatedFraction()));
-                        anim.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                super.onAnimationEnd(animation);
-                                controller.finish(true);
-                            }
-                        });
-                        anim.start();
-                    }
-
-                    @Override
-                    public void onCancelled(WindowInsetsAnimationController controller) {
-                    }
-
-                    @Override
-                    public void onFinished(WindowInsetsAnimationController controller) {
-                    }
-                }));
     }
 
     @Override
@@ -232,6 +198,57 @@ public class WindowInsetsActivity extends AppCompatActivity {
         super.onResume();
         // TODO: move this to onCreate once setDecorFitsSystemWindows can be safely called there.
         getWindow().getDecorView().post(() -> getWindow().setDecorFitsSystemWindows(false));
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getWindow().getInsetsController().addOnControllableInsetsChangedListener(
+                new OnControllableInsetsChangedListener() {
+
+                    boolean hasControl = false;
+                    @Override
+                    public void onControllableInsetsChanged(WindowInsetsController controller,
+                            int types) {
+                        if ((types & ime()) != 0 && !hasControl) {
+                            hasControl = true;
+                            controller.controlWindowInsetsAnimation(ime(), -1,
+                                    new LinearInterpolator(), null /* cancellationSignal */,
+                                    new WindowInsetsAnimationControlListener() {
+                                        @Override
+                                        public void onReady(
+                                                WindowInsetsAnimationController controller,
+                                                int types) {
+                                            ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+                                            anim.setDuration(1500);
+                                            anim.addUpdateListener(animation
+                                                    -> controller.setInsetsAndAlpha(
+                                                    controller.getShownStateInsets(),
+                                                    (float) animation.getAnimatedValue(),
+                                                    anim.getAnimatedFraction()));
+                                            anim.addListener(new AnimatorListenerAdapter() {
+                                                @Override
+                                                public void onAnimationEnd(Animator animation) {
+                                                    super.onAnimationEnd(animation);
+                                                    controller.finish(true);
+                                                }
+                                            });
+                                            anim.start();
+                                        }
+
+                                        @Override
+                                        public void onFinished(
+                                                WindowInsetsAnimationController controller) {
+                                        }
+
+                                        @Override
+                                        public void onCancelled(
+                                                WindowInsetsAnimationController controller) {
+                                        }
+                                    });
+                        }
+                    }
+                });
     }
 
     static class Transition {

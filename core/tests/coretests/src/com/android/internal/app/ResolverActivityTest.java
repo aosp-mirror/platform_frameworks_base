@@ -598,7 +598,7 @@ public class ResolverActivityTest {
         onView(withId(R.id.contentPanel))
                 .perform(swipeUp());
 
-        onView(withText(R.string.resolver_cant_share_with_work_apps))
+        onView(withText(R.string.resolver_cant_access_work_apps))
                 .check(matches(isDisplayed()));
     }
 
@@ -612,8 +612,15 @@ public class ResolverActivityTest {
                 createResolvedComponentsForTestWithOtherProfile(3, /* userId */ 10);
         List<ResolvedComponentInfo> workResolvedComponentInfos =
                 createResolvedComponentsForTest(workProfileTargets);
+        when(sOverrides.workResolverListController.getUserStateIndependentResolversAsUser(
+                Mockito.isA(List.class),
+                Mockito.isA(UserHandle.class)))
+                .thenReturn(new ArrayList<>(workResolvedComponentInfos));
         sOverrides.isQuietModeEnabled = true;
-        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        // When work profile is disabled, we get 0 results when we query the work profile
+        // intents.
+        setupResolverControllers(personalResolvedComponentInfos,
+                /* workResolvedComponentInfos */ new ArrayList<>());
         Intent sendIntent = createSendImageIntent();
         sendIntent.setType("TestType");
 
@@ -629,7 +636,7 @@ public class ResolverActivityTest {
     }
 
     @Test
-    public void testWorkTab_noWorkTargets_emptyStateShown() {
+    public void testWorkTab_noWorkAppsAvailable_emptyStateShown() {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
         markWorkProfileUserAvailable();
@@ -640,6 +647,57 @@ public class ResolverActivityTest {
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendImageIntent();
         sendIntent.setType("TestType");
+
+        mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        onView(withId(R.id.contentPanel))
+                .perform(swipeUp());
+        onView(withText(R.string.resolver_work_tab)).perform(click());
+        waitForIdle();
+
+        onView(withText(R.string.resolver_no_work_apps_available_resolve))
+                .check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testWorkTab_xProfileOff_noAppsAvailable_workOff_xProfileOffEmptyStateShown() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(0);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+        sendIntent.setType("TestType");
+        sOverrides.isQuietModeEnabled = true;
+        sOverrides.hasCrossProfileIntents = false;
+
+        mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        onView(withId(R.id.contentPanel))
+                .perform(swipeUp());
+        onView(withText(R.string.resolver_work_tab)).perform(click());
+        waitForIdle();
+
+        onView(withText(R.string.resolver_cant_access_work_apps))
+                .check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testWorkTab_noAppsAvailable_workOff_noAppsAvailableEmptyStateShown() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(0);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+        sendIntent.setType("TestType");
+        sOverrides.isQuietModeEnabled = true;
 
         mActivityRule.launchActivity(sendIntent);
         waitForIdle();

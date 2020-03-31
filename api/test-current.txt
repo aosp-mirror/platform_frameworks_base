@@ -5052,7 +5052,7 @@ package android.view.inputmethod {
   }
 
   public final class InlineSuggestionInfo implements android.os.Parcelable {
-    method @NonNull public static android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(@NonNull android.view.inline.InlinePresentationSpec, @NonNull String, @Nullable String[], @NonNull String, boolean);
+    method @NonNull public static android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(@NonNull android.widget.inline.InlinePresentationSpec, @NonNull String, @Nullable String[], @NonNull String, boolean);
   }
 
   public final class InlineSuggestionsResponse implements android.os.Parcelable {

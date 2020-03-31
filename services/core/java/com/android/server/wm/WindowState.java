@@ -3974,7 +3974,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         pw.println(prefix + "isOnScreen=" + isOnScreen());
         pw.println(prefix + "isVisible=" + isVisible());
-        pw.println(prefix + "mEmbeddedDisplayContents=" + mEmbeddedDisplayContents);
+        if (!mEmbeddedDisplayContents.isEmpty()) {
+            pw.println(prefix + "mEmbeddedDisplayContents=" + mEmbeddedDisplayContents);
+        }
+        if (dumpAll) {
+            pw.println(prefix + "mRequestedInsetsState: " + mRequestedInsetsState);
+        }
     }
 
     @Override

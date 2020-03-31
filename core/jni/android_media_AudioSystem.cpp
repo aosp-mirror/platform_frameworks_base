@@ -2266,6 +2266,11 @@ android_media_AudioSystem_setA11yServicesUids(JNIEnv *env, jobject thiz, jintArr
     return (jint)nativeToJavaStatus(status);
 }
 
+static jint android_media_AudioSystem_setCurrentImeUid(JNIEnv *env, jobject thiz, jint uid) {
+    status_t status = AudioSystem::setCurrentImeUid(uid);
+    return (jint)nativeToJavaStatus(status);
+}
+
 static jboolean
 android_media_AudioSystem_isHapticPlaybackSupported(JNIEnv *env, jobject thiz)
 {
@@ -2527,7 +2532,8 @@ static const JNINativeMethod gMethods[] =
          {"setUserIdDeviceAffinities", "(I[I[Ljava/lang/String;)I",
           (void *)android_media_AudioSystem_setUserIdDeviceAffinities},
          {"removeUserIdDeviceAffinities", "(I)I",
-          (void *)android_media_AudioSystem_removeUserIdDeviceAffinities}};
+          (void *)android_media_AudioSystem_removeUserIdDeviceAffinities},
+         {"setCurrentImeUid", "(I)I", (void *)android_media_AudioSystem_setCurrentImeUid}};
 
 static const JNINativeMethod gEventHandlerMethods[] = {
     {"native_setup",

@@ -18,9 +18,10 @@ package android.database.sqlite;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
+import android.util.Pair;
 
+import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Map;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
@@ -100,6 +101,11 @@ public final class SQLiteDatabaseConfiguration {
      */
     public final ArrayMap<String, BinaryOperator<String>> customAggregateFunctions
             = new ArrayMap<>();
+
+    /**
+     * The statements to execute to initialize each connection.
+     */
+    public final ArrayList<Pair<String, Object[]>> perConnectionSql = new ArrayList<>();
 
     /**
      * The size in bytes of each lookaside slot
@@ -194,6 +200,8 @@ public final class SQLiteDatabaseConfiguration {
         customScalarFunctions.putAll(other.customScalarFunctions);
         customAggregateFunctions.clear();
         customAggregateFunctions.putAll(other.customAggregateFunctions);
+        perConnectionSql.clear();
+        perConnectionSql.addAll(other.perConnectionSql);
         lookasideSlotSize = other.lookasideSlotSize;
         lookasideSlotCount = other.lookasideSlotCount;
         idleConnectionTimeoutMs = other.idleConnectionTimeoutMs;

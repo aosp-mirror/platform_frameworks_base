@@ -585,6 +585,16 @@ public class Location implements Parcelable {
         return mElapsedRealtimeNanos;
     }
 
+    /** @hide */
+    public long getElapsedRealtimeAgeNanos(long referenceRealtimeNs) {
+        return referenceRealtimeNs - mElapsedRealtimeNanos;
+    }
+
+    /** @hide */
+    public long getElapsedRealtimeAgeNanos() {
+        return getElapsedRealtimeAgeNanos(SystemClock.elapsedRealtimeNanos());
+    }
+
     /**
      * Set the time of this fix, in elapsed real-time since system boot.
      *

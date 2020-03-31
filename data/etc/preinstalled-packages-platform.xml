@@ -97,8 +97,8 @@ The way that a device treats system packages that do not have any entry (for any
 is determined by the config resource value config_userTypePackageWhitelistMode.
 See frameworks/base/core/res/res/values/config.xml#config_userTypePackageWhitelistMode.
 
-Changes to the whitelist during system updates can result in installing new system packages
-to pre-existing users, but cannot uninstall system packages from pre-existing users.
+Changes to the whitelist during system updates can result in installing additional system packages
+to pre-existing users, but cannot uninstall pre-existing system packages from pre-existing users.
 -->
 <config>
     <install-in-user-type package="com.android.providers.settings">

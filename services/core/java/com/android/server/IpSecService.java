@@ -359,10 +359,14 @@ public class IpSecService extends IIpSecService.Stub {
     @VisibleForTesting
     static final class UserRecord {
         /* Maximum number of each type of resource that a single UID may possess */
-        public static final int MAX_NUM_TUNNEL_INTERFACES = 2;
-        public static final int MAX_NUM_ENCAP_SOCKETS = 2;
-        public static final int MAX_NUM_TRANSFORMS = 4;
-        public static final int MAX_NUM_SPIS = 8;
+
+        // Up to 4 active VPNs/IWLAN with potential soft handover.
+        public static final int MAX_NUM_TUNNEL_INTERFACES = 8;
+        public static final int MAX_NUM_ENCAP_SOCKETS = 16;
+
+        // SPIs and Transforms are both cheap, and are 1:1 correlated.
+        public static final int MAX_NUM_TRANSFORMS = 64;
+        public static final int MAX_NUM_SPIS = 64;
 
         /**
          * Store each of the OwnedResource types in an (thinly wrapped) sparse array for indexing

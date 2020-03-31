@@ -3438,10 +3438,10 @@ public class UserManagerService extends IUserManager.Stub {
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
             t.traceEnd();
 
-            final Set<String> installablePackages =
+            final Set<String> userTypeInstallablePackages =
                     mSystemPackageInstaller.getInstallablePackagesForUserType(userType);
             t.traceBegin("PM.createNewUser");
-            mPm.createNewUser(userId, installablePackages, disallowedPackages);
+            mPm.createNewUser(userId, userTypeInstallablePackages, disallowedPackages);
             t.traceEnd();
 
             userInfo.partial = false;
@@ -3562,8 +3562,10 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /** Install/uninstall system packages for all users based on their user-type, as applicable. */
-    boolean installWhitelistedSystemPackages(boolean isFirstBoot, boolean isUpgrade) {
-        return mSystemPackageInstaller.installWhitelistedSystemPackages(isFirstBoot, isUpgrade);
+    boolean installWhitelistedSystemPackages(boolean isFirstBoot, boolean isUpgrade,
+            @Nullable ArraySet<String> existingPackages) {
+        return mSystemPackageInstaller.installWhitelistedSystemPackages(
+                isFirstBoot, isUpgrade, existingPackages);
     }
 
     private long getCreationTime() {

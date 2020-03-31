@@ -117,7 +117,7 @@ public abstract class GnssMeasurementsProvider
         foreach((IGnssMeasurementsListener listener, CallerIdentity callerIdentity) -> {
             if (!hasPermission(mContext, callerIdentity)) {
                 logPermissionDisabledEventNotReported(
-                        TAG, callerIdentity.mPackageName, "GNSS measurements");
+                        TAG, callerIdentity.packageName, "GNSS measurements");
                 return;
             }
             listener.onGnssMeasurementsReceived(event);

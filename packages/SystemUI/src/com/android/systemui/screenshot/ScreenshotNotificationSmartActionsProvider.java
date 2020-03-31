@@ -56,16 +56,18 @@ public class ScreenshotNotificationSmartActionsProvider {
      * Default implementation that returns an empty list.
      * This method is overridden in vendor-specific Sys UI implementation.
      *
-     * @param screenshotId     A generated random unique id for the screenshot.
-     * @param bitmap           The bitmap of the screenshot. The bitmap config must be {@link
-     *                         HARDWARE}.
-     * @param componentName    Contains package and activity class names where the screenshot was
-     *                         taken. This is used as an additional signal to generate and rank more
-     *                         relevant actions.
-     * @param isManagedProfile The screenshot was taken for a work profile app.
+     * @param screenshotId       A generated random unique id for the screenshot.
+     * @param screenshotFileName name of the file where the screenshot will be written.
+     * @param bitmap             The bitmap of the screenshot. The bitmap config must be {@link
+     *                           HARDWARE}.
+     * @param componentName      Contains package and activity class names where the screenshot was
+     *                           taken. This is used as an additional signal to generate and rank
+     *                           more relevant actions.
+     * @param isManagedProfile   The screenshot was taken for a work profile app.
      */
     public CompletableFuture<List<Notification.Action>> getActions(
             String screenshotId,
+            String screenshotFileName,
             Bitmap bitmap,
             ComponentName componentName,
             boolean isManagedProfile) {
@@ -77,7 +79,7 @@ public class ScreenshotNotificationSmartActionsProvider {
      * Notify exceptions and latency encountered during generating smart actions.
      * This method is overridden in vendor-specific Sys UI implementation.
      *
-     * @param screenshotId Unique id of the screenshot.
+     * @param screenshotId unique id of the screenshot.
      * @param op           screenshot execution phase defined in {@link ScreenshotOp}
      * @param status       {@link ScreenshotOpStatus} to report success or failure.
      * @param durationMs   latency experienced in different phases of screenshots.

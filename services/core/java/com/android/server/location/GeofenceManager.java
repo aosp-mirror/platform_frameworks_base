@@ -16,9 +16,6 @@
 
 package com.android.server.location;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -38,7 +35,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.FgThread;
-import com.android.server.LocationManagerService;
 import com.android.server.PendingIntentUtils;
 
 import java.io.PrintWriter;
@@ -125,16 +121,10 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     }
 
     public void addFence(LocationRequest request, Geofence geofence, PendingIntent intent,
-            int allowedResolutionLevel, int uid, String packageName, @Nullable String featureId,
-            @NonNull String listenerIdentifier) {
-        if (D) {
-            Slog.d(TAG, "addFence: request=" + request + ", geofence=" + geofence
-                    + ", intent=" + intent + ", uid=" + uid + ", packageName=" + packageName);
-        }
-
+            CallerIdentity identity) {
         GeofenceState state = new GeofenceState(geofence,
                 request.getExpirationRealtimeMs(SystemClock.elapsedRealtime()),
-                allowedResolutionLevel, uid, packageName, featureId, listenerIdentifier, intent);
+                identity, intent);
         synchronized (mLock) {
             // first make sure it doesn't already exist
             for (int i = mFences.size() - 1; i >= 0; i--) {
@@ -182,26 +172,14 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
         }
 
         synchronized (mLock) {
-            Iterator<GeofenceState> iter = mFences.iterator();
-            while (iter.hasNext()) {
-                GeofenceState state = iter.next();
-                if (state.mPackageName.equals(packageName)) {
-                    iter.remove();
-                }
-            }
+            mFences.removeIf(state -> state.mIdentity.packageName.equals(packageName));
             scheduleUpdateFencesLocked();
         }
     }
 
     private void removeExpiredFencesLocked() {
         long time = SystemClock.elapsedRealtime();
-        Iterator<GeofenceState> iter = mFences.iterator();
-        while (iter.hasNext()) {
-            GeofenceState state = iter.next();
-            if (state.mExpireAt < time) {
-                iter.remove();
-            }
-        }
+        mFences.removeIf(state -> state.mExpireAt < time);
     }
 
     private void scheduleUpdateFencesLocked() {
@@ -266,24 +244,17 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
             double minFenceDistance = Double.MAX_VALUE;
             boolean needUpdates = false;
             for (GeofenceState state : mFences) {
-                if (mSettingsStore.isLocationPackageBlacklisted(ActivityManager.getCurrentUser(),
-                        state.mPackageName)) {
-                    if (D) {
-                        Slog.d(TAG, "skipping geofence processing for blacklisted app: "
-                                + state.mPackageName);
-                    }
+                CallerIdentity identity = state.mIdentity;
+                if (mSettingsStore.isLocationPackageBlacklisted(identity.userId,
+                        identity.packageName)) {
                     continue;
                 }
 
-                int op = LocationManagerService.resolutionLevelToOp(state.mAllowedResolutionLevel);
+                int op = CallerIdentity.asAppOp(identity.permissionLevel);
                 if (op >= 0) {
-                    if (mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, state.mUid,
-                            state.mPackageName, state.mFeatureId, state.mListenerIdentifier)
+                    if (mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, identity.uid,
+                            identity.packageName, identity.featureId, null)
                             != AppOpsManager.MODE_ALLOWED) {
-                        if (D) {
-                            Slog.d(TAG, "skipping geofence processing for no op app: "
-                                    + state.mPackageName);
-                        }
                         continue;
                     }
                 }
@@ -429,7 +400,7 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
 
     public void dump(PrintWriter pw) {
         for (GeofenceState state : mFences) {
-            pw.println(state.mPackageName + " " + state.mFence);
+            pw.println(state.mIdentity + " " + state.mFence);
         }
     }
 

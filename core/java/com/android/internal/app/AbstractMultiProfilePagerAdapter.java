@@ -300,21 +300,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     private boolean rebuildTab(ResolverListAdapter activeListAdapter, boolean doPostProcessing) {
         UserHandle listUserHandle = activeListAdapter.getUserHandle();
-        if (listUserHandle.equals(mWorkProfileUserHandle)
-                && mInjector.isQuietModeEnabled(mWorkProfileUserHandle)) {
-            DevicePolicyEventLogger
-                    .createEvent(DevicePolicyEnums.RESOLVER_EMPTY_STATE_WORK_APPS_DISABLED)
-                    .setStrings(getMetricsCategory())
-                    .write();
-            showWorkProfileOffEmptyState(activeListAdapter,
-                    v -> {
-                        ProfileDescriptor descriptor = getItem(
-                                userHandleToPageIndex(activeListAdapter.getUserHandle()));
-                        showSpinner(descriptor.getEmptyStateView());
-                        mInjector.requestQuietModeEnabled(false, mWorkProfileUserHandle);
-                    });
-            return false;
-        }
+
         if (UserHandle.myUserId() != listUserHandle.getIdentifier()) {
             if (!mInjector.hasCrossProfileIntents(activeListAdapter.getIntents(),
                     UserHandle.myUserId(), listUserHandle.getIdentifier())) {
@@ -352,7 +338,65 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     protected abstract void showNoWorkToPersonalIntentsEmptyState(
             ResolverListAdapter activeListAdapter);
 
-    void showNoAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
+    /**
+     * The empty state screens are shown according to their priority:
+     * <ol>
+     * <li>(highest priority) cross-profile disabled by policy (handled in
+     * {@link #rebuildTab(ResolverListAdapter, boolean)})</li>
+     * <li>no apps available</li>
+     * <li>(least priority) work is off</li>
+     * </ol>
+     *
+     * The intention is to prevent the user from having to turn
+     * the work profile on if there will not be any apps resolved
+     * anyway.
+     */
+    void showEmptyResolverListEmptyState(ResolverListAdapter listAdapter) {
+        if (maybeShowWorkProfileOffEmptyState(listAdapter)) {
+            return;
+        }
+        maybeShowNoAppsAvailableEmptyState(listAdapter);
+    }
+
+    /**
+     * Returns {@code true} if the work profile off empty state screen is shown.
+     */
+    private boolean maybeShowWorkProfileOffEmptyState(ResolverListAdapter listAdapter) {
+        UserHandle listUserHandle = listAdapter.getUserHandle();
+        if (!listUserHandle.equals(mWorkProfileUserHandle)
+                || !mInjector.isQuietModeEnabled(mWorkProfileUserHandle)
+                || !hasResolvedAppsInWorkProfile(listAdapter)) {
+            return false;
+        }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.RESOLVER_EMPTY_STATE_WORK_APPS_DISABLED)
+                .setStrings(getMetricsCategory())
+                .write();
+        showWorkProfileOffEmptyState(listAdapter,
+                v -> {
+                    ProfileDescriptor descriptor = getItem(
+                            userHandleToPageIndex(listAdapter.getUserHandle()));
+                    showSpinner(descriptor.getEmptyStateView());
+                    mInjector.requestQuietModeEnabled(false, mWorkProfileUserHandle);
+                });
+        return true;
+    }
+
+    /**
+     * Returns {@code true} if there is at least one app resolved in the work profile,
+     * regardless of whether the work profile is enabled or not.
+     */
+    private boolean hasResolvedAppsInWorkProfile(ResolverListAdapter listAdapter) {
+        List<ResolverActivity.ResolvedComponentInfo> userStateIndependentWorkResolvers =
+                listAdapter.mResolverListController.getUserStateIndependentResolversAsUser(
+                        listAdapter.getIntents(), mWorkProfileUserHandle);
+        return userStateIndependentWorkResolvers.stream()
+                .anyMatch(resolvedComponentInfo ->
+                        resolvedComponentInfo.getResolveInfoAt(0).targetUserId
+                                == UserHandle.USER_CURRENT);
+    }
+
+    private void maybeShowNoAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
         UserHandle listUserHandle = listAdapter.getUserHandle();
         if (mWorkProfileUserHandle != null
                 && (UserHandle.myUserId() == listUserHandle.getIdentifier()

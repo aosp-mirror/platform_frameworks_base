@@ -36,8 +36,10 @@ public class WatchdogEventLogger {
     }
 
     public void stop() {
-        mReceiver.stop();
-        mReceiver.clear();
+        if (mReceiver != null) {
+            mReceiver.stop();
+            mReceiver.clear();
+        }
     }
 
     /**

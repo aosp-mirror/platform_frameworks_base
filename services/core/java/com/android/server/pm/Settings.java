@@ -24,6 +24,8 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOM
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
+import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
+import static android.content.pm.PackageManager.UNINSTALL_REASON_USER_TYPE;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
@@ -266,6 +268,7 @@ public final class Settings {
     private static final String ATTR_DOMAIN_VERIFICATON_STATE = "domainVerificationStatus";
     private static final String ATTR_APP_LINK_GENERATION = "app-link-generation";
     private static final String ATTR_INSTALL_REASON = "install-reason";
+    private static final String ATTR_UNINSTALL_REASON = "uninstall-reason";
     private static final String ATTR_INSTANT_APP = "instant-app";
     private static final String ATTR_VIRTUAL_PRELOAD = "virtual-preload";
     private static final String ATTR_HARMFUL_APP_WARNING = "harmful-app-warning";
@@ -684,7 +687,9 @@ public final class Settings {
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0, PackageManager.INSTALL_REASON_UNKNOWN,
+                                0 /*linkGeneration*/,
+                                PackageManager.INSTALL_REASON_UNKNOWN,
+                                PackageManager.UNINSTALL_REASON_UNKNOWN,
                                 null /*harmfulAppWarning*/);
                     }
                 }
@@ -768,6 +773,7 @@ public final class Settings {
                     if (allUserInfos != null) {
                         for (UserInfo userInfo : allUserInfos) {
                             pkgSetting.setInstalled(true, userInfo.id);
+                            pkgSetting.setUninstallReason(UNINSTALL_REASON_UNKNOWN, userInfo.id);
                         }
                     }
                 }
@@ -1580,7 +1586,9 @@ public final class Settings {
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0, PackageManager.INSTALL_REASON_UNKNOWN,
+                                0 /*linkGeneration*/,
+                                PackageManager.INSTALL_REASON_UNKNOWN,
+                                PackageManager.UNINSTALL_REASON_UNKNOWN,
                                 null /*harmfulAppWarning*/);
                     }
                     return;
@@ -1678,6 +1686,8 @@ public final class Settings {
                     }
                     final int installReason = XmlUtils.readIntAttribute(parser,
                             ATTR_INSTALL_REASON, PackageManager.INSTALL_REASON_UNKNOWN);
+                    final int uninstallReason = XmlUtils.readIntAttribute(parser,
+                            ATTR_UNINSTALL_REASON, PackageManager.UNINSTALL_REASON_UNKNOWN);
 
                     ArraySet<String> enabledComponents = null;
                     ArraySet<String> disabledComponents = null;
@@ -1751,7 +1761,7 @@ public final class Settings {
                             hidden, distractionFlags, suspended, suspendParamsMap,
                             instantApp, virtualPreload,
                             enabledCaller, enabledComponents, disabledComponents, verifState,
-                            linkGeneration, installReason, harmfulAppWarning);
+                            linkGeneration, installReason, uninstallReason, harmfulAppWarning);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -2078,6 +2088,10 @@ public final class Settings {
                 if (ustate.installReason != PackageManager.INSTALL_REASON_UNKNOWN) {
                     serializer.attribute(null, ATTR_INSTALL_REASON,
                             Integer.toString(ustate.installReason));
+                }
+                if (ustate.uninstallReason != PackageManager.UNINSTALL_REASON_UNKNOWN) {
+                    serializer.attribute(null, ATTR_UNINSTALL_REASON,
+                            Integer.toString(ustate.uninstallReason));
                 }
                 if (ustate.harmfulAppWarning != null) {
                     serializer.attribute(null, ATTR_HARMFUL_APP_WARNING,
@@ -4126,7 +4140,7 @@ public final class Settings {
     }
 
     void createNewUserLI(@NonNull PackageManagerService service, @NonNull Installer installer,
-            @UserIdInt int userHandle, @Nullable Set<String> installablePackages,
+            @UserIdInt int userHandle, @Nullable Set<String> userTypeInstallablePackages,
             String[] disallowedPackages) {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
@@ -4137,7 +4151,7 @@ public final class Settings {
         String[] seinfos;
         int[] targetSdkVersions;
         int packagesCount;
-        final boolean skipPackageWhitelist = installablePackages == null;
+        final boolean skipPackageWhitelist = userTypeInstallablePackages == null;
         synchronized (mLock) {
             Collection<PackageSetting> packages = mPackages.values();
             packagesCount = packages.size();
@@ -4152,13 +4166,20 @@ public final class Settings {
                 if (ps.pkg == null) {
                     continue;
                 }
-                final boolean shouldInstall = ps.isSystem() &&
-                        (skipPackageWhitelist || installablePackages.contains(ps.name)) &&
+                final boolean shouldMaybeInstall = ps.isSystem() &&
                         !ArrayUtils.contains(disallowedPackages, ps.name) &&
                         !ps.getPkgState().isHiddenUntilInstalled();
+                final boolean shouldReallyInstall = shouldMaybeInstall &&
+                        (skipPackageWhitelist || userTypeInstallablePackages.contains(ps.name));
                 // Only system apps are initially installed.
-                ps.setInstalled(shouldInstall, userHandle);
-                if (!shouldInstall) {
+                ps.setInstalled(shouldReallyInstall, userHandle);
+                // If userTypeInstallablePackages is the *only* reason why we're not installing,
+                // then uninstallReason is USER_TYPE. If there's a different reason, or if we
+                // actually are installing, put UNKNOWN.
+                final int uninstallReason = (shouldMaybeInstall && !shouldReallyInstall) ?
+                        UNINSTALL_REASON_USER_TYPE : UNINSTALL_REASON_UNKNOWN;
+                ps.setUninstallReason(uninstallReason, userHandle);
+                if (!shouldReallyInstall) {
                     writeKernelMappingLPr(ps);
                 }
                 // Need to create a data directory for all apps under this user. Accumulate all

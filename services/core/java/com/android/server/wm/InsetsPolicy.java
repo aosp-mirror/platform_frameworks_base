@@ -77,6 +77,9 @@ class InsetsPolicy {
 
     /** Updates the target which can control system bars. */
     void updateBarControlTarget(@Nullable WindowState focusedWin) {
+        if (mFocusedWin != focusedWin){
+            abortTransient();
+        }
         mFocusedWin = focusedWin;
         mStateController.onBarControlTargetChanged(getStatusControlTarget(focusedWin),
                 getFakeStatusControlTarget(focusedWin),
@@ -123,11 +126,13 @@ class InsetsPolicy {
             mPolicy.getStatusBarManagerInternal().showTransient(mDisplayContent.getDisplayId(),
                     mShowingTransientTypes.toArray());
             updateBarControlTarget(mFocusedWin);
+            InsetsState state = new InsetsState(mStateController.getRawInsetsState());
             startAnimation(true /* show */, () -> {
                 synchronized (mDisplayContent.mWmService.mGlobalLock) {
                     mStateController.notifyInsetsChanged();
                 }
-            });
+            }, state);
+            mStateController.onInsetsModified(mDummyControlTarget, state);
         }
     }
 
@@ -135,13 +140,15 @@ class InsetsPolicy {
         if (mShowingTransientTypes.size() == 0) {
             return;
         }
+        InsetsState state = new InsetsState(mStateController.getRawInsetsState());
         startAnimation(false /* show */, () -> {
             synchronized (mDisplayContent.mWmService.mGlobalLock) {
                 mShowingTransientTypes.clear();
                 mStateController.notifyInsetsChanged();
                 updateBarControlTarget(mFocusedWin);
             }
-        });
+        }, state);
+        mStateController.onInsetsModified(mDummyControlTarget, state);
     }
 
     boolean isTransient(@InternalInsetsType int type) {
@@ -152,14 +159,22 @@ class InsetsPolicy {
      * @see InsetsStateController#getInsetsForDispatch
      */
     InsetsState getInsetsForDispatch(WindowState target) {
-        InsetsState state = mStateController.getInsetsForDispatch(target);
+        InsetsState originalState = mStateController.getInsetsForDispatch(target);
+        InsetsState state = originalState;
         for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
+            state = new InsetsState(state);
             state.setSourceVisible(mShowingTransientTypes.get(i), false);
         }
         if (mFocusedWin != null && getStatusControlTarget(mFocusedWin) == mDummyControlTarget) {
+            if (state == originalState) {
+                state = new InsetsState(state);
+            }
             state.setSourceVisible(ITYPE_STATUS_BAR, mFocusedWin.getRequestedInsetsState());
         }
         if (mFocusedWin != null && getNavControlTarget(mFocusedWin) == mDummyControlTarget) {
+            if (state == originalState) {
+                state = new InsetsState(state);
+            }
             state.setSourceVisible(ITYPE_NAVIGATION_BAR, mFocusedWin.getRequestedInsetsState());
         }
         return state;
@@ -204,6 +219,13 @@ class InsetsPolicy {
                 updateBarControlTarget(mFocusedWin);
             }
         }
+    }
+
+    private void abortTransient() {
+        mPolicy.getStatusBarManagerInternal().abortTransient(mDisplayContent.getDisplayId(),
+                mShowingTransientTypes.toArray());
+        mShowingTransientTypes.clear();
+        updateBarControlTarget(mFocusedWin);
     }
 
     private @Nullable InsetsControlTarget getFakeStatusControlTarget(
@@ -286,19 +308,20 @@ class InsetsPolicy {
     }
 
     @VisibleForTesting
-    void startAnimation(boolean show, Runnable callback) {
+    void startAnimation(boolean show, Runnable callback, InsetsState state) {
         int typesReady = 0;
         final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
         final IntArray showingTransientTypes = mShowingTransientTypes;
         for (int i = showingTransientTypes.size() - 1; i >= 0; i--) {
-            InsetsSourceProvider provider =
-                    mStateController.getSourceProvider(showingTransientTypes.get(i));
+            int type = showingTransientTypes.get(i);
+            InsetsSourceProvider provider = mStateController.getSourceProvider(type);
             InsetsSourceControl control = provider.getControl(mDummyControlTarget);
             if (control == null || control.getLeash() == null) {
                 continue;
             }
-            typesReady |= InsetsState.toPublicType(showingTransientTypes.get(i));
+            typesReady |= InsetsState.toPublicType(type);
             controls.put(control.getType(), new InsetsSourceControl(control));
+            state.setSourceVisible(type, show);
         }
         controlAnimationUnchecked(typesReady, controls, show, callback);
     }

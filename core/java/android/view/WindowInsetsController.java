@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.inputmethodservice.InputMethodService;
 import android.os.CancellationSignal;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.animation.Interpolator;
@@ -224,6 +225,13 @@ public interface WindowInsetsController {
      * @hide
      */
     InsetsState getState();
+
+    /**
+     * @return Whether the specified insets source is currently requested to be visible by the
+     *         application.
+     * @hide
+     */
+    boolean isRequestedVisible(@InternalInsetsType int type);
 
     /**
      * Adds a {@link OnControllableInsetsChangedListener} to the window insets controller.

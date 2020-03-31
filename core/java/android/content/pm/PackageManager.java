@@ -1031,6 +1031,27 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_REASON_ROLLBACK = 5;
 
+    /** @hide */
+    @IntDef(prefix = { "UNINSTALL_REASON_" }, value = {
+            UNINSTALL_REASON_UNKNOWN,
+            UNINSTALL_REASON_USER_TYPE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UninstallReason {}
+
+    /**
+     * Code indicating that the reason for uninstalling this package is unknown.
+     * @hide
+     */
+    public static final int UNINSTALL_REASON_UNKNOWN = 0;
+
+    /**
+     * Code indicating that this package was uninstalled due to the type of user.
+     * See UserSystemPackageInstaller
+     * @hide
+     */
+    public static final int UNINSTALL_REASON_USER_TYPE = 1;
+
     /**
      * @hide
      */

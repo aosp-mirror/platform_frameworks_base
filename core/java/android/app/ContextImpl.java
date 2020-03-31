@@ -1763,7 +1763,6 @@ class ContextImpl extends Context {
         return bindServiceCommon(service, conn, flags, instanceName, null, executor, getUser());
     }
 
-    /** @hide */
     @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             UserHandle user) {

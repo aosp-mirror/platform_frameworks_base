@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // This is a cc_test just because it supports test_suites. This should be converted to something
-// like cc_binary_test_helper once supported.
+// like cc_binary_test_helper once supported, thus auto_gen_config:false below.
 cc_test {
     // Depending on how the test runs, the executable may be uploaded to different location.
     // Before the bug in the file pusher is fixed, workaround by making the name unique.
@@ -47,6 +47,7 @@ cc_test {
         },
     },
 
+    auto_gen_config: false,
     test_suites: ["general-tests", "pts", "vts-core"],
     gtest: false,
 }

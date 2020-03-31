@@ -2840,44 +2840,6 @@ public class StatsPullAtomService extends SystemService {
             HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
                     TimeUnit.MILLISECONDS);
             processHistoricalOps(histOps, atomTag, pulledData);
-
-            for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
-                final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
-                final int uid = uidOps.getUid();
-                for (int pkgIdx = 0; pkgIdx < uidOps.getPackageCount(); pkgIdx++) {
-                    final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
-                    for (int opIdx = 0; opIdx < packageOps.getOpCount(); opIdx++) {
-                        final AppOpsManager.HistoricalOp op = packageOps.getOpAt(opIdx);
-
-                        StatsEvent.Builder e = StatsEvent.newBuilder();
-                        e.setAtomId(atomTag);
-                        e.writeInt(uid);
-                        e.writeString(packageOps.getPackageName());
-                        e.writeInt(op.getOpCode());
-                        e.writeLong(op.getForegroundAccessCount(OP_FLAGS_PULLED));
-                        e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_PULLED));
-                        e.writeLong(op.getForegroundRejectCount(OP_FLAGS_PULLED));
-                        e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_PULLED));
-                        e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_PULLED));
-                        e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_PULLED));
-
-                        String perm = AppOpsManager.opToPermission(op.getOpCode());
-                        if (perm == null) {
-                            e.writeBoolean(false);
-                        } else {
-                            PermissionInfo permInfo;
-                            try {
-                                permInfo = mContext.getPackageManager().getPermissionInfo(perm, 0);
-                                e.writeBoolean(permInfo.getProtection() == PROTECTION_DANGEROUS);
-                            } catch (PackageManager.NameNotFoundException exception) {
-                                e.writeBoolean(false);
-                            }
-                        }
-
-                        pulledData.add(e.build());
-                    }
-                }
-            }
         } catch (Throwable t) {
             // TODO: catch exceptions at a more granular level
             Slog.e(TAG, "Could not read appops", t);

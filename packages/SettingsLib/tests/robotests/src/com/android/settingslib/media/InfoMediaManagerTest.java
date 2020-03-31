@@ -77,6 +77,14 @@ public class InfoMediaManagerTest {
 
     @Test
     public void onRouteAdded_getAvailableRoutes_shouldAddMediaDevice() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(sessionInfo);
+        final List<String> selectedRoutes = new ArrayList<>();
+        selectedRoutes.add(TEST_ID);
+        when(sessionInfo.getSelectedRoutes()).thenReturn(selectedRoutes);
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         when(info.getId()).thenReturn(TEST_ID);
         when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
@@ -120,6 +128,14 @@ public class InfoMediaManagerTest {
 
     @Test
     public void onControlCategoriesChanged_samePackageName_shouldAddMediaDevice() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(sessionInfo);
+        final List<String> selectedRoutes = new ArrayList<>();
+        selectedRoutes.add(TEST_ID);
+        when(sessionInfo.getSelectedRoutes()).thenReturn(selectedRoutes);
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         when(info.getId()).thenReturn(TEST_ID);
         when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
@@ -148,6 +164,14 @@ public class InfoMediaManagerTest {
 
     @Test
     public void onRoutesChanged_getAvailableRoutes_shouldAddMediaDevice() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(sessionInfo);
+        final List<String> selectedRoutes = new ArrayList<>();
+        selectedRoutes.add(TEST_ID);
+        when(sessionInfo.getSelectedRoutes()).thenReturn(selectedRoutes);
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         mInfoMediaManager.registerCallback(mCallback);
 
@@ -210,6 +234,14 @@ public class InfoMediaManagerTest {
 
     @Test
     public void onRoutesRemoved_getAvailableRoutes_shouldAddMediaDevice() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(sessionInfo);
+        final List<String> selectedRoutes = new ArrayList<>();
+        selectedRoutes.add(TEST_ID);
+        when(sessionInfo.getSelectedRoutes()).thenReturn(selectedRoutes);
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         when(info.getId()).thenReturn(TEST_ID);
         when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
@@ -409,13 +441,12 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    public void getSessionVolumeMax_notContainPackageName_returnNotFound() {
+    public void getSessionVolumeMax_routeSessionInfoIsNull_returnNotFound() {
         final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
-        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        final RoutingSessionInfo info = null;
         routingSessionInfos.add(info);
 
         mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
-        when(info.getClientPackageName()).thenReturn("com.fake.packagename");
 
         assertThat(mInfoMediaManager.getSessionVolumeMax()).isEqualTo(-1);
     }
@@ -442,13 +473,12 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    public void getSessionVolume_notContainPackageName_returnNotFound() {
+    public void getSessionVolume_routeSessionInfoIsNull_returnNotFound() {
         final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
-        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        final RoutingSessionInfo info = null;
         routingSessionInfos.add(info);
 
         mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
-        when(info.getClientPackageName()).thenReturn("com.fake.packagename");
 
         assertThat(mInfoMediaManager.getSessionVolume()).isEqualTo(-1);
     }
@@ -480,14 +510,12 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    public void getSessionName_notContainPackageName_returnNull() {
+    public void getSessionName_routeSessionInfoIsNull_returnNull() {
         final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
-        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        final RoutingSessionInfo info = null;
         routingSessionInfos.add(info);
 
         mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
-        when(info.getClientPackageName()).thenReturn("com.fake.packagename");
-        when(info.getName()).thenReturn(TEST_NAME);
 
         assertThat(mInfoMediaManager.getSessionName()).isNull();
     }

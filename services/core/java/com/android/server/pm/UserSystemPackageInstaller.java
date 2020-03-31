@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.res.Resources;
@@ -72,6 +73,14 @@ import java.util.Set;
  *          as whitelisted for the <b>{@link UserHandle#USER_SYSTEM}</b> user (not other users),
  *          which is useful for local development purposes</li>
  *     <li>Otherwise, the package is implicitly treated as blacklisted for all users</li>
+ * </ul>
+ *
+ * <p>Packages are only installed/uninstalled by this mechanism when a new user is created or during
+ * an update. In the case of updates:<ul>
+ *     <li>new packages are (un)installed per the whitelist/blacklist</li>
+ *     <li>pre-existing installed blacklisted packages are never uninstalled</li>
+ *     <li>pre-existing not-installed whitelisted packages are only installed if the reason why they
+ *     had been previously uninstalled was due to UserSystemPackageInstaller</li>
  * </ul>
  *
  * <p><b>NOTE:</b> the {@code SystemConfig} state is only updated on first boot or after a system
@@ -171,8 +180,12 @@ class UserSystemPackageInstaller {
      *
      * This is responsible for enforcing the whitelist for pre-existing users (i.e. USER_SYSTEM);
      * enforcement for new users is done when they are created in UserManagerService.createUser().
+     *
+     * @param preExistingPackages list of packages on the device prior to the upgrade. Cannot be
+     *                            null if isUpgrade is true.
      */
-    boolean installWhitelistedSystemPackages(boolean isFirstBoot, boolean isUpgrade) {
+    boolean installWhitelistedSystemPackages(boolean isFirstBoot, boolean isUpgrade,
+            @Nullable ArraySet<String> preExistingPackages) {
         final int mode = getWhitelistMode();
         checkWhitelistedSystemPackages(mode);
         final boolean isConsideredUpgrade = isUpgrade && !isIgnoreOtaMode(mode);
@@ -198,17 +211,48 @@ class UserSystemPackageInstaller {
                 final boolean install =
                         (userWhitelist == null || userWhitelist.contains(pkg.getPackageName()))
                                 && !pkgSetting.getPkgState().isHiddenUntilInstalled();
-                if (isConsideredUpgrade && !isFirstBoot && !install) {
-                    return; // To be careful, we don’t uninstall apps during OTAs
+                if (pkgSetting.getInstalled(userId) == install
+                        || !shouldChangeInstallationState(pkgSetting, install, userId, isFirstBoot,
+                                isConsideredUpgrade, preExistingPackages)) {
+                    return;
                 }
-                final boolean changed = pmInt.setInstalled(pkg, userId, install);
-                if (changed) {
-                    Slog.i(TAG, (install ? "Installed " : "Uninstalled ")
-                            + pkg.getPackageName() + " for user " + userId);
-                }
+                pkgSetting.setInstalled(install, userId);
+                pkgSetting.setUninstallReason(
+                        install ? PackageManager.UNINSTALL_REASON_UNKNOWN :
+                                PackageManager.UNINSTALL_REASON_USER_TYPE,
+                        userId);
+                Slog.i(TAG, (install ? "Installed " : "Uninstalled ")
+                        + pkg.getPackageName() + " for user " + userId);
             });
         }
         return true;
+    }
+
+    /**
+     * Returns whether to proceed with install/uninstall for the given package.
+     * In particular, do not install a package unless it was only uninstalled due to the user type;
+     * and do not uninstall a package if it previously was installed (prior to the OTA).
+     *
+     * Should be called only within PackageManagerInternal.forEachPackageSetting() since it
+     * requires the LP lock.
+     *
+     * @param preOtaPkgs list of packages on the device prior to the upgrade.
+     *                   Cannot be null if isUpgrade is true.
+     */
+    private static boolean shouldChangeInstallationState(PackageSetting pkgSetting,
+                                                         boolean install,
+                                                         @UserIdInt int userId,
+                                                         boolean isFirstBoot,
+                                                         boolean isUpgrade,
+                                                         @Nullable ArraySet<String> preOtaPkgs) {
+        if (install) {
+            // Only proceed with install if we are the only reason why it had been uninstalled.
+            return pkgSetting.getUninstallReason(userId)
+                    == PackageManager.UNINSTALL_REASON_USER_TYPE;
+        } else {
+            // Only proceed with uninstall if the package is new to the device.
+            return isFirstBoot || (isUpgrade && !preOtaPkgs.contains(pkgSetting.name));
+        }
     }
 
     /**

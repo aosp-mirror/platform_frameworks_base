@@ -60,16 +60,16 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
 
     @Test
     public void testSmallHash() {
-        assertEquals(0, NotificationRecordLogger.smallHash(0));
-        final int maxHash = NotificationRecordLogger.MAX_HASH;
+        assertEquals(0, SmallHash.hash(0));
+        final int maxHash = SmallHash.MAX_HASH;
         assertEquals(0,
-                NotificationRecordLogger.smallHash(maxHash));
+                SmallHash.hash(maxHash));
         assertEquals(0,
-                NotificationRecordLogger.smallHash(17 * maxHash));
+                SmallHash.hash(17 * maxHash));
         assertEquals(maxHash - 1,
-                NotificationRecordLogger.smallHash(maxHash - 1));
+                SmallHash.hash(maxHash - 1));
         assertEquals(maxHash - 1,
-                NotificationRecordLogger.smallHash(-1));
+                SmallHash.hash(-1));
     }
 
     @Test
@@ -78,10 +78,10 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
                 getNotificationRecordPair(0, null).getNotificationIdHash());
         assertEquals(1,
                 getNotificationRecordPair(1, null).getNotificationIdHash());
-        assertEquals(NotificationRecordLogger.MAX_HASH - 1,
+        assertEquals(SmallHash.MAX_HASH - 1,
                 getNotificationRecordPair(-1, null).getNotificationIdHash());
         final String tag = "someTag";
-        final int hash = NotificationRecordLogger.smallHash(tag.hashCode());
+        final int hash = SmallHash.hash(tag.hashCode());
         assertEquals(hash, getNotificationRecordPair(0, tag).getNotificationIdHash());
         // We xor the tag and hashcode together before compressing the range. The order of
         // operations doesn't matter if id is small.
@@ -89,19 +89,19 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
                 getNotificationRecordPair(1, tag).getNotificationIdHash());
         // But it does matter for an id with more 1 bits than fit in the small hash.
         assertEquals(
-                NotificationRecordLogger.smallHash(-1 ^ tag.hashCode()),
+                SmallHash.hash(-1 ^ tag.hashCode()),
                 getNotificationRecordPair(-1, tag).getNotificationIdHash());
         assertNotEquals(-1 ^ hash,
-                NotificationRecordLogger.smallHash(-1 ^ tag.hashCode()));
+                SmallHash.hash(-1 ^ tag.hashCode()));
     }
 
     @Test
     public void testGetChannelIdHash() {
         assertEquals(
-                NotificationRecordLogger.smallHash(CHANNEL_ID.hashCode()),
+                SmallHash.hash(CHANNEL_ID.hashCode()),
                 getNotificationRecordPair(0, null).getChannelIdHash());
         assertNotEquals(
-                NotificationRecordLogger.smallHash(CHANNEL_ID.hashCode()),
+                SmallHash.hash(CHANNEL_ID.hashCode()),
                 CHANNEL_ID.hashCode());
     }
 
@@ -113,7 +113,7 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
         final String group = "someGroup";
         p.r.setOverrideGroupKey(group);
         assertEquals(
-                NotificationRecordLogger.smallHash(group.hashCode()),
+                SmallHash.hash(group.hashCode()),
                 p.getGroupIdHash());
     }
 }

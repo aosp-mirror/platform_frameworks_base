@@ -417,12 +417,21 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     }
 
     @Test
-    public void testCredentialChangeNotPossibleInSecureFrpMode() {
+    public void testCredentialChangeNotPossibleInSecureFrpModeDuringSuw() {
+        mSettings.setUserSetupComplete(false);
         mSettings.setSecureFrpMode(true);
         try {
             mService.setLockCredential(newPassword("1234"), nonePassword(), PRIMARY_USER_ID);
             fail("Password shouldn't be changeable before FRP unlock");
         } catch (SecurityException e) { }
+    }
+
+    @Test
+    public void testCredentialChangePossibleInSecureFrpModeAfterSuw() {
+        mSettings.setUserSetupComplete(true);
+        mSettings.setSecureFrpMode(true);
+        assertTrue(mService.setLockCredential(newPassword("1234"), nonePassword(),
+                PRIMARY_USER_ID));
     }
 
     private void testCreateCredential(int userId, LockscreenCredential credential)
