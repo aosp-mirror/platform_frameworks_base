@@ -16,6 +16,8 @@
 
 package com.android.systemui.glwallpaper;
 
+import static com.android.systemui.glwallpaper.ImageWallpaperRenderer.WallpaperTexture;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -66,15 +68,15 @@ class ImageProcessHelper {
 
     private float mThreshold = DEFAULT_THRESHOLD;
 
-    void start(Bitmap bitmap) {
-        new ThresholdComputeTask(mHandler).execute(bitmap);
+    void start(WallpaperTexture texture) {
+        new ThresholdComputeTask(mHandler).execute(texture);
     }
 
     float getThreshold() {
         return Math.min(mThreshold, MAX_THRESHOLD);
     }
 
-    private static class ThresholdComputeTask extends AsyncTask<Bitmap, Void, Float> {
+    private static class ThresholdComputeTask extends AsyncTask<WallpaperTexture, Void, Float> {
         private Handler mUpdateHandler;
 
         ThresholdComputeTask(Handler handler) {
@@ -83,13 +85,22 @@ class ImageProcessHelper {
         }
 
         @Override
-        protected Float doInBackground(Bitmap... bitmaps) {
-            Bitmap bitmap = bitmaps[0];
-            if (bitmap != null) {
-                return new Threshold().compute(bitmap);
+        protected Float doInBackground(WallpaperTexture... textures) {
+            WallpaperTexture texture = textures[0];
+            final float[] threshold = new float[] {DEFAULT_THRESHOLD};
+            if (texture == null) {
+                Log.e(TAG, "ThresholdComputeTask: WallpaperTexture not initialized");
+                return threshold[0];
             }
-            Log.e(TAG, "ThresholdComputeTask: Can't get bitmap");
-            return DEFAULT_THRESHOLD;
+
+            texture.use(bitmap -> {
+                if (bitmap != null) {
+                    threshold[0] = new Threshold().compute(bitmap);
+                } else {
+                    Log.e(TAG, "ThresholdComputeTask: Can't get bitmap");
+                }
+            });
+            return threshold[0];
         }
 
         @Override

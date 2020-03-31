@@ -134,7 +134,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
         return new ImageWallpaperRenderer(mMockContext, engine) {
             @Override
             public void startProcessingImage() {
-                loadBitmap();
+                // No - Op
             }
         };
     }
