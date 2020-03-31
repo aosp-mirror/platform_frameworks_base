@@ -65,7 +65,7 @@ public class VpnProfileTest {
         assertTrue(p.getAllowedAlgorithms() != null && p.getAllowedAlgorithms().isEmpty());
         assertFalse(p.isBypassable);
         assertFalse(p.isMetered);
-        assertEquals(1400, p.maxMtu);
+        assertEquals(1360, p.maxMtu);
         assertFalse(p.areAuthParamsInline);
     }
 
