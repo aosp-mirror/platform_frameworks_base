@@ -947,7 +947,6 @@ public class BubbleStackView extends FrameLayout {
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         ViewClippingUtil.setClippingDeactivated(bubble.getIconView(), true, mClippingParameters);
         animateInFlyoutForBubble(bubble);
-        updatePointerPosition();
         requestUpdate();
         logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
     }
@@ -1005,8 +1004,8 @@ public class BubbleStackView extends FrameLayout {
             Bubble bubble = bubbles.get(i);
             mBubbleContainer.reorderView(bubble.getIconView(), i);
         }
-
         updateBubbleZOrdersAndDotPosition(false /* animate */);
+        updatePointerPosition();
     }
 
     void showOverflow() {
@@ -1394,7 +1393,7 @@ public class BubbleStackView extends FrameLayout {
     /** Called when a drag operation on an individual bubble has started. */
     public void onBubbleDragStart(View bubble) {
         if (DEBUG_BUBBLE_STACK_VIEW) {
-            Log.d(TAG, "onBubbleDragStart: bubble=" + bubble);
+            Log.d(TAG, "onBubbleDragStart: bubble=" + ((BadgedImageView) bubble).getKey());
         }
 
         if (mBubbleOverflow != null && bubble.equals(mBubbleOverflow.getIconView())) {
@@ -1909,6 +1908,9 @@ public class BubbleStackView extends FrameLayout {
             return;
         }
         int index = getBubbleIndex(mExpandedBubble);
+        if (index == -1) {
+            return;
+        }
         float bubbleLeftFromScreenLeft = mExpandedAnimationController.getBubbleLeft(index);
         float halfBubble = mBubbleSize / 2f;
         float bubbleCenter = bubbleLeftFromScreenLeft + halfBubble;
