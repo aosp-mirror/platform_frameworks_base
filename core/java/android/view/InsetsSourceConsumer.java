@@ -121,7 +121,7 @@ public class InsetsSourceConsumer {
             }
         }
         if (lastControl != null) {
-            lastControl.release(mController::releaseSurfaceControlFromRt);
+            lastControl.release(SurfaceControl::release);
         }
     }
 
