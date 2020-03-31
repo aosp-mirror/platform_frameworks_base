@@ -3895,6 +3895,8 @@
   <java-symbol type="dimen" name="conversation_icon_container_top_padding_small_avatar" />
   <java-symbol type="dimen" name="conversation_icon_container_top_padding_no_app_name" />
   <java-symbol type="layout" name="notification_template_material_conversation" />
+  <java-symbol type="dimen" name="button_padding_horizontal_material" />
+  <java-symbol type="dimen" name="button_inset_horizontal_material" />
   <java-symbol type="layout" name="conversation_face_pile_layout" />
 
   <!-- Intent resolver and share sheet -->

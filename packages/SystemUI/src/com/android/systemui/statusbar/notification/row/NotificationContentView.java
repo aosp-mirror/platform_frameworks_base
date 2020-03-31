@@ -159,7 +159,7 @@ public class NotificationContentView extends FrameLayout {
     private int mContentHeightAtAnimationStart = UNDEFINED;
     private boolean mFocusOnVisibilityChange;
     private boolean mHeadsUpAnimatingAway;
-    private boolean mIconsVisible;
+    private boolean mShelfIconVisible;
     private int mClipBottomAmount;
     private boolean mIsLowPriority;
     private boolean mIsContentExpandable;
@@ -1582,29 +1582,20 @@ public class NotificationContentView extends FrameLayout {
         mFocusOnVisibilityChange = true;
     }
 
-    public void setIconsVisible(boolean iconsVisible) {
-        mIconsVisible = iconsVisible;
+    public void setShelfIconVisible(boolean iconsVisible) {
+        mShelfIconVisible = iconsVisible;
         updateIconVisibilities();
     }
 
     private void updateIconVisibilities() {
         if (mContractedWrapper != null) {
-            NotificationHeaderView header = mContractedWrapper.getNotificationHeader();
-            if (header != null) {
-                header.getIcon().setForceHidden(!mIconsVisible);
-            }
+            mContractedWrapper.setShelfIconVisible(mShelfIconVisible);
         }
         if (mHeadsUpWrapper != null) {
-            NotificationHeaderView header = mHeadsUpWrapper.getNotificationHeader();
-            if (header != null) {
-                header.getIcon().setForceHidden(!mIconsVisible);
-            }
+            mHeadsUpWrapper.setShelfIconVisible(mShelfIconVisible);
         }
         if (mExpandedWrapper != null) {
-            NotificationHeaderView header = mExpandedWrapper.getNotificationHeader();
-            if (header != null) {
-                header.getIcon().setForceHidden(!mIconsVisible);
-            }
+            mExpandedWrapper.setShelfIconVisible(mShelfIconVisible);
         }
     }
 
@@ -1834,5 +1825,24 @@ public class NotificationContentView extends FrameLayout {
 
     public RemoteInputView getExpandedRemoteInput() {
         return mExpandedRemoteInput;
+    }
+
+    /**
+     * @return get the transformation target of the shelf, which usually is the icon
+     */
+    public View getShelfTransformationTarget() {
+        NotificationViewWrapper visibleWrapper = getVisibleWrapper(mVisibleType);
+        if (visibleWrapper != null) {
+            return visibleWrapper.getShelfTransformationTarget();
+        }
+        return null;
+    }
+
+    public int getOriginalIconColor() {
+        NotificationViewWrapper visibleWrapper = getVisibleWrapper(mVisibleType);
+        if (visibleWrapper != null) {
+            return visibleWrapper.getOriginalIconColor();
+        }
+        return Notification.COLOR_INVALID;
     }
 }
