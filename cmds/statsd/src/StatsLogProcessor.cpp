@@ -536,6 +536,7 @@ void StatsLogProcessor::OnConfigUpdatedLocked(
             new MetricsManager(key, config, mTimeBaseNs, timestampNs, mUidMap, mPullerManager,
                                mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
     if (newMetricsManager->isConfigValid()) {
+        newMetricsManager->init();
         mUidMap->OnConfigUpdated(key);
         newMetricsManager->refreshTtl(timestampNs);
         mMetricsManagers[key] = newMetricsManager;

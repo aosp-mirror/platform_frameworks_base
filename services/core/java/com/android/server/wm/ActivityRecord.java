@@ -2505,7 +2505,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     final DisplayContent display = stack.getDisplay();
                     next = display.topRunningActivity();
                     if (next != null) {
-                        display.positionStackAtTop(next.getRootTask(),
+                        display.mTaskContainers.positionStackAtTop(next.getRootTask(),
                                 false /* includingParents */, "finish-display-top");
                     }
                 }
@@ -2680,7 +2680,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final ActivityRecord next = display.topRunningActivity();
         final boolean isLastStackOverEmptyHome =
                 next == null && stack.isFocusedStackOnDisplay()
-                        && display.getOrCreateRootHomeTask() != null;
+                        && display.mTaskContainers.getOrCreateRootHomeTask() != null;
         if (isLastStackOverEmptyHome) {
             // Don't destroy activity immediately if this is the last activity on the display and
             // the display contains home stack. Although there is no next activity at the moment,
@@ -4478,7 +4478,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // case where this is the top activity in a pinned stack.
         final boolean isTop = this == stack.getTopNonFinishingActivity();
         final boolean isTopNotPinnedStack = stack.isAttached()
-                && stack.getDisplay().isTopNotPinnedStack(stack);
+                && stack.getDisplay().mTaskContainers.isTopNotPinnedStack(stack);
         final boolean visibleIgnoringDisplayStatus = stack.checkKeyguardVisibility(this,
                 visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
 
@@ -7391,7 +7391,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     boolean isResumedActivityOnDisplay() {
         final DisplayContent display = getDisplay();
-        return display != null && this == display.getResumedActivity();
+        return display != null && this == display.mTaskContainers.getResumedActivity();
     }
 
 

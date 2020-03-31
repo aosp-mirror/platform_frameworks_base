@@ -169,14 +169,6 @@ package android.os {
 
 }
 
-package android.os.ext.test {
-
-  @Deprecated public class Test {
-    method @Deprecated public void testD();
-  }
-
-}
-
 package android.util {
 
   public final class Log {

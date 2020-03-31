@@ -462,9 +462,11 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         }
 
         ActivityStack build() {
-            final int stackId = mStackId >= 0 ? mStackId : mDisplay.getNextStackId();
-            final ActivityStack stack = mDisplay.createStackUnchecked(mWindowingMode,
-                    mActivityType, stackId, mOnTop, mInfo, mIntent, false /* createdByOrganizer */);
+            final int stackId = mStackId >= 0 ? mStackId
+                    : mDisplay.mTaskContainers.getNextStackId();
+            final ActivityStack stack = mDisplay.mTaskContainers.createStackUnchecked(
+                    mWindowingMode, mActivityType, stackId, mOnTop, mInfo, mIntent,
+                    false /* createdByOrganizer */);
             final ActivityStackSupervisor supervisor = mRootWindowContainer.mStackSupervisor;
 
             if (mCreateActivity) {

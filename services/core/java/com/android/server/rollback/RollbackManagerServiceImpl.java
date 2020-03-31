@@ -573,6 +573,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         if (mRollbackLifetimeDurationInMillis < 0) {
             mRollbackLifetimeDurationInMillis = DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS;
         }
+        Slog.d(TAG, "mRollbackLifetimeDurationInMillis=" + mRollbackLifetimeDurationInMillis);
     }
 
     @AnyThread
@@ -709,9 +710,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             }
             Instant rollbackTimestamp = rollback.getTimestamp();
             if (!now.isBefore(rollbackTimestamp.plusMillis(mRollbackLifetimeDurationInMillis))) {
-                if (LOCAL_LOGV) {
-                    Slog.v(TAG, "runExpiration id=" + rollback.info.getRollbackId());
-                }
+                Slog.i(TAG, "runExpiration id=" + rollback.info.getRollbackId());
                 iter.remove();
                 rollback.delete(mAppDataRollbackHelper);
             } else if (oldest == null || oldest.isAfter(rollbackTimestamp)) {
@@ -1207,9 +1206,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @GuardedBy("rollback.getLock")
     private void makeRollbackAvailable(Rollback rollback) {
         assertInWorkerThread();
-        if (LOCAL_LOGV) {
-            Slog.v(TAG, "makeRollbackAvailable id=" + rollback.info.getRollbackId());
-        }
+        Slog.i(TAG, "makeRollbackAvailable id=" + rollback.info.getRollbackId());
         rollback.makeAvailable();
 
         // TODO(zezeozue): Provide API to explicitly start observing instead

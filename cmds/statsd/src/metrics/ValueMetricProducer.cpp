@@ -156,7 +156,7 @@ ValueMetricProducer::ValueMetricProducer(
     flushIfNeededLocked(startTimeNs);
 
     if (mIsPulled) {
-        mPullerManager->RegisterReceiver(mPullTagId, this, getCurrentBucketEndTimeNs(),
+        mPullerManager->RegisterReceiver(mPullTagId, mConfigKey, this, getCurrentBucketEndTimeNs(),
                                          mBucketSizeNs);
     }
 
@@ -166,10 +166,6 @@ ValueMetricProducer::ValueMetricProducer(
     mCurrentBucketStartTimeNs = startTimeNs;
     mConditionTimer.newBucketStart(mCurrentBucketStartTimeNs);
 
-     // Kicks off the puller immediately if condition is true and diff based.
-    if (mIsActive && mIsPulled && mCondition == ConditionState::kTrue && mUseDiff) {
-        pullAndMatchEventsLocked(mCurrentBucketStartTimeNs);
-    }
     // Now that activations are processed, start the condition timer if needed.
     mConditionTimer.onConditionChanged(mIsActive && mCondition == ConditionState::kTrue,
                                        mCurrentBucketStartTimeNs);
@@ -181,7 +177,7 @@ ValueMetricProducer::ValueMetricProducer(
 ValueMetricProducer::~ValueMetricProducer() {
     VLOG("~ValueMetricProducer() called");
     if (mIsPulled) {
-        mPullerManager->UnRegisterReceiver(mPullTagId, this);
+        mPullerManager->UnRegisterReceiver(mPullTagId, mConfigKey, this);
     }
 }
 
@@ -503,9 +499,16 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
     mConditionTimer.onConditionChanged(mCondition, eventTimeNs);
 }
 
+void ValueMetricProducer::prepareFirstBucketLocked() {
+    // Kicks off the puller immediately if condition is true and diff based.
+    if (mIsActive && mIsPulled && mCondition == ConditionState::kTrue && mUseDiff) {
+        pullAndMatchEventsLocked(mCurrentBucketStartTimeNs);
+    }
+}
+
 void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     vector<std::shared_ptr<LogEvent>> allData;
-    if (!mPullerManager->Pull(mPullTagId, &allData)) {
+    if (!mPullerManager->Pull(mPullTagId, mConfigKey, &allData)) {
         ALOGE("Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
         invalidateCurrentBucket(timestampNs, BucketDropReason::PULL_FAILED);
         return;

@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ફરીથી સ્ક્રીનશૉટ લેવાનો પ્રયાસ કરો"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"મર્યાદિત સ્ટોરેજ સ્પેસને કારણે સ્ક્રીનશૉટ સાચવી શકાતો નથી"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશૉટ લેવાની મંજૂરી નથી"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"સ્ક્રીનશૉટ છોડી દો"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"સ્ક્રીનશૉટ ખોલો"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"સ્ક્રીન રેકૉર્ડર"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"સ્ક્રીન રેકોર્ડિંગ સત્ર માટે ચાલુ નોટિફિકેશન"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"રેકૉર્ડિંગ શરૂ કરીએ?"</string>
@@ -152,6 +154,16 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ખોટી પૅટર્ન"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ખોટો પાસવર્ડ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"ઘણા વધારે ખોટા પ્રયત્નો. \n <xliff:g id="NUMBER">%d</xliff:g> સેકંડમાં ફરી પ્રયાસ કરો."</string>
+    <!-- no translation found for biometric_dialog_credential_attempts_before_wipe (6751859711975516999) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_device (6585503524026243042) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_user (7015008539146949115) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_profile (5239378521440749682) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_now_wiping_dialog_dismiss (7189432882125106154) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ફિંગરપ્રિન્ટના સેન્સરને સ્પર્શ કરો"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ફિંગરપ્રિન્ટનું આઇકન"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"તમારા માટે શોધી રહ્યાં છે..."</string>
@@ -558,6 +570,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"તમારી કાર્યાલયની પ્રોફાઇલ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે. આ પ્રોફાઇલ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે.\n\nતમે <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> સાથે પણ કનેક્ટ કરેલું છે, જે તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent દ્વારા અનલૉક રાખેલું"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"તમે ઉપકરણને મેન્યુઅલી અનલૉક કરશો નહીં ત્યાં સુધી તે લૉક રહેશે"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"વધુ ઝડપથી સૂચનાઓ મેળવો"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"તમે અનલૉક કરો તે પહેલાં તેમને જુઓ"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"ના, આભાર"</string>
@@ -693,8 +706,17 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"તમને સાઉન્ડ અથવા વાઇબ્રેશન વિના ફોકસ કરવામાં સહાય કરે છે."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"સાઉન્ડ અથવા વાઇબ્રેશન વિના તમારું ધ્યાન દોરે છે."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ફ્લોટિંગ શૉર્ટકટથી આ કન્ટેન્ટ પર તમારું ધ્યાન દોરી રાખે છે."</string>
+    <!-- no translation found for notification_channel_summary_priority (7415770044553264622) -->
+    <skip />
+    <!-- no translation found for notification_conversation_channel_all_bubble (5389290797101635297) -->
+    <skip />
+    <!-- no translation found for notification_conversation_channel_settings (2409977688430606835) -->
+    <skip />
+    <!-- no translation found for notification_priority_title (2079708866333537093) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"તાજેતરના કોઈ બબલ નથી"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"એકદમ નવા બબલ અને છોડી દીધેલા બબલ અહીં દેખાશે."</string>
+    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"આ નોટિફિકેશનમાં કોઈ ફેરફાર થઈ શકશે નહીં."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"નોટિફિકેશનના આ ગ્રૂપની ગોઠવણી અહીં કરી શકાશે નહીં"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"પ્રૉક્સી નોટિફિકેશન"</string>
@@ -964,13 +986,8 @@
     <string name="device_services" msgid="1549944177856658705">"ડિવાઇસ સેવાઓ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"કોઈ શીર્ષક નથી"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"આ ઍપ ફરીથી ચાલુ કરવા માટે ટૅપ કરીને પૂર્ણ સ્ક્રીન કરો."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> ખોલો"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> બબલ માટેનાં સેટિંગ"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> પરના બબલને મંજૂરી આપીએ?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"મેનેજ કરો"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"નકારો"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"મંજૂરી આપો"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"મને થોડા સમય પછી પૂછશો"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> તરફથી <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> અને વધુ <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> તરફથી <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ખસેડો"</string>
@@ -979,27 +996,76 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"નીચે ડાબે ખસેડો"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"નીચે જમણે ખસેડો"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"છોડી દો"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
     <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
     <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
+    <skip />
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"આ ઍપમાંથી બબલને બંધ કરવા માટે મેનેજ કરો પર ટૅપ કરો"</string>
+    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
     <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"સિસ્ટમ નૅવિગેશન અપડેટ કર્યું. ફેરફારો કરવા માટે, સેટિંગ પર જાઓ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"સિસ્ટમ નૅવિગેશનને અપડેટ કરવા માટે સેટિંગ પર જાઓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"સ્ટૅન્ડબાય"</string>
-    <string name="magnification_overlay_title" msgid="6584179429612427958">"વિસ્તૃતીકરણ ઓવરલે વિંડો"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"વિસ્તૃતીકરણ વિંડો"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"વિસ્તૃતીકરણ વિંડોના નિયંત્રણો"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"ઝડપી નિયંત્રણો"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"નિયંત્રણો ઉમેરો"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"જેમાંથી નિયંત્રણો ઉમેરવા હોય તે ઍપ પસંદ કરો"</string>
-    <!-- no translation found for controls_number_of_favorites (1057347832073807380) -->
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <!-- no translation found for quick_controls_subtitle (1667408093326318053) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> નિયંત્રણ ઉમેર્યું.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> નિયંત્રણો ઉમેર્યા.</item>
+    </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"નિયંત્રણો"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"ઝડપી ઍક્સેસ માટેનાં નિયંત્રણો પસંદ કરો"</string>
-    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"મનપસંદ"</string>
-    <string name="controls_favorite_header_all" msgid="7507855973418969992">"તમામ"</string>
+    <!-- no translation found for controls_favorite_subtitle (6604402232298443956) -->
+    <skip />
+    <!-- no translation found for controls_favorite_rearrange (7364147066539766260) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"બધા નિયંત્રણોની સૂચિ લોડ કરી શકાઈ નથી."</string>
-    <!-- no translation found for controls_favorite_other_zone_header (9089613266575525252) -->
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"અન્ય"</string>
+    <!-- no translation found for controls_dialog_title (3475025327938684220) -->
+    <skip />
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"મનપસંદમાં ઉમેરો"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> એ આ નિયંત્રણને તમારા મનપસંદમાં ઉમેરવાનું સૂચવ્યું છે."</string>
+    <!-- no translation found for controls_dialog_confirmation (586517302736263447) -->
+    <skip />
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"પિનમાં અક્ષરો અથવા પ્રતીકોનો સમાવેશ થાય છે"</string>
+    <!-- no translation found for controls_pin_verify (3452778292918877662) -->
+    <skip />
+    <!-- no translation found for controls_pin_verifying (3755045989392131746) -->
+    <skip />
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"પિન દાખલ કરો"</string>
+    <!-- no translation found for controls_pin_instructions_retry (1566667581012131046) -->
+    <skip />
+    <!-- no translation found for controls_confirmation_confirming (2596071302617310665) -->
+    <skip />
+    <!-- no translation found for controls_confirmation_message (7744104992609594859) -->
+    <skip />
+    <!-- no translation found for controls_structure_tooltip (4355922222944447867) -->
+    <skip />
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"સુઝાવ લોડ કરી રહ્યાં છીએ"</string>
+    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
+    <skip />
+    <!-- no translation found for controls_error_timeout (794197289772728958) -->
+    <skip />
+    <!-- no translation found for controls_error_failed (960228639198558525) -->
+    <skip />
+    <!-- no translation found for controls_in_progress (4421080500238215939) -->
+    <skip />
+    <!-- no translation found for controls_added_tooltip (4842812921719153085) -->
+    <skip />
+    <!-- no translation found for controls_menu_add (4447246119229920050) -->
+    <skip />
+    <!-- no translation found for controls_menu_edit (890623986951347062) -->
     <skip />
 </resources>

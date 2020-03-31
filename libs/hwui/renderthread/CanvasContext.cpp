@@ -555,9 +555,11 @@ void CanvasContext::draw() {
         FrameInfo* forthBehind = mLast4FrameInfos.front().first;
         int64_t composedFrameId = mLast4FrameInfos.front().second;
         nsecs_t acquireTime = -1;
-        native_window_get_frame_timestamps(mNativeSurface->getNativeWindow(), composedFrameId,
-                                           nullptr, &acquireTime, nullptr, nullptr, nullptr,
-                                           nullptr, nullptr, nullptr, nullptr);
+        if (mNativeSurface) {
+            native_window_get_frame_timestamps(mNativeSurface->getNativeWindow(), composedFrameId,
+                                               nullptr, &acquireTime, nullptr, nullptr, nullptr,
+                                               nullptr, nullptr, nullptr, nullptr);
+        }
         // Ignore default -1, NATIVE_WINDOW_TIMESTAMP_INVALID and NATIVE_WINDOW_TIMESTAMP_PENDING
         forthBehind->set(FrameInfoIndex::GpuCompleted) = acquireTime > 0 ? acquireTime : -1;
         mJankTracker.finishGpuDraw(*forthBehind);

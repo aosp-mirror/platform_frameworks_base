@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪುನಃ ತೆಗೆದುಕೊಳ್ಳಲು ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"ಪರಿಮಿತ ಸಂಗ್ರಹಣೆ ಸ್ಥಳದ ಕಾರಣದಿಂದಾಗಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ಅಪ್ಲಿಕೇಶನ್ ಅಥವಾ ಸಂಸ್ಥೆಯು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆಯುವುದನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ವಜಾಗೊಳಿಸಿ"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡರ್"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಅಧಿಸೂಚನೆ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಬೇಕೆ?"</string>
@@ -152,6 +154,16 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ಪ್ಯಾಟರ್ನ್ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ಪಾಸ್‌ವರ್ಡ್ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"ಹಲವಾರು ತಪ್ಪು ಪ್ರಯತ್ನಗಳು.\nಮತ್ತೆ <xliff:g id="NUMBER">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <!-- no translation found for biometric_dialog_credential_attempts_before_wipe (6751859711975516999) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_device (6585503524026243042) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_user (7015008539146949115) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_profile (5239378521440749682) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_now_wiping_dialog_dismiss (7189432882125106154) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"ನಿಮಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
@@ -558,6 +570,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು <xliff:g id="ORGANIZATION">%1$s</xliff:g> ನಿರ್ವಹಿಸುತ್ತಿದೆ. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ಗೆ ಪ್ರೊಫೈಲ್ ಸಂಪರ್ಕಗೊಂಡಿರುವ ಕಾರಣ, ಅದು ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳೂ ಸೇರಿದಂತೆ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು.\n\nನೀವು <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ಗೆ ಕೂಡಾ ಸಂಪರ್ಕಗೊಂಡಿದ್ದೀರಿ, ಇದು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ನಿಂದ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"ನೀವಾಗಿಯೇ ಅನ್‌ಲಾಕ್‌ ಮಾಡುವವರೆಗೆ ಸಾಧನವು ಲಾಕ್‌ ಆಗಿಯೇ ಇರುತ್ತದೆ"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"ವೇಗವಾಗಿ ಅಧಿಸೂಚನೆಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಿ"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"ನೀವು ಅನ್‌ಲಾಕ್‌ ಮಾಡುವ ಮೊದಲೇ ಅವುಗಳನ್ನು ನೋಡಿ"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"ಧನ್ಯವಾದಗಳು"</string>
@@ -693,8 +706,17 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ಶಬ್ದ ಅಥವಾ ವೈಬ್ರೇಷನ್ ಇರದಂತೆ ನಿಮಗೆ ಗಮನಹರಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ಧ್ವನಿ ಅಥವಾ ವೈಬ್ರೇಷನ್ ಮೂಲಕ ನಿಮ್ಮ ಗಮನವನ್ನು ಸೆಳೆಯುತ್ತದೆ."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ಈ ವಿಷಯಕ್ಕೆ ಲಿಂಕ್ ಮಾಡಿ ಕೊಂಡೊಯ್ಯುವ ಶಾರ್ಟ್‌ಕಟ್‌ ಕಡೆಗೆ ಗಮನ ಇರಿಸಿ."</string>
+    <!-- no translation found for notification_channel_summary_priority (7415770044553264622) -->
+    <skip />
+    <!-- no translation found for notification_conversation_channel_all_bubble (5389290797101635297) -->
+    <skip />
+    <!-- no translation found for notification_conversation_channel_settings (2409977688430606835) -->
+    <skip />
+    <!-- no translation found for notification_priority_title (2079708866333537093) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ಯಾವುದೇ ಇತ್ತೀಚಿನ ಬಬಲ್‌ಗಳಿಲ್ಲ"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"ಇತ್ತೀಚಿನ ಬಬಲ್‌ಗಳು ಮತ್ತು ವಜಾಗೊಳಿಸಿದ ಬಬಲ್‌ಗಳು ಇಲ್ಲಿ ಗೋಚರಿಸುತ್ತವೆ."</string>
+    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ಈ ಗುಂಪಿನ ಅಧಿಸೂಚನೆಗಳನ್ನು ಇಲ್ಲಿ ಕಾನ್ಫಿಗರ್‌ ಮಾಡಲಾಗಿರುವುದಿಲ್ಲ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ಪ್ರಾಕ್ಸಿ ಮಾಡಿದ ಅಧಿಸೂಚನೆಗಳು"</string>
@@ -964,13 +986,8 @@
     <string name="device_services" msgid="1549944177856658705">"ಸಾಧನ ಸೇವೆಗಳು"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ಯಾವುದೇ ಶೀರ್ಷಿಕೆಯಿಲ್ಲ"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಪ್ರಾರಂಭಿಸಲು ಮತ್ತು ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಬಬಲ್‌ಗಳಿಗಾಗಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಆ್ಯಪ್‌ನ ಬಬಲ್‌ಗಳನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"ನಿರ್ವಹಿಸಿ"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"ನಿರಾಕರಿಸಿ"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"ಅನುಮತಿಸಿ"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"ನನ್ನನ್ನು ಆನಂತರ ಕೇಳಿ"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> ಆ್ಯಪ್‌ನ <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> ಮತ್ತು <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> ಹೆಚ್ಚಿನವುಗಳ <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ಸರಿಸಿ"</string>
@@ -979,27 +996,76 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ಸ್ಕ್ರೀನ್‌ನ ಎಡ ಕೆಳಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ಕೆಳಗಿನ ಬಲಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"ವಜಾಗೊಳಿಸಿ"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
     <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
     <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
+    <skip />
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ಈ ಆ್ಯಪ್‌ನಿಂದ ಬಬಲ್‌ಗಳನ್ನು ಆಫ್ ಮಾಡಲು ನಿರ್ವಹಿಸಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
     <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ ಬದಲಾವಣೆಗಳನ್ನು ಮಾಡಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಲು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ಸ್ಟ್ಯಾಂಡ್‌ಬೈ"</string>
-    <string name="magnification_overlay_title" msgid="6584179429612427958">"ವರ್ಧನೆಯ ಓವರ್‌ಲೇ ವಿಂಡೋ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ವರ್ಧನೆಯ ವಿಂಡೋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ವರ್ಧನೆಯ ವಿಂಡೋ ನಿಯಂತ್ರಣಗಳು"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"ತ್ವರಿತ ನಿಯಂತ್ರಣಗಳು"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
-    <!-- no translation found for controls_number_of_favorites (1057347832073807380) -->
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <!-- no translation found for quick_controls_subtitle (1667408093326318053) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.</item>
+    </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ನಿಯಂತ್ರಣಗಳು"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"ತ್ವರಿತ ಪ್ರವೇಶಕ್ಕಾಗಿ ನಿಯಂತ್ರಣಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"ಮೆಚ್ಚಿನವುಗಳು"</string>
-    <string name="controls_favorite_header_all" msgid="7507855973418969992">"ಎಲ್ಲಾ"</string>
+    <!-- no translation found for controls_favorite_subtitle (6604402232298443956) -->
+    <skip />
+    <!-- no translation found for controls_favorite_rearrange (7364147066539766260) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ಎಲ್ಲಾ ನಿಯಂತ್ರಣಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಆಗಲಿಲ್ಲ."</string>
-    <!-- no translation found for controls_favorite_other_zone_header (9089613266575525252) -->
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ಇತರ"</string>
+    <!-- no translation found for controls_dialog_title (3475025327938684220) -->
+    <skip />
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿ"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"ಈ ನಿಯಂತ್ರಣವನ್ನು ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಲು <xliff:g id="APP">%s</xliff:g> ಸೂಚಿಸಿದೆ."</string>
+    <!-- no translation found for controls_dialog_confirmation (586517302736263447) -->
+    <skip />
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ಪಿನ್ ಅಕ್ಷರಗಳು ಅಥವಾ ಸಂಕೇತಗಳನ್ನು ಒಳಗೊಂಡಿದೆ"</string>
+    <!-- no translation found for controls_pin_verify (3452778292918877662) -->
+    <skip />
+    <!-- no translation found for controls_pin_verifying (3755045989392131746) -->
+    <skip />
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"ಪಿನ್ ನಮೂದಿಸಿ"</string>
+    <!-- no translation found for controls_pin_instructions_retry (1566667581012131046) -->
+    <skip />
+    <!-- no translation found for controls_confirmation_confirming (2596071302617310665) -->
+    <skip />
+    <!-- no translation found for controls_confirmation_message (7744104992609594859) -->
+    <skip />
+    <!-- no translation found for controls_structure_tooltip (4355922222944447867) -->
+    <skip />
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ಶಿಫಾರಸುಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ"</string>
+    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
+    <skip />
+    <!-- no translation found for controls_error_timeout (794197289772728958) -->
+    <skip />
+    <!-- no translation found for controls_error_failed (960228639198558525) -->
+    <skip />
+    <!-- no translation found for controls_in_progress (4421080500238215939) -->
+    <skip />
+    <!-- no translation found for controls_added_tooltip (4842812921719153085) -->
+    <skip />
+    <!-- no translation found for controls_menu_add (4447246119229920050) -->
+    <skip />
+    <!-- no translation found for controls_menu_edit (890623986951347062) -->
     <skip />
 </resources>

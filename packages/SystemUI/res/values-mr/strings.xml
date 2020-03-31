@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रीनशॉट पुन्हा घेण्याचा प्रयत्न करा"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"मर्यादित स्टोरेज जागेमुळे स्क्रीनशॉट सेव्ह करू शकत नाही"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"अ‍ॅप किंवा आपल्या संस्थेद्वारे स्क्रीनशॉट घेण्याची अनुमती नाही"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"स्क्रीनशॉट डिसमिस करा"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"स्क्रीनशॉट उघडा"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रेकॉर्डर"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रेकॉर्ड सत्रासाठी सुरू असलेली सूचना"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"रेकॉर्डिंग सुरू करायचे आहे का?"</string>
@@ -152,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"चुकीचा पॅटर्न"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"चुकीचा पासवर्ड"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"बरेच चुकीचे प्रयत्न. \n <xliff:g id="NUMBER">%d</xliff:g> सेकंदांमध्‍ये पुन्हा प्रयत्न करा."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"पुन्हा प्रयत्न करा. <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> पैकी <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> प्रयत्न."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"बरेच चुकीचे प्रयत्‍न. या डिव्‍हाइसचा डेटा हटवला जाईल."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"बरेच चुकीचे प्रयत्‍न. हा वापरकर्ता हटवला जाईल."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"बरेच चुकीचे प्रयत्‍न. ही कार्य प्रोफाइल आणि त्यामधील डेटा हटवला जाईल."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"डिसमिस करा"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फिंगरप्रिंट सेन्सरला स्पर्श करा"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"फिंगरप्रिंट आयकन"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"तुमच्यासाठी शोधत आहे…"</string>
@@ -558,6 +565,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"तुमचे कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते. प्रोफाइल <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या कार्य नेटवर्क क्रियाकलापाचे परीक्षण करू शकते.\n\nतुम्ही <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> शीदेखील कनेक्‍ट केले आहे, जे आपल्या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ने अनलॉक ठेवले"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"तुम्ही मॅन्युअली अनलॉक करेपर्यंत डिव्हाइस लॉक राहील"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"सूचना अधिक जलद मिळवा"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"तुम्ही अनलॉक करण्‍यापूर्वी त्यांना पहा"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"नाही, नको"</string>
@@ -693,8 +701,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"आवाज किंवा व्हायब्रेशनशिवाय तुम्हाला लक्ष केंद्रित करण्यास मदत करते."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"आवाज किंवा व्हायब्रेशनने तुमचे लक्ष वेधून घेते."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"या आशयाच्या फ्लोटिंग शॉर्टकटसह तुमचे लक्ष केंद्रित करते."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"संभाषण विभागाच्या सर्वात वरती दिसते आणि बबलसारखे दिसते."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> वरील सर्व संभाषणे बाय डीफॉल्ट बबल केली जातात. <xliff:g id="APP_NAME_1">%2$s</xliff:g> मध्ये व्यवस्थापित करा."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग्ज"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"प्राधान्य"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"अलीकडील कोणतेही बबल नाहीत"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"अलीकडील बबल आणि डिसमिस केलेले बबल येथे दिसतील."</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"अलीकडील बबल आणि डिसमिस केलेले बबल येथे दिसतील"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी केलेल्या सूचना"</string>
@@ -964,13 +976,8 @@
     <string name="device_services" msgid="1549944177856658705">"डिव्हाइस सेवा"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"शीर्षक नाही"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"हे अ‍ॅप रीस्टार्ट करण्यासाठी आणि फुल स्क्रीन करण्यासाठी टॅप करा."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> उघडा"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबलसाठी सेटिंग्ज"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> वरील बबलना अनुमती द्यायची?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"व्यवस्थापित करा"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"नाकारा"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"अनुमती द्या"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"मला नंतर विचारा"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> कडून <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> आणि आणखी <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> कडून <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"हलवा"</string>
@@ -979,27 +986,53 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"तळाशी डावीकडे हलवा"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"तळाशी उजवीकडे हलवा"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"डिसमिस करा"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"संभाषणाला बबल करू नका"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"बबल वापरून चॅट करा"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"नवीन संभाषणे फ्लोटिंग आयकन किंवा बबल म्हणून दिसतात. बबल उघडण्यासाठी टॅप करा. हे हलवण्यासाठी ड्रॅग करा."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"बबल कधीही नियंत्रित करा"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"या अ‍ॅपमधून बुडबुडे बंद करण्यासाठी व्यवस्थापित करा वर टॅप करा"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"समजले"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेव्हिगेशन अपडेट केले. बदल करण्यासाठी, सेटिंग्जवर जा."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेव्हिगेशन अपडेट करण्यासाठी सेटिंग्जवर जा"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टँडबाय"</string>
-    <string name="magnification_overlay_title" msgid="6584179429612427958">"मॅग्निफिकेशन ओव्हरले विंडो"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"मॅग्निफिकेशन विंडो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"मॅग्निफिकेशन विंडो नियंत्रणे"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"क्विक नियंत्रणे"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"नियंत्रणे जोडा"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"ज्यामधून नियंत्रणे जोडायची आहेत ते ॲप निवडा"</string>
-    <!-- no translation found for controls_number_of_favorites (1057347832073807380) -->
-    <string name="controls_favorite_default_title" msgid="967742178688938137">"नियंत्रणे"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"झटपट अ‍ॅक्सेससाठी नियंत्रणे निवडा"</string>
-    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"आवडते"</string>
-    <string name="controls_favorite_header_all" msgid="7507855973418969992">"सर्व"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"सर्व नियंत्रणांची सूची लोड करता आली नाही."</string>
-    <!-- no translation found for controls_favorite_other_zone_header (9089613266575525252) -->
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
     <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"तुमच्या कनेक्ट केलेल्या डिव्हाइससाठी नियंत्रणे जोडा"</string>
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> नियंत्रणे जोडली.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> नियंत्रण जोडले.</item>
+    </plurals>
+    <string name="controls_favorite_default_title" msgid="967742178688938137">"नियंत्रणे"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पॉवर मेनूमधून अ‍ॅक्सेस करण्यासाठी नियंत्रणे निवडा"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"हे हलवण्यासाठी नियंत्रण धरून ठेवा आणि ड्रॅग करा"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"सर्व नियंत्रणांची सूची लोड करता आली नाही."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"इतर"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"क्विक नियंत्रणांमध्ये जोडा"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"आवडीचे यामध्ये जोडा"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ने तुमच्या आवडीचे मध्ये जोडण्यासाठी या नियंत्रणाची शिफारस केली आहे."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"नियंत्रणे अपडेट केली आहेत"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"पिनमध्ये अक्षरांचा किंवा चिन्हांचा समावेश असतो"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ची पडताळणी करा"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"पडताळणी करत आहे…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"पिन एंटर करा"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"दुसरा पिन वापरून पहा"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"निश्चिती करीत आहे…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> च्या बदलांची निश्चिती करा"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"अधिक पाहण्यासाठी स्वाइप करा"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"शिफारशी लोड करत आहे"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"हे मीडिया सेशन बंद करा"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"एरर, पुन्हा प्रयत्न करा"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"प्रगतीपथावर आहे"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"नवीन नियंत्रणे पाहण्यासाठी पॉवर बटण धरून ठेवा"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"नियंत्रणे जोडा"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"नियंत्रणे व्यवस्थापित करा"</string>
 </resources>

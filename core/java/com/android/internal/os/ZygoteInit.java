@@ -918,7 +918,7 @@ public class ZygoteInit {
             // loops forever in the zygote.
             caller = zygoteServer.runSelectLoop(abiList);
         } catch (Throwable ex) {
-            Log.e(TAG, "System zygote died with exception", ex);
+            Log.e(TAG, "System zygote died with fatal exception", ex);
             throw ex;
         } finally {
             if (zygoteServer != null) {

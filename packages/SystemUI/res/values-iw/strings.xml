@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"יש לנסות שוב לבצע צילום מסך"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"לא היה מספיק מקום לשמור את צילום המסך"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"האפליקציה או הארגון שלך אינם מתירים ליצור צילומי מסך"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"סגירת צילום מסך"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"פתיחת צילום מסך"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"מקליט מסך"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"התראה מתמשכת לסשן הקלטת מסך"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"להתחיל את ההקלטה?"</string>
@@ -152,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"קו ביטול נעילה שגוי"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"סיסמה שגויה"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"יותר מדי ניסיונות שגויים.\nיש לנסות שוב בעוד <xliff:g id="NUMBER">%d</xliff:g> שניות."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"יש לנסות שוב. ניסיון <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> מתוך <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"נעשו יותר מדי ניסיונות שגויים. הנתונים במכשיר יימחקו."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"נעשו יותר מדי ניסיונות שגויים. המשתמש הזה יימחק."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"נעשו יותר מדי ניסיונות שגויים. פרופיל העבודה הזה והנתונים המשויכים אליו יימחקו."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"סגירה"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"יש לגעת בחיישן טביעות האצבע"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"סמל טביעת אצבע"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"מחפש אותך…"</string>
@@ -223,7 +230,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"פתיחת פרטי סוללה"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> אחוזים של סוללה."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"רמת הטעינה בסוללה: <xliff:g id="PERCENTAGE">%1$s</xliff:g> אחוזים, הזמן הנותר המשוער על סמך השימוש שלך:<xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"טעינת סוללה, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"הסוללה בטעינה, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"הגדרות מערכת"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"התראות"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"הצגת כל ההתראות"</string>
@@ -564,6 +571,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"פרופיל העבודה שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>. הפרופיל מחובר לאפליקציה <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים.\n\nהפרופיל מחובר גם לאפליקציה <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"הנעילה נמנעת על ידי סביבה אמינה"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"המכשיר יישאר נעול עד שתבטל את נעילתו באופן ידני"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"קבלה מהירה של התראות"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"צפה בהן לפני שתבטל נעילה"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"לא, תודה"</string>
@@ -699,8 +707,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"עוזרת להתרכז ללא צלילים או רטט."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"מעוררת תשומת לב באמצעות צלילים או רטט."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"מעוררת תשומת לב באמצעות קיצור דרך צף לתוכן הזה."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"מוצגת בחלק העליון של קטע השיחה ומופיעה כבועה."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"כל השיחות מהאפליקציה <xliff:g id="APP_NAME_0">%1$s</xliff:g> מופיעות בבועות כברירת מחדל. ניתן לנהל באפליקציה <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"הגדרות"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"עדיפות"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"אין בועות מהזמן האחרון"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"בועות אחרונות ובועות שנסגרו יופיעו כאן."</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"בועות אחרונות ובועות שנסגרו יופיעו כאן"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"לא ניתן לשנות את ההתראות האלה."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"לא ניתן להגדיר כאן את קבוצת ההתראות הזו"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"‏התראה דרך שרת proxy"</string>
@@ -974,13 +986,8 @@
     <string name="device_services" msgid="1549944177856658705">"שירותים למכשיר"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ללא שם"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"צריך להקיש כדי להפעיל מחדש את האפליקציה הזו ולעבור למסך מלא."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"לפתיחת <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"הגדרות בשביל בועות של <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"להתיר ל-<xliff:g id="APP_NAME">%1$s</xliff:g> להציג בועות?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"ניהול"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"אני לא מרשה"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"כן, זה בסדר"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"אחליט מאוחר יותר"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> מהאפליקציה <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> מ-<xliff:g id="APP_NAME">%2$s</xliff:g> ועוד <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"העברה"</string>
@@ -989,21 +996,26 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"העברה לפינה השמאלית התחתונה"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"העברה לפינה הימנית התחתונה"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"סגירה"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"אין להציג בועות לשיחה"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"לדבר בצ\'אט באמצעות בועות"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"שיחות חדשות מופיעות כסמלים צפים, או בועות. יש להקיש כדי לפתוח בועה. יש לגרור כדי להזיז אותה."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"שליטה בבועות, בכל זמן"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"יש להקיש על \'ניהול\' כדי להשבית את הבועות מהאפליקציה הזו"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"הבנתי"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"הניווט במערכת עודכן. אפשר לערוך שינויים דרך ההגדרות."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"יש לעבור להגדרות כדי לעדכן את הניווט במערכת"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"המתנה"</string>
-    <string name="magnification_overlay_title" msgid="6584179429612427958">"חלון ליצירת שכבת-על להגדלה"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"חלון הגדלה"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"בקרות של חלון ההגדלה"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"פקדים מהירים"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"הוספת פקדים"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"יש לבחור אפליקציות שמהן יתווספו פקדים"</string>
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"יש להוסיף פקדים למכשירים המחוברים"</string>
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="two">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
       <item quantity="many">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
@@ -1011,9 +1023,28 @@
       <item quantity="one">נוסף פקד אחד (<xliff:g id="NUMBER_0">%s</xliff:g>).</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"פקדים"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"יש לבחור פקדים לגישה מהירה"</string>
-    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"מועדפים"</string>
-    <string name="controls_favorite_header_all" msgid="7507855973418969992">"הכול"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"יש לבחור פקדים לגישה מתפריט ההפעלה"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"כדי להזיז פקד, יש ללחוץ עליו ולגרור אותו"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"לא ניתן היה לטעון את הרשימה של כל הפקדים."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"אחר"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"הוספה לפקדים מהירים"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"הוספה למועדפים"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"בקרה זו הוצעה על ידי <xliff:g id="APP">%s</xliff:g> להוספה למועדפים."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"הפקדים עודכנו"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"קוד האימות מכיל אותיות או סמלים"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"אימות <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"בתהליך אימות…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"יש להזין קוד אימות"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"יש לנסות קוד אימות אחר"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"בתהליך אישור…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"יש לאשר את השינוי עבור <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"יש להחליק כדי להציג עוד פריטים"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"בטעינת המלצות"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"סגירת הסשן הזה של המדיה"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"לא פעיל, יש לבדוק את האפליקציה"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"שגיאה, יש לנסות שוב"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"בתהליך"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"ניתן ללחוץ על לחצן ההפעלה כדי להציג פקדים חדשים"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"הוספת פקדים"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"עריכת פקדים"</string>
 </resources>

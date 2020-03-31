@@ -63,6 +63,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public static final String KEY_USE_DEFAULT_TITLE = "use_default_title";
     /**
      * @hide
@@ -75,14 +76,17 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public static final String KEY_DEVICE_CREDENTIAL_TITLE = "device_credential_title";
     /**
      * @hide
      */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public static final String KEY_DEVICE_CREDENTIAL_SUBTITLE = "device_credential_subtitle";
     /**
      * @hide
      */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public static final String KEY_DEVICE_CREDENTIAL_DESCRIPTION = "device_credential_description";
     /**
      * @hide
@@ -106,7 +110,15 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * If this is set, check the Device Policy Manager for allowed biometrics.
      * @hide
      */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public static final String EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS = "check_dpm";
+    /**
+     * Request to receive system events, such as back gesture/button. See
+     * {@link AuthenticationCallback#onSystemEvent(int)}
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public static final String KEY_RECEIVE_SYSTEM_EVENTS = "receive_system_events";
 
     /**
      * Error/help message will show for this amount of time.
@@ -384,6 +396,18 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * If set, receive internal events via {@link AuthenticationCallback#onSystemEvent(int)}
+         * @param set
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        public Builder setReceiveSystemEvents(boolean set) {
+            mBundle.putBoolean(KEY_RECEIVE_SYSTEM_EVENTS, set);
+            return this;
+        }
+
+        /**
          * Creates a {@link BiometricPrompt}.
          *
          * @return An instance of {@link BiometricPrompt}.
@@ -492,6 +516,13 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                     mNegativeButtonInfo.listener.onClick(null, DialogInterface.BUTTON_NEGATIVE);
                 });
             }
+        }
+
+        @Override
+        public void onSystemEvent(int event) throws RemoteException {
+            mExecutor.execute(() -> {
+                mAuthenticationCallback.onSystemEvent(event);
+            });
         }
     };
 
@@ -732,6 +763,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          */
         @Override
         public void onAuthenticationAcquired(int acquireInfo) {}
+
+        /**
+         * Receiver for internal system events. See {@link Builder#setReceiveSystemEvents(boolean)}
+         * @hide
+         */
+        public void onSystemEvent(int event) {}
     }
 
     /**

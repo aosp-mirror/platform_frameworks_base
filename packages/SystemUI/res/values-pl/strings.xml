@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Spróbuj jeszcze raz wykonać zrzut ekranu"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Nie można zapisać zrzutu ekranu, bo brakuje miejsca w pamięci"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Nie możesz wykonać zrzutu ekranu, bo nie zezwala na to aplikacja lub Twoja organizacja."</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zamknij zrzut ekranu"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"Otwórz zrzut ekranu"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Rejestrator ekranu"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Rozpocząć rejestrowanie?"</string>
@@ -131,7 +133,7 @@
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Odblokuj bez używania odcisku palca"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skanowanie twarzy"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Wyślij"</string>
-    <string name="accessibility_manage_notification" msgid="582215815790143983">"Zarządzanie powiadomieniami"</string>
+    <string name="accessibility_manage_notification" msgid="582215815790143983">"Zarządzaj powiadomieniami"</string>
     <string name="phone_label" msgid="5715229948920451352">"otwórz telefon"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"otwórz pomoc głosową"</string>
     <string name="camera_label" msgid="8253821920931143699">"otwórz aparat"</string>
@@ -152,6 +154,11 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Nieprawidłowy wzór"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Nieprawidłowe hasło"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Zbyt wiele nieudanych prób.\n Spróbuj ponownie za <xliff:g id="NUMBER">%d</xliff:g> s."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Spróbuj ponownie. Próba <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> z <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Zbyt wiele nieudanych prób. Dane na urządzeniu zostaną usunięte."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Zbyt wiele nieudanych prób. Użytkownik zostanie usunięty."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Zbyt wiele nieudanych prób. Profil do pracy i powiązane z nim dane zostaną usunięte."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Zamknij"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dotknij czytnika linii papilarnych"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikona odcisku palca"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Szukam Cię…"</string>
@@ -564,6 +571,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem do pracy. Profil jest połączony z aplikacją <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nMasz też połączenie z aplikacją <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, która może monitorować Twoją osobistą aktywność w sieci."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Blokada anulowana przez agenta zaufania"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Urządzenie pozostanie zablokowane, aż odblokujesz je ręcznie"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Szybszy dostęp do powiadomień"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Zobacz powiadomienia, jeszcze zanim odblokujesz ekran"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Nie, dziękuję"</string>
@@ -699,8 +707,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Pomaga Ci się skupić, nie sygnalizując niczego dźwiękiem ani wibracjami."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Przyciąga uwagę dźwiękiem lub wibracjami."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Przyciąga uwagę dzięki pływającym skrótom do treści."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Wyświetla się u góry sekcji wątków i ma postać dymku."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Wszystkie wątki z aplikacji <xliff:g id="APP_NAME_0">%1$s</xliff:g> są domyślnie wyświetlane jako dymki. Zarządzaj w aplikacji <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ustawienia"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Priorytet"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Brak ostatnich dymków"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Tutaj będą pojawiać się ostatnie i odrzucone dymki."</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Tutaj będą pojawiać się ostatnie i odrzucone dymki"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tych powiadomień nie można zmodyfikować."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tej grupy powiadomień nie można tu skonfigurować"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Powiadomienie w zastępstwie"</string>
@@ -974,13 +986,8 @@
     <string name="device_services" msgid="1549944177856658705">"Usługi urządzenia"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez tytułu"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Kliknij, by uruchomić tę aplikację ponownie i przejść w tryb pełnoekranowy."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Otwórz: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Ustawienia dymków aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Zezwolić na dymki z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Zarządzaj"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Odmów"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Zezwól"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Zapytaj później"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikacji <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikacji <xliff:g id="APP_NAME">%2$s</xliff:g> i jeszcze <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Przenieś"</string>
@@ -989,21 +996,26 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Przenieś w lewy dolny róg"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Przenieś w prawy dolny róg"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Zamknij"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nie wyświetlaj wątków jako dymków."</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Czatuj, korzystając z dymków"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nowe wątki będą wyświetlane jako pływające ikony lub dymki. Kliknij, by otworzyć dymek. Przeciągnij, by go przenieść."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Zarządzaj dymkami w dowolnym momencie"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Kliknij Zarządzaj, aby wyłączyć dymki z tej aplikacji"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Nawigacja w systemie została zaktualizowana. Aby wprowadzić zmiany, otwórz Ustawienia."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Otwórz Ustawienia, by zaktualizować nawigację w systemie"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Tryb gotowości"</string>
-    <string name="magnification_overlay_title" msgid="6584179429612427958">"Okno nakładki powiększenia"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno powiększenia"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Elementy sterujące okna powiększenia"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"Szybkie sterowanie"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"Dodaj elementy sterujące"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Wybierz, z której chcesz wybrać elementy sterujące"</string>
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodaj elementy sterujące do połączonych urządzeń"</string>
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="few">Dodano <xliff:g id="NUMBER_1">%s</xliff:g> elementy sterujące</item>
       <item quantity="many">Dodano <xliff:g id="NUMBER_1">%s</xliff:g> elementów sterujących</item>
@@ -1011,9 +1023,28 @@
       <item quantity="one">Dodano <xliff:g id="NUMBER_0">%s</xliff:g> element sterujący</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Elementy sterujące"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Wybierz elementy sterujące dla szybszego dostępu"</string>
-    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"Ulubione"</string>
-    <string name="controls_favorite_header_all" msgid="7507855973418969992">"Wszystko"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Wybierz elementy sterujące dostępne w menu zasilania"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Przytrzymaj i przeciągnij element sterujący, by go przenieść"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nie udało się wczytać listy elementów sterujących."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Inne"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"Dodaj do Szybkiego sterowania"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"Dodaj do ulubionych"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"Aplikacja <xliff:g id="APP">%s</xliff:g> zaproponowała dodanie tego elementu sterującego do ulubionych."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Zaktualizowano elementy sterujące"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Kod PIN zawiera litery lub symbole"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Sprawdź urządzenie <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"Sprawdzam…"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Wpisz kod PIN"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Spróbuj użyć innego kodu PIN"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Potwierdzam…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Potwierdź zmianę dotyczącą urządzenia <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"Przesuń palcem, by zobaczyć więcej"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Wczytuję rekomendacje"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"Zamknij tę sesję multimediów"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Nieaktywny, sprawdź aplikację"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Błąd, spróbuj ponownie"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"W toku"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"Przytrzymaj przycisk zasilania, by zobaczyć nowe elementy sterujące"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj elementy sterujące"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Edytuj elementy sterujące"</string>
 </resources>

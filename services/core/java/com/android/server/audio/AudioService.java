@@ -635,6 +635,9 @@ public class AudioService extends IAudioService.Stub
         }
     };
 
+    @GuardedBy("mSettingsLock")
+    private boolean mRttEnabled = false;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -1054,7 +1057,7 @@ public class AudioService extends IAudioService.Stub
             sendEncodedSurroundMode(mContentResolver, "onAudioServerDied");
             sendEnabledSurroundFormats(mContentResolver, true);
             updateAssistantUId(true);
-            updateRttEanbled(mContentResolver);
+            AudioSystem.setRttEnabled(mRttEnabled);
         }
         synchronized (mAccessibilityServiceUidsLock) {
             AudioSystem.setA11yServicesUids(mAccessibilityServiceUids);
@@ -1599,12 +1602,6 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void updateRttEanbled(ContentResolver cr) {
-        final boolean rttEnabled = Settings.Secure.getIntForUser(cr,
-                    Settings.Secure.RTT_CALLING_MODE, 0, UserHandle.USER_CURRENT) != 0;
-        AudioSystem.setRttEnabled(rttEnabled);
-    }
-
     private void readPersistedSettings() {
         final ContentResolver cr = mContentResolver;
 
@@ -1649,7 +1646,7 @@ public class AudioService extends IAudioService.Stub
             sendEncodedSurroundMode(cr, "readPersistedSettings");
             sendEnabledSurroundFormats(cr, true);
             updateAssistantUId(true);
-            updateRttEanbled(cr);
+            AudioSystem.setRttEnabled(mRttEnabled);
         }
 
         mMuteAffectedStreams = System.getIntForUser(cr,
@@ -3768,6 +3765,27 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#isCallScreeningModeSupported() */
     public boolean isCallScreeningModeSupported() {
         return mIsCallScreeningModeSupported;
+    }
+
+    /** @see AudioManager#setRttEnabled() */
+    @Override
+    public void setRttEnabled(boolean rttEnabled) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: setRttEnabled from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+        synchronized (mSettingsLock) {
+            mRttEnabled = rttEnabled;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                AudioSystem.setRttEnabled(rttEnabled);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
     }
 
     //==========================================================================================
@@ -5984,8 +6002,6 @@ public class AudioService extends IAudioService.Stub
 
             mContentResolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.VOICE_INTERACTION_SERVICE), false, this);
-            mContentResolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.RTT_CALLING_MODE), false, this);
         }
 
         @Override
@@ -6009,7 +6025,6 @@ public class AudioService extends IAudioService.Stub
                 updateEncodedSurroundOutput();
                 sendEnabledSurroundFormats(mContentResolver, mSurroundModeChanged);
                 updateAssistantUId(false);
-                updateRttEanbled(mContentResolver);
             }
         }
 

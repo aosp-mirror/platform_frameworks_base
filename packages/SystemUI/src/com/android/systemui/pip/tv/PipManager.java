@@ -45,7 +45,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayInfo;
-import android.window.WindowOrganizer;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -296,7 +295,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         try {
             WindowManagerWrapper.getInstance().addPinnedStackListener(mPinnedStackListener);
             TaskOrganizer.registerOrganizer(mPipTaskOrganizer, WINDOWING_MODE_PINNED);
-        } catch (RemoteException e) {
+        } catch (RemoteException | UnsupportedOperationException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
 

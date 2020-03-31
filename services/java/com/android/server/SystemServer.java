@@ -1066,7 +1066,8 @@ public final class SystemServer {
             t.traceEnd();
 
             t.traceBegin("StartTelephonyRegistry");
-            telephonyRegistry = new TelephonyRegistry(context);
+            telephonyRegistry = new TelephonyRegistry(
+                    context, new TelephonyRegistry.ConfigurationProvider());
             ServiceManager.addService("telephony.registry", telephonyRegistry);
             t.traceEnd();
 

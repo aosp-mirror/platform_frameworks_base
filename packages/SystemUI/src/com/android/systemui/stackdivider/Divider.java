@@ -25,6 +25,7 @@ import static android.window.WindowOrganizer.TaskOrganizer;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -32,11 +33,11 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Slog;
-import android.window.IWindowContainer;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.window.IWindowContainer;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
@@ -112,6 +113,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     private DisplayChangeController.OnDisplayChangingListener mRotationController =
             (display, fromRotation, toRotation, t) -> {
+                if (!mSplits.isSplitScreenSupported()) {
+                    return;
+                }
                 DisplayLayout displayLayout =
                         new DisplayLayout(mDisplayController.getDisplayLayout(display));
                 SplitDisplayLayout sdl = new SplitDisplayLayout(mContext, displayLayout, mSplits);
@@ -472,6 +476,10 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 mDisplayController.getDisplayLayout(displayId), mSplits);
         mImeController.addPositionProcessor(mImePositionProcessor);
         mDisplayController.addDisplayChangingController(mRotationController);
+        if (!ActivityTaskManager.supportsSplitScreenMultiWindow(mContext)) {
+            removeDivider();
+            return;
+        }
         try {
             mSplits.init(mSurfaceSession);
             // Set starting tile bounds based on middle target
@@ -481,13 +489,15 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             WindowOrganizer.applyTransaction(tct);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to register docked stack listener", e);
+            removeDivider();
+            return;
         }
         update(mDisplayController.getDisplayContext(displayId).getResources().getConfiguration());
     }
 
     @Override
     public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
-        if (displayId != DEFAULT_DISPLAY) {
+        if (displayId != DEFAULT_DISPLAY || !mSplits.isSplitScreenSupported()) {
             return;
         }
         mSplitLayout = new SplitDisplayLayout(mDisplayController.getDisplayContext(displayId),

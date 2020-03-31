@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricConstants;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -207,6 +208,7 @@ public class AuthContainerView extends LinearLayout
                     animateAway(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED);
                     break;
                 case AuthBiometricView.Callback.ACTION_USER_CANCELED:
+                    sendEarlyUserCanceled();
                     animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
                     break;
                 case AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE:
@@ -286,11 +288,13 @@ public class AuthContainerView extends LinearLayout
 
         addView(mFrameLayout);
 
+        // TODO: De-dupe the logic with AuthCredentialPasswordView
         setOnKeyListener((v, keyCode, event) -> {
             if (keyCode != KeyEvent.KEYCODE_BACK) {
                 return false;
             }
             if (event.getAction() == KeyEvent.ACTION_UP) {
+                sendEarlyUserCanceled();
                 animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
             }
             return true;
@@ -298,6 +302,11 @@ public class AuthContainerView extends LinearLayout
 
         setFocusableInTouchMode(true);
         requestFocus();
+    }
+
+    void sendEarlyUserCanceled() {
+        mConfig.mCallback.onSystemEvent(
+                BiometricConstants.BIOMETRIC_SYSTEM_EVENT_EARLY_USER_CANCEL);
     }
 
     @Override

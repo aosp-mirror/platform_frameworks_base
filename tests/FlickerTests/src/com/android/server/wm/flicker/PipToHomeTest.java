@@ -18,6 +18,7 @@ package com.android.server.wm.flicker;
 
 import static com.android.server.wm.flicker.CommonTransitions.exitPipModeToHome;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
 import com.android.server.wm.flicker.helpers.PipAppHelper;
@@ -36,6 +37,8 @@ import org.junit.runners.Parameterized;
 @LargeTest
 @RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 152738416)
+@Ignore("Waiting bug feedback")
 public class PipToHomeTest extends PipTestBase {
     public PipToHomeTest(String beginRotationName, int beginRotation) {
         super(beginRotationName, beginRotation);

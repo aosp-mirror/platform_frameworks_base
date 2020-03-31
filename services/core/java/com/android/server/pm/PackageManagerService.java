@@ -93,6 +93,7 @@ import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
+import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.incremental.IncrementalManager.isIncrementalPath;
@@ -415,7 +416,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -737,9 +737,10 @@ public class PackageManagerService extends IPackageManager.Stub
     final private ArrayMap<String, File> mExpectingBetter = new ArrayMap<>();
 
     /**
-     * Tracks existing system packages prior to receiving an OTA. Keys are package name.
+     * Tracks existing packages prior to receiving an OTA. Keys are package name.
+     * Only non-null during an OTA, and even then it is nulled again once systemReady().
      */
-    final private ArraySet<String> mExistingSystemPackages = new ArraySet<>();
+    private @Nullable ArraySet<String> mExistingPackages = null;
     /**
      * Whether or not system app permissions should be promoted from install to runtime.
      */
@@ -2570,9 +2571,10 @@ public class PackageManagerService extends IPackageManager.Stub
     private void installWhitelistedSystemPackages() {
         synchronized (mLock) {
             final boolean scheduleWrite = mUserManager.installWhitelistedSystemPackages(
-                    isFirstBoot(), isDeviceUpgrading());
+                    isFirstBoot(), isDeviceUpgrading(), mExistingPackages);
             if (scheduleWrite) {
                 scheduleWritePackageRestrictionsLocked(UserHandle.USER_ALL);
+                scheduleWriteSettingsLocked();
             }
         }
     }
@@ -2654,6 +2656,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     throw new IllegalStateException("Unable to determine scan flag for "
                             + partition.folder);
             }
+        }
+
+        @Override
+        public String toString() {
+            return folder.getAbsolutePath() + ":" + scanFlag;
         }
     }
 
@@ -2763,15 +2770,19 @@ public class PackageManagerService extends IPackageManager.Stub
         mApexManager = ApexManager.getInstance();
         mAppsFilter = mInjector.getAppsFilter();
 
+        final List<ScanPartition> scanPartitions = new ArrayList<>();
+        final List<ApexManager.ActiveApexInfo> activeApexInfos = mApexManager.getActiveApexInfos();
+        for (int i = 0; i < activeApexInfos.size(); i++) {
+            final ScanPartition scanPartition = resolveApexToScanPartition(activeApexInfos.get(i));
+            if (scanPartition != null) {
+                scanPartitions.add(scanPartition);
+            }
+        }
+
         mDirsToScanAsSystem = new ArrayList<>();
         mDirsToScanAsSystem.addAll(SYSTEM_PARTITIONS);
-        mDirsToScanAsSystem.addAll(mApexManager.getActiveApexInfos().stream()
-                .map(PackageManagerService::resolveApexToScanPartition)
-                .filter(Objects::nonNull).collect(Collectors.toList()));
-        Slog.d(TAG,
-                "Directories scanned as system partitions: [" + mDirsToScanAsSystem.stream().map(
-                        d -> (d.folder.getAbsolutePath() + ":" + d.scanFlag))
-                        .collect(Collectors.joining(",")) + "]");
+        mDirsToScanAsSystem.addAll(scanPartitions);
+        Slog.d(TAG, "Directories scanned as system partitions: " + mDirsToScanAsSystem);
 
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
@@ -2879,13 +2890,12 @@ public class PackageManagerService extends IPackageManager.Stub
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
             mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
 
-            // save off the names of pre-existing system packages prior to scanning; we don't
-            // want to automatically grant runtime permissions for new system apps
-            if (mPromoteSystemApps) {
+            // Save the names of pre-existing packages prior to scanning, so we can determine
+            // which system packages are completely new due to an upgrade.
+            if (isDeviceUpgrading()) {
+                mExistingPackages = new ArraySet<>(mSettings.mPackages.size());
                 for (PackageSetting ps : mSettings.mPackages.values()) {
-                    if (isSystemApp(ps)) {
-                        mExistingSystemPackages.add(ps.name);
-                    }
+                    mExistingPackages.add(ps.name);
                 }
             }
 
@@ -3346,7 +3356,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             // clear only after permissions and other defaults have been updated
-            mExistingSystemPackages.clear();
             mPromoteSystemApps = false;
 
             // All the changes are done during package scanning.
@@ -12781,6 +12790,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     pkgSetting.setInstalled(true, userId);
                     pkgSetting.setHidden(false, userId);
                     pkgSetting.setInstallReason(installReason, userId);
+                    pkgSetting.setUninstallReason(PackageManager.UNINSTALL_REASON_UNKNOWN, userId);
                     mSettings.writePackageRestrictionsLPr(userId);
                     mSettings.writeKernelMappingLPr(pkgSetting);
                     installed = true;
@@ -15613,7 +15623,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 // It's implied that when a user requests installation, they want the app to be
-                // installed and enabled.
+                // installed and enabled. (This does not apply to USER_ALL, which here means only
+                // install on users for which the app is already installed).
                 if (userId != UserHandle.USER_ALL) {
                     ps.setInstalled(true, userId);
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
@@ -15631,7 +15642,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.addInstallerPackageNames(installSource);
 
                 // When replacing an existing package, preserve the original install reason for all
-                // users that had the package installed before.
+                // users that had the package installed before. Similarly for uninstall reasons.
                 final Set<Integer> previousUserIds = new ArraySet<>();
                 if (res.removedInfo != null && res.removedInfo.installReasons != null) {
                     final int installReasonCount = res.removedInfo.installReasons.size();
@@ -15642,16 +15653,32 @@ public class PackageManagerService extends IPackageManager.Stub
                         previousUserIds.add(previousUserId);
                     }
                 }
+                if (res.removedInfo != null && res.removedInfo.uninstallReasons != null) {
+                    for (int i = 0; i < res.removedInfo.uninstallReasons.size(); i++) {
+                        final int previousUserId = res.removedInfo.uninstallReasons.keyAt(i);
+                        final int previousReason = res.removedInfo.uninstallReasons.valueAt(i);
+                        ps.setUninstallReason(previousReason, previousUserId);
+                    }
+                }
 
                 // Set install reason for users that are having the package newly installed.
+                final int[] allUsersList = mUserManager.getUserIds();
                 if (userId == UserHandle.USER_ALL) {
-                    for (int currentUserId : mUserManager.getUserIds()) {
+                    // TODO(b/152629990): It appears that the package doesn't actually get newly
+                    //  installed in this case, so the installReason shouldn't get modified?
+                    for (int currentUserId : allUsersList) {
                         if (!previousUserIds.contains(currentUserId)) {
                             ps.setInstallReason(installReason, currentUserId);
                         }
                     }
                 } else if (!previousUserIds.contains(userId)) {
                     ps.setInstallReason(installReason, userId);
+                }
+                // Ensure that the uninstall reason is UNKNOWN for users with the package installed.
+                for (int currentUserId : allUsersList) {
+                    if (ps.getInstalled(currentUserId)) {
+                        ps.setUninstallReason(UNINSTALL_REASON_UNKNOWN, currentUserId);
+                    }
                 }
                 mSettings.writeKernelMappingLPr(ps);
             }
@@ -17017,6 +17044,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 final String pkgName11 = parsedPackage.getPackageName();
                 final int[] allUsers;
                 final int[] installedUsers;
+                final int[] uninstalledUsers;
 
                 synchronized (mLock) {
                     oldPackage = mPackages.get(pkgName11);
@@ -17091,6 +17119,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // In case of rollback, remember per-user/profile install state
                     allUsers = mUserManager.getUserIds();
                     installedUsers = ps.queryInstalledUsers(allUsers, true);
+                    uninstalledUsers = ps.queryInstalledUsers(allUsers, false);
 
 
                     // don't allow an upgrade from full to ephemeral
@@ -17128,6 +17157,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (int i = 0; i < installedUsers.length; i++) {
                     final int userId = installedUsers[i];
                     res.removedInfo.installReasons.put(userId, ps.getInstallReason(userId));
+                }
+                res.removedInfo.uninstallReasons = new SparseArray<>(uninstalledUsers.length);
+                for (int i = 0; i < uninstalledUsers.length; i++) {
+                    final int userId = uninstalledUsers[i];
+                    res.removedInfo.uninstallReasons.put(userId, ps.getUninstallReason(userId));
                 }
 
                 sysPkg = oldPackage.isSystem();
@@ -17943,6 +17977,7 @@ public class PackageManagerService extends IPackageManager.Stub
         int[] broadcastUsers = null;
         int[] instantUserIds = null;
         SparseArray<Integer> installReasons;
+        SparseArray<Integer> uninstallReasons;
         boolean isRemovedPackageSystemUpdate = false;
         boolean isUpdate;
         boolean dataRemoved;
@@ -18165,6 +18200,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         installedStateChanged = true;
                     }
                     deletedPs.setInstalled(installed, userId);
+                    if (installed) {
+                        deletedPs.setUninstallReason(UNINSTALL_REASON_UNKNOWN, userId);
+                    }
                 }
             }
         }
@@ -18347,6 +18385,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         installedStateChanged = true;
                     }
                     ps.setInstalled(installed, userId);
+                    if (installed) {
+                        ps.setUninstallReason(UNINSTALL_REASON_UNKNOWN, userId);
+                    }
 
                     mSettings.writeRuntimePermissionsForUserLPr(userId, false);
                 }
@@ -18619,7 +18660,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     null /*enabledComponents*/,
                     null /*disabledComponents*/,
                     ps.readUserState(nextUserId).domainVerificationStatus,
-                    0, PackageManager.INSTALL_REASON_UNKNOWN,
+                    0 /*linkGeneration*/,
+                    PackageManager.INSTALL_REASON_UNKNOWN,
+                    PackageManager.UNINSTALL_REASON_UNKNOWN,
                     null /*harmfulAppWarning*/);
         }
         mSettings.writeKernelMappingLPr(ps);
@@ -20770,6 +20813,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // installation on reboot. Make sure this is the last component to be call since the
         // installation might require other components to be ready.
         mInstallerService.restoreAndApplyStagedSessionIfNeeded();
+
+        mExistingPackages = null;
     }
 
     public void waitForAppDataPrepared() {
@@ -22722,16 +22767,17 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Called by UserManagerService.
      *
-     * @param installablePackages system packages that should be initially installed for this user,
-     *                            or {@code null} if all system packages should be installed
+     * @param userTypeInstallablePackages system packages that should be initially installed for
+     *                                    this type of user, or {@code null} if all system packages
+     *                                    should be installed
      * @param disallowedPackages packages that should not be initially installed. Takes precedence
      *                           over installablePackages.
      */
-    void createNewUser(int userId, @Nullable Set<String> installablePackages,
+    void createNewUser(int userId, @Nullable Set<String> userTypeInstallablePackages,
             String[] disallowedPackages) {
         synchronized (mInstallLock) {
             mSettings.createNewUserLI(this, mInstaller, userId,
-                    installablePackages, disallowedPackages);
+                    userTypeInstallablePackages, disallowedPackages);
         }
         synchronized (mLock) {
             scheduleWritePackageRestrictionsLocked(userId);
@@ -23745,19 +23791,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public boolean setInstalled(AndroidPackage pkg, @UserIdInt int userId,
-                boolean installed) {
-            synchronized (mLock) {
-                final PackageSetting ps = mSettings.mPackages.get(pkg.getPackageName());
-                if (ps.getInstalled(userId) != installed) {
-                    ps.setInstalled(installed, userId);
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        @Override
         public void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
                 Intent origIntent, String resolvedType, String callingPackage,
                 @Nullable String callingFeatureId, boolean isRequesterInstantApp,
@@ -23823,16 +23856,6 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mLock) {
                 AndroidPackage pkg = mPackages.get(packageName);
                 return pkg != null && pkg.isSystem() && pkg.isPersistent();
-            }
-        }
-
-        @Override
-        public boolean isLegacySystemApp(AndroidPackage pkg) {
-            synchronized (mLock) {
-                final PackageSetting ps = getPackageSetting(pkg.getPackageName());
-                return mPromoteSystemApps
-                        && ps.isSystem()
-                        && mExistingSystemPackages.contains(ps.name);
             }
         }
 
