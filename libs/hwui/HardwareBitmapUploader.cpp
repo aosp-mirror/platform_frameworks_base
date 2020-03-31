@@ -24,7 +24,6 @@
 #include <GrContext.h>
 #include <SkCanvas.h>
 #include <SkImage.h>
-#include <private/android/AHardwareBufferHelpers.h>
 #include <utils/GLUtils.h>
 #include <utils/NdkUtils.h>
 #include <utils/Trace.h>
@@ -178,7 +177,7 @@ private:
                             uirenderer::renderthread::EglManager::eglErrorString());
         // We use an EGLImage to access the content of the buffer
         // The EGL image is later bound to a 2D texture
-        EGLClientBuffer clientBuffer = (EGLClientBuffer)AHardwareBuffer_to_ANativeWindowBuffer(ahb);
+        const EGLClientBuffer clientBuffer = eglGetNativeClientBufferANDROID(ahb);
         AutoEglImage autoImage(display, clientBuffer);
         if (autoImage.image == EGL_NO_IMAGE_KHR) {
             ALOGW("Could not create EGL image, err =%s",
