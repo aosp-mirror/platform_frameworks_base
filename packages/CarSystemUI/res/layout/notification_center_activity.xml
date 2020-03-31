@@ -20,6 +20,8 @@
     android:id="@+id/notification_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:visibility="invisible"
+    android:layout_marginBottom="@dimen/navigation_bar_height"
     android:background="@color/notification_shade_background_color">
 
     <View
