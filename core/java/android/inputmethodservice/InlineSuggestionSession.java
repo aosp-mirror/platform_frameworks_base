@@ -20,129 +20,148 @@ import static android.inputmethodservice.InputMethodService.DEBUG;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.annotation.BinderThread;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
-import android.content.ComponentName;
+import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.autofill.AutofillId;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
 
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Maintains an active inline suggestion session with the autofill manager service.
+ * Maintains an inline suggestion session with the autofill manager service.
  *
+ * <p> Each session correspond to one request from the Autofill manager service to create an
+ * {@link InlineSuggestionsRequest}. It's responsible for calling back to the Autofill manager
+ * service with {@link InlineSuggestionsRequest} and receiving {@link InlineSuggestionsResponse}
+ * from it.
  * <p>
- * Each session corresponds to one {@link InlineSuggestionsRequest} and one {@link
- * IInlineSuggestionsResponseCallback}, but there may be multiple invocations of the response
- * callback for the same field or different fields in the same component.
+ * TODO(b/151123764): currently the session may receive responses for different views on the same
+ * screen, but we will fix it so each session corresponds to one view.
  *
- * <p>
- * The data flow from IMS point of view is:
- * Before calling {@link InputMethodService#onStartInputView(EditorInfo, boolean)}, call the {@link
- * #notifyOnStartInputView(AutofillId)}
- * ->
- * [async] {@link IInlineSuggestionsRequestCallback#onInputMethodStartInputView(AutofillId)}
- * --- process boundary ---
- * ->
- * {@link com.android.server.inputmethod.InputMethodManagerService
- * .InlineSuggestionsRequestCallbackDecorator#onInputMethodStartInputView(AutofillId)}
- * ->
- * {@link com.android.server.autofill.InlineSuggestionSession
- * .InlineSuggestionsRequestCallbackImpl#onInputMethodStartInputView(AutofillId)}
- *
- * <p>
- * The data flow for {@link #notifyOnFinishInputView(AutofillId)} is similar.
+ * <p> All the methods are expected to be called from the main thread, to ensure thread safety.
  */
 class InlineSuggestionSession {
-
     private static final String TAG = "ImsInlineSuggestionSession";
 
-    private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
-
     @NonNull
-    private final ComponentName mComponentName;
+    private final Handler mMainThreadHandler;
+    @NonNull
+    private final InlineSuggestionSessionController mInlineSuggestionSessionController;
+    @NonNull
+    private final InlineSuggestionsRequestInfo mRequestInfo;
     @NonNull
     private final IInlineSuggestionsRequestCallback mCallback;
     @NonNull
-    private final InlineSuggestionsResponseCallbackImpl mResponseCallback;
-    @NonNull
-    private final Supplier<String> mClientPackageNameSupplier;
-    @NonNull
-    private final Supplier<AutofillId> mClientAutofillIdSupplier;
-    @NonNull
-    private final Supplier<InlineSuggestionsRequest> mRequestSupplier;
+    private final Function<Bundle, InlineSuggestionsRequest> mRequestSupplier;
     @NonNull
     private final Supplier<IBinder> mHostInputTokenSupplier;
     @NonNull
     private final Consumer<InlineSuggestionsResponse> mResponseConsumer;
 
-    private volatile boolean mInvalidated = false;
 
-    InlineSuggestionSession(@NonNull ComponentName componentName,
+    /**
+     * Indicates whether {@link #makeInlineSuggestionRequestUncheck()} has been called or not,
+     * because it should only be called at most once.
+     */
+    @Nullable
+    private boolean mCallbackInvoked = false;
+    @Nullable
+    private InlineSuggestionsResponseCallbackImpl mResponseCallback;
+
+    InlineSuggestionSession(@NonNull InlineSuggestionsRequestInfo requestInfo,
             @NonNull IInlineSuggestionsRequestCallback callback,
-            @NonNull Supplier<String> clientPackageNameSupplier,
-            @NonNull Supplier<AutofillId> clientAutofillIdSupplier,
-            @NonNull Supplier<InlineSuggestionsRequest> requestSupplier,
+            @NonNull Function<Bundle, InlineSuggestionsRequest> requestSupplier,
             @NonNull Supplier<IBinder> hostInputTokenSupplier,
             @NonNull Consumer<InlineSuggestionsResponse> responseConsumer,
-            boolean inputViewStarted) {
-        mComponentName = componentName;
+            @NonNull InlineSuggestionSessionController inlineSuggestionSessionController,
+            @NonNull Handler mainThreadHandler) {
+        mRequestInfo = requestInfo;
         mCallback = callback;
-        mResponseCallback = new InlineSuggestionsResponseCallbackImpl(this);
-        mClientPackageNameSupplier = clientPackageNameSupplier;
-        mClientAutofillIdSupplier = clientAutofillIdSupplier;
         mRequestSupplier = requestSupplier;
         mHostInputTokenSupplier = hostInputTokenSupplier;
         mResponseConsumer = responseConsumer;
-
-        makeInlineSuggestionsRequest(inputViewStarted);
+        mInlineSuggestionSessionController = inlineSuggestionSessionController;
+        mMainThreadHandler = mainThreadHandler;
     }
 
-    void notifyOnStartInputView(AutofillId imeFieldId) {
-        if (DEBUG) Log.d(TAG, "notifyOnStartInputView");
-        try {
-            mCallback.onInputMethodStartInputView(imeFieldId);
-        } catch (RemoteException e) {
-            Log.w(TAG, "onInputMethodStartInputView() remote exception:" + e);
-        }
+    @MainThread
+    InlineSuggestionsRequestInfo getRequestInfo() {
+        return mRequestInfo;
     }
 
-    void notifyOnFinishInputView(AutofillId imeFieldId) {
-        if (DEBUG) Log.d(TAG, "notifyOnFinishInputView");
-        try {
-            mCallback.onInputMethodFinishInputView(imeFieldId);
-        } catch (RemoteException e) {
-            Log.w(TAG, "onInputMethodFinishInputView() remote exception:" + e);
+    @MainThread
+    IInlineSuggestionsRequestCallback getRequestCallback() {
+        return mCallback;
+    }
+
+    /**
+     * Returns true if the session should send Ime status updates to Autofill.
+     *
+     * <p> The session only starts to send Ime status updates to Autofill after the sending back
+     * an {@link InlineSuggestionsRequest}.
+     */
+    @MainThread
+    boolean shouldSendImeStatus() {
+        return mResponseCallback != null;
+    }
+
+    /**
+     * Returns true if {@link #makeInlineSuggestionRequestUncheck()} is called. It doesn't not
+     * necessarily mean an {@link InlineSuggestionsRequest} was sent, because it may call {@link
+     * IInlineSuggestionsRequestCallback#onInlineSuggestionsUnsupported()}.
+     *
+     * <p> The callback should be invoked at most once for each session.
+     */
+    @MainThread
+    boolean isCallbackInvoked() {
+        return mCallbackInvoked;
+    }
+
+    /**
+     * Invalidates the current session so it doesn't process any further {@link
+     * InlineSuggestionsResponse} from Autofill.
+     *
+     * <p> This method should be called when the session is de-referenced from the {@link
+     * InlineSuggestionSessionController}.
+     */
+    @MainThread
+    void invalidate() {
+        if (mResponseCallback != null) {
+            mResponseCallback.invalidate();
+            mResponseCallback = null;
         }
     }
 
     /**
-     * This needs to be called before creating a new session, such that the later response callbacks
-     * will be discarded.
+     * Gets the {@link InlineSuggestionsRequest} from IME and send it back to the Autofill if it's
+     * not null.
+     *
+     * <p>Calling this method implies that the input is started on the view corresponding to the
+     * session.
      */
-    void invalidateSession() {
-        mInvalidated = true;
-    }
-
-    /**
-     * Sends an {@link InlineSuggestionsRequest} obtained from {@cocde supplier} to the current
-     * Autofill Session through
-     * {@link IInlineSuggestionsRequestCallback#onInlineSuggestionsRequest}.
-     */
-    private void makeInlineSuggestionsRequest(boolean inputViewStarted) {
+    @MainThread
+    void makeInlineSuggestionRequestUncheck() {
+        if (mCallbackInvoked) {
+            return;
+        }
         try {
-            final InlineSuggestionsRequest request = mRequestSupplier.get();
+            final InlineSuggestionsRequest request = mRequestSupplier.apply(
+                    mRequestInfo.getUiExtras());
             if (request == null) {
                 if (DEBUG) {
                     Log.d(TAG, "onCreateInlineSuggestionsRequest() returned null request");
@@ -150,37 +169,19 @@ class InlineSuggestionSession {
                 mCallback.onInlineSuggestionsUnsupported();
             } else {
                 request.setHostInputToken(mHostInputTokenSupplier.get());
-                mCallback.onInlineSuggestionsRequest(request, mResponseCallback,
-                        mClientAutofillIdSupplier.get(), inputViewStarted);
+                mResponseCallback = new InlineSuggestionsResponseCallbackImpl(this);
+                mCallback.onInlineSuggestionsRequest(request, mResponseCallback);
             }
         } catch (RemoteException e) {
             Log.w(TAG, "makeInlinedSuggestionsRequest() remote exception:" + e);
         }
+        mCallbackInvoked = true;
     }
 
-    private void handleOnInlineSuggestionsResponse(@NonNull AutofillId fieldId,
+    @MainThread
+    void handleOnInlineSuggestionsResponse(@NonNull AutofillId fieldId,
             @NonNull InlineSuggestionsResponse response) {
-        if (mInvalidated) {
-            if (DEBUG) {
-                Log.d(TAG, "handleOnInlineSuggestionsResponse() called on invalid session");
-            }
-            return;
-        }
-        // The IME doesn't have information about the virtual view id for the child views in the
-        // web view, so we are only comparing the parent view id here. This means that for cases
-        // where there are two input fields in the web view, they will have the same view id
-        // (although different virtual child id), and we will not be able to distinguish them.
-        final AutofillId imeClientFieldId = mClientAutofillIdSupplier.get();
-        if (!mComponentName.getPackageName().equals(mClientPackageNameSupplier.get())
-                || imeClientFieldId == null
-                || fieldId.getViewId() != imeClientFieldId.getViewId()) {
-            if (DEBUG) {
-                Log.d(TAG,
-                        "handleOnInlineSuggestionsResponse() called on the wrong package/field "
-                                + "name: " + mComponentName.getPackageName() + " v.s. "
-                                + mClientPackageNameSupplier.get() + ", " + fieldId + " v.s. "
-                                + mClientAutofillIdSupplier.get());
-            }
+        if (!mInlineSuggestionSessionController.match(fieldId)) {
             return;
         }
         if (DEBUG) {
@@ -192,23 +193,31 @@ class InlineSuggestionSession {
     /**
      * Internal implementation of {@link IInlineSuggestionsResponseCallback}.
      */
-    static final class InlineSuggestionsResponseCallbackImpl
-            extends IInlineSuggestionsResponseCallback.Stub {
-        private final WeakReference<InlineSuggestionSession> mInlineSuggestionSession;
+    private static final class InlineSuggestionsResponseCallbackImpl extends
+            IInlineSuggestionsResponseCallback.Stub {
+        private final WeakReference<InlineSuggestionSession> mSession;
+        private volatile boolean mInvalid = false;
 
-        private InlineSuggestionsResponseCallbackImpl(
-                InlineSuggestionSession inlineSuggestionSession) {
-            mInlineSuggestionSession = new WeakReference<>(inlineSuggestionSession);
+        private InlineSuggestionsResponseCallbackImpl(InlineSuggestionSession session) {
+            mSession = new WeakReference<>(session);
         }
 
+        void invalidate() {
+            mInvalid = true;
+        }
+
+        @BinderThread
         @Override
         public void onInlineSuggestionsResponse(AutofillId fieldId,
                 InlineSuggestionsResponse response) {
-            final InlineSuggestionSession session = mInlineSuggestionSession.get();
+            if (mInvalid) {
+                return;
+            }
+            final InlineSuggestionSession session = mSession.get();
             if (session != null) {
-                session.mHandler.sendMessage(obtainMessage(
-                        InlineSuggestionSession::handleOnInlineSuggestionsResponse, session,
-                        fieldId, response));
+                session.mMainThreadHandler.sendMessage(
+                        obtainMessage(InlineSuggestionSession::handleOnInlineSuggestionsResponse,
+                                session, fieldId, response));
             }
         }
     }
