@@ -24,6 +24,8 @@ import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection
 import javax.inject.Inject
 
 class ShadeListBuilderLogger @Inject constructor(
@@ -36,12 +38,13 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
-    fun logEndBuildList(iterationCount: Int, listLength: Int) {
+    fun logEndBuildList(iterationCount: Int, topLevelEntries: Int, numChildren: Int) {
         buffer.log(TAG, INFO, {
-            int1 = iterationCount
-            int2 = listLength
+            long1 = iterationCount.toLong()
+            int1 = topLevelEntries
+            int2 = numChildren
         }, {
-            "(Build $int1) Finished building shade list ($int2 top-level entries)"
+            "(Build $long1) Build complete ($int1 top-level entries, $int2 children)"
         })
     }
 
@@ -110,69 +113,90 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
-    fun logParentChanged(buildId: Int, key: String, prevParent: String?, newParent: String?) {
+    fun logEntryAttachStateChanged(
+        buildId: Int,
+        key: String,
+        prevParent: GroupEntry?,
+        newParent: GroupEntry?
+    ) {
         buffer.log(TAG, INFO, {
             int1 = buildId
             str1 = key
-            str2 = prevParent
-            str3 = newParent
+            str2 = prevParent?.key
+            str3 = newParent?.key
         }, {
-            "(Build $int1) Parent change for $str1: $str2 -> $str3"
+            if (str2 == null && str3 != null) {
+                "(Build $int1) ATTACHED {$str1}"
+            } else if (str2 != null && str3 == null) {
+                "(Build $int1) DETACHED {$str1}"
+            } else {
+                "(Build $int1) MODIFIED {$str1}"
+            }
+        })
+    }
+
+    fun logParentChanged(buildId: Int, prevParent: GroupEntry?, newParent: GroupEntry?) {
+        buffer.log(TAG, INFO, {
+            int1 = buildId
+            str1 = prevParent?.key
+            str2 = newParent?.key
+        }, {
+            if (str1 == null && str2 != null) {
+                "(Build $int1)     Parent is {$str2}"
+            } else if (str1 != null && str2 == null) {
+                "(Build $int1)     Parent was {$str1}"
+            } else {
+                "(Build $int1)     Reparent: {$str2} -> {$str3}"
+            }
         })
     }
 
     fun logFilterChanged(
         buildId: Int,
-        key: String,
         prevFilter: NotifFilter?,
         newFilter: NotifFilter?
     ) {
         buffer.log(TAG, INFO, {
             int1 = buildId
-            str1 = key
-            str2 = prevFilter?.name
-            str3 = newFilter?.name
+            str1 = prevFilter?.name
+            str2 = newFilter?.name
         }, {
-            "(Build $int1) Filter changed for $str1: $str2 -> $str3"
+            "(Build $int1)     Filter changed: $str1 -> $str2"
         })
     }
 
     fun logPromoterChanged(
         buildId: Int,
-        key: String,
-        prevPromoter: String?,
-        newPromoter: String?
+        prevPromoter: NotifPromoter?,
+        newPromoter: NotifPromoter?
     ) {
         buffer.log(TAG, INFO, {
             int1 = buildId
-            str1 = key
-            str2 = prevPromoter
-            str3 = newPromoter
+            str1 = prevPromoter?.name
+            str2 = newPromoter?.name
         }, {
-            "(Build $int1) Promoter changed for $str1: $str2 -> $str3"
+            "(Build $int1)     Promoter changed: $str1 -> $str2"
         })
     }
 
     fun logSectionChanged(
         buildId: Int,
-        key: String,
-        prevSection: String?,
+        prevSection: NotifSection?,
         prevIndex: Int,
-        section: String,
-        index: Int
+        newSection: NotifSection?,
+        newIndex: Int
     ) {
         buffer.log(TAG, INFO, {
             long1 = buildId.toLong()
-            str1 = key
-            str2 = section
-            int1 = index
-            str3 = prevSection
-            int2 = prevIndex
+            str1 = prevSection?.name
+            int1 = prevIndex
+            str2 = newSection?.name
+            int2 = newIndex
         }, {
-            if (str3 == null) {
-                "(Build $long1) Section assigned for $str1: '$str2' (#$int1)"
+            if (str1 == null) {
+                "(Build $long1)     Section assigned: '$str2' (#$int2)"
             } else {
-                "(Build $long1) Section changed for $str1: '$str3' (#$int2) -> '$str2' (#$int1)"
+                "(Build $long1)     Section changed: '$str1' (#$int1) -> '$str2' (#$int2)"
             }
         })
     }
