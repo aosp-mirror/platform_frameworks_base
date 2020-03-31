@@ -241,9 +241,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                 + " multi-window mode... newParent=" + newParent + " task=" + task);
                         return 0;
                     } else {
-                        // Clear the window crop on root task since it may not be updated after
-                        // reparent (no longer be a root task)
-                        task.getSurfaceControl().setWindowCrop(null);
                         task.reparent((ActivityStack) newParent,
                                 hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
                                 false /*moveParents*/, "sanitizeAndApplyHierarchyOp");
