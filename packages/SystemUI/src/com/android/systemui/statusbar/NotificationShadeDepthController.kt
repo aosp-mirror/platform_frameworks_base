@@ -180,7 +180,7 @@ class NotificationShadeDepthController @Inject constructor(
         choreographer.postFrameCallback(updateBlurCallback)
     }
 
-    fun updateGlobalDialogVisibility(visibility: Float, dialogView: View) {
+    fun updateGlobalDialogVisibility(visibility: Float, dialogView: View?) {
         globalActionsSpring.animateTo(blurUtils.blurRadiusOfRatio(visibility), dialogView)
     }
 
