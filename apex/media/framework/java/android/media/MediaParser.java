@@ -16,6 +16,7 @@
 package android.media;
 
 import android.annotation.CheckResult;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
@@ -391,8 +392,7 @@ public final class MediaParser {
          *
          * @param trackIndex The index of the track to which the sample corresponds.
          * @param timeMicros The media timestamp associated with the sample, in microseconds.
-         * @param flags Flags associated with the sample. See {@link MediaCodec
-         *     MediaCodec.BUFFER_FLAG_*}.
+         * @param flags Flags associated with the sample. See the {@code SAMPLE_FLAG_*} constants.
          * @param size The size of the sample data, in bytes.
          * @param offset The number of bytes that have been consumed by {@code
          *     onSampleDataFound(int, MediaParser.InputReader)} for the specified track, since the
@@ -405,7 +405,7 @@ public final class MediaParser {
         void onSampleCompleted(
                 int trackIndex,
                 long timeMicros,
-                int flags,
+                @SampleFlags int flags,
                 int size,
                 int offset,
                 @Nullable CryptoInfo cryptoInfo);
@@ -448,6 +448,31 @@ public final class MediaParser {
             super(cause);
         }
     }
+
+    // Sample flags.
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            flag = true,
+            value = {
+                SAMPLE_FLAG_KEY_FRAME,
+                SAMPLE_FLAG_HAS_SUPPLEMENTAL_DATA,
+                SAMPLE_FLAG_LAST_SAMPLE,
+                SAMPLE_FLAG_ENCRYPTED,
+                SAMPLE_FLAG_DECODE_ONLY
+            })
+    public @interface SampleFlags {}
+    /** Indicates that the sample holds a synchronization sample. */
+    public static final int SAMPLE_FLAG_KEY_FRAME = MediaCodec.BUFFER_FLAG_KEY_FRAME;
+    /** Indicates that the sample has supplemental data. */
+    public static final int SAMPLE_FLAG_HAS_SUPPLEMENTAL_DATA = 1 << 28;
+    /** Indicates that the sample is known to contain the last media sample of the stream. */
+    public static final int SAMPLE_FLAG_LAST_SAMPLE = 1 << 29;
+    /** Indicates that the sample is (at least partially) encrypted. */
+    public static final int SAMPLE_FLAG_ENCRYPTED = 1 << 30;
+    /** Indicates that the sample should be decoded but not rendered. */
+    public static final int SAMPLE_FLAG_DECODE_ONLY = 1 << 31;
 
     // Parser implementation names.
 
