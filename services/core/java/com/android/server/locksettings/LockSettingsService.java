@@ -824,7 +824,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void getAuthSecretHal() {
         try {
-            mAuthSecretService = IAuthSecret.getService();
+            mAuthSecretService = IAuthSecret.getService(/* retry */ true);
         } catch (NoSuchElementException e) {
             Slog.i(TAG, "Device doesn't implement AuthSecret HAL");
         } catch (RemoteException e) {
