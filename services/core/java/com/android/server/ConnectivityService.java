@@ -7992,11 +7992,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // Administrator UIDs also contains the Owner UID
         final int[] administratorUids = nai.networkCapabilities.getAdministratorUids();
-        for (final int uid : administratorUids) {
-            if (uid == callbackUid) return true;
-        }
-
-        return false;
+        return ArrayUtils.contains(administratorUids, callbackUid);
     }
 
     @Override
