@@ -142,6 +142,9 @@ public class ConversationLayout extends FrameLayout
     private int mContentMarginEnd;
     private Rect mMessagingClipRect;
     private ObservableTextView mAppName;
+    private ViewGroup mActions;
+    private int mConversationContentStart;
+    private int mInternalButtonPadding;
     private boolean mAppNameGone;
     private int mFacePileAvatarSize;
     private int mFacePileAvatarSizeExpandedGroup;
@@ -171,6 +174,7 @@ public class ConversationLayout extends FrameLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
         mMessagingLinearLayout = findViewById(R.id.notification_messaging);
+        mActions = findViewById(R.id.actions);
         mMessagingLinearLayout.setMessagingLayout(this);
         mImageMessageContainer = findViewById(R.id.conversation_image_message_container);
         // We still want to clip, but only on the top, since views can temporarily out of bounds
@@ -273,6 +277,11 @@ public class ConversationLayout extends FrameLayout
         mAppName.setOnVisibilityChangedListener((visibility) -> {
             onAppNameVisibilityChanged();
         });
+        mConversationContentStart = getResources().getDimensionPixelSize(
+                R.dimen.conversation_content_start);
+        mInternalButtonPadding
+                = getResources().getDimensionPixelSize(R.dimen.button_padding_horizontal_material)
+                + getResources().getDimensionPixelSize(R.dimen.button_inset_horizontal_material);
     }
 
     private void animateViewForceHidden(CachingIconView view, boolean forceHidden) {
@@ -425,7 +434,6 @@ public class ConversationLayout extends FrameLayout
     private void updateConversationLayout() {
         // Set avatar and name
         CharSequence conversationText = mConversationTitle;
-        // TODO: display the secondary text somewhere
         if (mIsOneToOne) {
             // Let's resolve the icon / text from the last sender
             mConversationIcon.setVisibility(VISIBLE);
@@ -480,6 +488,27 @@ public class ConversationLayout extends FrameLayout
         updateIconPositionAndSize();
         updateImageMessages();
         updatePaddingsBasedOnContentAvailability();
+        updateActionListPadding();
+    }
+
+    private void updateActionListPadding() {
+        if (mActions == null) {
+            return;
+        }
+        View firstAction = mActions.getChildAt(0);
+        if (firstAction != null) {
+            // Let's visually position the first action where the content starts
+            int paddingStart = mConversationContentStart;
+
+            MarginLayoutParams layoutParams = (MarginLayoutParams) firstAction.getLayoutParams();
+            paddingStart -= layoutParams.getMarginStart();
+            paddingStart -= mInternalButtonPadding;
+
+            mActions.setPaddingRelative(paddingStart,
+                    mActions.getPaddingTop(),
+                    mActions.getPaddingEnd(),
+                    mActions.getPaddingBottom());
+        }
     }
 
     private void updateImageMessages() {
