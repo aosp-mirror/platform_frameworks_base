@@ -194,7 +194,7 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -2327,7 +2327,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * 2. App is delayed closing since it might enter PIP.
      */
     boolean isClosingOrEnteringPip() {
-        return (isAnimating(TRANSITION | PARENTS) && !mVisibleRequested) || mWillCloseOrEnterPip;
+        return (isAnimating(TRANSITION | PARENTS, ANIMATION_TYPE_APP_TRANSITION)
+                && !mVisibleRequested) || mWillCloseOrEnterPip;
     }
     /**
      * @return Whether AppOps allows this package to enter picture-in-picture.
@@ -3151,7 +3152,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // going. App transition animation might be applied on the parent stack not on the activity,
         // but the actual frame buffer is associated with the activity, so we have to keep the
         // activity while a parent is animating.
-        boolean delayed = isAnimating(TRANSITION | PARENTS | CHILDREN);
+        boolean delayed = isAnimating(TRANSITION | PARENTS | CHILDREN,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION);
         if (getDisplayContent().mClosingApps.contains(this)) {
             delayed = true;
         } else if (getDisplayContent().mAppTransition.isTransitionSet()) {
@@ -3161,7 +3163,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Removing app %s delayed=%b animation=%s animating=%b", this, delayed,
-                getAnimation(), isAnimating(TRANSITION | PARENTS));
+                getAnimation(),
+                isAnimating(TRANSITION | PARENTS, ANIMATION_TYPE_APP_TRANSITION));
 
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "removeAppToken: %s"
                 + " delayed=%b Callers=%s", this, delayed, Debug.getCallers(4));
@@ -3170,10 +3173,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             removeStartingWindow();
         }
 
-        // If this window was animating, then we need to ensure that the app transition notifies
-        // that animations have completed in DisplayContent.handleAnimatingStoppedAndTransition(),
-        // so add to that list now
-        if (isAnimating(TRANSITION | PARENTS)) {
+        // If app transition animation was running for this activity, then we need to ensure that
+        // the app transition notifies that animations have completed in
+        // DisplayContent.handleAnimatingStoppedAndTransition(), so add to that list now
+        if (isAnimating(TRANSITION | PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
             getDisplayContent().mNoAnimationNotifyOnTransitionFinished.add(token);
         }
 
@@ -3510,7 +3513,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         color mode set to avoid jank in the middle of the transition.
      */
     boolean canShowWindows() {
-        return allDrawn && !(isAnimating(PARENTS) && hasNonDefaultColorWindow());
+        return allDrawn && !(isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)
+                && hasNonDefaultColorWindow());
     }
 
     /**
@@ -4175,7 +4179,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final int windowsCount = mChildren.size();
         for (int i = 0; i < windowsCount; i++) {
-            mChildren.get(i).onAppVisibilityChanged(visible, isAnimating(PARENTS));
+            mChildren.get(i).onAppVisibilityChanged(visible, isAnimating(PARENTS,
+                    ANIMATION_TYPE_APP_TRANSITION));
         }
         setVisible(visible);
         mVisibleRequested = visible;
@@ -4218,7 +4223,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *                this has become invisible.
      */
     private void postApplyAnimation(boolean visible) {
-        final boolean delayed = isAnimating(PARENTS | CHILDREN);
+        final boolean delayed = isAnimating(PARENTS | CHILDREN,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION);
         if (!delayed) {
             // We aren't delayed anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be delayed,
@@ -4238,7 +4244,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // updated.
         // If we're becoming invisible, update the client visibility if we are not running an
         // animation. Otherwise, we'll update client visibility in onAnimationFinished.
-        if (visible || !isAnimating(PARENTS)) {
+        if (visible || !isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
             setClientVisible(visible);
         }
 
@@ -5447,14 +5453,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (!allDrawn && w.mightAffectAllDrawn()) {
             if (DEBUG_VISIBILITY || WM_DEBUG_ORIENTATION.isLogToLogcat()) {
+                final boolean isAnimationSet = isAnimating(TRANSITION | PARENTS,
+                        ANIMATION_TYPE_APP_TRANSITION);
                 Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
-                        + ", isAnimationSet=" + isAnimating(TRANSITION | PARENTS));
+                        + ", isAnimationSet=" + isAnimationSet);
                 if (!w.isDrawnLw()) {
                     Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
                             + " pv=" + w.isVisibleByPolicy()
                             + " mDrawState=" + winAnimator.drawStateToString()
                             + " ph=" + w.isParentWindowHidden() + " th=" + mVisibleRequested
-                            + " a=" + isAnimating(TRANSITION | PARENTS));
+                            + " a=" + isAnimationSet);
                 }
             }
 
@@ -5960,8 +5968,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void prepareSurfaces() {
-        final boolean show = isVisible() || isAnimatingExcluding(PARENTS,
-                ANIMATION_TYPE_SCREEN_ROTATION);
+        final boolean show = isVisible() || isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION);
 
         if (mSurfaceControl != null) {
             if (show && !mLastSurfaceShowing) {
@@ -5985,7 +5992,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void attachThumbnailAnimation() {
-        if (!isAnimating(PARENTS)) {
+        if (!isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
             return;
         }
         final HardwareBuffer thumbnailHeader =
@@ -6006,7 +6013,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * {@link android.app.ActivityOptions#ANIM_OPEN_CROSS_PROFILE_APPS} animation.
      */
     void attachCrossProfileAppsThumbnailAnimation() {
-        if (!isAnimating(PARENTS)) {
+        if (!isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
             return;
         }
         clearThumbnail();
@@ -7546,7 +7553,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
         proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
-        proto.write(IS_ANIMATING, isAnimating(PARENTS));
+        proto.write(IS_ANIMATING, isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION));
         if (mThumbnail != null){
             mThumbnail.dumpDebug(proto, THUMBNAIL);
         }
