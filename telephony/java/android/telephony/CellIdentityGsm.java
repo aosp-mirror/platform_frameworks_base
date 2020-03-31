@@ -64,6 +64,7 @@ public final class CellIdentityGsm extends CellIdentity {
         mArfcn = CellInfo.UNAVAILABLE;
         mBsic = CellInfo.UNAVAILABLE;
         mAdditionalPlmns = new ArraySet<>();
+        mGlobalCellId = null;
     }
 
     /**
@@ -94,6 +95,7 @@ public final class CellIdentityGsm extends CellIdentity {
                 mAdditionalPlmns.add(plmn);
             }
         }
+        updateGlobalCellId();
     }
 
     /** @hide */
@@ -134,6 +136,18 @@ public final class CellIdentityGsm extends CellIdentity {
     public @NonNull CellIdentityGsm sanitizeLocationInfo() {
         return new CellIdentityGsm(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 CellInfo.UNAVAILABLE, mMccStr, mMncStr, mAlphaLong, mAlphaShort, mAdditionalPlmns);
+    }
+
+    /** @hide */
+    @Override
+    protected void updateGlobalCellId() {
+        mGlobalCellId = null;
+        String plmn = getPlmn();
+        if (plmn == null) return;
+
+        if (mLac == CellInfo.UNAVAILABLE || mCid == CellInfo.UNAVAILABLE) return;
+
+        mGlobalCellId = plmn + String.format("%04x%04x", mLac, mCid);
     }
 
     /**
