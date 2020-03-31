@@ -19,8 +19,8 @@ package com.android.test.taskembed;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.window.WindowOrganizer.TaskOrganizer;
 
-import android.app.ActivityManager;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
@@ -35,10 +35,10 @@ import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.window.ITaskOrganizer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.WindowContainerTransaction;
-import android.widget.LinearLayout;
 import android.window.WindowOrganizer;
 
 public class TaskOrganizerMultiWindowTest extends Activity {
@@ -162,6 +162,9 @@ public class TaskOrganizerMultiWindowTest extends Activity {
         }
         @Override
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
+        }
+        @Override
+        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
         }
     }
 
