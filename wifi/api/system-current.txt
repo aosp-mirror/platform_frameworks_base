@@ -23,16 +23,16 @@ package android.net.wifi {
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public android.net.wifi.RttManager.RttCapabilities getRttCapabilities();
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startRanging(android.net.wifi.RttManager.RttParams[], android.net.wifi.RttManager.RttListener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void stopRanging(android.net.wifi.RttManager.RttListener);
-    field @Deprecated public static final int BASE;
-    field @Deprecated public static final int CMD_OP_ABORTED;
-    field @Deprecated public static final int CMD_OP_DISABLE_RESPONDER;
-    field @Deprecated public static final int CMD_OP_ENABLE_RESPONDER;
-    field @Deprecated public static final int CMD_OP_ENALBE_RESPONDER_FAILED;
-    field @Deprecated public static final int CMD_OP_ENALBE_RESPONDER_SUCCEEDED;
-    field @Deprecated public static final int CMD_OP_FAILED;
-    field @Deprecated public static final int CMD_OP_START_RANGING;
-    field @Deprecated public static final int CMD_OP_STOP_RANGING;
-    field @Deprecated public static final int CMD_OP_SUCCEEDED;
+    field @Deprecated public static final int BASE = 160256; // 0x27200
+    field @Deprecated public static final int CMD_OP_ABORTED = 160260; // 0x27204
+    field @Deprecated public static final int CMD_OP_DISABLE_RESPONDER = 160262; // 0x27206
+    field @Deprecated public static final int CMD_OP_ENABLE_RESPONDER = 160261; // 0x27205
+    field @Deprecated public static final int CMD_OP_ENALBE_RESPONDER_FAILED = 160264; // 0x27208
+    field @Deprecated public static final int CMD_OP_ENALBE_RESPONDER_SUCCEEDED = 160263; // 0x27207
+    field @Deprecated public static final int CMD_OP_FAILED = 160258; // 0x27202
+    field @Deprecated public static final int CMD_OP_START_RANGING = 160256; // 0x27200
+    field @Deprecated public static final int CMD_OP_STOP_RANGING = 160257; // 0x27201
+    field @Deprecated public static final int CMD_OP_SUCCEEDED = 160259; // 0x27203
     field @Deprecated public static final String DESCRIPTION_KEY = "android.net.wifi.RttManager.Description";
     field @Deprecated public static final int PREAMBLE_HT = 2; // 0x2
     field @Deprecated public static final int PREAMBLE_LEGACY = 1; // 0x1
