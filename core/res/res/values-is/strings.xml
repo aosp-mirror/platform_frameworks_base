@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Kerfisstjóri lét af hendi tæki til einkanota"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Tækinu er stjórnað"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Fyrirtækið þitt stjórnar þessu tæki og kann að fylgjast með netnotkun. Ýttu hér til að fá upplýsingar."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"Stjórnandi breytti staðsetningarstillingum"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"Ýttu til að sjá staðsetningarstillingar."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Forrit hafa aðgang að staðsetningu þinni"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Hafðu samband við kerfisstjórann til að fá frekari upplýsingar"</string>
     <string name="country_detector" msgid="7023275114706088854">"Landsgreining"</string>
     <string name="location_service" msgid="2439187616018455546">"Staðsetningarþjónusta"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Tilkynningaþjónusta nema"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Tækið verður hreinsað"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Ekki er hægt að nota stjórnunarforritið. Tækinu verður eytt.\n\nEf spurningar vakna skaltu hafa samband við kerfisstjóra fyrirtækisins."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> lokaði á prentun."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Opna fyrir persónuleg forrit"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Lokað á forrit á morgun"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"Kerfisstjórinn þinn leyfir ekki að hlé sé gert á vinnusniði lengur en í <xliff:g id="DAYS">%1$d</xliff:g> daga"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Kveikja á vinnusniði"</string>
     <string name="me" msgid="6207584824693813140">"Ég"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Valkostir spjaldtölvu"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Valkostir Android TV"</string>
@@ -241,10 +237,8 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Valkostir síma"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Skjálás"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Slökkva"</string>
-    <!-- no translation found for global_action_power_options (1185286119330160073) -->
-    <skip />
-    <!-- no translation found for global_action_restart (4678451019561687074) -->
-    <skip />
+    <string name="global_action_power_options" msgid="1185286119330160073">"Orka"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Endurræsa"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Neyðarsímtal"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Villutilkynning"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Ljúka lotu"</string>
@@ -428,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"aðgangur að viðbótarskipunum staðsetningarveitu"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Leyfir forriti að fá aðgang að fleiri skipunum staðsetningarveitu. Þetta getur gert forritinu kleift að hafa áhrif á virkni GPS og annars staðsetningarbúnaðar."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"aðgangur að nákvæmri staðsetningu aðeins í forgrunni"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Þetta forrit getur aðeins séð staðsetningu þína þegar það er í forgrunni. Það verður að vera kveikt á staðsetningarþjónustu og hún þarf að vera tiltæk í tækinu til að forritið geti notað hana. Þetta getur aukið rafhlöðunotkun."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Þetta forrit getur sótt nákvæma staðsetningu þína í staðsetningarþjónustu þegar forritið er í notkun. Kveikt verður að vera á staðsetningarþjónustu fyrir tækið þitt til að forritið geti sótt staðsetninguna. Þetta gæti aukið rafhlöðunotkun."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"aðgangur að áætlaðri staðsetningu aðeins í forgrunni"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Þetta forrit getur aðeins séð áætlaða staðsetningu þína þegar það er í forgrunni. Það verður að vera kveikt á staðsetningarþjónustu og hún þarf að vera tiltæk í tækinu til að forritið geti notað hana."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Þetta forrit getur sótt áætlaða staðsetningu þína í staðsetningarþjónustu þegar forritið er í notkun. Kveikt verður að vera á staðsetningarþjónustu fyrir tækið þitt til að forritið geti sótt staðsetninguna."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"aðgangur að staðsetningu í bakgrunni"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Þetta forrit hefur aðgang að staðsetningu þegar það er í gangi í bakgrunni, og auk þess þegar það er í forgrunni."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Þetta forrit hefur aðgang að staðsetningu hvenær sem er, jafnvel þegar forritið er ekki í notkun."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"breyta hljóðstillingum"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Leyfir forriti að breyta altækum hljóðstillingum, s.s. hljóðstyrk og hvaða hátalari er notaður sem úttak."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"taka upp hljóð"</string>
@@ -444,11 +438,9 @@
     <string name="permlab_camera" msgid="6320282492904119413">"taka myndir og myndskeið"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Þetta forrit getur tekið myndir og tekið upp myndskeið með myndavélinni hvenær sem er."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Veittu forriti eða þjónustu aðgang að myndavélum kerfis til að taka myndir og myndskeið"</string>
-    <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
-    <skip />
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Þetta forgangs- eða kerfisforrit hefur heimild til að taka myndir og taka upp myndskeið með myndavél kerfisins hvenær sem er. Forritið þarf einnig að vera með heimildina android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Leyfa forriti eða þjónustu að taka við svörum um myndavélar sem verið er að opna eða loka."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Þetta forrit getur tekið við svörum þegar verið er að opna eða loka myndavél í hvaða forriti sem er."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"stjórna titringi"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Leyfir forriti að stjórna titraranum."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Veitir forritinu aðgang að stöðu titrings."</string>
@@ -1350,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Fer yfir núverandi efni"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nýtt <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Ýttu til að setja upp"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Til að flytja myndir og aðrar skrár"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Vandamál með <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Ýttu til að lagfæra"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> er skemmt. Veldu til að lagfæra."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Óstutt <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Þetta tæki styður ekki <xliff:g id="NAME">%s</xliff:g>. Ýttu til að setja upp með studdu sniði."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Þetta tæki styður ekki <xliff:g id="NAME">%s</xliff:g>. Veldu til að setja upp með studdu sniði."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Þetta tæki styður ekki þetta <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> fjarlægt án fyrirvara"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Aftengdu geymslumiðil áður en þú tekur hann úr sambandi til að koma í veg fyrir að þú glatir efni"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> fjarlægt"</string>
@@ -1624,24 +1619,15 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Hækka hljóðstyrk umfram ráðlagðan styrk?\n\nEf hlustað er á háum hljóðstyrk í langan tíma kann það að skaða heyrnina."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Viltu nota aðgengisflýtileið?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Þegar flýtileiðin er virk er kveikt á aðgengiseiginleikanum með því að halda báðum hljóðstyrkshnöppunum inni í þrjár sekúndur."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (8417489297036013065) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning (3740723309483706911) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (6935581470716541531) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning_title (3410100187167382427) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning (8412954203626349109) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (2819109500943271385) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning (6363127705112844257) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_on (5463618449556111344) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Viltu kveikja á aðgengiseiginleikum?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Kveikt er á aðgengiseiginleikum þegar báðum hljóðstyrkstökkunum er haldið inni í nokkrar sekúndur. Þetta getur breytt því hvernig tækið virkar.\n\nNúverandi eiginleikar:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nÞú getur breytt völdum eiginleikum í Stillingar &gt; Aðgengi."</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Viltu kveikja á TalkBack?"</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ef báðum hljóðstyrkstökkunum er haldið niðri í nokkrar sekúndur er kveikt á TalkBack, sem er skjálesari sem gagnast blindum eða sjónskertum einstaklingum. TalkBack breytir því algjörlega hvernig tækið virkar.\n\nÞú getur breytt þessari flýtileið í annan eiginleika í Stillingar &gt; Aðgengi."</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Viltu kveikja á <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ef báðum hljóðstyrkstökkunum er haldið inni í nokkrar sekúndur er kveikt á aðgengiseiginleikanum <xliff:g id="SERVICE">%1$s</xliff:g>. Þetta getur breytt því hvernig tækið virkar.\n\nÞú getur breytt þessari flýtileið í annan eiginleika í Stillingar &gt; Aðgengi."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Kveikja"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ekki kveikja"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Viltu leyfa <xliff:g id="SERVICE">%1$s</xliff:g> að hafa fulla stjórn yfir tækinu þínu?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ef þú kveikir á <xliff:g id="SERVICE">%1$s</xliff:g> mun tækið ekki nota skjálásinn til að efla dulkóðun gagna."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Full stjórnun er viðeigandi fyrir forrit sem hjálpa þér ef þú hefur ekki aðgang, en ekki fyrir flest forrit."</string>
@@ -1652,10 +1638,8 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Leyfa"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Hafna"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ýttu á eiginleika til að byrja að nota hann:"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Veldu eiginleika sem á að nota með aðgengishnappinum"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Veldu eiginleika á að nota með flýtileið hljóðstyrkstakka"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Slökkt hefur verið á <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Breyta flýtileiðum"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Lokið"</string>
@@ -1663,23 +1647,15 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Nota flýtileið"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Umsnúningur lita"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Litaleiðrétting"</string>
-    <!-- no translation found for accessibility_shortcut_enabling_service (5473495203759847687) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_disabling_service (8675244165062700619) -->
-    <skip />
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Hljóðstyrkstökkum haldið inni. Kveikt á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Hljóðstyrkstökkum haldið inni. Slökkt á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Haltu báðum hljóðstyrkstökkunum inni í þrjár sekúndur til að nota <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_button_prompt_text (8343213623338605305) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (8742535972130563952) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (5211827854510660203) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8853928358872550500) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (9196230728837090497) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3425123684990193765) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Veldu eiginleika sem á að nota þegar ýtt er á aðgengishnappinn:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Veldu eiginleika sem á að nota með aðgengisbendingunni (strjúka upp frá neðri hluta skjásins með tveimur fingrum):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Veldu eiginleika sem á að nota með aðgengisbendingunni (strjúka upp frá neðri hluta skjásins með þremur fingrum):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Til að skipta á milli eiginleika skaltu halda aðgengishnappinum inni."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Til að skipta á milli eiginleika skaltu strjúka upp með tveimur fingrum og halda inni."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Til að skipta á milli eiginleika skaltu strjúka upp með þremur fingrum og halda inni."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Stækkun"</string>
     <string name="user_switched" msgid="7249833311585228097">"Núverandi notandi <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Skiptir yfir á <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2050,8 +2026,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> skrá</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> skrá</item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (1511722103987329028) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Engir einstaklingar sem mælt er með að deila með"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Forritalisti"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Þetta forrit hefur ekki fengið heimild fyrir upptöku en gæti tekið upp hljóð í gegnum þetta USB-tæki."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Heim"</string>
@@ -2087,222 +2062,112 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Engin vinnuforrit geta opnað þetta efni"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Engin forrit til einkanota styðja þetta efni"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Engin forrit til einkanota geta opnað þetta efni"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Taka upp eða spila hljóð í símtölum"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Gerir þessu forriti kleift að taka upp og spila hljóð í símtölum þegar það er valið sem sjálfgefið hringiforrit."</string>
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ENTRY (4447629474818217364) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY (973059024670737358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ENTRY (4487435301206073787) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY (768060297218652809) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY (7129527319490548930) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY (2876126640607573252) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY (8952595089930109282) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ENTRY (3013902515773728996) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ENTRY (2974411408893410289) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ENTRY (687618528751880721) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ENTRY (6810596579655575381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ENTRY (2715929642540980259) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY (8557791623303951590) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ENTRY (7382468767274580323) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY (6730880791104286987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY (6432126539782267026) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY (1730510161529488920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY (3369885925003346830) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY (9129139686191167829) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY (2869929685874615358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ENTRY (1238663472392741771) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY (3988705848553894358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ENTRY (6186770686690993200) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ENTRY (7043865376145617024) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ENTRY (6144227308185112176) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS (4233355366318061180) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS (6742563947637715645) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS (2033399698172403560) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS (4795977251920732254) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS (1090425878157254446) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS (6476898876518094438) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS (6006806734293747731) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (6546680489620881893) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS (3506845511000727015) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_IN_PROGRESS (6709169861932992750) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS (4013870911606478520) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS (9032651188219523434) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS (6584576506344491207) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS (830981927724888114) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS (7851790973098894802) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_IN_PROGRESS (1149560739586960121) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS (5708964693522116025) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS (7288103122966483455) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS (4036752174056147753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS (5089536274515338566) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS (6737197986936251958) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS (5658767775619998623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS (665978313257653727) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS (3857142652251836850) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS (2695664012344346788) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (2695678959963807782) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS (1230605365926493599) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ERROR (1924844017037151535) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR (3372797822292089708) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR (1878443146720411381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ERROR (7664778312218023192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ERROR (2472944311643350302) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ERROR (828089694480999120) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ERROR (17619001007092511) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ERROR (807214229604353614) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ERROR (8644184447744175747) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR (3801002648649640407) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ERROR (707397021218680753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR (894358680773257820) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR (352466878146726991) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR (7353389721907138671) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR (2655263155490857920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ERROR (6903740900892931310) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR (5165901670447518687) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR (2856763216589267623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR (817542684437829139) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR (5178635064113393143) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR (5391587926974531008) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR (4895494864493315868) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ERROR (9017576601595353649) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR (1116993930995545742) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ERROR (7559167306794441462) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ERROR (2782926139511136588) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ERROR (1890493954453456758) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUCCESS (4886243367747126325) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS (4053809277733513987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS (8249342930499801740) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_SUCCESS (2339794542560381270) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_SUCCESS (6975608174152828954) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS (2846699261330463192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS (5335414726057102801) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_SUCCESS (8868100318474971969) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS (6020936629725666932) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS (6944873647584595489) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_SUCCESS (2526483514124121988) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS (7662200333621664621) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS (2861223407953766632) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS (5345648571175243272) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS (3725278343103422466) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS (6998502547560297983) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS (8555433771162560361) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS (3555767296933606232) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS (6778051818199974237) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS (4080108758498911429) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS (7873675303000794343) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS (1763198215069819523) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_SUCCESS (2053891977727320532) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS (8146602361895007345) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_SUCCESS (8058678548991999545) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_SUCCESS (2545608067978550571) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_SUCCESS (4352382949744625007) -->
-    <skip />
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-númer fyrir opnun SIM netkerfis"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-númer fyrir opnun SIM netkerfishlutmengis"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-númer til að opna SIM fyrirtækis"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"PIN-númer fyrir opnun SIM þjónustuaðila"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"PIN-númer fyrir opnun SIM"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"PIN-númer fyrir opnun RUIM netkerfis 1"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"PIN-númer fyrir opnun RUIM netkerfis 2"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"PIN-númer fyrir opnun RUIM hrpd"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"PIN-númer fyrir opnun RUIM fyrirtækis"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"PIN-númer fyrir opnun þjónustuaðila RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"PIN-númer fyrir opnun RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"Slá inn PUK-númer"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"PIN-númer fyrir opnun SPN"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"PIN-númer fyrir opnun SP Equivalent Home PLMN"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"PIN-númer fyrir opnun ICCID"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"PIN-númer fyrir opnun IMPI"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"PIN-númer fyrir opnun þjónustuaðila netkerfishlutmengis"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"Biður um opnun SIM netkerfis…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"Biður um opnun SIM netkerfishlutmengis…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"Biður um opnun þjónustuaðila SIM…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"Biður um opnun SIM fyrirtækis…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"Biður um opnun SIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Biður um opnun RUIM netkerfis 1…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Biður um opnun RUIM netkerfis 2…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"Biður um opnun RUIM hrpd…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"Biður um opnun þjónustuaðila RUIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"Biður um opnun RUIM fyrirtækis…"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"Biður um opnun SPN…"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"Biður um opnun SP Equivalent Home PLMN…"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"Biður um opnun ICCID…"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"Biður um opnun IMPI…"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"Biður um opnun þjónustuaðila netkerfishlutmengis…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"Biður um opnun RUIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"Beiðni um opnun SIM netkerfis tókst ekki."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"Beiðni um opnun SIM netkerfishlutmengis tókst ekki."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"Beiðni um opnun þjónustuaðila SIM tókst ekki."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"Beiðni um opnun SIM fyrirtækis tókst ekki."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"Beiðni um opnun SIM tókst ekki."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"Beiðni um opnun RUIM netkerfis 1 tókst ekki."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"Beiðni um opnun RUIM netkerfis 2 tókst ekki."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"Beiðni um opnun RUIM Hrpd tókst ekki."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"Beiðni um opnun RUIM fyrirtækis tókst ekki."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"Beiðni um opnun þjónustuaðila RUIM tókst ekki."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"Beiðni um opnun RUIM tókst ekki."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK-opnun mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"Beiðni um opnun SPN tókst ekki."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"Beiðni um opnun SP Equivalent Home PLMN tókst ekki."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"Beiðni um opnun ICCID tókst ekki."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"Beiðni um opnun IMPI tókst ekki."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"Beiðni um opnun þjónustuaðila netkerfishlutmengis tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"Opnun SIM netkerfis tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"Opnun SIM netkerfishlutmengis tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"Opnun þjónustuaðila SIM tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"Opnun SIM fyrirtækis tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"Opnun SIM tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"Opnun RUIM netkerfis 1 tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"Opnun RUIM netkerfis 2 tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"Opnun RUIM Hrpd tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"Beiðni um opnun þjónustuaðila RUIM tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"Opnun RUIM fyrirtækis tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"Opnun RUIM tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"Opnun SPN tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"Opnun SP Equivalent Home PLMN tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"Opnun ICCID tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"Opnun IMPI tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Opnun þjónustuaðila netkerfishlutmengis tókst."</string>
 </resources>
