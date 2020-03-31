@@ -5321,7 +5321,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalArgumentException(
                         "Requested window " + client + " does not exist");
             }
-            ProtoLog.w(WM_ERROR, "Failed looking up window callers=%s", Debug.getCallers(3));
+            ProtoLog.w(WM_ERROR, "Failed looking up window session=%s callers=%s", session,
+                    Debug.getCallers(3));
             return null;
         }
         if (session != null && win.mSession != session) {
@@ -5329,7 +5330,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalArgumentException("Requested window " + client + " is in session "
                         + win.mSession + ", not " + session);
             }
-            ProtoLog.w(WM_ERROR, "Failed looking up window callers=%s", Debug.getCallers(3));
+            ProtoLog.w(WM_ERROR, "Failed looking up window session=%s callers=%s", session,
+                    Debug.getCallers(3));
             return null;
         }
 
