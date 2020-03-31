@@ -86,10 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"আবার স্ক্রিনশট নেওয়ার চেষ্টা করুন"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"বেশি জায়গা নেই তাই স্ক্রিনশটটি সেভ করা যাবে না৷"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এই অ্যাপ বা আপনার প্রতিষ্ঠান স্ক্রিনশট নেওয়ার অনুমতি দেয়নি"</string>
-    <!-- no translation found for screenshot_dismiss_ui_description (934736855340147968) -->
-    <skip />
-    <!-- no translation found for screenshot_preview_description (669177537416980449) -->
-    <skip />
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"স্ক্রিনশট বাতিল করুন"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"স্ক্রিনশট খুলুন"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"স্ক্রিন রেকর্ডার"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"স্ক্রিন রেকর্ডিং সেশন চলার বিজ্ঞপ্তি"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"রেকর্ডিং শুরু করবেন?"</string>
@@ -156,6 +154,31 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ভুল প্যাটার্ন"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ভুল পাসওয়ার্ড"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"অনেকবার ভুল চেষ্টা করা হয়েছে। \n<xliff:g id="NUMBER">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন।"</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"আবার চেষ্টা করুন। <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> বারের মধ্যে <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> বার চেষ্টা করা হয়েছে।"</string>
+    <!-- no translation found for biometric_dialog_last_attempt_before_wipe_dialog_title (2874250099278693477) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_device (6562299244825817598) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_device (9151756675698215723) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_device (2363778585575998317) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_user (8400180746043407270) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_user (4159878829962411168) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_user (4695682515465063885) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_profile (6045224069529284686) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_profile (545567685899091757) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_profile (8538032972389729253) -->
+    <skip />
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"বহুবার ভুল লেখা হয়েছে। এই ডিভাইসের ডেটা মুছে যাবে।"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"বহুবার ভুল লেখা হয়েছে। এই ব্যবহারকারীর ডেটা মুছে যাবে।"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"বহুবার ভুল লেখা হয়েছে। এই অফিসের প্রোফাইল ও সংশ্লিষ্ট ডেটা মুছে যাবে।"</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"বাতিল করুন"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"আঙ্গুলের ছাপের সেন্সর স্পর্শ করুন"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"আঙ্গুলের ছাপের আইকন"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"আপনার জন্য খোঁজা হচ্ছে…"</string>
@@ -227,7 +250,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"ব্যাটারির বিশদ বিবরণ খুলুন"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ ব্যাটারি রয়েছে৷"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ব্যাটারি <xliff:g id="PERCENTAGE">%1$s</xliff:g> শতাংশ, বর্তমান ব্যবহারের উপর ভিত্তি করে আর <xliff:g id="TIME">%2$s</xliff:g> চলবে"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ব্যাটারি চার্জ হচ্ছে, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ৷"</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ব্যাটারি চার্জ হচ্ছে, এখন <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ চার্জ আছে৷"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"সিস্টেম সেটিংস৷"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"বিজ্ঞপ্তি৷"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"সমস্ত বিজ্ঞপ্তি দেখুন"</string>
@@ -460,9 +483,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"প্রোফাইল দেখান"</string>
     <string name="user_add_user" msgid="4336657383006913022">"ব্যবহারকারী জুড়ুন"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"নতুন ব্যবহারকারী"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"অতিথি"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"অতিথি যোগ করুন"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"অতিথি সরান"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"অতিথি সরাবেন?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই সেশনের সব অ্যাপ্লিকেশান ও ডেটা মুছে ফেলা হবে।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"সরান"</string>
@@ -698,9 +718,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"সাউন্ড বা ভাইব্রেশন ছাড়া ফোকাস করতে আপনাকে সাহায্য করে।"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"সাউন্ড বা ভাইব্রেশনের সাহায্যে দৃষ্টি আকর্ষণ করে।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ফ্লোটিং শর্টকাট ব্যবহার করে এই কন্টেন্টে আপনার দৃষ্টি আকর্ষণ করে রাখে।"</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"কথোপকথন বিভাগের উপরে বাবল হিসেবে দেখা যায়।"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"ডিফল্ট হিসেবে <xliff:g id="APP_NAME_0">%1$s</xliff:g>-এর সব কথোপকথন বাবলের মধ্যে দেখুন। <xliff:g id="APP_NAME_1">%2$s</xliff:g>-এ ম্যানেজ করুন।"</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"সেটিংস"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"অগ্রাধিকার"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"কোনও সাম্প্রতিক বাবল নেই"</string>
-    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
-    <skip />
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"সাম্প্রতিক ও বাতিল করা বাবল এখানে দেখা যাবে"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই বিজ্ঞপ্তিগুলি পরিবর্তন করা যাবে না।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"এই সমস্ত বিজ্ঞপ্তিকে এখানে কনফিগার করা যাবে না"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"প্রক্সি করা বিজ্ঞপ্তি"</string>
@@ -980,43 +1003,50 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"নিচে বাঁদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"নিচে ডান দিকে সরান"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"খারিজ করুন"</string>
-    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"কথোপকথন বাবল হিসেবে দেখাবেন না"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"বাবল ব্যবহার করে চ্যাট করুন"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"নতুন কথোপকথন ভেসে থাকা আইকন বা বাবল হিসেবে দেখানো হয়। বাবল খুলতে ট্যাপ করুন। সেটি সরাতে ধরে টেনে আনুন।"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"যেকোনও সময় বাবল নিয়ন্ত্রণ করুন"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"এই অ্যাপ থেকে বাবল বন্ধ করতে ম্যানেজ করুন বিকল্প ট্যাপ করুন"</string>
-    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"বুঝেছি"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"সিস্টেম নেভিগেশন আপডেট হয়েছে। পরিবর্তন করার জন্য সেটিংসে যান।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"সিস্টেম নেভিগেশন আপডেট করতে সেটিংসে যান"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"স্ট্যান্ডবাই"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ওভারলে উইন্ডো বড় করে দেখা"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"উইন্ডো বড় করে দেখা"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"উইন্ডো কন্ট্রোল বড় করে দেখা"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"দ্রুত নিয়ন্ত্রণ"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"কন্ট্রোল যোগ করুন"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"এমন একটি অ্যাপ বাছুন যেটি থেকে কন্ট্রোল যোগ করা যাবে"</string>
+    <string name="quick_controls_title" msgid="1686913115679255053">"দ্রুত কন্ট্রোল"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"আপনার কানেক্ট করা ডিভাইসের জন্য কন্ট্রোল যোগ করুন"</string>
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"দ্রুত কন্ট্রোল সেট-আপ করুন"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"আপনার কন্ট্রোল অ্যাক্সেস করতে পাওয়ার বোতাম ধরে থাকুন"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"কন্ট্রোল যোগ করতে অ্যাপ বেছে নিন"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g>টি কন্ট্রোল যোগ করা হয়েছে।</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g>টি কন্ট্রোল যোগ করা হয়েছে।</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্রণ"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"দ্রুত অ্যাক্সেস করার জন্য কন্ট্রোল বেছে নিন"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"যেসব কন্ট্রোল অ্যাক্সেস করতে চান সেগুলি পাওয়ার মেনু থেকে বেছে নিন"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"কন্ট্রোল সরাতে সেটি ধরে টেনে আনুন"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"সব কন্ট্রোলের তালিকা লোড করা যায়নি।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"অন্য"</string>
-    <string name="controls_dialog_title" msgid="8806193219278278442">"কুইক কন্ট্রোলে যোগ করুন"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"কুইক কন্ট্রোলে যোগ করুন"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"পছন্দসইতে যোগ করুন"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"আপনার পছন্দসইতে যোগ করতে <xliff:g id="APP">%s</xliff:g> এই কন্ট্রোল সাজেস্ট করেছে।"</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"কন্ট্রোল আপডেট করা হয়েছে"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"পিন-এ অক্ষর বা চিহ্ন রয়েছে"</string>
-    <string name="controls_pin_verify" msgid="414043854030774349">"ডিভাইসের পিন যাচাই করান"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> যাচাই করুন"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"যাচাই করা হচ্ছে…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"পিন লিখুন"</string>
-    <string name="controls_structure_tooltip" msgid="1392966215435667434">"অন্য স্ট্রাকচার দেখতে সোয়াইপ করুন"</string>
-    <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
-    <skip />
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"আরেকটি পিন লিখে চেষ্টা করুন"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"কনফার্ম করা হচ্ছে…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g>-এর জন্য পরিবর্তন কনফার্ম করুন"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"আরও দেখতে সোয়াইপ করুন"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"সাজেশন লোড করা হচ্ছে"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"এই মিডিয়া সেশন বেছে নিন"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"বন্ধ আছে, অ্যাপ চেক করুন"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"সমস্যা হয়েছে, আবার চেষ্টা করুন"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"চলছে"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"নতুন কন্ট্রোল দেখতে পাওয়ার বোতাম টিপে ধরে থাকুন"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"কন্ট্রোল যোগ করুন"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"কন্ট্রোল এডিট করুন"</string>
 </resources>

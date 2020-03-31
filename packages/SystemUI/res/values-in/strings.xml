@@ -86,10 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Coba ambil screenshot lagi"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Tidak dapat menyimpan screenshot karena ruang penyimpanan terbatas"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Mengambil screenshot tidak diizinkan oleh aplikasi atau organisasi"</string>
-    <!-- no translation found for screenshot_dismiss_ui_description (934736855340147968) -->
-    <skip />
-    <!-- no translation found for screenshot_preview_description (669177537416980449) -->
-    <skip />
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Menutup screenshot"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"Membuka screenshot"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Perekam Layar"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifikasi yang sedang berjalan untuk sesi rekaman layar"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Mulai Merekam?"</string>
@@ -156,6 +154,21 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Pola salah"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Sandi salah"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Terlalu banyak kesalahan pola.\nCoba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> detik."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Coba lagi. Percobaan <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> dari <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Data akan dihapus"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Jika Anda memasukkan pola yang salah saat mencoba lagi, data perangkat ini akan dihapus."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Jika Anda memasukkan PIN yang salah saat mencoba lagi, data perangkat ini akan dihapus."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Jika Anda memasukkan sandi yang salah saat mencoba lagi, data perangkat ini akan dihapus."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Jika Anda memasukkan pola yang salah saat mencoba lagi, pengguna ini akan dihapus."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Jika Anda memasukkan PIN yang salah saat mencoba lagi, pengguna ini akan dihapus."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Jika Anda memasukkan sandi yang salah saat mencoba lagi, pengguna ini akan dihapus."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jika Anda memasukkan pola yang salah saat mencoba lagi, profil kerja dan datanya akan dihapus."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jika Anda memasukkan PIN yang salah saat mencoba lagi, profil kerja dan datanya akan dihapus."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Jika Anda memasukkan sandi yang salah saat mencoba lagi, profil kerja dan datanya akan dihapus."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Terlalu banyak percobaan yang salah. Data perangkat ini akan dihapus."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Terlalu banyak percobaan yang salah. Pengguna ini akan dihapus."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Terlalu banyak percobaan yang salah. Profil kerja ini dan datanya akan dihapus."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Tutup"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sentuh sensor sidik jari"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon sidik jari"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Mencari wajah Anda…"</string>
@@ -460,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Tampilkan profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Tambahkan pengguna"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Pengguna baru"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Tamu"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Tambahkan tamu"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Buang tamu"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Hapus tamu?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua aplikasi dan data di sesi ini akan dihapus."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Hapus"</string>
@@ -698,9 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Membantu Anda tetap fokus tanpa suara atau getaran."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Menarik perhatian Anda dengan suara atau getaran."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Menjaga perhatian dengan pintasan floating ke konten ini."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Muncul di atas bagian percakapan dan ditampilkan sebagai balon."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Semua percakapan <xliff:g id="APP_NAME_0">%1$s</xliff:g> menggunakan balon secara default. Kelola di <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Setelan"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Tidak ada balon baru-baru ini"</string>
-    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
-    <skip />
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Balon yang baru dipakai dan balon yang telah ditutup akan muncul di sini"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Notifikasi ini tidak dapat diubah."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Grup notifikasi ini tidak dapat dikonfigurasi di sini"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notifikasi proxy"</string>
@@ -980,43 +993,50 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Pindahkan ke kiri bawah"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Pindahkan ke kanan bawah"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Tutup"</string>
-    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Jangan gunakan percakapan balon"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chat dalam tampilan balon"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Percakapan baru muncul sebagai ikon mengambang, atau balon. Ketuk untuk membuka balon. Tarik untuk memindahkannya."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Kontrol balon kapan saja"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Ketuk Kelola untuk menonaktifkan balon dari aplikasi ini"</string>
-    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Oke"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigasi sistem diupdate. Untuk melakukan perubahan, buka Setelan."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Buka Setelan untuk mengupdate navigasi sistem"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Siaga"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Jendela Overlay Pembesaran"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Jendela Pembesaran"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrol Jendela Pembesaran"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"Kontrol Cepat"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"Tambahkan Kontrol"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Pilih aplikasi yang digunakan untuk menambahkan kontrol"</string>
+    <string name="quick_controls_title" msgid="1686913115679255053">"Kontrol cepat"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Tambahkan kontrol untuk perangkat terhubung"</string>
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Siapkan kontrol cepat"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Tahan tombol Daya untuk mengakses kontrol"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Pilih aplikasi untuk menambahkan kontrol"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontrol ditambahkan.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kontrol ditambahkan.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrol"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Pilih kontrol untuk akses cepat"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Pilih kontrol yang akan diakses dari menu daya"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Tahan dan tarik kontrol untuk memindahkannya"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Daftar semua kontrol tidak dapat dimuat."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Lainnya"</string>
-    <string name="controls_dialog_title" msgid="8806193219278278442">"Tambahkan ke Kontrol Cepat"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"Tambahkan ke kontrol cepat"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Tambahkan ke favorit"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> menyarankan kontrol ini ditambahkan ke favorit."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Kontrol diperbarui"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN berisi huruf atau simbol"</string>
-    <string name="controls_pin_verify" msgid="414043854030774349">"Verifikasi PIN perangkat"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Verifikasi <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"Memverifikasi …"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Masukkan PIN"</string>
-    <string name="controls_structure_tooltip" msgid="1392966215435667434">"Geser untuk melihat struktur lainnya"</string>
-    <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
-    <skip />
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Coba PIN lain"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Mengonfirmasi…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Konfirmasi perubahan untuk <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"Geser untuk melihat selengkapnya"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Memuat rekomendasi"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"Tutup sesi media ini"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Nonaktif, periksa aplikasi"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Error, coba lagi"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"Dalam proses"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"Tahan Tombol daya untuk melihat kontrol baru"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Tambahkan kontrol"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Edit kontrol"</string>
 </resources>

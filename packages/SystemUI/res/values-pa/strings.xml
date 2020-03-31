@@ -86,10 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੁਬਾਰਾ ਲੈ ਕੇ ਦੇਖੋ"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"ਸੀਮਿਤ ਸਟੋਰੇਜ ਹੋਣ ਕਾਰਨ ਸਕ੍ਰੀਨਸ਼ਾਟ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ਐਪ ਜਾਂ ਤੁਹਾਡੀ ਸੰਸਥਾ ਵੱਲੋਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਹੈ"</string>
-    <!-- no translation found for screenshot_dismiss_ui_description (934736855340147968) -->
-    <skip />
-    <!-- no translation found for screenshot_preview_description (669177537416980449) -->
-    <skip />
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਖਾਰਜ ਕਰੋ"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਖੋਲ੍ਹੋ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਰ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ਕਿਸੇ ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਸੈਸ਼ਨ ਲਈ ਚੱਲ ਰਹੀ ਸੂਚਨਾ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ਕੀ ਰਿਕਾਰਡਿੰਗ ਸ਼ੁਰੂ ਕਰਨੀ ਹੈ?"</string>
@@ -156,6 +154,31 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ਗਲਤ ਪੈਟਰਨ"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ਗਲਤ ਪਾਸਵਰਡ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"ਬਹੁਤ ਸਾਰੀਆਂ ਗ਼ਲਤ ਕੋਸ਼ਿਸ਼ਾਂ।\n<xliff:g id="NUMBER">%d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ। <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> ਵਿੱਚੋਂ <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> ਕੋਸ਼ਿਸ਼।"</string>
+    <!-- no translation found for biometric_dialog_last_attempt_before_wipe_dialog_title (2874250099278693477) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_device (6562299244825817598) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_device (9151756675698215723) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_device (2363778585575998317) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_user (8400180746043407270) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_user (4159878829962411168) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_user (4695682515465063885) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_profile (6045224069529284686) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_profile (545567685899091757) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_profile (8538032972389729253) -->
+    <skip />
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸ ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਹ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਇਸਦਾ ਡਾਟਾ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਪ੍ਰਤੀਕ"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"ਤੁਹਾਡੀ ਪਛਾਣ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
@@ -227,7 +250,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"ਬੈਟਰੀ ਵੇਰਵੇ ਖੋਲ੍ਹੋ"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"ਬੈਟਰੀ <xliff:g id="NUMBER">%d</xliff:g> ਪ੍ਰਤੀਸ਼ਤ ਹੈ।"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ਬੈਟਰੀ <xliff:g id="PERCENTAGE">%1$s</xliff:g> ਫ਼ੀਸਦ, ਤੁਹਾਡੀ ਵਰਤੋਂ ਦੇ ਆਧਾਰ \'ਤੇ ਲਗਭਗ <xliff:g id="TIME">%2$s</xliff:g> ਬਾਕੀ"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ਬੈਟਰੀ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ਪ੍ਰਤੀਸ਼ਤ।"</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ਬੈਟਰੀ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ਪ੍ਰਤੀਸ਼ਤ ਹੋ ਗਈ।"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ।"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"ਸੂਚਨਾਵਾਂ।"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਦੇਖੋ"</string>
@@ -460,9 +483,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"ਪ੍ਰੋਫਾਈਲ ਦਿਖਾਓ"</string>
     <string name="user_add_user" msgid="4336657383006913022">"ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ਨਵਾਂ ਵਰਤੋਂਕਾਰ"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"ਮਹਿਮਾਨ"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"ਮਹਿਮਾਨ ਸ਼ਾਮਲ ਕਰੋ"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"ਮਹਿਮਾਨ ਹਟਾਓ"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ਕੀ ਮਹਿਮਾਨ ਹਟਾਉਣਾ ਹੈ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿੱਚ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ਹਟਾਓ"</string>
@@ -698,9 +718,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ਤੁਹਾਨੂੰ ਬਿਨਾਂ ਧੁਨੀ ਅਤੇ ਥਰਥਰਾਹਟ ਦੇ ਫੋਕਸ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ।"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ਧੁਨੀ ਅਤੇ ਥਰਥਰਾਹਟ ਨਾਲ ਤੁਹਾਡਾ ਧਿਆਨ ਖਿੱਚਦੀ ਹੈ।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ਇਸ ਸਮੱਗਰੀ ਦੇ ਅਸਥਿਰ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਆਪਣਾ ਧਿਆਨ ਕੇਂਦਰਿਤ ਰੱਖੋ।"</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਦੇ ਉੱਪਰ ਅਤੇ ਬੁਲਬੁਲਿਆਂ ਦੇ ਤੌਰ \'ਤੇ ਦਿਖਾਉਂਦਾ ਹੈ।"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ਵੱਲੋਂ ਸਾਰੀਆਂ ਗੱਲਾਂਬਾਤਾਂ \'ਤੇ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ \'ਤੇ ਬੁਲਬੁਲੇ ਲਾਏ ਗਏ ਹਨ। <xliff:g id="APP_NAME_1">%2$s</xliff:g> ਵਿੱਚ ਪ੍ਰਬੰਧਨ ਕਰੋ।"</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ਸੈਟਿੰਗਾਂ"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ਕੋਈ ਹਾਲੀਆ ਬੁਲਬੁਲਾ ਨਹੀਂ"</string>
-    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
-    <skip />
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ਹਾਲੀਆ ਬੁਲਬੁਲੇ ਅਤੇ ਖਾਰਜ ਕੀਤੇ ਬੁਲਬੁਲੇ ਇੱਥੇ ਦਿਸਣਗੇ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ਇਹ ਸੂਚਨਾਵਾਂ ਦਾ ਗਰੁੱਪ ਇੱਥੇ ਸੰਰੂਪਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ਇੱਕ ਐਪ ਦੀ ਥਾਂ \'ਤੇ ਦੂਜੀ ਐਪ ਰਾਹੀਂ ਦਿੱਤੀ ਗਈ ਸੂਚਨਾ"</string>
@@ -980,43 +1003,50 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ਹੇਠਾਂ ਵੱਲ ਖੱਬੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ਹੇਠਾਂ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"ਖਾਰਜ ਕਰੋ"</string>
-    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ਗੱਲਬਾਤ \'ਤੇ ਬੁਲਬੁਲੇ ਨਾ ਲਾਓ"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"ਬੁਲਬੁਲੇ ਵਰਤਦੇ ਹੋਏ ਚੈਟ ਕਰੋ"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"ਨਵੀਆਂ ਗੱਲਾਂਬਾਤਾਂ ਫਲੋਟਿੰਗ ਪ੍ਰਤੀਕਾਂ ਜਾਂ ਬੁਲਬੁਲਿਆਂ ਦੇ ਰੂਪ ਵਿੱਚ ਦਿਸਦੀਆਂ ਹਨ। ਬੁਲਬੁਲਿਆਂ ਨੂੰ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ। ਇਸਨੂੰ ਲਿਜਾਣ ਲਈ ਘਸੀਟੋ।"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ਬੁਲਬੁਲਿਆਂ ਨੂੰ ਕਿਸੇ ਵੇਲੇ ਵੀ ਕੰਟਰੋਲ ਕਰੋ"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ਇਸ ਐਪ \'ਤੇ ਬੁਲਬੁਲੇ ਬੰਦ ਕਰਨ ਲਈ \'ਪ੍ਰਬੰਧਨ ਕਰੋ\' \'ਤੇ ਟੈਪ ਕਰੋ"</string>
-    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ਸਮਝ ਲਿਆ"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਅੱਪਡੇਟ ਹੋ ਗਿਆ। ਤਬਦੀਲੀਆਂ ਕਰਨ ਲਈ, ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ਸਟੈਂਡਬਾਈ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ਵੱਡਦਰਸ਼ੀਕਰਨ ਓਵਰਲੇ Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ਵੱਡਦਰਸ਼ੀਕਰਨ Window"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ਵੱਡਦਰਸ਼ੀਕਰਨ Window ਦੇ ਕੰਟਰੋਲ"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"ਤਤਕਾਲ ਕੰਟਰੋਲ"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"ਉਹ ਐਪ ਚੁਣੋ ਜਿੱਥੋਂ ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰਨੇ ਹਨ"</string>
+    <string name="quick_controls_title" msgid="1686913115679255053">"ਤਤਕਾਲ ਕੰਟਰੋਲ"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"ਆਪਣੇ ਕਨੈਕਟ ਕੀਤੇ ਡੀਵਾਈਸਾਂ ਲਈ ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"ਤਤਕਾਲ ਕੰਟਰੋਲਾਂ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ਆਪਣੇ ਕੰਟਰੋਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਲਈ ਪਾਵਰ ਬਟਨ ਦਬਾ ਕੇ ਰੱਖੋ"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"ਕੰਟਰੋਲਾਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਐਪ ਚੁਣੋ"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ।</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤੇ ਗਏ।</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ਕੰਟਰੋਲ"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"ਤਤਕਾਲ ਪਹੁੰਚ ਲਈ ਕੰਟਰੋਲ ਚੁਣੋ"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ਪਹੁੰਚ ਕਰਨ ਲਈ ਪਾਵਰ ਮੀਨੂ ਤੋਂ ਕੰਟਰੋਲ ਚੁਣੋ"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ਕਿਸੇ ਕੰਟਰੋਲ ਨੂੰ ਇੱਕ ਥਾਂ ਤੋਂ ਦੂਜੀ ਥਾਂ \'ਤੇ ਲਿਜਾਣ ਲਈ ਫੜ੍ਹ ਕੇ ਰੱਖੋ ਅਤੇ ਘਸੀਟੋ"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ਸਾਰੇ ਕੰਟਰੋਲਾਂ ਦੀ ਸੂਚੀ ਨੂੰ ਲੋਡ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ਹੋਰ"</string>
-    <string name="controls_dialog_title" msgid="8806193219278278442">"ਤਤਕਾਲ ਕੰਟਰੋਲ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"ਤਤਕਾਲ ਕੰਟਰੋਲ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ਨੇ ਇਸ ਕੰਟਰੋਲ ਨੂੰ ਤੁਹਾਡੇ ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਸੁਝਾਅ ਦਿੱਤਾ ਹੈ।"</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"ਕੰਟਰੋਲ ਅੱਪਡੇਟ ਕੀਤੇ ਗਏ"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ਪਿੰਨ ਵਿੱਚ ਅੱਖਰ ਜਾਂ ਚਿੰਨ੍ਹ ਸ਼ਾਮਲ ਹਨ"</string>
-    <string name="controls_pin_verify" msgid="414043854030774349">"ਡੀਵਾਈਸ ਪਿੰਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"ਪੁਸ਼ਟੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"ਪਿੰਨ ਦਾਖਲ ਕਰੋ"</string>
-    <string name="controls_structure_tooltip" msgid="1392966215435667434">"ਹੋਰ ਬਣਤਰਾਂ ਦੇਖਣ ਲਈ ਸਵਾਈਪ ਕਰੋ"</string>
-    <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
-    <skip />
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"ਕੋਈ ਹੋਰ ਪਿੰਨ ਵਰਤ ਕੇ ਦੇਖੋ"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"ਤਸਦੀਕ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> ਲਈ ਤਬਦੀਲੀ ਦੀ ਤਸਦੀਕ ਕਰੋ"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"ਹੋਰ ਦੇਖਣ ਲਈ ਸਵਾਈਪ ਕਰੋ"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ਸਿਫ਼ਾਰਸ਼ਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"ਇਸ ਮੀਡੀਆ ਸੈਸ਼ਨ ਨੂੰ ਬੰਦ ਕਰੋ"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"ਅਕਿਰਿਆਸ਼ੀਲ, ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"ਗੜਬੜ, ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"ਜਾਰੀ ਹੈ"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"ਨਵੇਂ ਕੰਟਰੋਲ ਦੇਖਣ ਲਈ ਪਾਵਰ ਬਟਨ ਦਬਾਈ ਰੱਖੋ"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"ਕੰਟਰੋਲਾਂ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
 </resources>
