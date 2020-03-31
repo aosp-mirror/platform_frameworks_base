@@ -19,6 +19,7 @@ package com.android.internal.net;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Ikev2VpnProfile;
+import android.net.PlatformVpnProfile;
 import android.net.ProxyInfo;
 import android.os.Build;
 import android.os.Parcel;
@@ -131,10 +132,10 @@ public final class VpnProfile implements Cloneable, Parcelable {
      * delimiters) are not present in the algorithm names. See {@link #validateAllowedAlgorithms()}
      */
     private List<String> mAllowedAlgorithms = new ArrayList<>(); // 19
-    public boolean isBypassable = false;                       // 20
-    public boolean isMetered = false;                          // 21
-    public int maxMtu = 1400;                                  // 22
-    public boolean areAuthParamsInline = false;                   // 23
+    public boolean isBypassable = false;                         // 20
+    public boolean isMetered = false;                            // 21
+    public int maxMtu = PlatformVpnProfile.MAX_MTU_DEFAULT;      // 22
+    public boolean areAuthParamsInline = false;                  // 23
 
     // Helper fields.
     @UnsupportedAppUsage
