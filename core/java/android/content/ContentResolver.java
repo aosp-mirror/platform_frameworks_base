@@ -4013,7 +4013,7 @@ public abstract class ContentResolver implements ContentInterface {
 
         // Convert to Point, since that's what the API is defined as
         final Bundle opts = new Bundle();
-        opts.putParcelable(EXTRA_SIZE, Point.convert(size));
+        opts.putParcelable(EXTRA_SIZE, new Point(size.getWidth(), size.getHeight()));
         final Int32Ref orientation = new Int32Ref(0);
 
         Bitmap bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(() -> {

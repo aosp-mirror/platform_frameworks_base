@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.graphics.GraphicsProtos.dumpPointProto;
 import static android.view.RemoteAnimationTargetProto.CLIP_RECT;
 import static android.view.RemoteAnimationTargetProto.CONTENT_INSETS;
 import static android.view.RemoteAnimationTargetProto.IS_TRANSLUCENT;
@@ -255,7 +256,7 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(" clipRect="); clipRect.printShortString(pw);
         pw.print(" contentInsets="); contentInsets.printShortString(pw);
         pw.print(" prefixOrderIndex="); pw.print(prefixOrderIndex);
-        pw.print(" position="); position.printShortString(pw);
+        pw.print(" position="); position.dump(pw);
         pw.print(" sourceContainerBounds="); sourceContainerBounds.printShortString(pw);
         pw.print(" screenSpaceBounds="); screenSpaceBounds.printShortString(pw);
         pw.print(" localBounds="); localBounds.printShortString(pw);
@@ -273,7 +274,7 @@ public class RemoteAnimationTarget implements Parcelable {
         clipRect.dumpDebug(proto, CLIP_RECT);
         contentInsets.dumpDebug(proto, CONTENT_INSETS);
         proto.write(PREFIX_ORDER_INDEX, prefixOrderIndex);
-        position.dumpDebug(proto, POSITION);
+        dumpPointProto(position, proto, POSITION);
         sourceContainerBounds.dumpDebug(proto, SOURCE_CONTAINER_BOUNDS);
         screenSpaceBounds.dumpDebug(proto, SCREEN_SPACE_BOUNDS);
         localBounds.dumpDebug(proto, LOCAL_BOUNDS);

@@ -51,6 +51,7 @@ import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.Size;
 
 import com.android.internal.util.Preconditions;
 
@@ -1341,8 +1342,8 @@ public final class DocumentsContract {
             @NonNull Uri documentUri, @NonNull Point size, @Nullable CancellationSignal signal)
             throws FileNotFoundException {
         try {
-            return ContentResolver.loadThumbnail(content, documentUri, Point.convert(size), signal,
-                    ImageDecoder.ALLOCATOR_SOFTWARE);
+            return ContentResolver.loadThumbnail(content, documentUri, new Size(size.x, size.y),
+                    signal, ImageDecoder.ALLOCATOR_SOFTWARE);
         } catch (Exception e) {
             if (!(e instanceof OperationCanceledException)) {
                 Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
