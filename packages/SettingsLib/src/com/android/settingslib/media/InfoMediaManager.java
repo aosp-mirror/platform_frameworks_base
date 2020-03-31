@@ -338,7 +338,8 @@ public class InfoMediaManager extends MediaManager {
     private void buildAllRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAllRoutes()) {
             if (DEBUG) {
-                Log.d(TAG, "buildAllRoutes() route : " + route.getName());
+                Log.d(TAG, "buildAllRoutes() route : " + route.getName() + ", volume : "
+                        + route.getVolume());
             }
             if (route.isSystemRoute()) {
                 addMediaDevice(route);
@@ -414,18 +415,7 @@ public class InfoMediaManager extends MediaManager {
 
         @Override
         public void onRoutesChanged(List<MediaRoute2Info> routes) {
-            mMediaDevices.clear();
-            mCurrentConnectedDevice = null;
-            if (TextUtils.isEmpty(mPackageName)) {
-                buildAllRoutes();
-            } else {
-                buildAvailableRoutes();
-            }
-
-            final String id = mCurrentConnectedDevice != null
-                    ? mCurrentConnectedDevice.getId()
-                    : null;
-            dispatchConnectedDeviceChanged(id);
+            refreshDevices();
         }
 
         @Override
@@ -439,6 +429,18 @@ public class InfoMediaManager extends MediaManager {
                 Log.d(TAG, "onTransferred() oldSession : " + oldSession.getName()
                         + ", newSession : " + newSession.getName());
             }
+            mMediaDevices.clear();
+            mCurrentConnectedDevice = null;
+            if (TextUtils.isEmpty(mPackageName)) {
+                buildAllRoutes();
+            } else {
+                buildAvailableRoutes();
+            }
+
+            final String id = mCurrentConnectedDevice != null
+                    ? mCurrentConnectedDevice.getId()
+                    : null;
+            dispatchConnectedDeviceChanged(id);
         }
 
         @Override
