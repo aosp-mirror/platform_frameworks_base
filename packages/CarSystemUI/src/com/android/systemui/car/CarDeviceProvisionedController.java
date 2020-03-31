@@ -29,9 +29,16 @@ public interface CarDeviceProvisionedController extends DeviceProvisionedControl
     boolean isUserSetupInProgress(int user);
 
     /**
-     * Returns {@code true} then SUW is in progress for the current user.
+     * Returns {@code true} when SUW is in progress for the current user.
      */
     default boolean isCurrentUserSetupInProgress() {
         return isUserSetupInProgress(getCurrentUser());
+    }
+
+    /**
+     * Returns {@code true} when the user is setup and not currently in SUW.
+     */
+    default boolean isCurrentUserFullySetup() {
+        return isCurrentUserSetup() && !isCurrentUserSetupInProgress();
     }
 }
