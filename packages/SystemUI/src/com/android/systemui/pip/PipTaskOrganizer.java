@@ -311,6 +311,29 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     /**
+     * TODO(b/152809058): consolidate the display info handling logic in SysUI
+     */
+    @SuppressWarnings("unchecked")
+    public void mayUpdateCurrentAnimationOnRotationChange() {
+        final PipAnimationController.PipTransitionAnimator animator =
+                mPipAnimationController.getCurrentAnimator();
+        if (animator != null && animator.isRunning()
+                && animator.getTransitionDirection() == TRANSITION_DIRECTION_TO_PIP) {
+            final Rect currentDestinationBounds = animator.getDestinationBounds();
+            if (mPipBoundsHandler.getDisplayBounds().contains(currentDestinationBounds)) {
+                return;
+            }
+            final Rect newDestinationBounds = mPipBoundsHandler.getDestinationBounds(
+                    getAspectRatioOrDefault(mTaskInfo.pictureInPictureParams),
+                    null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
+            if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
+                animator.updateEndValue(newDestinationBounds);
+            }
+            animator.setDestinationBounds(newDestinationBounds);
+        }
+    }
+
+    /**
      * @return {@code true} if the aspect ratio is changed since no other parameters within
      * {@link PictureInPictureParams} would affect the bounds.
      */
