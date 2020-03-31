@@ -160,7 +160,7 @@ public class InlineContentView extends ViewGroup {
 
     @Override
     public void onLayout(boolean changed, int l, int t, int r, int b) {
-        mSurfaceView.layout(l, t, r, b);
+        mSurfaceView.layout(0, 0, getMeasuredWidth(), getMeasuredHeight());
     }
 
     /**
