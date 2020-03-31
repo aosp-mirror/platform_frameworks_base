@@ -26,10 +26,36 @@ import com.android.internal.view.IInlineSuggestionsResponseCallback;
  * {@hide}
  */
 oneway interface IInlineSuggestionsRequestCallback {
+    // Indicates that the current IME does not support inline suggestion.
     void onInlineSuggestionsUnsupported();
+
+    // Sends the inline suggestions request from IME to Autofill. Calling this method indicates
+    // that the IME input is started on the view corresponding to the request.
     void onInlineSuggestionsRequest(in InlineSuggestionsRequest request,
-            in IInlineSuggestionsResponseCallback callback, in AutofillId imeFieldId,
-            boolean inputViewStarted);
-    void onInputMethodStartInputView(in AutofillId imeFieldId);
-    void onInputMethodFinishInputView(in AutofillId imeFieldId);
+            in IInlineSuggestionsResponseCallback callback);
+
+    // Signals that {@link android.inputmethodservice.InputMethodService
+    //  #onStartInput(EditorInfo, boolean)} is called on the given focused field.
+    void onInputMethodStartInput(in AutofillId imeFieldId);
+
+    // Signals that {@link android.inputmethodservice.InputMethodService
+    //  #dispatchOnShowInputRequested(int, boolean)} is called and shares the call result.
+    //  The true value of {@code requestResult} means the IME is about to be shown, while
+    //  false value means the IME will not be shown.
+    void onInputMethodShowInputRequested(boolean requestResult);
+
+    // Signals that {@link android.inputmethodservice.InputMethodService
+    //  #onStartInputView(EditorInfo, boolean)} is called on the field specified by the earlier
+    //  {@link #onInputMethodStartInput(AutofillId)}.
+    void onInputMethodStartInputView();
+
+    // Signals that {@link android.inputmethodservice.InputMethodService
+    //  #onFinishInputView(boolean)} is called on the field specified by the earlier
+    //  {@link #onInputMethodStartInput(AutofillId)}.
+    void onInputMethodFinishInputView();
+
+    // Signals that {@link android.inputmethodservice.InputMethodService
+    //  #onFinishInput()} is called on the field specified by the earlier
+    //  {@link #onInputMethodStartInput(AutofillId)}.
+    void onInputMethodFinishInput();
 }
