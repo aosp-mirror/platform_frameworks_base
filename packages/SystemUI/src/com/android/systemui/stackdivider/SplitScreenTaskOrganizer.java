@@ -114,6 +114,10 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
         mDivider.getHandler().post(() -> handleTaskInfoChanged(taskInfo));
     }
 
+    @Override
+    public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
+    }
+
     /**
      * This is effectively a finite state machine which moves between the various split-screen
      * presentations based on the contents of the split regions.

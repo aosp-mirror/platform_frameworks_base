@@ -57,4 +57,10 @@ interface ITaskOrganizerController {
      * and thus new tasks just end up directly on the display.
      */
     void setLaunchRoot(int displayId, in IWindowContainer root);
+
+    /**
+     * Requests that the given task organizer is notified when back is pressed on the root activity
+     * of one of its controlled tasks.
+     */
+    void setInterceptBackPressedOnTaskRoot(ITaskOrganizer organizer, boolean interceptBackPressed);
 }
