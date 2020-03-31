@@ -45,6 +45,7 @@ import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -353,7 +354,9 @@ public class DexManager {
 
         try {
             mPackageDexUsage.read();
-            mPackageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
+            List<String> packagesToKeepDataAbout = new ArrayList<>();
+            mPackageDexUsage.syncData(
+                    packageToUsersMap, packageToCodePaths, packagesToKeepDataAbout);
         } catch (Exception e) {
             mPackageDexUsage.clear();
             Slog.w(TAG, "Exception while loading package dex usage. "

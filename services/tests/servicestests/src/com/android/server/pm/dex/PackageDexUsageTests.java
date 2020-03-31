@@ -282,11 +282,46 @@ public class PackageDexUsageTests {
         Map<String, Set<String>> packageToCodePaths = new HashMap<>();
         packageToCodePaths.put(mBarBaseUser0.mPackageName,
                 new HashSet<>(Arrays.asList(mBarBaseUser0.mDexFile)));
-        mPackageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
+        mPackageDexUsage.syncData(packageToUsersMap, packageToCodePaths, new ArrayList<String>());
 
         // Assert that only user 1 files are there.
         assertPackageDexUsage(mBarBaseUser0, mBarSecondary2User1);
         assertNull(mPackageDexUsage.getPackageUseInfo(mFooBaseUser0.mPackageName));
+    }
+
+    @Test
+    public void testSyncDataKeepPackages() {
+        PackageDexUsage packageDexUsage = new PackageDexUsage();
+        // Write the record we want to keep and which won't be keep by default.
+        Set<String> fooUsers = new HashSet<>(Arrays.asList(
+                new String[] {mFooBaseUser0.mPackageName}));
+        assertTrue(record(packageDexUsage, mFooBaseUser0, fooUsers));
+        // Write a record that would be kept by default.
+        Set<String> barUsers = new HashSet<>(Arrays.asList(
+                new String[] {"another.package", mFooBaseUser0.mPackageName}));
+        assertTrue(record(packageDexUsage, mBarBaseUser0, barUsers));
+
+        // Construct the user packages and their code paths (things that will be
+        // kept by default during sync).
+        Map<String, Set<Integer>> packageToUsersMap = new HashMap<>();
+        packageToUsersMap.put(mBarBaseUser0.mPackageName,
+                new HashSet<>(Arrays.asList(mBarBaseUser0.mOwnerUserId)));
+        Map<String, Set<String>> packageToCodePaths = new HashMap<>();
+        packageToCodePaths.put(mBarBaseUser0.mPackageName,
+                new HashSet<>(Arrays.asList(mBarBaseUser0.mDexFile)));
+
+        // Sync data.
+        List<String> keepData = new ArrayList<String>();
+        keepData.add(mFooBaseUser0.mPackageName);
+        packageDexUsage.syncData(packageToUsersMap, packageToCodePaths, keepData);
+
+        // Assert that both packages are kept
+        assertPackageDexUsage(packageDexUsage, fooUsers, mFooBaseUser0);
+        // "another.package" should not be in the loading packages after sync.
+        Set<String> expectedBarUsers = new HashSet<>(Arrays.asList(
+                new String[] {mFooBaseUser0.mPackageName}));
+        assertPackageDexUsage(packageDexUsage, expectedBarUsers,
+                mBarBaseUser0.updateUsedBy(mFooBaseUser0.mPackageName));
     }
 
     @Test
@@ -501,7 +536,7 @@ public class PackageDexUsageTests {
                 new HashSet<>(Arrays.asList(mFooSplit2UsedByOtherApps0.mOwnerUserId)));
 
         // Sync the data.
-        packageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
+        packageDexUsage.syncData(packageToUsersMap, packageToCodePaths, new ArrayList<>());
 
         // Assert foo code paths.
         assertPackageDexUsage(
@@ -654,9 +689,9 @@ public class PackageDexUsageTests {
                     mPrimaryOrSplit, mUsedBy, newContext);
         }
 
-        private TestData updateUseByOthers(boolean newUsedByOthers) {
+        private TestData updateUsedBy(String newUsedBy) {
             return new TestData(mPackageName, mDexFile, mOwnerUserId, mLoaderIsa,
-                mPrimaryOrSplit, mUsedBy, mClassLoaderContext);
+                mPrimaryOrSplit, newUsedBy, mClassLoaderContext);
         }
 
         private boolean isUsedByOtherApps() {

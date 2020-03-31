@@ -474,13 +474,19 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
      * Syncs the existing data with the set of available packages by removing obsolete entries.
      */
     /*package*/ void syncData(Map<String, Set<Integer>> packageToUsersMap,
-            Map<String, Set<String>> packageToCodePaths) {
+            Map<String, Set<String>> packageToCodePaths,
+            List<String> packagesToKeepDataAbout) {
         synchronized (mPackageUseInfoMap) {
             Iterator<Map.Entry<String, PackageUseInfo>> pIt =
                     mPackageUseInfoMap.entrySet().iterator();
             while (pIt.hasNext()) {
                 Map.Entry<String, PackageUseInfo> pEntry = pIt.next();
                 String packageName = pEntry.getKey();
+                if (packagesToKeepDataAbout.contains(packageName)) {
+                    // This is a package for which we should keep the data even if it's not
+                    // in the list of user packages.
+                    continue;
+                }
                 PackageUseInfo packageUseInfo = pEntry.getValue();
                 Set<Integer> users = packageToUsersMap.get(packageName);
                 if (users == null) {
@@ -501,11 +507,27 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
 
                     // Sync the code paths.
                     Set<String> codePaths = packageToCodePaths.get(packageName);
-                    Iterator<Map.Entry<String, Set<String>>> codeIt =
+
+                    Iterator<Map.Entry<String, Set<String>>> recordedIt =
                             packageUseInfo.mPrimaryCodePaths.entrySet().iterator();
-                    while (codeIt.hasNext()) {
-                        if (!codePaths.contains(codeIt.next().getKey())) {
-                            codeIt.remove();
+                    while (recordedIt.hasNext()) {
+                        Map.Entry<String, Set<String>> entry = recordedIt.next();
+                        String recordedCodePath = entry.getKey();
+                        if (!codePaths.contains(recordedCodePath)) {
+                            // Clean up a non existing code path.
+                            recordedIt.remove();
+                        } else {
+                            // Clean up a non existing loading package.
+                            Set<String> recordedLoadingPackages = entry.getValue();
+                            Iterator<String> recordedLoadingPackagesIt =
+                                    recordedLoadingPackages.iterator();
+                            while (recordedLoadingPackagesIt.hasNext()) {
+                                String recordedLoadingPackage = recordedLoadingPackagesIt.next();
+                                if (!packagesToKeepDataAbout.contains(recordedLoadingPackage)
+                                        && !packageToUsersMap.containsKey(recordedLoadingPackage)) {
+                                    recordedLoadingPackagesIt.remove();
+                                }
+                            }
                         }
                     }
 
