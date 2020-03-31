@@ -172,8 +172,20 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      * Called by the InputManager.
      */
     @Override
-    public long notifyANR(InputApplicationHandle inputApplicationHandle,
-            IBinder token, String reason) {
+    public long notifyANR(InputApplicationHandle inputApplicationHandle, IBinder token,
+            String reason) {
+        final long startTime = SystemClock.uptimeMillis();
+        try {
+            return notifyANRInner(inputApplicationHandle, token, reason);
+        } finally {
+            // Log the time because the method is called from InputDispatcher thread. It shouldn't
+            // take too long that may affect input response time.
+            Slog.d(TAG_WM, "notifyANR took " + (SystemClock.uptimeMillis() - startTime) + "ms");
+        }
+    }
+
+    private long notifyANRInner(InputApplicationHandle inputApplicationHandle, IBinder token,
+            String reason) {
         ActivityRecord activity = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
