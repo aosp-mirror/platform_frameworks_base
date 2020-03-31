@@ -67,8 +67,6 @@ public class LocalMediaManagerTest {
     private static final String TEST_PACKAGE_NAME = "com.test.playmusic";
 
     @Mock
-    private BluetoothMediaManager mBluetoothMediaManager;
-    @Mock
     private InfoMediaManager mInfoMediaManager;
     @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
