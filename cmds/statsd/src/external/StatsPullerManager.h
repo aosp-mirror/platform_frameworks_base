@@ -66,6 +66,7 @@ public:
     virtual ~StatsPullerManager() {
     }
 
+
     // Registers a receiver for tagId. It will be pulled on the nextPullTimeNs
     // and then every intervalNs thereafter.
     virtual void RegisterReceiver(int tagId, const ConfigKey& configKey,
@@ -124,6 +125,8 @@ public:
     std::map<const PullerKey, sp<StatsPuller>> kAllPullAtomInfo;
 
 private:
+    const static int64_t kMinCoolDownNs = NS_PER_SEC;
+    const static int64_t kMaxTimeoutNs = 10 * NS_PER_SEC;
     shared_ptr<IStatsCompanionService> mStatsCompanionService = nullptr;
 
     // A struct containing an atom id and a Config Key
