@@ -313,8 +313,10 @@ void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t a
     // TODO(b/146439412): linkToDeath with the callback so that we can remove it
     // and delete the puller.
     StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
-    kAllPullAtomInfo[{.atomTag = atomTag, .uid = useUid ? uid : -1}] =
-            new StatsCallbackPuller(atomTag, callback, coolDownNs, timeoutNs, additiveFields);
+    int64_t actualCoolDownNs = coolDownNs < kMinCoolDownNs ? kMinCoolDownNs : coolDownNs;
+    int64_t actualTimeoutNs = timeoutNs > kMaxTimeoutNs ? kMaxTimeoutNs : timeoutNs;
+    kAllPullAtomInfo[{.atomTag = atomTag, .uid = useUid ? uid : -1}] = new StatsCallbackPuller(
+            atomTag, callback, actualCoolDownNs, actualTimeoutNs, additiveFields);
 }
 
 void StatsPullerManager::UnregisterPullAtomCallback(const int uid, const int32_t atomTag) {
