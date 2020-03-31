@@ -122,6 +122,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     public TestWatcher failWatcher = new TestWatcher() {
         @Override
         protected void failed(Throwable e, Description description) {
+            if (mNetworkController == null) {
+                Log.d(TAG, "mNetworkController = null!");
+                return;
+            }
             // Print out mNetworkController state if the test fails.
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
