@@ -7893,6 +7893,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
+        // Decrement the reference count for this NetworkRequestInfo. The reference count is
+        // incremented when the NetworkRequestInfo is created as part of
+        // enforceRequestCountLimit().
+        decrementNetworkRequestPerUidCount(nri);
+
         cb.asBinder().unlinkToDeath(mConnectivityDiagnosticsCallbacks.remove(cb), 0);
     }
 
