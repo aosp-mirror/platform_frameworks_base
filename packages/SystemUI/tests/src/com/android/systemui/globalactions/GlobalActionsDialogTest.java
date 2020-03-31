@@ -16,6 +16,11 @@
 
 package com.android.systemui.globalactions;
 
+import static junit.framework.Assert.assertEquals;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -199,5 +204,64 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         verify(mUiEventLogger, times(1))
                 .log(event);
+    }
+
+    @Test
+    public void testCreateActionItems_maxThree() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        // allow 3 items to be shown
+        doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
+        // ensure items are not blocked by keyguard or device provisioning
+        doReturn(true).when(mGlobalActionsDialog).shouldShowAction(any());
+        String[] actions = {
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
+        };
+        doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
+        mGlobalActionsDialog.createActionItems();
+
+        assertEquals(3, mGlobalActionsDialog.mItems.size());
+        assertEquals(1, mGlobalActionsDialog.mOverflowItems.size());
+    }
+
+    @Test
+    public void testCreateActionItems_maxAny() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        // allow any number of power menu items to be shown
+        doReturn(Integer.MAX_VALUE).when(mGlobalActionsDialog).getMaxShownPowerItems();
+        // ensure items are not blocked by keyguard or device provisioning
+        doReturn(true).when(mGlobalActionsDialog).shouldShowAction(any());
+        String[] actions = {
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
+        };
+        doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
+        mGlobalActionsDialog.createActionItems();
+
+        assertEquals(4, mGlobalActionsDialog.mItems.size());
+        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
+    }
+
+    @Test
+    public void testCreateActionItems_maxThree_itemNotShown() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        // allow only 3 items to be shown
+        doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
+        String[] actions = {
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
+                // screenshot blocked because device not provisioned
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+        };
+        doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
+        mGlobalActionsDialog.createActionItems();
+
+        assertEquals(3, mGlobalActionsDialog.mItems.size());
+        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
     }
 }

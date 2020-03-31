@@ -75,9 +75,12 @@ import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.ListPopupWindow;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -151,19 +154,20 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     /* Valid settings for global actions keys.
      * see config.xml config_globalActionList */
-    private static final String GLOBAL_ACTION_KEY_POWER = "power";
-    private static final String GLOBAL_ACTION_KEY_AIRPLANE = "airplane";
-    private static final String GLOBAL_ACTION_KEY_BUGREPORT = "bugreport";
-    private static final String GLOBAL_ACTION_KEY_SILENT = "silent";
-    private static final String GLOBAL_ACTION_KEY_USERS = "users";
-    private static final String GLOBAL_ACTION_KEY_SETTINGS = "settings";
-    private static final String GLOBAL_ACTION_KEY_LOCKDOWN = "lockdown";
-    private static final String GLOBAL_ACTION_KEY_VOICEASSIST = "voiceassist";
-    private static final String GLOBAL_ACTION_KEY_ASSIST = "assist";
-    private static final String GLOBAL_ACTION_KEY_RESTART = "restart";
-    private static final String GLOBAL_ACTION_KEY_LOGOUT = "logout";
-    private static final String GLOBAL_ACTION_KEY_EMERGENCY = "emergency";
-    private static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
+    @VisibleForTesting
+    protected static final String GLOBAL_ACTION_KEY_POWER = "power";
+    protected static final String GLOBAL_ACTION_KEY_AIRPLANE = "airplane";
+    protected static final String GLOBAL_ACTION_KEY_BUGREPORT = "bugreport";
+    protected static final String GLOBAL_ACTION_KEY_SILENT = "silent";
+    protected static final String GLOBAL_ACTION_KEY_USERS = "users";
+    protected static final String GLOBAL_ACTION_KEY_SETTINGS = "settings";
+    protected static final String GLOBAL_ACTION_KEY_LOCKDOWN = "lockdown";
+    protected static final String GLOBAL_ACTION_KEY_VOICEASSIST = "voiceassist";
+    protected static final String GLOBAL_ACTION_KEY_ASSIST = "assist";
+    protected static final String GLOBAL_ACTION_KEY_RESTART = "restart";
+    protected static final String GLOBAL_ACTION_KEY_LOGOUT = "logout";
+    protected static final String GLOBAL_ACTION_KEY_EMERGENCY = "emergency";
+    protected static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
 
     private static final String PREFS_CONTROLS_SEEDING_COMPLETED = "ControlsSeedingCompleted";
     private static final String PREFS_CONTROLS_FILE = "controls_prefs";
@@ -191,13 +195,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
 
-    private ArrayList<Action> mItems;
+    @VisibleForTesting
+    protected ArrayList<Action> mItems;
+    @VisibleForTesting
+    protected ArrayList<Action> mOverflowItems;
+
     private ActionsDialog mDialog;
 
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
 
     private MyAdapter mAdapter;
+    private MyOverflowAdapter mOverflowAdapter;
 
     private boolean mKeyguardShowing = false;
     private boolean mDeviceProvisioned = false;
@@ -459,12 +468,51 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
+    @VisibleForTesting
+    protected boolean shouldShowAction(Action action) {
+        if (mKeyguardShowing && !action.showDuringKeyguard()) {
+            return false;
+        }
+        if (!mDeviceProvisioned && !action.showBeforeProvisioning()) {
+            return false;
+        }
+        return true;
+    }
+
     /**
-     * Create the global actions dialog.
-     *
-     * @return A new dialog.
+     * Returns the maximum number of power menu items to show based on which GlobalActions
+     * layout is being used.
      */
-    private ActionsDialog createDialog() {
+    @VisibleForTesting
+    protected int getMaxShownPowerItems() {
+        if (shouldShowControls()) {
+            return mResources.getInteger(com.android.systemui.R.integer.power_menu_max_columns);
+        } else {
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    /**
+     * Add a power menu action item for to either the main or overflow items lists, depending on
+     * whether controls are enabled and whether the max number of shown items has been reached.
+     */
+    private void addActionItem(Action action) {
+        if (mItems != null && shouldShowAction(action)) {
+            if (mItems.size() < getMaxShownPowerItems()) {
+                mItems.add(action);
+            } else if (mOverflowItems != null) {
+                mOverflowItems.add(action);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    protected String[] getDefaultActions() {
+        return mResources.getStringArray(R.array.config_globalActionsList);
+    }
+
+    @VisibleForTesting
+    protected void createActionItems() {
         // Simple toggle style if there's no vibrator, otherwise use a tri-state
         if (!mHasVibrator) {
             mSilentModeAction = new SilentModeToggleAction();
@@ -475,7 +523,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         onAirplaneModeChanged();
 
         mItems = new ArrayList<Action>();
-        String[] defaultActions = mResources.getStringArray(R.array.config_globalActionsList);
+        mOverflowItems = new ArrayList<Action>();
+        String[] defaultActions = getDefaultActions();
+
+        // make sure emergency affordance action is first, if needed
+        if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
+            addActionItem(new EmergencyAffordanceAction());
+        }
 
         ArraySet<String> addedKeys = new ArraySet<String>();
         for (int i = 0; i < defaultActions.length; i++) {
@@ -485,46 +539,46 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 continue;
             }
             if (GLOBAL_ACTION_KEY_POWER.equals(actionKey)) {
-                mItems.add(new PowerAction());
+                addActionItem(new PowerAction());
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
-                mItems.add(mAirplaneModeOn);
+                addActionItem(mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
                 if (Settings.Global.getInt(mContentResolver,
                         Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
-                    mItems.add(new BugReportAction());
+                    addActionItem(new BugReportAction());
                 }
             } else if (GLOBAL_ACTION_KEY_SILENT.equals(actionKey)) {
                 if (mShowSilentToggle) {
-                    mItems.add(mSilentModeAction);
+                    addActionItem(mSilentModeAction);
                 }
             } else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey)) {
                 if (SystemProperties.getBoolean("fw.power_user_switcher", false)) {
-                    addUsersToMenu(mItems);
+                    addUsersToMenu();
                 }
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
-                mItems.add(getSettingsAction());
+                addActionItem(getSettingsAction());
             } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
                 if (Settings.Secure.getIntForUser(mContentResolver,
                         Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0, getCurrentUser().id) != 0
                         && shouldDisplayLockdown()) {
-                    mItems.add(getLockdownAction());
+                    addActionItem(getLockdownAction());
                 }
             } else if (GLOBAL_ACTION_KEY_VOICEASSIST.equals(actionKey)) {
-                mItems.add(getVoiceAssistAction());
+                addActionItem(getVoiceAssistAction());
             } else if (GLOBAL_ACTION_KEY_ASSIST.equals(actionKey)) {
-                mItems.add(getAssistAction());
+                addActionItem(getAssistAction());
             } else if (GLOBAL_ACTION_KEY_RESTART.equals(actionKey)) {
-                mItems.add(new RestartAction());
+                addActionItem(new RestartAction());
             } else if (GLOBAL_ACTION_KEY_SCREENSHOT.equals(actionKey)) {
-                mItems.add(new ScreenshotAction());
+                addActionItem(new ScreenshotAction());
             } else if (GLOBAL_ACTION_KEY_LOGOUT.equals(actionKey)) {
                 if (mDevicePolicyManager.isLogoutEnabled()
                         && getCurrentUser().id != UserHandle.USER_SYSTEM) {
-                    mItems.add(new LogoutAction());
+                    addActionItem(new LogoutAction());
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
                 if (!mEmergencyAffordanceManager.needsEmergencyAffordance()) {
-                    mItems.add(new EmergencyDialerAction());
+                    addActionItem(new EmergencyDialerAction());
                 }
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
@@ -532,17 +586,23 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             // Add here so we don't add more than one.
             addedKeys.add(actionKey);
         }
+    }
 
-        if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
-            mItems.add(new EmergencyAffordanceAction());
-        }
+    /**
+     * Create the global actions dialog.
+     *
+     * @return A new dialog.
+     */
+    private ActionsDialog createDialog() {
+        createActionItems();
 
         mAdapter = new MyAdapter();
+        mOverflowAdapter = new MyOverflowAdapter();
 
         mDepthController.setShowingHomeControls(shouldShowControls());
-        ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, getWalletPanelViewController(),
-                mDepthController, mSysuiColorExtractor, mStatusBarService,
-                mNotificationShadeWindowController,
+        ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, mOverflowAdapter,
+                getWalletPanelViewController(), mDepthController, mSysuiColorExtractor,
+                mStatusBarService, mNotificationShadeWindowController,
                 shouldShowControls() ? mControlsUiController : null, mBlurUtils);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setKeyguardShowing(mKeyguardShowing);
@@ -1020,7 +1080,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         return currentUser == null || currentUser.isPrimary();
     }
 
-    private void addUsersToMenu(ArrayList<Action> items) {
+    private void addUsersToMenu() {
         if (mUserManager.isUserSwitcherEnabled()) {
             List<UserInfo> users = mUserManager.getUsers();
             UserInfo currentUser = getCurrentUser();
@@ -1050,7 +1110,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                             return false;
                         }
                     };
-                    items.add(switchToUser);
+                    addActionItem(switchToUser);
                 }
             }
         }
@@ -1099,11 +1159,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     /**
-     * The adapter used for the list within the global actions dialog, taking into account whether
-     * the keyguard is showing via
-     * {@link com.android.systemui.globalactions.GlobalActionsDialog#mKeyguardShowing}
-     * and whether the device is provisioned via
-     * {@link com.android.systemui.globalactions.GlobalActionsDialog#mDeviceProvisioned}.
+     * The adapter used for power menu items shown in the global actions dialog.
      */
     public class MyAdapter extends MultiListAdapter {
         private int countItems(boolean separated) {
@@ -1111,21 +1167,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             for (int i = 0; i < mItems.size(); i++) {
                 final Action action = mItems.get(i);
 
-                if (shouldBeShown(action) && action.shouldBeSeparated() == separated) {
+                if (action.shouldBeSeparated() == separated) {
                     count++;
                 }
             }
             return count;
-        }
-
-        private boolean shouldBeShown(Action action) {
-            if (mKeyguardShowing && !action.showDuringKeyguard()) {
-                return false;
-            }
-            if (!mDeviceProvisioned && !action.showBeforeProvisioning()) {
-                return false;
-            }
-            return true;
         }
 
         @Override
@@ -1158,7 +1204,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             int filteredPos = 0;
             for (int i = 0; i < mItems.size(); i++) {
                 final Action action = mItems.get(i);
-                if (!shouldBeShown(action)) {
+                if (!shouldShowAction(action)) {
                     continue;
                 }
                 if (filteredPos == position) {
@@ -1223,6 +1269,79 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
+    /**
+     * The adapter used for items in the overflow menu.
+     */
+    public class MyOverflowAdapter extends BaseAdapter {
+        @Override
+        public int getCount() {
+            return mOverflowItems != null ? mOverflowItems.size() : 0;
+        }
+
+        @Override
+        public Action getItem(int position) {
+            return mOverflowItems != null ? mOverflowItems.get(position) : null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            Action action = getItem(position);
+            if (action == null) {
+                Log.w(TAG, "No overflow action found at position: " + position);
+                return null;
+            }
+            int viewLayoutResource = com.android.systemui.R.layout.controls_more_item;
+            View view = convertView != null ? convertView
+                    : LayoutInflater.from(mContext).inflate(viewLayoutResource, parent, false);
+            TextView textView = (TextView) view;
+            textView.setOnClickListener(v -> onClickItem(position));
+            if (action.getMessageResId() != 0) {
+                textView.setText(action.getMessageResId());
+            } else {
+                textView.setText(action.getMessage());
+            }
+
+            if (action instanceof LongPressAction) {
+                textView.setOnLongClickListener(v -> onLongClickItem(position));
+            } else {
+                textView.setOnLongClickListener(null);
+            }
+            return textView;
+        }
+
+        private boolean onLongClickItem(int position) {
+            final Action action = getItem(position);
+            if (action instanceof LongPressAction) {
+                if (mDialog != null) {
+                    mDialog.hidePowerOverflowMenu();
+                    mDialog.dismiss();
+                } else {
+                    Log.w(TAG, "Action long-clicked while mDialog is null.");
+                }
+                return ((LongPressAction) action).onLongPress();
+            }
+            return false;
+        }
+
+        private void onClickItem(int position) {
+            Action item = getItem(position);
+            if (!(item instanceof SilentModeTriStateAction)) {
+                if (mDialog != null) {
+                    mDialog.hidePowerOverflowMenu();
+                    mDialog.dismiss();
+                } else {
+                    Log.w(TAG, "Action clicked while mDialog is null.");
+                }
+                item.onPress();
+            }
+        }
+    }
+
     // note: the scheme below made more sense when we were planning on having
     // 8 different things in the global actions dialog.  seems overkill with
     // only 3 items now, but may as well keep this flexible approach so it will
@@ -1248,8 +1367,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         boolean showDuringKeyguard();
 
         /**
-         * @return whether this action should appear in the dialog before the device is
-         * provisioned.onlongpress
+         * @return whether this action should appear in the dialog before the
+         * device is provisioned.f
          */
         boolean showBeforeProvisioning();
 
@@ -1258,6 +1377,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         default boolean shouldBeSeparated() {
             return false;
         }
+
+        /**
+         * Return the id of the message associated with this action, or 0 if it doesn't have one.
+         * @return
+         */
+        int getMessageResId();
+
+        /**
+         * Return the message associated with this action, or null if it doesn't have one.
+         * @return
+         */
+        CharSequence getMessage();
     }
 
     /**
@@ -1307,6 +1438,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             } else {
                 return context.getString(mMessageResId);
             }
+        }
+
+
+        public int getMessageResId() {
+            return mMessageResId;
+        }
+
+        public CharSequence getMessage() {
+            return mMessage;
         }
 
         public View create(
@@ -1396,6 +1536,23 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             return context.getString(mMessageResId);
         }
 
+        private boolean isOn() {
+            return mState == ToggleState.On || mState == ToggleState.TurningOn;
+        }
+
+        @Override
+        public CharSequence getMessage() {
+            return null;
+        }
+        @Override
+        public int getMessageResId() {
+            return isOn() ? mEnabledStatusMessageResId : mDisabledStatusMessageResId;
+        }
+
+        private int getIconResId() {
+            return isOn() ? mEnabledIconResId : mDisabledIconResid;
+        }
+
         public View create(Context context, View convertView, ViewGroup parent,
                 LayoutInflater inflater) {
             willCreate();
@@ -1405,17 +1562,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
             final boolean enabled = isEnabled();
-            boolean on = ((mState == ToggleState.On) || (mState == ToggleState.TurningOn));
 
             if (messageView != null) {
-                messageView.setText(on ? mEnabledStatusMessageResId : mDisabledStatusMessageResId);
+                messageView.setText(getMessageResId());
                 messageView.setEnabled(enabled);
                 messageView.setSelected(true); // necessary for marquee to work
             }
 
             if (icon != null) {
-                icon.setImageDrawable(context.getDrawable(
-                        (on ? mEnabledIconResId : mDisabledIconResid)));
+                icon.setImageDrawable(context.getDrawable(getIconResId()));
                 icon.setEnabled(enabled);
             }
 
@@ -1550,6 +1705,16 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public CharSequence getLabelForAccessibility(Context context) {
+            return null;
+        }
+
+        @Override
+        public int getMessageResId() {
+            return 0;
+        }
+
+        @Override
+        public CharSequence getMessage() {
             return null;
         }
 
@@ -1708,6 +1873,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private final Context mContext;
         private final MyAdapter mAdapter;
+        private final MyOverflowAdapter mOverflowAdapter;
         private final IStatusBarService mStatusBarService;
         private final IBinder mToken = new Binder();
         private MultiListLayout mGlobalActionsLayout;
@@ -1722,11 +1888,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final NotificationShadeWindowController mNotificationShadeWindowController;
         private final NotificationShadeDepthController mDepthController;
         private final BlurUtils mBlurUtils;
+        private ListPopupWindow mOverflowPopup;
 
         private ControlsUiController mControlsUiController;
         private ViewGroup mControlsView;
 
-        ActionsDialog(Context context, MyAdapter adapter,
+        ActionsDialog(Context context, MyAdapter adapter, MyOverflowAdapter overflowAdapter,
                 GlobalActionsPanelPlugin.PanelViewController plugin,
                 NotificationShadeDepthController depthController,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
@@ -1735,6 +1902,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = context;
             mAdapter = adapter;
+            mOverflowAdapter = overflowAdapter;
             mDepthController = depthController;
             mColorExtractor = sysuiColorExtractor;
             mStatusBarService = statusBarService;
@@ -1817,6 +1985,45 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         }
 
+        private ListPopupWindow createPowerOverflowPopup() {
+            ListPopupWindow popup = new ListPopupWindow(new ContextThemeWrapper(
+                    mContext, com.android.systemui.R.style.Control_ListPopupWindow));
+            popup.setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
+            View overflowButton =
+                    findViewById(com.android.systemui.R.id.global_actions_overflow_button);
+            popup.setAnchorView(overflowButton);
+            int parentWidth = mGlobalActionsLayout.getWidth();
+            // arbitrarily set the menu width to half of parent
+            // TODO: Logic for menu sizing based on contents.
+            int halfParentWidth = Math.round(parentWidth * 0.5f);
+            popup.setContentWidth(halfParentWidth);
+            popup.setAdapter(mOverflowAdapter);
+            popup.setModal(true);
+            return popup;
+        }
+
+        private void showPowerOverflowMenu() {
+            mOverflowPopup.show();
+
+            // Width is fixed to slightly more than half of the GlobalActionsLayout container.
+            // TODO: Resize the width of this dialog based on the sizes of the items in it.
+            int width = Math.round(mGlobalActionsLayout.getWidth() * 0.6f);
+
+            ListView listView = mOverflowPopup.getListView();
+            listView.setDividerHeight(mContext.getResources()
+                    .getDimensionPixelSize(com.android.systemui.R.dimen.control_list_divider));
+            listView.setDivider(mContext.getResources().getDrawable(
+                    com.android.systemui.R.drawable.controls_list_divider));
+            mOverflowPopup.setWidth(width);
+            mOverflowPopup.setHorizontalOffset(-width + mOverflowPopup.getAnchorView().getWidth());
+            mOverflowPopup.setVerticalOffset(mOverflowPopup.getAnchorView().getHeight());
+            mOverflowPopup.show();
+        }
+
+        private void hidePowerOverflowMenu() {
+            mOverflowPopup.dismiss();
+        }
+
         private void initializeLayout() {
             setContentView(getGlobalActionsLayoutId(mContext));
             fixNavBarClipping();
@@ -1834,6 +2041,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             });
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
+
+            mOverflowPopup = createPowerOverflowPopup();
+
+            View overflowButton = findViewById(
+                    com.android.systemui.R.id.global_actions_overflow_button);
+            if (overflowButton != null) {
+                if (mOverflowAdapter.getCount() > 0) {
+                    overflowButton.setOnClickListener((view) -> showPowerOverflowMenu());
+                } else {
+                    overflowButton.setVisibility(View.GONE);
+                }
+            }
 
             View globalActionsParent = (View) mGlobalActionsLayout.getParent();
             globalActionsParent.setOnClickListener(v -> dismiss());
@@ -2090,7 +2309,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         return isPanelDebugModeEnabled(context);
     }
 
-    private boolean shouldShowControls() {
+    @VisibleForTesting
+    protected boolean shouldShowControls() {
         return mKeyguardStateController.isUnlocked()
                 && mControlsUiController.getAvailable()
                 && !mControlsServiceInfos.isEmpty();

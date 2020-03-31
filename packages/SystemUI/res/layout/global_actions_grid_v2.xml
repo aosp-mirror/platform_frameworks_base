@@ -12,34 +12,46 @@
       android:layout_height="wrap_content"
       android:orientation="horizontal"
       android:theme="@style/qs_theme"
-      android:gravity="top"
       android:clipChildren="false"
       android:clipToPadding="false"
       android:layout_marginTop="@dimen/global_actions_top_margin"
+      android:layout_marginLeft="@dimen/global_actions_side_margin"
+      android:layout_marginRight="@dimen/global_actions_side_margin"
   >
     <LinearLayout
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/global_actions_side_margin"
-        android:layout_marginRight="@dimen/global_actions_side_margin"
         android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
         android:paddingRight="@dimen/global_actions_grid_horizontal_padding"
         android:paddingTop="@dimen/global_actions_grid_vertical_padding"
         android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
         android:orientation="horizontal"
-        android:gravity="left"
+        android:gravity="left | center_vertical"
         android:translationZ="@dimen/global_actions_translate"
-    />
+    >
+      <RelativeLayout
+          android:id="@+id/global_actions_overflow_button"
+          android:layout_width="48dp"
+          android:layout_height="48dp"
+      >
+        <ImageView
+            android:src="@drawable/ic_more_vert"
+            android:layout_centerInParent="true"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:tint="@color/control_more_vert"
+        />
+      </RelativeLayout>
+    </LinearLayout>
   </com.android.systemui.globalactions.GlobalActionsFlatLayout>
 
   <com.android.systemui.globalactions.MinHeightScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/global_actions_grid_container_shadow_offset"
-    android:layout_marginBottom="@dimen/global_actions_grid_container_negative_shadow_offset"
-    android:orientation="vertical"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:paddingBottom="@dimen/global_actions_grid_container_shadow_offset"
+      android:layout_marginBottom="@dimen/global_actions_grid_container_negative_shadow_offset"
+      android:orientation="vertical"
   >
     <LinearLayout
         android:id="@+id/global_actions_grid_root"
