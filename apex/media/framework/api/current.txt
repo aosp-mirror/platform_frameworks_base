@@ -67,6 +67,11 @@ package android.media {
     field public static final String PARSER_NAME_TS = "android.media.mediaparser.TsParser";
     field public static final String PARSER_NAME_UNKNOWN = "android.media.mediaparser.UNKNOWN";
     field public static final String PARSER_NAME_WAV = "android.media.mediaparser.WavParser";
+    field public static final int SAMPLE_FLAG_DECODE_ONLY = -2147483648; // 0x80000000
+    field public static final int SAMPLE_FLAG_ENCRYPTED = 1073741824; // 0x40000000
+    field public static final int SAMPLE_FLAG_HAS_SUPPLEMENTAL_DATA = 268435456; // 0x10000000
+    field public static final int SAMPLE_FLAG_KEY_FRAME = 1; // 0x1
+    field public static final int SAMPLE_FLAG_LAST_SAMPLE = 536870912; // 0x20000000
   }
 
   public static interface MediaParser.InputReader {
