@@ -1440,7 +1440,7 @@ public class BubbleStackView extends FrameLayout {
 
     /** Expands the clicked bubble. */
     public void expandBubble(Bubble bubble) {
-        if (bubble.equals(mBubbleData.getSelectedBubble())) {
+        if (bubble != null && bubble.equals(mBubbleData.getSelectedBubble())) {
             // If the bubble we're supposed to expand is the selected bubble, that means the
             // overflow bubble is currently expanded. Don't tell BubbleData to set this bubble as
             // selected, since it already is. Just call the stack's setSelectedBubble to expand it.
