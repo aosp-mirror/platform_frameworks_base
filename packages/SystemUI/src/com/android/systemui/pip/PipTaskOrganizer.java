@@ -318,6 +318,11 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
                 null /* updateBoundsCallback */);
     }
 
+    @Override
+    public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
+        // Do nothing
+    }
+
     /**
      * TODO(b/152809058): consolidate the display info handling logic in SysUI
      */
