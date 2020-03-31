@@ -50,6 +50,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
+import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -420,6 +421,10 @@ public class TaskOrganizerTests extends WindowTestsBase {
             @Override
             public void onTaskInfoChanged(RunningTaskInfo info) throws RemoteException {
             }
+
+            @Override
+            public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
+            }
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener,
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
@@ -473,6 +478,10 @@ public class TaskOrganizerTests extends WindowTestsBase {
             public void onTaskInfoChanged(RunningTaskInfo info) throws RemoteException {
                 lastReportedTiles.add(info);
                 called[0] = true;
+            }
+
+            @Override
+            public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
             }
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener,
@@ -530,6 +539,10 @@ public class TaskOrganizerTests extends WindowTestsBase {
             @Override
             public void onTaskInfoChanged(RunningTaskInfo info) {
                 lastReportedTiles.put(info.token.asBinder(), info);
+            }
+
+            @Override
+            public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
             }
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(
@@ -751,6 +764,9 @@ public class TaskOrganizerTests extends WindowTestsBase {
         @Override
         public void onTaskInfoChanged(RunningTaskInfo info) {
         }
+        @Override
+        public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
+        }
     };
 
     private ActivityRecord makePipableActivity() {
@@ -826,5 +842,32 @@ public class TaskOrganizerTests extends WindowTestsBase {
 
         task.removeImmediately();
         verify(organizer).onTaskVanished(any());
+    }
+
+    @Test
+    public void testInterceptBackPressedOnTaskRoot() throws RemoteException {
+        final ActivityStack stack = createStack();
+        final Task task = createTask(stack);
+        final ActivityRecord activity = WindowTestUtils.createActivityRecordInTask(
+                stack.mDisplayContent, task);
+        final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
+
+        // Setup the task to be controlled by the MW mode organizer
+        stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        assertTrue(stack.isOrganized());
+
+        // Verify a back pressed does not call the organizer
+        mWm.mAtmService.onBackPressedOnTaskRoot(activity.token,
+                new IRequestFinishCallback.Default());
+        verify(organizer, never()).onBackPressedOnTaskRoot(any());
+
+        // Enable intercepting back
+        mWm.mAtmService.mTaskOrganizerController.setInterceptBackPressedOnTaskRoot(organizer,
+                true);
+
+        // Verify now that the back press does call the organizer
+        mWm.mAtmService.onBackPressedOnTaskRoot(activity.token,
+                new IRequestFinishCallback.Default());
+        verify(organizer, times(1)).onBackPressedOnTaskRoot(any());
     }
 }
