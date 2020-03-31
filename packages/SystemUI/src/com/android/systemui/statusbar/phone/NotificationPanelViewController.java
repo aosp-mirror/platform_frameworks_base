@@ -379,14 +379,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private Runnable mPanelAlphaEndAction;
     private float mBottomAreaShadeAlpha;
     private final ValueAnimator mBottomAreaShadeAlphaAnimator;
-    private AnimatorListenerAdapter mAnimatorListenerAdapter = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            if (mPanelAlphaEndAction != null) {
-                mPanelAlphaEndAction.run();
-            }
-        }
-    };
     private final AnimatableProperty mPanelAlphaAnimator = AnimatableProperty.from("panelAlpha",
             NotificationPanelView::setPanelAlphaInternal,
             NotificationPanelView::getCurrentPanelAlpha,
@@ -396,8 +388,11 @@ public class NotificationPanelViewController extends PanelViewController {
             new AnimationProperties().setDuration(150).setCustomInterpolator(
                     mPanelAlphaAnimator.getProperty(), Interpolators.ALPHA_OUT);
     private final AnimationProperties mPanelAlphaInPropertiesAnimator =
-            new AnimationProperties().setDuration(200).setAnimationFinishListener(
-                    mAnimatorListenerAdapter).setCustomInterpolator(
+            new AnimationProperties().setDuration(200).setAnimationEndAction((property) -> {
+                            if (mPanelAlphaEndAction != null) {
+                                mPanelAlphaEndAction.run();
+                            }
+                        }).setCustomInterpolator(
                     mPanelAlphaAnimator.getProperty(), Interpolators.ALPHA_IN);
     private final NotificationEntryManager mEntryManager;
 
