@@ -29,7 +29,9 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Drawable;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -104,11 +106,25 @@ class QuickAccessWalletServiceInfo {
         @Nullable
         private final String mSettingsActivity;
         @Nullable
-        private final String mWalletActivity;
+        private final String mTargetActivity;
+        @Nullable
+        private final CharSequence mShortcutShortLabel;
+        @Nullable
+        private final CharSequence mShortcutLongLabel;
 
-        private ServiceMetadata(String settingsActivity, String walletActivity) {
-            this.mSettingsActivity = settingsActivity;
-            this.mWalletActivity = walletActivity;
+        private static ServiceMetadata empty() {
+            return new ServiceMetadata(null, null, null, null);
+        }
+
+        private ServiceMetadata(
+                String targetActivity,
+                String settingsActivity,
+                CharSequence shortcutShortLabel,
+                CharSequence shortcutLongLabel) {
+            mTargetActivity = targetActivity;
+            mSettingsActivity = settingsActivity;
+            mShortcutShortLabel = shortcutShortLabel;
+            mShortcutLongLabel = shortcutLongLabel;
         }
     }
 
@@ -118,7 +134,7 @@ class QuickAccessWalletServiceInfo {
                 serviceInfo.loadXmlMetaData(pm, QuickAccessWalletService.SERVICE_META_DATA);
 
         if (parser == null) {
-            return new ServiceMetadata(null, null);
+            return ServiceMetadata.empty();
         }
 
         try {
@@ -134,11 +150,16 @@ class QuickAccessWalletServiceInfo {
                 try {
                     afsAttributes = resources.obtainAttributes(allAttributes,
                             R.styleable.QuickAccessWalletService);
+                    String targetActivity = afsAttributes.getString(
+                            R.styleable.QuickAccessWalletService_targetActivity);
                     String settingsActivity = afsAttributes.getString(
                             R.styleable.QuickAccessWalletService_settingsActivity);
-                    String walletActivity = afsAttributes.getString(
-                            R.styleable.QuickAccessWalletService_targetActivity);
-                    return new ServiceMetadata(settingsActivity, walletActivity);
+                    CharSequence shortcutShortLabel = afsAttributes.getText(
+                            R.styleable.QuickAccessWalletService_shortcutShortLabel);
+                    CharSequence shortcutLongLabel = afsAttributes.getText(
+                            R.styleable.QuickAccessWalletService_shortcutLongLabel);
+                    return new ServiceMetadata(targetActivity, settingsActivity, shortcutShortLabel,
+                            shortcutLongLabel);
                 } finally {
                     if (afsAttributes != null) {
                         afsAttributes.recycle();
@@ -147,13 +168,12 @@ class QuickAccessWalletServiceInfo {
             } else {
                 Log.e(TAG, "Meta-data does not start with quickaccesswallet-service tag");
             }
-
         } catch (PackageManager.NameNotFoundException
                 | IOException
                 | XmlPullParserException e) {
             Log.e(TAG, "Error parsing quickaccesswallet service meta-data", e);
         }
-        return new ServiceMetadata(null, null);
+        return ServiceMetadata.empty();
     }
 
     /**
@@ -171,7 +191,7 @@ class QuickAccessWalletServiceInfo {
      */
     @Nullable
     String getWalletActivity() {
-        return mServiceMetadata.mWalletActivity;
+        return mServiceMetadata.mTargetActivity;
     }
 
     /**
@@ -182,5 +202,35 @@ class QuickAccessWalletServiceInfo {
     @Nullable
     String getSettingsActivity() {
         return mServiceMetadata.mSettingsActivity;
+    }
+
+    @NonNull
+    Drawable getWalletLogo(Context context) {
+        Drawable drawable = mServiceInfo.loadLogo(context.getPackageManager());
+        if (drawable != null) {
+            return drawable;
+        }
+        return mServiceInfo.loadIcon(context.getPackageManager());
+    }
+
+    @NonNull
+    CharSequence getShortcutShortLabel(Context context) {
+        if (!TextUtils.isEmpty(mServiceMetadata.mShortcutShortLabel)) {
+            return mServiceMetadata.mShortcutShortLabel;
+        }
+        return mServiceInfo.loadLabel(context.getPackageManager());
+    }
+
+    @NonNull
+    CharSequence getShortcutLongLabel(Context context) {
+        if (!TextUtils.isEmpty(mServiceMetadata.mShortcutLongLabel)) {
+            return mServiceMetadata.mShortcutLongLabel;
+        }
+        return mServiceInfo.loadLabel(context.getPackageManager());
+    }
+
+    @NonNull
+    CharSequence getServiceLabel(Context context) {
+        return mServiceInfo.loadLabel(context.getPackageManager());
     }
 }
