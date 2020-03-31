@@ -152,6 +152,7 @@ void ReportHandler::handleMessage(const Message& message) {
 }
 
 void ReportHandler::schedulePersistedReport(const IncidentReportArgs& args) {
+    unique_lock<mutex> lock(mLock);
     mBatch->addPersistedReport(args);
     mHandlerLooper->removeMessages(this, WHAT_TAKE_REPORT);
     mHandlerLooper->sendMessage(this, Message(WHAT_TAKE_REPORT));
@@ -159,6 +160,7 @@ void ReportHandler::schedulePersistedReport(const IncidentReportArgs& args) {
 
 void ReportHandler::scheduleStreamingReport(const IncidentReportArgs& args,
         const sp<IIncidentReportStatusListener>& listener, int streamFd) {
+    unique_lock<mutex> lock(mLock);
     mBatch->addStreamingReport(args, listener, streamFd);
     mHandlerLooper->removeMessages(this, WHAT_TAKE_REPORT);
     mHandlerLooper->sendMessage(this, Message(WHAT_TAKE_REPORT));
