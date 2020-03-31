@@ -43,6 +43,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IHwBinder;
 import android.os.IRemoteCallback;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -52,6 +53,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FrameworkStatsLog;
@@ -93,7 +95,22 @@ public abstract class BiometricServiceBase extends SystemService
     protected final Map<Integer, Long> mAuthenticatorIds =
             Collections.synchronizedMap(new HashMap<>());
     protected final AppOpsManager mAppOps;
-    protected final H mHandler = new H();
+
+    /**
+     * Handler which all subclasses should post events to.
+     */
+    protected final Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(android.os.Message msg) {
+            switch (msg.what) {
+                case MSG_USER_SWITCHING:
+                    handleUserSwitching(msg.arg1);
+                    break;
+                default:
+                    Slog.w(getTag(), "Unknown message:" + msg.what);
+            }
+        }
+    };
 
     private final IBinder mToken = new Binder(); // Used for internal enumeration
     private final ArrayList<UserTemplate> mUnknownHALTemplates = new ArrayList<>();
@@ -483,23 +500,6 @@ public abstract class BiometricServiceBase extends SystemService
         void resetLockout(byte[] token) throws RemoteException;
     }
 
-    /**
-     * Handler which all subclasses should post events to.
-     */
-    protected final class H extends Handler {
-        @Override
-        public void handleMessage(android.os.Message msg) {
-            switch (msg.what) {
-                case MSG_USER_SWITCHING:
-                    handleUserSwitching(msg.arg1);
-                    break;
-
-                default:
-                    Slog.w(getTag(), "Unknown message:" + msg.what);
-            }
-        }
-    }
-
     private final Runnable mOnTaskStackChangedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -647,8 +647,9 @@ public abstract class BiometricServiceBase extends SystemService
         mContext = context;
         mStatusBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mKeyguardPackage = ComponentName.unflattenFromString(context.getResources().getString(
-                com.android.internal.R.string.config_keyguardComponent)).getPackageName();
+        final ComponentName keyguardComponent = ComponentName.unflattenFromString(
+                context.getResources().getString(R.string.config_keyguardComponent));
+        mKeyguardPackage = keyguardComponent != null ? keyguardComponent.getPackageName() : null;
         mAppOps = context.getSystemService(AppOpsManager.class);
         mActivityTaskManager = ((ActivityTaskManager) context.getSystemService(
                 Context.ACTIVITY_TASK_SERVICE)).getService();
@@ -798,9 +799,10 @@ public abstract class BiometricServiceBase extends SystemService
     }
 
     protected void handleEnumerate(BiometricAuthenticator.Identifier identifier, int remaining) {
-        ClientMonitor client = getCurrentClient();
-
-        client.onEnumerationResult(identifier, remaining);
+        ClientMonitor client = mCurrentClient;
+        if (client != null) {
+            client.onEnumerationResult(identifier, remaining);
+        }
 
         // All templates in the HAL for this user were enumerated
         if (remaining == 0) {
@@ -818,7 +820,7 @@ public abstract class BiometricServiceBase extends SystemService
                 }
                 removeClient(client);
                 startCleanupUnknownHALTemplates();
-            } else {
+            } else if (client != null) {
                 removeClient(client);
             }
         }
@@ -1145,7 +1147,7 @@ public abstract class BiometricServiceBase extends SystemService
             }
         }
         if (mCurrentClient != null) {
-            if (DEBUG) Slog.v(getTag(), "Done with client: " + client.getOwnerString());
+            if (DEBUG) Slog.v(getTag(), "Done with client: " + mCurrentClient.getOwnerString());
             mCurrentClient = null;
         }
         if (mPendingClient == null) {
