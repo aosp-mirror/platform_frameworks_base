@@ -674,7 +674,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     final ServiceThread mHandlerThread;
 
-    final Handler mHandler;
+    final PackageHandler mHandler;
 
     private final ProcessLoggingHandler mProcessLoggingHandler;
 
@@ -1031,61 +1031,6 @@ public class PackageManagerService extends IPackageManager.Stub
         public PlatformCompat getCompatibility() {
             return mPlatformCompatProducer.get(this, mPackageManager);
         }
-    }
-
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    public static class TestParams {
-        public ApexManager apexManager;
-        public @Nullable String appPredictionServicePackage;
-        public ArtManagerService artManagerService;
-        public @Nullable String configuratorPackage;
-        public int defParseFlags;
-        public DexManager dexManager;
-        public List<ScanPartition> dirsToScanAsSystem;
-        public @Nullable String documenterPackage;
-        public boolean factoryTest;
-        public ArrayMap<String, FeatureInfo> availableFeatures;
-        public Handler handler;
-        public ServiceThread handlerThread;
-        public @Nullable String incidentReportApproverPackage;
-        public IncrementalManager incrementalManager;
-        public PackageInstallerService installerService;
-        public InstantAppRegistry instantAppRegistry;
-        public InstantAppResolverConnection instantAppResolverConnection;
-        public ComponentName instantAppResolverSettingsComponent;
-        public @Nullable IntentFilterVerifier<ParsedIntentInfo> intentFilterVerifier;
-        public @Nullable ComponentName intentFilterVerifierComponent;
-        public boolean isPreNmr1Upgrade;
-        public boolean isPreNupgrade;
-        public boolean isPreQupgrade;
-        public boolean isUpgrade;
-        public DisplayMetrics Metrics;
-        public ModuleInfoProvider moduleInfoProvider;
-        public MoveCallbacks moveCallbacks;
-        public boolean onlyCore;
-        public OverlayConfig overlayConfig;
-        public PackageDexOptimizer packageDexOptimizer;
-        public IPermissionManager permissionManagerService;
-        public PendingPackageBroadcasts pendingPackageBroadcasts;
-        public PackageManagerInternal pmInternal;
-        public ProcessLoggingHandler processLoggingHandler;
-        public ProtectedPackages protectedPackages;
-        public @NonNull String requiredInstallerPackage;
-        public @NonNull String requiredPermissionControllerPackage;
-        public @NonNull String requiredUninstallerPackage;
-        public @Nullable String requiredVerifierPackage;
-        public String[] separateProcesses;
-        public @NonNull String servicesExtensionPackageName;
-        public @Nullable String setupWizardPackage;
-        public @NonNull String sharedSystemSharedLibraryPackageName;
-        public @Nullable String storageManagerPackage;
-        public @Nullable String defaultTextClassifierPackage;
-        public @Nullable String systemTextClassifierPackage;
-        public ViewCompiler viewCompiler;
-        public @Nullable String wellbeingPackage;
-        public @Nullable String retailDemoPackage;
-        public ComponentName resolveComponentName;
-        public ArrayMap<String, AndroidPackage> packages;
     }
 
     private final AppsFilter mAppsFilter;
@@ -1457,8 +1402,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // Set of pending broadcasts for aggregating enable/disable of components.
-    @VisibleForTesting(visibility = Visibility.PACKAGE)
-    public static class PendingPackageBroadcasts {
+    static class PendingPackageBroadcasts {
         // for each user id, a map of <package name -> components within that package>
         final SparseArray<ArrayMap<String, ArrayList<String>>> mUidMap;
 
@@ -1521,7 +1465,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return map;
         }
     }
-    final PendingPackageBroadcasts mPendingBroadcasts;
+    final PendingPackageBroadcasts mPendingBroadcasts = new PendingPackageBroadcasts();
 
     static final int SEND_PENDING_BROADCAST = 1;
     static final int INIT_COPY = 5;
@@ -2738,81 +2682,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    /**
-     * A extremely minimal constructor designed to start up a PackageManagerService instance for
-     * testing.
-     *
-     * It is assumed that all methods under test will mock the internal fields and thus
-     * none of the initialization is needed.
-     */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    public PackageManagerService(@NonNull Injector injector, @NonNull TestParams testParams) {
-        mInjector = injector;
-        mInjector.bootstrap(this);
-        mAppsFilter = injector.getAppsFilter();
-        mComponentResolver = injector.getComponentResolver();
-        mContext = injector.getContext();
-        mInstaller = injector.getInstaller();
-        mInstallLock = injector.getInstallLock();
-        mLock = injector.getLock();
-        mPermissionManager = injector.getPermissionManagerServiceInternal();
-        mSettings = injector.getSettings();
-        mUserManager = injector.getUserManagerService();
-
-        mApexManager = testParams.apexManager;
-        mArtManagerService = testParams.artManagerService;
-        mAvailableFeatures = testParams.availableFeatures;
-        mDefParseFlags = testParams.defParseFlags;
-        mDexManager = testParams.dexManager;
-        mDirsToScanAsSystem = testParams.dirsToScanAsSystem;
-        mFactoryTest = testParams.factoryTest;
-        mHandler = testParams.handler;
-        mHandlerThread = testParams.handlerThread;
-        mIncrementalManager = testParams.incrementalManager;
-        mInstallerService = testParams.installerService;
-        mInstantAppRegistry = testParams.instantAppRegistry;
-        mInstantAppResolverConnection = testParams.instantAppResolverConnection;
-        mInstantAppResolverSettingsComponent = testParams.instantAppResolverSettingsComponent;
-        mIntentFilterVerifier = testParams.intentFilterVerifier;
-        mIntentFilterVerifierComponent = testParams.intentFilterVerifierComponent;
-        mIsPreNMR1Upgrade = testParams.isPreNmr1Upgrade;
-        mIsPreNUpgrade = testParams.isPreNupgrade;
-        mIsPreQUpgrade = testParams.isPreQupgrade;
-        mIsUpgrade = testParams.isUpgrade;
-        mMetrics = testParams.Metrics;
-        mModuleInfoProvider = testParams.moduleInfoProvider;
-        mMoveCallbacks = testParams.moveCallbacks;
-        mOnlyCore = testParams.onlyCore;
-        mOverlayConfig = testParams.overlayConfig;
-        mPackageDexOptimizer = testParams.packageDexOptimizer;
-        mPendingBroadcasts = testParams.pendingPackageBroadcasts;
-        mPermissionManagerService = testParams.permissionManagerService;
-        mPmInternal = testParams.pmInternal;
-        mProcessLoggingHandler = testParams.processLoggingHandler;
-        mProtectedPackages = testParams.protectedPackages;
-        mSeparateProcesses = testParams.separateProcesses;
-        mViewCompiler = testParams.viewCompiler;
-        mRequiredVerifierPackage = testParams.requiredVerifierPackage;
-        mRequiredInstallerPackage = testParams.requiredInstallerPackage;
-        mRequiredUninstallerPackage = testParams.requiredUninstallerPackage;
-        mRequiredPermissionControllerPackage = testParams.requiredPermissionControllerPackage;
-        mSetupWizardPackage = testParams.setupWizardPackage;
-        mStorageManagerPackage = testParams.storageManagerPackage;
-        mDefaultTextClassifierPackage = testParams.defaultTextClassifierPackage;
-        mSystemTextClassifierPackageName = testParams.systemTextClassifierPackage;
-        mWellbeingPackage = testParams.wellbeingPackage;
-        mRetailDemoPackage = testParams.retailDemoPackage;
-        mDocumenterPackage = testParams.documenterPackage;
-        mConfiguratorPackage = testParams.configuratorPackage;
-        mAppPredictionServicePackage = testParams.appPredictionServicePackage;
-        mIncidentReportApproverPackage = testParams.incidentReportApproverPackage;
-        mServicesExtensionPackageName = testParams.servicesExtensionPackageName;
-        mSharedSystemSharedLibraryPackageName = testParams.sharedSystemSharedLibraryPackageName;
-
-        mResolveComponentName = testParams.resolveComponentName;
-        mPackages.putAll(testParams.packages);
-    }
-
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest) {
         PackageManager.invalidatePackageInfoCache();
         PackageManager.disableApplicationInfoCache();
@@ -2820,8 +2689,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
-        mPendingBroadcasts = new PendingPackageBroadcasts();
-
         mInjector = injector;
         mInjector.bootstrap(this);
         mLock = injector.getLock();
