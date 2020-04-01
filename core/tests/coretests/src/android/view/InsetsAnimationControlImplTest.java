@@ -229,7 +229,7 @@ public class InsetsAnimationControlImplTest {
         doAnswer(invocation -> {
             mController.applyChangeInsets(mInsetsState);
             return null;
-        }).when(mMockController).scheduleApplyChangeInsets();
+        }).when(mMockController).scheduleApplyChangeInsets(any());
         mController.finish(true /* shown */);
         assertEquals(Insets.of(0, 100, 100, 0), mController.getCurrentInsets());
         verify(mMockController).notifyFinished(eq(mController), eq(true /* shown */));
