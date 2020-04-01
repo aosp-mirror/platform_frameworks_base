@@ -513,18 +513,14 @@
     <string name="storage_category" msgid="2287342585424631813">"Speicher"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Geteilte Daten"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Geteilte Daten anzeigen und ändern"</string>
-    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
-    <skip />
-    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
-    <skip />
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Es gibt keine geteilten Daten für diesen Nutzer."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Beim Abrufen der geteilten Daten ist ein Fehler aufgetreten. Versuch es noch einmal."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID für geteilte Daten: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Läuft am <xliff:g id="DATE">%s</xliff:g> ab"</string>
-    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
-    <skip />
-    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
-    <skip />
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Beim Löschen der geteilten Daten ist ein Fehler aufgetreten."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Für diese geteilten Daten gibt es keine Freigaben. Möchtest du sie löschen?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Apps, die Daten teilen"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"Keine Beschreibung der App verfügbar."</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Keine von der App bereitgestellte Beschreibung verfügbar."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Freigabe läuft am <xliff:g id="DATE">%s</xliff:g> ab"</string>
     <string name="delete_blob_text" msgid="2819192607255625697">"Geteilte Daten löschen"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Bist du sicher, dass du diese geteilten Daten löschen möchtest?"</string>
@@ -547,4 +543,12 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profilinformationen"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Vor dem Erstellen eines eingeschränkten Profils musst du eine Displaysperre einrichten, um deine Apps und personenbezogenen Daten zu schützen."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Sperre einrichten"</string>
+    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
+    <skip />
+    <!-- no translation found for guest_new_guest (3482026122932643557) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
+    <skip />
+    <!-- no translation found for guest_nickname (6332276931583337261) -->
+    <skip />
 </resources>

@@ -418,8 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ప్రొటానోమలీ (ఎరుపు-ఆకుపచ్చ రంగు)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ట్రైటనోమలీ (నీలం-పసుపు రంగు)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"రంగు సవరణ"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"రంగుల సరి చేసే ఫీచర్‌తో మీరు మీ పరికరంలో రంగులో కనిపించే పద్ధతిని సర్దుబాటు చేయగలుగుతారు"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ద్వారా భర్తీ చేయబడింది"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
@@ -520,18 +519,14 @@
     <skip />
     <!-- no translation found for shared_data_summary (5516326713822885652) -->
     <skip />
-    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
-    <skip />
-    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
-    <skip />
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ఈ యూజర్ కోసం షేర్ చేసిన డేటా ఏదీ లేదు."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"షేర్ చేసిన డేటా పొందడంలో ఎర్రర్ ఏర్పడింది. మళ్లీ ట్రై చేయండి."</string>
     <!-- no translation found for blob_id_text (8680078988996308061) -->
     <skip />
     <!-- no translation found for blob_expires_text (7882727111491739331) -->
     <skip />
-    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
-    <skip />
-    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
-    <skip />
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"షేర్ చేసిన డేటాను తొలగించడంలో ఎర్రర్ ఏర్పడింది."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"ఈ షేర్ చేసిన డేటాకు సేకరించబడిన లీజులు ఏవీ లేవు. దీన్ని మీరు తొలగించాలనుకుంటున్నారా?"</string>
     <!-- no translation found for accessor_info_title (8289823651512477787) -->
     <skip />
     <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
@@ -561,4 +556,12 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"ప్రొఫైల్ సమాచారం"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"మీరు పరిమితం చేయబడిన ప్రొఫైల్‌ను సృష్టించడానికి ముందు, మీ అనువర్తనాలు మరియు వ్యక్తిగత డేటాను రక్షించడానికి స్క్రీన్ లాక్‌ను సెటప్ చేయాల్సి ఉంటుంది."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"లాక్‌ను సెట్ చేయి"</string>
+    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
+    <skip />
+    <!-- no translation found for guest_new_guest (3482026122932643557) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
+    <skip />
+    <!-- no translation found for guest_nickname (6332276931583337261) -->
+    <skip />
 </resources>
