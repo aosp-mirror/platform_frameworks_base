@@ -5293,7 +5293,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             AndroidPackage pkg = a == null ? null : mPackages.get(a.getPackageName());
             if (pkg != null && mSettings.isEnabledAndMatchLPr(pkg, a, flags, userId)) {
-                PackageSetting ps = mSettings.getPackageLPr(component.getPackageName());
+                PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
                 if (shouldFilterApplicationLocked(
                         ps, filterCallingUid, component, TYPE_ACTIVITY, userId)) {
@@ -15735,12 +15735,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         // these install state changes will be persisted in the
                         // upcoming call to mSettings.writeLPr().
                     }
-
-                    if (allUsers != null) {
-                        for (int currentUserId : allUsers) {
-                            ps.resetOverrideComponentLabelIcon(currentUserId);
-                        }
-                    }
                 }
 
                 // Retrieve the overlays for shared libraries of the package.
@@ -20309,86 +20303,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (pkgSetting != null) {
                 pkgSetting.setUpdateAvailable(updateAvailable);
             }
-        }
-    }
-
-    @Override
-    public void overrideLabelAndIcon(@NonNull ComponentName componentName,
-            @NonNull String nonLocalizedLabel, int icon, int userId) {
-        if (TextUtils.isEmpty(nonLocalizedLabel)) {
-            throw new IllegalArgumentException("Override label should be a valid String");
-        }
-        updateComponentLabelIcon(componentName, nonLocalizedLabel, icon, userId);
-    }
-
-    @Override
-    public void restoreLabelAndIcon(@NonNull ComponentName componentName, int userId) {
-        updateComponentLabelIcon(componentName, null, null, userId);
-    }
-
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    public void updateComponentLabelIcon(/*@NonNull*/ ComponentName componentName,
-            @Nullable String nonLocalizedLabel, @Nullable Integer icon, int userId) {
-        if (componentName == null) {
-            throw new IllegalArgumentException("Must specify a component");
-        }
-
-        boolean componentExists = mComponentResolver.componentExists(componentName);
-        if (!componentExists) {
-            throw new IllegalArgumentException("Component " + componentName + " not found");
-        }
-
-        int callingUid = Binder.getCallingUid();
-
-        String componentPkgName = componentName.getPackageName();
-        int componentUid = getPackageUid(componentPkgName, 0, userId);
-        if (!UserHandle.isSameApp(callingUid, componentUid)) {
-            throw new SecurityException("The calling UID (" + callingUid + ")"
-                    + " does not match the target UID");
-        }
-
-        String allowedCallerPkg = mContext.getString(R.string.config_overrideComponentUiPackage);
-        if (TextUtils.isEmpty(allowedCallerPkg)) {
-            throw new SecurityException(
-                    "There is no package defined as allowed to change a component's label or icon");
-        }
-
-        int allowedCallerUid = getPackageUid(allowedCallerPkg, PackageManager.MATCH_SYSTEM_ONLY,
-                userId);
-        if (allowedCallerUid == -1 || !UserHandle.isSameApp(callingUid, allowedCallerUid)) {
-            throw new SecurityException("The calling UID (" + callingUid + ")"
-                    + " is not allowed to change a component's label or icon");
-        }
-
-        synchronized (mLock) {
-            AndroidPackage pkg = mPackages.get(componentPkgName);
-            PackageSetting pkgSetting = getPackageSetting(componentPkgName);
-            if (pkg == null || pkgSetting == null
-                    || (!pkg.isSystem() && !pkgSetting.getPkgState().isUpdatedSystemApp())) {
-                throw new SecurityException(
-                        "Changing the label is not allowed for " + componentName);
-            }
-
-            if (!pkgSetting.overrideNonLocalizedLabelAndIcon(componentName, nonLocalizedLabel,
-                    icon, userId)) {
-                // Nothing changed
-                return;
-            }
-        }
-
-        ArrayList<String> components = mPendingBroadcasts.get(userId, componentPkgName);
-        if (components == null) {
-            components = new ArrayList<>();
-            mPendingBroadcasts.put(userId, componentPkgName, components);
-        }
-
-        String className = componentName.getClassName();
-        if (!components.contains(className)) {
-            components.add(className);
-        }
-
-        if (!mHandler.hasMessages(SEND_PENDING_BROADCAST)) {
-            mHandler.sendEmptyMessageDelayed(SEND_PENDING_BROADCAST, BROADCAST_DELAY);
         }
     }
 
