@@ -39,6 +39,15 @@ static int write_java_q_logger_class(FILE* out, const SignatureInfoMap& signatur
     return 0;
 }
 
+static void write_java_annotation_constants(FILE* out) {
+    fprintf(out, "    // Annotation constants.\n");
+
+    for (const auto& [id, name] : ANNOTATION_ID_CONSTANTS) {
+        fprintf(out, "    public static final byte %s = %hhu;\n", name.c_str(), id);
+    }
+    fprintf(out, "\n");
+}
+
 static void write_annotations(FILE* out, int argIndex,
                               const FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet) {
     FieldNumberToAtomDeclSet::const_iterator fieldNumberToAtomDeclSetIt =
@@ -48,32 +57,28 @@ static void write_annotations(FILE* out, int argIndex,
     }
     const AtomDeclSet& atomDeclSet = fieldNumberToAtomDeclSetIt->second;
     for (const shared_ptr<AtomDecl>& atomDecl : atomDeclSet) {
-        fprintf(out, "        if (code == %d) {\n", atomDecl->code);
+        const string atomConstant = make_constant_name(atomDecl->name);
+        fprintf(out, "        if (%s == code) {\n", atomConstant.c_str());
         const AnnotationSet& annotations = atomDecl->fieldNumberToAnnotations.at(argIndex);
         int resetState = -1;
         int defaultState = -1;
         for (const shared_ptr<Annotation>& annotation : annotations) {
-            // TODO(b/151786433): Write atom constant name instead of atom id literal.
+            const string& annotationConstant =
+                    ANNOTATION_ID_CONSTANTS.at(annotation->annotationId);
             switch (annotation->type) {
-                // TODO(b/151776731): Check for reset state annotation and only include
-                // reset state when field value == default state annotation value.
                 case ANNOTATION_TYPE_INT:
-                    // TODO(b/151786433): Write annotation constant name instead of
-                    // annotation id literal.
                     if (ANNOTATION_ID_RESET_STATE == annotation->annotationId) {
                         resetState = annotation->value.intValue;
                     } else if (ANNOTATION_ID_DEFAULT_STATE == annotation->annotationId) {
                         defaultState = annotation->value.intValue;
                     } else {
-                        fprintf(out, "            builder.addIntAnnotation((byte) %d, %d);\n",
-                                annotation->annotationId, annotation->value.intValue);
+                        fprintf(out, "            builder.addIntAnnotation(%s, %d);\n",
+                                annotationConstant.c_str(), annotation->value.intValue);
                     }
                     break;
                 case ANNOTATION_TYPE_BOOL:
-                    // TODO(b/151786433): Write annotation constant name instead of
-                    // annotation id literal.
-                    fprintf(out, "            builder.addBooleanAnnotation((byte) %d, %s);\n",
-                            annotation->annotationId,
+                    fprintf(out, "            builder.addBooleanAnnotation(%s, %s);\n",
+                            annotationConstant.c_str(),
                             annotation->value.boolValue ? "true" : "false");
                     break;
                 default:
@@ -81,9 +86,11 @@ static void write_annotations(FILE* out, int argIndex,
             }
         }
         if (defaultState != -1 && resetState != -1) {
+            const string& annotationConstant =
+                    ANNOTATION_ID_CONSTANTS.at(ANNOTATION_ID_RESET_STATE);
             fprintf(out, "            if (arg%d == %d) {\n", argIndex, resetState);
-            fprintf(out, "                builder.addIntAnnotation((byte) %d, %d);\n",
-                    ANNOTATION_ID_RESET_STATE, defaultState);
+            fprintf(out, "                builder.addIntAnnotation(%s, %d);\n",
+                    annotationConstant.c_str(), defaultState);
             fprintf(out, "            }\n");
         }
         fprintf(out, "        }\n");
@@ -311,6 +318,7 @@ int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl& attribut
 
     write_java_atom_codes(out, atoms);
     write_java_enum_values(out, atoms);
+    write_java_annotation_constants(out);
 
     int errors = 0;
 
