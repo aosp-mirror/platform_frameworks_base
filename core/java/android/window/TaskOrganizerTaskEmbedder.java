@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.window;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
+import android.app.ActivityManager;
+import android.app.ActivityOptions;
+import android.app.ActivityView;
+import android.app.TaskStackListener;
 import android.content.Context;
 import android.graphics.Rect;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.SurfaceControl;
-import android.window.ITaskOrganizer;
-import android.window.IWindowContainer;
-import android.window.WindowContainerTransaction;
-import android.window.WindowOrganizer;
-import android.window.WindowOrganizer.TaskOrganizer;
 
 /**
  * A component which handles embedded display of tasks within another window. The embedded task can
@@ -41,9 +39,9 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
     private static final String TAG = "TaskOrgTaskEmbedder";
     private static final boolean DEBUG = false;
 
-    private ITaskOrganizer.Stub mTaskOrganizer;
+    private TaskOrganizer mTaskOrganizer;
     private ActivityManager.RunningTaskInfo mTaskInfo;
-    private IWindowContainer mTaskToken;
+    private WindowContainerToken mTaskToken;
     private SurfaceControl mTaskLeash;
     private boolean mPendingNotifyBoundsChanged;
 
@@ -79,16 +77,11 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         }
         // Register the task organizer
         mTaskOrganizer =  new TaskOrganizerImpl();
-        try {
-            // TODO(wm-shell): This currently prevents other organizers from controlling MULT_WINDOW
-            // windowing mode tasks. Plan is to migrate this to a wm-shell front-end when that
-            // infrastructure is ready.
-            TaskOrganizer.registerOrganizer(mTaskOrganizer, WINDOWING_MODE_MULTI_WINDOW);
-            TaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskOrganizer, true);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to initialize TaskEmbedder", e);
-            return false;
-        }
+        // TODO(wm-shell): This currently prevents other organizers from controlling MULT_WINDOW
+        // windowing mode tasks. Plan is to migrate this to a wm-shell front-end when that
+        // infrastructure is ready.
+        mTaskOrganizer.registerOrganizer(WINDOWING_MODE_MULTI_WINDOW);
+        mTaskOrganizer.setInterceptBackPressedOnTaskRoot(true);
         return true;
     }
 
@@ -100,11 +93,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         if (!isInitialized()) {
             return false;
         }
-        try {
-            TaskOrganizer.unregisterOrganizer(mTaskOrganizer);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to remove task");
-        }
+        mTaskOrganizer.unregisterOrganizer();
         resetTaskInfo();
         return true;
     }
@@ -125,11 +114,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setHidden(mTaskToken, false /* hidden */);
-        try {
-            WindowOrganizer.applyTransaction(wct);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to unset hidden in transaction");
-        }
+        WindowOrganizer.applyTransaction(wct);
         // TODO(b/151449487): Only call callback once we enable synchronization
         if (mListener != null) {
             mListener.onTaskVisibilityChanged(getTaskId(), true);
@@ -152,11 +137,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setHidden(mTaskToken, true /* hidden */);
-        try {
-            WindowOrganizer.applyTransaction(wct);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to set hidden in transaction");
-        }
+        WindowOrganizer.applyTransaction(wct);
         // TODO(b/151449487): Only call callback once we enable synchronization
         if (mListener != null) {
             mListener.onTaskVisibilityChanged(getTaskId(), false);
@@ -186,12 +167,8 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
 
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setBounds(mTaskToken, screenBounds);
-        try {
-            // TODO(b/151449487): Enable synchronization
-            WindowOrganizer.applyTransaction(wct);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to set bounds in transaction");
-        }
+        // TODO(b/151449487): Enable synchronization
+        WindowOrganizer.applyTransaction(wct);
     }
 
     /**
@@ -253,8 +230,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
     private class TaskStackListenerImpl extends TaskStackListener {
 
         @Override
-        public void onTaskDescriptionChanged(ActivityManager.RunningTaskInfo taskInfo)
-                throws RemoteException {
+        public void onTaskDescriptionChanged(ActivityManager.RunningTaskInfo taskInfo) {
             if (!isInitialized()) {
                 return;
             }
@@ -266,10 +242,9 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         }
     }
 
-    private class TaskOrganizerImpl extends ITaskOrganizer.Stub {
+    private class TaskOrganizerImpl extends TaskOrganizer {
         @Override
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo)
-                throws RemoteException {
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo) {
             if (DEBUG) {
                 log("taskAppeared: " + taskInfo.taskId);
             }
@@ -293,8 +268,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         }
 
         @Override
-        public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo)
-                throws RemoteException {
+        public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
             if (DEBUG) {
                 log("taskVanished: " + taskInfo.taskId);
             }
@@ -309,14 +283,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         }
 
         @Override
-        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo)
-                throws RemoteException {
-            // Do nothing
-        }
-
-        @Override
-        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo)
-                throws RemoteException {
+        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
             if (mListener != null) {
                 mListener.onBackPressedOnTaskRoot(taskInfo.taskId);
             }

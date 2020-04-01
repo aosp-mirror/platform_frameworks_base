@@ -340,12 +340,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     @Override
-    public void transactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
+    public void onTransactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
         final IWindowContainerTransactionCallback callback =
                 mTransactionCallbacksByPendingSyncId.get(mSyncId);
 
         try {
-            callback.transactionReady(mSyncId, mergedTransaction);
+            callback.onTransactionReady(mSyncId, mergedTransaction);
         } catch (RemoteException e) {
         }
 

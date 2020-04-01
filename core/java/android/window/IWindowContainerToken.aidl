@@ -23,7 +23,7 @@ import android.view.SurfaceControl;
  * token.
  * @hide
  */
-interface IWindowContainer {
+interface IWindowContainerToken {
 
     /**
      * Gets a persistent leash for this container or {@code null}.
