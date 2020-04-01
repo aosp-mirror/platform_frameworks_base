@@ -76,14 +76,14 @@ public class NotificationContentViewTest extends SysuiTestCase {
     @Test
     @UiThreadTest
     public void testShowAppOpsIcons() {
-        NotificationHeaderView mockContracted = mock(NotificationHeaderView.class);
-        when(mockContracted.findViewById(com.android.internal.R.id.notification_header))
+        View mockContracted = mock(View.class);
+        when(mockContracted.findViewById(com.android.internal.R.id.mic))
                 .thenReturn(mockContracted);
-        NotificationHeaderView mockExpanded = mock(NotificationHeaderView.class);
-        when(mockExpanded.findViewById(com.android.internal.R.id.notification_header))
+        View mockExpanded = mock(View.class);
+        when(mockExpanded.findViewById(com.android.internal.R.id.mic))
                 .thenReturn(mockExpanded);
-        NotificationHeaderView mockHeadsUp = mock(NotificationHeaderView.class);
-        when(mockHeadsUp.findViewById(com.android.internal.R.id.notification_header))
+        View mockHeadsUp = mock(View.class);
+        when(mockHeadsUp.findViewById(com.android.internal.R.id.mic))
                 .thenReturn(mockHeadsUp);
 
         mView.setContractedChild(mockContracted);
@@ -91,11 +91,11 @@ public class NotificationContentViewTest extends SysuiTestCase {
         mView.setHeadsUpChild(mockHeadsUp);
 
         ArraySet<Integer> ops = new ArraySet<>();
-        ops.add(AppOpsManager.OP_ANSWER_PHONE_CALLS);
+        ops.add(AppOpsManager.OP_RECORD_AUDIO);
         mView.showAppOpsIcons(ops);
 
-        verify(mockContracted, times(1)).showAppOpsIcons(ops);
-        verify(mockExpanded, times(1)).showAppOpsIcons(ops);
-        verify(mockHeadsUp, times(1)).showAppOpsIcons(any());
+        verify(mockContracted, times(1)).setVisibility(View.VISIBLE);
+        verify(mockExpanded, times(1)).setVisibility(View.VISIBLE);
+        verify(mockHeadsUp, times(1)).setVisibility(View.VISIBLE);
     }
 }
