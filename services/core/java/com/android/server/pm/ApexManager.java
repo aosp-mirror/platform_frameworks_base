@@ -569,12 +569,12 @@ abstract class ApexManager {
                         ipw.println("State: ACTIVATION FAILED");
                     } else if (si.isSuccess) {
                         ipw.println("State: SUCCESS");
-                    } else if (si.isRollbackInProgress) {
-                        ipw.println("State: ROLLBACK IN PROGRESS");
-                    } else if (si.isRolledBack) {
-                        ipw.println("State: ROLLED BACK");
-                    } else if (si.isRollbackFailed) {
-                        ipw.println("State: ROLLBACK FAILED");
+                    } else if (si.isRevertInProgress) {
+                        ipw.println("State: REVERT IN PROGRESS");
+                    } else if (si.isReverted) {
+                        ipw.println("State: REVERTED");
+                    } else if (si.isRevertFailed) {
+                        ipw.println("State: REVERT FAILED");
                     }
                     ipw.decreaseIndent();
                 }
