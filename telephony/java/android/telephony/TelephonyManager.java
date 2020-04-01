@@ -3791,19 +3791,19 @@ public class TelephonyManager {
     }
 
     /**
-     * Return if the current radio has global mode enabled, meaning it supports
-     * both 3GPP and 3GPP2 radio technologies at the same time.
+     * Return if the current radio can support both 3GPP and 3GPP2 radio technologies at the same
+     * time. This is also known as global mode, which includes LTE, CDMA, EvDo and GSM/WCDMA.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
-     * @return {@code true} if global mode is enabled
-     *         {@code false} if global mode is not enabled or unknown
+     * @return {@code true} if 3GPP and 3GPP2 radio technologies can be supported at the same time
+     *         {@code false} if not supported or unknown
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isGlobalModeEnabled() {
+    public boolean isLteCdmaEvdoGsmWcdmaEnabled() {
         return getLteOnCdmaMode(getSubId()) == PhoneConstants.LTE_ON_CDMA_TRUE;
     }
 
@@ -9628,14 +9628,12 @@ public class TelephonyManager {
      * Powers down the SIM. SIM must be up prior.
      * @hide
      */
-    @SystemApi
     public static final int CARD_POWER_DOWN = 0;
 
     /**
      * Powers up the SIM normally. SIM must be down prior.
      * @hide
      */
-    @SystemApi
     public static final int CARD_POWER_UP = 1;
 
     /**
@@ -9653,7 +9651,6 @@ public class TelephonyManager {
      * is NOT persistent across boots. On reboot, SIM will power up normally.
      * @hide
      */
-    @SystemApi
     public static final int CARD_POWER_UP_PASS_THROUGH = 2;
 
     /**
