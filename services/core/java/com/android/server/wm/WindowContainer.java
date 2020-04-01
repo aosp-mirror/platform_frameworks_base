@@ -729,6 +729,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mDisplayContent;
     }
 
+    /** Get the first node of type {@link DisplayArea} above or at this node. */
+    @Nullable
+    DisplayArea getDisplayArea() {
+        WindowContainer parent = getParent();
+        return parent != null ? parent.getDisplayArea() : null;
+    }
+
     void setWaitingForDrawnIfResizingChanged() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);

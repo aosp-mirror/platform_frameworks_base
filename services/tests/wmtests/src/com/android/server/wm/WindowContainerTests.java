@@ -799,7 +799,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
         final DisplayContent newDc = createNewDisplay();
         mDisplayContent.removeStack(stack);
-        newDc.setStackOnDisplay(stack, POSITION_TOP);
+        newDc.mTaskContainers.addChild(stack, POSITION_TOP);
 
         verify(stack).onDisplayChanged(newDc);
         verify(task).onDisplayChanged(newDc);
