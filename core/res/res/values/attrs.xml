@@ -3182,6 +3182,9 @@
         <!-- Whether or not this view is a heading for accessibility purposes. -->
         <attr name="accessibilityHeading" format="boolean"/>
 
+        <!-- Whether or not allow clicks on disabled view. -->
+        <attr name="allowClickWhenDisabled" format="boolean"/>
+
         <!-- Sets the color of the spot shadow that is drawn when the view has a positive Z or
              elevation value.
              <p>
