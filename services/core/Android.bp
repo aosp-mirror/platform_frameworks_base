@@ -126,6 +126,7 @@ java_library_static {
         "android.hardware.rebootescrow-java",
         "android.hardware.soundtrigger-V2.3-java",
         "android.hidl.manager-V1.2-java",
+        "capture_state_listener-aidl-java",
         "dnsresolver_aidl_interface-V2-java",
         "netd_event_listener_interface-java",
         "overlayable_policy_aidl-java",
