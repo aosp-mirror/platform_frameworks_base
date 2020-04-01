@@ -41,11 +41,16 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -72,6 +77,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String KEY_REQUIRED_ACCOUNTS = "required_accounts";
     private static final String KEY_APPS = "apps";
     private static final String KEY_IORAP_TRIAL_LAUNCH = "iorap_trial_launch";
+    private static final String KEY_IORAP_COMPILER_FILTERS = "iorap_compiler_filters";
     private static final String KEY_TRIAL_LAUNCH = "trial_launch";
     private static final String KEY_LAUNCH_ITERATIONS = "launch_iterations";
     private static final String KEY_LAUNCH_ORDER = "launch_order";
@@ -153,6 +159,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private BufferedWriter mBufferedWriter = null;
     private boolean mSimplePerfAppOnly = false;
     private String[] mCompilerFilters = null;
+    private List<String> mIorapCompilerFilters = null;
     private String mLastAppName = "";
     private boolean mCycleCleanUp = false;
     private boolean mTraceAll = false;
@@ -501,20 +508,91 @@ public class AppLaunch extends InstrumentationTestCase {
      * based on status of the compilation command.
      */
     private boolean compileAppForIorap(String appPkgName) throws IOException {
+        String logcatTimestamp = getTimeNowForLogcat();
+
         getInstrumentation().getUiAutomation().
                 executeShellCommand(IORAP_COMPILE_CMD);
 
-        for (int i = 0; i < IORAP_COMPILE_CMD_TIMEOUT; ++i) {
+        int i = 0;
+        for (i = 0; i < IORAP_COMPILE_CMD_TIMEOUT; ++i) {
             IorapCompilationStatus status = waitForIorapCompiled(appPkgName);
             if (status == IorapCompilationStatus.COMPLETE) {
-                return true;
+                Log.v(TAG, "compileAppForIorap: success");
+                logDumpsysIorapd(appPkgName);
+                break;
             } else if (status == IorapCompilationStatus.INSUFFICIENT_TRACES) {
+                Log.e(TAG, "compileAppForIorap: failed due to insufficient traces");
+                logDumpsysIorapd(appPkgName);
                 return false;
             } // else INCOMPLETE. keep asking iorapd if it's done yet.
             sleep(1000);
         }
 
+        if (i == IORAP_COMPILE_CMD_TIMEOUT) {
+            Log.e(TAG, "compileAppForIorap: failed due to timeout");
+            logDumpsysIorapd(appPkgName);
+            return false;
+        }
+
+        // Wait for the job to finish completely.
+        // Other packages could be compiled in cyclic runs.
+        int currentAttempt = 0;
+        do {
+            String logcatLines = getLogcatSinceTime(logcatTimestamp);
+            if (logcatLines.contains("IorapForwardingService: Finished background job")) {
+                return true;
+            }
+            sleep(1000);
+        } while (currentAttempt++ < IORAP_COMPILE_CMD_TIMEOUT);
+
+        Log.e(TAG, "compileAppForIorap: failed due to jobscheduler timeout.");
         return false;
+    }
+
+    /** Save the contents of $(adb shell dumpsys iorapd) to the launch_logs directory. */
+    private void logDumpsysIorapd(String packageName) throws IOException {
+        InstrumentationTestRunner instrumentation =
+                (InstrumentationTestRunner)getInstrumentation();
+        Bundle args = instrumentation.getArguments();
+
+        String launchDirectory = args.getString(KEY_LAUNCH_DIRECTORY);
+
+        // Root directory for applaunch file to log the app launch output
+        // Will be useful in case of simpleperf command is used
+        File launchRootDir = null;
+        if (null != launchDirectory && !launchDirectory.isEmpty()) {
+            launchRootDir = new File(launchDirectory);
+            if (!launchRootDir.exists() && !launchRootDir.mkdirs()) {
+                throw new IOException("Unable to create the destination directory "
+                    + launchRootDir + ". Try disabling selinux.");
+            }
+        } else {
+            Log.w(TAG, "logDumpsysIorapd: Missing launch-directory arg");
+            return;
+        }
+
+        File launchSubDir = new File(launchRootDir, LAUNCH_SUB_DIRECTORY);
+
+        if (!launchSubDir.exists() && !launchSubDir.mkdirs()) {
+            throw new IOException("Unable to create the lauch file sub directory "
+                + launchSubDir + ". Try disabling selinux.");
+        }
+        String path = "iorapd_dumpsys_" + packageName + "_" + System.nanoTime() + ".txt";
+        File file = new File(launchSubDir, path);
+        try (FileOutputStream outputStream = new FileOutputStream(file);
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(outputStream));
+                ParcelFileDescriptor result = getInstrumentation().getUiAutomation().
+                        executeShellCommand(IORAP_DUMPSYS_CMD);
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(result.getFileDescriptor())))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                writer.write(line + "\n");
+            }
+        }
+
+        Log.v(TAG, "logDumpsysIorapd: Saved to file: " + path);
     }
 
     enum IorapCompilationStatus {
@@ -564,6 +642,24 @@ public class AppLaunch extends InstrumentationTestCase {
         return reason;
     }
 
+    private boolean shouldIncludeIorap(String compilerFilter) {
+        if (!mIorapTrialLaunch) {
+            return false;
+        }
+
+        // No iorap compiler filters specified: treat all compiler filters as ok.
+        if (mIorapCompilerFilters == null) {
+            return true;
+        }
+
+        // iorap compiler filters specified: the compilerFilter must be in the whitelist.
+        if (mIorapCompilerFilters.indexOf(compilerFilter) != -1) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * If launch order is "cyclic" then apps will be launched one after the
      * other for each iteration count.
@@ -578,7 +674,7 @@ public class AppLaunch extends InstrumentationTestCase {
                         mLaunchOrderList.add(new LaunchOrder(app, compilerFilter, TRIAL_LAUNCH, /*iorapEnabled*/false));
                     }
                 }
-                if (mIorapTrialLaunch) {
+                if (shouldIncludeIorap(compilerFilter)) {
                     for (int launchCount = 0; launchCount < IORAP_TRIAL_LAUNCH_ITERATIONS; ++launchCount) {
                         for (String app : mNameToResultKey.keySet()) {
                             String reason = makeReasonForIorapTrialLaunch(launchCount);
@@ -592,14 +688,16 @@ public class AppLaunch extends InstrumentationTestCase {
                 for (int launchCount = 0; launchCount < mLaunchIterations; launchCount++) {
                     for (String app : mNameToResultKey.keySet()) {
                         mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                  String.format(LAUNCH_ITERATION, launchCount), mIorapTrialLaunch));
+                                  String.format(LAUNCH_ITERATION, launchCount),
+                                        shouldIncludeIorap(compilerFilter)));
                     }
                 }
                 if (mTraceDirectoryStr != null && !mTraceDirectoryStr.isEmpty()) {
                     for (int traceCount = 0; traceCount < mTraceLaunchCount; traceCount++) {
                         for (String app : mNameToResultKey.keySet()) {
                             mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                      String.format(TRACE_ITERATION, traceCount), mIorapTrialLaunch));
+                                      String.format(TRACE_ITERATION, traceCount),
+                                            shouldIncludeIorap(compilerFilter)));
                         }
                     }
                 }
@@ -610,7 +708,7 @@ public class AppLaunch extends InstrumentationTestCase {
                     if (mTrialLaunch) {
                         mLaunchOrderList.add(new LaunchOrder(app, compilerFilter, TRIAL_LAUNCH, /*iorapEnabled*/false));
                     }
-                    if (mIorapTrialLaunch) {
+                    if (shouldIncludeIorap(compilerFilter)) {
                         for (int launchCount = 0; launchCount < IORAP_TRIAL_LAUNCH_ITERATIONS; ++launchCount) {
                             String reason = makeReasonForIorapTrialLaunch(launchCount);
                             mLaunchOrderList.add(
@@ -621,12 +719,14 @@ public class AppLaunch extends InstrumentationTestCase {
                     }
                     for (int launchCount = 0; launchCount < mLaunchIterations; launchCount++) {
                         mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                String.format(LAUNCH_ITERATION, launchCount), mIorapTrialLaunch));
+                                String.format(LAUNCH_ITERATION, launchCount),
+                                        shouldIncludeIorap(compilerFilter)));
                     }
                     if (mTraceDirectoryStr != null && !mTraceDirectoryStr.isEmpty()) {
                         for (int traceCount = 0; traceCount < mTraceLaunchCount; traceCount++) {
                             mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                    String.format(TRACE_ITERATION, traceCount), mIorapTrialLaunch));
+                                    String.format(TRACE_ITERATION, traceCount),
+                                            shouldIncludeIorap(compilerFilter)));
                         }
                     }
                 }
@@ -659,6 +759,41 @@ public class AppLaunch extends InstrumentationTestCase {
         return total.contains("root");
     }
 
+    private void stopIorapd() {
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand("stop iorapd");
+        sleep(100);  // give it extra time to fully stop.
+    }
+
+    private void startIorapd() {
+        String logcatTimeNow = getTimeNowForLogcat();
+        Log.v(TAG, "startIorapd, logcat time: " + logcatTimeNow);
+
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand("start iorapd");
+
+        int maxAttempts = 100;
+        int attempt = 0;
+        do {
+            // Ensure that IorapForwardingService fully reconnects to iorapd before proceeding.
+            String needle = "Connected to iorapd native service";
+            String logcatLines = getLogcatSinceTime(logcatTimeNow);
+
+            if (logcatLines.contains(needle)) {
+                break;
+            }
+
+            sleep(1000);
+            attempt++;
+        } while (attempt < maxAttempts);
+
+        if (attempt == maxAttempts) {
+            Log.e(TAG, "Timed out after waiting for iorapd to start");
+        }
+        // Wait a little bit longer for iorapd to settle.
+        sleep(1000);
+    }
+
     // Delete all db rows and files associated with a package in iorapd.
     // Effectively deletes any raw or compiled trace files, unoptimizing the package in iorap.
     private void purgeIorapPackage(String packageName) {
@@ -670,15 +805,65 @@ public class AppLaunch extends InstrumentationTestCase {
             throw new AssertionError(e);
         }
 
-        getInstrumentation().getUiAutomation()
-                .executeShellCommand("stop iorapd");
-        sleep(100);  // give iorapd enough time to stop.
+        Log.v(TAG, "Purge iorap package: " + packageName);
+        stopIorapd();
         getInstrumentation().getUiAutomation()
                 .executeShellCommand(String.format(IORAP_MAINTENANCE_CMD, packageName));
         Log.v(TAG, "Executed: " + String.format(IORAP_MAINTENANCE_CMD, packageName));
-        getInstrumentation().getUiAutomation()
-                .executeShellCommand("start iorapd");
-        sleep(2000);  // give iorapd enough time to start up.
+        startIorapd();
+    }
+
+    String executeShellCommandWithTempFile(String cmd) {
+        Log.v(TAG, "executeShellCommandWithTempFile, cmd: " + cmd);
+        try {
+            //File outputDir =
+            //       InstrumentationRegistry.getInstrumentation().getContext().getCacheDir();
+            File outputFile = File.createTempFile("exec_shell_command", ".sh");
+
+            try {
+                outputFile.setWritable(true);
+                outputFile.setExecutable(true, /*ownersOnly*/false);
+
+                String scriptPath = outputFile.toString();
+
+                // If this works correctly, the next log-line will print 'Success'.
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(scriptPath))) {
+                    writer.write(cmd);
+                }
+
+                String resultString = "";
+                try (ParcelFileDescriptor result = getInstrumentation().getUiAutomation().
+                        executeShellCommand(scriptPath);
+                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                                new FileInputStream(result.getFileDescriptor())))) {
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        resultString += line + "\n";
+                    }
+                }
+
+                return resultString;
+            } finally {
+                outputFile.delete();
+            }
+        } catch (IOException e) {
+            throw new AssertionError("Failed to execute shell command: " + cmd, e);
+        }
+    }
+
+    // Get the 'now' timestamp usable with $(adb logcat -v utc -T "time string")
+    String getTimeNowForLogcat() {
+        ZonedDateTime utc = ZonedDateTime.now(ZoneOffset.UTC);
+
+        // YYYY-MM-DD hh:mm:ss.mmm
+        return utc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+    }
+
+    String getLogcatSinceTime(String logcatTime) {
+        // The time has spaces in it but must be passed as a single arg.
+        // Therefore use a temp script file.
+        return executeShellCommandWithTempFile(
+                String.format("logcat -d -v threadtime -v utc -T '%s'", logcatTime));
     }
 
     /**
@@ -705,15 +890,12 @@ public class AppLaunch extends InstrumentationTestCase {
             throw new AssertionError(e);
         }
 
-        getInstrumentation().getUiAutomation()
-                .executeShellCommand("stop iorapd");
+        stopIorapd();
         getInstrumentation().getUiAutomation()
                 .executeShellCommand(String.format("setprop iorapd.perfetto.enable %b", enable));
         getInstrumentation().getUiAutomation()
                 .executeShellCommand(String.format("setprop iorapd.readahead.enable %b", enable));
-        getInstrumentation().getUiAutomation()
-                .executeShellCommand("start iorapd");
-        sleep(2000);  // give enough time for iorapd to start back up.
+        startIorapd();
 
         if (enable) {
             mIorapStatus = IorapStatus.ENABLED;
@@ -766,6 +948,13 @@ public class AppLaunch extends InstrumentationTestCase {
         } else {
             // Just pass a null compiler filter to use the current state of the app.
             mCompilerFilters = new String[1];
+        }
+
+        String iorapCompilerFilterList = args.getString(KEY_IORAP_COMPILER_FILTERS);
+        if (iorapCompilerFilterList != null) {
+            // Passing in iorap compiler filters implies an iorap trial launch.
+            mIorapTrialLaunch = true;
+            mIorapCompilerFilters = Arrays.asList(iorapCompilerFilterList.split("\\|"));
         }
 
         // Pre-populate the results map to avoid null checks.
