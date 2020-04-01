@@ -1101,7 +1101,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
 
-            final ActivityStack stack = getRootTask();
             layoutDisplayFrame = new Rect(windowFrames.mDisplayFrame);
             windowFrames.mDisplayFrame.set(windowFrames.mContainingFrame);
             layoutXDiff = mInsetFrame.left - windowFrames.mContainingFrame.left;
@@ -1205,8 +1204,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mIsWallpaper && (fw != windowFrames.mFrame.width()
                 || fh != windowFrames.mFrame.height())) {
-            dc.mWallpaperController.updateWallpaperOffset(this,
-                    displayInfo.logicalWidth, displayInfo.logicalHeight, false /* sync */);
+            dc.mWallpaperController.updateWallpaperOffset(this, false /* sync */);
         }
 
         // Calculate relative frame
