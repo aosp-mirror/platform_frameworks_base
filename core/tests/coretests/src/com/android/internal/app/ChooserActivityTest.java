@@ -1337,15 +1337,8 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTestWithOtherProfile(3, /* userId */ 10);
         List<ResolvedComponentInfo> workResolvedComponentInfos =
                 createResolvedComponentsForTest(workProfileTargets);
-        when(sOverrides.workResolverListController.getUserStateIndependentResolversAsUser(
-                Mockito.isA(List.class),
-                Mockito.isA(UserHandle.class)))
-                .thenReturn(new ArrayList<>(workResolvedComponentInfos));
         sOverrides.isQuietModeEnabled = true;
-        // When work profile is disabled, we get 0 results when we query the work profile
-        // intents.
-        setupResolverControllers(personalResolvedComponentInfos,
-                /* workResolvedComponentInfos */ new ArrayList<>());
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType("TestType");
 
