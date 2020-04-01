@@ -103,8 +103,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     protected final Uri mMediaUri;
     private final Date mCurrentTime = new Date();
     private final Handler mHandler;
+    private final Handler mMediaHandler;
     private final AlarmManager.OnAlarmListener mUpdateNextAlarm = this::updateNextAlarm;
-    private final Object mMediaToken = new Object();
     private DozeParameters mDozeParameters;
     @VisibleForTesting
     protected SettableWakeLock mMediaWakeLock;
@@ -169,17 +169,13 @@ public class KeyguardSliceProvider extends SliceProvider implements
                 }
             };
 
-    public KeyguardSliceProvider() {
-        this(new Handler());
-    }
-
     public static KeyguardSliceProvider getAttachedInstance() {
         return KeyguardSliceProvider.sInstance;
     }
 
-    @VisibleForTesting
-    KeyguardSliceProvider(Handler handler) {
-        mHandler = handler;
+    public KeyguardSliceProvider() {
+        mHandler = new Handler();
+        mMediaHandler = new Handler();
         mSliceUri = Uri.parse(KEYGUARD_SLICE_URI);
         mHeaderUri = Uri.parse(KEYGUARD_HEADER_URI);
         mDateUri = Uri.parse(KEYGUARD_DATE_URI);
@@ -462,16 +458,18 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public void onMetadataOrStateChanged(MediaMetadata metadata, @PlaybackState.State int state) {
         synchronized (this) {
             boolean nextVisible = NotificationMediaManager.isPlayingState(state);
-            mHandler.removeCallbacksAndMessages(mMediaToken);
+            mMediaHandler.removeCallbacksAndMessages(null);
             if (mMediaIsVisible && !nextVisible && mStatusBarState != StatusBarState.SHADE) {
                 // We need to delay this event for a few millis when stopping to avoid jank in the
                 // animation. The media app might not send its update when buffering, and the slice
                 // would end up without a header for 0.5 second.
                 mMediaWakeLock.setAcquired(true);
-                mHandler.postDelayed(() -> {
-                    updateMediaStateLocked(metadata, state);
-                    mMediaWakeLock.setAcquired(false);
-                }, mMediaToken, 2000);
+                mMediaHandler.postDelayed(() -> {
+                    synchronized (this) {
+                        updateMediaStateLocked(metadata, state);
+                        mMediaWakeLock.setAcquired(false);
+                    }
+                }, 2000);
             } else {
                 mMediaWakeLock.setAcquired(false);
                 updateMediaStateLocked(metadata, state);

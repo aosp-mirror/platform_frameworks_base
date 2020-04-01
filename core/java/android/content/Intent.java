@@ -2677,6 +2677,9 @@ public class Intent implements Parcelable, Cloneable {
      * that application is first launched (that is the first time it is moved
      * out of the stopped state).  The data contains the name of the package.
      *
+     * <p>When the application is first launched, the application itself doesn't receive this
+     * broadcast.</p>
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */

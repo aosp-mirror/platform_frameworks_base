@@ -30,6 +30,7 @@ import android.util.Log;
 
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -37,7 +38,7 @@ import java.util.List;
 /**
  * Used to sort resolved activities in {@link ResolverListController}.
  */
-abstract class AbstractResolverComparator implements Comparator<ResolvedComponentInfo> {
+public abstract class AbstractResolverComparator implements Comparator<ResolvedComponentInfo> {
 
     private static final int NUM_OF_TOP_ANNOTATIONS_TO_USE = 3;
     private static final boolean DEBUG = false;
@@ -61,6 +62,8 @@ abstract class AbstractResolverComparator implements Comparator<ResolvedComponen
     // timeout for establishing connections with a ResolverRankerService, collecting features and
     // predicting ranking scores.
     private static final int WATCHDOG_TIMEOUT_MILLIS = 500;
+
+    private final Comparator<ResolveInfo> mAzComparator;
 
     protected final Handler mHandler = new Handler(Looper.getMainLooper()) {
         public void handleMessage(Message msg) {
@@ -90,7 +93,7 @@ abstract class AbstractResolverComparator implements Comparator<ResolvedComponen
         }
     };
 
-    AbstractResolverComparator(Context context, Intent intent) {
+    public AbstractResolverComparator(Context context, Intent intent) {
         String scheme = intent.getScheme();
         mHttp = "http".equals(scheme) || "https".equals(scheme);
         mContentType = intent.getType();
@@ -100,6 +103,7 @@ abstract class AbstractResolverComparator implements Comparator<ResolvedComponen
         mDefaultBrowserPackageName = mHttp
                 ? mPm.getDefaultBrowserPackageNameAsUser(UserHandle.myUserId())
                 : null;
+        mAzComparator = new AzInfoComparator(context);
     }
 
     // get annotations of content from intent.
@@ -168,6 +172,20 @@ abstract class AbstractResolverComparator implements Comparator<ResolvedComponen
                 return lhsSpecific ? -1 : 1;
             }
         }
+
+        final boolean lPinned = lhsp.isPinned();
+        final boolean rPinned = rhsp.isPinned();
+
+        // Pinned items always receive priority.
+        if (lPinned && !rPinned) {
+            return -1;
+        } else if (!lPinned && rPinned) {
+            return 1;
+        } else if (lPinned && rPinned) {
+            // If both items are pinned, resolve the tie alphabetically.
+            return mAzComparator.compare(lhsp.getResolveInfoAt(0), rhsp.getResolveInfoAt(0));
+        }
+
         return compare(lhs, rhs);
     }
 
@@ -258,4 +276,25 @@ abstract class AbstractResolverComparator implements Comparator<ResolvedComponen
         }
         return false;
     }
+
+    /**
+     * Sort intents alphabetically based on package name.
+     */
+    class AzInfoComparator implements Comparator<ResolveInfo> {
+        Collator mCollator;
+        AzInfoComparator(Context context) {
+            mCollator = Collator.getInstance(context.getResources().getConfiguration().locale);
+        }
+
+        @Override
+        public int compare(ResolveInfo lhsp, ResolveInfo rhsp) {
+            if (lhsp == null) {
+                return -1;
+            } else if (rhsp == null) {
+                return 1;
+            }
+            return mCollator.compare(lhsp.activityInfo.packageName, rhsp.activityInfo.packageName);
+        }
+    }
+
 }

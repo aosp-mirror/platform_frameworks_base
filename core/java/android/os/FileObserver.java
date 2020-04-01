@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * Monitors files (using <a href="http://en.wikipedia.org/wiki/Inotify">inotify</a>)
- * to fire an event after files are accessed or changed by by any process on
+ * to fire an event after files are accessed or changed by any process on
  * the device (including this one).  FileObserver is an abstract class;
  * subclasses must implement the event handler {@link #onEvent(int, String)}.
  *

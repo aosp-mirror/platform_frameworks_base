@@ -24,14 +24,14 @@ import java.io.PrintWriter;
 
 abstract class TintController {
 
-    private ValueAnimator mAnimator;
+    private ColorDisplayService.TintValueAnimator mAnimator;
     private Boolean mIsActivated;
 
-    public ValueAnimator getAnimator() {
+    public ColorDisplayService.TintValueAnimator getAnimator() {
         return mAnimator;
     }
 
-    public void setAnimator(ValueAnimator animator) {
+    public void setAnimator(ColorDisplayService.TintValueAnimator animator) {
         mAnimator = animator;
     }
 

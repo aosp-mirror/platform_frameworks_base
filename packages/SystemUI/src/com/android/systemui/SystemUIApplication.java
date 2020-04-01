@@ -142,7 +142,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
 
     public void startServicesIfNeeded() {
         String[] names = getResources().getStringArray(R.array.config_systemUIServiceComponents);
-        startServicesIfNeeded(names);
+        startServicesIfNeeded(/* metricsPrefix= */ "StartServices", names);
     }
 
     /**
@@ -154,10 +154,10 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
     void startSecondaryUserServicesIfNeeded() {
         String[] names =
                   getResources().getStringArray(R.array.config_systemUIServiceComponentsPerUser);
-        startServicesIfNeeded(names);
+        startServicesIfNeeded(/* metricsPrefix= */ "StartSecondaryServices", names);
     }
 
-    private void startServicesIfNeeded(String[] services) {
+    private void startServicesIfNeeded(String metricsPrefix, String[] services) {
         if (mServicesStarted) {
             return;
         }
@@ -176,14 +176,16 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
 
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
+
         TimingsTraceLog log = new TimingsTraceLog("SystemUIBootTiming",
                 Trace.TRACE_TAG_APP);
-        log.traceBegin("StartServices");
+        log.traceBegin(metricsPrefix);
+
         final int N = services.length;
         for (int i = 0; i < N; i++) {
             String clsName = services[i];
             if (DEBUG) Log.d(TAG, "loading: " + clsName);
-            log.traceBegin("StartServices" + clsName);
+            log.traceBegin(metricsPrefix + clsName);
             long ti = System.currentTimeMillis();
             Class cls;
             try {

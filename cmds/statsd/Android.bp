@@ -50,6 +50,7 @@ cc_defaults {
 
     srcs: [
         ":statsd_aidl",
+        ":ICarStatsService.aidl",
         "src/active_config_list.proto",
         "src/statsd_config.proto",
         "src/uid_data.proto",
@@ -69,6 +70,7 @@ cc_defaults {
         "src/config/ConfigKey.cpp",
         "src/config/ConfigListener.cpp",
         "src/config/ConfigManager.cpp",
+        "src/external/CarStatsPuller.cpp",
         "src/external/GpuStatsPuller.cpp",
         "src/external/Perfetto.cpp",
         "src/external/Perfprofd.cpp",

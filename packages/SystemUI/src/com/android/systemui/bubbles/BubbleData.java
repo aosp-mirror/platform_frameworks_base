@@ -184,6 +184,8 @@ public class BubbleData {
             Log.d(TAG, "notificationEntryUpdated: " + entry);
         }
         Bubble bubble = getBubbleWithKey(entry.key);
+        suppressFlyout = !entry.isVisuallyInterruptive || suppressFlyout;
+
         if (bubble == null) {
             // Create a new bubble
             bubble = new Bubble(mContext, entry);
@@ -193,8 +195,10 @@ public class BubbleData {
         } else {
             // Updates an existing bubble
             bubble.updateEntry(entry);
+            bubble.setSuppressFlyout(suppressFlyout);
             doUpdate(bubble);
         }
+
         if (bubble.shouldAutoExpand()) {
             setSelectedBubbleInternal(bubble);
             if (!mExpanded) {

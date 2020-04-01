@@ -53,6 +53,8 @@ void sigHandler(int sig) {
     if (gStatsService != nullptr) {
         gStatsService->Terminate();
     }
+    ALOGW("statsd terminated on receiving signal %d.", sig);
+    exit(1);
 }
 
 void registerSigHandler()

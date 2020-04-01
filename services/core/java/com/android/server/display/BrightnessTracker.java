@@ -94,6 +94,8 @@ public class BrightnessTracker {
 
     static final String TAG = "BrightnessTracker";
     static final boolean DEBUG = false;
+    @VisibleForTesting
+    static final boolean ENABLE_COLOR_SAMPLING = false;
 
     private static final String EVENTS_FILE = "brightness_events.xml";
     private static final String AMBIENT_BRIGHTNESS_STATS_FILE = "ambient_brightness_stats.xml";
@@ -757,7 +759,8 @@ public class BrightnessTracker {
     }
 
     private void enableColorSampling() {
-        if (!mInjector.isBrightnessModeAutomatic(mContentResolver)
+        if (!ENABLE_COLOR_SAMPLING
+                || !mInjector.isBrightnessModeAutomatic(mContentResolver)
                 || !mInjector.isInteractive(mContext)
                 || mColorSamplingEnabled) {
             return;

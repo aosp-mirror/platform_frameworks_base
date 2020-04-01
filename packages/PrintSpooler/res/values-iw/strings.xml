@@ -108,7 +108,7 @@
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"לא ניתן היה לכתוב לקובץ"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"מצטערים, אך זה לא עבד. נסה שוב."</string>
-    <string name="print_error_retry" msgid="1426421728784259538">"נסה שוב"</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"כדאי לנסות שוב"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"המדפסת הזו אינה זמינה כעת."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"לא ניתן להציג תצוגה מקדימה"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"מכין תצוגה מקדימה…"</string>

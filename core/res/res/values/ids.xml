@@ -193,4 +193,7 @@
 
   <!-- A tag used to save the index where the custom view is stored -->
   <item type="id" name="notification_custom_view_index_tag" />
+
+  <!-- Marks the "copy to clipboard" button in the ChooserActivity -->
+  <item type="id" name="chooser_copy_button" />
 </resources>

@@ -73,6 +73,8 @@ public final class LinkProperties implements Parcelable {
     private static final int MIN_MTU_V6 = 1280;
     private static final int MAX_MTU    = 10000;
 
+    private static final int INET6_ADDR_LENGTH = 16;
+
     // Stores the properties of links that are "stacked" above this link.
     // Indexed by interface name to allow modification and to prevent duplicates being added.
     private Hashtable<String, LinkProperties> mStackedLinks = new Hashtable<>();
@@ -1590,20 +1592,11 @@ public final class LinkProperties implements Parcelable {
             dest.writeParcelable(linkAddress, flags);
         }
 
-        dest.writeInt(mDnses.size());
-        for (InetAddress d : mDnses) {
-            dest.writeByteArray(d.getAddress());
-        }
-        dest.writeInt(mValidatedPrivateDnses.size());
-        for (InetAddress d : mValidatedPrivateDnses) {
-            dest.writeByteArray(d.getAddress());
-        }
+        writeAddresses(dest, mDnses);
+        writeAddresses(dest, mValidatedPrivateDnses);
         dest.writeBoolean(mUsePrivateDns);
         dest.writeString(mPrivateDnsServerName);
-        dest.writeInt(mPcscfs.size());
-        for (InetAddress d : mPcscfs) {
-            dest.writeByteArray(d.getAddress());
-        }
+        writeAddresses(dest, mPcscfs);
         dest.writeString(mDomains);
         dest.writeInt(mMtu);
         dest.writeString(mTcpBufferSizes);
@@ -1622,6 +1615,35 @@ public final class LinkProperties implements Parcelable {
 
         ArrayList<LinkProperties> stackedLinks = new ArrayList<>(mStackedLinks.values());
         dest.writeList(stackedLinks);
+    }
+
+    private static void writeAddresses(@NonNull Parcel dest, @NonNull List<InetAddress> list) {
+        dest.writeInt(list.size());
+        for (InetAddress d : list) {
+            writeAddress(dest, d);
+        }
+    }
+
+    private static void writeAddress(@NonNull Parcel dest, @NonNull InetAddress addr) {
+        dest.writeByteArray(addr.getAddress());
+        if (addr instanceof Inet6Address) {
+            final Inet6Address v6Addr = (Inet6Address) addr;
+            final boolean hasScopeId = v6Addr.getScopeId() != 0;
+            dest.writeBoolean(hasScopeId);
+            if (hasScopeId) dest.writeInt(v6Addr.getScopeId());
+        }
+    }
+
+    @NonNull
+    private static InetAddress readAddress(@NonNull Parcel p) throws UnknownHostException {
+        final byte[] addr = p.createByteArray();
+        if (addr.length == INET6_ADDR_LENGTH) {
+            final boolean hasScopeId = p.readBoolean();
+            final int scopeId = hasScopeId ? p.readInt() : 0;
+            return Inet6Address.getByAddress(null /* host */, addr, scopeId);
+        }
+
+        return InetAddress.getByAddress(addr);
     }
 
     /**
@@ -1643,14 +1665,13 @@ public final class LinkProperties implements Parcelable {
                 addressCount = in.readInt();
                 for (int i = 0; i < addressCount; i++) {
                     try {
-                        netProp.addDnsServer(InetAddress.getByAddress(in.createByteArray()));
+                        netProp.addDnsServer(readAddress(in));
                     } catch (UnknownHostException e) { }
                 }
                 addressCount = in.readInt();
                 for (int i = 0; i < addressCount; i++) {
                     try {
-                        netProp.addValidatedPrivateDnsServer(
-                                InetAddress.getByAddress(in.createByteArray()));
+                        netProp.addValidatedPrivateDnsServer(readAddress(in));
                     } catch (UnknownHostException e) { }
                 }
                 netProp.setUsePrivateDns(in.readBoolean());
@@ -1658,7 +1679,7 @@ public final class LinkProperties implements Parcelable {
                 addressCount = in.readInt();
                 for (int i = 0; i < addressCount; i++) {
                     try {
-                        netProp.addPcscfServer(InetAddress.getByAddress(in.createByteArray()));
+                        netProp.addPcscfServer(readAddress(in));
                     } catch (UnknownHostException e) { }
                 }
                 netProp.setDomains(in.readString());

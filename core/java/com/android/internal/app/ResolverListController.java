@@ -156,10 +156,21 @@ public class ResolverListController {
                         newInfo.activityInfo.packageName, newInfo.activityInfo.name);
                 final ResolverActivity.ResolvedComponentInfo rci =
                         new ResolverActivity.ResolvedComponentInfo(name, intent, newInfo);
+                rci.setPinned(isComponentPinned(name));
                 into.add(rci);
             }
         }
     }
+
+
+    /**
+     * Whether this component is pinned by the user. Always false for resolver; overridden in
+     * Chooser.
+     */
+    public boolean isComponentPinned(ComponentName name) {
+        return false;
+    }
+
 
     // Filter out any activities that the launched uid does not have permission for.
     // To preserve the inputList, optionally will return the original list if any modification has

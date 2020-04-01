@@ -29,7 +29,7 @@ import java.util.concurrent.Executor;
  */
 public abstract class CompositionSamplingListener {
 
-    private final long mNativeListener;
+    private long mNativeListener;
     private final Executor mExecutor;
 
     public CompositionSamplingListener(Executor executor) {
@@ -37,13 +37,19 @@ public abstract class CompositionSamplingListener {
         mNativeListener = nativeCreate(this);
     }
 
+    public void destroy() {
+        if (mNativeListener == 0) {
+            return;
+        }
+        unregister(this);
+        nativeDestroy(mNativeListener);
+        mNativeListener = 0;
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mNativeListener != 0) {
-                unregister(this);
-                nativeDestroy(mNativeListener);
-            }
+            destroy();
         } finally {
             super.finalize();
         }
@@ -59,6 +65,9 @@ public abstract class CompositionSamplingListener {
      */
     public static void register(CompositionSamplingListener listener,
             int displayId, IBinder stopLayer, Rect samplingArea) {
+        if (listener.mNativeListener == 0) {
+            return;
+        }
         Preconditions.checkArgument(displayId == Display.DEFAULT_DISPLAY,
                 "default display only for now");
         nativeRegister(listener.mNativeListener, stopLayer, samplingArea.left, samplingArea.top,
@@ -69,6 +78,9 @@ public abstract class CompositionSamplingListener {
      * Unregisters a sampling listener.
      */
     public static void unregister(CompositionSamplingListener listener) {
+        if (listener.mNativeListener == 0) {
+            return;
+        }
         nativeUnregister(listener.mNativeListener);
     }
 

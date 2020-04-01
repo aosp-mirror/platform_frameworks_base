@@ -1868,6 +1868,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mCount = computeCurrentCountLocked();
             mUnpluggedReportedTotalTime = mCurrentReportedTotalTime = 0;
             mUnpluggedReportedCount = mCurrentReportedCount = 0;
+            mTrackingReportedValues = false;
         }
 
         public void setUpdateVersion(int version) {

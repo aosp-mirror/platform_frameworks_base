@@ -750,7 +750,7 @@
 
     <dimen name="seekbar_thumb_exclusion_max_size">48dp</dimen>
 
-    <!-- chooser (sharesheet) spacing -->
+    <!-- chooser/resolver (sharesheet) spacing -->
     <dimen name="chooser_corner_radius">8dp</dimen>
     <dimen name="chooser_row_text_option_translate">25dp</dimen>
     <dimen name="chooser_view_spacing">18dp</dimen>
@@ -759,11 +759,16 @@
     <dimen name="chooser_preview_image_font_size">20sp</dimen>
     <dimen name="chooser_preview_image_border">1dp</dimen>
     <dimen name="chooser_preview_width">-1px</dimen>
-    <dimen name="resolver_icon_size">42dp</dimen>
-    <dimen name="resolver_button_bar_spacing">8dp</dimen>
-    <dimen name="resolver_badge_size">18dp</dimen>
     <dimen name="chooser_target_width">90dp</dimen>
     <dimen name="chooser_header_scroll_elevation">4dp</dimen>
     <dimen name="chooser_max_collapsed_height">288dp</dimen>
     <dimen name="chooser_direct_share_label_placeholder_max_width">72dp</dimen>
+    <dimen name="resolver_icon_size">32dp</dimen>
+    <dimen name="resolver_button_bar_spacing">8dp</dimen>
+    <dimen name="resolver_badge_size">18dp</dimen>
+    <dimen name="resolver_icon_margin">16dp</dimen>
+    <dimen name="resolver_small_margin">18dp</dimen>
+    <dimen name="resolver_edge_margin">24dp</dimen>
+    <dimen name="resolver_elevation">1dp</dimen>
+    <dimen name="chooser_action_button_icon_size">18dp</dimen>
 </resources>

@@ -93,7 +93,7 @@ class UsbSerialReader extends IUsbSerialReader.Stub {
                                 UserHandle.getUserId(uid));
 
                         if (mDevice instanceof UsbDevice) {
-                            settings.checkPermission((UsbDevice) mDevice, packageName, uid);
+                            settings.checkPermission((UsbDevice) mDevice, packageName, pid, uid);
                         } else {
                             settings.checkPermission((UsbAccessory) mDevice, uid);
                         }

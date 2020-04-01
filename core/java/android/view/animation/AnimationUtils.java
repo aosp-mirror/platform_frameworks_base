@@ -127,7 +127,7 @@ public class AnimationUtils {
      *
      * @param context Application context used to access resources
      * @param id The resource id of the animation to load
-     * @return The animation object reference by the specified id
+     * @return The animation object referenced by the specified id
      * @throws NotFoundException when the animation cannot be loaded
      */
     public static Animation loadAnimation(Context context, @AnimRes int id)
@@ -208,7 +208,7 @@ public class AnimationUtils {
      *
      * @param context Application context used to access resources
      * @param id The resource id of the animation to load
-     * @return The animation object reference by the specified id
+     * @return The animation controller object referenced by the specified id
      * @throws NotFoundException when the layout animation controller cannot be loaded
      */
     public static LayoutAnimationController loadLayoutAnimation(Context context, @AnimRes int id)
@@ -331,7 +331,7 @@ public class AnimationUtils {
      *
      * @param context Application context used to access resources
      * @param id The resource id of the animation to load
-     * @return The animation object reference by the specified id
+     * @return The interpolator object referenced by the specified id
      * @throws NotFoundException
      */
     public static Interpolator loadInterpolator(Context context, @AnimRes @InterpolatorRes int id)
@@ -361,7 +361,7 @@ public class AnimationUtils {
      *
      * @param res The resources
      * @param id The resource id of the animation to load
-     * @return The interpolator object reference by the specified id
+     * @return The interpolator object referenced by the specified id
      * @throws NotFoundException
      * @hide
      */

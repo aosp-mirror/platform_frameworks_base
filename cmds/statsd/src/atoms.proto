@@ -321,10 +321,11 @@ message Atom {
             218  [(log_from_module) = "permissioncontroller"];
         ExclusionRectStateChanged exclusion_rect_state_changed = 223;
         BackGesture back_gesture_reported_reported = 224;
+        VmsClientConnectionStateChanged vms_client_connection_state_changed = 230;
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10062
+    // Next: 10067
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -388,6 +389,8 @@ message Atom {
         CoolingDevice cooling_device = 10059;
         AppOps app_ops = 10060;
         ProcessSystemIonHeapSize process_system_ion_heap_size = 10061;
+        VmsClientStats vms_client_stats = 10065;
+        NotificationRemoteViews notification_remote_views = 10066;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -1684,6 +1687,19 @@ message WatchdogRollbackOccurred {
     optional string package_name = 2;
 
     optional int32 package_version_code = 3;
+
+    enum RollbackReasonType {
+        REASON_UNKNOWN = 0;
+        REASON_NATIVE_CRASH = 1;
+        REASON_EXPLICIT_HEALTH_CHECK = 2;
+        REASON_APP_CRASH = 3;
+        REASON_APP_NOT_RESPONDING = 4;
+    }
+    optional RollbackReasonType rollback_reason = 4;
+
+    // Set by RollbackPackageHealthObserver to be the package that is failing when a rollback
+    // is initiated. Empty if the package is unknown.
+    optional string failing_package_name = 5;
 }
 
 /**
@@ -3708,6 +3724,33 @@ message RoleRequestResultReported {
     optional Result result = 9;
 }
 
+/**
+ * Logs when a Vehicle Maps Service client's connection state has changed
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/stats/VmsClientLog.java
+ */
+message VmsClientConnectionStateChanged {
+    // The UID of the VMS client app
+    optional int32 uid = 1 [(is_uid) = true];
+
+    enum State {
+        UNKNOWN = 0;
+        // Attempting to connect to the client
+        CONNECTING = 1;
+        // Client connection established
+        CONNECTED = 2;
+        // Client connection closed unexpectedly
+        DISCONNECTED = 3;
+        // Client connection closed by VMS
+        TERMINATED = 4;
+        // Error establishing the client connection
+        CONNECTION_ERROR = 5;
+    }
+
+    optional State state  = 2;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Pulled atoms below this line //
 //////////////////////////////////////////////////////////////////////
@@ -4720,6 +4763,24 @@ message ProcStats {
  */
 message ProcStatsPkgProc {
     optional ProcessStatsSectionProto proc_stats_section = 1;
+}
+
+// Next Tag: 2
+message PackageRemoteViewInfoProto {
+    optional string package_name = 1;
+    // add per-package additional info here (like channels)
+}
+
+// Next Tag: 2
+message NotificationRemoteViewsProto {
+    repeated PackageRemoteViewInfoProto package_remote_view_info = 1;
+}
+
+/**
+ * Pulled from NotificationManagerService.java
+ */
+message NotificationRemoteViews {
+    optional NotificationRemoteViewsProto notification_remote_views = 1;
 }
 
 message PowerProfileProto {
@@ -6818,4 +6879,33 @@ message PermissionAppsFragmentViewed {
         DENIED = 3;
     }
     optional Category category = 6;
+}
+
+/**
+ * Pulls client metrics on data transferred via Vehicle Maps Service.
+ * Metrics are keyed by uid + layer.
+ *
+ * Pulled from:
+ *   packages/services/Car/service/src/com/android/car/stats/CarStatsService.java
+ */
+message VmsClientStats {
+    // UID of the VMS client app
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // VMS layer definition
+    optional int32 layer_type = 2;
+    optional int32 layer_channel = 3;
+    optional int32 layer_version = 4;
+
+    // Bytes and packets sent by the client for the layer
+    optional int64 tx_bytes = 5;
+    optional int64 tx_packets = 6;
+
+    // Bytes and packets received by the client for the layer
+    optional int64 rx_bytes = 7;
+    optional int64 rx_packets = 8;
+
+    // Bytes and packets dropped due to client error
+    optional int64 dropped_bytes = 9;
+    optional int64 dropped_packets = 10;
 }

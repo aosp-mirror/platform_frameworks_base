@@ -21,244 +21,244 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wifi_status">
-    <item msgid="1922181315419294640"></item>
-    <item msgid="8934131797783724664">"Nag-i-scan…"</item>
-    <item msgid="8513729475867537913">"Kumukonekta…"</item>
-    <item msgid="515055375277271756">"Pinapatunayan…"</item>
-    <item msgid="1943354004029184381">"Kumukuha ng IP address…"</item>
-    <item msgid="4221763391123233270">"Konektado"</item>
-    <item msgid="624838831631122137">"Suspendido"</item>
-    <item msgid="7979680559596111948">"Nadidiskonekta…"</item>
-    <item msgid="1634960474403853625">"Hindi nakakonekta"</item>
-    <item msgid="746097431216080650">"Hindi tagumpay"</item>
-    <item msgid="6367044185730295334">"Naka-block"</item>
-    <item msgid="503942654197908005">"Pansamantalang iniiwasan ang mabagal na koneksyon"</item>
+    <item msgid="1596683495752107015"></item>
+    <item msgid="3288373008277313483">"Nag-i-scan…"</item>
+    <item msgid="6050951078202663628">"Kumukonekta…"</item>
+    <item msgid="8356618438494652335">"Pinapatunayan…"</item>
+    <item msgid="2837871868181677206">"Kumukuha ng IP address…"</item>
+    <item msgid="4613015005934755724">"Konektado"</item>
+    <item msgid="3763530049995655072">"Suspendido"</item>
+    <item msgid="7852381437933824454">"Nadidiskonekta…"</item>
+    <item msgid="5046795712175415059">"Hindi nakakonekta"</item>
+    <item msgid="2473654476624070462">"Hindi tagumpay"</item>
+    <item msgid="9146847076036105115">"Naka-block"</item>
+    <item msgid="4543924085816294893">"Pansamantalang iniiwasan ang mabagal na koneksyon"</item>
   </string-array>
   <string-array name="wifi_status_with_ssid">
-    <item msgid="7714855332363650812"></item>
-    <item msgid="8878186979715711006">"Nag-ii-scan…"</item>
-    <item msgid="355508996603873860">"Kumukonekta sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="554971459996405634">"Nagpapatotoo sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="7928343808033020343">"Pagkuha ng IP address mula sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="8937994881315223448">"Nakakonekta sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
-    <item msgid="1330262655415760617">"Suspendido"</item>
-    <item msgid="7698638434317271902">"Inaalis sa pagkakakonekta mula sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="197508606402264311">"Hindi nakakonekta"</item>
-    <item msgid="8578370891960825148">"Hindi tagumpay"</item>
-    <item msgid="5660739516542454527">"Naka-block"</item>
-    <item msgid="1805837518286731242">"Pansamantalang iniiwasan ang mabagal na koneksyon"</item>
+    <item msgid="5969842512724979061"></item>
+    <item msgid="1818677602615822316">"Nag-ii-scan…"</item>
+    <item msgid="8339720953594087771">"Kumukonekta sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="3028983857109369308">"Nagpapatotoo sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="4287401332778341890">"Pagkuha ng IP address mula sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="1043944043827424501">"Nakakonekta sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
+    <item msgid="7445993821842009653">"Suspendido"</item>
+    <item msgid="1175040558087735707">"Inaalis sa pagkakakonekta mula sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="699832486578171722">"Hindi nakakonekta"</item>
+    <item msgid="522383512264986901">"Hindi tagumpay"</item>
+    <item msgid="3602596701217484364">"Naka-block"</item>
+    <item msgid="1999413958589971747">"Pansamantalang iniiwasan ang mabagal na koneksyon"</item>
   </string-array>
   <string-array name="hdcp_checking_titles">
-    <item msgid="441827799230089869">"Huwag kailanman suriin"</item>
-    <item msgid="6042769699089883931">"Suriin lang para sa DRM content"</item>
-    <item msgid="9174900380056846820">"Palaging suriin"</item>
+    <item msgid="2377230797542526134">"Huwag kailanman suriin"</item>
+    <item msgid="3919638466823112484">"Suriin lang para sa DRM content"</item>
+    <item msgid="9048424957228926377">"Palaging suriin"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
-    <item msgid="505558545611516707">"Huwag kailanman gumamit ng pagsusuring HDCP"</item>
-    <item msgid="3878793616631049349">"Gamitin lang ang pagsusuring HDCP para sa nilalamang DRM"</item>
-    <item msgid="45075631231212732">"Palaging gumamit ng pagsusuring HDCP"</item>
+    <item msgid="4045840870658484038">"Huwag kailanman gumamit ng pagsusuring HDCP"</item>
+    <item msgid="8254225038262324761">"Gamitin lang ang pagsusuring HDCP para sa nilalamang DRM"</item>
+    <item msgid="6421717003037072581">"Palaging gumamit ng pagsusuring HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="3966341281672645384">"Naka-disable"</item>
-    <item msgid="1969681323976948639">"Na-enable Na-filter"</item>
-    <item msgid="8719029132154020716">"Naka-enable"</item>
+    <item msgid="695678520785580527">"Naka-disable"</item>
+    <item msgid="6336372935919715515">"Na-enable Na-filter"</item>
+    <item msgid="2779123106632690576">"Naka-enable"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="5347678900838034763">"AVRCP 1.4 (Default)"</item>
-    <item msgid="2809759619990248160">"AVRCP 1.3"</item>
-    <item msgid="6199178154704729352">"AVRCP 1.5"</item>
-    <item msgid="5172170854953034852">"AVRCP 1.6"</item>
+    <item msgid="8036025277512210160">"AVRCP 1.4 (Default)"</item>
+    <item msgid="1637054408779685086">"AVRCP 1.3"</item>
+    <item msgid="8317734704797203949">"AVRCP 1.5"</item>
+    <item msgid="7556896992111771426">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
-    <item msgid="2838624067805073303">"avrcp14"</item>
-    <item msgid="3011533352527449572">"avrcp13"</item>
-    <item msgid="8837606198371920819">"avrcp15"</item>
-    <item msgid="3422726142222090896">"avrcp16"</item>
+    <item msgid="8965800440990431014">"avrcp14"</item>
+    <item msgid="1613629084012791988">"avrcp13"</item>
+    <item msgid="4398977131424970917">"avrcp15"</item>
+    <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"Gamitin ang Pagpili ng System (Default)"</item>
-    <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="686685526567131661">"AAC"</item>
-    <item msgid="5254942598247222737">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> na audio"</item>
-    <item msgid="2091430979086738145">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> na audio"</item>
-    <item msgid="6751080638867012696">"LDAC"</item>
-    <item msgid="723675059572222462">"I-enable ang Mga Opsyonal na Codec"</item>
-    <item msgid="3304843301758635896">"I-disable ang Mga Opsyonal na Codec"</item>
+    <item msgid="2494959071796102843">"Gamitin ang Pagpili ng System (Default)"</item>
+    <item msgid="4055460186095649420">"SBC"</item>
+    <item msgid="720249083677397051">"AAC"</item>
+    <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> na audio"</item>
+    <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> na audio"</item>
+    <item msgid="3825367753087348007">"LDAC"</item>
+    <item msgid="5832677994279829983">"I-enable ang Mga Opsyonal na Codec"</item>
+    <item msgid="9205039209798344398">"I-disable ang Mga Opsyonal na Codec"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"Gamitin ang Pagpili ng System (Default)"</item>
-    <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="6839647709301342559">"AAC"</item>
-    <item msgid="7848030269621918608">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> na audio"</item>
-    <item msgid="298198075927343893">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> na audio"</item>
-    <item msgid="7950781694447359344">"LDAC"</item>
-    <item msgid="2209680154067241740">"I-enable ang Mga Opsyonal na Codec"</item>
-    <item msgid="741805482892725657">"I-disable ang Mga Opsyonal na Codec"</item>
+    <item msgid="8868109554557331312">"Gamitin ang Pagpili ng System (Default)"</item>
+    <item msgid="9024885861221697796">"SBC"</item>
+    <item msgid="4688890470703790013">"AAC"</item>
+    <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> na audio"</item>
+    <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> na audio"</item>
+    <item msgid="2553206901068987657">"LDAC"</item>
+    <item msgid="221347164942544028">"I-enable ang Mga Opsyonal na Codec"</item>
+    <item msgid="7416462860415701287">"I-disable ang Mga Opsyonal na Codec"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="3093023430402746802">"Gamitin ang Pagpili ng System (Default)"</item>
-    <item msgid="8895532488906185219">"44.1 kHz"</item>
-    <item msgid="2909915718994807056">"48.0 kHz"</item>
-    <item msgid="3347287377354164611">"88.2 kHz"</item>
-    <item msgid="1234212100239985373">"96.0 kHz"</item>
+    <item msgid="926809261293414607">"Gamitin ang Pagpili ng System (Default)"</item>
+    <item msgid="8003118270854840095">"44.1 kHz"</item>
+    <item msgid="3208896645474529394">"48.0 kHz"</item>
+    <item msgid="8420261949134022577">"88.2 kHz"</item>
+    <item msgid="8887519571067543785">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="3214516120190965356">"Gamitin ang Pagpili ng System (Default)"</item>
-    <item msgid="4482862757811638365">"44.1 kHz"</item>
-    <item msgid="354495328188724404">"48.0 kHz"</item>
-    <item msgid="7329816882213695083">"88.2 kHz"</item>
-    <item msgid="6967397666254430476">"96.0 kHz"</item>
+    <item msgid="2284090879080331090">"Gamitin ang Pagpili ng System (Default)"</item>
+    <item msgid="1872276250541651186">"44.1 kHz"</item>
+    <item msgid="8736780630001704004">"48.0 kHz"</item>
+    <item msgid="7698585706868856888">"88.2 kHz"</item>
+    <item msgid="8946330945963372966">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2684127272582591429">"Gamitin ang Pagpili ng System (Default)"</item>
-    <item msgid="5618929009984956469">"16 bits/sample"</item>
-    <item msgid="3412640499234627248">"24 bits/sample"</item>
-    <item msgid="121583001492929387">"32 bits/sample"</item>
+    <item msgid="2574107108483219051">"Gamitin ang Pagpili ng System (Default)"</item>
+    <item msgid="4671992321419011165">"16 bits/sample"</item>
+    <item msgid="1933898806184763940">"24 bits/sample"</item>
+    <item msgid="1212577207279552119">"32 bits/sample"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="1081159789834584363">"Gamitin ang Pagpili ng System (Default)"</item>
-    <item msgid="4726688794884191540">"16 bits/sample"</item>
-    <item msgid="305344756485516870">"24 bits/sample"</item>
-    <item msgid="244568657919675099">"32 bits/sample"</item>
+    <item msgid="9196208128729063711">"Gamitin ang Pagpili ng System (Default)"</item>
+    <item msgid="1084497364516370912">"16 bits/sample"</item>
+    <item msgid="2077889391457961734">"24 bits/sample"</item>
+    <item msgid="3836844909491316925">"32 bits/sample"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="5226878858503393706">"Gamitin ang Pagpili ng System (Default)"</item>
-    <item msgid="4106832974775067314">"Mono"</item>
-    <item msgid="5571632958424639155">"Stereo"</item>
+    <item msgid="3014194562841654656">"Gamitin ang Pagpili ng System (Default)"</item>
+    <item msgid="5982952342181788248">"Mono"</item>
+    <item msgid="927546067692441494">"Stereo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="4118561796005528173">"Gamitin ang Pagpili ng System (Default)"</item>
-    <item msgid="8900559293912978337">"Mono"</item>
-    <item msgid="8883739882299884241">"Stereo"</item>
+    <item msgid="1997302811102880485">"Gamitin ang Pagpili ng System (Default)"</item>
+    <item msgid="8005696114958453588">"Mono"</item>
+    <item msgid="1333279807604675720">"Stereo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="7158319962230727476">"Naka-optimize para sa Kalidad ng Audio (990kbps/909kbps)"</item>
-    <item msgid="2921767058740704969">"Balanse ang Kalidad ng Audio at Koneksyon (660kbps/606kbps)"</item>
-    <item msgid="8860982705384396512">"Naka-optimize para sa Kalidad ng Koneksyon (330kbps/303kbps)"</item>
-    <item msgid="4414060457677684127">"Pinakamahusay na Effort (Adaptive Bit Rate)"</item>
+    <item msgid="1241278021345116816">"Naka-optimize para sa Kalidad ng Audio (990kbps/909kbps)"</item>
+    <item msgid="3523665555859696539">"Balanse ang Kalidad ng Audio at Koneksyon (660kbps/606kbps)"</item>
+    <item msgid="886408010459747589">"Naka-optimize para sa Kalidad ng Koneksyon (330kbps/303kbps)"</item>
+    <item msgid="3808414041654351577">"Pinakamahusay na Effort (Adaptive Bit Rate)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="6398189564246596868">"Naka-optimize para sa Kalidad ng Audio"</item>
-    <item msgid="4327143584633311908">"Balanse ang Kalidad ng Audio at Koneksyon"</item>
-    <item msgid="4681409244565426925">"Naka-optimize para sa Kalidad ng Koneksyon"</item>
-    <item msgid="364670732877872677">"Pinakamahusay na Effort (Adaptive Bit Rate)"</item>
+    <item msgid="804499336721569838">"Naka-optimize para sa Kalidad ng Audio"</item>
+    <item msgid="7451422070435297462">"Balanse ang Kalidad ng Audio at Koneksyon"</item>
+    <item msgid="6173114545795428901">"Naka-optimize para sa Kalidad ng Koneksyon"</item>
+    <item msgid="4349908264188040530">"Pinakamahusay na Effort (Adaptive Bit Rate)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
-    <item msgid="4862957058729193940"></item>
-    <item msgid="6481691720774549651">", aktibo"</item>
-    <item msgid="8962366465966010158">", aktibo (media)"</item>
-    <item msgid="4046665544396189228">", aktibo (telepono)"</item>
+    <item msgid="8019740759207729126"></item>
+    <item msgid="204248102837117183">", aktibo"</item>
+    <item msgid="253388653486517049">", aktibo (media)"</item>
+    <item msgid="5001852592115448348">", aktibo (telepono)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="8665206199209698501">"I-off"</item>
-    <item msgid="1593289376502312923">"64K"</item>
-    <item msgid="487545340236145324">"256K"</item>
-    <item msgid="2423528675294333831">"1M"</item>
-    <item msgid="180883774509476541">"4M"</item>
-    <item msgid="2803199102589126938">"16M"</item>
+    <item msgid="1191094707770726722">"I-off"</item>
+    <item msgid="7839165897132179888">"64K"</item>
+    <item msgid="2715700596495505626">"256K"</item>
+    <item msgid="7099386891713159947">"1M"</item>
+    <item msgid="6069075827077845520">"4M"</item>
+    <item msgid="8243549501764402572">"16M"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="6089470720451068364">"I-off"</item>
-    <item msgid="4622460333038586791">"64K"</item>
-    <item msgid="2212125625169582330">"256K"</item>
-    <item msgid="1704946766699242653">"1M"</item>
+    <item msgid="1145807928339101085">"I-off"</item>
+    <item msgid="4064786181089783077">"64K"</item>
+    <item msgid="3052710745383602630">"256K"</item>
+    <item msgid="3691785423374588514">"1M"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="6921048829791179331">"I-off"</item>
-    <item msgid="2969458029344750262">"64K kada log buffer"</item>
-    <item msgid="1342285115665698168">"256K kada log buffer"</item>
-    <item msgid="1314234299552254621">"1M kada log buffer"</item>
-    <item msgid="3606047780792894151">"4M kada log buffer"</item>
-    <item msgid="5431354956856655120">"16M kada log buffer"</item>
+    <item msgid="409235464399258501">"I-off"</item>
+    <item msgid="4195153527464162486">"64K kada log buffer"</item>
+    <item msgid="7464037639415220106">"256K kada log buffer"</item>
+    <item msgid="8539423820514360724">"1M kada log buffer"</item>
+    <item msgid="1984761927103140651">"4M kada log buffer"</item>
+    <item msgid="7892098981256010498">"16M kada log buffer"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
-    <item msgid="1744840221860799971">"Naka-off"</item>
-    <item msgid="3054662377365844197">"Lahat"</item>
-    <item msgid="688870735111627832">"Maliban sa radyo"</item>
-    <item msgid="2850427388488887328">"kernel lang"</item>
+    <item msgid="704720725704372366">"Naka-off"</item>
+    <item msgid="6014837961827347618">"Lahat"</item>
+    <item msgid="7387060437894578132">"Maliban sa radyo"</item>
+    <item msgid="7300881231043255746">"kernel lang"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="2216470072500521830">"Naka-off"</item>
-    <item msgid="172978079776521897">"Lahat ng buffer ng log"</item>
-    <item msgid="3873873912383879240">"Lahat maliban sa buffer ng log ng radyo"</item>
-    <item msgid="8489661142527693381">"kernel log buffer lang"</item>
+    <item msgid="97587758561106269">"Naka-off"</item>
+    <item msgid="7126170197336963369">"Lahat ng buffer ng log"</item>
+    <item msgid="7167543126036181392">"Lahat maliban sa buffer ng log ng radyo"</item>
+    <item msgid="5135340178556563979">"kernel log buffer lang"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
-    <item msgid="8134156599370824081">"Naka-off ang animation"</item>
-    <item msgid="6624864048416710414">"Scale ng animation .5x"</item>
-    <item msgid="2219332261255416635">"Scale ng animation 1x"</item>
-    <item msgid="3544428804137048509">"Scale ng animation 1.5x"</item>
-    <item msgid="3110710404225974514">"Scale ng animation 2x"</item>
-    <item msgid="4402738611528318731">"Scale ng animation 5x"</item>
-    <item msgid="6189539267968330656">"Scale ng animation 10x"</item>
+    <item msgid="2675263395797191850">"Naka-off ang animation"</item>
+    <item msgid="5790132543372767872">"Scale ng animation .5x"</item>
+    <item msgid="2529692189302148746">"Scale ng animation 1x"</item>
+    <item msgid="8072785072237082286">"Scale ng animation 1.5x"</item>
+    <item msgid="3531560925718232560">"Scale ng animation 2x"</item>
+    <item msgid="4542853094898215187">"Scale ng animation 5x"</item>
+    <item msgid="5643881346223901195">"Scale ng animation 10x"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
-    <item msgid="8464255836173039442">"Naka-off ang animation"</item>
-    <item msgid="3375781541913316411">"Scale ng animation .5x"</item>
-    <item msgid="1991041427801869945">"Scale ng animation 1x"</item>
-    <item msgid="4012689927622382874">"Scale ng animation 1.5x"</item>
-    <item msgid="3289156759925947169">"Scale ng animation 2x"</item>
-    <item msgid="7705857441213621835">"Scale ng animation 5x"</item>
-    <item msgid="6660750935954853365">"Scale ng animation 10x"</item>
+    <item msgid="3376676813923486384">"Naka-off ang animation"</item>
+    <item msgid="753422683600269114">"Scale ng animation .5x"</item>
+    <item msgid="3695427132155563489">"Scale ng animation 1x"</item>
+    <item msgid="9032615844198098981">"Scale ng animation 1.5x"</item>
+    <item msgid="8473868962499332073">"Scale ng animation 2x"</item>
+    <item msgid="4403482320438668316">"Scale ng animation 5x"</item>
+    <item msgid="169579387974966641">"Scale ng animation 10x"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
-    <item msgid="6039901060648228241">"Naka-off ang animation"</item>
-    <item msgid="1138649021950863198">"Scale ng animation .5x"</item>
-    <item msgid="4394388961370833040">"Scale ng animation 1x"</item>
-    <item msgid="8125427921655194973">"Scale ng animation 1.5x"</item>
-    <item msgid="3334024790739189573">"Scale ng animation 2x"</item>
-    <item msgid="3170120558236848008">"Scale ng animation 5x"</item>
-    <item msgid="1069584980746680398">"Scale ng animation 10x"</item>
+    <item msgid="6416998593844817378">"Naka-off ang animation"</item>
+    <item msgid="875345630014338616">"Scale ng animation .5x"</item>
+    <item msgid="2753729231187104962">"Scale ng animation 1x"</item>
+    <item msgid="1368370459723665338">"Scale ng animation 1.5x"</item>
+    <item msgid="5768005350534383389">"Scale ng animation 2x"</item>
+    <item msgid="3728265127284005444">"Scale ng animation 5x"</item>
+    <item msgid="2464080977843960236">"Scale ng animation 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="1606809880904982133">"Wala"</item>
-    <item msgid="9033194758688161545">"480p"</item>
-    <item msgid="1025306206556583600">"480p (secure)"</item>
-    <item msgid="1853913333042744661">"720p"</item>
-    <item msgid="3414540279805870511">"720p (secure)"</item>
-    <item msgid="9039818062847141551">"1080p"</item>
-    <item msgid="4939496949750174834">"1080p (secure)"</item>
-    <item msgid="1833612718524903568">"4K"</item>
-    <item msgid="238303513127879234">"4K (secure)"</item>
-    <item msgid="3547211260846843098">"4K (na-upscale)"</item>
-    <item msgid="5411365648951414254">"4K (na-upscale, secure)"</item>
-    <item msgid="1311305077526792901">"720p, 1080p (dual screen)"</item>
+    <item msgid="4497393944195787240">"Wala"</item>
+    <item msgid="8461943978957133391">"480p"</item>
+    <item msgid="6923083594932909205">"480p (secure)"</item>
+    <item msgid="1226941831391497335">"720p"</item>
+    <item msgid="7051983425968643928">"720p (secure)"</item>
+    <item msgid="7765795608738980305">"1080p"</item>
+    <item msgid="8084293856795803592">"1080p (secure)"</item>
+    <item msgid="938784192903353277">"4K"</item>
+    <item msgid="8612549335720461635">"4K (secure)"</item>
+    <item msgid="7322156123728520872">"4K (na-upscale)"</item>
+    <item msgid="7735692090314849188">"4K (na-upscale, secure)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (dual screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
-    <item msgid="3191973083884253830">"Wala"</item>
-    <item msgid="9089630089455370183">"Logcat"</item>
-    <item msgid="5397807424362304288">"Systrace (Graphics)"</item>
-    <item msgid="1340692776955662664">"Stack ng tawag sa glGetError"</item>
+    <item msgid="4433736508877934305">"Wala"</item>
+    <item msgid="9140053004929079158">"Logcat"</item>
+    <item msgid="3866871644917859262">"Systrace (Graphics)"</item>
+    <item msgid="7345673972166571060">"Stack ng tawag sa glGetError"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
-    <item msgid="993742912147090253">"I-off"</item>
-    <item msgid="675719912558941285">"Iguhit sa asul ang di-parihabang clip region"</item>
-    <item msgid="1064373276095698656">"I-higlight nang berde ang tested drawing commands"</item>
+    <item msgid="2482978351289846212">"I-off"</item>
+    <item msgid="3405519300199774027">"Iguhit sa asul ang di-parihabang clip region"</item>
+    <item msgid="1212561935004167943">"I-higlight nang berde ang tested drawing commands"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"Naka-off"</item>
-    <item msgid="2751513398307949636">"Sa screen bilang mga bar"</item>
-    <item msgid="2355151170975410323">"Sa <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+    <item msgid="634406443901014984">"Naka-off"</item>
+    <item msgid="1288760936356000927">"Sa screen bilang mga bar"</item>
+    <item msgid="5023908510820531131">"Sa <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="8190572633763871652">"I-off"</item>
-    <item msgid="7688197031296835369">"Tingnan ang mga overdraw na bahagi"</item>
-    <item msgid="2290859360633824369">"Ipakita ang mga lugar para sa Deuteranomaly"</item>
+    <item msgid="1968128556747588800">"I-off"</item>
+    <item msgid="3033215374382962216">"Tingnan ang mga overdraw na bahagi"</item>
+    <item msgid="3474333938380896988">"Ipakita ang mga lugar para sa Deuteranomaly"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="3401625457385943795">"Karaniwang limitasyon"</item>
-    <item msgid="4071574792028999443">"Walang mga proseso sa background"</item>
-    <item msgid="4810006996171705398">"1 proseso sa pinakamarami"</item>
-    <item msgid="8586370216857360863">"2 proseso sa pinakamarami"</item>
-    <item msgid="836593137872605381">"3 proseso sa pinakamarami"</item>
-    <item msgid="7899496259191969307">"4 na proseso sa pinakamarami"</item>
+    <item msgid="794656271086646068">"Karaniwang limitasyon"</item>
+    <item msgid="8628438298170567201">"Walang mga proseso sa background"</item>
+    <item msgid="915752993383950932">"1 proseso sa pinakamarami"</item>
+    <item msgid="8554877790859095133">"2 proseso sa pinakamarami"</item>
+    <item msgid="9060830517215174315">"3 proseso sa pinakamarami"</item>
+    <item msgid="6506681373060736204">"4 na proseso sa pinakamarami"</item>
   </string-array>
   <string-array name="usb_configuration_titles">
-    <item msgid="488237561639712799">"Nagcha-charge"</item>
-    <item msgid="5220695614993094977">"MTP (Media Transfer Protocol)"</item>
-    <item msgid="2086000968159047375">"PTP (Picture Transfer Protocol)"</item>
-    <item msgid="7398830860950841822">"RNDIS (USB Ethernet)"</item>
-    <item msgid="1718924214939774352">"Pinagmulan ng Audio"</item>
-    <item msgid="8126315616613006284">"MIDI"</item>
+    <item msgid="3358668781763928157">"Nagcha-charge"</item>
+    <item msgid="7804797564616858506">"MTP (Media Transfer Protocol)"</item>
+    <item msgid="910925519184248772">"PTP (Picture Transfer Protocol)"</item>
+    <item msgid="3825132913289380004">"RNDIS (USB Ethernet)"</item>
+    <item msgid="8828567335701536560">"Pinagmulan ng Audio"</item>
+    <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
 </resources>

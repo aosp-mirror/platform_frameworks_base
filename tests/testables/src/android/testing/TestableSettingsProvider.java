@@ -14,6 +14,8 @@
 
 package android.testing;
 
+import static org.junit.Assert.assertEquals;
+
 import android.content.ContentProviderClient;
 import android.content.Context;
 import android.os.Bundle;
@@ -24,8 +26,6 @@ import android.test.mock.MockContentProvider;
 import android.util.Log;
 
 import java.util.HashMap;
-
-import static org.junit.Assert.*;
 
 /**
  * Allows calls to android.provider.Settings to be tested easier.
@@ -71,7 +71,7 @@ public class TestableSettingsProvider extends MockContentProvider {
 
     public Bundle call(String method, String arg, Bundle extras) {
         // Methods are "GET_system", "GET_global", "PUT_secure", etc.
-        final int userId = extras.getInt(Settings.CALL_METHOD_USER_KEY, 0);
+        final int userId = extras.getInt(Settings.CALL_METHOD_USER_KEY, UserHandle.myUserId());
         final String[] commands = method.split("_", 2);
         final String op = commands[0];
         final String table = commands[1];

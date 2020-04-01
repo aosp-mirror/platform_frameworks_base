@@ -17998,7 +17998,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public int getCurrentUserId() {
-            return mUserController.getCurrentUserIdLU();
+            return mUserController.getCurrentUserId();
         }
 
         @Override

@@ -19,5 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="toast_rotation_locked" msgid="7609673011431556092">"አሁን ማያበወርድ ገፅ አቀማመጥ ተሸንጉሯል።"</string>
+    <string name="toast_rotation_locked" msgid="4914046305911646988">"አሁን ማያበወርድ ገፅ አቀማመጥ ተሸንጉሯል።"</string>
 </resources>

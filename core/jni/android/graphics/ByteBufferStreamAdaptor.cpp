@@ -1,6 +1,7 @@
 #include "ByteBufferStreamAdaptor.h"
 #include "core_jni_helpers.h"
 #include "Utils.h"
+#include <jni.h>
 
 #include <SkStream.h>
 
@@ -8,6 +9,24 @@ using namespace android;
 
 static jmethodID gByteBuffer_getMethodID;
 static jmethodID gByteBuffer_setPositionMethodID;
+
+/**
+ * Helper method for accessing the JNI interface pointer.
+ *
+ * Image decoding (which this supports) is started on a thread that is already
+ * attached to the Java VM. But an AnimatedImageDrawable continues decoding on
+ * the AnimatedImageThread, which is not attached. This will attach if
+ * necessary.
+ */
+static JNIEnv* requireEnv(JavaVM* jvm) {
+    JNIEnv* env;
+    if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        if (jvm->AttachCurrentThreadAsDaemon(&env, nullptr) != JNI_OK) {
+            LOG_ALWAYS_FATAL("Failed to AttachCurrentThread!");
+        }
+    }
+    return env;
+}
 
 class ByteBufferStream : public SkStreamAsset {
 private:
@@ -46,7 +65,7 @@ public:
     }
 
     ~ByteBufferStream() override {
-        auto* env = get_env_or_die(mJvm);
+        auto* env = requireEnv(mJvm);
         env->DeleteGlobalRef(mByteBuffer);
         env->DeleteGlobalRef(mStorage);
     }
@@ -63,7 +82,7 @@ public:
             return this->setPosition(mPosition + size) ? size : 0;
         }
 
-        auto* env = get_env_or_die(mJvm);
+        auto* env = requireEnv(mJvm);
         size_t bytesRead = 0;
         do {
             const size_t requested = (size > kStorageSize) ? kStorageSize : size;
@@ -146,7 +165,7 @@ private:
 
     // Range has already been checked by the caller.
     bool setPosition(size_t newPosition) {
-        auto* env = get_env_or_die(mJvm);
+        auto* env = requireEnv(mJvm);
         env->CallObjectMethod(mByteBuffer, gByteBuffer_setPositionMethodID,
                               newPosition + mInitialPosition);
         if (env->ExceptionCheck()) {
@@ -185,7 +204,7 @@ public:
     }
 
     ~ByteArrayStream() override {
-        auto* env = get_env_or_die(mJvm);
+        auto* env = requireEnv(mJvm);
         env->DeleteGlobalRef(mByteArray);
     }
 
@@ -197,7 +216,7 @@ public:
             return 0;
         }
 
-        auto* env = get_env_or_die(mJvm);
+        auto* env = requireEnv(mJvm);
         if (buffer) {
             env->GetByteArrayRegion(mByteArray, mPosition + mOffset, size,
                                     reinterpret_cast<jbyte*>(buffer));

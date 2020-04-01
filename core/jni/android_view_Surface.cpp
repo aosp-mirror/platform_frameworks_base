@@ -488,7 +488,7 @@ static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfaceP
         proxy->setWideGamut(true);
     }
     proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
-    proxy->setSurface(surface);
+    proxy->setSurface(surface, false);
     // Shadows can't be used via this interface, so just set the light source
     // to all 0s.
     proxy->setLightAlpha(0, 0);

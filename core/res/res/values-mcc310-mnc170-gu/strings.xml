@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="210168420192421012">"SIMને MM#2ની જોગવાઈ નથી"</string>
-    <string name="mmcc_illegal_ms" msgid="1130721094178658338">"SIMને MM#3 કરવાની મંજૂરી નથી"</string>
-    <string name="mmcc_illegal_me" msgid="3173546391131606065">"MM#6 ફોનની મંજૂરી નથી"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5424518490295341205">"SIMને MM#2ની જોગવાઈ નથી"</string>
+    <string name="mmcc_illegal_ms" msgid="3527626511418944853">"SIMને MM#3 કરવાની મંજૂરી નથી"</string>
+    <string name="mmcc_illegal_me" msgid="3948912590657398489">"MM#6 ફોનની મંજૂરી નથી"</string>
 </resources>

@@ -19,5 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="recents_quick_scrub_onboarding" msgid="3449337212132057178">"መተግበሪያዎችን በፍጥነት ለመቀየር ወደ ግራ ይጎትቱ"</string>
+    <string name="recents_quick_scrub_onboarding" msgid="2452671841151577157">"መተግበሪያዎችን በፍጥነት ለመቀየር ወደ ግራ ይጎትቱ"</string>
 </resources>
