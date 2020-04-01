@@ -78,6 +78,11 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
+
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
@@ -114,6 +119,7 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.EmergencyDialerConstants;
+import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.leak.RotationUtils;
 import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolator;
 
@@ -130,7 +136,8 @@ import javax.inject.Inject;
 public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         DialogInterface.OnShowListener,
         ConfigurationController.ConfigurationListener,
-        GlobalActionsPanelPlugin.Callbacks {
+        GlobalActionsPanelPlugin.Callbacks,
+        LifecycleOwner {
 
     public static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     public static final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
@@ -179,6 +186,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final NotificationShadeDepthController mDepthController;
     private final BlurUtils mBlurUtils;
 
+    // Used for RingerModeTracker
+    private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
+
     private ArrayList<Action> mItems;
     private ActionsDialog mDialog;
 
@@ -209,6 +219,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private List<ControlsServiceInfo> mControlsServiceInfos = new ArrayList<>();
     private ControlsController mControlsController;
     private SharedPreferences mControlsPreferences;
+    private final RingerModeTracker mRingerModeTracker;
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
@@ -247,7 +258,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             ControlsUiController controlsUiController, IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
             ControlsListingController controlsListingController,
-            ControlsController controlsController, UiEventLogger uiEventLogger) {
+            ControlsController controlsController, UiEventLogger uiEventLogger,
+            RingerModeTracker ringerModeTracker) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -274,6 +286,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mBackgroundExecutor = backgroundExecutor;
         mControlsListingController = controlsListingController;
         mBlurUtils = blurUtils;
+        mRingerModeTracker = ringerModeTracker;
         mControlsController = controlsController;
 
         // receive broadcasts
@@ -294,6 +307,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mShowSilentToggle = SHOW_SILENT_TOGGLE && !resources.getBoolean(
                 R.bool.config_useFixedVolume);
+        if (mShowSilentToggle) {
+            mRingerModeTracker.getRingerMode().observe(this, ringer ->
+                    mHandler.sendEmptyMessage(MESSAGE_REFRESH)
+            );
+        }
 
         mEmergencyAffordanceManager = new EmergencyAffordanceManager(context);
         mScreenshotHelper = new ScreenshotHelper(context);
@@ -1001,16 +1019,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         refreshSilentMode();
         mAirplaneModeOn.updateState(mAirplaneState);
         mAdapter.notifyDataSetChanged();
-        if (mShowSilentToggle) {
-            IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
-            mBroadcastDispatcher.registerReceiver(mRingerModeReceiver, filter);
-        }
+        mLifecycle.setCurrentState(Lifecycle.State.RESUMED);
     }
 
     private void refreshSilentMode() {
         if (!mHasVibrator) {
-            final boolean silentModeOn =
-                    mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL;
+            Integer value = mRingerModeTracker.getRingerMode().getValue();
+            final boolean silentModeOn = value != null && value != AudioManager.RINGER_MODE_NORMAL;
             ((ToggleAction) mSilentModeAction).updateState(
                     silentModeOn ? ToggleState.On : ToggleState.Off);
         }
@@ -1024,14 +1039,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mDialog = null;
         }
         mWindowManagerFuncs.onGlobalActionsHidden();
-        if (mShowSilentToggle) {
-            try {
-                mBroadcastDispatcher.unregisterReceiver(mRingerModeReceiver);
-            } catch (IllegalArgumentException ie) {
-                // ignore this
-                Log.w(TAG, ie);
-            }
-        }
+        mLifecycle.setCurrentState(Lifecycle.State.DESTROYED);
     }
 
     /**
@@ -1578,15 +1586,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     };
 
-    private BroadcastReceiver mRingerModeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
-                mHandler.sendEmptyMessage(MESSAGE_REFRESH);
-            }
-        }
-    };
-
     private ContentObserver mAirplaneModeObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
@@ -1650,6 +1649,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         if (!mHasTelephony) {
             mAirplaneState = on ? ToggleState.On : ToggleState.Off;
         }
+    }
+
+    @NonNull
+    @Override
+    public Lifecycle getLifecycle() {
+        return mLifecycle;
     }
 
     private static final class ActionsDialog extends Dialog implements DialogInterface,
