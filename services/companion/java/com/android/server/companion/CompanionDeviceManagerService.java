@@ -660,6 +660,11 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 + "associate USER_ID PACKAGE MAC_ADDRESS\n"
                 + "disassociate USER_ID PACKAGE MAC_ADDRESS";
 
+        ShellCmd() {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_COMPANION_DEVICES, "ShellCmd");
+        }
+
         @Override
         public int onCommand(String cmd) {
             switch (cmd) {
