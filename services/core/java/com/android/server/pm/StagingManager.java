@@ -323,7 +323,7 @@ public class StagingManager {
                 return;
             }
 
-            if (!mApexManager.abortActiveSession()) {
+            if (!mApexManager.revertActiveSessions()) {
                 Slog.e(TAG, "Failed to abort APEXd session");
             } else {
                 Slog.e(TAG,
