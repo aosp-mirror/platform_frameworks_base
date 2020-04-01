@@ -91,7 +91,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
             @AnimationType int animationType, Handler mainThreadHandler) {
         mMainThreadHandler = mainThreadHandler;
         mOuterCallbacks = controller;
-        mControl = new InsetsAnimationControlImpl(copyControls(controls), frame, state, listener,
+        mControl = new InsetsAnimationControlImpl(controls, frame, state, listener,
                 types, mCallbacks, durationMs, interpolator, animationType);
         InsetsAnimationThread.getHandler().post(() -> listener.onReady(mControl, types));
     }
