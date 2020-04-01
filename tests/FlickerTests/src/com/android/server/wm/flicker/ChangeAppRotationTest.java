@@ -142,6 +142,7 @@ public class ChangeAppRotationTest extends FlickerTestBase {
         );
     }
 
+    @Ignore("Flaky. Pending debug")
     @Test
     public void checkVisibility_screenshotLayerBecomesInvisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
