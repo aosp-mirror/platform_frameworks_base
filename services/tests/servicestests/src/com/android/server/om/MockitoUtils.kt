@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.testutils
+package com.android.server.om
 
 import org.mockito.Answers
 import org.mockito.Mockito
@@ -31,13 +31,6 @@ object MockitoUtils {
             else -> {
                 val arguments = it.arguments
                         ?.takeUnless { it.isEmpty() }
-                        ?.mapIndexed { index, arg ->
-                            try {
-                                arg?.toString()
-                            } catch (e: Exception) {
-                                "toString[$index] threw ${e.message}"
-                            }
-                        }
                         ?.joinToString()
                         ?.let {
                             "with $it"
@@ -53,8 +46,6 @@ object MockitoUtils {
 
 inline fun <reified T> mock(block: T.() -> Unit = {}) = Mockito.mock(T::class.java).apply(block)
 
-fun <T> spy(value: T, block: T.() -> Unit = {}) = Mockito.spy(value).apply(block)
-
 fun <Type> Stubber.whenever(mock: Type) = Mockito.`when`(mock)
 fun <Type : Any?> whenever(mock: Type) = Mockito.`when`(mock)
 
@@ -64,7 +55,7 @@ fun <Type : Any?> whenever(mock: Type, block: InvocationOnMock.() -> Any?) =
 
 fun whenever(mock: Unit) = Mockito.`when`(mock).thenAnswer { }
 
-inline fun <reified T> spyThrowOnUnmocked(value: T?, block: T.() -> Unit): T {
+inline fun <reified T> mockThrowOnUnmocked(block: T.() -> Unit): T {
     val swappingAnswer = object : Answer<Any?> {
         var delegate: Answer<*> = Answers.RETURNS_DEFAULTS
 
@@ -73,12 +64,9 @@ inline fun <reified T> spyThrowOnUnmocked(value: T?, block: T.() -> Unit): T {
         }
     }
 
-    return Mockito.mock(T::class.java, Mockito.withSettings().spiedInstance(value)
-            .defaultAnswer(swappingAnswer)).apply(block)
+    return Mockito.mock(T::class.java, swappingAnswer).apply(block)
             .also {
                 // To allow when() usage inside block, only swap to throwing afterwards
                 swappingAnswer.delegate = MockitoUtils.ANSWER_THROWS
             }
 }
-
-inline fun <reified T> mockThrowOnUnmocked(block: T.() -> Unit) = spyThrowOnUnmocked<T>(null, block)

@@ -54,7 +54,6 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.IntentResolver;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -208,54 +207,30 @@ public class ComponentResolver {
     }
 
     /** Returns the given activity */
-    @Nullable
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public ParsedActivity getActivity(@NonNull ComponentName component) {
+    ParsedActivity getActivity(ComponentName component) {
         synchronized (mLock) {
             return mActivities.mActivities.get(component);
         }
     }
 
     /** Returns the given provider */
-    @Nullable
-    ParsedProvider getProvider(@NonNull ComponentName component) {
+    ParsedProvider getProvider(ComponentName component) {
         synchronized (mLock) {
             return mProviders.mProviders.get(component);
         }
     }
 
     /** Returns the given receiver */
-    @Nullable
-    ParsedActivity getReceiver(@NonNull ComponentName component) {
+    ParsedActivity getReceiver(ComponentName component) {
         synchronized (mLock) {
             return mReceivers.mActivities.get(component);
         }
     }
 
     /** Returns the given service */
-    @Nullable
-    ParsedService getService(@NonNull ComponentName component) {
+    ParsedService getService(ComponentName component) {
         synchronized (mLock) {
             return mServices.mServices.get(component);
-        }
-    }
-
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public boolean componentExists(@NonNull ComponentName componentName) {
-        synchronized (mLock) {
-            ParsedMainComponent component = mActivities.mActivities.get(componentName);
-            if (component != null) {
-                return true;
-            }
-            component = mReceivers.mActivities.get(componentName);
-            if (component != null) {
-                return true;
-            }
-            component = mServices.mServices.get(componentName);
-            if (component != null) {
-                return true;
-            }
-            return mProviders.mProviders.get(componentName) != null;
         }
     }
 
