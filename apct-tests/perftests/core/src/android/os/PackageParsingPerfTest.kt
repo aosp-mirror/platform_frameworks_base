@@ -22,6 +22,7 @@ import android.content.pm.PackageParserCacheHelper.WriteHelper
 import android.content.pm.parsing.ParsingPackageImpl
 import android.content.pm.parsing.ParsingPackageRead
 import android.content.pm.parsing.ParsingPackageUtils
+import android.content.pm.parsing.result.ParseInput
 import android.content.pm.parsing.result.ParseTypeImpl
 import android.content.res.TypedArray
 import android.perftests.utils.BenchmarkState
@@ -173,7 +174,10 @@ class PackageParsingPerfTest {
 
     class ParallelParser2(cacher: PackageCacher2? = null)
         : ParallelParser<ParsingPackageRead>(cacher) {
-        val input = ThreadLocal.withInitial { ParseTypeImpl() }
+        val input = ThreadLocal.withInitial {
+            // For testing, just disable enforcement to avoid hooking up to compat framework
+            ParseTypeImpl(ParseInput.Callback { _, _, _ -> false })
+        }
         val parser = ParsingPackageUtils(false, null, null,
             object : ParsingPackageUtils.Callback {
                 override fun hasFeature(feature: String) = true
