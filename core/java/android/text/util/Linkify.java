@@ -304,7 +304,7 @@ public class Linkify {
 
         if ((mask & WEB_URLS) != 0) {
             gatherLinks(links, text, Patterns.AUTOLINK_WEB_URL,
-                new String[] { "http://", "https://", "rtsp://" },
+                new String[] { "http://", "https://", "rtsp://", "ftp://" },
                 sUrlMatchFilter, null);
         }
 
