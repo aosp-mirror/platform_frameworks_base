@@ -34,6 +34,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -41,8 +42,10 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.doThrow
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import java.lang.IllegalArgumentException
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
@@ -114,6 +117,21 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun updateGlobalDialogVisibility_appliesBlur() {
         notificationShadeDepthController.updateGlobalDialogVisibility(0.5f, root)
         verify(globalActionsSpring).animateTo(eq(maxBlur / 2), safeEq(root))
+    }
+
+    @Test
+    fun updateBlurCallback_setsBlurAndZoom() {
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(wallpaperManager).setWallpaperZoomOut(any(), anyFloat())
+        verify(blurUtils).applyBlur(any(), anyInt())
+    }
+
+    @Test
+    fun updateBlurCallback_invalidWindow() {
+        doThrow(IllegalArgumentException("test exception")).`when`(wallpaperManager)
+                .setWallpaperZoomOut(any(), anyFloat())
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(wallpaperManager).setWallpaperZoomOut(any(), anyFloat())
     }
 
     private fun <T : Any> safeEq(value: T): T {
