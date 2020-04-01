@@ -173,11 +173,12 @@ public abstract class InlineSuggestionRenderService extends Service {
     }
 
     /**
-     *  Returns the metadata about the renderer. Returns {@code null} if no metadata is provided.
+     *  Returns the metadata about the renderer. Returns {@code Bundle.Empty} if no metadata is
+     *  provided.
      */
-    @Nullable
+    @NonNull
     public Bundle onGetInlineSuggestionsRendererInfo() {
-        return null;
+        return Bundle.EMPTY;
     }
 
     /**
