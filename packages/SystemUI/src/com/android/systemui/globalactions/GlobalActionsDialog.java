@@ -1903,6 +1903,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private void completeDismiss() {
             mNotificationShadeWindowController.setForceHasTopUi(mHadTopUi);
+            mDepthController.updateGlobalDialogVisibility(0, null /* view */);
             super.dismiss();
         }
 
