@@ -210,6 +210,13 @@ abstract class ApexManager {
     abstract boolean abortActiveSession();
 
     /**
+     * Abandons the staged session with the given sessionId.
+     *
+     * @return {@code true} upon success, {@code false} if any remote exception occurs
+     */
+    abstract boolean abortStagedSession(int sessionId) throws PackageManagerException;
+
+    /**
      * Uninstalls given {@code apexPackage}.
      *
      * <p>NOTE. Device must be rebooted in order for uninstall to take effect.
@@ -500,6 +507,21 @@ abstract class ApexManager {
         }
 
         @Override
+        boolean abortStagedSession(int sessionId) throws PackageManagerException {
+            try {
+                mApexService.abortStagedSession(sessionId);
+                return true;
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Unable to contact apexservice", re);
+                return false;
+            } catch (Exception e) {
+                throw new PackageManagerException(
+                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        "Failed to abort staged session : " + e.getMessage());
+            }
+        }
+
+        @Override
         boolean uninstallApex(String apexPackagePath) {
             try {
                 mApexService.unstagePackages(Collections.singletonList(apexPackagePath));
@@ -683,6 +705,11 @@ abstract class ApexManager {
 
         @Override
         boolean abortActiveSession() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        boolean abortStagedSession(int sessionId) throws PackageManagerException {
             throw new UnsupportedOperationException();
         }
 
