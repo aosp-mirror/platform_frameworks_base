@@ -358,6 +358,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         spyOn(parentWindowContainer);
         parentWindowContainer.setBounds(fullScreenBounds);
         doReturn(parentWindowContainer).when(task).getParent();
+        doReturn(display.mTaskContainers).when(task).getDisplayArea();
         doReturn(stack).when(task).getStack();
         doReturn(true).when(parentWindowContainer).handlesOrientationChangeFromDescendant();
 
@@ -944,14 +945,14 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testNotSpecifyOrientationByFloatingTask() {
         final Task task = getTestTask();
         final ActivityRecord activity = task.getTopMostActivity();
-        final WindowContainer<?> taskContainer = task.getParent();
+        final WindowContainer<?> taskDisplayArea = task.getParent();
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, taskContainer.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, taskDisplayArea.getOrientation());
 
         task.setWindowingMode(WINDOWING_MODE_PINNED);
 
-        assertEquals(SCREEN_ORIENTATION_UNSET, taskContainer.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_UNSET, taskDisplayArea.getOrientation());
     }
 
     private Task getTestTask() {

@@ -395,25 +395,26 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                DisplayContent display = mService.mRootWindowContainer.getDisplayContent(displayId);
-                if (display == null) {
+                TaskDisplayArea taskDisplayArea =
+                        mService.mRootWindowContainer.getDisplayContent(displayId).mTaskContainers;
+                if (taskDisplayArea == null) {
                     return;
                 }
                 Task task = token == null
                         ? null : WindowContainer.fromBinder(token.asBinder()).asTask();
                 if (task == null) {
-                    display.mLaunchRootTask = null;
+                    taskDisplayArea.mLaunchRootTask = null;
                     return;
                 }
                 if (!task.mCreatedByOrganizer) {
                     throw new IllegalArgumentException("Attempt to set task not created by "
                             + "organizer as launch root task=" + task);
                 }
-                if (task.getDisplayContent() != display) {
+                if (task.getDisplayArea() != taskDisplayArea) {
                     throw new RuntimeException("Can't set launch root for display " + displayId
                             + " to task on display " + task.getDisplayContent().getDisplayId());
                 }
-                display.mLaunchRootTask = task;
+                taskDisplayArea.mLaunchRootTask = task;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

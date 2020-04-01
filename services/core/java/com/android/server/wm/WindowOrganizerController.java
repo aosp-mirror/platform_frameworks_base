@@ -249,10 +249,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     final ActivityStack rootTask =
                             (ActivityStack) (newParent != null ? newParent : task.getRootTask());
                     if (hop.getToTop()) {
-                        as.getDisplay().mTaskContainers.positionStackAtTop(rootTask,
+                        as.getDisplayArea().positionStackAtTop(rootTask,
                                 false /* includingParents */);
                     } else {
-                        as.getDisplay().mTaskContainers.positionStackAtBottom(rootTask);
+                        as.getDisplayArea().positionStackAtBottom(rootTask);
                     }
                 }
             } else {
@@ -262,9 +262,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             // Ugh, of course ActivityStack has its own special reorder logic...
             if (task.isRootTask()) {
                 if (hop.getToTop()) {
-                    dc.mTaskContainers.positionStackAtTop(as, false /* includingParents */);
+                    as.getDisplayArea().positionStackAtTop(as, false /* includingParents */);
                 } else {
-                    dc.mTaskContainers.positionStackAtBottom(as);
+                    as.getDisplayArea().positionStackAtBottom(as);
                 }
             } else {
                 task.getParent().positionChildAt(
