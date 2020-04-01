@@ -575,6 +575,22 @@ public class PackageDexUsageTests {
         assertPackageDexUsage(mBarBaseUser0);
     }
 
+    @Test
+    public void testEnsureLoadingPackagesCanBeExtended() {
+        String isa = VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]);
+        String content = "PACKAGE_MANAGER__PACKAGE_DEX_USAGE__2\n"
+                + "com.google.foo\n"
+                + "+/data/app/com.google.foo/split-2.apk\n"
+                + "@\n";
+        PackageDexUsage packageDexUsage = new PackageDexUsage();
+        try {
+            packageDexUsage.read(new StringReader(content));
+        } catch (IOException e) {
+            fail();
+        }
+        record(packageDexUsage, mFooSplit2UsedByOtherApps0, mFooSplit2UsedByOtherApps0.getUsedBy());
+    }
+
     private void assertPackageDexUsage(TestData primary, TestData... secondaries) {
         assertPackageDexUsage(mPackageDexUsage, null, primary, secondaries);
     }

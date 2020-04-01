@@ -446,15 +446,12 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         if (line == null) {
             throw new IllegalStateException("Could not find the loadingPackages line.");
         }
-        // We expect that most of the times the list of loading packages will be empty.
-        if (line.length() == LOADING_PACKAGE_CHAR.length()) {
-            return Collections.emptySet();
-        } else {
-            Set<String> result = new HashSet<>();
+        Set<String> result = new HashSet<>();
+        if (line.length() != LOADING_PACKAGE_CHAR.length()) {
             Collections.addAll(result,
                     line.substring(LOADING_PACKAGE_CHAR.length()).split(SPLIT_CHAR));
-            return result;
         }
+        return result;
     }
 
     /**
