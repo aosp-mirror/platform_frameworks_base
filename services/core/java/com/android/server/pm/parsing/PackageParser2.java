@@ -17,7 +17,10 @@
 package com.android.server.pm.parsing;
 
 import android.annotation.AnyThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.ParsingPackage;
@@ -27,10 +30,13 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.TypedArray;
 import android.os.Build;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 
+import com.android.server.compat.PlatformCompat;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
@@ -39,19 +45,53 @@ import java.io.File;
 /**
  * The v2 of {@link PackageParser} for use when parsing is initiated in the server and must
  * contain state contained by the server.
+ *
+ * The {@link AutoCloseable} helps signal that this class contains resources that must be freed.
+ * Although it is sufficient to release references to an instance of this class and let it get
+ * collected automatically.
  */
-public class PackageParser2 {
+public class PackageParser2 implements AutoCloseable {
+
+    /**
+     * For parsing inside the system server but outside of {@link PackageManagerService}.
+     * Generally used for parsing information in an APK that hasn't been installed yet.
+     *
+     * This must be called inside the system process as it relies on {@link ServiceManager}.
+     */
+    public static PackageParser2 forParsingFileWithDefaults() {
+        PlatformCompat platformCompat =
+                (PlatformCompat) ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
+        return new PackageParser2(null /* separateProcesses */, false /* onlyCoreApps */,
+                null /* displayMetrics */, null /* cacheDir */, new Callback() {
+            @Override
+            public boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo) {
+                return platformCompat.isChangeEnabled(changeId, appInfo);
+            }
+
+            @Override
+            public boolean hasFeature(String feature) {
+                // Assume the device doesn't support anything. This will affect permission parsing
+                // and will force <uses-permission/> declarations to include all requiredNotFeature
+                // permissions and exclude all requiredFeature permissions. This mirrors the old
+                // behavior.
+                return false;
+            }
+        });
+    }
 
     static final String TAG = "PackageParser2";
 
     private static final boolean LOG_PARSE_TIMINGS = Build.IS_DEBUGGABLE;
     private static final int LOG_PARSE_TIMINGS_THRESHOLD_MS = 100;
 
-    private ThreadLocal<ParseTypeImpl> mSharedResult = ThreadLocal.withInitial(ParseTypeImpl::new);
+    private ThreadLocal<ApplicationInfo> mSharedAppInfo =
+            ThreadLocal.withInitial(() -> {
+                ApplicationInfo appInfo = new ApplicationInfo();
+                appInfo.uid = -1; // Not a valid UID since the app will not be installed yet
+                return appInfo;
+            });
 
-    private final String[] mSeparateProcesses;
-    private final boolean mOnlyCoreApps;
-    private final DisplayMetrics mDisplayMetrics;
+    private ThreadLocal<ParseTypeImpl> mSharedResult;
 
     @Nullable
     protected PackageCacher mCacher;
@@ -64,27 +104,26 @@ public class PackageParser2 {
      *                     creating a minimalist boot environment.
      */
     public PackageParser2(String[] separateProcesses, boolean onlyCoreApps,
-            DisplayMetrics displayMetrics, @Nullable File cacheDir, Callback callback) {
-        mSeparateProcesses = separateProcesses;
-        mOnlyCoreApps = onlyCoreApps;
-
+            DisplayMetrics displayMetrics, @Nullable File cacheDir, @NonNull Callback callback) {
         if (displayMetrics == null) {
-            mDisplayMetrics = new DisplayMetrics();
-            mDisplayMetrics.setToDefaults();
-        } else {
-            mDisplayMetrics = displayMetrics;
+            displayMetrics = new DisplayMetrics();
+            displayMetrics.setToDefaults();
         }
 
         mCacher = cacheDir == null ? null : new PackageCacher(cacheDir);
-        // TODO(b/135203078): Remove nullability of callback
-        callback = callback != null ? callback : new Callback() {
-            @Override
-            public boolean hasFeature(String feature) {
-                return false;
-            }
+
+        parsingUtils = new ParsingPackageUtils(onlyCoreApps, separateProcesses, displayMetrics,
+                callback);
+
+        ParseInput.Callback enforcementCallback = (changeId, packageName, targetSdkVersion) -> {
+            ApplicationInfo appInfo = mSharedAppInfo.get();
+            //noinspection ConstantConditions
+            appInfo.packageName = packageName;
+            appInfo.targetSdkVersion = targetSdkVersion;
+            return callback.isChangeEnabled(changeId, appInfo);
         };
 
-        parsingUtils = new ParsingPackageUtils(onlyCoreApps, separateProcesses, displayMetrics, callback);
+        mSharedResult = ThreadLocal.withInitial(() -> new ParseTypeImpl(enforcementCallback));
     }
 
     /**
@@ -126,13 +165,38 @@ public class PackageParser2 {
         return parsed;
     }
 
+    /**
+     * Removes the cached value for the thread the parser was created on. It is assumed that
+     * any threads created for parallel parsing will be created and released, so they don't
+     * need an explicit close call.
+     *
+     * Realistically an instance should never be retained, so when the enclosing class is released,
+     * the values will also be released, making this method unnecessary.
+     */
+    @Override
+    public void close() {
+        mSharedResult.remove();
+        mSharedAppInfo.remove();
+    }
+
     public static abstract class Callback implements ParsingPackageUtils.Callback {
 
         @Override
-        public final ParsingPackage startParsingPackage(String packageName, String baseCodePath,
-                String codePath, TypedArray manifestArray, boolean isCoreApp) {
+        public final ParsingPackage startParsingPackage(@NonNull String packageName,
+                @NonNull String baseCodePath, @NonNull String codePath,
+                @NonNull TypedArray manifestArray, boolean isCoreApp) {
             return PackageImpl.forParsing(packageName, baseCodePath, codePath, manifestArray,
                     isCoreApp);
         }
+
+        /**
+         * An indirection from {@link ParseInput.Callback#isChangeEnabled(long, String, int)},
+         * allowing the {@link ApplicationInfo} objects to be cached in {@link #mSharedAppInfo}
+         * and cleaned up with the parser instance, not the callback instance.
+         *
+         * @param appInfo will only have 3 fields filled in, {@link ApplicationInfo#packageName},
+         * {@link ApplicationInfo#targetSdkVersion}, and {@link ApplicationInfo#uid}
+         */
+        public abstract boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo);
     }
 }
