@@ -21,7 +21,9 @@ import static android.os.Parcelable.Creator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -64,6 +66,7 @@ import java.util.concurrent.TimeUnit;
  * </pre>
  * @hide
  */
+@TestApi
 @SystemApi
 public abstract class ExplicitHealthCheckService extends Service {
 
@@ -159,6 +162,15 @@ public abstract class ExplicitHealthCheckService extends Service {
     }
 
     /**
+     * Sets {@link RemoteCallback}, for testing purpose.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setCallback(@Nullable RemoteCallback callback) {
+        mCallback = callback;
+    }
+    /**
      * Implementors should call this to notify the system when explicit health check passes
      * for {@code packageName};
      */
@@ -183,6 +195,7 @@ public abstract class ExplicitHealthCheckService extends Service {
      *
      * @hide
      */
+    @TestApi
     @SystemApi
     public static final class PackageConfig implements Parcelable {
         private static final long DEFAULT_HEALTH_CHECK_TIMEOUT_MILLIS = TimeUnit.HOURS.toMillis(1);
@@ -263,7 +276,7 @@ public abstract class ExplicitHealthCheckService extends Service {
         }
 
         @Override
-        public void writeToParcel(Parcel parcel, int flags) {
+        public void writeToParcel(@SuppressLint({"MissingNullability"}) Parcel parcel, int flags) {
             parcel.writeString(mPackageName);
             parcel.writeLong(mHealthCheckTimeoutMillis);
         }
