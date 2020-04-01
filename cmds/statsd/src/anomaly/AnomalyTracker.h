@@ -24,6 +24,7 @@
 #include "AlarmMonitor.h"
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alert
+#include "frameworks/base/cmds/statsd/src/statsd_metadata.pb.h"  // AlertMetadata
 #include "stats_util.h"  // HashableDimensionKey and DimToValMap
 
 namespace android {
@@ -111,6 +112,17 @@ public:
             unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms) {
         return; // The base AnomalyTracker class doesn't have alarms.
     }
+
+    // Writes metadata of the alert (refractory_period_end_sec) to AlertMetadata.
+    // Returns true if at least one element is written to alertMetadata.
+    bool writeAlertMetadataToProto(
+            int64_t currentWallClockTimeNs,
+            int64_t systemElapsedTimeNs, metadata::AlertMetadata* alertMetadata);
+
+    void loadAlertMetadata(
+            const metadata::AlertMetadata& alertMetadata,
+            int64_t currentWallClockTimeNs,
+            int64_t systemElapsedTimeNs);
 
 protected:
     // For testing only.
