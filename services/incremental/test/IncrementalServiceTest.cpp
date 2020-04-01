@@ -175,7 +175,7 @@ public:
     MOCK_CONST_METHOD3(link,
                        ErrorCode(const Control& control, std::string_view from, std::string_view to));
     MOCK_CONST_METHOD2(unlink, ErrorCode(const Control& control, std::string_view path));
-    MOCK_CONST_METHOD2(openWrite, base::unique_fd(const Control& control, FileId id));
+    MOCK_CONST_METHOD2(openForSpecialOps, base::unique_fd(const Control& control, FileId id));
     MOCK_CONST_METHOD1(writeBlocks, ErrorCode(Span<const DataBlock> blocks));
 
     void makeFileFails() { ON_CALL(*this, makeFile(_, _, _, _, _)).WillByDefault(Return(-1)); }
