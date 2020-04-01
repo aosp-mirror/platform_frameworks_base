@@ -139,7 +139,7 @@ public class TestHandler extends Handler {
         }
     }
 
-    public class MsgInfo implements Comparable<MsgInfo> {
+    private class MsgInfo implements Comparable<MsgInfo> {
         public final Message message;
         public final long sendTime;
         public final RuntimeException postPoint;
