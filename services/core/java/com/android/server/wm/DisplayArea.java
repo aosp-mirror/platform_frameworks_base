@@ -31,7 +31,6 @@ import static com.android.server.wm.DisplayAreaProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowContainerChildProto.DISPLAY_AREA;
 
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.window.IDisplayAreaOrganizer;
@@ -225,6 +224,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
             }
             return req;
         }
+    }
+
+    @Override
+    DisplayArea getDisplayArea() {
+        return this;
     }
 
     /**

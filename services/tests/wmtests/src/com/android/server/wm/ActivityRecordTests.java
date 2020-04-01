@@ -532,7 +532,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
             verify(mService.getLifecycleManager()).scheduleTransaction(
                     eq(mActivity.app.getThread()), eq(mActivity.appToken), eq(expected));
         } finally {
-            stack.getDisplay().removeStack(stack);
+            stack.getDisplayArea().removeChild(stack);
         }
     }
 
@@ -719,13 +719,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final ActivityStack stack2 = new StackBuilder(mRootWindowContainer).build();
         stack2.moveToBack("test", stack2.getBottomMostTask());
 
-        assertTrue(mStack.isTopStackOnDisplay());
+        assertTrue(mStack.isTopStackInDisplayArea());
 
         mActivity.setState(RESUMED, "test");
         mActivity.finishIfPossible(0 /* resultCode */, null /* resultData */, "test",
                 false /* oomAdj */);
 
-        assertTrue(stack1.isTopStackOnDisplay());
+        assertTrue(stack1.isTopStackInDisplayArea());
     }
 
     /**
@@ -1024,7 +1024,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testDestroyIfPossible_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
-        final ActivityStack homeStack = mActivity.getDisplay().getRootHomeTask();
+        final ActivityStack homeStack = mActivity.getDisplayArea().getRootHomeTask();
         homeStack.forAllLeafTasks((t) -> {
             homeStack.removeChild(t, "test");
         }, true /* traverseTopToBottom */);
@@ -1050,7 +1050,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
-        final ActivityStack homeStack = mActivity.getDisplay().getRootHomeTask();
+        final ActivityStack homeStack = mActivity.getDisplayArea().getRootHomeTask();
         homeStack.forAllLeafTasks((t) -> {
             homeStack.removeChild(t, "test");
         }, true /* traverseTopToBottom */);

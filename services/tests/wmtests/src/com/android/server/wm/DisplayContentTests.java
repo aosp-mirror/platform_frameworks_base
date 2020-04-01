@@ -1080,15 +1080,16 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testGetOrCreateRootHomeTask_defaultDisplay() {
         DisplayContent defaultDisplay = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
+        TaskDisplayArea defaultTaskDisplayArea = defaultDisplay.mTaskContainers;
 
         // Remove the current home stack if it exists so a new one can be created below.
-        ActivityStack homeTask = defaultDisplay.getRootHomeTask();
+        ActivityStack homeTask = defaultTaskDisplayArea.getRootHomeTask();
         if (homeTask != null) {
-            defaultDisplay.removeStack(homeTask);
+            defaultTaskDisplayArea.removeChild(homeTask);
         }
-        assertNull(defaultDisplay.getRootHomeTask());
+        assertNull(defaultTaskDisplayArea.getRootHomeTask());
 
-        assertNotNull(defaultDisplay.mTaskContainers.getOrCreateRootHomeTask());
+        assertNotNull(defaultTaskDisplayArea.getOrCreateRootHomeTask());
     }
 
     @Test
@@ -1098,31 +1099,34 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(false).when(display).isUntrustedVirtualDisplay();
 
         // Remove the current home stack if it exists so a new one can be created below.
-        ActivityStack homeTask = display.getRootHomeTask();
+        TaskDisplayArea taskDisplayArea = display.mTaskContainers;
+        ActivityStack homeTask = taskDisplayArea.getRootHomeTask();
         if (homeTask != null) {
-            display.removeStack(homeTask);
+            taskDisplayArea.removeChild(homeTask);
         }
-        assertNull(display.getRootHomeTask());
+        assertNull(taskDisplayArea.getRootHomeTask());
 
-        assertNotNull(display.mTaskContainers.getOrCreateRootHomeTask());
+        assertNotNull(taskDisplayArea.getOrCreateRootHomeTask());
     }
 
     @Test
     public void testGetOrCreateRootHomeTask_unsupportedSystemDecorations() {
         DisplayContent display = createNewDisplay();
+        TaskDisplayArea taskDisplayArea = display.mTaskContainers;
         doReturn(false).when(display).supportsSystemDecorations();
 
-        assertNull(display.getRootHomeTask());
-        assertNull(display.mTaskContainers.getOrCreateRootHomeTask());
+        assertNull(taskDisplayArea.getRootHomeTask());
+        assertNull(taskDisplayArea.getOrCreateRootHomeTask());
     }
 
     @Test
     public void testGetOrCreateRootHomeTask_untrustedVirtualDisplay() {
         DisplayContent display = createNewDisplay();
+        TaskDisplayArea taskDisplayArea = display.mTaskContainers;
         doReturn(true).when(display).isUntrustedVirtualDisplay();
 
-        assertNull(display.getRootHomeTask());
-        assertNull(display.mTaskContainers.getOrCreateRootHomeTask());
+        assertNull(taskDisplayArea.getRootHomeTask());
+        assertNull(taskDisplayArea.getOrCreateRootHomeTask());
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {
