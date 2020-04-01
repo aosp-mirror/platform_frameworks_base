@@ -193,7 +193,6 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -7734,19 +7733,30 @@ public class WindowManagerService extends IWindowManager.Stub
     public void syncInputTransactions() {
         waitForAnimationsToComplete();
 
+        // Collect all input transactions from all displays to make sure we could sync all input
+        // windows at same time.
+        final SurfaceControl.Transaction t = mTransactionFactory.get();
         synchronized (mGlobalLock) {
             mWindowPlacerLocked.performSurfacePlacementIfScheduled();
             mRoot.forAllDisplays(displayContent ->
-                    displayContent.getInputMonitor().updateInputWindowsImmediately());
+                    displayContent.getInputMonitor().updateInputWindowsImmediately(t));
         }
 
-        mTransactionFactory.get().syncInputWindows().apply(true);
+        t.syncInputWindows().apply();
     }
 
+    /**
+     * Wait until all container animations and surface operations behalf of WindowManagerService
+     * complete.
+     */
     private void waitForAnimationsToComplete() {
         synchronized (mGlobalLock) {
             long timeoutRemaining = ANIMATION_COMPLETED_TIMEOUT_MS;
-            while (mRoot.isAnimating(TRANSITION | CHILDREN) && timeoutRemaining > 0) {
+            // This could prevent if there is no container animation, we still have to apply the
+            // pending transaction and exit waiting.
+            mAnimator.mNotifyWhenNoAnimation = true;
+            while ((mAnimator.isAnimationScheduled()
+                    || mRoot.isAnimating(TRANSITION | CHILDREN)) && timeoutRemaining > 0) {
                 long startTime = System.currentTimeMillis();
                 try {
                     mGlobalLock.wait(timeoutRemaining);
@@ -7754,9 +7764,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 timeoutRemaining -= (System.currentTimeMillis() - startTime);
             }
+            mAnimator.mNotifyWhenNoAnimation = false;
 
-            if (mRoot.isAnimating(TRANSITION | CHILDREN)) {
-                Log.w(TAG, "Timed out waiting for animations to complete.");
+            if (mAnimator.isAnimationScheduled()
+                    || mRoot.isAnimating(TRANSITION | CHILDREN)) {
+                Slog.w(TAG, "Timed out waiting for animations to complete.");
             }
         }
     }
