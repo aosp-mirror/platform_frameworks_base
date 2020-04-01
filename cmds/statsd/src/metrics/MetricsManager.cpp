@@ -642,8 +642,40 @@ void MetricsManager::writeActiveConfigToProtoOutputStream(
     }
 }
 
+bool MetricsManager::writeMetadataToProto(int64_t currentWallClockTimeNs,
+                                          int64_t systemElapsedTimeNs,
+                                          metadata::StatsMetadata* statsMetadata) {
+    bool metadataWritten = false;
+    metadata::ConfigKey* configKey = statsMetadata->mutable_config_key();
+    configKey->set_config_id(mConfigKey.GetId());
+    configKey->set_uid(mConfigKey.GetUid());
+    for (const auto& anomalyTracker : mAllAnomalyTrackers) {
+        metadata::AlertMetadata* alertMetadata = statsMetadata->add_alert_metadata();
+        bool alertWritten = anomalyTracker->writeAlertMetadataToProto(currentWallClockTimeNs,
+                systemElapsedTimeNs, alertMetadata);
+        if (!alertWritten) {
+            statsMetadata->mutable_alert_metadata()->RemoveLast();
+        }
+        metadataWritten |= alertWritten;
+    }
+    return metadataWritten;
+}
 
-
+void MetricsManager::loadMetadata(const metadata::StatsMetadata& metadata,
+                                  int64_t currentWallClockTimeNs,
+                                  int64_t systemElapsedTimeNs) {
+    for (const metadata::AlertMetadata& alertMetadata : metadata.alert_metadata()) {
+        int64_t alertId = alertMetadata.alert_id();
+        auto it = mAlertTrackerMap.find(alertId);
+        if (it == mAlertTrackerMap.end()) {
+            ALOGE("No anomalyTracker found for alertId %lld", (long long) alertId);
+            continue;
+        }
+        mAllAnomalyTrackers[it->second]->loadAlertMetadata(alertMetadata,
+                                                           currentWallClockTimeNs,
+                                                           systemElapsedTimeNs);
+    }
+}
 
 }  // namespace statsd
 }  // namespace os

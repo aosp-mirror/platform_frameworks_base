@@ -18,9 +18,11 @@
 #include "Log.h"
 
 #include "AnomalyTracker.h"
-#include "subscriber_util.h"
 #include "external/Perfetto.h"
 #include "guardrail/StatsdStats.h"
+#include "metadata_util.h"
+#include "stats_log_util.h"
+#include "subscriber_util.h"
 #include "subscriber/IncidentdReporter.h"
 #include "subscriber/SubscriberReporter.h"
 
@@ -260,6 +262,58 @@ bool AnomalyTracker::isInRefractoryPeriod(const int64_t& timestampNs,
 void AnomalyTracker::informSubscribers(const MetricDimensionKey& key, int64_t metric_id,
                                        int64_t metricValue) {
     triggerSubscribers(mAlert.id(), metric_id, key, metricValue, mConfigKey, mSubscriptions);
+}
+
+bool AnomalyTracker::writeAlertMetadataToProto(int64_t currentWallClockTimeNs,
+                                               int64_t systemElapsedTimeNs,
+                                               metadata::AlertMetadata* alertMetadata) {
+    bool metadataWritten = false;
+
+    if (mRefractoryPeriodEndsSec.empty()) {
+        return false;
+    }
+
+    for (const auto& it: mRefractoryPeriodEndsSec) {
+        // Do not write the timestamp to disk if it has already expired
+        if (it.second < systemElapsedTimeNs / NS_PER_SEC) {
+            continue;
+        }
+
+        metadataWritten = true;
+        if (alertMetadata->alert_dim_keyed_data_size() == 0) {
+            alertMetadata->set_alert_id(mAlert.id());
+        }
+
+        metadata::AlertDimensionKeyedData* keyedData = alertMetadata->add_alert_dim_keyed_data();
+        // We convert and write the refractory_end_sec to wall clock time because we do not know
+        // when statsd will start again.
+        int32_t refractoryEndWallClockSec = (int32_t) ((currentWallClockTimeNs / NS_PER_SEC) +
+                (it.second - systemElapsedTimeNs / NS_PER_SEC));
+
+        keyedData->set_last_refractory_ends_sec(refractoryEndWallClockSec);
+        writeMetricDimensionKeyToMetadataDimensionKey(
+                it.first, keyedData->mutable_dimension_key());
+    }
+
+    return metadataWritten;
+}
+
+void AnomalyTracker::loadAlertMetadata(
+        const metadata::AlertMetadata& alertMetadata,
+        int64_t currentWallClockTimeNs,
+        int64_t systemElapsedTimeNs) {
+    for (const metadata::AlertDimensionKeyedData& keyedData :
+            alertMetadata.alert_dim_keyed_data()) {
+        if ((uint64_t) keyedData.last_refractory_ends_sec() < currentWallClockTimeNs / NS_PER_SEC) {
+            // Do not update the timestamp if it has already expired.
+            continue;
+        }
+        MetricDimensionKey metricKey = loadMetricDimensionKeyFromProto(
+                keyedData.dimension_key());
+        int32_t refractoryPeriodEndsSec = (int32_t) keyedData.last_refractory_ends_sec() -
+                currentWallClockTimeNs / NS_PER_SEC + systemElapsedTimeNs / NS_PER_SEC;
+        mRefractoryPeriodEndsSec[metricKey] = refractoryPeriodEndsSec;
+    }
 }
 
 }  // namespace statsd

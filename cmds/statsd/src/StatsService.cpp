@@ -1022,6 +1022,7 @@ Status StatsService::informDeviceShutdown() {
     VLOG("StatsService::informDeviceShutdown");
     mProcessor->WriteDataToDisk(DEVICE_SHUTDOWN, FAST);
     mProcessor->SaveActiveConfigsToDisk(getElapsedRealtimeNs());
+    mProcessor->SaveMetadataToDisk(getWallClockNs(), getElapsedRealtimeNs());
     return Status::ok();
 }
 
@@ -1056,6 +1057,7 @@ Status StatsService::statsCompanionReady() {
 void StatsService::Startup() {
     mConfigManager->Startup();
     mProcessor->LoadActiveConfigsFromDisk();
+    mProcessor->LoadMetadataFromDisk(getWallClockNs(), getElapsedRealtimeNs());
 }
 
 void StatsService::Terminate() {
@@ -1063,6 +1065,7 @@ void StatsService::Terminate() {
     if (mProcessor != nullptr) {
         mProcessor->WriteDataToDisk(TERMINATION_SIGNAL_RECEIVED, FAST);
         mProcessor->SaveActiveConfigsToDisk(getElapsedRealtimeNs());
+        mProcessor->SaveMetadataToDisk(getWallClockNs(), getElapsedRealtimeNs());
     }
 }
 
@@ -1285,20 +1288,23 @@ void StatsService::statsCompanionServiceDiedImpl() {
     if (mProcessor != nullptr) {
         ALOGW("Reset statsd upon system server restarts.");
         int64_t systemServerRestartNs = getElapsedRealtimeNs();
-        ProtoOutputStream proto;
+        ProtoOutputStream activeConfigsProto;
         mProcessor->WriteActiveConfigsToProtoOutputStream(systemServerRestartNs,
-                STATSCOMPANION_DIED, &proto);
-
+                STATSCOMPANION_DIED, &activeConfigsProto);
+        metadata::StatsMetadataList metadataList;
+        mProcessor->WriteMetadataToProto(getWallClockNs(),
+                systemServerRestartNs, &metadataList);
         mProcessor->WriteDataToDisk(STATSCOMPANION_DIED, FAST);
         mProcessor->resetConfigs();
 
         std::string serializedActiveConfigs;
-        if (proto.serializeToString(&serializedActiveConfigs)) {
+        if (activeConfigsProto.serializeToString(&serializedActiveConfigs)) {
             ActiveConfigList activeConfigs;
             if (activeConfigs.ParseFromString(serializedActiveConfigs)) {
                 mProcessor->SetConfigsActiveState(activeConfigs, systemServerRestartNs);
             }
         }
+        mProcessor->SetMetadataState(metadataList, getWallClockNs(), systemServerRestartNs);
     }
     mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
     mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
