@@ -62,6 +62,7 @@ import com.android.internal.util.ContrastColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -151,6 +152,7 @@ public class ConversationLayout extends FrameLayout
     private int mFacePileProtectionWidth;
     private int mFacePileProtectionWidthExpanded;
     private boolean mImportantConversation;
+    private TextView mUnreadBadge;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -277,6 +279,7 @@ public class ConversationLayout extends FrameLayout
         mAppName.setOnVisibilityChangedListener((visibility) -> {
             onAppNameVisibilityChanged();
         });
+        mUnreadBadge = findViewById(R.id.conversation_unread_count);
         mConversationContentStart = getResources().getDimensionPixelSize(
                 R.dimen.conversation_content_start);
         mInternalButtonPadding
@@ -354,7 +357,6 @@ public class ConversationLayout extends FrameLayout
         // mUser now set (would be nice to avoid the side effect but WHATEVER)
         setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON));
 
-
         // Append remote input history to newMessages (again, side effect is lame but WHATEVS)
         RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
                 extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
@@ -362,14 +364,28 @@ public class ConversationLayout extends FrameLayout
 
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
-
         // bind it, baby
         bind(newMessages, newHistoricMessages, showSpinner);
+
+        int unreadCount = extras.getInt(Notification.EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
+        setUnreadCount(unreadCount);
     }
 
     @Override
     public void setImageResolver(ImageResolver resolver) {
         mImageResolver = resolver;
+    }
+
+    /** @hide */
+    public void setUnreadCount(int unreadCount) {
+        mUnreadBadge.setVisibility(mIsCollapsed && unreadCount > 1 ? VISIBLE : GONE);
+        CharSequence text = unreadCount >= 100
+                ? getResources().getString(R.string.unread_convo_overflow, 99)
+                : String.format(Locale.getDefault(), "%d", unreadCount);
+        mUnreadBadge.setText(text);
+        mUnreadBadge.setBackgroundTintList(ColorStateList.valueOf(mLayoutColor));
+        boolean needDarkText = ColorUtils.calculateLuminance(mLayoutColor) > 0.5f;
+        mUnreadBadge.setTextColor(needDarkText ? Color.BLACK : Color.WHITE);
     }
 
     private void addRemoteInputHistoryToMessages(
