@@ -5158,14 +5158,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int currRotation = currOverrideConfig.windowConfiguration.getRotation();
         final int overrideRotation = overrideConfiguration.windowConfiguration.getRotation();
         if (currRotation != ROTATION_UNDEFINED && currRotation != overrideRotation) {
-            if (mFixedRotationLaunchingApp != null) {
-                mFixedRotationLaunchingApp.clearFixedRotationTransform(
-                        () -> applyRotation(currRotation, overrideRotation));
-                // Clear the record because the display will sync to current rotation.
-                mFixedRotationLaunchingApp = null;
-            } else {
-                applyRotation(currRotation, overrideRotation);
-            }
+            applyRotationAndClearFixedRotation(currRotation, overrideRotation);
         }
         mCurrentOverrideConfigurationChanges = currOverrideConfig.diff(overrideConfiguration);
         super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
@@ -5173,6 +5166,36 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mWmService.setNewDisplayOverrideConfiguration(overrideConfiguration, this);
         mAtmService.addWindowLayoutReasons(
                 ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED);
+    }
+
+    /**
+     * If the launching rotated activity ({@link #mFixedRotationLaunchingApp}) is null, it simply
+     * applies the rotation to display. Otherwise because the activity has shown as rotated, the
+     * fixed rotation transform also needs to be cleared to make sure the rotated activity fits
+     * the display naturally.
+     */
+    private void applyRotationAndClearFixedRotation(int oldRotation, int newRotation) {
+        if (mFixedRotationLaunchingApp == null) {
+            applyRotation(oldRotation, newRotation);
+            return;
+        }
+
+        // The display may be about to rotate seamlessly, and the animation of closing apps may
+        // still animate in old rotation. So make sure the outdated animation won't show on the
+        // rotated display.
+        mTaskContainers.forAllActivities(a -> {
+            if (a.nowVisible && a != mFixedRotationLaunchingApp
+                    && a.getWindowConfiguration().getRotation() != newRotation) {
+                final WindowContainer<?> w = a.getAnimatingContainer();
+                if (w != null) {
+                    w.cancelAnimation();
+                }
+            }
+        });
+
+        mFixedRotationLaunchingApp.clearFixedRotationTransform(
+                () -> applyRotation(oldRotation, newRotation));
+        mFixedRotationLaunchingApp = null;
     }
 
     /** Checks whether the given activity is in size compatibility mode and notifies the change. */
