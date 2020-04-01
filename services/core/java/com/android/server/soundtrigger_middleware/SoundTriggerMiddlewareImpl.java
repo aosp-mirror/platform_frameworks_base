@@ -50,7 +50,7 @@ import java.util.List;
  *
  * @hide
  */
-public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareService {
+public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareInternal {
     static private final String TAG = "SoundTriggerMiddlewareImpl";
     private final SoundTriggerModule[] mModules;
 
@@ -124,7 +124,7 @@ public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareServic
     }
 
     @Override
-    public void setExternalCaptureState(boolean active) {
+    public void setCaptureState(boolean active) {
         for (SoundTriggerModule module : mModules) {
             module.setExternalCaptureState(active);
         }
