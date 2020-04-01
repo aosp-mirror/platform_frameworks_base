@@ -1280,4 +1280,13 @@ public class NotificationChildrenContainer extends ViewGroup {
             mNotificationHeaderWrapperLowPriority.showAppOpsIcons(appOps);
         }
     }
+
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlertedRecently) {
+        if (mNotificationHeaderWrapper != null) {
+            mNotificationHeaderWrapper.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
+        }
+        if (mNotificationHeaderWrapperLowPriority != null) {
+            mNotificationHeaderWrapperLowPriority.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
+        }
+    }
 }

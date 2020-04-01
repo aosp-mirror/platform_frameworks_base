@@ -61,7 +61,6 @@ public class NotificationHeaderView extends ViewGroup {
     private CachingIconView mIcon;
     private View mProfileBadge;
     private View mAppOps;
-    private View mAudiblyAlertedIcon;
     private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
@@ -119,7 +118,6 @@ public class NotificationHeaderView extends ViewGroup {
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
         mAppOps = findViewById(com.android.internal.R.id.app_ops);
-        mAudiblyAlertedIcon = findViewById(com.android.internal.R.id.alerted_icon);
     }
 
     @Override
@@ -316,11 +314,6 @@ public class NotificationHeaderView extends ViewGroup {
     public void setExpanded(boolean expanded) {
         mExpanded = expanded;
         updateExpandButton();
-    }
-
-    /** Updates icon visibility based on the noisiness of the notification. */
-    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
-        mAudiblyAlertedIcon.setVisibility(audiblyAlerted ? View.VISIBLE : View.GONE);
     }
 
     private void updateExpandButton() {

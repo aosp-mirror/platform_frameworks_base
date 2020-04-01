@@ -66,6 +66,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private View mMicIcon;
     private View mOverlayIcon;
     private View mAppOps;
+    private View mAudiblyAlertedIcon;
 
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
@@ -117,6 +118,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mMicIcon = mView.findViewById(com.android.internal.R.id.mic);
         mOverlayIcon = mView.findViewById(com.android.internal.R.id.overlay);
         mAppOps = mView.findViewById(com.android.internal.R.id.app_ops);
+        mAudiblyAlertedIcon = mView.findViewById(com.android.internal.R.id.alerted_icon);
         if (mNotificationHeader != null) {
             mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
             mColor = mNotificationHeader.getOriginalIconColor();
@@ -230,6 +232,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         if (mOverlayIcon != null) {
             mTransformationHelper.addViewTransformingToSimilar(mOverlayIcon);
         }
+        if (mAudiblyAlertedIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mAudiblyAlertedIcon);
+        }
     }
 
     @Override
@@ -237,6 +242,13 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
         if (mNotificationHeader != null) {
             mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
+        }
+    }
+
+    @Override
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
+        if (mAudiblyAlertedIcon != null) {
+            mAudiblyAlertedIcon.setVisibility(audiblyAlerted ? View.VISIBLE : View.GONE);
         }
     }
 

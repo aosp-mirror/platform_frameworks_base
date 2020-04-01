@@ -371,4 +371,10 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public int getExtraMeasureHeight() {
         return 0;
     }
+
+    /**
+     * Set the view to have recently visibly alerted.
+     */
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
+    }
 }
