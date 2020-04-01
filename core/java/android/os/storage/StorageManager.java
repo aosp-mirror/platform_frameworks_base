@@ -2304,6 +2304,19 @@ public class StorageManager {
         }
     }
 
+    /**
+     * Check whether the device supports filesystem checkpoint.
+     *
+     * @return true if the device supports filesystem checkpoint, false otherwise.
+     */
+    public boolean isCheckpointSupported() {
+        try {
+            return mStorageManager.supportsCheckpoint();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private final Object mFuseAppLoopLock = new Object();
 
     @GuardedBy("mFuseAppLoopLock")
