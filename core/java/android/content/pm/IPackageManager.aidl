@@ -306,6 +306,35 @@ interface IPackageManager {
     void setHomeActivity(in ComponentName className, int userId);
 
     /**
+     * Overrides the label and icon of the component specified by the component name. The component
+     * must belong to the calling app.
+     *
+     * These changes will be reset on the next boot and whenever the package is updated.
+     *
+     * Only the app defined as com.android.internal.R.config_overrideComponentUiPackage is allowed
+     * to call this.
+     *
+     * @param componentName The component name to override the label/icon of.
+     * @param nonLocalizedLabel The label to be displayed.
+     * @param icon The icon to be displayed.
+     * @param userId The user id.
+     */
+    void overrideLabelAndIcon(in ComponentName componentName, String nonLocalizedLabel,
+            int icon, int userId);
+
+    /**
+     * Restores the label and icon of the activity specified by the component name if either has
+     * been overridden. The component must belong to the calling app.
+     *
+     * Only the app defined as com.android.internal.R.config_overrideComponentUiPackage is allowed
+     * to call this.
+     *
+     * @param componentName The component name.
+     * @param userId The user id.
+     */
+    void restoreLabelAndIcon(in ComponentName componentName, int userId);
+
+    /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSetting}.
      */
     @UnsupportedAppUsage
