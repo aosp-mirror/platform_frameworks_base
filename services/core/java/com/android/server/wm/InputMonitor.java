@@ -62,7 +62,7 @@ final class InputMonitor {
     // When true, need to call updateInputWindowsLw().
     private boolean mUpdateInputWindowsNeeded = true;
     private boolean mUpdateInputWindowsPending;
-    private boolean mApplyImmediately;
+    private boolean mUpdateInputWindowsImmediately;
 
     // Currently focused input window handle.
     private InputWindowHandle mFocusedInputWindowHandle;
@@ -347,14 +347,20 @@ final class InputMonitor {
         }
     }
 
-    void updateInputWindowsImmediately() {
+    /**
+     * Immediately update the input transaction and merge into the passing Transaction that could be
+     * collected and applied later.
+     */
+    void updateInputWindowsImmediately(SurfaceControl.Transaction t) {
         mHandler.removeCallbacks(mUpdateInputWindows);
-        mApplyImmediately = true;
+        mUpdateInputWindowsImmediately = true;
         mUpdateInputWindows.run();
-        mApplyImmediately = false;
+        mUpdateInputWindowsImmediately = false;
+        t.merge(mInputTransaction);
     }
 
-    /* Called when the current input focus changes.
+    /**
+     * Called when the current input focus changes.
      * Layer assignment is assumed to be complete by the time this is called.
      */
     public void setInputFocusLw(WindowState newWindow, boolean updateInputWindows) {
@@ -465,10 +471,7 @@ final class InputMonitor {
             if (mAddWallpaperInputConsumerHandle) {
                 mWallpaperInputConsumer.show(mInputTransaction, 0);
             }
-
-            if (mApplyImmediately) {
-                mInputTransaction.apply();
-            } else {
+            if (!mUpdateInputWindowsImmediately) {
                 mDisplayContent.getPendingTransaction().merge(mInputTransaction);
                 mDisplayContent.scheduleAnimation();
             }
