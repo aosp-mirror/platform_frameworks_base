@@ -21,18 +21,17 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.Activity;
-import android.app.Notification;
-import android.app.Person;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -55,6 +54,7 @@ public class BubbleOverflowActivity extends Activity {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleOverflowActivity" : TAG_BUBBLES;
 
     private LinearLayout mEmptyState;
+    private ImageView mEmptyStateImage;
     private BubbleController mBubbleController;
     private BubbleOverflowAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -73,6 +73,7 @@ public class BubbleOverflowActivity extends Activity {
 
         mEmptyState = findViewById(R.id.bubble_overflow_empty_state);
         mRecyclerView = findViewById(R.id.bubble_overflow_recycler);
+        mEmptyStateImage = findViewById(R.id.bubble_overflow_empty_state_image);
 
         Resources res = getResources();
         final int columns = res.getInteger(R.integer.bubbles_overflow_columns);
@@ -98,6 +99,31 @@ public class BubbleOverflowActivity extends Activity {
         mBubbleController.setOverflowCallback(() -> {
             onDataChanged(mBubbleController.getOverflowBubbles());
         });
+        onThemeChanged();
+    }
+
+    /**
+     * Handle theme changes.
+     */
+    void onThemeChanged() {
+        final int mode =
+                getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        switch (mode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                if (DEBUG_OVERFLOW) {
+                    Log.d(TAG, "Set overflow UI to light mode");
+                }
+                mEmptyStateImage.setImageDrawable(
+                        getResources().getDrawable(R.drawable.ic_empty_bubble_overflow_light));
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                if (DEBUG_OVERFLOW) {
+                    Log.d(TAG, "Set overflow UI to dark mode");
+                }
+                mEmptyStateImage.setImageDrawable(
+                        getResources().getDrawable(R.drawable.ic_empty_bubble_overflow_dark));
+                break;
+        }
     }
 
     void setBackgroundColor() {
@@ -138,6 +164,7 @@ public class BubbleOverflowActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+        onThemeChanged();
     }
 
     @Override
