@@ -18,6 +18,7 @@ package android.view.autofill;
 
 import static android.view.View.AUTOFILL_TYPE_DATE;
 import static android.view.View.AUTOFILL_TYPE_LIST;
+import static android.view.View.AUTOFILL_TYPE_RICH_CONTENT;
 import static android.view.View.AUTOFILL_TYPE_TEXT;
 import static android.view.View.AUTOFILL_TYPE_TOGGLE;
 import static android.view.autofill.Helper.sDebug;
@@ -25,6 +26,7 @@ import static android.view.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ClipData;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -140,6 +142,28 @@ public final class AutofillValue implements Parcelable {
     }
 
     /**
+     * Gets the value to autofill a field that accepts rich content (text, images, etc).
+     *
+     * <p>See {@link View#AUTOFILL_TYPE_RICH_CONTENT} for more info.</p>
+     *
+     * @throws IllegalStateException if the value is not a content value
+     */
+    public @NonNull ClipData getRichContentValue() {
+        Preconditions.checkState(isRichContent(),
+                "value must be a rich content value, not type=" + mType);
+        return (ClipData) mValue;
+    }
+
+    /**
+     * Checks if this is a rich content value (represented by {@link ClipData}).
+     *
+     * <p>See {@link View#AUTOFILL_TYPE_RICH_CONTENT} for more info.</p>
+     */
+    public boolean isRichContent() {
+        return mType == AUTOFILL_TYPE_RICH_CONTENT;
+    }
+
+    /**
      * Used to define whether a field is empty so it's not sent to service on save.
      *
      * <p>Only applies to some types, like text.
@@ -184,6 +208,10 @@ public final class AutofillValue implements Parcelable {
                 .append(", value=");
         if (isText()) {
             Helper.appendRedacted(string, (CharSequence) mValue);
+        } else if (isRichContent()) {
+            string.append("{");
+            getRichContentValue().getDescription().toShortStringTypesOnly(string);
+            string.append("}");
         } else {
             string.append(mValue);
         }
@@ -216,6 +244,9 @@ public final class AutofillValue implements Parcelable {
             case AUTOFILL_TYPE_DATE:
                 parcel.writeLong((Long) mValue);
                 break;
+            case AUTOFILL_TYPE_RICH_CONTENT:
+                ((ClipData) mValue).writeToParcel(parcel, flags);
+                break;
         }
     }
 
@@ -235,6 +266,9 @@ public final class AutofillValue implements Parcelable {
                 break;
             case AUTOFILL_TYPE_DATE:
                 mValue = parcel.readLong();
+                break;
+            case AUTOFILL_TYPE_RICH_CONTENT:
+                mValue = ClipData.CREATOR.createFromParcel(parcel);
                 break;
             default:
                 throw new IllegalArgumentException("type=" + mType + " not valid");
@@ -302,5 +336,16 @@ public final class AutofillValue implements Parcelable {
      */
     public static AutofillValue forDate(long value) {
         return new AutofillValue(AUTOFILL_TYPE_DATE, value);
+    }
+
+    /**
+     * Creates a new {@link AutofillValue} to autofill a {@link View} that accepts rich content
+     * (text, images, etc).
+     *
+     * <p>See {@link View#AUTOFILL_TYPE_RICH_CONTENT} for more info.
+     */
+    public static @NonNull AutofillValue forRichContent(@NonNull ClipData value) {
+        Objects.requireNonNull(value.getDescription(), "clip description must not be null");
+        return new AutofillValue(AUTOFILL_TYPE_RICH_CONTENT, value);
     }
 }
