@@ -39,7 +39,7 @@ java_test_host {
     name: "NetworkStagedRollbackTest",
     srcs: ["NetworkStagedRollbackTest/src/**/*.java"],
     libs: ["tradefed"],
-    static_libs: ["testng", "RollbackTestLib"],
+    static_libs: ["RollbackTestLib"],
     test_suites: ["general-tests"],
     test_config: "NetworkStagedRollbackTest.xml",
 }
