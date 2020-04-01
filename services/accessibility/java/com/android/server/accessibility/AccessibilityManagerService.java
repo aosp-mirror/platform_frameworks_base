@@ -599,7 +599,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             // Make sure the reported package is one the caller has access to.
             event.setPackageName(mSecurityPolicy.resolveValidReportedPackageLocked(
-                    event.getPackageName(), UserHandle.getCallingAppId(), resolvedUserId));
+                    event.getPackageName(), UserHandle.getCallingAppId(), resolvedUserId,
+                    getCallingPid()));
 
             // This method does nothing for a background user.
             if (resolvedUserId == mCurrentUserId) {

@@ -3201,6 +3201,11 @@
     <permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA"
                 android:protectionLevel="signature" />
 
+    <!-- @hide Allows an application to perform accessibility operations (e.g. send events) on
+         behalf of another package. -->
+    <permission android:name="android.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY"
+                android:protectionLevel="signature" />
+
     <!-- @hide Allows an application to change the accessibility volume. -->
     <permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME"
                 android:protectionLevel="signature" />
