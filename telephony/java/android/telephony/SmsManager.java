@@ -2395,7 +2395,6 @@ public final class SmsManager {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      * @throws IllegalArgumentException if contentUri is empty
-     * @deprecated use {@link MmsManager#sendMultimediaMessage} instead.
      */
     public void sendMultimediaMessage(Context context, Uri contentUri, String locationUrl,
             Bundle configOverrides, PendingIntent sentIntent) {
@@ -2430,7 +2429,6 @@ public final class SmsManager {
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
-     * @deprecated use {@link MmsManager#downloadMultimediaMessage} instead.
      */
     public void downloadMultimediaMessage(Context context, String locationUrl, Uri contentUri,
             Bundle configOverrides, PendingIntent downloadedIntent) {
@@ -2768,7 +2766,7 @@ public final class SmsManager {
                         getSubscriptionId(), null);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            throw new RuntimeException(ex);
         }
         return smsc;
     }
@@ -2790,7 +2788,7 @@ public final class SmsManager {
      * </p>
      *
      * @param smsc the SMSC address string.
-     * @return true for success, false otherwise.
+     * @return true for success, false otherwise. Failure can be due modem returning an error.
      */
     @SuppressAutoDoc // for carrier privileges and default SMS application.
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -2802,7 +2800,7 @@ public final class SmsManager {
                         smsc, getSubscriptionId(), null);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            throw new RuntimeException(ex);
         }
         return false;
     }

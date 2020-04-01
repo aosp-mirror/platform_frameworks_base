@@ -548,7 +548,6 @@ public abstract class PackageManager {
      * Internal {@link PackageInfo} flag used to indicate that a package is a hidden system app.
      * @hide
      */
-    @SystemApi
     public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS =  0x20000000;
 
     /**

@@ -2648,13 +2648,6 @@ class StorageManagerService extends IStorageManager.Stub
      */
     @Override
     public boolean supportsCheckpoint() throws RemoteException {
-        // Only the root, system_server and shell processes are permitted to start checkpoints
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID
-                && callingUid != Process.SHELL_UID) {
-            throw new SecurityException("no permission to start filesystem checkpoint");
-        }
-
         return mVold.supportsCheckpoint();
     }
 

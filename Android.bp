@@ -515,6 +515,10 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
+    static_libs: [
+        // Additional dependencies needed to build the ike API classes.
+        "ike-internals",
+    ],
     apex_available: ["//apex_available:platform"],
     visibility: [
         // DO NOT ADD ANY MORE ENTRIES TO THIS LIST

@@ -89,6 +89,7 @@ droidstubs {
     api_filename: "public_api.txt",
     private_api_filename: "private.txt",
     removed_api_filename: "removed.txt",
+    removed_dex_api_filename: "removed-dex.txt",
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
@@ -129,6 +130,7 @@ droidstubs {
     api_filename: "system-api.txt",
     private_api_filename: "system-private.txt",
     removed_api_filename: "system-removed.txt",
+    removed_dex_api_filename: "system-removed-dex.txt",
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
@@ -312,42 +314,6 @@ java_library_static {
     srcs: [
         ":hwbinder-stubs-docs",
     ],
-}
-
-/////////////////////////////////////////////////////////////////////
-// Stubs for hiddenapi processing.
-/////////////////////////////////////////////////////////////////////
-
-droidstubs {
-    name: "hiddenapi-lists-docs",
-    defaults: ["metalava-full-api-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    removed_dex_api_filename: "removed-dex.txt",
-    args: metalava_framework_docs_args +
-        " --show-unannotated " +
-        priv_apps +
-        " --show-annotation android.annotation.TestApi ",
-}
-
-droidstubs {
-    name: "hiddenapi-mappings",
-    defaults: ["metalava-full-api-stubs-default"],
-    srcs: [
-        ":opt-telephony-common-srcs",
-    ],
-
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    dex_mapping_filename: "dex-mapping.txt",
-    args: metalava_framework_docs_args +
-        " --hide ReferencesHidden " +
-        " --hide UnhiddenSystemApi " +
-        " --show-unannotated " +
-        priv_apps +
-        " --show-annotation android.annotation.TestApi ",
 }
 
 /////////////////////////////////////////////////////////////////////
