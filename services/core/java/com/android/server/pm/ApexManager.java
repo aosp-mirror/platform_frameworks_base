@@ -503,6 +503,9 @@ abstract class ApexManager {
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
                 return false;
+            } catch (Exception e) {
+                Slog.e(TAG, e.getMessage(), e);
+                return false;
             }
         }
 
