@@ -41,6 +41,9 @@ interface IPowerManager
     oneway void setPowerBoost(int boost, int durationMs);
     oneway void setPowerMode(int mode, boolean enabled);
 
+    // Functionally identical to setPowerMode, but returns whether the call was successful
+    boolean setPowerModeChecked(int mode, boolean enabled);
+
     void updateWakeLockWorkSource(IBinder lock, in WorkSource ws, String historyTag);
     boolean isWakeLockLevelSupported(int level);
 

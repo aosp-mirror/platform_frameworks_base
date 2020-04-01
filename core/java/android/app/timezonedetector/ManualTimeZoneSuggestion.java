@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A time signal from a manual (user provided) source.
+ * A time zone suggestion from a manual (user provided) source.
  *
  * <p>{@code zoneId} contains the suggested time zone ID, e.g. "America/Los_Angeles".
  *
@@ -124,7 +124,7 @@ public final class ManualTimeZoneSuggestion implements Parcelable {
 
     @Override
     public String toString() {
-        return "ManualTimeSuggestion{"
+        return "ManualTimeZoneSuggestion{"
                 + "mZoneId=" + mZoneId
                 + ", mDebugInfo=" + mDebugInfo
                 + '}';

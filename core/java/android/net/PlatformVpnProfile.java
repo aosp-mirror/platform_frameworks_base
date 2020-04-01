@@ -60,6 +60,9 @@ public abstract class PlatformVpnProfile {
     public static final int TYPE_IKEV2_IPSEC_RSA = VpnProfile.TYPE_IKEV2_IPSEC_RSA;
 
     /** @hide */
+    public static final int MAX_MTU_DEFAULT = 1360;
+
+    /** @hide */
     @PlatformVpnType protected final int mType;
 
     /** @hide */

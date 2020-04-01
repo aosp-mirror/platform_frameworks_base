@@ -120,4 +120,9 @@ public class OverlayViewController {
     protected final View getLayout() {
         return mLayout;
     }
+
+    /** Returns the {@link OverlayViewGlobalStateController}. */
+    protected final OverlayViewGlobalStateController getOverlayViewGlobalStateController() {
+        return mOverlayViewGlobalStateController;
+    }
 }

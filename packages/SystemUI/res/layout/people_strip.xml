@@ -57,6 +57,7 @@
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:forceHasOverlappingRendering="false"
+            android:visibility="gone"
         />
 
         <ImageView
@@ -65,6 +66,7 @@
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:forceHasOverlappingRendering="false"
+            android:visibility="gone"
         />
 
         <ImageView
@@ -73,6 +75,7 @@
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:forceHasOverlappingRendering="false"
+            android:visibility="gone"
         />
 
         <ImageView
@@ -81,6 +84,7 @@
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:forceHasOverlappingRendering="false"
+            android:visibility="gone"
         />
 
         <ImageView
@@ -89,6 +93,7 @@
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:forceHasOverlappingRendering="false"
+            android:visibility="gone"
         />
 
     </LinearLayout>

@@ -42,7 +42,7 @@ public class PowerManagerHelper {
     private final CarServiceProvider.CarServiceOnConnectedListener mCarServiceLifecycleListener;
 
     @Inject
-    PowerManagerHelper(CarServiceProvider carServiceProvider) {
+    public PowerManagerHelper(CarServiceProvider carServiceProvider) {
         mCarServiceProvider = carServiceProvider;
         mCarServiceLifecycleListener = car -> {
             Log.d(TAG, "Car Service connected");
@@ -58,14 +58,14 @@ public class PowerManagerHelper {
     /**
      * Sets a {@link CarPowerStateListener}. Should be set before {@link #connectToCarService()}.
      */
-    void setCarPowerStateListener(@NonNull CarPowerStateListener listener) {
+    public void setCarPowerStateListener(@NonNull CarPowerStateListener listener) {
         mCarPowerStateListener = listener;
     }
 
     /**
      * Connect to Car service.
      */
-    void connectToCarService() {
+    public void connectToCarService() {
         mCarServiceProvider.addListener(mCarServiceLifecycleListener);
     }
 }

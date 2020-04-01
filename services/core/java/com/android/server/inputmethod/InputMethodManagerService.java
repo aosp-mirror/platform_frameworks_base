@@ -2042,8 +2042,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void onInlineSuggestionsRequest(InlineSuggestionsRequest request,
-                IInlineSuggestionsResponseCallback callback, AutofillId imeFieldId,
-                boolean inputViewStarted)
+                IInlineSuggestionsResponseCallback callback)
                 throws RemoteException {
             if (!mImePackageName.equals(request.getHostPackageName())) {
                 throw new SecurityException(
@@ -2053,17 +2052,32 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             request.setHostDisplayId(mImeDisplayId);
             mImms.setCurHostInputToken(mImeToken, request.getHostInputToken());
-            mCallback.onInlineSuggestionsRequest(request, callback, imeFieldId, inputViewStarted);
+            mCallback.onInlineSuggestionsRequest(request, callback);
         }
 
         @Override
-        public void onInputMethodStartInputView(AutofillId imeFieldId) throws RemoteException {
-            mCallback.onInputMethodStartInputView(imeFieldId);
+        public void onInputMethodStartInput(AutofillId imeFieldId) throws RemoteException {
+            mCallback.onInputMethodStartInput(imeFieldId);
         }
 
         @Override
-        public void onInputMethodFinishInputView(AutofillId imeFieldId) throws RemoteException {
-            mCallback.onInputMethodFinishInputView(imeFieldId);
+        public void onInputMethodShowInputRequested(boolean requestResult) throws RemoteException {
+            mCallback.onInputMethodShowInputRequested(requestResult);
+        }
+
+        @Override
+        public void onInputMethodStartInputView() throws RemoteException {
+            mCallback.onInputMethodStartInputView();
+        }
+
+        @Override
+        public void onInputMethodFinishInputView() throws RemoteException {
+            mCallback.onInputMethodFinishInputView();
+        }
+
+        @Override
+        public void onInputMethodFinishInput() throws RemoteException {
+            mCallback.onInputMethodFinishInput();
         }
     }
 

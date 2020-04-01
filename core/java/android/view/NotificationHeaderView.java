@@ -65,7 +65,6 @@ public class NotificationHeaderView extends ViewGroup {
     private View mMicIcon;
     private View mAppOps;
     private View mAudiblyAlertedIcon;
-    private int mIconColor;
     private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
@@ -315,13 +314,8 @@ public class NotificationHeaderView extends ViewGroup {
         updateTouchListener();
     }
 
-    @RemotableViewMethod
-    public void setOriginalIconColor(int color) {
-        mIconColor = color;
-    }
-
     public int getOriginalIconColor() {
-        return mIconColor;
+        return mIcon.getOriginalIconColor();
     }
 
     public int getOriginalNotificationColor() {

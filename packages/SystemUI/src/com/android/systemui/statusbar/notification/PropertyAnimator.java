@@ -96,7 +96,7 @@ public class PropertyAnimator {
                 || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(properties.delay);
         }
-        AnimatorListenerAdapter listener = properties.getAnimationFinishListener();
+        AnimatorListenerAdapter listener = properties.getAnimationFinishListener(property);
         if (listener != null) {
             animator.addListener(listener);
         }

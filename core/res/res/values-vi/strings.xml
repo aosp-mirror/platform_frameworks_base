@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Quản trị viên đã từ bỏ quyền sở hữu thiết bị để cho phép dùng vào mục đích cá nhân"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Thiết bị được quản lý"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tổ chức của bạn sẽ quản lý thiết bị này và có thể theo dõi lưu lượng truy cập mạng. Nhấn để biết chi tiết."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"Quản trị viên của bạn đã thay đổi các tùy chọn cài đặt vị trí"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"Nhấn để xem các tùy chọn cài đặt vị trí của bạn."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Ứng dụng có thể truy cập vào thông tin vị trí của bạn"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Hãy liên hệ với quản trị viên CNTT để tìm hiểu thêm"</string>
     <string name="country_detector" msgid="7023275114706088854">"Trình phát hiện quốc gia"</string>
     <string name="location_service" msgid="2439187616018455546">"Dịch vụ vị trí"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Dịch vụ Thông báo của cảm biến"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Thiết bị của bạn sẽ bị xóa"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Không thể sử dụng ứng dụng quản trị. Thiết bị của bạn sẽ bị xóa ngay bây giờ.\n\nHãy liên hệ với quản trị viên của tổ chức nếu bạn có thắc mắc."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> đã tắt tính năng in."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Bỏ chặn ứng dụng cá nhân của bạn"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Các ứng dụng sẽ bị chặn vào ngày mai"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"Quản trị viên CNTT không cho phép bạn tạm dừng hồ sơ công việc quá <xliff:g id="DAYS">%1$d</xliff:g> ngày"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Bật hồ sơ công việc"</string>
     <string name="me" msgid="6207584824693813140">"Tôi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tùy chọn máy tính bảng"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Tùy chọn dành cho Android TV"</string>
@@ -239,12 +235,10 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Tùy chọn máy tính bảng"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Tùy chọn dành cho Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Tùy chọn điện thoại"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"Phương thức khoá màn hình"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"Cách khóa màn hình"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Tắt nguồn"</string>
-    <!-- no translation found for global_action_power_options (1185286119330160073) -->
-    <skip />
-    <!-- no translation found for global_action_restart (4678451019561687074) -->
-    <skip />
+    <string name="global_action_power_options" msgid="1185286119330160073">"Nguồn"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Khởi động lại"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Khẩn cấp"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Báo cáo lỗi"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Kết thúc phiên"</string>
@@ -428,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"truy cập vào các lệnh của nhà cung cấp vị trí bổ sung"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Cho phép ứng dụng truy cập vào các lệnh của nhà cung cấp vị trí bổ sung. Điều này có thể cho phép ứng dụng can thiệp vào hoạt động của Hệ thống định vị toàn cầu (GPS) hoặc các nguồn vị trí khác."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"chỉ truy cập vị trí chính xác trong nền trước"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Ứng dụng này chỉ có thể nhận thông tin vị trí chính xác của bạn khi mở trên màn hình. Để ứng dụng có thể sử các dụng dịch vụ vị trí, thiết bị của bạn phải có các dịch vụ này và dịch vụ ở trạng thái bật. Hoạt động này có thể tăng mức tiêu thụ pin."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Khi bạn dùng ứng dụng này, ứng dụng có thể nhận được thông tin vị trí chính xác của bạn từ dịch vụ vị trí. Bạn phải bật dịch vụ vị trí trên thiết bị của mình thì ứng dụng mới nhận được thông tin vị trí. Việc này có thể làm tăng mức sử dụng pin."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"chỉ truy cập thông tin vị trí gần đúng khi ứng dụng mở trên màn hình"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Ứng dụng này chỉ có thể nhận được thông tin vị trí gần đúng của bạn khi mở trên màn hình. Để ứng dụng có thể dùng các dịch vụ vị trí này, thiết bị của bạn phải có các dịch vụ này và dịch vụ ở trạng thái bật."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Khi bạn dùng ứng dụng này, ứng dụng có thể nhận được thông tin vị trí gần đúng của bạn từ dịch vụ vị trí. Bạn phải bật dịch vụ vị trí trên thiết bị của mình thì ứng dụng mới nhận được thông tin vị trí."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"truy cập vào vị trí trong nền"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Ngoài quyền truy cập vào thông tin vị trí khi mở trên màn hình, ứng dụng này còn có thể truy cập vào thông tin vị trí khi đang chạy trong nền."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Ứng dụng này có thể truy cập vào thông tin vị trí bất cứ lúc nào, ngay cả khi bạn không dùng ứng dụng đó."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"thay đổi cài đặt âm thanh của bạn"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Cho phép ứng dụng sửa đổi cài đặt âm thanh chung chẳng hạn như âm lượng và loa nào được sử dụng cho thiết bị ra."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ghi âm"</string>
@@ -444,11 +438,9 @@
     <string name="permlab_camera" msgid="6320282492904119413">"chụp ảnh và quay video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ứng dụng này có thể chụp ảnh và quay video bằng máy ảnh bất cứ lúc nào."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Cho phép một ứng dụng hoặc dịch vụ truy cập vào máy ảnh hệ thống để chụp ảnh và quay video"</string>
-    <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
-    <skip />
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ứng dụng hệ thống có đặc quyền này có thể dùng máy ảnh hệ thống để chụp ảnh và quay video bất cứ lúc nào. Ngoài ra, ứng dụng này cũng cần có quyền android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Cho phép một ứng dụng hoặc dịch vụ nhận lệnh gọi lại khi các thiết bị máy ảnh đang được mở/đóng."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ứng dụng này có thể nhận các lệnh gọi lại khi có bất kỳ thiết bị camera nào đang được mở (bằng ứng dụng) hoặc đóng."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kiểm soát rung"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Cho phép ứng dụng kiểm soát bộ rung."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Cho phép ứng dụng truy cập vào trạng thái bộ rung."</string>
@@ -1350,13 +1342,17 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Đang xem lại nội dung hiện tại"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> mới"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Hãy nhấn để thiết lập"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Để chuyển ảnh và phương tiện"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Vấn đề với <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Hãy nhấn để sửa"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> bị lỗi. Chọn để sửa."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> không được hỗ trợ"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Thiết bị này không hỗ trợ <xliff:g id="NAME">%s</xliff:g> này. Nhấn để thiết lập ở định dạng được hỗ trợ."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Thiết bị này không hỗ trợ <xliff:g id="NAME">%s</xliff:g> này. Chọn để thiết lập ở định dạng được hỗ trợ."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (7657357085538772913) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Đã tháo đột ngột <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Hãy ngắt kết nối phương tiện trước khi tháo để tránh mất nội dung"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Đã xóa <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1624,24 +1620,15 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Bạn tăng âm lượng lên quá mức khuyên dùng?\n\nViệc nghe ở mức âm lượng cao trong thời gian dài có thể gây tổn thương thính giác của bạn."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Sử dụng phím tắt Hỗ trợ tiếp cận?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Khi phím tắt này đang bật, thao tác nhấn cả hai nút âm lượng trong 3 giây sẽ mở tính năng hỗ trợ tiếp cận."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (8417489297036013065) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning (3740723309483706911) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (6935581470716541531) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning_title (3410100187167382427) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning (8412954203626349109) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (2819109500943271385) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning (6363127705112844257) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_on (5463618449556111344) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Bật các tính năng hỗ trợ tiếp cận?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Thao tác nhấn và giữ cả hai phím âm lượng trong vài giây sẽ bật các tính năng hỗ trợ tiếp cận. Việc bật các tính năng này có thể thay đổi cách thiết bị của bạn hoạt động.\n\nCác tính năng hiện tại:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nBạn có thể thay đổi những tính năng đã chọn trong phần Cài đặt &gt; Hỗ trợ tiếp cận."</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Bật TalkBack?"</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Thao tác nhấn và giữ cả hai phím âm lượng trong vài giây sẽ bật TalkBack, một trình đọc màn hình rất hữu ích cho những người bị khiếm thị hoặc có thị lực kém. TalkBack thay đổi hoàn toàn cách thiết bị của bạn hoạt động.\n\nBạn có thể chuyển phím tắt này thành một tính năng khác trong phần Cài đặt &gt; Hỗ trợ tiếp cận."</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Bật <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Thao tác nhấn và giữ cả hai phím âm lượng trong vài giây sẽ bật <xliff:g id="SERVICE">%1$s</xliff:g>, một tính năng hỗ trợ tiếp cận. Việc bật tính năng này có thể thay đổi cách thiết bị của bạn hoạt động.\n\nBạn có thể chuyển phím tắt này thành một tính năng khác trong phần Cài đặt &gt; Hỗ trợ tiếp cận."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Bật"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Không bật"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Cho phép <xliff:g id="SERVICE">%1$s</xliff:g> toàn quyền kiểm soát thiết bị của bạn?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Nếu bạn bật <xliff:g id="SERVICE">%1$s</xliff:g>, thiết bị của bạn sẽ không dùng phương thức khóa màn hình để tăng cường mã hóa dữ liệu."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Bạn chỉ nên cấp toàn quyền kiểm soát cho những ứng dụng trợ giúp mình khi cần hỗ trợ tiếp cận, chứ không nên cấp cho hầu hết các ứng dụng."</string>
@@ -1652,10 +1639,8 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Cho phép"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Từ chối"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Nhấn vào một tính năng để bắt đầu sử dụng:"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Chọn các tính năng để dùng với nút hỗ trợ tiếp cận"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Chọn các tính năng để dùng với phím tắt là phím âm lượng"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> đã bị tắt"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Chỉnh sửa phím tắt"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Xong"</string>
@@ -1663,23 +1648,15 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sử dụng phím tắt"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Đảo màu"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Sửa màu"</string>
-    <!-- no translation found for accessibility_shortcut_enabling_service (5473495203759847687) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_disabling_service (8675244165062700619) -->
-    <skip />
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã bật."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã tắt."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Nhấn và giữ đồng thời cả hai phím âm lượng trong 3 giây để sử dụng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_button_prompt_text (8343213623338605305) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (8742535972130563952) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (5211827854510660203) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8853928358872550500) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (9196230728837090497) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3425123684990193765) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Chọn một tính năng để dùng khi bạn nhấn nút hỗ trợ tiếp cận:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Chọn một tính năng để dùng với cử chỉ hỗ trợ tiếp cận (dùng 2 ngón tay vuốt lên từ cuối màn hình):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Chọn một tính năng để dùng với cử chỉ hỗ trợ tiếp cận (dùng 3 ngón tay vuốt lên từ cuối màn hình):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Để chuyển đổi giữa các tính năng, hãy chạm và giữ nút hỗ trợ tiếp cận."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Để chuyển đổi giữa các tính năng, hãy dùng 2 ngón tay vuốt lên và giữ."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Để chuyển đổi giữa các tính năng, hãy dùng 3 ngón tay vuốt lên và giữ."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Phóng to"</string>
     <string name="user_switched" msgid="7249833311585228097">"Người dùng hiện tại <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Đang chuyển sang <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2050,8 +2027,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> tệp</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> tệp</item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (1511722103987329028) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Không có người nào được đề xuất để chia sẻ"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Danh sách ứng dụng"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ứng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Màn hình chính"</string>
@@ -2087,222 +2063,112 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Các ứng dụng công việc không thể mở nội dung này"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Các ứng dụng cá nhân không hỗ trợ nội dung này"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Các ứng dụng cá nhân không thể mở nội dung này"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Ghi âm hoặc phát âm thanh trong cuộc gọi điện thoại"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Cho phép ứng dụng này ghi âm hoặc phát âm thanh trong cuộc gọi điện thoại khi được chỉ định làm ứng dụng trình quay số mặc định."</string>
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ENTRY (4447629474818217364) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY (973059024670737358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ENTRY (4487435301206073787) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY (768060297218652809) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY (7129527319490548930) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY (2876126640607573252) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY (8952595089930109282) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ENTRY (3013902515773728996) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ENTRY (2974411408893410289) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ENTRY (687618528751880721) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ENTRY (6810596579655575381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ENTRY (2715929642540980259) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY (8557791623303951590) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ENTRY (7382468767274580323) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY (6730880791104286987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY (6432126539782267026) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY (1730510161529488920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY (3369885925003346830) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY (9129139686191167829) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY (2869929685874615358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ENTRY (1238663472392741771) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY (3988705848553894358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ENTRY (6186770686690993200) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ENTRY (7043865376145617024) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ENTRY (6144227308185112176) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS (4233355366318061180) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS (6742563947637715645) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS (2033399698172403560) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS (4795977251920732254) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS (1090425878157254446) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS (6476898876518094438) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS (6006806734293747731) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (6546680489620881893) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS (3506845511000727015) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_IN_PROGRESS (6709169861932992750) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS (4013870911606478520) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS (9032651188219523434) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS (6584576506344491207) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS (830981927724888114) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS (7851790973098894802) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_IN_PROGRESS (1149560739586960121) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS (5708964693522116025) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS (7288103122966483455) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS (4036752174056147753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS (5089536274515338566) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS (6737197986936251958) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS (5658767775619998623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS (665978313257653727) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS (3857142652251836850) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS (2695664012344346788) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (2695678959963807782) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS (1230605365926493599) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ERROR (1924844017037151535) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR (3372797822292089708) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR (1878443146720411381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ERROR (7664778312218023192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ERROR (2472944311643350302) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ERROR (828089694480999120) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ERROR (17619001007092511) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ERROR (807214229604353614) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ERROR (8644184447744175747) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR (3801002648649640407) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ERROR (707397021218680753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR (894358680773257820) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR (352466878146726991) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR (7353389721907138671) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR (2655263155490857920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ERROR (6903740900892931310) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR (5165901670447518687) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR (2856763216589267623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR (817542684437829139) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR (5178635064113393143) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR (5391587926974531008) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR (4895494864493315868) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ERROR (9017576601595353649) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR (1116993930995545742) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ERROR (7559167306794441462) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ERROR (2782926139511136588) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ERROR (1890493954453456758) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUCCESS (4886243367747126325) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS (4053809277733513987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS (8249342930499801740) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_SUCCESS (2339794542560381270) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_SUCCESS (6975608174152828954) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS (2846699261330463192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS (5335414726057102801) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_SUCCESS (8868100318474971969) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS (6020936629725666932) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS (6944873647584595489) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_SUCCESS (2526483514124121988) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS (7662200333621664621) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS (2861223407953766632) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS (5345648571175243272) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS (3725278343103422466) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS (6998502547560297983) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS (8555433771162560361) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS (3555767296933606232) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS (6778051818199974237) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS (4080108758498911429) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS (7873675303000794343) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS (1763198215069819523) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_SUCCESS (2053891977727320532) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS (8146602361895007345) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_SUCCESS (8058678548991999545) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_SUCCESS (2545608067978550571) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_SUCCESS (4352382949744625007) -->
-    <skip />
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Mã PIN mở khóa mạng SIM"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Mã PIN mở khóa tập con của mạng SIM"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Mã PIN mở khóa SIM corporate"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"Mã PIN mở khóa nhà cung cấp dịch vụ SIM"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"Mã PIN mở khóa SIM"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"Mã PIN mở khóa RUIM network1"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"Mã PIN mở khóa RUIM network2"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"Mã PIN mở khóa RUIM hrpd"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"Mã PIN mở khóa RUIM corporate"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"Mã PIN mở khóa nhà cung cấp dịch vụ RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"Mã PIN mở khóa RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"Nhập mã PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"Mã PIN mở khóa SPN"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"Mã PIN mở khóa SP Equivalent Home PLMN"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"Mã PIN mở khóa ICCID"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"Mã PIN mở khóa IMPI"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"Mã PIN mở khóa nhà cung cấp dịch vụ tập con của mạng"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"Đang yêu cầu mở khóa mạng SIM…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"Đang yêu cầu mở khóa tập con của mạng SIM…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"Đang yêu cầu mở khóa nhà cung cấp dịch vụ SIM…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"Đang yêu cầu mở khóa SIM corporate…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"Đang yêu cầu mở khóa SIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Đang yêu cầu mở khóa RUIM network1…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Đang yêu cầu mở khóa RUIM network2…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"Đang yêu cầu mở khóa RUIM hrpd…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"Đang yêu cầu mở khóa nhà cung cấp dịch vụ RUIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"Đang yêu cầu mở khóa RUIM corporate…"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"Đang yêu cầu mở khóa SPN…"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"Đang yêu cầu mở khóa SP Equivalent Home PLMN…"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"Đang yêu cầu mở khóa ICCID…"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"Đang yêu cầu mở khóa IMPI…"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"Đang yêu cầu mở khóa nhà cung cấp dịch vụ tập con của Mạng…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"Đang yêu cầu mở khóa RUIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"Đang yêu cầu mở khóa mã PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"Yêu cầu mở khóa Mạng SIM không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"Yêu cầu mở khóa Tập con của mạng SIM không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"Yêu cầu mở khóa Nhà cung cấp dịch vụ SIM không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"Yêu cầu mở khóa SIM Corporate không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"Yêu cầu mở khóa SIM không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"Yêu cầu mở khóa RUIM Network1 không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"Yêu cầu mở khóa RUIM Network2 không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"Yêu cầu mở khóa RUIM Hrpd không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"Yêu cầu mở khóa RUIM Corporate không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"Yêu cầu mở khóa Nhà cung cấp dịch vụ RUIM không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"Yêu cầu mở khóa RUIM không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"Mở khóa mã PUK không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"Yêu cầu mở khóa SPN không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"Yêu cầu mở khóa SP Equivalent Home PLMN không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"Yêu cầu mở khóa ICCID không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"Yêu cầu mở khóa IMPI không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"Yêu cầu mở khóa nhà cung cấp dịch vụ tập con của mạng không thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"Mở khóa Mạng SIM thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"Mở khóa Tập con của mạng SIM thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"Mở khóa Nhà cung cấp dịch vụ SIM thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"Mở khóa SIM Corporate thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"Mở khóa SIM thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"Mở khóa RUIM Network1 thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"Mở khóa RUIM Network2 thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"Mở khóa RUIM Hrpd thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"Mở khóa Nhà cung cấp dịch vụ RUIM thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"Mở khóa RUIM Corporate thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"Mở khóa RUIM thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"Mở khóa mã PUK thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"Mở khóa SPN thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"Mở khóa SP Equivalent Home PLMN thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"Mở khóa ICCID thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"Mở khóa IMPI thành công."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Mở khóa nhà cung cấp dịch vụ tập con của mạng thành công."</string>
 </resources>
