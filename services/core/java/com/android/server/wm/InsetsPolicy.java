@@ -367,7 +367,6 @@ class InsetsPolicy {
         @Override
         protected void onAnimationFinish() {
             super.onAnimationFinish();
-            mControlCallbacks.mAnimationControl.finish(mAnimatingShown);
             DisplayThread.getHandler().post(mFinishCallback);
         }
 
