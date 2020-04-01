@@ -435,6 +435,53 @@ public class RollbackTest {
     }
 
     /**
+     * Test that available rollbacks should expire correctly when the property
+     * {@link RollbackManager#PROPERTY_ROLLBACK_LIFETIME_MILLIS} is changed
+     */
+    @Test
+    public void testRollbackExpiresWhenLifetimeChanges() throws Exception {
+        long defaultExpirationTime = TimeUnit.HOURS.toMillis(48);
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+
+        try {
+            InstallUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                    Manifest.permission.WRITE_DEVICE_CONFIG);
+
+            Uninstall.packages(TestApp.A);
+            assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
+            Install.single(TestApp.A1).commit();
+            assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+            Install.single(TestApp.A2).setEnableRollback().commit();
+            assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+            RollbackInfo rollback = waitForAvailableRollback(TestApp.A);
+            assertThat(rollback).packagesContainsExactly(Rollback.from(TestApp.A2).to(TestApp.A1));
+
+            // Change the lifetime to 0 which should expire rollbacks immediately
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
+                    RollbackManager.PROPERTY_ROLLBACK_LIFETIME_MILLIS,
+                    Long.toString(0), false /* makeDefault*/);
+
+            // Keep polling until device config changes has happened (which might take more than
+            // 5 sec depending how busy system_server is) and rollbacks have expired
+            for (int i = 0; i < 30; ++i) {
+                if (hasRollbackInclude(rm.getAvailableRollbacks(), TestApp.A)) {
+                    Thread.sleep(1000);
+                }
+            }
+            rollback = getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TestApp.A);
+            assertThat(rollback).isNull();
+        } finally {
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
+                    RollbackManager.PROPERTY_ROLLBACK_LIFETIME_MILLIS,
+                    Long.toString(defaultExpirationTime), false /* makeDefault*/);
+            InstallUtils.dropShellPermissionIdentity();
+        }
+    }
+
+    /**
      * Test that changing time on device does not affect the duration of time that we keep
      * rollback available
      */
