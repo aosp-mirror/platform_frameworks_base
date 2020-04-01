@@ -16,6 +16,7 @@
 
 package com.android.server.os;
 
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -34,7 +35,6 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 import com.android.server.SystemConfig;
 
 import java.io.FileDescriptor;
@@ -95,11 +95,22 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     @Override
     @RequiresPermission(android.Manifest.permission.DUMP)
     public void cancelBugreport() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, "startBugreport");
-        // This tells init to cancel bugreportd service. Note that this is achieved through setting
-        // a system property which is not thread-safe. So the lock here offers thread-safety only
-        // among callers of the API.
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
+                "cancelBugreport");
         synchronized (mLock) {
+            IDumpstate ds = getDumpstateBinderServiceLocked();
+            if (ds == null) {
+                Slog.w(TAG, "cancelBugreport: Could not find native dumpstate service");
+                return;
+            }
+            try {
+                ds.cancelBugreport();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException in cancelBugreport", e);
+            }
+            // This tells init to cancel bugreportd service. Note that this is achieved through
+            // setting a system property which is not thread-safe. So the lock here offers
+            // thread-safety only among callers of the API.
             SystemProperties.set("ctl.stop", BUGREPORT_SERVICE);
         }
     }
@@ -177,8 +188,14 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
     @GuardedBy("mLock")
     private boolean isDumpstateBinderServiceRunningLocked() {
-        IDumpstate ds = IDumpstate.Stub.asInterface(ServiceManager.getService("dumpstate"));
-        return ds != null;
+        return getDumpstateBinderServiceLocked() != null;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private IDumpstate getDumpstateBinderServiceLocked() {
+        // Note that the binder service on the native side is "dumpstate".
+        return IDumpstate.Stub.asInterface(ServiceManager.getService("dumpstate"));
     }
 
     /*
@@ -202,8 +219,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         int totalTimeWaitedMillis = 0;
         int seedWaitTimeMillis = 500;
         while (!timedOut) {
-            // Note that the binder service on the native side is "dumpstate".
-            ds = IDumpstate.Stub.asInterface(ServiceManager.getService("dumpstate"));
+            ds = getDumpstateBinderServiceLocked();
             if (ds != null) {
                 Slog.i(TAG, "Got bugreport service handle.");
                 break;

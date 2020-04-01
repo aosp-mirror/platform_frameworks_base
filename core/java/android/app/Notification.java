@@ -8859,6 +8859,7 @@ public class Notification implements Parcelable
 
         /**
          * @deprecated use {@link #getIntent()} instead.
+         * @removed Removed from the R SDK but was never publicly stable.
          */
         @Nullable
         @Deprecated
@@ -8886,6 +8887,7 @@ public class Notification implements Parcelable
 
         /**
          * @deprecated use {@link #getIcon()} instead.
+         * @removed Removed from the R SDK but was never publicly stable.
          */
         @Nullable
         @Deprecated
@@ -9089,6 +9091,7 @@ public class Notification implements Parcelable
 
             /**
              * @deprecated use {@link Builder#Builder(String)} instead.
+             * @removed Removed from the R SDK but was never publicly stable.
              */
             @NonNull
             @Deprecated
@@ -9104,6 +9107,7 @@ public class Notification implements Parcelable
 
             /**
              * @deprecated use {@link Builder#Builder(PendingIntent, Icon)} instead.
+             * @removed Removed from the R SDK but was never publicly stable.
              */
             @NonNull
             @Deprecated

@@ -990,7 +990,7 @@ public class AppOpsManager {
     /** @hide Control whether an application is allowed to run in the background. */
     @UnsupportedAppUsage
     public static final int OP_RUN_IN_BACKGROUND =
-            AppProtoEnums.APP_OP_RUN_ANY_IN_BACKGROUND;
+            AppProtoEnums.APP_OP_RUN_IN_BACKGROUND;
     /** @hide */
     @UnsupportedAppUsage
     public static final int OP_AUDIO_ACCESSIBILITY_VOLUME =

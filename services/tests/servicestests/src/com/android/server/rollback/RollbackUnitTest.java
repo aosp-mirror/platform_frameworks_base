@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verify;
 
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
-import android.util.IntArray;
 import android.util.SparseLongArray;
 
 import com.google.common.collect.Range;
@@ -344,7 +343,7 @@ public class RollbackUnitTest {
             String packageName, long fromVersion, long toVersion, boolean isApex) {
         return new PackageRollbackInfo(new VersionedPackage(packageName, fromVersion),
                 new VersionedPackage(packageName, toVersion),
-                new IntArray(), new ArrayList<>(), isApex, false, new IntArray(),
+                new ArrayList<>(), new ArrayList<>(), isApex, false, new ArrayList<>(),
                 new SparseLongArray());
     }
 
@@ -358,7 +357,7 @@ public class RollbackUnitTest {
             String packageName, long fromVersion, long toVersion) {
         return new PackageRollbackInfo(new VersionedPackage(packageName, fromVersion),
                 new VersionedPackage(packageName, toVersion),
-                new IntArray(), new ArrayList<>(), false, true, new IntArray(),
+                new ArrayList<>(), new ArrayList<>(), false, true, new ArrayList<>(),
                 new SparseLongArray());
     }
 

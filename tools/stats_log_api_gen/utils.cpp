@@ -22,10 +22,10 @@ namespace android {
 namespace stats_log_api_gen {
 
 static void build_non_chained_decl_map(const Atoms& atoms,
-                                       std::map<int, set<AtomDecl>::const_iterator>* decl_map) {
-    for (set<AtomDecl>::const_iterator atom = atoms.non_chained_decls.begin();
-         atom != atoms.non_chained_decls.end(); atom++) {
-        decl_map->insert(std::make_pair(atom->code, atom));
+                                       std::map<int, AtomDeclSet::const_iterator>* decl_map) {
+    for (AtomDeclSet::const_iterator atomIt = atoms.non_chained_decls.begin();
+         atomIt != atoms.non_chained_decls.end(); atomIt++) {
+        decl_map->insert(std::make_pair((*atomIt)->code, atomIt));
     }
 }
 
@@ -117,11 +117,11 @@ void write_closing_namespace(FILE* out, const string& cppNamespaces) {
 }
 
 static void write_cpp_usage(FILE* out, const string& method_name, const string& atom_code_name,
-                            const AtomDecl& atom, const AtomDecl& attributionDecl) {
+                            const shared_ptr<AtomDecl> atom, const AtomDecl& attributionDecl) {
     fprintf(out, "     * Usage: %s(StatsLog.%s", method_name.c_str(), atom_code_name.c_str());
 
-    for (vector<AtomField>::const_iterator field = atom.fields.begin(); field != atom.fields.end();
-         field++) {
+    for (vector<AtomField>::const_iterator field = atom->fields.begin();
+         field != atom->fields.end(); field++) {
         if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
             for (auto chainField : attributionDecl.fields) {
                 if (chainField.javaType == JAVA_TYPE_STRING) {
@@ -154,27 +154,27 @@ void write_native_atom_constants(FILE* out, const Atoms& atoms, const AtomDecl& 
     fprintf(out, " */\n");
     fprintf(out, "enum {\n");
 
-    std::map<int, set<AtomDecl>::const_iterator> atom_code_to_non_chained_decl_map;
+    std::map<int, AtomDeclSet::const_iterator> atom_code_to_non_chained_decl_map;
     build_non_chained_decl_map(atoms, &atom_code_to_non_chained_decl_map);
 
     size_t i = 0;
     // Print atom constants
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
-         atom++) {
-        string constant = make_constant_name(atom->name);
+    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
+         atomIt++) {
+        string constant = make_constant_name((*atomIt)->name);
         fprintf(out, "\n");
         fprintf(out, "    /**\n");
-        fprintf(out, "     * %s %s\n", atom->message.c_str(), atom->name.c_str());
-        write_cpp_usage(out, "stats_write", constant, *atom, attributionDecl);
+        fprintf(out, "     * %s %s\n", (*atomIt)->message.c_str(), (*atomIt)->name.c_str());
+        write_cpp_usage(out, "stats_write", constant, *atomIt, attributionDecl);
 
-        auto non_chained_decl = atom_code_to_non_chained_decl_map.find(atom->code);
+        auto non_chained_decl = atom_code_to_non_chained_decl_map.find((*atomIt)->code);
         if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
             write_cpp_usage(out, "stats_write_non_chained", constant, *non_chained_decl->second,
                             attributionDecl);
         }
         fprintf(out, "     */\n");
         char const* const comma = (i == atoms.decls.size() - 1) ? "" : ",";
-        fprintf(out, "    %s = %d%s\n", constant.c_str(), atom->code, comma);
+        fprintf(out, "    %s = %d%s\n", constant.c_str(), (*atomIt)->code, comma);
         i++;
     }
     fprintf(out, "\n");
@@ -245,40 +245,40 @@ void write_native_method_call(FILE* out, const string& methodName,
 void write_java_atom_codes(FILE* out, const Atoms& atoms) {
     fprintf(out, "    // Constants for atom codes.\n");
 
-    std::map<int, set<AtomDecl>::const_iterator> atom_code_to_non_chained_decl_map;
+    std::map<int, AtomDeclSet::const_iterator> atom_code_to_non_chained_decl_map;
     build_non_chained_decl_map(atoms, &atom_code_to_non_chained_decl_map);
 
     // Print constants for the atom codes.
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
-         atom++) {
-        string constant = make_constant_name(atom->name);
+    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
+         atomIt++) {
+        string constant = make_constant_name((*atomIt)->name);
         fprintf(out, "\n");
         fprintf(out, "    /**\n");
-        fprintf(out, "     * %s %s<br>\n", atom->message.c_str(), atom->name.c_str());
-        write_java_usage(out, "write", constant, *atom);
-        auto non_chained_decl = atom_code_to_non_chained_decl_map.find(atom->code);
+        fprintf(out, "     * %s %s<br>\n", (*atomIt)->message.c_str(), (*atomIt)->name.c_str());
+        write_java_usage(out, "write", constant, **atomIt);
+        auto non_chained_decl = atom_code_to_non_chained_decl_map.find((*atomIt)->code);
         if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
-            write_java_usage(out, "write_non_chained", constant, *non_chained_decl->second);
+            write_java_usage(out, "write_non_chained", constant, **(non_chained_decl->second));
         }
         fprintf(out, "     */\n");
-        fprintf(out, "    public static final int %s = %d;\n", constant.c_str(), atom->code);
+        fprintf(out, "    public static final int %s = %d;\n", constant.c_str(), (*atomIt)->code);
     }
     fprintf(out, "\n");
 }
 
 void write_java_enum_values(FILE* out, const Atoms& atoms) {
     fprintf(out, "    // Constants for enum values.\n\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
-         atom++) {
-        for (vector<AtomField>::const_iterator field = atom->fields.begin();
-             field != atom->fields.end(); field++) {
+    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
+         atomIt++) {
+        for (vector<AtomField>::const_iterator field = (*atomIt)->fields.begin();
+             field != (*atomIt)->fields.end(); field++) {
             if (field->javaType == JAVA_TYPE_ENUM) {
-                fprintf(out, "    // Values for %s.%s\n", atom->message.c_str(),
+                fprintf(out, "    // Values for %s.%s\n", (*atomIt)->message.c_str(),
                         field->name.c_str());
                 for (map<int, string>::const_iterator value = field->enumValues.begin();
                      value != field->enumValues.end(); value++) {
                     fprintf(out, "    public static final int %s__%s__%s = %d;\n",
-                            make_constant_name(atom->message).c_str(),
+                            make_constant_name((*atomIt)->message).c_str(),
                             make_constant_name(field->name).c_str(),
                             make_constant_name(value->second).c_str(), value->first);
                 }
@@ -307,8 +307,7 @@ void write_java_usage(FILE* out, const string& method_name, const string& atom_c
     fprintf(out, ");<br>\n");
 }
 
-int write_java_non_chained_methods(
-        FILE* out, const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap) {
+int write_java_non_chained_methods(FILE* out, const SignatureInfoMap& signatureInfoMap) {
     for (auto signatureInfoMapIt = signatureInfoMap.begin();
          signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
         // Print method signature.
@@ -351,8 +350,7 @@ int write_java_non_chained_methods(
     return 0;
 }
 
-int write_java_work_source_methods(
-        FILE* out, const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap) {
+int write_java_work_source_methods(FILE* out, const SignatureInfoMap& signatureInfoMap) {
     fprintf(out, "    // WorkSource methods.\n");
     for (auto signatureInfoMapIt = signatureInfoMap.begin();
          signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {

@@ -394,8 +394,6 @@ package android.telephony {
     method @Deprecated @NonNull public String getDataConnectionApn();
     method @Deprecated public int getDataConnectionApnTypeBitMask();
     method @Deprecated public int getDataConnectionFailCause();
-    method @Deprecated @Nullable public android.net.LinkProperties getDataConnectionLinkProperties();
-    method @Deprecated public int getDataConnectionNetworkType();
     method @Deprecated public int getDataConnectionState();
   }
 

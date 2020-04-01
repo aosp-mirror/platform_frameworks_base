@@ -22,9 +22,8 @@
 namespace android {
 namespace stats_log_api_gen {
 
-static int write_java_q_logger_class(
-        FILE* out, const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
-        const AtomDecl& attributionDecl) {
+static int write_java_q_logger_class(FILE* out, const SignatureInfoMap& signatureInfoMap,
+                                     const AtomDecl& attributionDecl) {
     fprintf(out, "\n");
     fprintf(out, "    // Write logging helper methods for statsd in Q and earlier.\n");
     fprintf(out, "    private static class QLogger {\n");
@@ -41,47 +40,64 @@ static int write_java_q_logger_class(
 }
 
 static void write_annotations(FILE* out, int argIndex,
-                              const FieldNumberToAnnotations& fieldNumberToAnnotations) {
-    auto it = fieldNumberToAnnotations.find(argIndex);
-    if (it == fieldNumberToAnnotations.end()) {
+                              const FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet) {
+    FieldNumberToAtomDeclSet::const_iterator fieldNumberToAtomDeclSetIt =
+            fieldNumberToAtomDeclSet.find(argIndex);
+    if (fieldNumberToAtomDeclSet.end() == fieldNumberToAtomDeclSetIt) {
         return;
     }
-    const set<shared_ptr<Annotation>>& annotations = it->second;
-    for (auto& annotation : annotations) {
-        // TODO(b/151744250): Group annotations for same atoms.
-        // TODO(b/151786433): Write atom constant name instead of atom id literal.
-        fprintf(out, "        if (code == %d) {\n", annotation->atomId);
-        switch (annotation->type) {
-            case ANNOTATION_TYPE_INT:
+    const AtomDeclSet& atomDeclSet = fieldNumberToAtomDeclSetIt->second;
+    for (const shared_ptr<AtomDecl>& atomDecl : atomDeclSet) {
+        fprintf(out, "        if (code == %d) {\n", atomDecl->code);
+        const AnnotationSet& annotations = atomDecl->fieldNumberToAnnotations.at(argIndex);
+        int resetState = -1;
+        int defaultState = -1;
+        for (const shared_ptr<Annotation>& annotation : annotations) {
+            // TODO(b/151786433): Write atom constant name instead of atom id literal.
+            switch (annotation->type) {
                 // TODO(b/151776731): Check for reset state annotation and only include
                 // reset state when field value == default state annotation value.
-                // TODO(b/151786433): Write annotation constant name instead of
-                // annotation id literal.
-                fprintf(out, "            builder.addIntAnnotation((byte) %d, %d);\n",
-                        annotation->annotationId, annotation->value.intValue);
-                break;
-            case ANNOTATION_TYPE_BOOL:
-                // TODO(b/151786433): Write annotation constant name instead of
-                // annotation id literal.
-                fprintf(out, "            builder.addBooleanAnnotation((byte) %d, %s);\n",
-                        annotation->annotationId, annotation->value.boolValue ? "true" : "false");
-                break;
-            default:
-                break;
+                case ANNOTATION_TYPE_INT:
+                    // TODO(b/151786433): Write annotation constant name instead of
+                    // annotation id literal.
+                    if (ANNOTATION_ID_RESET_STATE == annotation->annotationId) {
+                        resetState = annotation->value.intValue;
+                    } else if (ANNOTATION_ID_DEFAULT_STATE == annotation->annotationId) {
+                        defaultState = annotation->value.intValue;
+                    } else {
+                        fprintf(out, "            builder.addIntAnnotation((byte) %d, %d);\n",
+                                annotation->annotationId, annotation->value.intValue);
+                    }
+                    break;
+                case ANNOTATION_TYPE_BOOL:
+                    // TODO(b/151786433): Write annotation constant name instead of
+                    // annotation id literal.
+                    fprintf(out, "            builder.addBooleanAnnotation((byte) %d, %s);\n",
+                            annotation->annotationId,
+                            annotation->value.boolValue ? "true" : "false");
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (defaultState != -1 && resetState != -1) {
+            fprintf(out, "            if (arg%d == %d) {\n", argIndex, resetState);
+            fprintf(out, "                builder.addIntAnnotation((byte) %d, %d);\n",
+                    ANNOTATION_ID_RESET_STATE, defaultState);
+            fprintf(out, "            }\n");
         }
         fprintf(out, "        }\n");
     }
 }
 
-static int write_java_methods(
-        FILE* out, const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
-        const AtomDecl& attributionDecl, const bool supportQ) {
+static int write_java_methods(FILE* out, const SignatureInfoMap& signatureInfoMap,
+                              const AtomDecl& attributionDecl, const bool supportQ) {
     for (auto signatureInfoMapIt = signatureInfoMap.begin();
          signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
         // Print method signature.
         fprintf(out, "    public static void write(int code");
         const vector<java_type_t>& signature = signatureInfoMapIt->first;
-        const FieldNumberToAnnotations& fieldNumberToAnnotations = signatureInfoMapIt->second;
+        const FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet = signatureInfoMapIt->second;
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature.begin(); arg != signature.end();
              arg++) {
@@ -120,7 +136,7 @@ static int write_java_methods(
 
         // Write atom code.
         fprintf(out, "%s        builder.setAtomId(code);\n", indent.c_str());
-        write_annotations(out, ATOM_ID_FIELD_NUMBER, fieldNumberToAnnotations);
+        write_annotations(out, ATOM_ID_FIELD_NUMBER, fieldNumberToAtomDeclSet);
 
         // Write the args.
         argIndex = 1;
@@ -231,7 +247,7 @@ static int write_java_methods(
                     fprintf(stderr, "Encountered unsupported type.");
                     return 1;
             }
-            write_annotations(out, argIndex, fieldNumberToAnnotations);
+            write_annotations(out, argIndex, fieldNumberToAtomDeclSet);
             argIndex++;
         }
 

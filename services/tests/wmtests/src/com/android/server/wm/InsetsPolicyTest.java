@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -29,13 +30,18 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.platform.test.annotations.Presubmit;
 import android.util.IntArray;
@@ -164,45 +170,51 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testShowTransientBars_bothCanBeTransient_appGetsBothFakeControls() {
-        addWindow(TYPE_STATUS_BAR, "statusBar")
+        addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
                 .getControllableInsetProvider().getSource().setVisible(false);
-        addWindow(TYPE_NAVIGATION_BAR, "navBar")
+        addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar")
                 .getControllableInsetProvider().getSource().setVisible(false);
-        final WindowState app = addWindow(TYPE_APPLICATION, "app");
 
         final InsetsPolicy policy = spy(mDisplayContent.getInsetsPolicy());
-        doNothing().when(policy).startAnimation(anyBoolean(), any());
-        policy.updateBarControlTarget(app);
+
+        doAnswer(invocation -> {
+            ((InsetsState) invocation.getArgument(2)).setSourceVisible(ITYPE_STATUS_BAR, true);
+            ((InsetsState) invocation.getArgument(2)).setSourceVisible(ITYPE_NAVIGATION_BAR, true);
+            return null;
+        }).when(policy).startAnimation(anyBoolean(), any(), any());
+
+        policy.updateBarControlTarget(mAppWindow);
         policy.showTransient(
                 IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
         final InsetsSourceControl[] controls =
-                mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
+                mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
 
         // The app must get both fake controls.
         assertEquals(2, controls.length);
         for (int i = controls.length - 1; i >= 0; i--) {
             assertNull(controls[i].getLeash());
         }
+
+        assertTrue(mDisplayContent.getInsetsStateController().getRawInsetsState()
+                .getSource(ITYPE_STATUS_BAR).isVisible());
+        assertTrue(mDisplayContent.getInsetsStateController().getRawInsetsState()
+                .getSource(ITYPE_NAVIGATION_BAR).isVisible());
     }
 
     @Test
     public void testShowTransientBars_statusBarCanBeTransient_appGetsStatusBarFakeControl() {
-        // Adding app window before setting source visibility is to prevent the visibility from
-        // being cleared by InsetsSourceProvider.updateVisibility.
-        final WindowState app = addWindow(TYPE_APPLICATION, "app");
-
-        addWindow(TYPE_STATUS_BAR, "statusBar")
+        addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
                 .getControllableInsetProvider().getSource().setVisible(false);
-        addWindow(TYPE_NAVIGATION_BAR, "navBar")
+        addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar")
                 .getControllableInsetProvider().getSource().setVisible(true);
 
         final InsetsPolicy policy = spy(mDisplayContent.getInsetsPolicy());
-        doNothing().when(policy).startAnimation(anyBoolean(), any());
-        policy.updateBarControlTarget(app);
+        doNothing().when(policy).startAnimation(anyBoolean(), any(), any());
+        policy.updateBarControlTarget(mAppWindow);
         policy.showTransient(
                 IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
         final InsetsSourceControl[] controls =
-                mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
+                mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
 
         // The app must get the fake control of the status bar, and must get the real control of the
         // navigation bar.
@@ -219,19 +231,18 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testAbortTransientBars_bothCanBeAborted_appGetsBothRealControls() {
-        addWindow(TYPE_STATUS_BAR, "statusBar")
+        addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
                 .getControllableInsetProvider().getSource().setVisible(false);
-        addWindow(TYPE_NAVIGATION_BAR, "navBar")
+        addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar")
                 .getControllableInsetProvider().getSource().setVisible(false);
-        final WindowState app = addWindow(TYPE_APPLICATION, "app");
 
         final InsetsPolicy policy = spy(mDisplayContent.getInsetsPolicy());
-        doNothing().when(policy).startAnimation(anyBoolean(), any());
-        policy.updateBarControlTarget(app);
+        doNothing().when(policy).startAnimation(anyBoolean(), any(), any());
+        policy.updateBarControlTarget(mAppWindow);
         policy.showTransient(
                 IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
         InsetsSourceControl[] controls =
-                mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
+                mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
 
         // The app must get both fake controls.
         assertEquals(2, controls.length);
@@ -239,18 +250,45 @@ public class InsetsPolicyTest extends WindowTestsBase {
             assertNull(controls[i].getLeash());
         }
 
-        final InsetsState state = policy.getInsetsForDispatch(app);
+        final InsetsState state = policy.getInsetsForDispatch(mAppWindow);
         state.setSourceVisible(ITYPE_STATUS_BAR, true);
         state.setSourceVisible(ITYPE_NAVIGATION_BAR, true);
-        policy.onInsetsModified(app, state);
+        policy.onInsetsModified(mAppWindow, state);
 
-        controls = mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
+        controls = mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
 
         // The app must get both real controls.
         assertEquals(2, controls.length);
         for (int i = controls.length - 1; i >= 0; i--) {
             assertNotNull(controls[i].getLeash());
         }
+    }
+
+    @Test
+    public void testShowTransientBars_abortsWhenControlTargetChanges() {
+        addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
+                .getControllableInsetProvider().getSource().setVisible(false);
+        addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar")
+                .getControllableInsetProvider().getSource().setVisible(false);
+        final WindowState app = addWindow(TYPE_APPLICATION, "app");
+        final WindowState app2 = addWindow(TYPE_APPLICATION, "app");
+
+        final InsetsPolicy policy = spy(mDisplayContent.getInsetsPolicy());
+        doNothing().when(policy).startAnimation(anyBoolean(), any(), any());
+        policy.updateBarControlTarget(app);
+        policy.showTransient(
+                IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
+        final InsetsSourceControl[] controls =
+                mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
+        policy.updateBarControlTarget(app2);
+        assertFalse(policy.isTransient(ITYPE_STATUS_BAR));
+        assertFalse(policy.isTransient(ITYPE_NAVIGATION_BAR));
+    }
+
+    private WindowState addNonFocusableWindow(int type, String name) {
+        WindowState win = addWindow(type, name);
+        win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+        return win;
     }
 
     private WindowState addWindow(int type, String name) {

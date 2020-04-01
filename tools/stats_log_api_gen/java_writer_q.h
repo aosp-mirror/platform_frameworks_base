@@ -32,9 +32,8 @@ using namespace std;
 
 void write_java_q_logging_constants(FILE* out, const string& indent);
 
-int write_java_methods_q_schema(
-        FILE* out, const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
-        const AtomDecl& attributionDecl, const string& indent);
+int write_java_methods_q_schema(FILE* out, const SignatureInfoMap& signatureInfoMap,
+                                const AtomDecl& attributionDecl, const string& indent);
 
 void write_java_helpers_for_q_schema_methods(FILE* out, const AtomDecl& attributionDecl,
                                              const int requiredHelpers, const string& indent);

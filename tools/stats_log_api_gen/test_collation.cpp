@@ -30,8 +30,7 @@ using std::vector;
 /**
  * Return whether the map contains a vector of the elements provided.
  */
-static bool map_contains_vector(const map<vector<java_type_t>, FieldNumberToAnnotations>& s,
-                                int count, ...) {
+static bool map_contains_vector(const SignatureInfoMap& s, int count, ...) {
     va_list args;
     vector<java_type_t> v;
 
@@ -110,35 +109,37 @@ TEST(CollationTest, CollateStats) {
                                   JAVA_TYPE_LONG                // sint64
     );
 
-    set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-    EXPECT_EQ(1, atom->code);
-    EXPECT_EQ("int_atom", atom->name);
-    EXPECT_EQ("IntAtom", atom->message);
-    EXPECT_NO_ENUM_FIELD(atom);
-    atom++;
+    EXPECT_EQ(4ul, atoms.decls.size());
 
-    EXPECT_EQ(2, atom->code);
-    EXPECT_EQ("out_of_order_atom", atom->name);
-    EXPECT_EQ("OutOfOrderAtom", atom->message);
-    EXPECT_NO_ENUM_FIELD(atom);
-    atom++;
+    AtomDeclSet::const_iterator atomIt = atoms.decls.begin();
+    EXPECT_EQ(1, (*atomIt)->code);
+    EXPECT_EQ("int_atom", (*atomIt)->name);
+    EXPECT_EQ("IntAtom", (*atomIt)->message);
+    EXPECT_NO_ENUM_FIELD((*atomIt));
+    atomIt++;
 
-    EXPECT_EQ(3, atom->code);
-    EXPECT_EQ("another_int_atom", atom->name);
-    EXPECT_EQ("AnotherIntAtom", atom->message);
-    EXPECT_NO_ENUM_FIELD(atom);
-    atom++;
+    EXPECT_EQ(2, (*atomIt)->code);
+    EXPECT_EQ("out_of_order_atom", (*atomIt)->name);
+    EXPECT_EQ("OutOfOrderAtom", (*atomIt)->message);
+    EXPECT_NO_ENUM_FIELD((*atomIt));
+    atomIt++;
 
-    EXPECT_EQ(4, atom->code);
-    EXPECT_EQ("all_types_atom", atom->name);
-    EXPECT_EQ("AllTypesAtom", atom->message);
+    EXPECT_EQ(3, (*atomIt)->code);
+    EXPECT_EQ("another_int_atom", (*atomIt)->name);
+    EXPECT_EQ("AnotherIntAtom", (*atomIt)->message);
+    EXPECT_NO_ENUM_FIELD((*atomIt));
+    atomIt++;
+
+    EXPECT_EQ(4, (*atomIt)->code);
+    EXPECT_EQ("all_types_atom", (*atomIt)->name);
+    EXPECT_EQ("AllTypesAtom", (*atomIt)->message);
     map<int, string> enumValues;
     enumValues[0] = "VALUE0";
     enumValues[1] = "VALUE1";
-    EXPECT_HAS_ENUM_FIELD(atom, "enum_field", enumValues);
-    atom++;
+    EXPECT_HAS_ENUM_FIELD((*atomIt), "enum_field", enumValues);
+    atomIt++;
 
-    EXPECT_TRUE(atom == atoms.decls.end());
+    EXPECT_EQ(atoms.decls.end(), atomIt);
 }
 
 /**
@@ -235,10 +236,10 @@ TEST(CollationTest, RecogniseWhitelistedAtom) {
     Atoms atoms;
     collate_atoms(ListedAtoms::descriptor(), DEFAULT_MODULE_NAME, &atoms);
     for (const auto& atomDecl : atoms.decls) {
-        if (atomDecl.code == 1) {
-            EXPECT_TRUE(atomDecl.whitelisted);
+        if (atomDecl->code == 1) {
+            EXPECT_TRUE(atomDecl->whitelisted);
         } else {
-            EXPECT_FALSE(atomDecl.whitelisted);
+            EXPECT_FALSE(atomDecl->whitelisted);
         }
     }
 }
@@ -258,33 +259,66 @@ TEST(CollationTest, RecognizeModuleAtom) {
     EXPECT_EQ(atoms.signatureInfoMap.size(), 2u);
     EXPECT_MAP_CONTAINS_SIGNATURE(atoms.signatureInfoMap, JAVA_TYPE_INT);
     EXPECT_MAP_CONTAINS_SIGNATURE(atoms.signatureInfoMap, JAVA_TYPE_STRING);
-    for (auto signatureInfoMapIt : atoms.signatureInfoMap) {
-        vector<java_type_t> signature = signatureInfoMapIt.first;
-        const FieldNumberToAnnotations& fieldNumberToAnnotations = signatureInfoMapIt.second;
-        if (signature[0] == JAVA_TYPE_STRING) {
-            EXPECT_EQ(0u, fieldNumberToAnnotations.size());
-        } else if (signature[0] == JAVA_TYPE_INT) {
-            EXPECT_EQ(1u, fieldNumberToAnnotations.size());
-            EXPECT_NE(fieldNumberToAnnotations.end(), fieldNumberToAnnotations.find(1));
-            const set<shared_ptr<Annotation>>& annotations = fieldNumberToAnnotations.at(1);
-            EXPECT_EQ(2u, annotations.size());
-            for (const shared_ptr<Annotation> annotation : annotations) {
-                EXPECT_TRUE(annotation->annotationId == ANNOTATION_ID_IS_UID ||
-                            annotation->annotationId == ANNOTATION_ID_STATE_OPTION);
-                if (ANNOTATION_ID_IS_UID == annotation->annotationId) {
-                    EXPECT_EQ(1, annotation->atomId);
-                    EXPECT_EQ(ANNOTATION_TYPE_BOOL, annotation->type);
-                    EXPECT_TRUE(annotation->value.boolValue);
-                }
 
-                if (ANNOTATION_ID_STATE_OPTION == annotation->annotationId) {
-                    EXPECT_EQ(3, annotation->atomId);
-                    EXPECT_EQ(ANNOTATION_TYPE_INT, annotation->type);
-                    EXPECT_EQ(os::statsd::StateField::EXCLUSIVE_STATE, annotation->value.intValue);
-                }
-            }
-        }
-    }
+    SignatureInfoMap::const_iterator signatureInfoMapIt;
+    const vector<java_type_t>* signature;
+    const FieldNumberToAtomDeclSet* fieldNumberToAtomDeclSet;
+    FieldNumberToAtomDeclSet::const_iterator fieldNumberToAtomDeclSetIt;
+    const AtomDeclSet* atomDeclSet;
+    AtomDeclSet::const_iterator atomDeclSetIt;
+    AtomDecl* atomDecl;
+    FieldNumberToAnnotations* fieldNumberToAnnotations;
+    FieldNumberToAnnotations::const_iterator fieldNumberToAnnotationsIt;
+    const AnnotationSet* annotationSet;
+    AnnotationSet::const_iterator annotationSetIt;
+    Annotation* annotation;
+
+    signatureInfoMapIt = atoms.signatureInfoMap.begin();
+    signature = &(signatureInfoMapIt->first);
+    fieldNumberToAtomDeclSet = &signatureInfoMapIt->second;
+    EXPECT_EQ(1ul, signature->size());
+    EXPECT_EQ(JAVA_TYPE_INT, signature->at(0));
+    EXPECT_EQ(1ul, fieldNumberToAtomDeclSet->size());
+    fieldNumberToAtomDeclSetIt = fieldNumberToAtomDeclSet->begin();
+    EXPECT_EQ(1, fieldNumberToAtomDeclSetIt->first);
+    atomDeclSet = &fieldNumberToAtomDeclSetIt->second;
+    EXPECT_EQ(2ul, atomDeclSet->size());
+    atomDeclSetIt = atomDeclSet->begin();
+    atomDecl = atomDeclSetIt->get();
+    EXPECT_EQ(1, atomDecl->code);
+    fieldNumberToAnnotations = &atomDecl->fieldNumberToAnnotations;
+    fieldNumberToAnnotationsIt = fieldNumberToAnnotations->find(1);
+    EXPECT_NE(fieldNumberToAnnotations->end(), fieldNumberToAnnotationsIt);
+    annotationSet = &fieldNumberToAnnotationsIt->second;
+    EXPECT_EQ(1ul, annotationSet->size());
+    annotationSetIt = annotationSet->begin();
+    annotation = annotationSetIt->get();
+    EXPECT_EQ(ANNOTATION_ID_IS_UID, annotation->annotationId);
+    EXPECT_EQ(1, annotation->atomId);
+    EXPECT_EQ(ANNOTATION_TYPE_BOOL, annotation->type);
+    EXPECT_TRUE(annotation->value.boolValue);
+
+    atomDeclSetIt++;
+    atomDecl = atomDeclSetIt->get();
+    EXPECT_EQ(3, atomDecl->code);
+    fieldNumberToAnnotations = &atomDecl->fieldNumberToAnnotations;
+    fieldNumberToAnnotationsIt = fieldNumberToAnnotations->find(1);
+    EXPECT_NE(fieldNumberToAnnotations->end(), fieldNumberToAnnotationsIt);
+    annotationSet = &fieldNumberToAnnotationsIt->second;
+    EXPECT_EQ(1ul, annotationSet->size());
+    annotationSetIt = annotationSet->begin();
+    annotation = annotationSetIt->get();
+    EXPECT_EQ(ANNOTATION_ID_STATE_OPTION, annotation->annotationId);
+    EXPECT_EQ(3, annotation->atomId);
+    EXPECT_EQ(ANNOTATION_TYPE_INT, annotation->type);
+    EXPECT_EQ(os::statsd::StateField::EXCLUSIVE_STATE, annotation->value.intValue);
+
+    signatureInfoMapIt++;
+    signature = &signatureInfoMapIt->first;
+    fieldNumberToAtomDeclSet = &signatureInfoMapIt->second;
+    EXPECT_EQ(1ul, signature->size());
+    EXPECT_EQ(JAVA_TYPE_STRING, signature->at(0));
+    EXPECT_EQ(0ul, fieldNumberToAtomDeclSet->size());
 }
 
 TEST(CollationTest, RecognizeModule1Atom) {
@@ -295,31 +329,59 @@ TEST(CollationTest, RecognizeModule1Atom) {
     EXPECT_EQ(atoms.decls.size(), 2ul);
     EXPECT_EQ(atoms.signatureInfoMap.size(), 1u);
     EXPECT_MAP_CONTAINS_SIGNATURE(atoms.signatureInfoMap, JAVA_TYPE_INT);
-    for (auto signatureInfoMapIt : atoms.signatureInfoMap) {
-        vector<java_type_t> signature = signatureInfoMapIt.first;
-        const FieldNumberToAnnotations& fieldNumberToAnnotations = signatureInfoMapIt.second;
-        EXPECT_EQ(JAVA_TYPE_INT, signature[0]);
-        EXPECT_EQ(1u, fieldNumberToAnnotations.size());
-        int fieldNumber = 1;
-        EXPECT_NE(fieldNumberToAnnotations.end(), fieldNumberToAnnotations.find(fieldNumber));
-        const set<shared_ptr<Annotation>>& annotations = fieldNumberToAnnotations.at(fieldNumber);
-        EXPECT_EQ(2u, annotations.size());
-        for (const shared_ptr<Annotation> annotation : annotations) {
-            EXPECT_TRUE(annotation->annotationId == ANNOTATION_ID_IS_UID ||
-                        annotation->annotationId == ANNOTATION_ID_STATE_OPTION);
-            if (ANNOTATION_ID_IS_UID == annotation->annotationId) {
-                EXPECT_EQ(1, annotation->atomId);
-                EXPECT_EQ(ANNOTATION_TYPE_BOOL, annotation->type);
-                EXPECT_TRUE(annotation->value.boolValue);
-            }
 
-            if (ANNOTATION_ID_STATE_OPTION == annotation->annotationId) {
-                EXPECT_EQ(3, annotation->atomId);
-                EXPECT_EQ(ANNOTATION_TYPE_INT, annotation->type);
-                EXPECT_EQ(os::statsd::StateField::EXCLUSIVE_STATE, annotation->value.intValue);
-            }
-        }
-    }
+    SignatureInfoMap::const_iterator signatureInfoMapIt;
+    const vector<java_type_t>* signature;
+    const FieldNumberToAtomDeclSet* fieldNumberToAtomDeclSet;
+    FieldNumberToAtomDeclSet::const_iterator fieldNumberToAtomDeclSetIt;
+    const AtomDeclSet* atomDeclSet;
+    AtomDeclSet::const_iterator atomDeclSetIt;
+    AtomDecl* atomDecl;
+    FieldNumberToAnnotations* fieldNumberToAnnotations;
+    FieldNumberToAnnotations::const_iterator fieldNumberToAnnotationsIt;
+    const AnnotationSet* annotationSet;
+    AnnotationSet::const_iterator annotationSetIt;
+    Annotation* annotation;
+
+    signatureInfoMapIt = atoms.signatureInfoMap.begin();
+    signature = &(signatureInfoMapIt->first);
+    fieldNumberToAtomDeclSet = &signatureInfoMapIt->second;
+    EXPECT_EQ(1ul, signature->size());
+    EXPECT_EQ(JAVA_TYPE_INT, signature->at(0));
+    EXPECT_EQ(1ul, fieldNumberToAtomDeclSet->size());
+    fieldNumberToAtomDeclSetIt = fieldNumberToAtomDeclSet->begin();
+    EXPECT_EQ(1, fieldNumberToAtomDeclSetIt->first);
+    atomDeclSet = &fieldNumberToAtomDeclSetIt->second;
+    EXPECT_EQ(2ul, atomDeclSet->size());
+    atomDeclSetIt = atomDeclSet->begin();
+    atomDecl = atomDeclSetIt->get();
+    EXPECT_EQ(1, atomDecl->code);
+    fieldNumberToAnnotations = &atomDecl->fieldNumberToAnnotations;
+    fieldNumberToAnnotationsIt = fieldNumberToAnnotations->find(1);
+    EXPECT_NE(fieldNumberToAnnotations->end(), fieldNumberToAnnotationsIt);
+    annotationSet = &fieldNumberToAnnotationsIt->second;
+    EXPECT_EQ(1ul, annotationSet->size());
+    annotationSetIt = annotationSet->begin();
+    annotation = annotationSetIt->get();
+    EXPECT_EQ(ANNOTATION_ID_IS_UID, annotation->annotationId);
+    EXPECT_EQ(1, annotation->atomId);
+    EXPECT_EQ(ANNOTATION_TYPE_BOOL, annotation->type);
+    EXPECT_TRUE(annotation->value.boolValue);
+
+    atomDeclSetIt++;
+    atomDecl = atomDeclSetIt->get();
+    EXPECT_EQ(3, atomDecl->code);
+    fieldNumberToAnnotations = &atomDecl->fieldNumberToAnnotations;
+    fieldNumberToAnnotationsIt = fieldNumberToAnnotations->find(1);
+    EXPECT_NE(fieldNumberToAnnotations->end(), fieldNumberToAnnotationsIt);
+    annotationSet = &fieldNumberToAnnotationsIt->second;
+    EXPECT_EQ(1ul, annotationSet->size());
+    annotationSetIt = annotationSet->begin();
+    annotation = annotationSetIt->get();
+    EXPECT_EQ(ANNOTATION_ID_STATE_OPTION, annotation->annotationId);
+    EXPECT_EQ(3, annotation->atomId);
+    EXPECT_EQ(ANNOTATION_TYPE_INT, annotation->type);
+    EXPECT_EQ(os::statsd::StateField::EXCLUSIVE_STATE, annotation->value.intValue);
 }
 
 }  // namespace stats_log_api_gen

@@ -19,6 +19,7 @@ import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.media.MediaCodec.CryptoInfo;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -386,7 +387,7 @@ public final class MediaParser {
         /**
          * Called once all the data of a sample has been passed to {@link #onSampleDataFound}.
          *
-         * <p>Also includes sample metadata, like presentation timestamp and flags.
+         * <p>Includes sample metadata, like presentation timestamp and flags.
          *
          * @param trackIndex The index of the track to which the sample corresponds.
          * @param timeMicros The media timestamp associated with the sample, in microseconds.
@@ -396,8 +397,10 @@ public final class MediaParser {
          * @param offset The number of bytes that have been consumed by {@code
          *     onSampleDataFound(int, MediaParser.InputReader)} for the specified track, since the
          *     last byte belonging to the sample whose metadata is being passed.
-         * @param cryptoData Encryption data required to decrypt the sample. May be null for
-         *     unencrypted samples.
+         * @param cryptoInfo Encryption data required to decrypt the sample. May be null for
+         *     unencrypted samples. MediaParser may reuse {@link CryptoInfo} instances to avoid
+         *     allocations, so implementations of this method must not write to or keep reference to
+         *     the fields of this parameter.
          */
         void onSampleCompleted(
                 int trackIndex,
@@ -405,7 +408,7 @@ public final class MediaParser {
                 int flags,
                 int size,
                 int offset,
-                @Nullable MediaCodec.CryptoInfo cryptoData);
+                @Nullable CryptoInfo cryptoInfo);
     }
 
     /**
@@ -1404,7 +1407,7 @@ public final class MediaParser {
         return null;
     }
 
-    private static MediaCodec.CryptoInfo toCryptoInfo(TrackOutput.CryptoData encryptionData) {
+    private static CryptoInfo toCryptoInfo(TrackOutput.CryptoData encryptionData) {
         // TODO: Implement.
         return null;
     }

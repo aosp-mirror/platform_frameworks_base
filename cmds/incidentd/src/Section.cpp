@@ -755,7 +755,7 @@ status_t TombstoneSection::BlockingCall(unique_fd& pipeWriteFd) const {
         if (stat(link_name, &fileStat) != OK) {
             continue;
         }
-        size_t exe_name_len = readlink(link_name, exe_name, EXE_NAME_LEN);
+        ssize_t exe_name_len = readlink(link_name, exe_name, EXE_NAME_LEN);
         if (exe_name_len < 0 || exe_name_len >= EXE_NAME_LEN) {
             ALOGE("[%s] Can't read '%s': %s", name.string(), link_name, strerror(errno));
             continue;

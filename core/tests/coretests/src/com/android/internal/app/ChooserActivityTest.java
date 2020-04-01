@@ -1330,8 +1330,15 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTestWithOtherProfile(3, /* userId */ 10);
         List<ResolvedComponentInfo> workResolvedComponentInfos =
                 createResolvedComponentsForTest(workProfileTargets);
+        when(sOverrides.workResolverListController.getUserStateIndependentResolversAsUser(
+                Mockito.isA(List.class),
+                Mockito.isA(UserHandle.class)))
+                .thenReturn(new ArrayList<>(workResolvedComponentInfos));
         sOverrides.isQuietModeEnabled = true;
-        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        // When work profile is disabled, we get 0 results when we query the work profile
+        // intents.
+        setupResolverControllers(personalResolvedComponentInfos,
+                /* workResolvedComponentInfos */ new ArrayList<>());
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType("TestType");
 
@@ -1348,7 +1355,7 @@ public class ChooserActivityTest {
     }
 
     @Test
-    public void testWorkTab_noWorkTargets_emptyStateShown() {
+    public void testWorkTab_noWorkAppsAvailable_emptyStateShown() {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
         markWorkProfileUserAvailable();
@@ -1362,6 +1369,57 @@ public class ChooserActivityTest {
 
         final ChooserWrapperActivity activity =
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
+        waitForIdle();
+        onView(withId(R.id.contentPanel))
+                .perform(swipeUp());
+        onView(withText(R.string.resolver_work_tab)).perform(click());
+        waitForIdle();
+
+        onView(withText(R.string.resolver_no_work_apps_available_share))
+                .check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testWorkTab_xProfileOff_noAppsAvailable_workOff_xProfileOffEmptyStateShown() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(0);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        sOverrides.isQuietModeEnabled = true;
+        sOverrides.hasCrossProfileIntents = false;
+        Intent sendIntent = createSendTextIntent();
+        sendIntent.setType("TestType");
+
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
+        waitForIdle();
+        onView(withId(R.id.contentPanel))
+                .perform(swipeUp());
+        onView(withText(R.string.resolver_work_tab)).perform(click());
+        waitForIdle();
+
+        onView(withText(R.string.resolver_cant_share_with_work_apps))
+                .check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testWorkTab_noAppsAvailable_workOff_noAppsAvailableEmptyStateShown() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(0);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        sOverrides.isQuietModeEnabled = true;
+        Intent sendIntent = createSendTextIntent();
+        sendIntent.setType("TestType");
+
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
         onView(withId(R.id.contentPanel))
                 .perform(swipeUp());

@@ -403,4 +403,20 @@ public abstract class ActivityManagerInternal {
      * Called by DevicePolicyManagerService to set the uid of the device owner.
      */
     public abstract void setDeviceOwnerUid(int uid);
+
+    /**
+     * Sends a broadcast, assuming the caller to be the system and allowing the inclusion of an
+     * approved whitelist of app Ids >= {@link android.os.Process#FIRST_APPLICATION_UID} that the
+     * broadcast my be sent to; any app Ids < {@link android.os.Process#FIRST_APPLICATION_UID} are
+     * automatically whitelisted.
+     *
+     * @see com.android.server.am.ActivityManagerService#broadcastIntentWithFeature(
+     *      IApplicationThread, String, Intent, String, IIntentReceiver, int, String, Bundle,
+     *      String[], int, Bundle, boolean, boolean, int)
+     */
+    public abstract int broadcastIntent(Intent intent,
+            IIntentReceiver resultTo,
+            String[] requiredPermissions, boolean serialized,
+            int userId, int[] appIdWhitelist);
+
 }

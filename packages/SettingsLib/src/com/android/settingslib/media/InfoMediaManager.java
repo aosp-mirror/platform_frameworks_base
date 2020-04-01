@@ -52,7 +52,6 @@ public class InfoMediaManager extends MediaManager {
 
     private static final String TAG = "InfoMediaManager";
     private static final boolean DEBUG = false;
-
     @VisibleForTesting
     final RouterManagerCallback mMediaRouterCallback = new RouterManagerCallback();
     @VisibleForTesting
@@ -138,14 +137,10 @@ public class InfoMediaManager extends MediaManager {
     }
 
     private RoutingSessionInfo getRoutingSessionInfo() {
-        for (RoutingSessionInfo info : mRouterManager.getRoutingSessions(mPackageName)) {
-            if (TextUtils.equals(info.getClientPackageName(), mPackageName)) {
-                return info;
-            }
-        }
+        final List<RoutingSessionInfo> sessionInfos =
+                mRouterManager.getRoutingSessions(mPackageName);
 
-        Log.w(TAG, "RoutingSessionInfo() cannot found match packagename : " + mPackageName);
-        return null;
+        return sessionInfos.get(sessionInfos.size() - 1);
     }
 
     /**
@@ -181,10 +176,7 @@ public class InfoMediaManager extends MediaManager {
             return false;
         }
 
-
-        final List<RoutingSessionInfo> sessionInfos =
-                mRouterManager.getRoutingSessions(mPackageName);
-        final RoutingSessionInfo sessionInfo = sessionInfos.get(sessionInfos.size() - 1);
+        final RoutingSessionInfo sessionInfo = getRoutingSessionInfo();
 
         if (sessionInfo != null) {
             mRouterManager.releaseSession(sessionInfo);
@@ -346,7 +338,8 @@ public class InfoMediaManager extends MediaManager {
     private void buildAllRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAllRoutes()) {
             if (DEBUG) {
-                Log.d(TAG, "buildAllRoutes() route : " + route.getName());
+                Log.d(TAG, "buildAllRoutes() route : " + route.getName() + ", volume : "
+                        + route.getVolume());
             }
             if (route.isSystemRoute()) {
                 addMediaDevice(route);
@@ -375,7 +368,7 @@ public class InfoMediaManager extends MediaManager {
                 mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
                         mPackageName);
                 if (!TextUtils.isEmpty(mPackageName)
-                        && TextUtils.equals(route.getClientPackageName(), mPackageName)
+                        && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())
                         && mCurrentConnectedDevice == null) {
                     mCurrentConnectedDevice = mediaDevice;
                 }
@@ -422,18 +415,7 @@ public class InfoMediaManager extends MediaManager {
 
         @Override
         public void onRoutesChanged(List<MediaRoute2Info> routes) {
-            mMediaDevices.clear();
-            mCurrentConnectedDevice = null;
-            if (TextUtils.isEmpty(mPackageName)) {
-                buildAllRoutes();
-            } else {
-                buildAvailableRoutes();
-            }
-
-            final String id = mCurrentConnectedDevice != null
-                    ? mCurrentConnectedDevice.getId()
-                    : null;
-            dispatchConnectedDeviceChanged(id);
+            refreshDevices();
         }
 
         @Override
@@ -447,6 +429,18 @@ public class InfoMediaManager extends MediaManager {
                 Log.d(TAG, "onTransferred() oldSession : " + oldSession.getName()
                         + ", newSession : " + newSession.getName());
             }
+            mMediaDevices.clear();
+            mCurrentConnectedDevice = null;
+            if (TextUtils.isEmpty(mPackageName)) {
+                buildAllRoutes();
+            } else {
+                buildAvailableRoutes();
+            }
+
+            final String id = mCurrentConnectedDevice != null
+                    ? mCurrentConnectedDevice.getId()
+                    : null;
+            dispatchConnectedDeviceChanged(id);
         }
 
         @Override

@@ -3496,6 +3496,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final DisplayContent display = getChildAt(i);
             display.dump(pw, prefix, true /* dumpAll */);
         }
+        pw.println();
     }
 
     /**

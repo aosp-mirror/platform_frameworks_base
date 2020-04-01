@@ -360,7 +360,7 @@ public class UserSwitcherController implements Dumpable {
         if (record.isGuest && record.info == null) {
             // No guest user. Create one.
             UserInfo guest = mUserManager.createGuest(
-                    mContext, mContext.getString(R.string.guest_nickname));
+                    mContext, mContext.getString(com.android.settingslib.R.string.guest_nickname));
             if (guest == null) {
                 // Couldn't create guest, most likely because there already exists one, we just
                 // haven't reloaded the user list yet.
@@ -583,7 +583,7 @@ public class UserSwitcherController implements Dumpable {
         if (mUsers.isEmpty()) return null;
         UserRecord item = mUsers.get(0);
         if (item == null || item.info == null) return null;
-        if (item.isGuest) return context.getString(R.string.guest_nickname);
+        if (item.isGuest) return context.getString(com.android.settingslib.R.string.guest_nickname);
         return item.info.name;
     }
 
@@ -671,10 +671,11 @@ public class UserSwitcherController implements Dumpable {
         public String getName(Context context, UserRecord item) {
             if (item.isGuest) {
                 if (item.isCurrent) {
-                    return context.getString(R.string.guest_exit_guest);
+                    return context.getString(com.android.settingslib.R.string.guest_exit_guest);
                 } else {
                     return context.getString(
-                            item.info == null ? R.string.guest_new_guest : R.string.guest_nickname);
+                            item.info == null ? com.android.settingslib.R.string.guest_new_guest
+                                    : com.android.settingslib.R.string.guest_nickname);
                 }
             } else if (item.isAddUser) {
                 return context.getString(R.string.user_add_user);

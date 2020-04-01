@@ -4,9 +4,14 @@ android_app {
     resource_dirs: ["res"],
     srcs: ["src/**/*.java"],
     sdk_version: "system_current",
-
+    certificate: ":com.android.hotspot2.osulogin.certificate",
     apex_available: [
         "com.android.wifi",
         "test_com.android.wifi",
     ],
+}
+
+android_app_certificate {
+    name: "com.android.hotspot2.osulogin.certificate",
+    certificate: "certs/com.android.hotspot2.osulogin"
 }
