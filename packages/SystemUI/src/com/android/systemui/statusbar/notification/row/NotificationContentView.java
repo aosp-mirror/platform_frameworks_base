@@ -1468,27 +1468,27 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void showAppOpsIcons(ArraySet<Integer> activeOps) {
-        if (mContractedChild != null && mContractedWrapper.getNotificationHeader() != null) {
-            mContractedWrapper.getNotificationHeader().showAppOpsIcons(activeOps);
+        if (mContractedChild != null) {
+            mContractedWrapper.showAppOpsIcons(activeOps);
         }
-        if (mExpandedChild != null && mExpandedWrapper.getNotificationHeader() != null) {
-            mExpandedWrapper.getNotificationHeader().showAppOpsIcons(activeOps);
+        if (mExpandedChild != null) {
+            mExpandedWrapper.showAppOpsIcons(activeOps);
         }
-        if (mHeadsUpChild != null && mHeadsUpWrapper.getNotificationHeader() != null) {
-            mHeadsUpWrapper.getNotificationHeader().showAppOpsIcons(activeOps);
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.showAppOpsIcons(activeOps);
         }
     }
 
     /** Sets whether the notification being displayed audibly alerted the user. */
     public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
-        if (mContractedChild != null && mContractedWrapper.getNotificationHeader() != null) {
-            mContractedWrapper.getNotificationHeader().setRecentlyAudiblyAlerted(audiblyAlerted);
+        if (mContractedChild != null) {
+            mContractedWrapper.setRecentlyAudiblyAlerted(audiblyAlerted);
         }
-        if (mExpandedChild != null && mExpandedWrapper.getNotificationHeader() != null) {
-            mExpandedWrapper.getNotificationHeader().setRecentlyAudiblyAlerted(audiblyAlerted);
+        if (mExpandedChild != null) {
+            mExpandedWrapper.setRecentlyAudiblyAlerted(audiblyAlerted);
         }
-        if (mHeadsUpChild != null && mHeadsUpWrapper.getNotificationHeader() != null) {
-            mHeadsUpWrapper.getNotificationHeader().setRecentlyAudiblyAlerted(audiblyAlerted);
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.setRecentlyAudiblyAlerted(audiblyAlerted);
         }
     }
 
