@@ -17664,7 +17664,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             proc.setReportedForegroundServiceTypes(fgServiceTypes);
             ProcessChangeItem item = enqueueProcessChangeItemLocked(proc.pid, proc.info.uid);
-            item.changes = ProcessChangeItem.CHANGE_FOREGROUND_SERVICES;
+            item.changes |= ProcessChangeItem.CHANGE_FOREGROUND_SERVICES;
             item.foregroundServiceTypes = fgServiceTypes;
 
             if (oomAdj) {
