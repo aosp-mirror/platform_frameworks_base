@@ -31,7 +31,7 @@ import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.window.WindowOrganizer.DisplayAreaOrganizer.FEATURE_TASK_CONTAINER;
+import static android.window.DisplayAreaOrganizer.FEATURE_TASK_CONTAINER;
 
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
@@ -1183,7 +1183,8 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         for (int i = mTmpTasks.size() - 1; i >= 0; i--) {
             final Task root = mTmpTasks.get(i);
             for (int j = 0; j < root.getChildCount(); j++) {
-                wct.reparent(root.getChildAt(j).mRemoteToken, null, true /* toTop */);
+                wct.reparent(root.getChildAt(j).mRemoteToken.toWindowContainerToken(),
+                        null, true /* toTop */);
             }
         }
         mAtmService.mWindowOrganizerController.applyTransaction(wct);

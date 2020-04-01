@@ -2346,7 +2346,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         stack.getBounds(info.bounds);
         info.displayId = taskDisplayArea != null ? taskDisplayArea.getDisplayId() : INVALID_DISPLAY;
         info.stackId = stack.mTaskId;
-        info.stackToken = stack.mRemoteToken;
+        info.stackToken = stack.mRemoteToken.toWindowContainerToken();
         info.userId = stack.mCurrentUser;
         info.visible = stack.shouldBeVisible(null);
         // A stack might be not attached to a display.
