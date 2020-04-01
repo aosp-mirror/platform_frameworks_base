@@ -43,7 +43,6 @@ import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.StateMachine;
 
 import java.util.HashMap;
@@ -591,7 +590,9 @@ public class UpstreamNetworkMonitor {
         // Map from type to transports.
         final int notFound = -1;
         final int transport = sLegacyTypeToTransport.get(type, notFound);
-        Preconditions.checkArgument(transport != notFound, "unknown legacy type: " + type);
+        if (transport == notFound) {
+            throw new IllegalArgumentException("unknown legacy type: " + type);
+        }
         builder.addTransportType(transport);
 
         if (type == TYPE_MOBILE_DUN) {
