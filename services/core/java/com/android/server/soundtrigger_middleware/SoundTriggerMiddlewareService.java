@@ -71,7 +71,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
      */
     private SoundTriggerMiddlewareService(@NonNull ISoundTriggerMiddlewareInternal delegate) {
         mDelegate = Objects.requireNonNull(delegate);
-        new ExternalCaptureStateTracker("media.audio_policy", active -> {
+        new ExternalCaptureStateTracker(active -> {
             try {
                 mDelegate.setCaptureState(active);
             } catch (RemoteException e) {
