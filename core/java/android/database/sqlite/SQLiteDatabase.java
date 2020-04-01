@@ -1066,6 +1066,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
             throws SQLException {
         Objects.requireNonNull(sql);
 
+        // Copy arguments to ensure that the caller doesn't accidentally change
+        // the values used by future connections
+        bindArgs = DatabaseUtils.deepCopyOf(bindArgs);
+
         synchronized (mLock) {
             throwIfNotOpenLocked();
 
