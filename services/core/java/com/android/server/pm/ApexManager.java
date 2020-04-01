@@ -207,7 +207,14 @@ abstract class ApexManager {
      *
      * @return {@code true} upon success, {@code false} if any remote exception occurs
      */
-    abstract boolean abortActiveSession();
+    abstract boolean revertActiveSessions();
+
+    /**
+     * Abandons the staged session with the given sessionId.
+     *
+     * @return {@code true} upon success, {@code false} if any remote exception occurs
+     */
+    abstract boolean abortStagedSession(int sessionId) throws PackageManagerException;
 
     /**
      * Uninstalls given {@code apexPackage}.
@@ -489,13 +496,31 @@ abstract class ApexManager {
         }
 
         @Override
-        boolean abortActiveSession() {
+        boolean revertActiveSessions() {
             try {
-                mApexService.abortActiveSession();
+                mApexService.revertActiveSessions();
                 return true;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
                 return false;
+            } catch (Exception e) {
+                Slog.e(TAG, e.getMessage(), e);
+                return false;
+            }
+        }
+
+        @Override
+        boolean abortStagedSession(int sessionId) throws PackageManagerException {
+            try {
+                mApexService.abortStagedSession(sessionId);
+                return true;
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Unable to contact apexservice", re);
+                return false;
+            } catch (Exception e) {
+                throw new PackageManagerException(
+                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        "Failed to abort staged session : " + e.getMessage());
             }
         }
 
@@ -569,12 +594,12 @@ abstract class ApexManager {
                         ipw.println("State: ACTIVATION FAILED");
                     } else if (si.isSuccess) {
                         ipw.println("State: SUCCESS");
-                    } else if (si.isRollbackInProgress) {
-                        ipw.println("State: ROLLBACK IN PROGRESS");
-                    } else if (si.isRolledBack) {
-                        ipw.println("State: ROLLED BACK");
-                    } else if (si.isRollbackFailed) {
-                        ipw.println("State: ROLLBACK FAILED");
+                    } else if (si.isRevertInProgress) {
+                        ipw.println("State: REVERT IN PROGRESS");
+                    } else if (si.isReverted) {
+                        ipw.println("State: REVERTED");
+                    } else if (si.isRevertFailed) {
+                        ipw.println("State: REVERT FAILED");
                     }
                     ipw.decreaseIndent();
                 }
@@ -682,7 +707,12 @@ abstract class ApexManager {
         }
 
         @Override
-        boolean abortActiveSession() {
+        boolean revertActiveSessions() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        boolean abortStagedSession(int sessionId) throws PackageManagerException {
             throw new UnsupportedOperationException();
         }
 
