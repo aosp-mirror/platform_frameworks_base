@@ -75,6 +75,7 @@ public class WindowAnimator {
      * vsync-app and then schedule the animation tick at the right time (vsync-sf).
      */
     private boolean mAnimationFrameCallbackScheduled;
+    boolean mNotifyWhenNoAnimation = false;
 
     /**
      * A list of runnable that need to be run after {@link WindowContainer#prepareSurfaces} is
@@ -97,6 +98,9 @@ public class WindowAnimator {
             synchronized (mService.mGlobalLock) {
                 mAnimationFrameCallbackScheduled = false;
                 animate(frameTimeNs);
+                if (mNotifyWhenNoAnimation && !mLastRootAnimating) {
+                    mService.mGlobalLock.notifyAll();
+                }
             }
         };
     }
