@@ -1669,8 +1669,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void showAppOpsIcons(ArraySet<Integer> activeOps) {
-        if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
-            mChildrenContainer.getHeaderView().showAppOpsIcons(activeOps);
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.showAppOpsIcons(activeOps);
         }
         mPrivateLayout.showAppOpsIcons(activeOps);
         mPublicLayout.showAppOpsIcons(activeOps);
@@ -1697,8 +1697,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private final Runnable mExpireRecentlyAlertedFlag = () -> applyAudiblyAlertedRecently(false);
 
     private void applyAudiblyAlertedRecently(boolean audiblyAlertedRecently) {
-        if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
-            mChildrenContainer.getHeaderView().setRecentlyAudiblyAlerted(audiblyAlertedRecently);
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
         }
         mPrivateLayout.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
         mPublicLayout.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
