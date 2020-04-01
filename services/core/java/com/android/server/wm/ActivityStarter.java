@@ -341,7 +341,6 @@ class ActivityStarter {
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
         boolean allowBackgroundActivityStart;
-        boolean isDream;
 
         /**
          * If set to {@code true}, allows this activity start to look into
@@ -393,7 +392,6 @@ class ActivityStarter {
             filterCallingUid = UserHandle.USER_NULL;
             originatingPendingIntent = null;
             allowBackgroundActivityStart = false;
-            isDream = false;
         }
 
         /**
@@ -434,7 +432,6 @@ class ActivityStarter {
             filterCallingUid = request.filterCallingUid;
             originatingPendingIntent = request.originatingPendingIntent;
             allowBackgroundActivityStart = request.allowBackgroundActivityStart;
-            isDream = request.isDream;
         }
 
         /**
@@ -985,7 +982,7 @@ class ActivityStarter {
                 restrictedBgActivity = shouldAbortBackgroundActivityStart(callingUid,
                         callingPid, callingPackage, realCallingUid, realCallingPid, callerApp,
                         request.originatingPendingIntent, request.allowBackgroundActivityStart,
-                        request.isDream, intent);
+                        intent);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             }
@@ -1195,7 +1192,7 @@ class ActivityStarter {
     boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
             final String callingPackage, int realCallingUid, int realCallingPid,
             WindowProcessController callerApp, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart, boolean isDream, Intent intent) {
+            boolean allowBackgroundActivityStart, Intent intent) {
         // don't abort for the most important UIDs
         final int callingAppId = UserHandle.getAppId(callingUid);
         if (callingUid == Process.ROOT_UID || callingAppId == Process.SYSTEM_UID
@@ -1203,10 +1200,6 @@ class ActivityStarter {
             return false;
         }
 
-        // don't abort if this is the dream activity
-        if (isDream) {
-            return false;
-        }
         // don't abort if the callingUid has a visible window or is a persistent system process
         final int callingUidProcState = mService.getUidState(callingUid);
         final boolean callingUidHasAnyVisibleWindow =
@@ -2714,11 +2707,6 @@ class ActivityStarter {
 
     ActivityStarter setAllowBackgroundActivityStart(boolean allowBackgroundActivityStart) {
         mRequest.allowBackgroundActivityStart = allowBackgroundActivityStart;
-        return this;
-    }
-
-    ActivityStarter setIsDream(boolean isDream) {
-        mRequest.isDream = isDream;
         return this;
     }
 
