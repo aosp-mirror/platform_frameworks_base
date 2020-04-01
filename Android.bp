@@ -1170,7 +1170,7 @@ filegroup {
 // into wifi-service
 java_library {
     name: "framework-wifi-util-lib",
-    sdk_version: "core_current",
+    sdk_version: "module_current",
     srcs: [
         "core/java/android/content/pm/BaseParceledListSlice.java",
         "core/java/android/content/pm/ParceledListSlice.java",
@@ -1186,7 +1186,6 @@ java_library {
     libs: [
         "framework-annotations-lib",
         "unsupportedappusage",
-        "android_system_stubs_current",
     ],
     visibility: ["//frameworks/base/wifi"],
 }
