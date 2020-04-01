@@ -102,10 +102,6 @@ public class PackageParserLegacyCoreTest {
         }
     }
 
-    private PackageParser2 makeParser() {
-        return new PackageParser2(null, false, null, null, null);
-    }
-
     @Test
     public void testComputeMinSdkVersion_preReleasePlatform() {
         // Do allow older release minSdkVersion on pre-release platform.
@@ -357,8 +353,8 @@ public class PackageParserLegacyCoreTest {
         File outFile = null;
         try {
             outFile = copyRawResourceToFile(apkFileName, apkResourceId);
-            return converter.apply(
-                    makeParser().parsePackage(outFile, 0 /* flags */, false));
+            return converter.apply(new TestPackageParser2()
+                    .parsePackage(outFile, 0 /* flags */, false));
         } finally {
             if (outFile != null) {
                 outFile.delete();
