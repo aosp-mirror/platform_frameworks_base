@@ -379,8 +379,10 @@ public class FaceService extends BiometricServiceBase {
             checkPermission(MANAGE_BIOMETRIC);
             updateActiveGroup(userId, opPackageName);
 
-            mNotificationManager.cancelAsUser(NOTIFICATION_TAG, NOTIFICATION_ID,
-                    UserHandle.CURRENT);
+            mHandler.post(() -> {
+                mNotificationManager.cancelAsUser(NOTIFICATION_TAG, NOTIFICATION_ID,
+                        UserHandle.CURRENT);
+            });
 
             final boolean restricted = isRestricted();
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
