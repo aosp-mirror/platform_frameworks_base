@@ -1182,8 +1182,8 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
             success = false;
             break;
         }
-        android::base::unique_fd writeFd(mIncFs->openWrite(ifs->control, libFileId));
-        if (writeFd < 0) {
+        const auto writeFd = mIncFs->openForSpecialOps(ifs->control, libFileId);
+        if (!writeFd.ok()) {
             LOG(ERROR) << "Failed to open write fd for: " << targetLibPath << " errno: " << writeFd;
             success = false;
             break;
