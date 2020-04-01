@@ -43,6 +43,7 @@ import static com.android.server.wm.DisplayContent.alwaysCreateStack;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.RootWindowContainer.TAG_STATES;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
@@ -66,11 +67,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Window container class that contains all containers on this display relating to Apps.
- * I.e Activities.
+ * {@link DisplayArea} that represents a section of a screen that contains app window containers.
  */
-final class TaskContainers extends DisplayArea<ActivityStack> {
-    private DisplayContent mDisplayContent;
+final class TaskDisplayArea extends DisplayArea<ActivityStack> {
+    DisplayContent mDisplayContent;
     /**
      * A control placed at the appropriate level for transitions to occur.
      */
@@ -109,14 +109,14 @@ final class TaskContainers extends DisplayArea<ActivityStack> {
     private RootWindowContainer mRootWindowContainer;
 
     // When non-null, new tasks get put into this root task.
-    private Task mLaunchRootTask = null;
+    Task mLaunchRootTask = null;
 
     /**
      * A focusable stack that is purposely to be positioned at the top. Although the stack may not
      * have the topmost index, it is used as a preferred candidate to prevent being unable to resume
      * target stack properly when there are other focusable always-on-top stacks.
      */
-    private ActivityStack mPreferredTopFocusableStack;
+    ActivityStack mPreferredTopFocusableStack;
 
     private final RootWindowContainer.FindTaskResult
             mTmpFindTaskResult = new RootWindowContainer.FindTaskResult();
@@ -128,7 +128,7 @@ final class TaskContainers extends DisplayArea<ActivityStack> {
      */
     ActivityStack mLastFocusedStack;
 
-    TaskContainers(DisplayContent displayContent, WindowManagerService service) {
+    TaskDisplayArea(DisplayContent displayContent, WindowManagerService service) {
         super(service, Type.ANY, "TaskContainers", FEATURE_TASK_CONTAINER);
         mDisplayContent = displayContent;
         mRootWindowContainer = service.mRoot;
@@ -350,7 +350,7 @@ final class TaskContainers extends DisplayArea<ActivityStack> {
         int minPosition = POSITION_BOTTOM;
 
         if (stack.isAlwaysOnTop()) {
-            if (mDisplayContent.hasPinnedTask()) {
+            if (hasPinnedTask()) {
                 // Always-on-top stacks go below the pinned stack.
                 maxPosition = mDisplayContent.getStacks().indexOf(mRootPinnedTask) - 1;
             }
@@ -623,7 +623,8 @@ final class TaskContainers extends DisplayArea<ActivityStack> {
     }
 
     void addStack(ActivityStack stack, int position) {
-        mDisplayContent.setStackOnDisplay(stack, position);
+        if (DEBUG_STACK) Slog.d(TAG_WM, "Set stack=" + stack + " on taskDisplayArea=" + this);
+        addChild(stack, position);
         positionStackAt(stack, position);
     }
 
@@ -1334,6 +1335,10 @@ final class TaskContainers extends DisplayArea<ActivityStack> {
         return false;
     }
 
+    ActivityRecord topRunningActivity() {
+        return topRunningActivity(false /* considerKeyguardState */);
+    }
+
     /**
      * Returns the top running activity in the focused stack. In the case the focused stack has no
      * such activity, the next focusable stack on this display is returned.
@@ -1446,7 +1451,7 @@ final class TaskContainers extends DisplayArea<ActivityStack> {
         }
 
         final PooledPredicate p = PooledLambda.obtainPredicate(
-                TaskContainers::isHomeActivityForUser, PooledLambda.__(ActivityRecord.class),
+                TaskDisplayArea::isHomeActivityForUser, PooledLambda.__(ActivityRecord.class),
                 userId);
         final ActivityRecord r = homeStack.getActivity(p);
         p.recycle();
@@ -1529,5 +1534,27 @@ final class TaskContainers extends DisplayArea<ActivityStack> {
         } else {
             parent.positionChildAt(position, stack, false /* includingParents */);
         }
+    }
+
+    boolean hasPinnedTask() {
+        return getRootPinnedTask() != null;
+    }
+
+    /**
+     * @return the stack currently above the {@param stack}. Can be null if the {@param stack} is
+     *         already top-most.
+     */
+    static ActivityStack getStackAbove(ActivityStack stack) {
+        final WindowContainer wc = stack.getParent();
+        final int index = wc.mChildren.indexOf(stack) + 1;
+        return (index < wc.mChildren.size()) ? (ActivityStack) wc.mChildren.get(index) : null;
+    }
+
+    int getDisplayId() {
+        return mDisplayContent.getDisplayId();
+    }
+
+    boolean isRemoved() {
+        return mDisplayContent.isRemoved();
     }
 }

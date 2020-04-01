@@ -325,8 +325,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         mSupervisor.findTaskToMoveToFront(targetTask, 0, ActivityOptions.makeBasic(), reason,
                 false);
 
-        final TaskContainers taskContainers = display.mTaskContainers;
-        verify(taskContainers).moveHomeStackToFront(contains(reason));
+        final TaskDisplayArea taskDisplayArea = display.mTaskContainers;
+        verify(taskDisplayArea).moveHomeStackToFront(contains(reason));
     }
 
     /**
@@ -353,8 +353,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         mSupervisor.findTaskToMoveToFront(targetTask, 0, ActivityOptions.makeBasic(), reason,
                 false);
 
-        final TaskContainers taskContainers = display.mTaskContainers;
-        verify(taskContainers, never()).moveHomeStackToFront(contains(reason));
+        final TaskDisplayArea taskDisplayArea = display.mTaskContainers;
+        verify(taskDisplayArea, never()).moveHomeStackToFront(contains(reason));
     }
 
     /**
@@ -373,7 +373,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         // Assume the stack is not at the topmost position (e.g. behind always-on-top stacks) but it
         // is the current top focused stack.
-        assertFalse(targetStack.isTopStackOnDisplay());
+        assertFalse(targetStack.isTopStackInDisplayArea());
         doReturn(targetStack).when(mRootWindowContainer).getTopDisplayFocusedStack();
 
         // Use the stack as target to resume.
@@ -454,7 +454,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         activity.setState(ActivityState.RESUMED, "test");
 
         // Assume the stack is at the topmost position
-        assertTrue(targetStack.isTopStackOnDisplay());
+        assertTrue(targetStack.isTopStackInDisplayArea());
 
         // Use the stack as target to resume.
         mRootWindowContainer.resumeFocusedStacksTopActivities();
@@ -475,7 +475,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         display.mTaskContainers.positionStackAtBottom(targetStack);
 
         // Assume the stack is at the topmost position
-        assertFalse(targetStack.isTopStackOnDisplay());
+        assertFalse(targetStack.isTopStackInDisplayArea());
         doReturn(targetStack).when(mRootWindowContainer).getTopDisplayFocusedStack();
 
         // Use the stack as target to resume.
