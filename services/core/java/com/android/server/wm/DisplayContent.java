@@ -72,6 +72,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
@@ -268,8 +269,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             new NonAppWindowContainers("mOverlayContainers", mWmService);
 
     /** The containers below are the only child containers {@link #mWindowContainers} can have. */
-    // Contains all window containers that are related to apps (Activities)
-    final TaskDisplayArea mTaskContainers = new TaskDisplayArea(this, mWmService);
 
     // Contains all IME window containers. Note that the z-ordering of the IME windows will depend
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
@@ -971,7 +970,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         super.addChild(mOverlayContainers, null);
 
         mDisplayAreaPolicy = mWmService.mDisplayAreaPolicyProvider.instantiate(
-                mWmService, this, mRootDisplayArea, mImeWindowsContainers, mTaskContainers);
+                mWmService, this, mRootDisplayArea, mImeWindowsContainers);
         mWindowContainers.addChildren();
 
         // Sets the display content for the children.
@@ -2070,13 +2069,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     protected int getTaskDisplayAreaCount() {
-        // TODO(multi-display-area): Report actual display area count
-        return 1;
+        return mDisplayAreaPolicy.getTaskDisplayAreaCount();
     }
 
     protected TaskDisplayArea getTaskDisplayAreaAt(int index) {
-        // TODO(multi-display-area): Report actual display area values
-        return mTaskContainers;
+        return mDisplayAreaPolicy.getTaskDisplayAreaAt(index);
     }
 
     ActivityStack getStack(int rootTaskId) {
@@ -2402,7 +2399,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * or for cases when multi-instance is not supported yet (like Split-screen, PiP or Recents).
      */
     TaskDisplayArea getDefaultTaskDisplayArea() {
-        return mTaskContainers;
+        return mDisplayAreaPolicy.getTaskDisplayAreaAt(0);
     }
 
     @Override
