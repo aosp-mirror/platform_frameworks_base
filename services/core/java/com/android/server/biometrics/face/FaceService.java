@@ -1043,7 +1043,18 @@ public class FaceService extends BiometricServiceBase {
             for (int i = 0; i < cryptoToken.length; i++) {
                 token.add(cryptoToken[i]);
             }
-            return daemon.enroll(token, timeout, disabledFeatures);
+            android.hardware.biometrics.face.V1_1.IBiometricsFace daemon11 =
+                    android.hardware.biometrics.face.V1_1.IBiometricsFace.castFrom(
+                            daemon);
+            if (daemon11 != null) {
+                return daemon11.enroll_1_1(token, timeout, disabledFeatures,
+                        convertSurfaceToNativeHandle(surface));
+            } else if (surface == null) {
+                return daemon.enroll(token, timeout, disabledFeatures);
+            } else {
+                Slog.e(TAG, "enroll(): surface is only supported in @1.1 HAL");
+                return ERROR_ESRCH;
+            }
         }
 
         @Override
