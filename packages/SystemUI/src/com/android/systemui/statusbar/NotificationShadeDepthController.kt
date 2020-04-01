@@ -239,7 +239,7 @@ class NotificationShadeDepthController @Inject constructor(
         init {
             springAnimation.spring = SpringForce(0.0f)
             springAnimation.spring.dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
-            springAnimation.spring.stiffness = SpringForce.STIFFNESS_MEDIUM
+            springAnimation.spring.stiffness = SpringForce.STIFFNESS_HIGH
             springAnimation.addEndListener { _, _, _, _ -> pendingRadius = -1 }
         }
 
