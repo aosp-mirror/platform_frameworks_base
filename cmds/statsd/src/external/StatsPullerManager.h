@@ -120,7 +120,7 @@ public:
                                   const shared_ptr<IPullAtomCallback>& callback,
                                   bool useUid = false);
 
-    void UnregisterPullAtomCallback(const int uid, const int32_t atomTag);
+    void UnregisterPullAtomCallback(const int uid, const int32_t atomTag, bool useUids = false);
 
     std::map<const PullerKey, sp<StatsPuller>> kAllPullAtomInfo;
 
@@ -163,6 +163,15 @@ private:
     void updateAlarmLocked();
 
     int64_t mNextPullTimeNs;
+
+    // Death recipient that is triggered when the process holding the IPullAtomCallback has died.
+    ::ndk::ScopedAIBinder_DeathRecipient mPullAtomCallbackDeathRecipient;
+
+    /**
+     * Death recipient callback that is called when a pull atom callback dies.
+     * The cookie is a pointer to a PullAtomCallbackDeathCookie.
+     */
+    static void pullAtomCallbackDied(void* cookie);
 
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm);
