@@ -1065,6 +1065,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean onlyCore;
         public OverlayConfig overlayConfig;
         public PackageDexOptimizer packageDexOptimizer;
+        public PackageParser2.Callback packageParserCallback;
         public IPermissionManager permissionManagerService;
         public PendingPackageBroadcasts pendingPackageBroadcasts;
         public PackageManagerInternal pmInternal;
@@ -2779,6 +2780,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mOnlyCore = testParams.onlyCore;
         mOverlayConfig = testParams.overlayConfig;
         mPackageDexOptimizer = testParams.packageDexOptimizer;
+        mPackageParserCallback = testParams.packageParserCallback;
         mPendingBroadcasts = testParams.pendingPackageBroadcasts;
         mPermissionManagerService = testParams.permissionManagerService;
         mPmInternal = testParams.pmInternal;
