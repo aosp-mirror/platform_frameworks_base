@@ -48,19 +48,19 @@ public abstract class DisplayAreaPolicy {
      * @param content the display content for which the policy applies
      * @param root the root display area under which the policy operates
      * @param imeContainer the ime container that the policy must attach
-     * @param taskContainers the task container that the policy must attach
+     * @param taskDisplayArea the task container that the policy must attach
      *
      * @see #attachDisplayAreas()
      */
     protected DisplayAreaPolicy(WindowManagerService wmService,
             DisplayContent content, DisplayArea.Root root,
             DisplayArea<? extends WindowContainer> imeContainer,
-            DisplayArea<? extends ActivityStack> taskContainers) {
+            DisplayArea<? extends ActivityStack> taskDisplayArea) {
         mWmService = wmService;
         mContent = content;
         mRoot = root;
         mImeContainer = imeContainer;
-        mTaskContainers = taskContainers;
+        mTaskContainers = taskDisplayArea;
     }
 
     /**
@@ -86,9 +86,9 @@ public abstract class DisplayAreaPolicy {
         public DisplayAreaPolicy instantiate(WindowManagerService wmService,
                 DisplayContent content, DisplayArea.Root root,
                 DisplayArea<? extends WindowContainer> imeContainer,
-                TaskContainers taskContainers) {
+                TaskDisplayArea taskDisplayArea) {
             return new DisplayAreaPolicyBuilder()
-                    .build(wmService, content, root, imeContainer, taskContainers);
+                    .build(wmService, content, root, imeContainer, taskDisplayArea);
         }
     }
 
@@ -108,7 +108,7 @@ public abstract class DisplayAreaPolicy {
         DisplayAreaPolicy instantiate(WindowManagerService wmService,
                 DisplayContent content, DisplayArea.Root root,
                 DisplayArea<? extends WindowContainer> imeContainer,
-                TaskContainers taskContainers);
+                TaskDisplayArea taskDisplayArea);
 
         /**
          * Instantiate the device-specific {@link Provider}.

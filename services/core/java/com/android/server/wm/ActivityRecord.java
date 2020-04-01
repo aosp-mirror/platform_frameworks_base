@@ -2079,6 +2079,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
+    @Nullable
+    TaskDisplayArea getDisplayArea() {
+        return (TaskDisplayArea) super.getDisplayArea();
+    }
+
+    @Override
     boolean fillsParent() {
         return occludesParent();
     }
@@ -2232,8 +2238,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         boolean isKeyguardLocked = mAtmService.isKeyguardLocked();
         boolean isCurrentAppLocked =
                 mAtmService.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
-        final DisplayContent display = getDisplay();
-        boolean hasPinnedStack = display != null && display.hasPinnedTask();
+        final TaskDisplayArea taskDisplayArea = getDisplayArea();
+        boolean hasPinnedStack = taskDisplayArea != null && taskDisplayArea.hasPinnedTask();
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
         // is in an incorrect state
         boolean isNotLockedOrOnKeyguard = !isKeyguardLocked && !isCurrentAppLocked;
@@ -2500,11 +2506,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // and focused application if needed.
                     stack.adjustFocusToNextFocusableStack("finish-top");
                 } else {
-                    // Only move the next stack to top in its display.
-                    final DisplayContent display = stack.getDisplay();
-                    next = display.topRunningActivity();
+                    // Only move the next stack to top in its task container.
+                    final TaskDisplayArea taskDisplayArea = stack.getDisplayArea();
+                    next = taskDisplayArea.topRunningActivity();
                     if (next != null) {
-                        display.mTaskContainers.positionStackAtTop(next.getRootTask(),
+                        taskDisplayArea.positionStackAtTop(next.getRootTask(),
                                 false /* includingParents */, "finish-display-top");
                     }
                 }
@@ -2634,7 +2640,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Note that if this finishing activity is floating task, we don't need to wait the
         // next activity resume and can destroy it directly.
         // TODO(b/137329632): find the next activity directly underneath this one, not just anywhere
-        final ActivityRecord next = getDisplay().topRunningActivity(
+        final ActivityRecord next = getDisplayArea().topRunningActivity(
                 true /* considerKeyguardState */);
         // isNextNotYetVisible is to check if the next activity is invisible, or it has been
         // requested to be invisible but its windows haven't reported as invisible.  If so, it
@@ -2673,13 +2679,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mStackSupervisor.mStoppingActivities.remove(this);
 
         final ActivityStack stack = getRootTask();
-        final DisplayContent display = getDisplay();
+        final TaskDisplayArea taskDisplayArea = getDisplayArea();
         // TODO(b/137329632): Exclude current activity when looking for the next one with
         // DisplayContent#topRunningActivity().
-        final ActivityRecord next = display.topRunningActivity();
+        final ActivityRecord next = taskDisplayArea.topRunningActivity();
         final boolean isLastStackOverEmptyHome =
                 next == null && stack.isFocusedStackOnDisplay()
-                        && display.mTaskContainers.getOrCreateRootHomeTask() != null;
+                        && taskDisplayArea.getOrCreateRootHomeTask() != null;
         if (isLastStackOverEmptyHome) {
             // Don't destroy activity immediately if this is the last activity on the display and
             // the display contains home stack. Although there is no next activity at the moment,
@@ -4477,7 +4483,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // case where this is the top activity in a pinned stack.
         final boolean isTop = this == stack.getTopNonFinishingActivity();
         final boolean isTopNotPinnedStack = stack.isAttached()
-                && stack.getDisplay().mTaskContainers.isTopNotPinnedStack(stack);
+                && stack.getDisplayArea().isTopNotPinnedStack(stack);
         final boolean visibleIgnoringDisplayStatus = stack.checkKeyguardVisibility(this,
                 visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
 
@@ -5194,7 +5200,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // The activity may have been requested to be invisible (another activity has been launched)
         // so there is no valid info. But if it is the current top activity (e.g. sleeping), the
         // invalid state is still reported to make sure the waiting result is notified.
-        if (validInfo || this == mDisplayContent.topRunningActivity()) {
+        if (validInfo || this == getDisplayArea().topRunningActivity()) {
             mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
                     windowsDrawnDelayMs, launchState);
             mStackSupervisor.stopWaitingForActivityVisible(this, windowsDrawnDelayMs);

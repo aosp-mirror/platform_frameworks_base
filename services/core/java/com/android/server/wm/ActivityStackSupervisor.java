@@ -1788,7 +1788,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             if (prevStack != null) {
                 return prevStack;
             }
-            stack = stack.getDisplay().createStack(
+            stack = stack.getDisplayArea().createStack(
                     WINDOWING_MODE_FULLSCREEN, stack.getActivityType(), toTop);
         }
         return stack;
@@ -1878,7 +1878,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mStoppingActivities.remove(r);
 
         final ActivityStack stack = r.getRootTask();
-        if (stack.getDisplay().mTaskContainers.allResumedActivitiesComplete()) {
+        if (stack.getDisplayArea().allResumedActivitiesComplete()) {
             mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             // Make sure activity & window visibility should be identical
             // for all displays in this stage.
@@ -2242,7 +2242,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final boolean isSecondaryDisplayPreferred =
                 (preferredDisplayId != DEFAULT_DISPLAY && preferredDisplayId != INVALID_DISPLAY);
         final boolean inSplitScreenMode = actualStack != null
-                && actualStack.getDisplay().mTaskContainers.isSplitScreenModeActivated();
+                && actualStack.getDisplayArea().isSplitScreenModeActivated();
         if (((!inSplitScreenMode && preferredWindowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
                 && !isSecondaryDisplayPreferred) || !task.isActivityTypeStandardOrUndefined()) {
             return;
@@ -2289,14 +2289,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
-            final DisplayContent display = task.getStack().getDisplay();
-            if (display.mTaskContainers.isSplitScreenModeActivated()) {
+            final TaskDisplayArea taskDisplayArea = task.getDisplayArea();
+            if (taskDisplayArea.isSplitScreenModeActivated()) {
                 // Display a warning toast that we tried to put an app that doesn't support
                 // split-screen in split-screen.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                display.mTaskContainers.onSplitScreenModeDismissed();
-                display.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
+                taskDisplayArea.onSplitScreenModeDismissed();
+                taskDisplayArea.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
                         true /* notifyClients */);
             }
             return;
