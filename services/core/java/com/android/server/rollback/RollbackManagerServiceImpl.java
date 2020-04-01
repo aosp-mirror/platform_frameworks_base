@@ -159,6 +159,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private final Installer mInstaller;
     private final RollbackPackageHealthObserver mPackageHealthObserver;
     private final AppDataRollbackHelper mAppDataRollbackHelper;
+    private final Runnable mRunExpiration = this::runExpiration;
 
     // The # of milli-seconds to sleep for each received ACTION_PACKAGE_ENABLE_ROLLBACK.
     // Used by #blockRollbackManager to test timeout in enabling rollbacks.
@@ -574,6 +575,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             mRollbackLifetimeDurationInMillis = DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS;
         }
         Slog.d(TAG, "mRollbackLifetimeDurationInMillis=" + mRollbackLifetimeDurationInMillis);
+        runExpiration();
     }
 
     @AnyThread
@@ -699,6 +701,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     // Schedules future expiration as appropriate.
     @WorkerThread
     private void runExpiration() {
+        getHandler().removeCallbacks(mRunExpiration);
         assertInWorkerThread();
         Instant now = Instant.now();
         Instant oldest = null;
@@ -719,18 +722,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         if (oldest != null) {
-            scheduleExpiration(now.until(oldest.plusMillis(mRollbackLifetimeDurationInMillis),
-                        ChronoUnit.MILLIS));
+            long delay = now.until(
+                    oldest.plusMillis(mRollbackLifetimeDurationInMillis), ChronoUnit.MILLIS);
+            getHandler().postDelayed(mRunExpiration, delay);
         }
-    }
-
-    /**
-     * Schedules an expiration check to be run after the given duration in
-     * milliseconds has gone by.
-     */
-    @AnyThread
-    private void scheduleExpiration(long duration) {
-        getHandler().postDelayed(() -> runExpiration(), duration);
     }
 
     @AnyThread
@@ -1216,7 +1211,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // prepare to rollback if packages crashes too frequently.
         mPackageHealthObserver.startObservingHealth(rollback.getPackageNames(),
                 mRollbackLifetimeDurationInMillis);
-        scheduleExpiration(mRollbackLifetimeDurationInMillis);
+        runExpiration();
     }
 
     /*
