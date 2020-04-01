@@ -46,6 +46,9 @@ public class CachingIconView extends ImageView {
     private boolean mForceHidden;
     private int mDesiredVisibility;
     private Consumer<Integer> mOnVisibilityChangedListener;
+    private Consumer<Boolean> mOnForceHiddenChangedListener;
+    private int mIconColor;
+    private boolean mWillBeForceHidden;
 
     @UnsupportedAppUsage
     public CachingIconView(Context context, @Nullable AttributeSet attrs) {
@@ -184,10 +187,18 @@ public class CachingIconView extends ImageView {
 
     /**
      * Set the icon to be forcibly hidden, even when it's visibility is changed to visible.
+     * This is necessary since we still want to keep certain views hidden when their visibility
+     * is modified from other sources like the shelf.
      */
     public void setForceHidden(boolean forceHidden) {
-        mForceHidden = forceHidden;
-        updateVisibility();
+        if (forceHidden != mForceHidden) {
+            mForceHidden = forceHidden;
+            mWillBeForceHidden = false;
+            updateVisibility();
+            if (mOnForceHiddenChangedListener != null) {
+                mOnForceHiddenChangedListener.accept(forceHidden);
+            }
+        }
     }
 
     @Override
@@ -208,5 +219,39 @@ public class CachingIconView extends ImageView {
 
     public void setOnVisibilityChangedListener(Consumer<Integer> listener) {
         mOnVisibilityChangedListener = listener;
+    }
+
+    public void setOnForceHiddenChangedListener(Consumer<Boolean> listener) {
+        mOnForceHiddenChangedListener = listener;
+    }
+
+
+    public boolean isForceHidden() {
+        return mForceHidden;
+    }
+
+    @RemotableViewMethod
+    public void setOriginalIconColor(int color) {
+        mIconColor = color;
+    }
+
+    public int getOriginalIconColor() {
+        return mIconColor;
+    }
+
+    /**
+     * @return if the view will be forceHidden after an animation
+     */
+    public boolean willBeForceHidden() {
+        return mWillBeForceHidden;
+    }
+
+    /**
+     * Set that this view will be force hidden after an animation
+     *
+     * @param forceHidden if it will be forcehidden
+     */
+    public void setWillBeForceHidden(boolean forceHidden) {
+        mWillBeForceHidden = forceHidden;
     }
 }

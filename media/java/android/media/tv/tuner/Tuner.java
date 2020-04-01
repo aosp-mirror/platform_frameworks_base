@@ -906,6 +906,7 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(l, "OnRecordStatusChangedListener must not be null");
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
         DvrRecorder dvr = nativeOpenDvrRecorder(bufferSize);
+        dvr.setListener(executor, l);
         return dvr;
     }
 
@@ -928,6 +929,7 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(l, "OnPlaybackStatusChangedListener must not be null");
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
         DvrPlayback dvr = nativeOpenDvrPlayback(bufferSize);
+        dvr.setListener(executor, l);
         return dvr;
     }
 
