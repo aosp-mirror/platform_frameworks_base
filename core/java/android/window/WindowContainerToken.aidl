@@ -16,13 +16,4 @@
 
 package android.window;
 
-import android.window.WindowContainerToken;
-
-/**
- * Interface for WindowManager to delegate control of display areas.
- * {@hide}
- */
-oneway interface IDisplayAreaOrganizer {
-    void onDisplayAreaAppeared(in WindowContainerToken displayArea);
-    void onDisplayAreaVanished(in WindowContainerToken displayArea);
-}
+parcelable WindowContainerToken;

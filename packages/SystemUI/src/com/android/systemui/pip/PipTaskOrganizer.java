@@ -41,8 +41,8 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
 import android.view.SurfaceControl;
-import android.window.ITaskOrganizer;
-import android.window.IWindowContainer;
+import android.window.TaskOrganizer;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
@@ -60,7 +60,7 @@ import java.util.function.Consumer;
 /**
  * Manages PiP tasks such as resize and offset.
  *
- * This class listens on {@link ITaskOrganizer} callbacks for windowing mode change
+ * This class listens on {@link TaskOrganizer} callbacks for windowing mode change
  * both to and from PiP and issues corresponding animation if applicable.
  * Normally, we apply series of {@link SurfaceControl.Transaction} when the animator is running
  * and files a final {@link WindowContainerTransaction} at the end of the transition.
@@ -68,7 +68,7 @@ import java.util.function.Consumer;
  * This class is also responsible for general resize/offset PiP operations within SysUI component,
  * see also {@link com.android.systemui.pip.phone.PipMotionHelper}.
  */
-public class PipTaskOrganizer extends ITaskOrganizer.Stub {
+public class PipTaskOrganizer extends TaskOrganizer {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
 
     private static final int MSG_RESIZE_IMMEDIATE = 1;
@@ -182,7 +182,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     };
 
     private ActivityManager.RunningTaskInfo mTaskInfo;
-    private IWindowContainer mToken;
+    private WindowContainerToken mToken;
     private SurfaceControl mLeash;
     private boolean mInPip;
     private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
@@ -234,13 +234,9 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
      * @param animationDurationMs duration in millisecond for the exiting PiP transition
      */
     public void dismissPip(int animationDurationMs) {
-        try {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.setActivityWindowingMode(mToken, WINDOWING_MODE_FULLSCREEN);
-            WindowOrganizer.applyTransaction(wct);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to apply container transaction", e);
-        }
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setActivityWindowingMode(mToken, WINDOWING_MODE_FULLSCREEN);
+        WindowOrganizer.applyTransaction(wct);
         final Rect destinationBounds = mBoundsToRestore.remove(mToken.asBinder());
         scheduleAnimateResizePip(mLastReportedBounds, destinationBounds,
                 TRANSITION_DIRECTION_TO_FULLSCREEN, animationDurationMs,
@@ -258,11 +254,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         mTaskInfo = info;
         mToken = mTaskInfo.token;
         mInPip = true;
-        try {
-            mLeash = mToken.getLeash();
-        } catch (RemoteException e) {
-            throw new RuntimeException("Unable to get leash", e);
-        }
+        mLeash = mToken.getLeash();
+
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
         mBoundsToRestore.put(mToken.asBinder(), currentBounds);
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
@@ -290,8 +283,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
      */
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
-        IWindowContainer token = info.token;
-        Objects.requireNonNull(token, "Requires valid IWindowContainer");
+        WindowContainerToken token = info.token;
+        Objects.requireNonNull(token, "Requires valid WindowContainerToken");
         if (token.asBinder() != mToken.asBinder()) {
             Log.wtf(TAG, "Unrecognized token: " + token);
             return;
@@ -502,30 +495,26 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
                     + "directly");
         }
         mLastReportedBounds.set(destinationBounds);
-        try {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            final Rect taskBounds;
-            if (direction == TRANSITION_DIRECTION_TO_FULLSCREEN) {
-                // If we are animating to fullscreen, then we need to reset the override bounds
-                // on the task to ensure that the task "matches" the parent's bounds, this applies
-                // also to the final windowing mode, which should be reset to undefined rather than
-                // fullscreen.
-                taskBounds = null;
-                wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED)
-                        .setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
-            } else {
-                taskBounds = destinationBounds;
-            }
-            if (direction == TRANSITION_DIRECTION_TO_PIP) {
-                wct.scheduleFinishEnterPip(mToken, taskBounds);
-            } else {
-                wct.setBounds(mToken, taskBounds);
-            }
-            wct.setBoundsChangeTransaction(mToken, tx);
-            WindowOrganizer.applyTransaction(wct);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to apply container transaction", e);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        final Rect taskBounds;
+        if (direction == TRANSITION_DIRECTION_TO_FULLSCREEN) {
+            // If we are animating to fullscreen, then we need to reset the override bounds
+            // on the task to ensure that the task "matches" the parent's bounds, this applies
+            // also to the final windowing mode, which should be reset to undefined rather than
+            // fullscreen.
+            taskBounds = null;
+            wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED)
+                    .setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+        } else {
+            taskBounds = destinationBounds;
         }
+        if (direction == TRANSITION_DIRECTION_TO_PIP) {
+            wct.scheduleFinishEnterPip(mToken, taskBounds);
+        } else {
+            wct.setBounds(mToken, taskBounds);
+        }
+        wct.setBoundsChangeTransaction(mToken, tx);
+        WindowOrganizer.applyTransaction(wct);
     }
 
     private void animateResizePip(Rect currentBounds, Rect destinationBounds,

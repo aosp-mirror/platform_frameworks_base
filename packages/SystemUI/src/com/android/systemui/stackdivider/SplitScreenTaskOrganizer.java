@@ -22,7 +22,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.window.WindowOrganizer.TaskOrganizer;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
@@ -32,11 +31,11 @@ import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.window.ITaskOrganizer;
+import android.window.TaskOrganizer;
 
 import java.util.ArrayList;
 
-class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
+class SplitScreenTaskOrganizer extends TaskOrganizer {
     private static final String TAG = "SplitScreenTaskOrganizer";
     private static final boolean DEBUG = Divider.DEBUG;
 
@@ -56,8 +55,8 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     void init(SurfaceSession session) throws RemoteException {
-        TaskOrganizer.registerOrganizer(this, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        TaskOrganizer.registerOrganizer(this, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        registerOrganizer(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        registerOrganizer(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         try {
             mPrimary = TaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
                     WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
@@ -65,9 +64,9 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
                     WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
             mPrimarySurface = mPrimary.token.getLeash();
             mSecondarySurface = mSecondary.token.getLeash();
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             // teardown to prevent callbacks
-            TaskOrganizer.unregisterOrganizer(this);
+            unregisterOrganizer();
             throw e;
         }
         mSplitScreenSupported = true;
@@ -96,14 +95,6 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
 
     void releaseTransaction(SurfaceControl.Transaction t) {
         mDivider.mTransactionPool.release(t);
-    }
-
-    @Override
-    public void onTaskAppeared(RunningTaskInfo taskInfo) {
-    }
-
-    @Override
-    public void onTaskVanished(RunningTaskInfo taskInfo) {
     }
 
     @Override
