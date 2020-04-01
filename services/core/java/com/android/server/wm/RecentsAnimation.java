@@ -30,6 +30,7 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
+import static com.android.server.wm.TaskDisplayArea.getStackAbove;
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
@@ -180,8 +181,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         ActivityRecord targetActivity = getTargetActivity(targetStack);
         final boolean hasExistingActivity = targetActivity != null;
         if (hasExistingActivity) {
-            final DisplayContent display = targetActivity.getDisplay();
-            mRestoreTargetBehindStack = display.getStackAbove(targetStack);
+            final TaskDisplayArea taskDisplayArea = targetActivity.getDisplayArea();
+            mRestoreTargetBehindStack = getStackAbove(targetStack);
             if (mRestoreTargetBehindStack == null) {
                 notifyAnimationCancelBeforeStart(recentsAnimationRunner);
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
@@ -210,7 +211,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 // Move the recents activity into place for the animation if it is not top most
                 mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(targetStack);
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Moved stack=%s behind stack=%s",
-                        targetStack, mDefaultDisplay.getStackAbove(targetStack));
+                        targetStack, getStackAbove(targetStack));
 
                 // If there are multiple tasks in the target stack (ie. the home stack, with 3p
                 // and default launchers coexisting), then move the task to the top as a part of
@@ -229,7 +230,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 targetActivity = getTargetActivity(targetStack);
                 mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(targetStack);
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Moved stack=%s behind stack=%s",
-                        targetStack, mDefaultDisplay.getStackAbove(targetStack));
+                        targetStack, getStackAbove(targetStack));
 
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
                 mWindowManager.executeAppTransition();
@@ -351,12 +352,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         }
                     } else if (reorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION){
                         // Restore the target stack to its previous position
-                        final DisplayContent display = targetActivity.getDisplay();
-                        display.mTaskContainers.moveStackBehindStack(targetStack,
+                        final TaskDisplayArea taskDisplayArea = targetActivity.getDisplayArea();
+                        taskDisplayArea.moveStackBehindStack(targetStack,
                                 mRestoreTargetBehindStack);
                         if (WM_DEBUG_RECENTS_ANIMATIONS.isLogToAny()) {
-                            final ActivityStack aboveTargetStack =
-                                    mDefaultDisplay.getStackAbove(targetStack);
+                            final ActivityStack aboveTargetStack = getStackAbove(targetStack);
                             if (mRestoreTargetBehindStack != null
                                     && aboveTargetStack != mRestoreTargetBehindStack) {
                                 ProtoLog.w(WM_DEBUG_RECENTS_ANIMATIONS,
