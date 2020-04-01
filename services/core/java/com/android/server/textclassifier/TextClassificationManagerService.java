@@ -772,6 +772,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         @NonNull
         final TextClassifierServiceConnection mConnection;
         final boolean mIsTrusted;
+        @Context.BindServiceFlags
+        final int mBindServiceFlags;
         @NonNull
         @GuardedBy("mLock")
         final Queue<PendingRequest> mPendingRequests = new ArrayDeque<>();
@@ -786,11 +788,22 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         @GuardedBy("mLock")
         int mBoundServiceUid = Process.INVALID_UID;
 
-        private ServiceState(@UserIdInt int userId, String packageName, boolean isTrusted) {
+        private ServiceState(
+                @UserIdInt int userId, @NonNull String packageName, boolean isTrusted) {
             mUserId = userId;
             mPackageName = packageName;
             mConnection = new TextClassifierServiceConnection(mUserId);
             mIsTrusted = isTrusted;
+            mBindServiceFlags = createBindServiceFlags(packageName);
+        }
+
+        @Context.BindServiceFlags
+        private int createBindServiceFlags(@NonNull String packageName) {
+            int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
+            if (!packageName.equals(mDefaultTextClassifierPackage)) {
+                flags |= Context.BIND_RESTRICT_ASSOCIATIONS;
+            }
+            return flags;
         }
 
         @GuardedBy("mLock")
@@ -858,10 +871,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                         .setComponent(componentName);
                 Slog.d(LOG_TAG, "Binding to " + serviceIntent.getComponent());
                 willBind = mContext.bindServiceAsUser(
-                        serviceIntent, mConnection,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE
-                                | Context.BIND_RESTRICT_ASSOCIATIONS,
-                        UserHandle.of(mUserId));
+                        serviceIntent, mConnection, mBindServiceFlags, UserHandle.of(mUserId));
                 mBinding = willBind;
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -884,6 +894,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 pw.printPair("packageName", mPackageName);
                 pw.printPair("boundComponentName", mBoundComponentName);
                 pw.printPair("isTrusted", mIsTrusted);
+                pw.printPair("bindServiceFlags", mBindServiceFlags);
                 pw.printPair("boundServiceUid", mBoundServiceUid);
                 pw.printPair("binding", mBinding);
                 pw.printPair("numberRequests", mPendingRequests.size());
