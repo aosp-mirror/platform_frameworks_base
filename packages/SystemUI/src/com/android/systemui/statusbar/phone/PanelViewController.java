@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static java.lang.Float.isNaN;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -638,6 +640,9 @@ public abstract class PanelViewController {
     }
 
     public void setExpandedHeightInternal(float h) {
+        if (isNaN(h)) {
+            Log.wtf(TAG, "ExpandedHeight set to NaN");
+        }
         if (mExpandLatencyTracking && h != 0f) {
             DejankUtils.postAfterTraversal(
                     () -> mLatencyTracker.onActionEnd(LatencyTracker.ACTION_EXPAND_PANEL));
