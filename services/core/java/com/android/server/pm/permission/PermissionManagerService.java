@@ -2497,10 +2497,24 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         synchronized (mLock) {
             ArraySet<String> newImplicitPermissions = new ArraySet<>();
 
+            // TODO ntmyren: Remove once propagated to droidfood
+            int flagMask = PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED
+                    | PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED;
+            int user = UserHandle.getUserId(pkg.getUid());
+
             final int N = pkg.getRequestedPermissions().size();
             for (int i = 0; i < N; i++) {
                 final String permName = pkg.getRequestedPermissions().get(i);
                 final BasePermission bp = mSettings.getPermissionLocked(permName);
+
+                // TODO ntmyren: Remove once propagated to droidfood
+                if (bp != null && !bp.isRuntime()) {
+                    PermissionState permState = permissionsState.getInstallPermissionState(bp.name);
+                    if (permState == null || (permState.getFlags() & flagMask) != 0) {
+                        permissionsState.updatePermissionFlags(bp, user, flagMask, 0);
+                    }
+                }
+
                 final boolean appSupportsRuntimePermissions =
                         pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M;
                 String upgradedActivityRecognitionPermission = null;
