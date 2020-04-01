@@ -659,8 +659,8 @@ public class ConnectivityDiagnosticsManager {
     public abstract static class ConnectivityDiagnosticsCallback {
         /**
          * Called when the platform completes a data connectivity check. This will also be invoked
-         * immediately upon registration with the latest report, if a report has already been
-         * generated for this network.
+         * immediately upon registration for each network matching the request with the latest
+         * report, if a report has already been generated for that network.
          *
          * <p>The Network specified in the ConnectivityReport may not be active any more when this
          * method is invoked.
