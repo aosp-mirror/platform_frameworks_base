@@ -20,7 +20,6 @@ import static com.android.tests.rollback.host.WatchdogEventLogger.watchdogEventO
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.testng.Assert.assertThrows;
 
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
@@ -31,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Runs the network rollback tests.
@@ -83,11 +83,12 @@ public class NetworkStagedRollbackTest extends BaseHostJUnit4Test {
 
             // Verify rollback was enabled
             runPhase("testNetworkFailedRollback_Phase2");
-            assertThrows(AssertionError.class, () -> runPhase("testNetworkFailedRollback_Phase3"));
-
+            // Wait for reboot to happen
+            assertTrue(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5)));
+            // Wait for reboot to complete and device to become available
             getDevice().waitForDeviceAvailable();
             // Verify rollback was executed after health check deadline
-            runPhase("testNetworkFailedRollback_Phase4");
+            runPhase("testNetworkFailedRollback_Phase3");
 
             List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
             assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
