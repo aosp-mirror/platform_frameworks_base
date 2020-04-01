@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
@@ -197,6 +198,7 @@ public interface StatusBarPhoneModule {
             UserInfoControllerImpl userInfoControllerImpl,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
             KeyguardIndicationController keyguardIndicationController,
+            Lazy<NotificationShadeDepthController> notificationShadeDepthController,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
         return new StatusBar(
@@ -276,6 +278,7 @@ public interface StatusBarPhoneModule {
                 phoneStatusBarPolicy,
                 keyguardIndicationController,
                 dismissCallbackRegistry,
+                notificationShadeDepthController,
                 statusBarTouchableRegionManager);
     }
 }
