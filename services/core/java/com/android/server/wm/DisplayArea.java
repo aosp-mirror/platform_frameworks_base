@@ -21,9 +21,9 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
-import static android.window.WindowOrganizer.DisplayAreaOrganizer.FEATURE_ROOT;
-import static android.window.WindowOrganizer.DisplayAreaOrganizer.FEATURE_UNDEFINED;
-import static android.window.WindowOrganizer.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
+import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
+import static android.window.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
 
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.wm.DisplayAreaProto.NAME;

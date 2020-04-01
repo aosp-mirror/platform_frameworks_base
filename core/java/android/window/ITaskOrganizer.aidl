@@ -18,7 +18,7 @@ package android.window;
 
 import android.view.SurfaceControl;
 import android.app.ActivityManager;
-import android.window.IWindowContainer;
+import android.window.WindowContainerToken;
 
 /**
  * Interface for ActivityTaskManager/WindowManager to delegate control of tasks.
