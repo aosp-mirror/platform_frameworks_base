@@ -3333,12 +3333,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
         Trace.beginSection("StatusBar#updateDozingState");
 
-        boolean sleepingFromKeyguard =
-                mStatusBarKeyguardViewManager.isGoingToSleepVisibleNotOccluded();
+        boolean visibleNotOccluded = mStatusBarKeyguardViewManager.isShowing()
+                && !mStatusBarKeyguardViewManager.isOccluded();
         boolean wakeAndUnlock = mBiometricUnlockController.getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
         boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup() && !wakeAndUnlock)
-                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff() && sleepingFromKeyguard);
+                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff() && visibleNotOccluded);
 
         mNotificationPanelViewController.setDozing(mDozing, animate, mWakeUpTouchLocation);
         updateQsExpansionEnabled();
