@@ -31,12 +31,12 @@ import android.os.Debug
 import android.os.Environment
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.om.mockThrowOnUnmocked
+import com.android.server.om.whenever
 import com.android.server.pm.PackageManagerService
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateUnserialized
-import com.android.server.testutils.mockThrowOnUnmocked
-import com.android.server.testutils.whenever
 import org.junit.BeforeClass
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
