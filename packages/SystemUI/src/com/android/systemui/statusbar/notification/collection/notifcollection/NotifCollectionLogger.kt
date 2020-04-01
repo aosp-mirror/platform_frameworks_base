@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar.notification.collection.notifcollection
 
+import android.os.RemoteException
 import android.service.notification.NotificationListenerService.RankingMap
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
+import com.android.systemui.log.LogLevel.WTF
 import com.android.systemui.log.dagger.NotificationLog
 import javax.inject.Inject
 
@@ -91,6 +93,23 @@ class NotifCollectionLogger @Inject constructor(
         for (entry in rankingMap.orderedKeys) {
             buffer.log(TAG, DEBUG, { str1 = entry }, { "  $str1" })
         }
+    }
+
+    fun logRemoteExceptionOnNotificationClear(key: String, e: RemoteException) {
+        buffer.log(TAG, WTF, {
+            str1 = key
+            str2 = e.toString()
+        }, {
+            "RemoteException while attempting to clear $str1:\n$str2"
+        })
+    }
+
+    fun logRemoteExceptionOnClearAllNotifications(e: RemoteException) {
+        buffer.log(TAG, WTF, {
+            str1 = e.toString()
+        }, {
+            "RemoteException while attempting to clear all notifications:\n$str1"
+        })
     }
 }
 
