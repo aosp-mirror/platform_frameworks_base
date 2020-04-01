@@ -235,8 +235,8 @@
         your organization</string>
     <!-- Content description indicating that tapping a button will dismiss the screenshots UI [CHAR LIMIT=NONE] -->
     <string name="screenshot_dismiss_ui_description">Dismiss screenshot</string>
-    <!-- Content description indicating that tapping will open an app to view/edit the screenshot. [CHAR LIMIT=NONE] -->
-    <string name="screenshot_preview_description">Open screenshot</string>
+    <!-- Content description indicating that the view is a preview of the screenshot that was just taken [CHAR LIMIT=NONE] -->
+    <string name="screenshot_preview_description">Screenshot preview</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_name">Screen Recorder</string>
