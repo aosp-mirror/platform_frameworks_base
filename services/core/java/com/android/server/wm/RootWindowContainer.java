@@ -2094,12 +2094,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             String reason) {
         mService.deferWindowLayout();
 
-        final DisplayContent display = r.getRootTask().getDisplay();
+        final TaskDisplayArea taskDisplayArea = r.getDisplayArea();
 
         try {
             final Task task = r.getTask();
 
-            final ActivityStack pinnedStack = display.getRootPinnedTask();
+            final ActivityStack pinnedStack = taskDisplayArea.getRootPinnedTask();
             // This will change the pinned stack's windowing mode to its original mode, ensuring
             // we only have one stack that is in pinned mode.
             if (pinnedStack != null) {
@@ -2115,9 +2115,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             } else {
                 // In the case of multiple activities, we will create a new task for it and then
                 // move the PIP activity into the task.
-                stack = display.mTaskContainers.createStack(WINDOWING_MODE_PINNED,
-                        r.getActivityType(), ON_TOP, r.info, r.intent,
-                        false /* createdByOrganizer */);
+                stack = taskDisplayArea.createStack(WINDOWING_MODE_PINNED, r.getActivityType(),
+                        ON_TOP, r.info, r.intent, false /* createdByOrganizer */);
 
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
@@ -2216,7 +2215,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         boolean result = false;
-        if (targetStack != null && (targetStack.isTopStackOnDisplay()
+        if (targetStack != null && (targetStack.isTopStackInDisplayArea()
                 || getTopDisplayFocusedStack() == targetStack)) {
             result = targetStack.resumeTopActivityUncheckedLocked(target, targetOptions);
         }
@@ -2342,16 +2341,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     private ActivityManager.StackInfo getStackInfo(ActivityStack stack) {
-        final DisplayContent display = stack.getDisplayContent();
+        final TaskDisplayArea taskDisplayArea = stack.getDisplayArea();
         ActivityManager.StackInfo info = new ActivityManager.StackInfo();
         stack.getBounds(info.bounds);
-        info.displayId = display.mDisplayId;
+        info.displayId = taskDisplayArea != null ? taskDisplayArea.getDisplayId() : INVALID_DISPLAY;
         info.stackId = stack.mTaskId;
         info.stackToken = stack.mRemoteToken;
         info.userId = stack.mCurrentUser;
         info.visible = stack.shouldBeVisible(null);
         // A stack might be not attached to a display.
-        info.position = display != null ? display.getIndexOf(stack) : 0;
+        info.position = taskDisplayArea != null ? taskDisplayArea.getIndexOf(stack) : 0;
         info.configuration.setTo(stack.getConfiguration());
 
         final int numTasks = stack.getDescendantTaskCount();
@@ -2507,16 +2506,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     ActivityStack findStackBehind(ActivityStack stack) {
-        final DisplayContent display = stack.getDisplayContent();
-        if (display != null) {
-            for (int i = display.getStackCount() - 1; i >= 0; i--) {
-                if (display.getStackAt(i) == stack && i > 0) {
-                    return display.getStackAt(i - 1);
+        final TaskDisplayArea taskDisplayArea = stack.getDisplayArea();
+        if (taskDisplayArea != null) {
+            for (int i = taskDisplayArea.getStackCount() - 1; i >= 0; i--) {
+                if (taskDisplayArea.getStackAt(i) == stack && i > 0) {
+                    return taskDisplayArea.getStackAt(i - 1);
                 }
             }
         }
         throw new IllegalStateException("Failed to find a stack behind stack=" + stack
-                + " in=" + display);
+                + " in=" + taskDisplayArea);
     }
 
     @Override
@@ -2799,7 +2798,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         // Give preference to the stack and display of the input task and activity if they match the
         // mode we want to launch into.
-        DisplayContent display = null;
+        TaskDisplayArea container = null;
         if (candidateTask != null) {
             stack = candidateTask.getStack();
         }
@@ -2809,11 +2808,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         int windowingMode = launchParams != null ? launchParams.mWindowingMode
                 : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
         if (stack != null) {
-            display = stack.getDisplay();
-            if (display != null && canLaunchOnDisplay(r, display.mDisplayId)) {
+            container = stack.getDisplayArea();
+            if (container != null && canLaunchOnDisplay(r, container.mDisplayContent.mDisplayId)) {
                 if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-                    windowingMode = display.mTaskContainers.resolveWindowingMode(r, options,
-                            candidateTask, activityType);
+                    windowingMode = container.resolveWindowingMode(r, options, candidateTask,
+                            activityType);
                 }
                 // Always allow organized tasks that created by organizer since the activity type
                 // of an organized task is decided by the activity type of its top child, which
@@ -2822,7 +2821,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     return stack;
                 }
                 if (windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY
-                        && display.getRootSplitScreenPrimaryTask() == stack
+                        && container.getRootSplitScreenPrimaryTask() == stack
                         && candidateTask == stack.getTopMostTask()) {
                     // This is a special case when we try to launch an activity that is currently on
                     // top of split-screen primary stack, but is targeting split-screen secondary.
@@ -2834,16 +2833,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        if (display == null || !canLaunchOnDisplay(r, display.mDisplayId)) {
-            display = getDefaultDisplay();
+        if (container == null
+                || !canLaunchOnDisplay(r, container.mDisplayContent.mDisplayId)) {
+            container = getDefaultDisplay().mTaskContainers;
             if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-                windowingMode = display.mTaskContainers.resolveWindowingMode(r, options,
-                        candidateTask, activityType);
+                windowingMode = container.resolveWindowingMode(r, options, candidateTask,
+                        activityType);
             }
         }
 
-        return display.mTaskContainers.getOrCreateStack(r, options, candidateTask, activityType,
-                onTop);
+        return container.getOrCreateStack(r, options, candidateTask, activityType, onTop);
     }
 
     /** @return true if activity record is null or can be launched on provided display. */
@@ -2986,18 +2985,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     ActivityStack getNextFocusableStack(@NonNull ActivityStack currentFocus,
             boolean ignoreCurrent) {
         // First look for next focusable stack on the same display
-        DisplayContent preferredDisplay = currentFocus.getDisplay();
-        if (preferredDisplay == null) {
+        TaskDisplayArea preferredDisplayArea = currentFocus.getDisplayArea();
+        if (preferredDisplayArea == null) {
             // Stack is currently detached because it is being removed. Use the previous display it
             // was on.
-            preferredDisplay = getDisplayContent(currentFocus.mPrevDisplayId);
+            preferredDisplayArea = getDisplayContent(currentFocus.mPrevDisplayId).mTaskContainers;
         }
-        final ActivityStack preferredFocusableStack = preferredDisplay.mTaskContainers
-                .getNextFocusableStack(currentFocus, ignoreCurrent);
+        final ActivityStack preferredFocusableStack = preferredDisplayArea.getNextFocusableStack(
+                currentFocus, ignoreCurrent);
         if (preferredFocusableStack != null) {
             return preferredFocusableStack;
         }
-        if (preferredDisplay.supportsSystemDecorations()) {
+        if (preferredDisplayArea.mDisplayContent.supportsSystemDecorations()) {
             // Stop looking for focusable stack on other displays because the preferred display
             // supports system decorations. Home activity would be launched on the same display if
             // no focusable stack found.
@@ -3007,7 +3006,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Now look through all displays
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final DisplayContent display = getChildAt(i);
-            if (display == preferredDisplay) {
+            if (display == preferredDisplayArea.mDisplayContent) {
                 // We've already checked this one
                 continue;
             }

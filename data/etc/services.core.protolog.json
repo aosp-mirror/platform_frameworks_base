@@ -301,12 +301,6 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "-1455600136": {
-      "message": "Attempted to add Dream window with unknown token %s.  Aborting.",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-1443029505": {
       "message": "SAFE MODE ENABLED (menu=%d s=%d dpad=%d trackball=%d)",
       "level": "INFO",
@@ -384,12 +378,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
-    },
-    "-1263554915": {
-      "message": "Attempted to add Dream window with bad token %s.  Aborting.",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-1263316010": {
       "message": "Computed rotation=%s (%d) for display id=%d based on lastOrientation=%s (%d) and oldRotation=%s (%d)",
@@ -540,12 +528,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
-    "-993446393": {
-      "message": "App is requesting an orientation, return %d for display id=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/TaskContainers.java"
     },
     "-993378225": {
       "message": "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING %s in %s",
@@ -967,6 +949,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/Session.java"
     },
+    "-49129622": {
+      "message": "performLayout: Activity exiting now removed %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
+    },
     "-33096143": {
       "message": "applyAnimation: transition animation is disabled or skipped. container=%s",
       "level": "VERBOSE",
@@ -1074,12 +1062,6 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
-    },
-    "137835146": {
-      "message": "No app is requesting an orientation, return %d for display id=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/TaskContainers.java"
     },
     "140319294": {
       "message": "IME target changed within ActivityRecord",
@@ -1723,6 +1705,12 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
+    "1381227466": {
+      "message": "App is requesting an orientation, return %d for display id=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
+    },
     "1389009035": {
       "message": "NonAppWindowContainer cannot set orientation: %s",
       "level": "WARN",
@@ -1891,6 +1879,12 @@
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "1640436199": {
+      "message": "No app is requesting an orientation, return %d for display id=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
+    },
     "1653210583": {
       "message": "Removing app %s delayed=%b animation=%s animating=%b",
       "level": "VERBOSE",
@@ -1914,12 +1908,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "1685441447": {
-      "message": "performLayout: Activity exiting now removed %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/TaskContainers.java"
     },
     "1720229827": {
       "message": "Creating animation bounds layer",
