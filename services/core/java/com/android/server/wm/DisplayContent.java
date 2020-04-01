@@ -110,7 +110,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -270,7 +269,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** The containers below are the only child containers {@link #mWindowContainers} can have. */
     // Contains all window containers that are related to apps (Activities)
-    final TaskContainers mTaskContainers = new TaskContainers(this, mWmService);
+    final TaskDisplayArea mTaskContainers = new TaskDisplayArea(this, mWmService);
 
     // Contains all IME window containers. Note that the z-ordering of the IME windows will depend
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
@@ -608,24 +607,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private ActivityRecord mLastCompatModeActivity;
 
-    /**
-     * A focusable stack that is purposely to be positioned at the top. Although the stack may not
-     * have the topmost index, it is used as a preferred candidate to prevent being unable to resume
-     * target stack properly when there are other focusable always-on-top stacks.
-     */
-    private ActivityStack mPreferredTopFocusableStack;
-
     // Used in updating the display size
     private Point mTmpDisplaySize = new Point();
 
     // Used in updating override configurations
     private final Configuration mTempConfig = new Configuration();
-
-    private final RootWindowContainer.FindTaskResult
-            mTmpFindTaskResult = new RootWindowContainer.FindTaskResult();
-
-    // When non-null, new tasks get put into this root task.
-    Task mLaunchRootTask = null;
 
     // Used in performing layout
     private boolean mTmpWindowsBehindIme;
@@ -2126,10 +2112,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mTaskContainers.getSplitScreenDividerAnchor();
     }
 
-    void onStackWindowingModeChanged(ActivityStack stack) {
-        mTaskContainers.onStackWindowingModeChanged(stack);
-    }
-
     /**
      * The value is only valid in the scope {@link #onRequestedOverrideConfigurationChanged} of the
      * changing hierarchy and the {@link #onConfigurationChanged} of its children.
@@ -2416,11 +2398,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     void getStableRect(Rect out) {
         out.set(mDisplayFrames.mStable);
-    }
-
-    void setStackOnDisplay(ActivityStack stack, int position) {
-        if (DEBUG_STACK) Slog.d(TAG_WM, "Set stack=" + stack + " on displayId=" + mDisplayId);
-        mTaskContainers.addChild(stack, position);
     }
 
     void moveStackToDisplay(ActivityStack stack, boolean onTop) {
@@ -2850,8 +2827,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mLastFocus != mCurrentFocus) {
             pw.print("  mLastFocus="); pw.println(mLastFocus);
         }
-        if (mPreferredTopFocusableStack != null) {
-            pw.println(prefix + "mPreferredTopFocusableStack=" + mPreferredTopFocusableStack);
+        if (mTaskContainers.mPreferredTopFocusableStack != null) {
+            pw.println(prefix + "mPreferredTopFocusableStack="
+                    + mTaskContainers.mPreferredTopFocusableStack);
         }
         if (mTaskContainers.mLastFocusedStack != null) {
             pw.println(prefix + "mLastFocusedStack=" + mTaskContainers.mLastFocusedStack);
@@ -5245,7 +5223,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mRemoving = true;
         final boolean destroyContentOnRemoval = shouldDestroyContentOnRemove();
         ActivityStack lastReparentedStack = null;
-        mPreferredTopFocusableStack = null;
+        mTaskContainers.mPreferredTopFocusableStack = null;
 
         // Stacks could be reparented from the removed display to other display. While
         // reparenting the last stack of the removed display, the remove display is ready to be
@@ -5363,16 +5341,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
                     true /*updateInputWindows*/);
         }
-    }
-
-    /**
-     * @return the stack currently above the {@param stack}.  Can be null if the {@param stack} is
-     *         already top-most.
-     */
-    ActivityStack getStackAbove(ActivityStack stack) {
-        final WindowContainer wc = stack.getParent();
-        final int index = wc.mChildren.indexOf(stack) + 1;
-        return (index < wc.mChildren.size()) ? (ActivityStack) wc.mChildren.get(index) : null;
     }
 
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,

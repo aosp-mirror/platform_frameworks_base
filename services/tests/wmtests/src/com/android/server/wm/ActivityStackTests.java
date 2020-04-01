@@ -45,6 +45,7 @@ import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE_BEHIN
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
+import static com.android.server.wm.TaskDisplayArea.getStackAbove;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -612,7 +613,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // Ensure that we don't move the home stack if it is already behind the top fullscreen stack
         int homeStackIndex = mDefaultDisplay.getIndexOf(homeStack);
-        assertEquals(fullscreenStack, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(fullscreenStack, getStackAbove(homeStack));
         mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(homeStack);
         assertEquals(homeStackIndex, mDefaultDisplay.getIndexOf(homeStack));
     }
@@ -631,7 +632,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // Ensure that we don't move the home stack if it is already behind the top fullscreen stack
         int homeStackIndex = mDefaultDisplay.getIndexOf(homeStack);
-        assertEquals(fullscreenStack, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(fullscreenStack, getStackAbove(homeStack));
         mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(homeStack);
         assertEquals(homeStackIndex, mDefaultDisplay.getIndexOf(homeStack));
     }
@@ -650,7 +651,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // Ensure we don't move the home stack if it is already on top
         int homeStackIndex = mDefaultDisplay.getIndexOf(homeStack);
-        assertNull(mDefaultDisplay.getStackAbove(homeStack));
+        assertNull(getStackAbove(homeStack));
         mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(homeStack);
         assertEquals(homeStackIndex, mDefaultDisplay.getIndexOf(homeStack));
     }
@@ -676,9 +677,9 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // Ensure that we move the home stack behind the bottom most fullscreen stack, ignoring the
         // pinned stack
-        assertEquals(fullscreenStack1, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(fullscreenStack1, getStackAbove(homeStack));
         mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(homeStack);
-        assertEquals(fullscreenStack2, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(fullscreenStack2, getStackAbove(homeStack));
     }
 
     @Test
@@ -701,9 +702,9 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // Ensure that we move the home stack behind the bottom most non-translucent fullscreen
         // stack
-        assertEquals(fullscreenStack1, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(fullscreenStack1, getStackAbove(homeStack));
         mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(homeStack);
-        assertEquals(fullscreenStack1, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(fullscreenStack1, getStackAbove(homeStack));
     }
 
     @Test
@@ -749,13 +750,13 @@ public class ActivityStackTests extends ActivityTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
 
         mDefaultDisplay.mTaskContainers.moveStackBehindStack(homeStack, fullscreenStack1);
-        assertEquals(fullscreenStack1, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(fullscreenStack1, getStackAbove(homeStack));
         mDefaultDisplay.mTaskContainers.moveStackBehindStack(homeStack, fullscreenStack2);
-        assertEquals(fullscreenStack2, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(fullscreenStack2, getStackAbove(homeStack));
         mDefaultDisplay.mTaskContainers.moveStackBehindStack(homeStack, fullscreenStack4);
-        assertEquals(fullscreenStack4, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(fullscreenStack4, getStackAbove(homeStack));
         mDefaultDisplay.mTaskContainers.moveStackBehindStack(homeStack, fullscreenStack2);
-        assertEquals(fullscreenStack2, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(fullscreenStack2, getStackAbove(homeStack));
     }
 
     @Test
@@ -764,7 +765,7 @@ public class ActivityStackTests extends ActivityTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
         final ActivityStack pinnedStack = createStackForShouldBeVisibleTest(mDefaultDisplay,
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        assertEquals(pinnedStack, mDefaultDisplay.getStackAbove(homeStack));
+        assertEquals(pinnedStack, getStackAbove(homeStack));
 
         final ActivityStack alwaysOnTopStack = createStackForShouldBeVisibleTest(
                 mDefaultDisplay, WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD,
@@ -772,13 +773,13 @@ public class ActivityStackTests extends ActivityTestsBase {
         alwaysOnTopStack.setAlwaysOnTop(true);
         assertTrue(alwaysOnTopStack.isAlwaysOnTop());
         // Ensure (non-pinned) always on top stack is put below pinned stack.
-        assertEquals(pinnedStack, mDefaultDisplay.getStackAbove(alwaysOnTopStack));
+        assertEquals(pinnedStack, getStackAbove(alwaysOnTopStack));
 
         final ActivityStack nonAlwaysOnTopStack = createStackForShouldBeVisibleTest(
                 mDefaultDisplay, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
         // Ensure non always on top stack is put below always on top stacks.
-        assertEquals(alwaysOnTopStack, mDefaultDisplay.getStackAbove(nonAlwaysOnTopStack));
+        assertEquals(alwaysOnTopStack, getStackAbove(nonAlwaysOnTopStack));
 
         final ActivityStack alwaysOnTopStack2 = createStackForShouldBeVisibleTest(
                 mDefaultDisplay, WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD,
@@ -786,21 +787,21 @@ public class ActivityStackTests extends ActivityTestsBase {
         alwaysOnTopStack2.setAlwaysOnTop(true);
         assertTrue(alwaysOnTopStack2.isAlwaysOnTop());
         // Ensure newly created always on top stack is placed above other all always on top stacks.
-        assertEquals(pinnedStack, mDefaultDisplay.getStackAbove(alwaysOnTopStack2));
+        assertEquals(pinnedStack, getStackAbove(alwaysOnTopStack2));
 
         alwaysOnTopStack2.setAlwaysOnTop(false);
         // Ensure, when always on top is turned off for a stack, the stack is put just below all
         // other always on top stacks.
-        assertEquals(alwaysOnTopStack, mDefaultDisplay.getStackAbove(alwaysOnTopStack2));
+        assertEquals(alwaysOnTopStack, getStackAbove(alwaysOnTopStack2));
         alwaysOnTopStack2.setAlwaysOnTop(true);
 
         // Ensure always on top state changes properly when windowing mode changes.
         alwaysOnTopStack2.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         assertFalse(alwaysOnTopStack2.isAlwaysOnTop());
-        assertEquals(alwaysOnTopStack, mDefaultDisplay.getStackAbove(alwaysOnTopStack2));
+        assertEquals(alwaysOnTopStack, getStackAbove(alwaysOnTopStack2));
         alwaysOnTopStack2.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertTrue(alwaysOnTopStack2.isAlwaysOnTop());
-        assertEquals(pinnedStack, mDefaultDisplay.getStackAbove(alwaysOnTopStack2));
+        assertEquals(pinnedStack, getStackAbove(alwaysOnTopStack2));
     }
 
     @Test
