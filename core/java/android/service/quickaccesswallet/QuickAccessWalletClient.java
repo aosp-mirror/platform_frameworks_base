@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 
 import java.io.Closeable;
 import java.util.concurrent.Executor;
@@ -165,4 +166,42 @@ public interface QuickAccessWalletClient extends Closeable {
      */
     @Nullable
     Intent createWalletSettingsIntent();
+
+    /**
+     * Returns the logo associated with the {@link QuickAccessWalletService}. This is specified by
+     * {@code android:logo} manifest entry. If the logo is not specified, the app icon will be
+     * returned instead ({@code android:icon}).
+     *
+     * @hide
+     */
+    @Nullable
+    Drawable getLogo();
+
+    /**
+     * Returns the service label specified by {@code android:label} in the service manifest entry.
+     *
+     * @hide
+     */
+    @Nullable
+    CharSequence getServiceLabel();
+
+    /**
+     * Returns the text specified by the {@link android:shortcutShortLabel} in the service manifest
+     * entry. If the shortcutShortLabel isn't specified, the service label ({@code android:label})
+     * will be returned instead.
+     *
+     * @hide
+     */
+    @Nullable
+    CharSequence getShortcutShortLabel();
+
+    /**
+     * Returns the text specified by the {@link android:shortcutLongLabel} in the service manifest
+     * entry. If the shortcutShortLabel isn't specified, the service label ({@code android:label})
+     * will be returned instead.
+     *
+     * @hide
+     */
+    @Nullable
+    CharSequence getShortcutLongLabel();
 }

@@ -1047,5 +1047,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 }
             }
         }
+        @Override
+        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
+        }
     };
 }

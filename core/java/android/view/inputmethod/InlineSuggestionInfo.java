@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
-import android.os.Bundle;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcelable;
 import android.widget.inline.InlinePresentationSpec;
 
@@ -93,15 +93,9 @@ public final class InlineSuggestionInfo implements Parcelable {
      * @hide
      * @removed
      */
+    @UnsupportedAppUsage
     public @NonNull android.view.inline.InlinePresentationSpec getPresentationSpec() {
-        final android.view.inline.InlinePresentationSpec.Builder builder =
-                new android.view.inline.InlinePresentationSpec.Builder(
-                        mInlinePresentationSpec.getMinSize(), mInlinePresentationSpec.getMaxSize());
-        final Bundle style = mInlinePresentationSpec.getStyle();
-        if (style != null) {
-            builder.setStyle(style);
-        }
-        return builder.build();
+        return android.view.inline.InlinePresentationSpec.fromWidget(mInlinePresentationSpec);
     }
 
 
@@ -364,10 +358,10 @@ public final class InlineSuggestionInfo implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1585528157244L,
+            time = 1585633580662L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestionInfo.java",
-            inputSignatures = "public static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_AUTOFILL\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_PLATFORM\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String TYPE_SUGGESTION\npublic static final @android.annotation.SuppressLint({\"IntentName\"}) @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String TYPE_ACTION\nprivate final @android.annotation.NonNull android.widget.inline.InlinePresentationSpec mInlinePresentationSpec\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String mSource\nprivate final @android.annotation.Nullable java.lang.String[] mAutofillHints\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String mType\nprivate final  boolean mPinned\npublic static @android.annotation.TestApi @android.annotation.NonNull android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(android.widget.inline.InlinePresentationSpec,java.lang.String,java.lang.String[],java.lang.String,boolean)\npublic @android.annotation.NonNull android.view.inline.InlinePresentationSpec getPresentationSpec()\nclass InlineSuggestionInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")
+            inputSignatures = "public static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_AUTOFILL\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_PLATFORM\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String TYPE_SUGGESTION\npublic static final @android.annotation.SuppressLint({\"IntentName\"}) @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String TYPE_ACTION\nprivate final @android.annotation.NonNull android.widget.inline.InlinePresentationSpec mInlinePresentationSpec\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String mSource\nprivate final @android.annotation.Nullable java.lang.String[] mAutofillHints\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String mType\nprivate final  boolean mPinned\npublic static @android.annotation.TestApi @android.annotation.NonNull android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(android.widget.inline.InlinePresentationSpec,java.lang.String,java.lang.String[],java.lang.String,boolean)\npublic @android.compat.annotation.UnsupportedAppUsage @android.annotation.NonNull android.view.inline.InlinePresentationSpec getPresentationSpec()\nclass InlineSuggestionInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 

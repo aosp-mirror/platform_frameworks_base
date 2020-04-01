@@ -86,10 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Testa att ta en skärmdump igen"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Det går inte att spara skärmdumpen eftersom lagringsutrymmet inte räcker"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisationen tillåter inte att du tar skärmdumpar"</string>
-    <!-- no translation found for screenshot_dismiss_ui_description (934736855340147968) -->
-    <skip />
-    <!-- no translation found for screenshot_preview_description (669177537416980449) -->
-    <skip />
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Stäng skärmdump"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"Öppna skärmdump"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skärminspelare"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Avisering om att skärminspelning pågår"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Vill du starta inspelningen?"</string>
@@ -156,6 +154,21 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Fel grafiskt lösenord"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Fel lösenord"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"För många felaktiga försök.\nFörsök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Försök igen. Försök <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> av <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Din data raderas."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Enhetens data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Enhetens data raderas om du anger fel pinkod vid nästa försök."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Enhetens data raderas om du anger fel lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Användaren raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Användaren raderas om du anger fel pinkod vid nästa försök."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Den här användaren raderas om du anger fel lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jobbprofilen och dess data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jobbprofilen och dess data raderas om du anger fel pinkod vid nästa försök."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Din jobbprofil och dess data raderas om du anger fel lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"För många felaktiga försök. Enhetens data raderas."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"För många felaktiga försök. Den här användaren raderas."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"För många felaktiga försök. Den här jobbprofilen och dess data raderas."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Stäng"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Tryck på fingeravtryckssensorn"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon för fingeravtryck"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Håller utkik efter dig …"</string>
@@ -460,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Visa profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Lägg till användare"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Ny användare"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Gäst"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Lägg till gäst"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Ta bort gäst"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vill du ta bort gästen?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alla appar och data i denna session kommer att raderas."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ta bort"</string>
@@ -698,9 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Inga ljud eller vibrationer som stör koncentrationen."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Påkallar uppmärksamhet med ljud eller vibrationer."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Behåller din uppmärksamhet med en flytande genväg till innehållet."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Visas högst upp bland konversationerna som en bubbla"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Alla konversationer från <xliff:g id="APP_NAME_0">%1$s</xliff:g> visas i bubblor som standard. Hantera detta i <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Inga senaste bubblor"</string>
-    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
-    <skip />
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"De senaste bubblorna och ignorerade bubblor visas här"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Det går inte att ändra de här aviseringarna."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Den här aviseringsgruppen kan inte konfigureras här"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Avisering via proxy"</string>
@@ -980,43 +993,50 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Flytta längst ned till vänster"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Flytta längst ned till höger"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Stäng"</string>
-    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Visa inte konversationen i bubblor"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatta med bubblor"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nya konversationer visas som flytande ikoner, så kallade bubblor. Tryck på bubblan om du vill öppna den. Dra den om du vill flytta den."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Styr bubblor när som helst"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tryck på Hantera för att stänga av bubblor från den här appen"</string>
-    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigeringen har uppdaterats. Öppna inställningarna om du vill ändra något."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Öppna inställningarna och uppdatera systemnavigeringen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Viloläge"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Överlagrat förstoringsfönster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Förstoringsfönster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Inställningar för förstoringsfönster"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"Snabbinställningar"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"Lägg till kontroller"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Välj den app du vill lägga till kontroller från"</string>
+    <string name="quick_controls_title" msgid="1686913115679255053">"Snabbinställningar"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lägg till snabbkontroller för anslutna enheter"</string>
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Konfigurera snabbinställningar"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Håll strömbrytaren nedtryckt för att få åtkomst till snabbkontrollerna"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Välj en app om du vill lägga till snabbkontroller"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontroller har lagts till.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kontroll har lagts till.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Välj kontroller för snabb åtkomst"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Välj snabbkontroller som ska visas i strömbrytarmenyn"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Dra en snabbkontroll om du vill flytta den"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Listan med alla kontroller kunde inte läsas in."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Övrigt"</string>
-    <string name="controls_dialog_title" msgid="8806193219278278442">"Lägg till i Snabbinställningar"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"Lägg till snabbkontroll"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Lägg till i Favoriter"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> föreslår att du lägger till kontrollen i dina favoriter."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Snabbkontroller uppdaterade"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Pinkoden innehåller bokstäver eller symboler"</string>
-    <string name="controls_pin_verify" msgid="414043854030774349">"Verifiera pinkoden för enheten"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Verifiera <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"Verifierar …"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Ange pinkod"</string>
-    <string name="controls_structure_tooltip" msgid="1392966215435667434">"Svep för att se andra strukturer"</string>
-    <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
-    <skip />
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Testa en annan pinkod"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Bekräftar …"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Bekräfta ändring av <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"Svep om du vill se mer"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Rekommendationer läses in"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"Stäng den här sessionen"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv, kolla appen"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Fel, försök igen"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"Pågår"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"De nya snabbkontrollerna visas om du håller strömbrytaren nedtryckt"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Lägg till snabbkontroller"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Redigera snabbkontroller"</string>
 </resources>

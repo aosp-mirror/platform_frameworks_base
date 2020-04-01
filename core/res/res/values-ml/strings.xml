@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"വ്യക്തിപരമായ ഉപയോഗത്തിനായി, ഉപകരണത്തിന്റെ ഔദ്യോഗിക ഉപയോഗം അഡ്‌മിൻ അവസാനിപ്പിച്ചു"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ഉപകരണം മാനേജുചെയ്യുന്നുണ്ട്"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"നിങ്ങളുടെ സ്ഥാപനമാണ് ഈ ഉപകരണം മാനേജുചെയ്യുന്നത്, നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"നിങ്ങളുടെ അഡ്‌മിൻ ലൊക്കേഷൻ ക്രമീകരണം മാറ്റി"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"നിങ്ങളുടെ ലൊക്കേഷൻ ക്രമീകരണം കാണാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"ആപ്പുകൾക്ക് നിങ്ങളുടെ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യാനാകും"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"കൂടുതലറിയാൻ നിങ്ങളുടെ ഐടി അഡ്‌മിനെ ബന്ധപ്പെടുക"</string>
     <string name="country_detector" msgid="7023275114706088854">"രാജ്യം കണ്ടെത്താനുള്ള സംവിധാനം"</string>
     <string name="location_service" msgid="2439187616018455546">"ലൊക്കേഷൻ സേവനം"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"സെൻസർ അറിയിപ്പ് സേവനം"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"അഡ്‌മിൻ ആപ്പ് ഉപയോഗിക്കാനാകില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ മായ്ക്കപ്പെടും.\n\nനിങ്ങൾക്ക് ചോദ്യങ്ങൾ ഉണ്ടെങ്കിൽ, നിങ്ങളുടെ സ്ഥാപനത്തിന്റെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> പ്രിന്റിംഗ് പ്രവർത്തനരഹിതമാക്കി."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"വ്യക്തിപര ആപ്പ് അൺബ്ലോക്കാക്കൂ"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"ആപ്പുകൾ നാളെ ബ്ലോക്ക് ചെയ്യും"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ <xliff:g id="DAYS">%1$d</xliff:g> ദിവസത്തിൽ കൂടുതൽ താൽക്കാലികമായി നിർത്താൻ നിങ്ങളുടെ ഐടി അഡ്‌മിൻ അനുവദിക്കുന്നില്ല"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുക"</string>
     <string name="me" msgid="6207584824693813140">"ഞാന്‍"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ടാബ്‌ലെറ്റ് ഓപ്‌ഷനുകൾ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android ടിവി ഓപ്‌ഷനുകൾ"</string>
@@ -428,11 +424,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"ലൊക്കേഷൻ ദാതാവിന്റെ അധിക കമാൻഡുകൾ ആക്‌സസ്സുചെയ്യുക"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"ലൊക്കേഷൻ ദാതാവിന്റെ അധിക കമാൻഡുകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് GPS-ന്റെയോ മറ്റ് ലൊക്കേഷൻ ഉറവിടങ്ങളുടെയോ പ്രവർത്തനത്തിൽ ഇടപെടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ഫോർഗ്രൗണ്ടിൽ മാത്രം കൃത്യമായ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യുക"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"ഫോർഗ്രൗണ്ടിൽ ഉള്ളപ്പോൾ മാത്രമേ ഈ ആപ്പിന് നിങ്ങളുടെ കൃത്യമായ ലൊക്കേഷൻ ലഭിക്കൂ. ഈ ആപ്പിന് ലൊക്കേഷൻ സേവനങ്ങൾ ഉപയോഗിക്കാൻ കഴിയണമെങ്കിൽ, അവ നിങ്ങളുടെ ഉപകരണത്തിൽ ലഭ്യമായിരിക്കുകയും ഓണായിരിക്കുകയും വേണം. ഇത് ബാറ്ററി ഉപഭോഗം വർദ്ധിപ്പിച്ചേക്കാം."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"ആപ്പ് ഉപയോഗത്തിലിരിക്കുമ്പോൾ ലൊക്കേഷൻ സേവനങ്ങളിൽ നിന്ന് നിങ്ങളുടെ കൃത്യമായ ലൊക്കേഷൻ ഈ ആപ്പിന് നേടാനാവും. ആപ്പിന് ലൊക്കേഷൻ ലഭിക്കാൻ നിങ്ങളുടെ ഉപകരണത്തിനുള്ള ലൊക്കേഷൻ സേവനങ്ങൾ ഓണാക്കേണ്ടതുണ്ട്. ഇത് ബാറ്ററി ഉപയോഗം വർദ്ധിപ്പിച്ചേക്കാം."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"ഫോർഗ്രൗണ്ടിൽ മാത്രം ഏകദേശ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യുക"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"ഫോർഗ്രൗണ്ടിൽ ഉള്ളപ്പോൾ മാത്രമേ ഈ ആപ്പിന് നിങ്ങളുടെ ഏകദേശ ലൊക്കേഷൻ ലഭിക്കൂ. ഈ ആപ്പിന് ലൊക്കേഷൻ സേവനങ്ങൾ ഉപയോഗിക്കാൻ കഴിയണമെങ്കിൽ, അവ നിങ്ങളുടെ ഉപകരണത്തിൽ ലഭ്യമായിരിക്കുകയും ഓണായിരിക്കുകയും വേണം."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"ആപ്പ് ഉപയോഗത്തിലിരിക്കുമ്പോൾ ലൊക്കേഷൻ സേവനങ്ങളിൽ നിന്ന് നിങ്ങളുടെ ഏകദേശ ലൊക്കേഷൻ ഈ ആപ്പിന് നേടാനാവും. ആപ്പിന് ലൊക്കേഷൻ ലഭിക്കാൻ നിങ്ങളുടെ ഉപകരണത്തിനുള്ള ലൊക്കേഷൻ സേവനങ്ങൾ ഓണാക്കേണ്ടതുണ്ട്."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"പശ്ചാത്തലത്തിൽ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യുക"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"പശ്ചാത്തലത്തിൽ പ്രവർത്തിക്കുമ്പോൾ, ഫോർഗ്രൗണ്ട് ലൊക്കേഷന് പുറമെ, ലൊക്കേഷൻ ആക്സസ് ചെയ്യാനും ഈ ആപ്പിന് കഴിയും."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"ആപ്പ് ഉപയോഗത്തിലല്ലെങ്കിൽ പോലും ഈ ആപ്പിന് ഏത് സമയത്തും ലൊക്കേഷൻ ആക്സസ് ചെയ്യാം."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"നിങ്ങളുടെ ഓഡിയോ ക്രമീകരണങ്ങൾ മാറ്റുക"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"വോളിയവും ഔട്ട്പുട്ടിനായി ഉപയോഗിച്ച സ്‌പീക്കറും പോലുള്ള ആഗോള ഓഡിയോ ക്രമീകരണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
@@ -447,7 +443,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ക്യാമറയുള്ള ഉപകരണങ്ങൾ ഓണാക്കുന്നതിനെയോ അടയ്ക്കുന്നതിനെയോ കുറിച്ചുള്ള കോൾബാക്കുകൾ സ്വീകരിക്കാൻ ആപ്പിനെയോ സേവനത്തെയോ അനുവദിക്കുക."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ക്യാമറയുള്ള ഏതെങ്കിലും ഉപകരണം ഓണാക്കുമ്പോഴോ (ആപ്പ് മുഖേന) അടയ്ക്കുമ്പോഴോ ഈ ആപ്പിന് കോൾബാക്കുകൾ സ്വീകരിക്കാനാവും."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ഏതെങ്കിലും ക്യാമറ ഉപകരണം തുറക്കുമ്പോഴോ (ഏത് ആപ്പ് ഉപയോഗിച്ചും) അടയ്ക്കുമ്പോഴോ ഈ ആപ്പിന് കോൾബാക്കുകൾ സ്വീകരിക്കാനാവും."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"വൈബ്രേറ്റുചെയ്യൽ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"വൈബ്രേറ്റർ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"വൈബ്രേറ്റ് ചെയ്യൽ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
@@ -769,7 +765,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"ഓഫീസ് മൊബൈല്‍"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"ഔദ്യോഗിക പേജര്‍‌"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"അസിസ്റ്റന്‍റ്"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"ഇഷ്‌ടാനുസൃതം"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"ജന്മദിനം"</string>
@@ -802,7 +798,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"മറ്റുള്ളവ"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"ഇഷ്‌ടാനുസൃതം"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"ഇഷ്‌ടാനുസൃതം"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"സഹായി"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"സഹോദരന്‍‌"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"കുട്ടി"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"ഗാര്‍‌ഹിക പങ്കാളി"</string>
@@ -1349,13 +1345,17 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"നിലവിലെ ഉള്ളടക്കം അവലോകനം ചെയ്യുന്നു"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"പുതിയ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"സജ്ജമാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ഫോട്ടോകളും മീഡിയയും ട്രാൻസ്‌ഫർ ചെയ്യാൻ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>-ൽ പ്രശ്‌നം"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"പരിഹരിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> കേടായി. പരിഹരിക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"പിന്തുണയില്ലാത്ത <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ഈ ഉപകരണം <xliff:g id="NAME">%s</xliff:g> പിന്തുണയ്ക്കുന്നതല്ല. പിന്തുണയുള്ള ഫോർമാറ്റിൽ സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"<xliff:g id="NAME">%s</xliff:g> ഈ ഉപകരണത്തിന് അനുയോജ്യമല്ല. അനുയോജ്യമായ ഒരു ഫോർമാറ്റിൽ സജ്ജമാക്കുന്നതിന് തിരഞ്ഞെടുക്കുക."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (7657357085538772913) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> അപ്രതീക്ഷിതമായി നീക്കംചെയ്‌തു"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"ഉള്ളടക്കം നഷ്‌ടമാകുന്നത് തടയാൻ, നീക്കം ചെയ്യുന്നതിന് മുൻപ് മീഡിയ ഒഴിവാക്കുക"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> നീക്കം ചെ‌യ്‌തു"</string>
@@ -2086,8 +2086,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ഔദ്യോഗിക ആപ്പുകൾക്കൊന്നും ഈ ഉള്ളടക്കം തുറക്കാനാവില്ല"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"വ്യക്തിപര ആപ്പുകൾക്കൊന്നും ഈ ഉള്ളടക്കത്തെ പിന്തുണയ്‌ക്കാനാവില്ല"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"വ്യക്തിപര ആപ്പുകൾക്കൊന്നും ഈ ഉള്ളടക്കം തുറക്കാനാവില്ല"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യുക അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യുക"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ഡിഫോൾട്ട് ഡയലർ ആപ്പായി അസെെൻ ചെയ്യുന്ന സമയത്ത്, ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യാൻ അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യാൻ ഈ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
     <skip />
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->

@@ -86,10 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"സ്‌റ്റോറേജ് ഇടം പരിമിതമായതിനാൽ സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കാനാകുന്നില്ല"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"സ്ക്രീൻഷോട്ടുകൾ എടുക്കുന്നത് ആപ്പോ നിങ്ങളുടെ സ്ഥാപനമോ അനുവദിക്കുന്നില്ല"</string>
-    <!-- no translation found for screenshot_dismiss_ui_description (934736855340147968) -->
-    <skip />
-    <!-- no translation found for screenshot_preview_description (669177537416980449) -->
-    <skip />
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"സ്ക്രീൻഷോട്ട് ഡിസ്‌മിസ് ചെയ്യുക"</string>
+    <string name="screenshot_preview_description" msgid="669177537416980449">"സ്ക്രീൻഷോട്ട് തുറക്കുക"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"സ്ക്രീൻ റെക്കോർഡർ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ഒരു സ്ക്രീൻ റെക്കോർഡിംഗ് സെഷനായി നിലവിലുള്ള അറിയിപ്പ്"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"റെക്കോർഡിംഗ് ആരംഭിക്കണോ?"</string>
@@ -156,6 +154,31 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"പാറ്റേൺ തെറ്റാണ്"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"പാസ്‌വേഡ് തെറ്റാണ്"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"നിരവധി തെറ്റായ ശ്രമങ്ങൾ. \n<xliff:g id="NUMBER">%d</xliff:g> സെക്കൻഡിൽ വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"വീണ്ടും ശ്രമിക്കുക. <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> ശ്രമങ്ങളിൽ <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> ശ്രമം."</string>
+    <!-- no translation found for biometric_dialog_last_attempt_before_wipe_dialog_title (2874250099278693477) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_device (6562299244825817598) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_device (9151756675698215723) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_device (2363778585575998317) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_user (8400180746043407270) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_user (4159878829962411168) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_user (4695682515465063885) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_profile (6045224069529284686) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_profile (545567685899091757) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_profile (8538032972389729253) -->
+    <skip />
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഉപകരണത്തിലെ ഡാറ്റ ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഉപയോക്താവ് ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഔദ്യോഗിക പ്രൊഫൈലും അതിന്റെ ഡാറ്റയും ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ഡിസ്മിസ് ചെയ്യുക"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ഫിംഗർപ്രിന്റ് സെൻസർ സ്‌പർശിക്കുക"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"നിങ്ങൾക്കായി തിരയുന്നു…"</string>
@@ -227,7 +250,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"ബാറ്ററി വിശദാംശങ്ങൾ തുറക്കുക"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"ബാറ്ററി <xliff:g id="NUMBER">%d</xliff:g> ശതമാനം."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ബാറ്ററി <xliff:g id="PERCENTAGE">%1$s</xliff:g> ശതമാനം, നിങ്ങളുടെ ഉപയോഗത്തിൻ്റെ അടിസ്ഥാനത്തിൽ ഏകദേശം <xliff:g id="TIME">%2$s</xliff:g> സമയം കൂടി ശേഷിക്കുന്നു"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ബാറ്ററി ചാർജുചെയ്യുന്നു, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ബാറ്ററി ചാർജ് ചെയ്യുന്നു, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"സിസ്‌റ്റം ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"അറിയിപ്പുകൾ."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"എല്ലാ അറിയിപ്പുകളും കാണുക"</string>
@@ -460,9 +483,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"പ്രൊഫൈൽ കാണിക്കുക"</string>
     <string name="user_add_user" msgid="4336657383006913022">"ഉപയോക്താവിനെ ചേര്‍ക്കുക"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"പുതിയ ഉപയോക്താവ്"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"അതിഥി"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"അതിഥിയെ ചേർക്കുക"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"അതിഥിയെ നീക്കംചെയ്യുക"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"അതിഥിയെ നീക്കംചെയ്യണോ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ഈ സെഷനിലെ എല്ലാ അപ്ലിക്കേഷനുകളും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"നീക്കംചെയ്യുക"</string>
@@ -698,9 +718,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ശബ്‌ദമോ വൈബ്രേഷനോ ഇല്ലാതെ ശ്രദ്ധ കേന്ദ്രീകരിക്കാൻ നിങ്ങളെ സഹായിക്കുന്നു."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ശബ്‌ദമോ വെെബ്രേഷനോ ഉപയോഗിച്ച് നിങ്ങളുടെ ശ്രദ്ധ ക്ഷണിക്കുന്നു."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ഈ ഉള്ളടക്കത്തിലേക്ക് ഒരു ഫ്ലോട്ടിംഗ് കുറുക്കുവഴി ഉപയോഗിച്ച് നിങ്ങളുടെ ശ്രദ്ധ നിലനിർത്തുന്നു."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"സംഭാഷണ വിഭാഗത്തിന് മുകളിൽ ഒരു ബബിളായി ദൃശ്യമാവുന്നു."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> എന്നതിൽ നിന്നുള്ള എല്ലാ സംഭാഷണങ്ങളും ഡിഫോൾട്ടായി ബബിളാവുന്നു. <xliff:g id="APP_NAME_1">%2$s</xliff:g> എന്നതിൽ മാനേജ് ചെയ്യുക."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ക്രമീകരണം"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"മുൻഗണന"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"അടുത്തിടെയുള്ള ബബിളുകൾ ഒന്നുമില്ല"</string>
-    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
-    <skip />
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"അടുത്തിടെയുള്ള ബബിൾ, ഡിസ്മിസ് ചെയ്ത ബബിൾ എന്നിവ ഇവിടെ ദൃശ്യമാവും"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ഈ അറിയിപ്പുകൾ പരിഷ്ക്കരിക്കാനാവില്ല."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"അറിയിപ്പുകളുടെ ഈ ഗ്രൂപ്പ് ഇവിടെ കോണ്‍ഫിഗര്‍ ചെയ്യാൻ കഴിയില്ല"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"പ്രോക്‌സി അറിയിപ്പ്"</string>
@@ -980,43 +1003,54 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ചുവടെ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ചുവടെ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
-    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"സംഭാഷണം ബബിൾ ചെയ്യരുത്"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"ബബിൾ ഉപയോഗിച്ച് ചാറ്റ് ചെയ്യുക"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"പുതിയ സംഭാഷണങ്ങൾ ഫ്ലോട്ടിംഗ് ഐക്കണുകളോ ബബിളോ ആയി ദൃശ്യമാവുന്നു. ബബിൾ തുറക്കാൻ ടാപ്പ് ചെയ്യു. ഇത് നീക്കാൻ വലിച്ചിടുക."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ബബിൾ ഏതുസമയത്തും നിയന്ത്രിക്കുക"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ഈ ആപ്പിൽ നിന്നുള്ള ബബിളുകൾ ഓഫാക്കാൻ \'മാനേജ് ചെയ്യുക\' ടാപ്പ് ചെയ്യുക"</string>
-    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ലഭിച്ചു"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്‌തു. മാറ്റങ്ങൾ വരുത്താൻ ക്രമീകരണത്തിലേക്ക് പോവുക."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്യാൻ ക്രമീകരണത്തിലേക്ക് പോവുക"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"സ്‌റ്റാൻഡ്‌ബൈ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"മാഗ്നിഫിക്കേഷൻ ഓവർലേ വിൻഡോ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ നിയന്ത്രണങ്ങൾ"</string>
-    <string name="quick_controls_title" msgid="525285759614231333">"ദ്രുത നിയന്ത്രണങ്ങൾ"</string>
-    <string name="controls_providers_title" msgid="8844124515157926071">"നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
-    <string name="controls_providers_subtitle" msgid="8187768950110836569">"നിയന്ത്രണങ്ങൾ ചേർക്കാൻ ഒരു ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
+    <!-- no translation found for quick_controls_title (1686913115679255053) -->
+    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"നിങ്ങളുടെ കണക്റ്റ് ചെയ്ത ഉപകരണങ്ങൾക്ക് നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
+    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
+    <skip />
+    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
+    <skip />
+    <!-- no translation found for controls_providers_title (6879775889857085056) -->
+    <skip />
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> നിയന്ത്രണങ്ങൾ ചേർത്തു.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> നിയന്ത്രണം ചേർത്തു.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"നിയന്ത്രണങ്ങൾ"</string>
-    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"അതിവേഗ ആക്‌സസിനുള്ള നിയന്ത്രണങ്ങൾ തിരഞ്ഞെടുക്കുക"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"പവർ മെനുവിൽ നിന്ന് ആക്സസ് ചെയ്യേണ്ട നിയന്ത്രണങ്ങൾ തിരഞ്ഞെടുക്കുക"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ഇത് നീക്കാൻ, നിയന്ത്രണം പിടിച്ച് വലിച്ചിടുക"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"എല്ലാ നിയന്ത്രണങ്ങളുടെയും ലിസ്റ്റ് ലോഡ് ചെയ്യാനായില്ല."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"മറ്റുള്ളവ"</string>
-    <string name="controls_dialog_title" msgid="8806193219278278442">"ദ്രുത നിയന്ത്രണങ്ങളിലേക്ക് ചേർക്കൂ"</string>
+    <string name="controls_dialog_title" msgid="3475025327938684220">"ദ്രുത നിയന്ത്രണങ്ങളിലേക്ക് ചേർക്കൂ"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"പ്രിയപ്പെട്ടവയിലേക്ക് ചേർക്കുക"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"ഈ നിയന്ത്രണത്തെ നിങ്ങളുടെ പ്രിയപ്പെട്ടവയിലേക്ക് ചേർക്കാൻ <xliff:g id="APP">%s</xliff:g> ശുപാർശ ചെയ്‌തു."</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"നിയന്ത്രണങ്ങൾ അപ്ഡേറ്റ് ചെയ്തു"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"പിന്നിൽ അക്ഷരങ്ങളോ ചിഹ്നങ്ങളോ അടങ്ങിയിരിക്കുന്നു"</string>
-    <string name="controls_pin_verify" msgid="414043854030774349">"ഉപകരണ പിൻ പരിശോധിച്ചുറപ്പിക്കൂ"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> പരിശോധിച്ചുറപ്പിക്കുക"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"പരിശോധിച്ചുറപ്പിക്കുന്നു…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"പിൻ നൽകുക"</string>
-    <string name="controls_structure_tooltip" msgid="1392966215435667434">"മറ്റ് ഘടനകൾ കാണാൻ സ്വൈപ്പ് ചെയ്യുക"</string>
-    <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
-    <skip />
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"മറ്റൊരു പിൻ പരീക്ഷിക്കുക"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"സ്ഥിരീകരിക്കുന്നു…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> എന്നതിനുള്ള മാറ്റം സ്ഥിരീകരിക്കുക"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"കൂടുതൽ കാണാൻ സ്വൈപ്പ് ചെയ്യുക"</string>
+    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"നിർദ്ദേശങ്ങൾ ലോഡ് ചെയ്യുന്നു"</string>
+    <string name="controls_media_close_session" msgid="9023534788828414585">"ഈ മീഡിയ സെഷൻ അടയ്ക്കുക"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"നിഷ്‌ക്രിയം, ആപ്പ് പരിശോധിക്കൂ"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"പിശക്, വീണ്ടും ശ്രമിക്കുക"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"പുരോഗതിയിലാണ്"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"പുതിയ നിയന്ത്രണങ്ങൾ കാണാൻ പവർ ബട്ടൺ പിടിക്കുക"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"നിയന്ത്രണങ്ങൾ എഡിറ്റ് ചെയ്യുക"</string>
 </resources>

@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"વ્યવસ્થાપકે ડિવાઇસ વ્યક્તિગત ઉપયોગ માટે આપી દીધું છે"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ઉપકરણ સંચાલિત છે"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"તમારી સંસ્થા આ ઉપકરણનું સંચાલન કરે છે અને નેટવર્ક ટ્રાફિફનું નિયમન કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"તમારા વ્યવસ્થાપક દ્વારા સ્થાન સેટિંગ બદલવામાં આવ્યાં"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"તમારા સ્થાન સેટિંગને જોવા માટે ટૅપ કરો."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"ઍપ તમારા સ્થાનને ઍક્સેસ કરી શકે છે"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"વધુ જાણવા માટે તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો"</string>
     <string name="country_detector" msgid="7023275114706088854">"દેશને ઓળખાવનારી સુવિધા"</string>
     <string name="location_service" msgid="2439187616018455546">"સ્થાન સેવા"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"સેન્સર નોટિફિકેશન સેવા"</string>
@@ -200,14 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"તમારું ઉપકરણ કાઢી નાખવામાં આવશે"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"વ્યવસ્થાપક ઍપનો ઉપયોગ કરી શકાશે નહીં. તમારું ઉપકરણ હવે કાઢી નાખવામાં આવશે.\n\nજો તમને પ્રશ્નો હોય, તો તમારી સંસ્થાના વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> દ્વારા પ્રિન્ટ કરવાનું બંધ કરાયું છે."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"તમારી ખાનગી ઍપને અનબ્લૉક કરો"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"ઍપ આવતીકાલે બ્લૉક કરાશે"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"તમારા IT વ્યવસ્થાપક તમારી કાર્યાલયની પ્રોફાઇલને <xliff:g id="DAYS">%1$d</xliff:g>થી વધુ દિવસ થોભાવી રાખવાની મંજૂરી આપતા નથી"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરો"</string>
     <string name="me" msgid="6207584824693813140">"હું"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ટેબ્લેટ વિકલ્પો"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TVના વિકલ્પો"</string>
@@ -428,11 +424,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરો"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"એપ્લિકેશનને વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને GPS અથવા અન્ય સ્થાન સ્રોતોના ઓપરેશનમાં દખલ કરવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ફૉરગ્રાઉન્ડમાં ફક્ત ચોક્કસ સ્થાન ઍક્સેસ કરો"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"આ ઍપ ફક્ત ફૉરગ્રાઉન્ડમાંમાં હોય ત્યારે જ તમારું ચોક્કસ સ્થાન મેળવી શકે છે. ઍપ આ સ્થાન સેવાઓનો ઉપયોગ કરી શકે તે માટે તે સેવાઓ ચાલુ કરેલી અને તમારા ડિવાઇસમાં ઉપલબ્ધ હોવી જોઈએ. આ બૅટરી વપરાશ વધારી શકે છે."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"ઍપ ઉપયોગમાં હોય તે વખતે સ્થાન સેવાઓમાંથી આ ઍપ તમારું ચોક્કસ સ્થાન મેળવી શકે છે. ઍપ સ્થાન મેળવી શકે તે માટે તમારા ડિવાઇસમાં સ્થાન સેવાઓ ચાલુ કરેલી હોવી જરૂરી છે. આનાથી બૅટરીનો વપરાશ વધી શકે છે."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"ફૉરગ્રાઉન્ડમાં ફક્ત અંદાજિત સ્થાન ઍક્સેસ કરો"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"આ ઍપ ફોરગ્રાઉન્ડમાં હોય, ત્યારે જ તે તમારું અંદાજિત સ્થાન મેળવી શકે છે. ઍપ આ સ્થાન સેવાઓનો ઉપયોગ કરી શકે તે માટે તે સેવાઓ ચાલુ કરેલી અને તમારા ડિવાઇસમાં ઉપલબ્ધ હોવી જોઈએ."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"ઍપ ઉપયોગમાં હોય તે વખતે સ્થાન સેવાઓમાંથી આ ઍપ તમારું અંદાજિત સ્થાન મેળવી શકે છે. ઍપ સ્થાન મેળવી શકે તે માટે તમારા ડિવાઇસમાં સ્થાન સેવાઓ ચાલુ કરેલી હોવી જરૂરી છે."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"બૅકગ્રાઉન્ડમાં સ્થાન ઍક્સેસ કરો"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"આ ઍપ ફૉરગ્રાઉન્ડમાં સ્થાનને ઍક્સેસ કરવા ઉપરાંત બૅકગ્રાઉન્ડમાં ચાલતી હોય ત્યારે પણ સ્થાનને ઍક્સેસ કરી શકે છે."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"આ ઍપ કોઈપણ સમયે સ્થાનને ઍક્સેસ કરી શકે છે, પછી ભલેને આ ઍપ ઉપયોગમાં ન હોય."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"તમારી ઑડિઓ સેટિંગ્સ બદલો"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"એપ્લિકેશનને વૈશ્વિક ઑડિઓ સેટિંગ્સને સંશોધિત કરવાની મંજૂરી આપે છે, જેમ કે વૉલ્યૂમ અને આઉટપુટ માટે કયા સ્પીકરનો ઉપયોગ કરવો."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ઑડિઓ રેકોર્ડ કરવાની"</string>
@@ -447,7 +443,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"કૅમેરા ડિવાઇસ ચાલુ કે બંધ થવા વિશે કૉલબૅક પ્રાપ્ત કરવાની ઍપ્લિકેશન કે સેવાને મંજૂરી આપો."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"જ્યારે કોઈ કૅમેરા ડિવાઇસ (કયા ઍપ્લિકેશન વડે) ખોલવા કે બંધ કરવામાં આવે, ત્યારે આ વિશેષ ઍપ કૉલબૅક પ્રાપ્ત કરી શકે છે."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"જ્યારે કોઈ કૅમેરા ડિવાઇસ (કયા ઍપ્લિકેશન વડે) ખોલવા કે બંધ કરવામાં આવે, ત્યારે આ ઍપ કૉલબૅક પ્રાપ્ત કરી શકે છે."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"વાઇબ્રેશન નિયંત્રિત કરો"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"એપ્લિકેશનને વાઇબ્રેટરને નિયંત્રિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ઍપને વાઇબ્રેટર સ્થિતિને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
@@ -769,7 +765,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"કાર્યાલય મોબાઇલ"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"કાર્ય પેજર"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"સહાયક"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"કસ્ટમ"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"જન્મદિવસ"</string>
@@ -802,7 +798,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"અન્ય"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"કસ્ટમ"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"કસ્ટમ"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"સહાયક"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ભાઈ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"બાળક"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"ઘરેલું ભાગીદાર"</string>
@@ -1349,13 +1345,17 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"હાલના કન્ટેન્ટને રિવ્યૂ કરવું"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"નવું <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"સેટ કરવા માટે ટૅપ કરો"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ફોટો અને મીડિયા ટ્રાન્સફર કરવા માટે"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>ની સમસ્યા"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ઠીક કરવા માટે ટૅપ કરો"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> દૂષિત છે. સુધારવા માટે પસંદ કરો."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"અસમર્થિત <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"આ ઉપકરણ આ <xliff:g id="NAME">%s</xliff:g> નું સમર્થન કરતું નથી. સમર્થિત ફોર્મેટમાં સેટ કરવા માટે ટૅપ કરો."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"આ ઉપકરણ આ <xliff:g id="NAME">%s</xliff:g> નું સમર્થન કરતું નથી. સમર્થિત ફૉર્મેટમાં સેટ કરવા માટે પસંદ કરો."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (7657357085538772913) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> અનપેક્ષિત રીતે દૂર કર્યું"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"કન્ટેન્ટ ગુમાવવાનું ટાળવા માટે મીડિયાને દૂર કરતા પહેલાં બહાર કાઢો"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> કાઢી નાખ્યું"</string>
@@ -2086,8 +2086,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"કોઈ ઑફિસ માટેની ઍપ આ કન્ટેન્ટ ખોલી શકતી નથી"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"કોઈ વ્યક્તિગત ઍપ આ કન્ટેન્ટને સપોર્ટ કરી શકતી નથી"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"કોઈ વ્યક્તિગત ઍપ આ કન્ટેન્ટ ખોલી શકતી નથી"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ટેલિફોની કૉલમાં ઑડિયો રેકૉર્ડ કરો અથવા ચલાવો"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ડિફૉલ્ટ ડાયલર ઍપ તરીકે સોંપણી કરવામાં આવવા પર આ ઍપને ટેલિફોની કૉલમાં ઑડિયો રેકૉર્ડ કરવાની અથવા ચલાવવાની મંજૂરી આપે છે."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
     <skip />
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->

@@ -129,7 +129,7 @@ public class TelephonyTimeZoneSuggestionTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testBuilderValidates_emptyZone_badMatchType() {
+    public void testBuilderValidates_nullZone_badMatchType() {
         TelephonyTimeZoneSuggestion.Builder builder =
                 new TelephonyTimeZoneSuggestion.Builder(SLOT_INDEX);
         // No zone ID, so match type should be left unset.

@@ -23,6 +23,8 @@ import static android.view.InsetsState.ISIDE_LEFT;
 import static android.view.InsetsState.ISIDE_RIGHT;
 import static android.view.InsetsState.ISIDE_TOP;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.graphics.Matrix;
@@ -76,6 +78,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private boolean mShownOnFinish;
     private float mCurrentAlpha = 1.0f;
     private float mPendingAlpha = 1.0f;
+    @VisibleForTesting(visibility = PACKAGE)
+    public boolean mReadyDispatched;
 
     @VisibleForTesting
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceControl> controls, Rect frame,
@@ -214,7 +218,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             return;
         }
         mCancelled = true;
-        mListener.onCancelled(this);
+        mListener.onCancelled(mReadyDispatched ? this : null);
 
         releaseLeashes();
     }
