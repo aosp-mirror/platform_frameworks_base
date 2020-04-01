@@ -17,30 +17,17 @@
 package android.content.pm.parsing.result;
 
 import android.annotation.Nullable;
-import android.content.pm.PackageParser;
 
 /**
  * The output side of {@link ParseInput}, which must result from a method call on
  * {@link ParseInput}.
  *
  * When using this class, keep in mind that all {@link ParseInput}s and {@link ParseResult}s
- * are the exact same object, scoped to a per {@link PackageParser} instance, per thread basis,
- * thrown around and casted everywhere for type safety.
+ * are the exact same object, scoped per thread, thrown around and casted for type safety.
  *
  * @hide
  */
 public interface ParseResult<ResultType> {
-
-    /**
-     * Un-marks this result as an error, also allowing it to be re-used as {@link ParseInput}.
-     *
-     * This should only be used in cases where it's absolutely certain that error handling is
-     * irrelevant. Such as for backwards compatibility where it previously didn't fail and that
-     * behavior has to be maintained.
-     *
-     * Mostly an alias for readability.
-     */
-    void ignoreError();
 
     /**
      * Returns true if the result is not an error and thus contains a valid object.
