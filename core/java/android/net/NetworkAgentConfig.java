@@ -155,6 +155,7 @@ public final class NetworkAgentConfig implements Parcelable {
     /**
      * @return the legacy type
      */
+    @ConnectivityManager.LegacyNetworkType
     public int getLegacyType() {
         return legacyType;
     }
@@ -206,7 +207,7 @@ public final class NetworkAgentConfig implements Parcelable {
     /**
      * Builder class to facilitate constructing {@link NetworkAgentConfig} objects.
      */
-    public static class Builder {
+    public static final class Builder {
         private final NetworkAgentConfig mConfig = new NetworkAgentConfig();
 
         /**
