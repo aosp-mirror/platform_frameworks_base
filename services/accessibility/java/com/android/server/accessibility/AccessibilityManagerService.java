@@ -414,7 +414,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                     && component.getPackageName().equals(packageName))
                             || userState.mCrashedServices.removeIf(component -> component != null
                                     && component.getPackageName().equals(packageName));
-                    if (reboundAService) {
+                    // Reloads the installed services info to make sure the rebound service could
+                    // get a new one.
+                    userState.mInstalledServices.clear();
+                    final boolean configurationChanged =
+                            readConfigurationForUserStateLocked(userState);
+                    if (reboundAService || configurationChanged) {
                         onUserStateChangedLocked(userState);
                     }
                     migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, packageName);
