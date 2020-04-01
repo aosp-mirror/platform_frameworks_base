@@ -45,6 +45,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.RemotableViewMethod;
+import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -153,6 +154,9 @@ public class ConversationLayout extends FrameLayout
     private int mFacePileProtectionWidthExpanded;
     private boolean mImportantConversation;
     private TextView mUnreadBadge;
+    private ViewGroup mAppOps;
+    private Rect mAppOpsTouchRect = new Rect();
+    private float mMinTouchSize;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -191,6 +195,8 @@ public class ConversationLayout extends FrameLayout
         mConversationIcon = findViewById(R.id.conversation_icon);
         mConversationIconContainer = findViewById(R.id.conversation_icon_container);
         mIcon = findViewById(R.id.icon);
+        mAppOps = findViewById(com.android.internal.R.id.app_ops);
+        mMinTouchSize = 48 * getResources().getDisplayMetrics().density;
         mImportanceRingView = findViewById(R.id.conversation_icon_badge_ring);
         mConversationIconBadge = findViewById(R.id.conversation_icon_badge);
         mConversationIconBadgeBg = findViewById(R.id.conversation_icon_badge_bg);
@@ -871,6 +877,7 @@ public class ConversationLayout extends FrameLayout
     @RemotableViewMethod
     public void setSenderTextColor(int color) {
         mSenderTextColor = color;
+        mConversationText.setTextColor(color);
     }
 
     /**
@@ -1070,6 +1077,47 @@ public class ConversationLayout extends FrameLayout
                     return true;
                 }
             });
+        }
+        if (mAppOps.getWidth() > 0) {
+
+            // Let's increase the touch size of the app ops view if it's here
+            mAppOpsTouchRect.set(
+                    mAppOps.getLeft(),
+                    mAppOps.getTop(),
+                    mAppOps.getRight(),
+                    mAppOps.getBottom());
+            for (int i = 0; i < mAppOps.getChildCount(); i++) {
+                View child = mAppOps.getChildAt(i);
+                if (child.getVisibility() == GONE) {
+                    continue;
+                }
+                // Make sure each child has at least a minTouchSize touch target around it
+                float childTouchLeft = child.getLeft() + child.getWidth() / 2.0f
+                        - mMinTouchSize / 2.0f;
+                float childTouchRight = childTouchLeft + mMinTouchSize;
+                mAppOpsTouchRect.left = (int) Math.min(mAppOpsTouchRect.left,
+                        mAppOps.getLeft() + childTouchLeft);
+                mAppOpsTouchRect.right = (int) Math.max(mAppOpsTouchRect.right,
+                        mAppOps.getLeft() + childTouchRight);
+            }
+
+            // Increase the height
+            int heightIncrease = 0;
+            if (mAppOpsTouchRect.height() < mMinTouchSize) {
+                heightIncrease = (int) Math.ceil((mMinTouchSize - mAppOpsTouchRect.height())
+                        / 2.0f);
+            }
+            mAppOpsTouchRect.inset(0, -heightIncrease);
+
+            // Let's adjust the hitrect since app ops isn't a direct child
+            ViewGroup viewGroup = (ViewGroup) mAppOps.getParent();
+            while (viewGroup != this) {
+                mAppOpsTouchRect.offset(viewGroup.getLeft(), viewGroup.getTop());
+                viewGroup = (ViewGroup) viewGroup.getParent();
+            }
+            //
+            // Extend the size of the app opps to be at least 48dp
+            setTouchDelegate(new TouchDelegate(mAppOpsTouchRect, mAppOps));
         }
     }
 
