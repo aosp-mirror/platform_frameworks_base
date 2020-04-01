@@ -16,10 +16,12 @@
 
 package android.content.pm.parsing.result;
 
-import android.annotation.Hide;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
 /**
  * Used as a method parameter which is then transformed into a {@link ParseResult}. This is
@@ -30,7 +32,51 @@ import android.content.pm.PackageManager;
  */
 public interface ParseInput {
 
+    /**
+     * Errors encountered during parsing may rely on the targetSDK version of the application to
+     * determine whether or not to fail. These are passed into {@link #deferError(String, long)}
+     * when encountered, and the implementation will handle how to defer the errors until the
+     * targetSdkVersion is known and sent to {@link #enableDeferredError(String, int)}.
+     *
+     * All of these must be marked {@link ChangeId}, as that is the mechanism used to check if the
+     * error must be propagated. This framework also allows developers to pre-disable specific
+     * checks if they wish to target a newer SDK version in a development environment without
+     * having to migrate their entire app to validate on a newer platform.
+     */
+    final class DeferredError {
+        /**
+         * Missing an "application" or "instrumentation" tag.
+         */
+        @ChangeId
+        @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+        public static final long MISSING_APP_TAG = 150776642;
+
+        /**
+         * An intent filter's actor or category is an empty string. A bug in the platform before R
+         * allowed this to pass through without an error. This does not include cases when the
+         * attribute is null/missing, as that has always been a failure.
+         */
+        @ChangeId
+        @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+        public static final long EMPTY_INTENT_ACTION_CATEGORY = 151163173;
+    }
+
     <ResultType> ParseResult<ResultType> success(ResultType result);
+
+    /**
+     * Used for errors gated by {@link DeferredError}. Will return an error result if the
+     * targetSdkVersion is already known and this must be returned as a real error. The result
+     * contains null and should not be unwrapped.
+     *
+     * @see #error(String)
+     */
+    ParseResult<?> deferError(@NonNull String parseError, long deferredError);
+
+    /**
+     * Called after targetSdkVersion is known. Returns an error result if a previously deferred
+     * error was registered. The result contains null and should not be unwrapped.
+     */
+    ParseResult<?> enableDeferredError(String packageName, int targetSdkVersion);
 
     /** @see #error(int, String, Exception) */
     <ResultType> ParseResult<ResultType> error(int parseError);
@@ -52,9 +98,6 @@ public interface ParseInput {
      * The calling site of that method is then expected to check the result for error, and
      * continue to bubble up if it is an error.
      *
-     * Or, if the code explicitly handles an error,
-     * {@link ParseResult#ignoreError()} should be called.
-     *
      * If the result {@link ParseResult#isSuccess()}, then it can be used as-is, as
      * overlapping/consecutive successes are allowed.
      */
@@ -66,5 +109,17 @@ public interface ParseInput {
      * but cast the type of the {@link ParseResult} for type safety, since the parameter
      * and the receiver should be the same object.
      */
-    <ResultType> ParseResult<ResultType> error(ParseResult result);
+    <ResultType> ParseResult<ResultType> error(ParseResult<?> result);
+
+    /**
+     * Implemented instead of a direct reference to
+     * {@link com.android.internal.compat.IPlatformCompat}, allowing caching and testing logic to
+     * be separated out.
+     */
+    interface Callback {
+        /**
+         * @return true if the changeId should be enabled
+         */
+        boolean isChangeEnabled(long changeId, @NonNull String packageName, int targetSdkVersion);
+    }
 }
