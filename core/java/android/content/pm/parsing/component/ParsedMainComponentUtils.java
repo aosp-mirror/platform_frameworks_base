@@ -20,6 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.IntentFilter;
 import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -28,9 +31,6 @@ import android.os.Build;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -83,12 +83,11 @@ class ParsedMainComponentUtils {
             ParseResult<String> processNameResult = ComponentParseUtils.buildProcessName(
                     pkg.getPackageName(), pkg.getProcessName(), processName, flags,
                     separateProcesses, input);
-            if (processNameResult.isSuccess()) {
-                component.setProcessName(processNameResult.getResult());
-            } else {
-                // Backwards-compat, ignore error
-                processNameResult.ignoreError();
+            if (processNameResult.isError()) {
+                return input.error(processNameResult);
             }
+
+            component.setProcessName(processNameResult.getResult());
         }
 
         if (splitNameAttr != null) {
