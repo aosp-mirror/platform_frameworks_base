@@ -2526,7 +2526,7 @@ static void android_media_MediaCodec_setAudioPresentation(
     codec->selectAudioPresentation((int32_t)presentationId, (int32_t)programId);
 }
 
-static void android_media_MediaCodec_native_init(JNIEnv *env) {
+static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
     ScopedLocalRef<jclass> clazz(
             env, env->FindClass("android/media/MediaCodec"));
     CHECK(clazz.get() != NULL);
@@ -2983,7 +2983,7 @@ static void android_media_MediaCodec_LinearBlock_native_obtain(
 }
 
 static jboolean android_media_MediaCodec_LinearBlock_checkCompatible(
-        JNIEnv *env, jobjectArray codecNames) {
+        JNIEnv *env, jclass, jobjectArray codecNames) {
     std::vector<std::string> names;
     PopulateNamesVector(env, codecNames, &names);
     bool isCompatible = false;
