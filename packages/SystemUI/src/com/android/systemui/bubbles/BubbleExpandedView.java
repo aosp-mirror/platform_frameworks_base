@@ -125,6 +125,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                     // Custom options so there is no activity transition animation
                     ActivityOptions options = ActivityOptions.makeCustomAnimation(getContext(),
                             0 /* enterResId */, 0 /* exitResId */);
+                    options.setTaskAlwaysOnTop(true);
                     // Post to keep the lifecycle normal
                     post(() -> {
                         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
