@@ -22,6 +22,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.NotificationHeaderView;
@@ -1264,5 +1265,28 @@ public class NotificationChildrenContainer extends ViewGroup {
     public void setHeaderVisibleAmount(float headerVisibleAmount) {
         mHeaderVisibleAmount = headerVisibleAmount;
         mCurrentHeaderTranslation = (int) ((1.0f - headerVisibleAmount) * mTranslationForHeader);
+    }
+
+    /**
+     * Show a set of app opp icons in the layout.
+     *
+     * @param appOps which app ops to show
+     */
+    public void showAppOpsIcons(ArraySet<Integer> appOps) {
+        if (mNotificationHeaderWrapper != null) {
+            mNotificationHeaderWrapper.showAppOpsIcons(appOps);
+        }
+        if (mNotificationHeaderWrapperLowPriority != null) {
+            mNotificationHeaderWrapperLowPriority.showAppOpsIcons(appOps);
+        }
+    }
+
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlertedRecently) {
+        if (mNotificationHeaderWrapper != null) {
+            mNotificationHeaderWrapper.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
+        }
+        if (mNotificationHeaderWrapperLowPriority != null) {
+            mNotificationHeaderWrapperLowPriority.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
+        }
     }
 }

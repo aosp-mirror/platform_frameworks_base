@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,6 +94,14 @@ public abstract class NotificationViewWrapper implements TransformableView {
      * @param row the row this wrapper is attached to
      */
     public void onContentUpdated(ExpandableNotificationRow row) {
+    }
+
+    /**
+     * Show a set of app opp icons in the layout.
+     *
+     * @param appOps which app ops to show
+     */
+    public void showAppOpsIcons(ArraySet<Integer> appOps) {
     }
 
     public void onReinflated() {
@@ -361,5 +370,11 @@ public abstract class NotificationViewWrapper implements TransformableView {
      */
     public int getExtraMeasureHeight() {
         return 0;
+    }
+
+    /**
+     * Set the view to have recently visibly alerted.
+     */
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
     }
 }

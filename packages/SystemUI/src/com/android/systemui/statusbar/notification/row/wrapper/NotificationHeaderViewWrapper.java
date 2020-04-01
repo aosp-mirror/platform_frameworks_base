@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.row.wrapper;
 
 import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
 
+import android.annotation.NonNull;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.content.Context;
 import android.util.ArraySet;
@@ -60,6 +62,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     protected NotificationHeaderView mNotificationHeader;
     private TextView mHeaderText;
     private ImageView mWorkProfileImage;
+    private View mCameraIcon;
+    private View mMicIcon;
+    private View mOverlayIcon;
+    private View mAppOps;
+    private View mAudiblyAlertedIcon;
 
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
@@ -107,6 +114,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
+        mCameraIcon = mView.findViewById(com.android.internal.R.id.camera);
+        mMicIcon = mView.findViewById(com.android.internal.R.id.mic);
+        mOverlayIcon = mView.findViewById(com.android.internal.R.id.overlay);
+        mAppOps = mView.findViewById(com.android.internal.R.id.app_ops);
+        mAudiblyAlertedIcon = mView.findViewById(com.android.internal.R.id.alerted_icon);
         if (mNotificationHeader != null) {
             mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
             mColor = mNotificationHeader.getOriginalIconColor();
@@ -114,8 +126,35 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     private void addAppOpsOnClickListener(ExpandableNotificationRow row) {
+        View.OnClickListener listener = row.getAppOpsOnClickListener();
         if (mNotificationHeader != null) {
-            mNotificationHeader.setAppOpsOnClickListener(row.getAppOpsOnClickListener());
+            mNotificationHeader.setAppOpsOnClickListener(listener);
+        }
+        mAppOps.setOnClickListener(listener);
+        mCameraIcon.setOnClickListener(listener);
+        mMicIcon.setOnClickListener(listener);
+        mOverlayIcon.setOnClickListener(listener);
+    }
+
+    /**
+     * Shows or hides 'app op in use' icons based on app usage.
+     */
+    @Override
+    public void showAppOpsIcons(ArraySet<Integer> appOps) {
+        if (appOps == null) {
+            return;
+        }
+        if (mOverlayIcon != null) {
+            mOverlayIcon.setVisibility(appOps.contains(AppOpsManager.OP_SYSTEM_ALERT_WINDOW)
+                    ? View.VISIBLE : View.GONE);
+        }
+        if (mCameraIcon != null) {
+            mCameraIcon.setVisibility(appOps.contains(AppOpsManager.OP_CAMERA)
+                    ? View.VISIBLE : View.GONE);
+        }
+        if (mMicIcon != null) {
+            mMicIcon.setVisibility(appOps.contains(AppOpsManager.OP_RECORD_AUDIO)
+                    ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -184,6 +223,18 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE,
                     mHeaderText);
         }
+        if (mCameraIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mCameraIcon);
+        }
+        if (mMicIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mMicIcon);
+        }
+        if (mOverlayIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mOverlayIcon);
+        }
+        if (mAudiblyAlertedIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mAudiblyAlertedIcon);
+        }
     }
 
     @Override
@@ -191,6 +242,13 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
         if (mNotificationHeader != null) {
             mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
+        }
+    }
+
+    @Override
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
+        if (mAudiblyAlertedIcon != null) {
+            mAudiblyAlertedIcon.setVisibility(audiblyAlerted ? View.VISIBLE : View.GONE);
         }
     }
 
