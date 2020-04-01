@@ -1073,7 +1073,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         });
 
-        mAutoHideController.addAutoHideUiElement(new AutoHideUiElement() {
+        mAutoHideController.setStatusBar(new AutoHideUiElement() {
             @Override
             public void synchronizeState() {
                 checkBarModes();
