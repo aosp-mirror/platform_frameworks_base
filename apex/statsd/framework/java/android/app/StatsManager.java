@@ -467,10 +467,6 @@ public final class StatsManager {
         synchronized (sLock) {
             try {
                 IStatsManagerService service = getIStatsManagerServiceLocked();
-                if (service == null) {
-                    throw new StatsUnavailableException("Failed to find statsmanager when "
-                                                              + "getting experiment IDs");
-                }
                 return service.getRegisteredExperimentIds();
             } catch (RemoteException e) {
                 if (DEBUG) {
