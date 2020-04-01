@@ -172,6 +172,10 @@ public class InsetsState implements Parcelable {
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources.get(type);
             if (source == null) {
+                int index = indexOf(toPublicType(type));
+                if (typeInsetsMap[index] == null) {
+                    typeInsetsMap[index] = Insets.NONE;
+                }
                 continue;
             }
 
