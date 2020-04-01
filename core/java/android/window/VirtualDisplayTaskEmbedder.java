@@ -248,7 +248,6 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
         options = super.prepareActivityOptions(options);
         options.setLaunchDisplayId(getDisplayId());
         options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        options.setTaskAlwaysOnTop(true);
         return options;
     }
 
