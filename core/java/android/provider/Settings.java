@@ -8612,7 +8612,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
         public static final String CARRIER_APPS_HANDLED = "carrier_apps_handled";
 
         /**

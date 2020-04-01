@@ -26,8 +26,24 @@ mainline_stubs_args =
     "--hide Typo " +
     "--hide UnavailableSymbol "
 
-// TODO: remove this server classes are cleaned up.
-mainline_stubs_args += "--hide-package com.android.server "
+// TODO: modularize this so not every module has the same whitelist
+framework_packages_to_document = [
+    "android",
+    "dalvik",
+    "java",
+    "javax",
+    "junit",
+    "org.apache.http",
+    "org.json",
+    "org.w3c.dom",
+    "org.xml.sax",
+    "org.xmlpull",
+]
+
+// TODO: remove the hiding when server classes are cleaned up.
+mainline_framework_stubs_args =
+    mainline_stubs_args +
+    "--hide-package com.android.server "
 
 priv_apps = " " +
     "--show-annotation android.annotation.SystemApi\\(" +
@@ -39,11 +55,20 @@ module_libs = " " +
         "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
     "\\) "
 
+mainline_service_stubs_args =
+    mainline_stubs_args +
+    "--show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.SYSTEM_SERVER" +
+    "\\) " +
+    "--hide-annotation android.annotation.Hide " +
+    "--hide InternalClasses " // com.android.* classes are okay in this interface
+
 stubs_defaults {
     name: "framework-module-stubs-defaults-publicapi",
-    args: mainline_stubs_args,
+    args: mainline_framework_stubs_args,
     installable: false,
     sdk_version: "current",
+    filter_packages: framework_packages_to_document,
     check_api: {
         current: {
             api_file: "api/current.txt",
@@ -54,10 +79,11 @@ stubs_defaults {
 
 stubs_defaults {
     name: "framework-module-stubs-defaults-systemapi",
-    args: mainline_stubs_args + priv_apps,
+    args: mainline_framework_stubs_args + priv_apps,
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "system_current",
+    filter_packages: framework_packages_to_document,
     check_api: {
         current: {
             api_file: "api/system-current.txt",
@@ -91,10 +117,11 @@ java_defaults {
 
 stubs_defaults {
     name: "framework-module-api-defaults-module_libs_api",
-    args: mainline_stubs_args + module_libs,
+    args: mainline_framework_stubs_args + module_libs,
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    filter_packages: framework_packages_to_document,
     check_api: {
         current: {
             api_file: "api/module-lib-current.txt",
@@ -105,8 +132,28 @@ stubs_defaults {
 
 stubs_defaults {
     name: "framework-module-stubs-defaults-module_libs_api",
-    args: mainline_stubs_args + module_libs + priv_apps,
+    args: mainline_framework_stubs_args + module_libs + priv_apps,
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    filter_packages: framework_packages_to_document,
+}
+
+stubs_defaults {
+    name: "service-module-stubs-srcs-defaults",
+    args: mainline_service_stubs_args,
+    installable: false,
+    filter_packages: ["com.android."],
+    check_api: {
+        current: {
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
+        },
+    },
+}
+
+// Empty for now, but a convenient place to add rules for all
+// module java_library system_server stub libs.
+java_defaults {
+    name: "service-module-stubs-defaults",
 }

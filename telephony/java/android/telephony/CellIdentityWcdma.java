@@ -68,6 +68,7 @@ public final class CellIdentityWcdma extends CellIdentity {
         mUarfcn = CellInfo.UNAVAILABLE;
         mAdditionalPlmns = new ArraySet<>();
         mCsgInfo = null;
+        mGlobalCellId = null;
     }
 
     /**
@@ -101,6 +102,7 @@ public final class CellIdentityWcdma extends CellIdentity {
             }
         }
         mCsgInfo = csgInfo;
+        updateGlobalCellId();
     }
 
     /** @hide */
@@ -140,6 +142,18 @@ public final class CellIdentityWcdma extends CellIdentity {
 
     @NonNull CellIdentityWcdma copy() {
         return new CellIdentityWcdma(this);
+    }
+
+    /** @hide */
+    @Override
+    protected void updateGlobalCellId() {
+        mGlobalCellId = null;
+        String plmn = getPlmn();
+        if (plmn == null) return;
+
+        if (mLac == CellInfo.UNAVAILABLE || mCid == CellInfo.UNAVAILABLE) return;
+
+        mGlobalCellId = plmn + String.format("%04x%04x", mLac, mCid);
     }
 
     /**
