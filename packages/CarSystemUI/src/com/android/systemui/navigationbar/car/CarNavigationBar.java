@@ -150,7 +150,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             ex.rethrowFromSystemServer();
         }
 
-        mAutoHideController.addAutoHideUiElement(new AutoHideUiElement() {
+        mAutoHideController.setNavigationBar(new AutoHideUiElement() {
             @Override
             public void synchronizeState() {
                 // No op.
