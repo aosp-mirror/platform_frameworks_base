@@ -1381,7 +1381,8 @@ class WindowStateAnimator {
             return true;
         }
 
-        if (isEntrance && mWin.mAttrs.type == TYPE_INPUT_METHOD) {
+        final boolean isImeWindow = mWin.mAttrs.type == TYPE_INPUT_METHOD;
+        if (isEntrance && isImeWindow) {
             mWin.getDisplayContent().adjustForImeIfNeeded();
             mWin.setDisplayLayoutNeeded();
             mService.mWindowPlacerLocked.requestTraversal();
@@ -1435,11 +1436,11 @@ class WindowStateAnimator {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
                 mAnimationIsEntrance = isEntrance;
             }
-        } else {
+        } else if (!isImeWindow) {
             mWin.cancelAnimation();
         }
 
-        if (!isEntrance && mWin.mAttrs.type == TYPE_INPUT_METHOD) {
+        if (!isEntrance && isImeWindow) {
             mWin.getDisplayContent().adjustForImeIfNeeded();
         }
 
