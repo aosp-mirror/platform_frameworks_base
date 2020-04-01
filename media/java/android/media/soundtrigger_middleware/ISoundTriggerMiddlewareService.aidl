@@ -39,10 +39,4 @@ interface ISoundTriggerMiddlewareService {
      * one of the handles from the returned list.
      */
     ISoundTriggerModule attach(int handle, ISoundTriggerCallback callback);
-
-    /**
-     * Notify the service that external input capture is taking place. This may cause some of the
-     * active recognitions to be aborted.
-     */
-    void setExternalCaptureState(boolean active);
 }
