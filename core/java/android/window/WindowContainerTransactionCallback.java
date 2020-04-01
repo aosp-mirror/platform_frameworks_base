@@ -16,13 +16,26 @@
 
 package android.window;
 
-import android.window.WindowContainerToken;
+import android.annotation.NonNull;
+import android.annotation.TestApi;
+import android.view.SurfaceControl;
+
 
 /**
- * Interface for WindowManager to delegate control of display areas.
+ * See WindowOrganizer#applyTransaction.
  * {@hide}
  */
-oneway interface IDisplayAreaOrganizer {
-    void onDisplayAreaAppeared(in WindowContainerToken displayArea);
-    void onDisplayAreaVanished(in WindowContainerToken displayArea);
+@TestApi
+public abstract class WindowContainerTransactionCallback {
+
+    public abstract void onTransactionReady(int id, @NonNull SurfaceControl.Transaction t);
+
+    /** @hide */
+    final IWindowContainerTransactionCallback mInterface =
+            new IWindowContainerTransactionCallback.Stub() {
+        @Override
+        public void onTransactionReady(int id, SurfaceControl.Transaction t) {
+            WindowContainerTransactionCallback.this.onTransactionReady(id, t);
+        }
+    };
 }

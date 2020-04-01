@@ -83,7 +83,7 @@ import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.Gravity;
 import android.window.ITaskOrganizer;
-import android.window.IWindowContainer;
+import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
@@ -1014,10 +1014,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
                     WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
             mService.mTaskOrganizerController.registerTaskOrganizer(this,
                     WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-            IWindowContainer primary = mService.mTaskOrganizerController.createRootTask(
+            WindowContainerToken primary = mService.mTaskOrganizerController.createRootTask(
                     displayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).token;
             mPrimary = WindowContainer.fromBinder(primary.asBinder()).asTask();
-            IWindowContainer secondary = mService.mTaskOrganizerController.createRootTask(
+            WindowContainerToken secondary = mService.mTaskOrganizerController.createRootTask(
                     displayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).token;
             mSecondary = WindowContainer.fromBinder(secondary.asBinder()).asTask();
         }
@@ -1037,7 +1037,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                         == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                     mInSplit = true;
                     mService.mTaskOrganizerController.setLaunchRoot(mDisplayId,
-                            mSecondary.mRemoteToken);
+                            mSecondary.mRemoteToken.toWindowContainerToken());
                     // move everything to secondary because test expects this but usually sysui
                     // does it.
                     DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
