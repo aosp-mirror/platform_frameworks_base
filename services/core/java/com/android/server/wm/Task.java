@@ -478,7 +478,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     /**
      * The TaskOrganizer which is delegated presentation of this task. If set the Task will
-     * emit an IWindowContainer (allowing access to it's SurfaceControl leash) to the organizers
+     * emit an WindowContainerToken (allowing access to it's SurfaceControl leash) to the organizers
      * taskAppeared callback, and emit a taskRemoved callback when the Task is vanished.
      */
     ITaskOrganizer mTaskOrganizer;
@@ -3435,7 +3435,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
         info.configuration.setTo(getConfiguration());
-        info.token = mRemoteToken;
+        info.token = mRemoteToken.toWindowContainerToken();
 
         //TODO (AM refactor): Just use local once updateEffectiveIntent is run during all child
         //                    order changes.

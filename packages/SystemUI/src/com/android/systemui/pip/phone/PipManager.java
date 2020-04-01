@@ -18,7 +18,6 @@ package com.android.systemui.pip.phone;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.window.WindowOrganizer.TaskOrganizer;
 
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_FULLSCREEN;
 
@@ -234,7 +233,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
 
         try {
-            TaskOrganizer.registerOrganizer(mPipTaskOrganizer, WINDOWING_MODE_PINNED);
+            mPipTaskOrganizer.registerOrganizer(WINDOWING_MODE_PINNED);
             ActivityManager.StackInfo stackInfo = activityTaskManager.getStackInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (stackInfo != null) {

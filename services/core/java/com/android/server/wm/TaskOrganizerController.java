@@ -36,7 +36,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
-import android.window.IWindowContainer;
+import android.window.WindowContainerToken;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -290,7 +290,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public boolean deleteRootTask(IWindowContainer token) {
+    public boolean deleteRootTask(WindowContainerToken token) {
         enforceStackPermission("deleteRootTask()");
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -367,7 +367,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public IWindowContainer getImeTarget(int displayId) {
+    public WindowContainerToken getImeTarget(int displayId) {
         enforceStackPermission("getImeTarget()");
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -382,7 +382,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 if (task == null) {
                     return null;
                 }
-                return task.getRootTask().mRemoteToken;
+                return task.getRootTask().mRemoteToken.toWindowContainerToken();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -390,7 +390,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public void setLaunchRoot(int displayId, @Nullable IWindowContainer token) {
+    public void setLaunchRoot(int displayId, @Nullable WindowContainerToken token) {
         enforceStackPermission("setLaunchRoot()");
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -422,7 +422,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public List<RunningTaskInfo> getChildTasks(IWindowContainer parent,
+    public List<RunningTaskInfo> getChildTasks(WindowContainerToken parent,
             @Nullable int[] activityTypes) {
         enforceStackPermission("getChildTasks()");
         final long ident = Binder.clearCallingIdentity();

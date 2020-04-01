@@ -18,6 +18,7 @@ package android.window;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -26,7 +27,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
-import android.window.IWindowContainer;
 import android.view.SurfaceControl;
 
 import java.util.ArrayList;
@@ -39,7 +39,8 @@ import java.util.Map;
  *
  * @hide
  */
-public class WindowContainerTransaction implements Parcelable {
+@TestApi
+public final class WindowContainerTransaction implements Parcelable {
     private final ArrayMap<IBinder, Change> mChanges = new ArrayMap<>();
 
     // Flat list because re-order operations are order-dependent
@@ -47,7 +48,7 @@ public class WindowContainerTransaction implements Parcelable {
 
     public WindowContainerTransaction() {}
 
-    protected WindowContainerTransaction(Parcel in) {
+    private WindowContainerTransaction(Parcel in) {
         in.readMap(mChanges, null /* loader */);
         in.readList(mHierarchyOps, null /* loader */);
     }
@@ -64,7 +65,9 @@ public class WindowContainerTransaction implements Parcelable {
     /**
      * Resize a container.
      */
-    public WindowContainerTransaction setBounds(IWindowContainer container, Rect bounds) {
+    @NonNull
+    public WindowContainerTransaction setBounds(
+            @NonNull WindowContainerToken container,@NonNull Rect bounds) {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mConfiguration.windowConfiguration.setBounds(bounds);
         chg.mConfigSetMask |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
@@ -77,7 +80,9 @@ public class WindowContainerTransaction implements Parcelable {
      * app's DisplayInfo. It is derived by subtracting the overlapping portion of the navbar from
      * the full bounds.
      */
-    public WindowContainerTransaction setAppBounds(IWindowContainer container, Rect appBounds) {
+    @NonNull
+    public WindowContainerTransaction setAppBounds(
+            @NonNull WindowContainerToken container,@NonNull Rect appBounds) {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mConfiguration.windowConfiguration.setAppBounds(appBounds);
         chg.mConfigSetMask |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
@@ -91,7 +96,9 @@ public class WindowContainerTransaction implements Parcelable {
      * derived by subtracting the overlapping portions of both the statusbar and the navbar from
      * the full bounds.
      */
-    public WindowContainerTransaction setScreenSizeDp(IWindowContainer container, int w, int h) {
+    @NonNull
+    public WindowContainerTransaction setScreenSizeDp(
+            @NonNull WindowContainerToken container, int w, int h) {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mConfiguration.screenWidthDp = w;
         chg.mConfiguration.screenHeightDp = h;
@@ -100,11 +107,12 @@ public class WindowContainerTransaction implements Parcelable {
     }
 
     /**
-     * Notify activies within the hiearchy of a container that they have entered picture-in-picture
+     * Notify activities within the hierarchy of a container that they have entered picture-in-picture
      * mode with the given bounds.
      */
-    public WindowContainerTransaction scheduleFinishEnterPip(IWindowContainer container,
-            Rect bounds) {
+    @NonNull
+    public WindowContainerTransaction scheduleFinishEnterPip(
+            @NonNull WindowContainerToken container,@NonNull Rect bounds) {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mPinnedBounds = new Rect(bounds);
         chg.mChangeMask |= Change.CHANGE_PIP_CALLBACK;
@@ -123,8 +131,9 @@ public class WindowContainerTransaction implements Parcelable {
      * that you can call this, apply the WindowContainer transaction, and then later call
      * dismissPip() to achieve synchronization.
      */
-    public WindowContainerTransaction setBoundsChangeTransaction(IWindowContainer container,
-            SurfaceControl.Transaction t) {
+    @NonNull
+    public WindowContainerTransaction setBoundsChangeTransaction(
+            @NonNull WindowContainerToken container,@NonNull SurfaceControl.Transaction t) {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mBoundsChangeTransaction = t;
         chg.mChangeMask |= Change.CHANGE_BOUNDS_TRANSACTION;
@@ -139,8 +148,9 @@ public class WindowContainerTransaction implements Parcelable {
      *
      * TODO(b/134365562): Can be removed once TaskOrg drives full-screen
      */
-    public WindowContainerTransaction setActivityWindowingMode(IWindowContainer container,
-            int windowingMode) {
+    @NonNull
+    public WindowContainerTransaction setActivityWindowingMode(
+            @NonNull WindowContainerToken container, int windowingMode) {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mActivityWindowingMode = windowingMode;
         return this;
@@ -149,8 +159,9 @@ public class WindowContainerTransaction implements Parcelable {
     /**
      * Sets the windowing mode of the given container.
      */
-    public WindowContainerTransaction setWindowingMode(IWindowContainer container,
-            int windowingMode) {
+    @NonNull
+    public WindowContainerTransaction setWindowingMode(
+            @NonNull WindowContainerToken container, int windowingMode) {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mWindowingMode = windowingMode;
         return this;
@@ -161,7 +172,9 @@ public class WindowContainerTransaction implements Parcelable {
      * child can be focused; however, when {@code true}, it is still possible for children to be
      * non-focusable due to WM policy.
      */
-    public WindowContainerTransaction setFocusable(IWindowContainer container, boolean focusable) {
+    @NonNull
+    public WindowContainerTransaction setFocusable(
+            @NonNull WindowContainerToken container, boolean focusable) {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mFocusable = focusable;
         chg.mChangeMask |= Change.CHANGE_FOCUSABLE;
@@ -173,7 +186,9 @@ public class WindowContainerTransaction implements Parcelable {
      * visibility of the container applies, but when {@code true} the container will be forced
      * to be hidden.
      */
-    public WindowContainerTransaction setHidden(IWindowContainer container, boolean hidden) {
+    @NonNull
+    public WindowContainerTransaction setHidden(
+            @NonNull WindowContainerToken container, boolean hidden) {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mHidden = hidden;
         chg.mChangeMask |= Change.CHANGE_HIDDEN;
@@ -183,8 +198,9 @@ public class WindowContainerTransaction implements Parcelable {
     /**
      * Set the smallestScreenWidth of a container.
      */
-    public WindowContainerTransaction setSmallestScreenWidthDp(IWindowContainer container,
-            int widthDp) {
+    @NonNull
+    public WindowContainerTransaction setSmallestScreenWidthDp(
+            @NonNull WindowContainerToken container, int widthDp) {
         Change cfg = getOrCreateChange(container.asBinder());
         cfg.mConfiguration.smallestScreenWidthDp = widthDp;
         cfg.mConfigSetMask |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
@@ -198,8 +214,9 @@ public class WindowContainerTransaction implements Parcelable {
      * @param onTop When {@code true}, the child goes to the top of parent; otherwise it goes to
      *              the bottom.
      */
-    public WindowContainerTransaction reparent(@NonNull IWindowContainer child,
-            @Nullable IWindowContainer parent, boolean onTop) {
+    @NonNull
+    public WindowContainerTransaction reparent(@NonNull WindowContainerToken child,
+            @Nullable WindowContainerToken parent, boolean onTop) {
         mHierarchyOps.add(new HierarchyOp(child.asBinder(),
                 parent == null ? null : parent.asBinder(), onTop));
         return this;
@@ -211,36 +228,43 @@ public class WindowContainerTransaction implements Parcelable {
      * @param onTop When {@code true}, the child goes to the top of parent; otherwise it goes to
      *              the bottom.
      */
-    public WindowContainerTransaction reorder(@NonNull IWindowContainer child, boolean onTop) {
+    @NonNull
+    public WindowContainerTransaction reorder(@NonNull WindowContainerToken child, boolean onTop) {
         mHierarchyOps.add(new HierarchyOp(child.asBinder(), onTop));
         return this;
     }
 
+    /** @hide */
     public Map<IBinder, Change> getChanges() {
         return mChanges;
     }
 
+    /** @hide */
     public List<HierarchyOp> getHierarchyOps() {
         return mHierarchyOps;
     }
 
     @Override
+    @NonNull
     public String toString() {
         return "WindowContainerTransaction { changes = " + mChanges + " hops = " + mHierarchyOps
                 + " }";
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    /** @hide */
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeMap(mChanges);
         dest.writeList(mHierarchyOps);
     }
 
     @Override
+    /** @hide */
     public int describeContents() {
         return 0;
     }
 
+    @NonNull
     public static final Creator<WindowContainerTransaction> CREATOR =
             new Creator<WindowContainerTransaction>() {
                 @Override
@@ -256,7 +280,6 @@ public class WindowContainerTransaction implements Parcelable {
 
     /**
      * Holds changes on a single WindowContainer including Configuration changes.
-     *
      * @hide
      */
     public static class Change implements Parcelable {
@@ -430,6 +453,7 @@ public class WindowContainerTransaction implements Parcelable {
     /**
      * Holds information about a reparent/reorder operation in the hierarchy. This is separate from
      * Changes because they must be executed in the same order that they are added.
+     * @hide
      */
     public static class HierarchyOp implements Parcelable {
         private final IBinder mContainer;
