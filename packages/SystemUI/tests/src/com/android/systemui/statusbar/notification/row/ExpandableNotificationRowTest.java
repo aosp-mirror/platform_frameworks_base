@@ -229,22 +229,19 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testShowAppOpsIcons_header() {
-        NotificationHeaderView mockHeader = mock(NotificationHeaderView.class);
-
         NotificationContentView publicLayout = mock(NotificationContentView.class);
         mGroupRow.setPublicLayout(publicLayout);
         NotificationContentView privateLayout = mock(NotificationContentView.class);
         mGroupRow.setPrivateLayout(privateLayout);
         NotificationChildrenContainer mockContainer = mock(NotificationChildrenContainer.class);
         when(mockContainer.getNotificationChildCount()).thenReturn(1);
-        when(mockContainer.getHeaderView()).thenReturn(mockHeader);
         mGroupRow.setChildrenContainer(mockContainer);
 
         ArraySet<Integer> ops = new ArraySet<>();
         ops.add(AppOpsManager.OP_ANSWER_PHONE_CALLS);
         mGroupRow.showAppOpsIcons(ops);
 
-        verify(mockHeader, times(1)).showAppOpsIcons(ops);
+        verify(mockContainer, times(1)).showAppOpsIcons(ops);
         verify(privateLayout, times(1)).showAppOpsIcons(ops);
         verify(publicLayout, times(1)).showAppOpsIcons(ops);
 

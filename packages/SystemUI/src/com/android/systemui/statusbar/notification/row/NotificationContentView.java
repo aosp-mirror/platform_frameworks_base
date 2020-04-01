@@ -1468,14 +1468,14 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void showAppOpsIcons(ArraySet<Integer> activeOps) {
-        if (mContractedChild != null && mContractedWrapper.getNotificationHeader() != null) {
-            mContractedWrapper.getNotificationHeader().showAppOpsIcons(activeOps);
+        if (mContractedChild != null) {
+            mContractedWrapper.showAppOpsIcons(activeOps);
         }
-        if (mExpandedChild != null && mExpandedWrapper.getNotificationHeader() != null) {
-            mExpandedWrapper.getNotificationHeader().showAppOpsIcons(activeOps);
+        if (mExpandedChild != null) {
+            mExpandedWrapper.showAppOpsIcons(activeOps);
         }
-        if (mHeadsUpChild != null && mHeadsUpWrapper.getNotificationHeader() != null) {
-            mHeadsUpWrapper.getNotificationHeader().showAppOpsIcons(activeOps);
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.showAppOpsIcons(activeOps);
         }
     }
 

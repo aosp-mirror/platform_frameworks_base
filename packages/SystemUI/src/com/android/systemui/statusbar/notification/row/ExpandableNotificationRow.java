@@ -1669,8 +1669,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void showAppOpsIcons(ArraySet<Integer> activeOps) {
-        if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
-            mChildrenContainer.getHeaderView().showAppOpsIcons(activeOps);
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.showAppOpsIcons(activeOps);
         }
         mPrivateLayout.showAppOpsIcons(activeOps);
         mPublicLayout.showAppOpsIcons(activeOps);
