@@ -216,11 +216,11 @@ public class ApexManagerTest {
     }
 
     @Test
-    public void testAbortActiveSession_remoteException() throws RemoteException {
-        doThrow(RemoteException.class).when(mApexService).abortActiveSession();
+    public void testRevertActiveSessions_remoteException() throws RemoteException {
+        doThrow(RemoteException.class).when(mApexService).revertActiveSessions();
 
         try {
-            assertThat(mApexManager.abortActiveSession()).isFalse();
+            assertThat(mApexManager.revertActiveSessions()).isFalse();
         } catch (Exception e) {
             throw new AssertionError("ApexManager should not raise Exception");
         }
