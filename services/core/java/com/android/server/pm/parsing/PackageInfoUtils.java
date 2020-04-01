@@ -48,7 +48,6 @@ import android.content.pm.parsing.component.ParsedService;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
@@ -272,7 +271,7 @@ public class PackageInfoUtils {
 
         ActivityInfo info =
                 PackageInfoWithoutStateUtils.generateActivityInfoUnchecked(a, applicationInfo);
-        assignSharedFieldsForComponentInfo(info, a, pkgSetting, userId);
+        assignSharedFieldsForComponentInfo(info, a, pkgSetting);
         return info;
     }
 
@@ -307,7 +306,7 @@ public class PackageInfoUtils {
 
         ServiceInfo info =
                 PackageInfoWithoutStateUtils.generateServiceInfoUnchecked(s, applicationInfo);
-        assignSharedFieldsForComponentInfo(info, s, pkgSetting, userId);
+        assignSharedFieldsForComponentInfo(info, s, pkgSetting);
         return info;
     }
 
@@ -334,7 +333,7 @@ public class PackageInfoUtils {
         }
         ProviderInfo info = PackageInfoWithoutStateUtils.generateProviderInfoUnchecked(p, flags,
                 applicationInfo);
-        assignSharedFieldsForComponentInfo(info, p, pkgSetting, userId);
+        assignSharedFieldsForComponentInfo(info, p, pkgSetting);
         return info;
     }
 
@@ -359,7 +358,7 @@ public class PackageInfoUtils {
         info.nativeLibraryDir = pkg.getNativeLibraryDir();
         info.secondaryNativeLibraryDir = pkg.getSecondaryNativeLibraryDir();
 
-        assignStateFieldsForPackageItemInfo(info, i, pkgSetting, userId);
+        assignStateFieldsForPackageItemInfo(info, i, pkgSetting);
 
         return info;
     }
@@ -427,9 +426,8 @@ public class PackageInfoUtils {
     }
 
     private static void assignSharedFieldsForComponentInfo(@NonNull ComponentInfo componentInfo,
-            @NonNull ParsedMainComponent mainComponent, @Nullable PackageSetting pkgSetting,
-            int userId) {
-        assignStateFieldsForPackageItemInfo(componentInfo, mainComponent, pkgSetting, userId);
+            @NonNull ParsedMainComponent mainComponent, @Nullable PackageSetting pkgSetting) {
+        assignStateFieldsForPackageItemInfo(componentInfo, mainComponent, pkgSetting);
         componentInfo.descriptionRes = mainComponent.getDescriptionRes();
         componentInfo.directBootAware = mainComponent.isDirectBootAware();
         componentInfo.enabled = mainComponent.isEnabled();
@@ -438,12 +436,8 @@ public class PackageInfoUtils {
 
     private static void assignStateFieldsForPackageItemInfo(
             @NonNull PackageItemInfo packageItemInfo, @NonNull ParsedComponent component,
-            @Nullable PackageSetting pkgSetting, int userId) {
-        Pair<CharSequence, Integer> labelAndIcon =
-                ParsedComponentStateUtils.getNonLocalizedLabelAndIcon(component, pkgSetting,
-                        userId);
-        packageItemInfo.nonLocalizedLabel = labelAndIcon.first;
-        packageItemInfo.icon = labelAndIcon.second;
+            @Nullable PackageSetting pkgSetting) {
+        // TODO(b/135203078): Add setting related state
     }
 
     @CheckResult
