@@ -68,7 +68,6 @@ import android.util.Pools;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.window.IWindowContainer;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
@@ -77,6 +76,7 @@ import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.window.IWindowContainer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
@@ -726,6 +726,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     DisplayContent getDisplayContent() {
         return mDisplayContent;
+    }
+
+    /** Get the first node of type {@link DisplayArea} above or at this node. */
+    @Nullable
+    DisplayArea getDisplayArea() {
+        WindowContainer parent = getParent();
+        return parent != null ? parent.getDisplayArea() : null;
     }
 
     void setWaitingForDrawnIfResizingChanged() {
