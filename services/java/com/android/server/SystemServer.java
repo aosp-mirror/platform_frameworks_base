@@ -519,10 +519,8 @@ public final class SystemServer {
             // Initialize native services.
             System.loadLibrary("android_servers");
 
-            // Debug builds - allow heap profiling.
-            if (Build.IS_DEBUGGABLE) {
-                initZygoteChildHeapProfiling();
-            }
+            // Allow heap / perf profiling.
+            initZygoteChildHeapProfiling();
 
             // Debug builds - spawn a thread to monitor for fd leaks.
             if (Build.IS_DEBUGGABLE) {
