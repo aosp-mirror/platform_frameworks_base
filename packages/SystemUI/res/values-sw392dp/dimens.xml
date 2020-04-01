@@ -30,5 +30,7 @@
     <dimen name="global_actions_grid_item_icon_side_margin">22dp</dimen>
     <dimen name="global_actions_grid_item_icon_bottom_margin">4dp</dimen>
 
+    <!-- Home Controls -->
+    <dimen name="controls_list_side_margin">16dp</dimen>
 </resources>
 

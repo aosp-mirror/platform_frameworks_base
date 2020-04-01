@@ -26,5 +26,7 @@
          navigation_extra_key_width -->
     <dimen name="navigation_side_padding">40dip</dimen>
 
+    <!-- Home Controls -->
+    <dimen name="controls_list_side_margin">12dp</dimen>
 </resources>
 
