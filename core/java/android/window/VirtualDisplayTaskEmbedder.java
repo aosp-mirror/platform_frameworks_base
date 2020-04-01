@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.window;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
@@ -23,6 +23,11 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLI
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
+import android.app.ActivityView;
+import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Insets;
@@ -72,7 +77,7 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
      * @param singleTaskInstance whether to apply a single-task constraint to this container,
      *                           only applicable if virtual displays are used
      */
-    VirtualDisplayTaskEmbedder(Context context, VirtualDisplayTaskEmbedder.Host host,
+    public VirtualDisplayTaskEmbedder(Context context, VirtualDisplayTaskEmbedder.Host host,
             boolean singleTaskInstance) {
         super(context, host);
         mSingleTaskInstance = singleTaskInstance;
