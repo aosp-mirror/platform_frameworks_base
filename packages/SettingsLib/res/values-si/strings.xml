@@ -513,16 +513,12 @@
     <string name="storage_category" msgid="2287342585424631813">"ගබඩාව"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"බෙදා ගත් දත්ත"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"බෙදා ගත් දත්ත බලා වෙනස් කරන්න"</string>
-    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
-    <skip />
-    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
-    <skip />
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"මෙම පරිශීලක සඳහා බෙදා ගත් දත්ත නැත."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"බෙදා ගත් දත්ත ලබා ගැනීමේ දෝෂයක් විය. නැවත උත්සාහ කරන්න."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"බෙදා ගත් දත්ත ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"<xliff:g id="DATE">%s</xliff:g> දින කල් ඉකුත් වේ"</string>
-    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
-    <skip />
-    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
-    <skip />
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"බෙදා ගත් දත්ත මැකීමේ දෝෂයක් විය."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"මෙම බෙදා ගත් දත්ත සඳහා අත්පත් කර ගත් කල්බදු නැත. ඔබ එය මැකීමට කැමතිද?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"යෙදුම් බෙදා ගැනීමේ දත්ත"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"යෙදුම මගින් විස්තර කිසිවක් ලබා දී නැත."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"කල් බද්ද <xliff:g id="DATE">%s</xliff:g> දින කල් ඉකුත් වේ"</string>
@@ -547,4 +543,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"පැතිකඩ තොරතුරු"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"සීමිත පැතිකඩක් නිර්මාණය කිරීමට කලින්. ඔබගේ යෙදුම් සහ පෞද්ගලික දත්ත ආරක්ෂා කිරීමට තිර අගුලක් සැකසිය යුතුයි."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"අගුල සකසන්න"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> වෙත මාරු වන්න"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"අමුත්තා එක් කරන්න"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"අමුත්තා ඉවත් කරන්න"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"අමුත්තා"</string>
 </resources>

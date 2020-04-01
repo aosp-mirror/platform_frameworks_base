@@ -513,16 +513,12 @@
     <string name="storage_category" msgid="2287342585424631813">"Berging"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Gedeelde data"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Bekyk en wysig gedeelde data"</string>
-    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
-    <skip />
-    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
-    <skip />
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Daar is geen gedeelde data vir hierdie gebruiker nie."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Kon nie gedeelde data gaan haal nie. Probeer weer."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Gedeelde data-ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Verval op <xliff:g id="DATE">%s</xliff:g>"</string>
-    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
-    <skip />
-    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
-    <skip />
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Kon nie die gedeelde data uitvee nie."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Daar is geen huurkontrakte vir hierdie gedeelde data verkry nie. Wil jy dit uitvee?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Programme wat data deel"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"Geen beskrywing is deur die program voorsien nie."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Huurkontrak verval op <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -547,4 +543,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profiel-inligting"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Voordat jy \'n beperkte profiel kan skep, moet jy \'n skermslot opstel om jou programme en persoonlike data te beskerm."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Stel slot op"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Skakel oor na <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Voeg gas by"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Verwyder gas"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Gas"</string>
 </resources>

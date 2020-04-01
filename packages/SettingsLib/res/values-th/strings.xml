@@ -232,7 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"ที่อยู่ IP และพอร์ต"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"สแกนคิวอาร์โค้ด"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"จับคู่อุปกรณ์ผ่าน Wi‑Fi ด้วยการสแกนคิวอาร์โค้ด"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"โปรดเชื่อมต่อเครือข่าย Wi-Fi"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"โปรดเชื่อมต่อกับเครือข่าย Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, แก้ไขข้อบกพร่อง, พัฒนา"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ทางลัดรายงานข้อบกพร่อง"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"แสดงปุ่มในเมนูเปิด/ปิดสำหรับการใช้รายงานข้อบกพร่อง"</string>
@@ -547,4 +547,12 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"ข้อมูลโปรไฟล์"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ก่อนที่คุณจะสามารถสร้างโปรไฟล์ที่ถูกจำกัดได้ คุณจะต้องตั้งค่าล็อกหน้าจอเพื่อปกป้องแอปและข้อมูลส่วนตัวของคุณ"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ตั้งค่าล็อก"</string>
+    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
+    <skip />
+    <!-- no translation found for guest_new_guest (3482026122932643557) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
+    <skip />
+    <!-- no translation found for guest_nickname (6332276931583337261) -->
+    <skip />
 </resources>
