@@ -493,7 +493,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    //TODO: Review this is handling multi-user properly.
+    //TODO(b/136703681): Review this is handling multi-user properly.
     void switchUser() {
         synchronized (mLock) {
             int userId = ActivityManager.getCurrentUser();
@@ -568,7 +568,9 @@ class MediaRouter2ServiceImpl {
 
         UserRecord userRecord = routerRecord.mUserRecord;
         userRecord.mRouterRecords.remove(routerRecord);
-        //TODO: update discovery request
+        userRecord.mHandler.sendMessage(
+                obtainMessage(UserHandler::updateDiscoveryPreferenceOnHandler,
+                        userRecord.mHandler));
         routerRecord.dispose();
         disposeUserIfNeededLocked(userRecord); // since router removed from user
     }
@@ -793,7 +795,7 @@ class MediaRouter2ServiceImpl {
         }
 
         long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
-        //TODO: Use MediaRouter2's OnCreateSessionListener to send proper session hints.
+        //TODO(b/152851868): Use MediaRouter2's OnCreateSessionListener to send session hints.
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::requestCreateSessionOnHandler,
                         routerRecord.mUserRecord.mHandler,
@@ -1146,7 +1148,6 @@ class MediaRouter2ServiceImpl {
             return mSessionToRouterMap.get(uniqueSessionId);
         }
 
-        //TODO: notify session info updates
         private void onProviderStateChangedOnHandler(@NonNull MediaRoute2Provider provider) {
             int providerInfoIndex = getLastProviderInfoIndex(provider.getUniqueId());
             MediaRoute2ProviderInfo providerInfo = provider.getProviderInfo();
@@ -1323,7 +1324,7 @@ class MediaRouter2ServiceImpl {
                 return true;
             }
 
-            //TODO: Handle RCN case.
+            //TODO(b/152950479): Handle RCN case.
             if (routerRecord == null) {
                 Slog.w(TAG, "Ignoring " + description + " route from unknown router.");
                 return false;
