@@ -227,10 +227,19 @@ class InsetsStateController {
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             mProviders.valueAt(i).onPostLayout();
         }
+        final ArrayList<WindowState> winInsetsChanged = mDisplayContent.mWinInsetsChanged;
         if (!mLastState.equals(mState)) {
             mLastState.set(mState, true /* copySources */);
             notifyInsetsChanged();
+        } else {
+            // The global insets state has not changed but there might be windows whose conditions
+            // (e.g., z-order) have changed. They can affect the insets states that we dispatch to
+            // the clients.
+            for (int i = winInsetsChanged.size() - 1; i >= 0; i--) {
+                winInsetsChanged.get(i).notifyInsetsChanged();
+            }
         }
+        winInsetsChanged.clear();
     }
 
     void onInsetsModified(InsetsControlTarget windowState, InsetsState state) {
