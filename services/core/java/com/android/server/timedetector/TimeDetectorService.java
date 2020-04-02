@@ -25,6 +25,7 @@ import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.os.Binder;
 import android.os.Handler;
 import android.provider.Settings;
 
@@ -102,11 +103,16 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     @Override
-    public void suggestManualTime(@NonNull ManualTimeSuggestion timeSignal) {
+    public boolean suggestManualTime(@NonNull ManualTimeSuggestion timeSignal) {
         enforceSuggestManualTimePermission();
         Objects.requireNonNull(timeSignal);
 
-        mHandler.post(() -> mTimeDetectorStrategy.suggestManualTime(timeSignal));
+        long token = Binder.clearCallingIdentity();
+        try {
+            return mTimeDetectorStrategy.suggestManualTime(timeSignal);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override

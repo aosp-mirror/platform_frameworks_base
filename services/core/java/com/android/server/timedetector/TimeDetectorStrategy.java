@@ -80,8 +80,13 @@ public interface TimeDetectorStrategy {
     /** Process the suggested time from telephony sources. */
     void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);
 
-    /** Process the suggested manually entered time. */
-    void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
+    /**
+     * Process the suggested manually entered time. Returns {@code false} if the suggestion was
+     * invalid, or the device configuration prevented the suggestion being used, {@code true} if the
+     * suggestion was accepted. A suggestion that is valid but does not change the time because it
+     * matches the current device time is considered accepted.
+     */
+    boolean suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
 
     /** Process the suggested time from network sources. */
     void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSuggestion);

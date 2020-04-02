@@ -403,7 +403,7 @@ public class TimeDetectorStrategyImplTest {
 
         long expectedSystemClockMillis =
                 mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
-        mScript.simulateManualTimeSuggestion(timeSuggestion)
+        mScript.simulateManualTimeSuggestion(timeSuggestion, true /* expectedResult */)
                 .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
     }
 
@@ -448,7 +448,7 @@ public class TimeDetectorStrategyImplTest {
 
         long expectedManualClockMillis =
                 mScript.calculateTimeInMillisForNow(manualTimeSuggestion.getUtcTime());
-        mScript.simulateManualTimeSuggestion(manualTimeSuggestion)
+        mScript.simulateManualTimeSuggestion(manualTimeSuggestion, true /* expectedResult */)
                 .verifySystemClockWasSetAndResetCallTracking(expectedManualClockMillis)
                 .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
 
@@ -481,7 +481,7 @@ public class TimeDetectorStrategyImplTest {
                 mScript.generateManualTimeSuggestion(ARBITRARY_TEST_TIME_MILLIS);
 
         mScript.simulateTimePassing()
-                .simulateManualTimeSuggestion(timeSuggestion)
+                .simulateManualTimeSuggestion(timeSuggestion, false /* expectedResult */)
                 .verifySystemClockWasNotSetAndResetCallTracking();
     }
 
@@ -765,8 +765,9 @@ public class TimeDetectorStrategyImplTest {
             return this;
         }
 
-        Script simulateManualTimeSuggestion(ManualTimeSuggestion timeSuggestion) {
-            mTimeDetectorStrategy.suggestManualTime(timeSuggestion);
+        Script simulateManualTimeSuggestion(
+                ManualTimeSuggestion timeSuggestion, boolean expectedResult) {
+            assertEquals(expectedResult, mTimeDetectorStrategy.suggestManualTime(timeSuggestion));
             return this;
         }
 
