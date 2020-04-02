@@ -146,7 +146,8 @@ java_library {
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/statsd", // statsd apex
-        "//frameworks/opt/net/wifi/service" // wifi service
+        "//frameworks/opt/net/wifi/service", // wifi service
+        "//packages/providers/MediaProvider", // MediaProvider apk
     ],
 }
 
