@@ -71,6 +71,7 @@ public:
     binder::Status configureNativeBinaries(int32_t storageId, const std::string& apkFullPath,
                                            const std::string& libDirRelativePath,
                                            const std::string& abi, bool* _aidl_return) final;
+    binder::Status setStorageParams(int32_t storage, bool enableReadLogs, int32_t* _aidl_return) final;
 
 private:
     android::incremental::IncrementalService mImpl;

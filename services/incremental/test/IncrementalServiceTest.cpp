@@ -52,6 +52,8 @@ public:
     MOCK_CONST_METHOD1(unmountIncFs, binder::Status(const std::string& dir));
     MOCK_CONST_METHOD2(bindMount,
                        binder::Status(const std::string& sourceDir, const std::string& argetDir));
+    MOCK_CONST_METHOD2(setIncFsMountOptions,
+                       binder::Status(const ::android::os::incremental::IncrementalFileSystemControlParcel&, bool));
 
     void mountIncFsFails() {
         ON_CALL(*this, mountIncFs(_, _, _, _))
@@ -73,6 +75,14 @@ public:
     }
     void bindMountSuccess() {
         ON_CALL(*this, bindMount(_, _)).WillByDefault(Return(binder::Status::ok()));
+    }
+    void setIncFsMountOptionsFails() const {
+        ON_CALL(*this, setIncFsMountOptions(_, _))
+                .WillByDefault(
+                        Return(binder::Status::fromExceptionCode(1, String8("failed to set options"))));
+    }
+    void setIncFsMountOptionsSuccess() {
+        ON_CALL(*this, setIncFsMountOptions(_, _)).WillByDefault(Return(binder::Status::ok()));
     }
     binder::Status getInvalidControlParcel(const std::string& imagePath,
                                            const std::string& targetDir, int32_t flags,
@@ -388,6 +398,42 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderSuccess) {
     ASSERT_GE(storageId, 0);
     mDataLoaderManager->setDataLoaderStatusReady();
     ASSERT_TRUE(mIncrementalService->startLoading(storageId));
+}
+
+TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccess) {
+    mVold->mountIncFsSuccess();
+    mIncFs->makeFileSuccess();
+    mVold->bindMountSuccess();
+    mVold->setIncFsMountOptionsSuccess();
+    mDataLoaderManager->initializeDataLoaderSuccess();
+    mDataLoaderManager->getDataLoaderSuccess();
+    EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, _));
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_GE(mIncrementalService->setStorageParams(storageId, true), 0);
+}
+
+TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsFails) {
+    mVold->mountIncFsSuccess();
+    mIncFs->makeFileSuccess();
+    mVold->bindMountSuccess();
+    mVold->setIncFsMountOptionsFails();
+    mDataLoaderManager->initializeDataLoaderSuccess();
+    mDataLoaderManager->getDataLoaderSuccess();
+    EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, _));
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_LT(mIncrementalService->setStorageParams(storageId, true), 0);
 }
 
 TEST_F(IncrementalServiceTest, testMakeDirectory) {

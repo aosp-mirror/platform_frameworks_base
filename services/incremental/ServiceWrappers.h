@@ -49,6 +49,7 @@ public:
     virtual binder::Status unmountIncFs(const std::string& dir) const = 0;
     virtual binder::Status bindMount(const std::string& sourceDir,
                                      const std::string& targetDir) const = 0;
+    virtual binder::Status setIncFsMountOptions(const ::android::os::incremental::IncrementalFileSystemControlParcel& control, bool enableReadLogs) const = 0;
 };
 
 class DataLoaderManagerWrapper {
@@ -105,6 +106,9 @@ public:
     binder::Status bindMount(const std::string& sourceDir,
                              const std::string& targetDir) const override {
         return mInterface->bindMount(sourceDir, targetDir);
+    }
+    binder::Status setIncFsMountOptions(const ::android::os::incremental::IncrementalFileSystemControlParcel& control, bool enableReadLogs) const override {
+        return mInterface->setIncFsMountOptions(control, enableReadLogs);
     }
 
 private:
