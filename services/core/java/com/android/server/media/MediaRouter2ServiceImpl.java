@@ -1403,7 +1403,8 @@ class MediaRouter2ServiceImpl {
 
         private void onSessionCreatedOnHandler(@NonNull MediaRoute2Provider provider,
                 long uniqueRequestId, @NonNull RoutingSessionInfo sessionInfo) {
-            notifySessionCreatedToManagers(getManagers(), sessionInfo);
+            notifySessionCreatedToManagers(getManagers(),
+                    toOriginalRequestId(uniqueRequestId), sessionInfo);
 
             if (uniqueRequestId == REQUEST_ID_NONE) {
                 // The session is created without any matching request.
@@ -1457,7 +1458,7 @@ class MediaRouter2ServiceImpl {
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
             List<IMediaRouter2Manager> managers = getManagers();
-            notifySessionInfosChangedToManagers(managers);
+            notifySessionInfoChangedToManagers(managers, sessionInfo);
 
             // For system provider, notify all routers.
             if (provider == mSystemProvider) {
@@ -1480,7 +1481,7 @@ class MediaRouter2ServiceImpl {
         private void onSessionReleasedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
             List<IMediaRouter2Manager> managers = getManagers();
-            notifySessionInfosChangedToManagers(managers);
+            notifySessionInfoChangedToManagers(managers, sessionInfo);
 
             RouterRecord routerRecord = mSessionToRouterMap.get(sessionInfo.getId());
             if (routerRecord == null) {
@@ -1558,7 +1559,8 @@ class MediaRouter2ServiceImpl {
         private void notifySessionCreationFailedToRouter(@NonNull RouterRecord routerRecord,
                 int requestId) {
             try {
-                routerRecord.mRouter.notifySessionCreated(requestId, /* sessionInfo= */ null);
+                routerRecord.mRouter.notifySessionCreated(requestId,
+                        /* sessionInfo= */ null);
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify router of the session creation failure."
                         + " Router probably died.", ex);
@@ -1731,10 +1733,10 @@ class MediaRouter2ServiceImpl {
         }
 
         private void notifySessionCreatedToManagers(@NonNull List<IMediaRouter2Manager> managers,
-                @NonNull RoutingSessionInfo sessionInfo) {
+                int requestId, @NonNull RoutingSessionInfo sessionInfo) {
             for (IMediaRouter2Manager manager : managers) {
                 try {
-                    manager.notifySessionCreated(sessionInfo);
+                    manager.notifySessionCreated(requestId, sessionInfo);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "notifySessionCreatedToManagers: "
                             + "failed to notify. Manager probably died.", ex);
@@ -1742,11 +1744,12 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifySessionInfosChangedToManagers(
-                @NonNull List<IMediaRouter2Manager> managers) {
+        private void notifySessionInfoChangedToManagers(
+                @NonNull List<IMediaRouter2Manager> managers,
+                @NonNull RoutingSessionInfo sessionInfo) {
             for (IMediaRouter2Manager manager : managers) {
                 try {
-                    manager.notifySessionsUpdated();
+                    manager.notifySessionUpdated(sessionInfo);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "notifySessionInfosChangedToManagers: "
                             + "failed to notify. Manager probably died.", ex);
