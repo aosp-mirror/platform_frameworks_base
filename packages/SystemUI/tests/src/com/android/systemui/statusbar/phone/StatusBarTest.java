@@ -102,6 +102,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -249,6 +250,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ExtensionController mExtensionController;
     @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
     @Mock private PhoneStatusBarPolicy mPhoneStatusBarPolicy;
+    @Mock private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -404,6 +406,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mPhoneStatusBarPolicy,
                 mKeyguardIndicationController,
                 mDismissCallbackRegistry,
+                mNotificationShadeDepthControllerLazy,
                 mStatusBarTouchableRegionManager);
 
         when(mNotificationShadeWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
