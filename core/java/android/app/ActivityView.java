@@ -42,6 +42,9 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.window.TaskEmbedder;
+import android.window.TaskOrganizerTaskEmbedder;
+import android.window.VirtualDisplayTaskEmbedder;
 
 import dalvik.system.CloseGuard;
 
@@ -52,11 +55,11 @@ import dalvik.system.CloseGuard;
  * @hide
  */
 @TestApi
-public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
+public class ActivityView extends ViewGroup implements android.window.TaskEmbedder.Host {
 
     private static final String TAG = "ActivityView";
 
-    private TaskEmbedder mTaskEmbedder;
+    private android.window.TaskEmbedder mTaskEmbedder;
 
     private final SurfaceView mSurfaceView;
     private final SurfaceCallback mSurfaceCallback;
@@ -487,7 +490,7 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
 
     /** @hide */
     @Override
-    public void onTaskBackgroundColorChanged(TaskEmbedder ts, int bgColor) {
+    public void onTaskBackgroundColorChanged(android.window.TaskEmbedder ts, int bgColor) {
         if (mSurfaceView != null) {
             mSurfaceView.setResizeBackgroundColor(bgColor);
         }

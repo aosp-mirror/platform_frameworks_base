@@ -107,6 +107,7 @@ import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAn
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
@@ -136,7 +137,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public interface LayoutListener {
         void onLayout();
+    }
 
+    /** Listens for changes to the expansion state of this row. */
+    public interface OnExpansionChangedListener {
+        void onExpansionChanged(boolean isExpanded);
     }
 
     private StatusBarStateController mStatusbarStateController;
@@ -323,6 +328,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mWasChildInGroupWhenRemoved;
     private NotificationInlineImageResolver mImageResolver;
     private NotificationMediaManager mMediaManager;
+    @Nullable private OnExpansionChangedListener mExpansionChangedListener;
 
     private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
             new SystemNotificationAsyncTask();
@@ -349,6 +355,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             Log.e(TAG, "cacheIsSystemNotification: Could not find package info");
         }
         return isSystemNotification;
+    }
+
+    public NotificationContentView[] getLayouts() {
+        return Arrays.copyOf(mLayouts, mLayouts.length);
     }
 
     @Override
@@ -1659,8 +1669,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void showAppOpsIcons(ArraySet<Integer> activeOps) {
-        if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
-            mChildrenContainer.getHeaderView().showAppOpsIcons(activeOps);
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.showAppOpsIcons(activeOps);
         }
         mPrivateLayout.showAppOpsIcons(activeOps);
         mPublicLayout.showAppOpsIcons(activeOps);
@@ -1687,8 +1697,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private final Runnable mExpireRecentlyAlertedFlag = () -> applyAudiblyAlertedRecently(false);
 
     private void applyAudiblyAlertedRecently(boolean audiblyAlertedRecently) {
-        if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
-            mChildrenContainer.getHeaderView().setRecentlyAudiblyAlerted(audiblyAlertedRecently);
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
         }
         mPrivateLayout.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
         mPublicLayout.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
@@ -2911,7 +2921,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             if (mIsSummaryWithChildren) {
                 mChildrenContainer.onExpansionChanged();
             }
+            if (mExpansionChangedListener != null) {
+                mExpansionChangedListener.onExpansionChanged(nowExpanded);
+            }
         }
+    }
+
+    public void setOnExpansionChangedListener(@Nullable OnExpansionChangedListener listener) {
+        mExpansionChangedListener = listener;
     }
 
     @Override

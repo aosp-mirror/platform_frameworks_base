@@ -35,7 +35,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
-import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.TestPackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
@@ -93,15 +93,11 @@ public class DexMetadataHelperTest {
         return outFile;
     }
 
-    private PackageParser2 makeParser() {
-        return new PackageParser2(null, false, null, null, null);
-    }
-
     @Test
     public void testParsePackageWithDmFileValid() throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         createDexMetadataFile("install_split_base.apk");
-        ParsedPackage pkg = makeParser().parsePackage(mTmpDir, 0 /* flags */, false);
+        ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, 0 /* flags */, false);
 
         Map<String, String> packageDexMetadata = AndroidPackageUtils.getPackageDexMetadata(pkg);
         assertEquals(1, packageDexMetadata.size());
@@ -117,7 +113,7 @@ public class DexMetadataHelperTest {
         copyApkToToTmpDir("install_split_feature_a.apk", R.raw.install_split_feature_a);
         createDexMetadataFile("install_split_base.apk");
         createDexMetadataFile("install_split_feature_a.apk");
-        ParsedPackage pkg = makeParser().parsePackage(mTmpDir, 0 /* flags */, false);
+        ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, 0 /* flags */, false);
 
         Map<String, String> packageDexMetadata = AndroidPackageUtils.getPackageDexMetadata(pkg);
         assertEquals(2, packageDexMetadata.size());
@@ -136,7 +132,7 @@ public class DexMetadataHelperTest {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         copyApkToToTmpDir("install_split_feature_a.apk", R.raw.install_split_feature_a);
         createDexMetadataFile("install_split_feature_a.apk");
-        ParsedPackage pkg = makeParser().parsePackage(mTmpDir, 0 /* flags */, false);
+        ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, 0 /* flags */, false);
 
         Map<String, String> packageDexMetadata = AndroidPackageUtils.getPackageDexMetadata(pkg);
         assertEquals(1, packageDexMetadata.size());
@@ -152,7 +148,8 @@ public class DexMetadataHelperTest {
         File invalidDmFile = new File(mTmpDir, "install_split_base.dm");
         Files.createFile(invalidDmFile.toPath());
         try {
-            ParsedPackage pkg = makeParser().parsePackage(mTmpDir, 0 /* flags */, false);
+            ParsedPackage pkg = new TestPackageParser2()
+                    .parsePackage(mTmpDir, 0 /* flags */, false);
             AndroidPackageUtils.validatePackageDexMetadata(pkg);
         } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
@@ -169,7 +166,8 @@ public class DexMetadataHelperTest {
         Files.createFile(invalidDmFile.toPath());
 
         try {
-            ParsedPackage pkg = makeParser().parsePackage(mTmpDir, 0 /* flags */, false);
+            ParsedPackage pkg = new TestPackageParser2()
+                    .parsePackage(mTmpDir, 0 /* flags */, false);
             AndroidPackageUtils.validatePackageDexMetadata(pkg);
         } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);

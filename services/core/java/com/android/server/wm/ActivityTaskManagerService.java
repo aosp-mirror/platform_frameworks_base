@@ -212,7 +212,6 @@ import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.dreams.DreamActivity;
-import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.sysprop.DisplayProperties;
@@ -597,6 +596,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * display changing states is undefined.
      */
     private boolean mSleeping = false;
+
+    /**
+     * The mDreaming state is set by the {@link DreamManagerService} when it receives a request to
+     * start/stop the dream. It is set to true shortly  before the {@link DreamService} is started.
+     * It is set to false after the {@link DreamService} is stopped.
+     */
+    private boolean mDreaming = false;
 
     /**
      * The process state used for processes that are running the top activities.
@@ -1238,36 +1244,29 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    @Override
-    public boolean startDreamActivity(Intent intent) {
-        final WindowProcessController process = mProcessMap.getProcess(Binder.getCallingPid());
+    private void enforceCallerIsDream(String callerPackageName) {
         final long origId = Binder.clearCallingIdentity();
-
-        // The dream activity is only called for non-doze dreams.
-        final ComponentName currentDream = LocalServices.getService(DreamManagerInternal.class)
-                .getActiveDreamComponent(/* doze= */ false);
-
-        if (currentDream == null || currentDream.getPackageName() == null
-                || !currentDream.getPackageName().equals(process.mInfo.packageName)) {
-            Slog.e(TAG, "Calling package is not the current dream package. "
-                    + "Aborting startDreamActivity...");
-            return false;
+        try {
+            if (!ActivityRecord.canLaunchDreamActivity(callerPackageName)) {
+                throw new SecurityException("The dream activity can be started only when the device"
+                        + " is dreaming and only by the active dream package.");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    @Override
+    public boolean startDreamActivity(@NonNull Intent intent) {
+        assertPackageMatchesCallingUid(intent.getPackage());
+        enforceCallerIsDream(intent.getPackage());
 
         final ActivityInfo a = new ActivityInfo();
         a.theme = com.android.internal.R.style.Theme_Dream;
         a.exported = true;
         a.name = DreamActivity.class.getName();
-
-
-        a.packageName = process.mInfo.packageName;
-        a.applicationInfo = process.mInfo;
-        a.processName = process.mInfo.processName;
-        a.uiOptions = process.mInfo.uiOptions;
-        a.taskAffinity = "android:" + a.packageName + "/dream";
         a.enabled = true;
         a.launchMode = ActivityInfo.LAUNCH_SINGLE_INSTANCE;
-
         a.persistableMode = ActivityInfo.PERSIST_NEVER;
         a.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         a.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
@@ -1276,15 +1275,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchActivityType(ACTIVITY_TYPE_DREAM);
 
-        try {
-            getActivityStartController().obtainStarter(intent, "dream")
-                    .setActivityInfo(a)
-                    .setActivityOptions(options.toBundle())
-                    .setIsDream(true)
-                    .execute();
-            return true;
-        } finally {
-            Binder.restoreCallingIdentity(origId);
+        synchronized (mGlobalLock) {
+            final WindowProcessController process = mProcessMap.getProcess(Binder.getCallingPid());
+
+            a.packageName = process.mInfo.packageName;
+            a.applicationInfo = process.mInfo;
+            a.processName = process.mInfo.processName;
+            a.uiOptions = process.mInfo.uiOptions;
+            a.taskAffinity = "android:" + a.packageName + "/dream";
+
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                getActivityStartController().obtainStarter(intent, "dream")
+                        .setCallingUid(callingUid)
+                        .setCallingPid(callingPid)
+                        .setActivityInfo(a)
+                        .setActivityOptions(options.toBundle())
+                        // To start the dream from background, we need to start it from a persistent
+                        // system process. Here we set the real calling uid to the system server uid
+                        .setRealCallingUid(Binder.getCallingUid())
+                        .setAllowBackgroundActivityStart(true)
+                        .execute();
+                return true;
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
     }
 
@@ -2357,7 +2375,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 // Convert some windowing-mode changes into root-task reparents for split-screen.
                 if (stack.inSplitScreenWindowingMode()) {
-                    stack.getDisplay().mTaskContainers.onSplitScreenModeDismissed();
+                    stack.getDisplayArea().onSplitScreenModeDismissed();
 
                 } else {
                     stack.setWindowingMode(windowingMode);
@@ -2476,7 +2494,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final ActivityStarter starter = getActivityStartController().obtainStarter(
                 null /* intent */, "moveTaskToFront");
         if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage, -1,
-                -1, callerApp, null, false, false, null)) {
+                -1, callerApp, null, false, null)) {
             if (!isBackgroundActivityStartsEnabled()) {
                 return;
             }
@@ -2773,18 +2791,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     void moveTaskToSplitScreenPrimaryTask(Task task, boolean toTop) {
-        final DisplayContent display = task.getDisplayContent();
-        final ActivityStack primarySplitTask = display.getRootSplitScreenPrimaryTask();
+        final TaskDisplayArea taskDisplayArea = task.getDisplayArea();
+        final ActivityStack primarySplitTask = taskDisplayArea.getRootSplitScreenPrimaryTask();
         if (primarySplitTask == null) {
             throw new IllegalStateException("Can't enter split without associated organized task");
         }
 
         if (toTop) {
-            display.mTaskContainers.positionStackAt(POSITION_TOP, primarySplitTask,
+            taskDisplayArea.positionStackAt(POSITION_TOP, primarySplitTask,
                     false /* includingParents */);
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.reparent(task.getStack().mRemoteToken, primarySplitTask.mRemoteToken, toTop);
+        wct.reparent(task.getStack().mRemoteToken.toWindowContainerToken(),
+                primarySplitTask.mRemoteToken.toWindowContainerToken(), toTop);
         mWindowOrganizerController.applyTransaction(wct);
     }
 
@@ -3250,8 +3269,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 final ActivityStack stack = r.getRootTask();
-                final Task task = stack.getDisplay().mTaskContainers.createStack(
-                        stack.getWindowingMode(), stack.getActivityType(), !ON_TOP, ainfo, intent,
+                final Task task = stack.getDisplayArea().createStack(stack.getWindowingMode(),
+                        stack.getActivityType(), !ON_TOP, ainfo, intent,
                         false /* createdByOrganizer */);
 
                 if (!mRecentTasks.addToBottom(task)) {
@@ -3314,10 +3333,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     throw new IllegalArgumentException("resizeTask not allowed on task=" + task);
                 }
                 if (bounds == null && stack.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
-                    stack = stack.getDisplay().mTaskContainers.getOrCreateStack(
+                    stack = stack.getDisplayArea().getOrCreateStack(
                             WINDOWING_MODE_FULLSCREEN, stack.getActivityType(), ON_TOP);
                 } else if (bounds != null && stack.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-                    stack = stack.getDisplay().mTaskContainers.getOrCreateStack(
+                    stack = stack.getDisplayArea().getOrCreateStack(
                             WINDOWING_MODE_FREEFORM, stack.getActivityType(), ON_TOP);
                 }
 
@@ -4273,7 +4292,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         tempDockedTaskInsetBounds != null ? tempDockedTaskInsetBounds
                             : (tempDockedTaskBounds != null ? tempDockedTaskBounds
                                     : dockedBounds);
-                wct.setBounds(primary.mRemoteToken, primaryRect);
+                wct.setBounds(primary.mRemoteToken.toWindowContainerToken(), primaryRect);
                 Rect otherRect = tempOtherTaskInsetBounds != null ? tempOtherTaskInsetBounds
                         : tempOtherTaskBounds;
                 if (otherRect == null) {
@@ -4285,7 +4304,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         otherRect.top = primaryRect.bottom + 6;
                     }
                 }
-                wct.setBounds(secondary.mRemoteToken, otherRect);
+                wct.setBounds(secondary.mRemoteToken.toWindowContainerToken(), otherRect);
                 mWindowOrganizerController.applyTransaction(wct);
             }
         } finally {
@@ -6337,6 +6356,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public void notifyDreamStateChanged(boolean dreaming) {
+            synchronized (mGlobalLock) {
+                mDreaming = dreaming;
+            }
+        }
+
+        @Override
         public void setAllowAppSwitches(@NonNull String type, int uid, int userId) {
             if (!mAmInternal.isUserRunning(userId, ActivityManager.FLAG_OR_STOPPED)) {
                 return;
@@ -6435,6 +6461,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 ActivityTaskManagerService.this.clearHeavyWeightProcessIfEquals(
                         mHeavyWeightProcess);
+            }
+        }
+
+        @Override
+        public boolean isDreaming() {
+            synchronized (mGlobalLock) {
+                return mDreaming;
             }
         }
 

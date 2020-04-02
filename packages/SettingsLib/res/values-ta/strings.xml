@@ -520,18 +520,14 @@
     <skip />
     <!-- no translation found for shared_data_summary (5516326713822885652) -->
     <skip />
-    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
-    <skip />
-    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
-    <skip />
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"இந்தப் பயனருடன் பகிரப்பட்ட தரவு எதுவும் இல்லை."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"பகிரப்பட்ட தரவைப் பெறுவதில் பிழை. மீண்டும் முயலவும்."</string>
     <!-- no translation found for blob_id_text (8680078988996308061) -->
     <skip />
     <!-- no translation found for blob_expires_text (7882727111491739331) -->
     <skip />
-    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
-    <skip />
-    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
-    <skip />
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"பகிரப்பட்ட தரவை நீக்குவதில் பிழை."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"இந்தப் பகிரப்பட்ட தரவிற்காகப் பெறப்பட்ட ஒப்பந்தங்கள் எதுவும் இல்லை. இதை நீக்க விரும்புகிறீர்களா?"</string>
     <!-- no translation found for accessor_info_title (8289823651512477787) -->
     <skip />
     <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
@@ -561,4 +557,12 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"சுயவிவரத் தகவல்"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"நீங்கள் வரையறுக்கப்பட்டச் சுயவிவரத்தை உருவாக்குவதற்கு முன்பு, உங்கள் ஆப்ஸ் மற்றும் தனிப்பட்ட தரவைப் பாதுகாக்கும் வகையில் நீங்கள் திரைப் பூட்டை அமைக்க வேண்டும்."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"பூட்டை அமை"</string>
+    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
+    <skip />
+    <!-- no translation found for guest_new_guest (3482026122932643557) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
+    <skip />
+    <!-- no translation found for guest_nickname (6332276931583337261) -->
+    <skip />
 </resources>

@@ -46,6 +46,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.TestPackageParser2;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +78,7 @@ public class ApexManagerTest {
         ApexManager.ApexManagerImpl managerImpl = spy(new ApexManager.ApexManagerImpl());
         doReturn(mApexService).when(managerImpl).waitForApexService();
         mApexManager = managerImpl;
-        mPackageParser2 = new PackageParser2(null, false, null, null, null);
+        mPackageParser2 = new TestPackageParser2();
     }
 
     @Test

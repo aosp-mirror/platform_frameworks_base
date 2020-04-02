@@ -91,6 +91,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
 public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
@@ -125,6 +126,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private final Context mContext;
     private final Handler mHandler;
     private final PackageManagerInternal mPackageManagerInternal;
+    private final Supplier<PackageParser2> mParserSupplier;
     private final RuleEvaluationEngine mEvaluationEngine;
     private final IntegrityFileManager mIntegrityFileManager;
 
@@ -136,6 +138,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         return new AppIntegrityManagerServiceImpl(
                 context,
                 LocalServices.getService(PackageManagerInternal.class),
+                PackageParser2::forParsingFileWithDefaults,
                 RuleEvaluationEngine.getRuleEvaluationEngine(),
                 IntegrityFileManager.getInstance(),
                 handlerThread.getThreadHandler());
@@ -145,11 +148,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     AppIntegrityManagerServiceImpl(
             Context context,
             PackageManagerInternal packageManagerInternal,
+            Supplier<PackageParser2> parserSupplier,
             RuleEvaluationEngine evaluationEngine,
             IntegrityFileManager integrityFileManager,
             Handler handler) {
         mContext = context;
         mPackageManagerInternal = packageManagerInternal;
+        mParserSupplier = parserSupplier;
         mEvaluationEngine = evaluationEngine;
         mIntegrityFileManager = integrityFileManager;
         mHandler = handler;
@@ -562,8 +567,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             throw new IllegalArgumentException("Installation path is null, package not found");
         }
 
-        PackageParser2 parser = new PackageParser2(null, false, null, null, null);
-        try {
+        try (PackageParser2 parser = mParserSupplier.get()) {
             ParsedPackage pkg = parser.parsePackage(installationPath, 0, false);
             int flags = PackageManager.GET_SIGNING_CERTIFICATES | PackageManager.GET_META_DATA;
             pkg.setSigningDetails(ParsingPackageUtils.collectCertificates(pkg, false));

@@ -513,16 +513,12 @@
     <string name="storage_category" msgid="2287342585424631813">"Yaddaş"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Paylaşılan data"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Paylaşılan dataya baxın və ona dəyişiklik edin"</string>
-    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
-    <skip />
-    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
-    <skip />
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Bu istifadəçi üçün paylaşılan data yoxdur."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Paylaşılan datanı əldə edərkən xəta oldu. Yenidən cəhd edin."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Paylaşılan data ID\'si: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"<xliff:g id="DATE">%s</xliff:g> tarixində müddəti bitir"</string>
-    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
-    <skip />
-    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
-    <skip />
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Paylaşılan datanı silərkən xəta oldu."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Bu paylaşılan data üçün lizinq əldə edilməyib. Onu silmək istərdiniz?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Data paylaşan tətbiqlər"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"Tətbiq tərəfindən heç bir təsvir təmin edilməyib."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"İcarə müddəti <xliff:g id="DATE">%s</xliff:g> tarixində bitir"</string>
@@ -547,4 +543,12 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profil info"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Məhdudlaşdırılmış profil yaratmadan öncə, Siz tətbiqlərinizi və şəxsi datanızı qorumaq üçün ekran kilidi quraşdırmalısınız."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Kilid ayarlayın"</string>
+    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
+    <skip />
+    <!-- no translation found for guest_new_guest (3482026122932643557) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
+    <skip />
+    <!-- no translation found for guest_nickname (6332276931583337261) -->
+    <skip />
 </resources>

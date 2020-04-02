@@ -1035,13 +1035,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private final AppsFilter mAppsFilter;
 
-    class PackageParserCallback extends PackageParser2.Callback {
-        @Override public final boolean hasFeature(String feature) {
-            return PackageManagerService.this.hasSystemFeature(feature, 0);
-        }
-    }
-
-    final PackageParser2.Callback mPackageParserCallback = new PackageParserCallback();
+    final PackageParser2.Callback mPackageParserCallback;
 
     // Currently known shared libraries.
     final ArrayMap<String, LongSparseArray<SharedLibraryInfo>> mSharedLibraries = new ArrayMap<>();
@@ -2720,6 +2714,18 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManagerService = (IPermissionManager) ServiceManager.getService("permissionmgr");
         mIncrementalManager =
                 (IncrementalManager) mContext.getSystemService(Context.INCREMENTAL_SERVICE);
+        PlatformCompat platformCompat = mInjector.getCompatibility();
+        mPackageParserCallback = new PackageParser2.Callback() {
+            @Override
+            public boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo) {
+                return platformCompat.isChangeEnabled(changeId, appInfo);
+            }
+
+            @Override
+            public boolean hasFeature(String feature) {
+                return PackageManagerService.this.hasSystemFeature(feature, 0);
+            }
+        };
 
         // CHECKSTYLE:ON IndentationCheck
         t.traceEnd();
@@ -3074,6 +3080,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         packageParser, executorService);
 
             }
+
+            packageParser.close();
 
             List<Runnable> unfinishedTasks = executorService.shutdownNow();
             if (!unfinishedTasks.isEmpty()) {
@@ -8901,12 +8909,11 @@ public class PackageManagerService extends IPackageManager.Stub
     private AndroidPackage scanPackageLI(File scanFile, int parseFlags, int scanFlags,
             long currentTime, UserHandle user) throws PackageManagerException {
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
-        PackageParser2 pp = new PackageParser2(mSeparateProcesses, mOnlyCore, mMetrics, null,
-                mPackageParserCallback);
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         final ParsedPackage parsedPackage;
-        try {
+        try (PackageParser2 pp = new PackageParser2(mSeparateProcesses, mOnlyCore, mMetrics, null,
+                mPackageParserCallback)) {
             parsedPackage = pp.parsePackage(scanFile, parseFlags, false);
         } catch (PackageParserException e) {
             throw PackageManagerException.from(e);
@@ -16676,12 +16683,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 | PackageParser.PARSE_ENFORCE_CODE
                 | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0);
 
-        PackageParser2 pp = new PackageParser2(mSeparateProcesses, false, mMetrics, null,
-                mPackageParserCallback);
-
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         ParsedPackage parsedPackage;
-        try {
+        try (PackageParser2 pp = new PackageParser2(mSeparateProcesses, false, mMetrics, null,
+                mPackageParserCallback)) {
             parsedPackage = pp.parsePackage(tmpPackageFile, parseFlags, false);
             AndroidPackageUtils.validatePackageDexMetadata(parsedPackage);
         } catch (PackageParserException e) {
@@ -16746,8 +16751,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     "Instant app package must be signed with APK Signature Scheme v2 or greater");
         }
 
-        // Get rid of all references to package scan path via parser.
-        pp = null;
         boolean systemApp = false;
         boolean replace = false;
         synchronized (mLock) {

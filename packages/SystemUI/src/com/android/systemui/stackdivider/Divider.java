@@ -20,7 +20,6 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.window.WindowOrganizer.TaskOrganizer;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -33,11 +32,12 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Slog;
+import android.window.TaskOrganizer;
+import android.window.WindowContainerToken;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
-import android.window.IWindowContainer;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
@@ -181,14 +181,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         private boolean mPausedTargetAdjusted = false;
 
         private boolean getSecondaryHasFocus(int displayId) {
-            try {
-                IWindowContainer imeSplit = TaskOrganizer.getImeTarget(displayId);
-                return imeSplit != null
-                        && (imeSplit.asBinder() == mSplits.mSecondary.token.asBinder());
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to get IME target", e);
-            }
-            return false;
+            WindowContainerToken imeSplit = TaskOrganizer.getImeTarget(displayId);
+            return imeSplit != null
+                    && (imeSplit.asBinder() == mSplits.mSecondary.token.asBinder());
         }
 
         private void updateDimTargets() {
@@ -270,10 +265,8 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 wct.setScreenSizeDp(mSplits.mSecondary.token,
                         SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
             }
-            try {
-                WindowOrganizer.applyTransaction(wct);
-            } catch (RemoteException e) {
-            }
+
+            WindowOrganizer.applyTransaction(wct);
 
             // Update all the adjusted-for-ime states
             if (!mPaused) {
@@ -506,12 +499,8 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
             final WindowContainerTransaction tct = new WindowContainerTransaction();
             mSplitLayout.resizeSplits(midPos, tct);
-            try {
-                WindowOrganizer.applyTransaction(tct);
-            } catch (RemoteException e) {
-            }
-        } else if (mRotateSplitLayout != null
-                && mSplitLayout.mDisplayLayout.rotation()
+            WindowOrganizer.applyTransaction(tct);
+        } else if (mSplitLayout.mDisplayLayout.rotation()
                         == mRotateSplitLayout.mDisplayLayout.rotation()) {
             mSplitLayout.mPrimary = new Rect(mRotateSplitLayout.mPrimary);
             mSplitLayout.mSecondary = new Rect(mRotateSplitLayout.mSecondary);
@@ -653,7 +642,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             }
         }
         updateTouchable();
-        WindowManagerProxy.applyContainerTransaction(wct);
+        WindowOrganizer.applyTransaction(wct);
     }
 
     void setAdjustedForIme(boolean adjustedForIme) {
