@@ -90,7 +90,6 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         assertNull(mTarget.getDragWindowHandleLocked());
     }
 
-    @FlakyTest(bugId = 129507487)
     @Test
     public void testFinishPositioningWhenAppRequested() {
         assertFalse(mTarget.isPositioningLocked());

@@ -73,7 +73,6 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testKeyguardOverride() {
         mWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
         mWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
@@ -81,7 +80,6 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testKeyguardKeep() {
         mWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
         mWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
@@ -89,7 +87,6 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testForceOverride() {
         mWm.prepareAppTransition(TRANSIT_KEYGUARD_UNOCCLUDE, false /* alwaysKeepCurrent */);
         mDc.prepareAppTransition(TRANSIT_ACTIVITY_OPEN,
@@ -105,7 +102,6 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testKeepKeyguard_withCrashing() {
         mWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
         mWm.prepareAppTransition(TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
@@ -113,7 +109,6 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testAppTransitionStateForMultiDisplay() {
         // Create 2 displays & presume both display the state is ON for ready to display & animate.
         final DisplayContent dc1 = createNewDisplay(Display.STATE_ON);
@@ -182,7 +177,6 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testLoadAnimationSafely() {
         DisplayContent dc = createNewDisplay(Display.STATE_ON);
         assertNull(dc.mAppTransition.loadAnimationSafely(

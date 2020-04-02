@@ -184,7 +184,6 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     /** Ensures that bounds on freeform stacks are not clipped. */
     @Test
-    @FlakyTest(bugId = 137879065)
     public void testAppBounds_FreeFormBounds() {
         final Rect freeFormBounds = new Rect(mParentBounds);
         freeFormBounds.offset(10, 10);
@@ -194,7 +193,6 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     /** Ensures that fully contained bounds are not clipped. */
     @Test
-    @FlakyTest(bugId = 137879065)
     public void testAppBounds_ContainedBounds() {
         final Rect insetBounds = new Rect(mParentBounds);
         insetBounds.inset(5, 5, 5, 5);
@@ -203,7 +201,6 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 137879065)
     public void testFitWithinBounds() {
         final Rect parentBounds = new Rect(10, 10, 200, 200);
         DisplayContent display = mService.mRootWindowContainer.getDefaultDisplay();
@@ -243,7 +240,6 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     /** Tests that the task bounds adjust properly to changes between FULLSCREEN and FREEFORM */
     @Test
-    @FlakyTest(bugId = 137879065)
     public void testBoundsOnModeChangeFreeformToFullscreen() {
         DisplayContent display = mService.mRootWindowContainer.getDefaultDisplay();
         ActivityStack stack = new StackBuilder(mRootWindowContainer).setDisplay(display)
