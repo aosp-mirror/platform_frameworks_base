@@ -1820,6 +1820,13 @@ public abstract class AccessibilityService extends Service {
 
     /**
      * Returns a list of system actions available in the system right now.
+     * <p>
+     * System actions that correspond to the global action constants will have matching action IDs.
+     * For example, an with id {@link #GLOBAL_ACTION_BACK} will perform the back action.
+     * </p>
+     * <p>
+     * These actions should be called by {@link #performGlobalAction}.
+     * </p>
      *
      * @return A list of available system actions.
      */
