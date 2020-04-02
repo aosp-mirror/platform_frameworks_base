@@ -40,8 +40,10 @@ public interface InsetsAnimationControlCallbacks {
 
     /**
      * Schedule the apply by posting the animation callback.
+     *
+     * @param runner The runner that requested applying insets
      */
-    void scheduleApplyChangeInsets();
+    void scheduleApplyChangeInsets(InsetsAnimationControlRunner runner);
 
     /**
      * Finish the final steps after the animation.
