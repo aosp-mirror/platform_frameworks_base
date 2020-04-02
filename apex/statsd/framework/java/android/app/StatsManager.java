@@ -467,10 +467,6 @@ public final class StatsManager {
         synchronized (sLock) {
             try {
                 IStatsManagerService service = getIStatsManagerServiceLocked();
-                if (service == null) {
-                    throw new StatsUnavailableException("Failed to find statsmanager when "
-                                                              + "getting experiment IDs");
-                }
                 return service.getRegisteredExperimentIds();
             } catch (RemoteException e) {
                 if (DEBUG) {
@@ -616,7 +612,7 @@ public final class StatsManager {
             /**
              * Set the cool down time of the pull in milliseconds. If two successive pulls are
              * issued within the cool down, a cached version of the first pull will be used for the
-             * second pull.
+             * second pull. The minimum allowed cool down is 1 second.
              */
             @NonNull
             public Builder setCoolDownMillis(long coolDownMillis) {
@@ -625,7 +621,8 @@ public final class StatsManager {
             }
 
             /**
-             * Set the maximum time the pull can take in milliseconds.
+             * Set the maximum time the pull can take in milliseconds. The maximum allowed timeout
+             * is 10 seconds.
              */
             @NonNull
             public Builder setTimeoutMillis(long timeoutMillis) {

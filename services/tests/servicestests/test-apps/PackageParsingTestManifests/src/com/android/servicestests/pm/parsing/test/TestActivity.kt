@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,6 @@
  * limitations under the License.
  */
 
-package android.window;
+package com.android.servicestests.pm.parsing.test
 
-import android.view.SurfaceControl;
-
-/**
- * Interface for a window container to communicate with the window manager. This also acts as a
- * token.
- * @hide
- */
-interface IWindowContainer {
-
-    /**
-     * Gets a persistent leash for this container or {@code null}.
-     */
-    SurfaceControl getLeash();
-}
+class TestActivity

@@ -1106,7 +1106,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void testAbortRecognition() throws Exception {
         // Make sure the HAL doesn't support concurrent capture.
         initService(false);
-        mService.setExternalCaptureState(false);
+        mService.setCaptureState(false);
 
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
@@ -1120,7 +1120,7 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Abort.
-        mService.setExternalCaptureState(true);
+        mService.setCaptureState(true);
 
         ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
                 RecognitionEvent.class);
@@ -1142,7 +1142,7 @@ public class SoundTriggerMiddlewareImplTest {
         verifyNotStartRecognition();
 
         // Now enable it and make sure we are notified.
-        mService.setExternalCaptureState(false);
+        mService.setCaptureState(false);
         verify(callback).onRecognitionAvailabilityChange(true);
 
         // Unload the model.
@@ -1154,7 +1154,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void testAbortPhraseRecognition() throws Exception {
         // Make sure the HAL doesn't support concurrent capture.
         initService(false);
-        mService.setExternalCaptureState(false);
+        mService.setCaptureState(false);
 
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
@@ -1168,7 +1168,7 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Abort.
-        mService.setExternalCaptureState(true);
+        mService.setCaptureState(true);
 
         ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
                 PhraseRecognitionEvent.class);
@@ -1190,7 +1190,7 @@ public class SoundTriggerMiddlewareImplTest {
         verifyNotStartRecognition();
 
         // Now enable it and make sure we are notified.
-        mService.setExternalCaptureState(false);
+        mService.setCaptureState(false);
         verify(callback).onRecognitionAvailabilityChange(true);
 
         // Unload the model.
@@ -1216,7 +1216,7 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Signal concurrent capture. Shouldn't abort.
-        mService.setExternalCaptureState(true);
+        mService.setCaptureState(true);
         verify(callback, never()).onRecognition(anyInt(), any());
         verify(callback, never()).onRecognitionAvailabilityChange(anyBoolean());
 
@@ -1252,7 +1252,7 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Signal concurrent capture. Shouldn't abort.
-        mService.setExternalCaptureState(true);
+        mService.setCaptureState(true);
         verify(callback, never()).onPhraseRecognition(anyInt(), any());
         verify(callback, never()).onRecognitionAvailabilityChange(anyBoolean());
 

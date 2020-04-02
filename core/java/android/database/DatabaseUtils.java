@@ -43,6 +43,7 @@ import com.android.internal.util.ArrayUtils;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.text.Collator;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -305,6 +306,34 @@ public class DatabaseUtils {
             }
         }
         return res.toString();
+    }
+
+    /**
+     * Make a deep copy of the given argument list, ensuring that the returned
+     * value is completely isolated from any changes to the original arguments.
+     *
+     * @hide
+     */
+    public static @Nullable Object[] deepCopyOf(@Nullable Object[] args) {
+        if (args == null) return null;
+
+        final Object[] res = new Object[args.length];
+        for (int i = 0; i < args.length; i++) {
+            final Object arg = args[i];
+
+            if ((arg == null) || (arg instanceof Number) || (arg instanceof String)) {
+                // When the argument is immutable, we can copy by reference
+                res[i] = arg;
+            } else if (arg instanceof byte[]) {
+                // Need to deep copy blobs
+                final byte[] castArg = (byte[]) arg;
+                res[i] = Arrays.copyOf(castArg, castArg.length);
+            } else {
+                // Convert everything else to string, making it immutable
+                res[i] = String.valueOf(arg);
+            }
+        }
+        return res;
     }
 
     /**

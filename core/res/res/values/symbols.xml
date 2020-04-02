@@ -3896,7 +3896,11 @@
   <java-symbol type="dimen" name="conversation_icon_container_top_padding_small_avatar" />
   <java-symbol type="dimen" name="conversation_icon_container_top_padding_no_app_name" />
   <java-symbol type="layout" name="notification_template_material_conversation" />
+  <java-symbol type="dimen" name="button_padding_horizontal_material" />
+  <java-symbol type="dimen" name="button_inset_horizontal_material" />
   <java-symbol type="layout" name="conversation_face_pile_layout" />
+  <java-symbol type="id" name="conversation_unread_count" />
+  <java-symbol type="string" name="unread_convo_overflow" />
 
   <!-- Intent resolver and share sheet -->
   <java-symbol type="string" name="resolver_personal_tab" />

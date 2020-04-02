@@ -42,7 +42,7 @@
         >
 
             <!-- Big icon: 52x52, 12dp padding left + top, 16dp padding right -->
-            <ImageView
+            <com.android.internal.widget.CachingIconView
                 android:id="@+id/conversation_icon"
                 android:layout_width="@dimen/conversation_avatar_size"
                 android:layout_height="@dimen/conversation_avatar_size"
@@ -64,11 +64,12 @@
                 android:layout_marginLeft="@dimen/conversation_badge_side_margin"
                 android:layout_marginTop="@dimen/conversation_badge_side_margin"
             >
-                <ImageView
+                <com.android.internal.widget.CachingIconView
                     android:id="@+id/conversation_icon_badge_bg"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/conversation_badge_background"
+                    android:forceHasOverlappingRendering="false"
                 />
                 <com.android.internal.widget.CachingIconView
                     android:id="@+id/icon"
@@ -76,13 +77,15 @@
                     android:layout_height="match_parent"
                     android:layout_margin="4dp"
                     android:layout_gravity="center"
+                    android:forceHasOverlappingRendering="false"
                 />
-                <ImageView
+                <com.android.internal.widget.CachingIconView
                     android:id="@+id/conversation_icon_badge_ring"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/conversation_badge_ring"
                     android:visibility="gone"
+                    android:forceHasOverlappingRendering="false"
                 />
             </FrameLayout>
         </FrameLayout>
@@ -196,10 +199,8 @@
                     android:clipChildren="false"
                     />
             </com.android.internal.widget.RemeasuringLinearLayout>
-            <!-- Unread Count -->
-            <!-- <TextView /> -->
 
-            <!-- This is where the expand button will be placed when collapsed-->
+            <!-- This is where the expand button container will be placed when collapsed-->
         </com.android.internal.widget.RemeasuringLinearLayout>
 
         <include layout="@layout/notification_template_smart_reply_container"
@@ -235,6 +236,21 @@
             android:clipToPadding="false"
             android:clipChildren="false"
             />
+        <!-- Unread Count -->
+        <TextView
+            android:id="@+id/conversation_unread_count"
+            android:layout_width="33sp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="11dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="2dp"
+            android:visibility="gone"
+            android:textAppearance="@style/TextAppearance.DeviceDefault.Notification"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:background="@drawable/conversation_unread_bg"
+        />
         <com.android.internal.widget.NotificationExpandButton
             android:id="@+id/expand_button"
             android:layout_width="@dimen/notification_header_expand_icon_size"
@@ -243,6 +259,6 @@
             android:drawable="@drawable/ic_expand_notification"
             android:clickable="false"
             android:importantForAccessibility="no"
-            />
+        />
     </LinearLayout>
 </com.android.internal.widget.ConversationLayout>

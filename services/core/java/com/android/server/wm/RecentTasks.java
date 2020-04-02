@@ -1399,8 +1399,9 @@ class RecentTasks {
         }
 
         // Trim tasks that are in stacks that are behind the home stack
-        final DisplayContent display = stack.getDisplay();
-        return display.getIndexOf(stack) < display.getIndexOf(display.getRootHomeTask());
+        final TaskDisplayArea taskDisplayArea = stack.getDisplayArea();
+        return taskDisplayArea.getIndexOf(stack) < taskDisplayArea.getIndexOf(
+                taskDisplayArea.getRootHomeTask());
     }
 
     /** Remove the tasks that user may not be able to return. */

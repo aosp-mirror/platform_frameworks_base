@@ -17,7 +17,6 @@
 package com.android.test.taskembed;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.window.WindowOrganizer.TaskOrganizer;
 
 import android.app.ActivityManager;
 import android.app.Service;
@@ -25,11 +24,10 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.ViewGroup;
-import android.window.ITaskOrganizer;
+import android.window.TaskOrganizer;
 import android.window.WindowContainerTransaction;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.window.WindowOrganizer;
 
 public class TaskOrganizerPipTest extends Service {
     static final int PIP_WIDTH  = 640;
@@ -37,20 +35,13 @@ public class TaskOrganizerPipTest extends Service {
 
     TaskView mTaskView;
 
-    class Organizer extends ITaskOrganizer.Stub {
+    class Organizer extends TaskOrganizer {
         public void onTaskAppeared(ActivityManager.RunningTaskInfo ti) {
             mTaskView.reparentTask(ti.token);
 
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.scheduleFinishEnterPip(ti.token, new Rect(0, 0, PIP_WIDTH, PIP_HEIGHT));
-            try {
-                WindowOrganizer.applyTransaction(wct);
-            } catch (Exception e) {
-            }
-        }
-        public void onTaskVanished(ActivityManager.RunningTaskInfo ti) {
-        }
-        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
+            applyTransaction(wct);
         }
     }
 
@@ -65,10 +56,7 @@ public class TaskOrganizerPipTest extends Service {
     public void onCreate() {
         super.onCreate();
 
-        try {
-            TaskOrganizer.registerOrganizer(mOrganizer, WINDOWING_MODE_PINNED);
-        } catch (Exception e) {
-        }
+        mOrganizer.registerOrganizer(WINDOWING_MODE_PINNED);
 
         final WindowManager.LayoutParams wlp = new WindowManager.LayoutParams();
         wlp.setTitle("TaskOrganizerPipTest");

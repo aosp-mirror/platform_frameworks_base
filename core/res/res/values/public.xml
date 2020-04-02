@@ -3075,6 +3075,28 @@
       <!-- @hide -->
       <public name="config_customSessionPolicyProvider" />
     </public-group>
+
+  <!-- ===============================================================
+     Resources added in version S of the platform
+
+     NOTE: add <public> elements within a <public-group> like so:
+
+     <public-group type="attr" first-id="0x01010531">
+         <public name="exampleAttr1" />
+         <public name="exampleAttr2" />
+     </public-group>
+
+     To add a new public-group block, choose an id value that is 1 greater
+     than the last of that item above. For example, the last "attr" id
+     value above is 0x01010530, so the public-group of attrs below has
+     the id value of 0x01010531.
+     =============================================================== -->
+  <eat-comment />
+
+  <public-group type="attr" first-id="0x01010625">
+    <public name="allowClickWhenDisabled" />
+  </public-group>
+
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
 

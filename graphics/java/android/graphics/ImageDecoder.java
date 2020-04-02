@@ -27,6 +27,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.content.ContentResolver;
@@ -918,8 +919,12 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      * Provide Resources for density scaling.
      *
+     * This is a SystemApi to enable legacy behavior, so there is no need to
+     * make it public like the version above, which does not have a Resources
+     * parameter.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @AnyThread
     @NonNull
     public static Source createSource(@NonNull ContentResolver cr,
@@ -939,6 +944,12 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      * Create a new {@link Source Source} from a byte array.
      *
+     * <p>Note: If this {@code Source} is passed to {@link #decodeDrawable decodeDrawable},
+     * and the encoded image is animated, the returned {@link AnimatedImageDrawable}
+     * will continue reading from {@code data}, so its contents must not
+     * be modified, even after the {@code AnimatedImageDrawable} is returned.
+     * {@code data}'s contents should never be modified during decode.</p>
+     *
      * @param data byte array of compressed image data.
      * @param offset offset into data for where the decoder should begin
      *      parsing.
@@ -949,7 +960,6 @@ public final class ImageDecoder implements AutoCloseable {
      * @throws NullPointerException if data is null.
      * @throws ArrayIndexOutOfBoundsException if offset and length are
      *      not within data.
-     * @hide
      */
     @AnyThread
     @NonNull
@@ -967,8 +977,19 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
-     * See {@link #createSource(byte[], int, int).
-     * @hide
+     * Create a new {@link Source Source} from a byte array.
+     *
+     * <p>Note: If this {@code Source} is passed to {@link #decodeDrawable decodeDrawable},
+     * and the encoded image is animated, the returned {@link AnimatedImageDrawable}
+     * will continue reading from {@code data}, so its contents must not
+     * be modified, even after the {@code AnimatedImageDrawable} is returned.
+     * {@code data}'s contents should never be modified during decode.</p>
+     *
+     * @param data byte array of compressed image data.
+     * @return a new Source object, which can be passed to
+     *      {@link #decodeDrawable decodeDrawable} or
+     *      {@link #decodeBitmap decodeBitmap}.
+     * @throws NullPointerException if data is null.
      */
     @AnyThread
     @NonNull

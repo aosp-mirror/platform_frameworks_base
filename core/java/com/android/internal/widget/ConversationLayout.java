@@ -18,6 +18,8 @@ package com.android.internal.widget;
 
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_EXTERNAL;
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_INLINE;
+import static com.android.internal.widget.MessagingPropertyAnimator.ALPHA_IN;
+import static com.android.internal.widget.MessagingPropertyAnimator.ALPHA_OUT;
 
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
@@ -60,6 +62,7 @@ import com.android.internal.util.ContrastColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -106,7 +109,7 @@ public class ConversationLayout extends FrameLayout
     private CharSequence mNameReplacement;
     private boolean mIsCollapsed;
     private ImageResolver mImageResolver;
-    private ImageView mConversationIcon;
+    private CachingIconView mConversationIcon;
     private View mConversationIconContainer;
     private int mConversationIconTopPadding;
     private int mConversationIconTopPaddingExpandedGroup;
@@ -114,7 +117,7 @@ public class ConversationLayout extends FrameLayout
     private int mExpandedGroupMessagePaddingNoAppName;
     private TextView mConversationText;
     private View mConversationIconBadge;
-    private ImageView mConversationIconBadgeBg;
+    private CachingIconView mConversationIconBadgeBg;
     private Icon mLargeIcon;
     private View mExpandButtonContainer;
     private ViewGroup mExpandButtonAndContentContainer;
@@ -125,7 +128,7 @@ public class ConversationLayout extends FrameLayout
     private int mConversationAvatarSize;
     private int mConversationAvatarSizeExpanded;
     private CachingIconView mIcon;
-    private View mImportanceRingView;
+    private CachingIconView mImportanceRingView;
     private int mExpandedGroupSideMargin;
     private int mExpandedGroupSideMarginFacePile;
     private View mConversationFacePile;
@@ -140,11 +143,16 @@ public class ConversationLayout extends FrameLayout
     private int mContentMarginEnd;
     private Rect mMessagingClipRect;
     private ObservableTextView mAppName;
+    private ViewGroup mActions;
+    private int mConversationContentStart;
+    private int mInternalButtonPadding;
     private boolean mAppNameGone;
     private int mFacePileAvatarSize;
     private int mFacePileAvatarSizeExpandedGroup;
     private int mFacePileProtectionWidth;
     private int mFacePileProtectionWidthExpanded;
+    private boolean mImportantConversation;
+    private TextView mUnreadBadge;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -168,6 +176,7 @@ public class ConversationLayout extends FrameLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
         mMessagingLinearLayout = findViewById(R.id.notification_messaging);
+        mActions = findViewById(R.id.actions);
         mMessagingLinearLayout.setMessagingLayout(this);
         mImageMessageContainer = findViewById(R.id.conversation_image_message_container);
         // We still want to clip, but only on the top, since views can temporarily out of bounds
@@ -186,9 +195,41 @@ public class ConversationLayout extends FrameLayout
         mConversationIconBadge = findViewById(R.id.conversation_icon_badge);
         mConversationIconBadgeBg = findViewById(R.id.conversation_icon_badge_bg);
         mIcon.setOnVisibilityChangedListener((visibility) -> {
-            // Always keep the badge visibility in sync with the icon. This is necessary in cases
-            // Where the icon is being hidden externally like in group children.
-            mConversationIconBadge.setVisibility(visibility);
+
+            // Let's hide the background directly or in an animated way
+            boolean isGone = visibility == GONE;
+            int oldVisibility = mConversationIconBadgeBg.getVisibility();
+            boolean wasGone = oldVisibility == GONE;
+            if (wasGone != isGone) {
+                // Keep the badge gone state in sync with the icon. This is necessary in cases
+                // Where the icon is being hidden externally like in group children.
+                mConversationIconBadgeBg.animate().cancel();
+                mConversationIconBadgeBg.setVisibility(visibility);
+            }
+
+            // Let's handle the importance ring which can also be be gone normally
+            oldVisibility = mImportanceRingView.getVisibility();
+            wasGone = oldVisibility == GONE;
+            visibility = !mImportantConversation ? GONE : visibility;
+            isGone = visibility == GONE;
+            if (wasGone != isGone) {
+                // Keep the badge visibility in sync with the icon. This is necessary in cases
+                // Where the icon is being hidden externally like in group children.
+                mImportanceRingView.animate().cancel();
+                mImportanceRingView.setVisibility(visibility);
+            }
+        });
+        // When the small icon is gone, hide the rest of the badge
+        mIcon.setOnForceHiddenChangedListener((forceHidden) -> {
+            animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
+            animateViewForceHidden(mImportanceRingView, forceHidden);
+        });
+
+        // When the conversation icon is gone, hide the whole badge
+        mConversationIcon.setOnForceHiddenChangedListener((forceHidden) -> {
+            animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
+            animateViewForceHidden(mImportanceRingView, forceHidden);
+            animateViewForceHidden(mIcon, forceHidden);
         });
         mConversationText = findViewById(R.id.conversation_text);
         mExpandButtonContainer = findViewById(R.id.expand_button_container);
@@ -238,6 +279,34 @@ public class ConversationLayout extends FrameLayout
         mAppName.setOnVisibilityChangedListener((visibility) -> {
             onAppNameVisibilityChanged();
         });
+        mUnreadBadge = findViewById(R.id.conversation_unread_count);
+        mConversationContentStart = getResources().getDimensionPixelSize(
+                R.dimen.conversation_content_start);
+        mInternalButtonPadding
+                = getResources().getDimensionPixelSize(R.dimen.button_padding_horizontal_material)
+                + getResources().getDimensionPixelSize(R.dimen.button_inset_horizontal_material);
+    }
+
+    private void animateViewForceHidden(CachingIconView view, boolean forceHidden) {
+        boolean nowForceHidden = view.willBeForceHidden() || view.isForceHidden();
+        if (forceHidden == nowForceHidden) {
+            // We are either already forceHidden or will be
+            return;
+        }
+        view.animate().cancel();
+        view.setWillBeForceHidden(forceHidden);
+        view.animate()
+                .scaleX(forceHidden ? 0.5f : 1.0f)
+                .scaleY(forceHidden ? 0.5f : 1.0f)
+                .alpha(forceHidden ? 0.0f : 1.0f)
+                .setInterpolator(forceHidden ? ALPHA_OUT : ALPHA_IN)
+                .setDuration(160);
+        if (view.getVisibility() != VISIBLE) {
+            view.setForceHidden(forceHidden);
+        } else {
+            view.animate().withEndAction(() -> view.setForceHidden(forceHidden));
+        }
+        view.animate().start();
     }
 
     @RemotableViewMethod
@@ -255,7 +324,12 @@ public class ConversationLayout extends FrameLayout
      */
     @RemotableViewMethod
     public void setIsImportantConversation(boolean isImportantConversation) {
+        mImportantConversation = isImportantConversation;
         mImportanceRingView.setVisibility(isImportantConversation ? VISIBLE : GONE);
+    }
+
+    public boolean isImportantConversation() {
+        return mImportantConversation;
     }
 
     /**
@@ -283,7 +357,6 @@ public class ConversationLayout extends FrameLayout
         // mUser now set (would be nice to avoid the side effect but WHATEVER)
         setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON));
 
-
         // Append remote input history to newMessages (again, side effect is lame but WHATEVS)
         RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
                 extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
@@ -291,14 +364,28 @@ public class ConversationLayout extends FrameLayout
 
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
-
         // bind it, baby
         bind(newMessages, newHistoricMessages, showSpinner);
+
+        int unreadCount = extras.getInt(Notification.EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
+        setUnreadCount(unreadCount);
     }
 
     @Override
     public void setImageResolver(ImageResolver resolver) {
         mImageResolver = resolver;
+    }
+
+    /** @hide */
+    public void setUnreadCount(int unreadCount) {
+        mUnreadBadge.setVisibility(mIsCollapsed && unreadCount > 1 ? VISIBLE : GONE);
+        CharSequence text = unreadCount >= 100
+                ? getResources().getString(R.string.unread_convo_overflow, 99)
+                : String.format(Locale.getDefault(), "%d", unreadCount);
+        mUnreadBadge.setText(text);
+        mUnreadBadge.setBackgroundTintList(ColorStateList.valueOf(mLayoutColor));
+        boolean needDarkText = ColorUtils.calculateLuminance(mLayoutColor) > 0.5f;
+        mUnreadBadge.setTextColor(needDarkText ? Color.BLACK : Color.WHITE);
     }
 
     private void addRemoteInputHistoryToMessages(
@@ -363,7 +450,6 @@ public class ConversationLayout extends FrameLayout
     private void updateConversationLayout() {
         // Set avatar and name
         CharSequence conversationText = mConversationTitle;
-        // TODO: display the secondary text somewhere
         if (mIsOneToOne) {
             // Let's resolve the icon / text from the last sender
             mConversationIcon.setVisibility(VISIBLE);
@@ -418,6 +504,27 @@ public class ConversationLayout extends FrameLayout
         updateIconPositionAndSize();
         updateImageMessages();
         updatePaddingsBasedOnContentAvailability();
+        updateActionListPadding();
+    }
+
+    private void updateActionListPadding() {
+        if (mActions == null) {
+            return;
+        }
+        View firstAction = mActions.getChildAt(0);
+        if (firstAction != null) {
+            // Let's visually position the first action where the content starts
+            int paddingStart = mConversationContentStart;
+
+            MarginLayoutParams layoutParams = (MarginLayoutParams) firstAction.getLayoutParams();
+            paddingStart -= layoutParams.getMarginStart();
+            paddingStart -= mInternalButtonPadding;
+
+            mActions.setPaddingRelative(paddingStart,
+                    mActions.getPaddingTop(),
+                    mActions.getPaddingEnd(),
+                    mActions.getPaddingBottom());
+        }
     }
 
     private void updateImageMessages() {

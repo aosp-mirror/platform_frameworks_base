@@ -20,14 +20,18 @@ import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowInsets.Type.systemBars;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +47,8 @@ import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.animation.LinearInterpolator;
 import android.view.test.InsetsModeSession;
 
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -53,8 +59,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
-
-import androidx.test.runner.AndroidJUnit4;
 
 /**
  * Tests for {@link InsetsAnimationControlImpl}.
@@ -124,6 +128,7 @@ public class InsetsAnimationControlImplTest {
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
                 mMockController, 10 /* durationMs */, new LinearInterpolator(),
                 0 /* animationType */);
+        mController.mReadyDispatched = true;
     }
 
     @Test
@@ -204,6 +209,34 @@ public class InsetsAnimationControlImplTest {
         assertTrue(mController.isCancelled());
         verify(mMockListener).onCancelled(mController);
         mController.finish(true /* shown */);
+        verify(mMockListener, never()).onFinished(any());
+    }
+
+    @Test
+    public void testCancelled_beforeReadyDispatched() {
+        mController.mReadyDispatched = false;
+        mController.cancel();
+        assertFalse(mController.isReady());
+        assertFalse(mController.isFinished());
+        assertTrue(mController.isCancelled());
+        verify(mMockListener).onCancelled(null);
+        verify(mMockListener, never()).onFinished(any());
+    }
+
+    @Test
+    public void testFinish_immediately() {
+        when(mMockController.getState()).thenReturn(mInsetsState);
+        doAnswer(invocation -> {
+            mController.applyChangeInsets(mInsetsState);
+            return null;
+        }).when(mMockController).scheduleApplyChangeInsets();
+        mController.finish(true /* shown */);
+        assertEquals(Insets.of(0, 100, 100, 0), mController.getCurrentInsets());
+        verify(mMockController).notifyFinished(eq(mController), eq(true /* shown */));
+        assertFalse(mController.isReady());
+        assertTrue(mController.isFinished());
+        assertFalse(mController.isCancelled());
+        verify(mMockListener).onFinished(mController);
     }
 
     private void assertPosition(Matrix m, Rect original, Rect transformed) {

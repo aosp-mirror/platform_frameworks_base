@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -254,6 +255,29 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
                         new ComponentName(
                                 mServiceInfo.getComponentName().getPackageName(),
                                 mServiceInfo.getSettingsActivity()));
+    }
+
+    @Override
+    @Nullable
+    public Drawable getLogo() {
+        return mServiceInfo == null ? null : mServiceInfo.getWalletLogo(mContext);
+    }
+
+    @Override
+    @Nullable
+    public CharSequence getServiceLabel() {
+        return mServiceInfo == null ? null : mServiceInfo.getServiceLabel(mContext);
+    }
+
+    @Override
+    @Nullable
+    public CharSequence getShortcutShortLabel() {
+        return mServiceInfo == null ? null : mServiceInfo.getShortcutShortLabel(mContext);
+    }
+
+    @Override
+    public CharSequence getShortcutLongLabel() {
+        return mServiceInfo == null ? null : mServiceInfo.getShortcutLongLabel(mContext);
     }
 
     private void connect() {

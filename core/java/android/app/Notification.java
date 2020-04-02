@@ -1232,6 +1232,10 @@ public class Notification implements Parcelable
     /** @hide */
     public static final String EXTRA_CONVERSATION_ICON = "android.conversationIcon";
 
+    /** @hide */
+    public static final String EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT =
+            "android.conversationUnreadMessageCount";
+
     /**
      * {@link #extras} key: an array of {@link android.app.Notification.MessagingStyle.Message}
      * bundles provided by a
@@ -5817,7 +5821,7 @@ public class Notification implements Parcelable
                         PorterDuff.Mode.SRC_ATOP);
 
             }
-            contentView.setInt(R.id.notification_header, "setOriginalIconColor",
+            contentView.setInt(R.id.icon, "setOriginalIconColor",
                     colorable ? color : NotificationHeaderView.NO_COLOR);
         }
 
@@ -7102,6 +7106,7 @@ public class Notification implements Parcelable
         List<Message> mHistoricMessages = new ArrayList<>();
         boolean mIsGroupConversation;
         @ConversationType int mConversationType = CONVERSATION_TYPE_LEGACY;
+        int mUnreadMessageCount;
 
         MessagingStyle() {
         }
@@ -7245,6 +7250,17 @@ public class Notification implements Parcelable
         @ConversationType
         public int getConversationType() {
             return mConversationType;
+        }
+
+        /** @hide */
+        public int getUnreadMessageCount() {
+            return mUnreadMessageCount;
+        }
+
+        /** @hide */
+        public MessagingStyle setUnreadMessageCount(int unreadMessageCount) {
+            mUnreadMessageCount = unreadMessageCount;
+            return this;
         }
 
         /**
@@ -7401,6 +7417,7 @@ public class Notification implements Parcelable
             if (mShortcutIcon != null) {
                 extras.putParcelable(EXTRA_CONVERSATION_ICON, mShortcutIcon);
             }
+            extras.putInt(EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT, mUnreadMessageCount);
 
             fixTitleAndTextExtras(extras);
             extras.putBoolean(EXTRA_IS_GROUP_CONVERSATION, mIsGroupConversation);
@@ -7452,6 +7469,7 @@ public class Notification implements Parcelable
             Parcelable[] histMessages = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES);
             mHistoricMessages = Message.getMessagesFromBundleArray(histMessages);
             mIsGroupConversation = extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION);
+            mUnreadMessageCount = extras.getInt(EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
         }
 
         /**
@@ -7601,6 +7619,7 @@ public class Notification implements Parcelable
                             : mBuilder.getMessagingLayoutResource(),
                     p,
                     bindResult);
+
             addExtras(mBuilder.mN.extras);
             if (!isConversationLayout) {
                 // also update the end margin if there is an image

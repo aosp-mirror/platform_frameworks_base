@@ -99,7 +99,6 @@
     <protected-broadcast android:name="android.intent.action.LOAD_DATA" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
-    <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGING" />
     <protected-broadcast android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_WHITELIST_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_TEMP_WHITELIST_CHANGED" />
@@ -4712,12 +4711,6 @@
          @SystemApi -->
     <permission android:name="android.permission.MANAGE_SOUND_TRIGGER"
         android:protectionLevel="signature|privileged" />
-
-    <!-- Allows preempting sound trigger recognitions for the sake of capturing audio on
-         implementations which do not support running both concurrently.
-         @hide -->
-    <permission android:name="android.permission.PREEMPT_SOUND_TRIGGER"
-                android:protectionLevel="signature|privileged" />
 
     <!-- Must be required by system/priv apps implementing sound trigger detection services
          @hide

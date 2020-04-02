@@ -13087,6 +13087,7 @@ public class TelephonyManager {
                 sISub.asBinder().unlinkToDeath(sServiceDeath, 0);
                 sISub = null;
                 SubscriptionManager.invalidateDefaultSubIdCaches();
+                SubscriptionManager.invalidateDefaultDataSubIdCaches();
             }
             if (sISms != null) {
                 sISms.asBinder().unlinkToDeath(sServiceDeath, 0);

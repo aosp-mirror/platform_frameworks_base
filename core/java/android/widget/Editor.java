@@ -27,7 +27,6 @@ import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
-import android.content.ClipData.Item;
 import android.content.Context;
 import android.content.Intent;
 import android.content.UndoManager;
@@ -2802,78 +2801,67 @@ public class Editor {
     }
 
     void onDrop(DragEvent event) {
-        SpannableStringBuilder content = new SpannableStringBuilder();
+        final int offset = mTextView.getOffsetForPosition(event.getX(), event.getY());
+        Object localState = event.getLocalState();
+        DragLocalState dragLocalState = null;
+        if (localState instanceof DragLocalState) {
+            dragLocalState = (DragLocalState) localState;
+        }
+        boolean dragDropIntoItself = dragLocalState != null
+                && dragLocalState.sourceTextView == mTextView;
+        if (dragDropIntoItself) {
+            if (offset >= dragLocalState.start && offset < dragLocalState.end) {
+                // A drop inside the original selection discards the drop.
+                return;
+            }
+        }
 
         final DragAndDropPermissions permissions = DragAndDropPermissions.obtain(event);
         if (permissions != null) {
             permissions.takeTransient();
         }
-
-        try {
-            ClipData clipData = event.getClipData();
-            final int itemCount = clipData.getItemCount();
-            for (int i = 0; i < itemCount; i++) {
-                Item item = clipData.getItemAt(i);
-                content.append(item.coerceToStyledText(mTextView.getContext()));
-            }
-        } finally {
-            if (permissions != null) {
-                permissions.release();
-            }
-        }
-
         mTextView.beginBatchEdit();
         mUndoInputFilter.freezeLastEdit();
         try {
-            final int offset = mTextView.getOffsetForPosition(event.getX(), event.getY());
-            Object localState = event.getLocalState();
-            DragLocalState dragLocalState = null;
-            if (localState instanceof DragLocalState) {
-                dragLocalState = (DragLocalState) localState;
-            }
-            boolean dragDropIntoItself = dragLocalState != null
-                    && dragLocalState.sourceTextView == mTextView;
-
-            if (dragDropIntoItself) {
-                if (offset >= dragLocalState.start && offset < dragLocalState.end) {
-                    // A drop inside the original selection discards the drop.
-                    return;
-                }
-            }
-
             final int originalLength = mTextView.getText().length();
-            int min = offset;
-            int max = offset;
-
-            Selection.setSelection((Spannable) mTextView.getText(), max);
-            mTextView.replaceText_internal(min, max, content);
-
+            Selection.setSelection((Spannable) mTextView.getText(), offset);
+            ClipData clip = event.getClipData();
+            mTextView.getRichContentReceiver().onReceive(mTextView, clip,
+                    RichContentReceiver.SOURCE_DRAG_AND_DROP, 0);
             if (dragDropIntoItself) {
-                int dragSourceStart = dragLocalState.start;
-                int dragSourceEnd = dragLocalState.end;
-                if (max <= dragSourceStart) {
-                    // Inserting text before selection has shifted positions
-                    final int shift = mTextView.getText().length() - originalLength;
-                    dragSourceStart += shift;
-                    dragSourceEnd += shift;
-                }
-
-                // Delete original selection
-                mTextView.deleteText_internal(dragSourceStart, dragSourceEnd);
-
-                // Make sure we do not leave two adjacent spaces.
-                final int prevCharIdx = Math.max(0,  dragSourceStart - 1);
-                final int nextCharIdx = Math.min(mTextView.getText().length(), dragSourceStart + 1);
-                if (nextCharIdx > prevCharIdx + 1) {
-                    CharSequence t = mTextView.getTransformedText(prevCharIdx, nextCharIdx);
-                    if (Character.isSpaceChar(t.charAt(0)) && Character.isSpaceChar(t.charAt(1))) {
-                        mTextView.deleteText_internal(prevCharIdx, prevCharIdx + 1);
-                    }
-                }
+                deleteSourceAfterLocalDrop(dragLocalState, offset, originalLength);
             }
         } finally {
             mTextView.endBatchEdit();
             mUndoInputFilter.freezeLastEdit();
+            if (permissions != null) {
+                permissions.release();
+            }
+        }
+    }
+
+    private void deleteSourceAfterLocalDrop(@NonNull DragLocalState dragLocalState, int dropOffset,
+            int lengthBeforeDrop) {
+        int dragSourceStart = dragLocalState.start;
+        int dragSourceEnd = dragLocalState.end;
+        if (dropOffset <= dragSourceStart) {
+            // Inserting text before selection has shifted positions
+            final int shift = mTextView.getText().length() - lengthBeforeDrop;
+            dragSourceStart += shift;
+            dragSourceEnd += shift;
+        }
+
+        // Delete original selection
+        mTextView.deleteText_internal(dragSourceStart, dragSourceEnd);
+
+        // Make sure we do not leave two adjacent spaces.
+        final int prevCharIdx = Math.max(0, dragSourceStart - 1);
+        final int nextCharIdx = Math.min(mTextView.getText().length(), dragSourceStart + 1);
+        if (nextCharIdx > prevCharIdx + 1) {
+            CharSequence t = mTextView.getTransformedText(prevCharIdx, nextCharIdx);
+            if (Character.isSpaceChar(t.charAt(0)) && Character.isSpaceChar(t.charAt(1))) {
+                mTextView.deleteText_internal(prevCharIdx, prevCharIdx + 1);
+            }
         }
     }
 

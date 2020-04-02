@@ -67,6 +67,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
 
     private static final String TAG = "NotifSectionsManager";
     private static final boolean DEBUG = false;
+    private static final boolean ENABLE_SNOOZED_CONVERSATION_HUB = false;
 
     private final ActivityStarter mActivityStarter;
     private final StatusBarStateController mStatusBarStateController;
@@ -193,7 +194,9 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             mPeopleHubSubscription.unsubscribe();
         }
         mPeopleHubView = reinflateView(mPeopleHubView, layoutInflater, R.layout.people_strip);
-        mPeopleHubSubscription = mPeopleHubViewAdapter.bindView(mPeopleHubViewBoundary);
+        if (ENABLE_SNOOZED_CONVERSATION_HUB) {
+            mPeopleHubSubscription = mPeopleHubViewAdapter.bindView(mPeopleHubViewBoundary);
+        }
 
         if (mMediaControlsView != null) {
             mKeyguardMediaPlayer.unbindView();

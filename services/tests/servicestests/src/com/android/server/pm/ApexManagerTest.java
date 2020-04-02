@@ -21,8 +21,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +46,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.TestPackageParser2;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,6 +61,7 @@ import java.io.InputStream;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
+
 public class ApexManagerTest {
     private static final String TEST_APEX_PKG = "com.android.apex.test";
     private static final int TEST_SESSION_ID = 99999999;
@@ -71,8 +75,10 @@ public class ApexManagerTest {
     @Before
     public void setUp() throws RemoteException {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
-        mApexManager = new ApexManager.ApexManagerImpl(mApexService);
-        mPackageParser2 = new PackageParser2(null, false, null, null, null);
+        ApexManager.ApexManagerImpl managerImpl = spy(new ApexManager.ApexManagerImpl());
+        doReturn(mApexService).when(managerImpl).waitForApexService();
+        mApexManager = managerImpl;
+        mPackageParser2 = new TestPackageParser2();
     }
 
     @Test

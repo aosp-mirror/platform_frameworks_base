@@ -543,7 +543,8 @@ public class BubbleStackView extends FrameLayout {
                         .setStiffness(SpringForce.STIFFNESS_LOW)
                         .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
         mExpandedViewYAnim.addEndListener((anim, cancelled, value, velocity) -> {
-            if (mIsExpanded && mExpandedBubble != null) {
+            if (mIsExpanded && mExpandedBubble != null
+                    && mExpandedBubble.getExpandedView() != null) {
                 mExpandedBubble.getExpandedView().updateView();
             }
         });
@@ -562,7 +563,7 @@ public class BubbleStackView extends FrameLayout {
                     // Update the insets after we're done translating otherwise position
                     // calculation for them won't be correct.
                     () -> {
-                        if (mExpandedBubble != null) {
+                        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
                             mExpandedBubble.getExpandedView().updateInsets(insets);
                         }
                     });
@@ -577,7 +578,7 @@ public class BubbleStackView extends FrameLayout {
                     // Reposition & adjust the height for new orientation
                     if (mIsExpanded) {
                         mExpandedViewContainer.setTranslationY(getExpandedViewY());
-                        if (mExpandedBubble != null) {
+                        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
                             mExpandedBubble.getExpandedView().updateView();
                         }
                     }
@@ -947,7 +948,6 @@ public class BubbleStackView extends FrameLayout {
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         ViewClippingUtil.setClippingDeactivated(bubble.getIconView(), true, mClippingParameters);
         animateInFlyoutForBubble(bubble);
-        updatePointerPosition();
         requestUpdate();
         logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
     }
@@ -1005,8 +1005,8 @@ public class BubbleStackView extends FrameLayout {
             Bubble bubble = bubbles.get(i);
             mBubbleContainer.reorderView(bubble.getIconView(), i);
         }
-
         updateBubbleZOrdersAndDotPosition(false /* animate */);
+        updatePointerPosition();
     }
 
     void showOverflow() {
@@ -1265,6 +1265,7 @@ public class BubbleStackView extends FrameLayout {
 
     void showExpandedViewContents(int displayId) {
         if (mExpandedBubble != null
+                && mExpandedBubble.getExpandedView() != null
                 && mExpandedBubble.getExpandedView().getVirtualDisplayId() == displayId) {
             mExpandedBubble.setContentVisibility(true);
         }
@@ -1394,7 +1395,7 @@ public class BubbleStackView extends FrameLayout {
     /** Called when a drag operation on an individual bubble has started. */
     public void onBubbleDragStart(View bubble) {
         if (DEBUG_BUBBLE_STACK_VIEW) {
-            Log.d(TAG, "onBubbleDragStart: bubble=" + bubble);
+            Log.d(TAG, "onBubbleDragStart: bubble=" + ((BadgedImageView) bubble).getKey());
         }
 
         if (mBubbleOverflow != null && bubble.equals(mBubbleOverflow.getIconView())) {
@@ -1440,7 +1441,7 @@ public class BubbleStackView extends FrameLayout {
 
     /** Expands the clicked bubble. */
     public void expandBubble(Bubble bubble) {
-        if (bubble.equals(mBubbleData.getSelectedBubble())) {
+        if (bubble != null && bubble.equals(mBubbleData.getSelectedBubble())) {
             // If the bubble we're supposed to expand is the selected bubble, that means the
             // overflow bubble is currently expanded. Don't tell BubbleData to set this bubble as
             // selected, since it already is. Just call the stack's setSelectedBubble to expand it.
@@ -1909,6 +1910,9 @@ public class BubbleStackView extends FrameLayout {
             return;
         }
         int index = getBubbleIndex(mExpandedBubble);
+        if (index == -1) {
+            return;
+        }
         float bubbleLeftFromScreenLeft = mExpandedAnimationController.getBubbleLeft(index);
         float halfBubble = mBubbleSize / 2f;
         float bubbleCenter = bubbleLeftFromScreenLeft + halfBubble;

@@ -21,7 +21,6 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
-#include <private/android/AHardwareBufferHelpers.h>
 #include <private/hwui/DrawGlInfo.h>
 #include <utils/Color.h>
 #include <utils/GLUtils.h>
@@ -111,8 +110,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
                             uirenderer::renderthread::EglManager::eglErrorString());
         // We use an EGLImage to access the content of the GraphicBuffer
         // The EGL image is later bound to a 2D texture
-        EGLClientBuffer clientBuffer =
-                (EGLClientBuffer)AHardwareBuffer_to_ANativeWindowBuffer(mFrameBuffer.get());
+        const EGLClientBuffer clientBuffer = eglGetNativeClientBufferANDROID(mFrameBuffer.get());
         AutoEglImage autoImage(display, clientBuffer);
         if (autoImage.image == EGL_NO_IMAGE_KHR) {
             ALOGW("Could not create EGL image, err =%s",

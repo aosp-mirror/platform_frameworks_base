@@ -65,7 +65,9 @@ import android.content.pm.parsing.component.ParsedProviderUtils;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.component.ParsedServiceUtils;
 import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
@@ -124,6 +126,51 @@ import java.util.StringTokenizer;
 public class ParsingPackageUtils {
 
     public static final String TAG = ParsingUtils.TAG;
+
+    /**
+     * For cases outside of PackageManagerService when an APK needs to be parsed as a one-off
+     * request, without caching the input object and without querying the internal system state
+     * for feature support.
+     */
+    @NonNull
+    public static ParseResult<ParsingPackage> parseDefaultOneTime(File file, int flags,
+            @NonNull ParseInput.Callback inputCallback, @NonNull Callback callback) {
+        if ((flags & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE)) == 0) {
+            // Caller expressed no opinion about what encryption
+            // aware/unaware components they want to see, so match both
+            flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE
+                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+        }
+
+        ParseInput input = new ParseTypeImpl(inputCallback).reset();
+        ParseResult<ParsingPackage> result;
+
+
+        ParsingPackageUtils parser = new ParsingPackageUtils(false, null, null, callback);
+        try {
+            result = parser.parsePackage(input, file, flags);
+            if (result.isError()) {
+                return result;
+            }
+        } catch (PackageParser.PackageParserException e) {
+            return input.error(PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                    "Error parsing package", e);
+        }
+
+        try {
+            ParsingPackage pkg = result.getResult();
+            if ((flags & PackageManager.GET_SIGNATURES) != 0
+                    || (flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
+                ParsingPackageUtils.collectCertificates(pkg, false /* skipVerify */);
+            }
+
+            return input.success(pkg);
+        } catch (PackageParser.PackageParserException e) {
+            return input.error(PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                    "Error collecting package certificates", e);
+        }
+    }
 
     private boolean mOnlyCoreApps;
     private String[] mSeparateProcesses;
@@ -455,10 +502,11 @@ public class ParsingPackageUtils {
         }
 
         if (!foundApp) {
-            return input.error(
-                    PackageManager.INSTALL_PARSE_FAILED_MANIFEST_EMPTY,
-                    "<manifest> does not contain an <application>"
-            );
+            ParseResult<?> deferResult = input.deferError(
+                    "<manifest> does not contain an <application>", DeferredError.MISSING_APP_TAG);
+            if (deferResult.isError()) {
+                return input.error(deferResult);
+            }
         }
 
         return input.success(pkg);
@@ -662,10 +710,12 @@ public class ParsingPackageUtils {
         }
 
         if (!foundApp && ArrayUtils.size(pkg.getInstrumentations()) == 0) {
-            return input.error(
-                    PackageManager.INSTALL_PARSE_FAILED_MANIFEST_EMPTY,
-                    "<manifest> does not contain an <application> or <instrumentation>"
-            );
+            ParseResult<?> deferResult = input.deferError(
+                    "<manifest> does not contain an <application> or <instrumentation>",
+                    DeferredError.MISSING_APP_TAG);
+            if (deferResult.isError()) {
+                return input.error(deferResult);
+            }
         }
 
         if (!ParsedAttribution.isCombinationValid(pkg.getAttributions())) {
@@ -757,11 +807,9 @@ public class ParsingPackageUtils {
             return input.success(pkg);
         }
 
-        ParseResult nameResult = validateName(input, str, true, true);
-        if (nameResult.isError()) {
-            if ("android".equals(pkg.getPackageName())) {
-                nameResult.ignoreError();
-            } else {
+        if (!"android".equals(pkg.getPackageName())) {
+            ParseResult<?> nameResult = validateName(input, str, true, true);
+            if (nameResult.isError()) {
                 return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID,
                         "<manifest> specifies bad sharedUserId name \"" + str + "\": "
                                 + nameResult.getErrorMessage());
@@ -1165,6 +1213,20 @@ public class ParsingPackageUtils {
                     targetCode = minCode;
                 }
 
+                ParseResult<Integer> targetSdkVersionResult = computeTargetSdkVersion(
+                        targetVers, targetCode, PackageParser.SDK_CODENAMES, input);
+                if (targetSdkVersionResult.isError()) {
+                    return input.error(targetSdkVersionResult);
+                }
+
+                int targetSdkVersion = targetSdkVersionResult.getResult();
+
+                ParseResult<?> deferResult =
+                        input.enableDeferredError(pkg.getPackageName(), targetSdkVersion);
+                if (deferResult.isError()) {
+                    return input.error(deferResult);
+                }
+
                 ParseResult<Integer> minSdkVersionResult = computeMinSdkVersion(minVers, minCode,
                         PackageParser.SDK_VERSION, PackageParser.SDK_CODENAMES, input);
                 if (minSdkVersionResult.isError()) {
@@ -1172,14 +1234,6 @@ public class ParsingPackageUtils {
                 }
 
                 int minSdkVersion = minSdkVersionResult.getResult();
-
-                ParseResult<Integer> targetSdkVersionResult = computeTargetSdkVersion(
-                        targetVers, targetCode, PackageParser.SDK_CODENAMES, input);
-                if (targetSdkVersionResult.isError()) {
-                    return input.error(targetSdkVersionResult);
-                }
-
-                int targetSdkVersion = minSdkVersionResult.getResult();
 
                 pkg.setMinSdkVersion(minSdkVersion)
                         .setTargetSdkVersion(targetSdkVersion);
@@ -1762,9 +1816,15 @@ public class ParsingPackageUtils {
             // Add a hidden app detail activity to normal apps which forwards user to App Details
             // page.
             ParseResult<ParsedActivity> a = generateAppDetailsHiddenActivity(input, pkg);
-            // Backwards-compat, assume success
+            if (a.isError()) {
+                // Error should be impossible here, as the only failure case as of SDK R is a
+                // string validation error on a constant ":app_details" string passed in by the
+                // parsing code itself. For this reason, this is just a hard failure instead of
+                // deferred.
+                return input.error(a);
+            }
+
             pkg.addActivity(a.getResult());
-            a.ignoreError();
         }
 
         if (hasActivityOrder) {
@@ -2121,17 +2181,13 @@ public class ParsingPackageUtils {
     private static ParseResult<ParsedActivity> generateAppDetailsHiddenActivity(ParseInput input,
             ParsingPackage pkg) {
         String packageName = pkg.getPackageName();
-        ParseResult<String> taskAffinityResult = ComponentParseUtils.buildTaskAffinityName(
+        ParseResult<String> result = ComponentParseUtils.buildTaskAffinityName(
                 packageName, packageName, ":app_details", input);
-
-        String taskAffinity;
-        if (taskAffinityResult.isSuccess()) {
-            taskAffinity = taskAffinityResult.getResult();
-        } else {
-            // Backwards-compat, do not fail
-            taskAffinity = null;
-            taskAffinityResult.ignoreError();
+        if (result.isError()) {
+            return input.error(result);
         }
+
+        String taskAffinity = result.getResult();
 
         // Build custom App Details activity info instead of parsing it from xml
         return input.success(ParsedActivity.makeAppDetailsActivity(packageName,
@@ -2669,7 +2725,8 @@ public class ParsingPackageUtils {
     public interface Callback {
         boolean hasFeature(String feature);
 
-        ParsingPackage startParsingPackage(String packageName, String baseCodePath, String codePath,
+        ParsingPackage startParsingPackage(@NonNull String packageName,
+                @NonNull String baseCodePath, @NonNull String codePath,
                 @NonNull TypedArray manifestArray, boolean isCoreApp);
     }
 }

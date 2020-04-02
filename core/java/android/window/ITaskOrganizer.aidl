@@ -18,7 +18,7 @@ package android.window;
 
 import android.view.SurfaceControl;
 import android.app.ActivityManager;
-import android.window.IWindowContainer;
+import android.window.WindowContainerToken;
 
 /**
  * Interface for ActivityTaskManager/WindowManager to delegate control of tasks.
@@ -41,5 +41,12 @@ oneway interface ITaskOrganizer {
      * has children. The Divider impl looks at the info and can see that the secondary root task
      * has adopted an ActivityType of HOME and proceeds to show the minimized dock UX.
      */
-    void onTaskInfoChanged(in ActivityManager.RunningTaskInfo info);
+    void onTaskInfoChanged(in ActivityManager.RunningTaskInfo taskInfo);
+
+    /**
+     * Called when the task organizer has requested
+     * {@link ITaskOrganizerController.setInterceptBackPressedOnTaskRoot} to get notified when the
+     * user has pressed back on the root activity of a task controlled by the task organizer.
+     */
+    void onBackPressedOnTaskRoot(in ActivityManager.RunningTaskInfo taskInfo);
 }

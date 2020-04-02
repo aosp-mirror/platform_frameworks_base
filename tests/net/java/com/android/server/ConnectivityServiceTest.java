@@ -317,6 +317,8 @@ public class ConnectivityServiceTest {
     private static final String TEST_PACKAGE_NAME = "com.android.test.package";
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
+    private static final String INTERFACE_NAME = "interface";
+
     private MockContext mServiceContext;
     private HandlerThread mCsHandlerThread;
     private ConnectivityService mService;
@@ -6748,16 +6750,12 @@ public class ConnectivityServiceTest {
 
         verify(mIBinder).linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
         verify(mConnectivityDiagnosticsCallback).asBinder();
-        assertTrue(
-                mService.mConnectivityDiagnosticsCallbacks.containsKey(
-                        mConnectivityDiagnosticsCallback));
+        assertTrue(mService.mConnectivityDiagnosticsCallbacks.containsKey(mIBinder));
 
         mService.unregisterConnectivityDiagnosticsCallback(mConnectivityDiagnosticsCallback);
         verify(mIBinder, timeout(TIMEOUT_MS))
                 .unlinkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
-        assertFalse(
-                mService.mConnectivityDiagnosticsCallbacks.containsKey(
-                        mConnectivityDiagnosticsCallback));
+        assertFalse(mService.mConnectivityDiagnosticsCallbacks.containsKey(mIBinder));
         verify(mConnectivityDiagnosticsCallback, atLeastOnce()).asBinder();
     }
 
@@ -6775,9 +6773,7 @@ public class ConnectivityServiceTest {
 
         verify(mIBinder).linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
         verify(mConnectivityDiagnosticsCallback).asBinder();
-        assertTrue(
-                mService.mConnectivityDiagnosticsCallbacks.containsKey(
-                        mConnectivityDiagnosticsCallback));
+        assertTrue(mService.mConnectivityDiagnosticsCallbacks.containsKey(mIBinder));
 
         // Register the same callback again
         mService.registerConnectivityDiagnosticsCallback(
@@ -6786,9 +6782,7 @@ public class ConnectivityServiceTest {
         // Block until all other events are done processing.
         HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
-        assertTrue(
-                mService.mConnectivityDiagnosticsCallbacks.containsKey(
-                        mConnectivityDiagnosticsCallback));
+        assertTrue(mService.mConnectivityDiagnosticsCallbacks.containsKey(mIBinder));
     }
 
     @Test
@@ -6913,6 +6907,38 @@ public class ConnectivityServiceTest {
                 mService.checkConnectivityDiagnosticsPermissions(
                         Process.myPid() + 1, Process.myUid() + 1, naiWithUid,
                         mContext.getOpPackageName()));
+    }
+
+    @Test
+    public void testRegisterConnectivityDiagnosticsCallbackCallsOnConnectivityReport()
+            throws Exception {
+        // Set up the Network, which leads to a ConnectivityReport being cached for the network.
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(callback);
+        final LinkProperties linkProperties = new LinkProperties();
+        linkProperties.setInterfaceName(INTERFACE_NAME);
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, linkProperties);
+        mCellNetworkAgent.connect(true);
+        callback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        callback.assertNoCallback();
+
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        when(mConnectivityDiagnosticsCallback.asBinder()).thenReturn(mIBinder);
+
+        mServiceContext.setPermission(
+                android.Manifest.permission.NETWORK_STACK, PERMISSION_GRANTED);
+
+        mService.registerConnectivityDiagnosticsCallback(
+                mConnectivityDiagnosticsCallback, request, mContext.getPackageName());
+
+        // Block until all other events are done processing.
+        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+
+        verify(mConnectivityDiagnosticsCallback)
+                .onConnectivityReportAvailable(argThat(report -> {
+                    return INTERFACE_NAME.equals(report.getLinkProperties().getInterfaceName())
+                            && report.getNetworkCapabilities().hasTransport(TRANSPORT_CELLULAR);
+                }));
     }
 
     private void setUpConnectivityDiagnosticsCallback() throws Exception {

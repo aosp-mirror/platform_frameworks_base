@@ -862,6 +862,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @UnsupportedAppUsage
     private Editor mEditor;
 
+    /**
+     * The default content insertion callback used by {@link TextView}. See
+     * {@link #setRichContentReceiver} for more info.
+     */
+    public static final @NonNull RichContentReceiver<TextView> DEFAULT_RICH_CONTENT_RECEIVER =
+            TextViewRichContentReceiver.INSTANCE;
+
+    private RichContentReceiver<TextView> mRichContentReceiver = DEFAULT_RICH_CONTENT_RECEIVER;
+
     private static final int DEVICE_PROVISIONED_UNKNOWN = 0;
     private static final int DEVICE_PROVISIONED_NO = 1;
     private static final int DEVICE_PROVISIONED_YES = 2;
@@ -8697,6 +8706,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.initialSelEnd = getSelectionEnd();
                 outAttrs.initialCapsMode = ic.getCursorCapsMode(getInputType());
                 outAttrs.setInitialSurroundingText(mText);
+                int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+                if (targetSdkVersion > Build.VERSION_CODES.R) {
+                    outAttrs.contentMimeTypes = mRichContentReceiver.getSupportedMimeTypes()
+                            .toArray(new String[0]);
+                }
                 return ic;
             }
         }
@@ -11689,26 +11703,36 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public void autofill(AutofillValue value) {
-        if (!value.isText() || !isTextEditable()) {
-            Log.w(LOG_TAG, value + " could not be autofilled into " + this);
+        if (!isTextEditable()) {
+            Log.w(LOG_TAG, "cannot autofill non-editable TextView: " + this);
             return;
         }
-
-        final CharSequence autofilledValue = value.getTextValue();
-
-        // First autofill it...
-        setText(autofilledValue, mBufferType, true, 0);
-
-        // ...then move cursor to the end.
-        final CharSequence text = getText();
-        if ((text instanceof Spannable)) {
-            Selection.setSelection((Spannable) text, text.length());
+        ClipData clip;
+        if (value.isRichContent()) {
+            clip = value.getRichContentValue();
+        } else if (value.isText()) {
+            clip = ClipData.newPlainText("", value.getTextValue());
+        } else {
+            Log.w(LOG_TAG, "value of type " + value.describeContents()
+                    + " cannot be autofilled into " + this);
+            return;
         }
+        mRichContentReceiver.onReceive(this, clip, RichContentReceiver.SOURCE_AUTOFILL, 0);
     }
 
     @Override
     public @AutofillType int getAutofillType() {
-        return isTextEditable() ? AUTOFILL_TYPE_TEXT : AUTOFILL_TYPE_NONE;
+        if (!isTextEditable()) {
+            return AUTOFILL_TYPE_NONE;
+        }
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion <= Build.VERSION_CODES.R) {
+            return AUTOFILL_TYPE_TEXT;
+        }
+        // TODO(b/147301047): Update autofill framework code to check the target SDK of the autofill
+        //  provider and force the type AUTOFILL_TYPE_TEXT for providers that target older SDKs.
+        return mRichContentReceiver.supportsNonTextContent() ? AUTOFILL_TYPE_RICH_CONTENT
+                : AUTOFILL_TYPE_TEXT;
     }
 
     /**
@@ -12286,11 +12310,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;  // Returns true even if nothing was undone.
 
             case ID_PASTE:
-                paste(min, max, true /* withFormatting */);
+                paste(true /* withFormatting */);
                 return true;
 
             case ID_PASTE_AS_PLAIN_TEXT:
-                paste(min, max, false /* withFormatting */);
+                paste(false /* withFormatting */);
                 return true;
 
             case ID_CUT:
@@ -12768,36 +12792,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ((Editable) mText).replace(getSelectionStart(), getSelectionEnd(), text);
     }
 
-    /**
-     * Paste clipboard content between min and max positions.
-     */
-    private void paste(int min, int max, boolean withFormatting) {
+    private void paste(boolean withFormatting) {
         ClipboardManager clipboard = getClipboardManagerForUser();
         ClipData clip = clipboard.getPrimaryClip();
-        if (clip != null) {
-            boolean didFirst = false;
-            for (int i = 0; i < clip.getItemCount(); i++) {
-                final CharSequence paste;
-                if (withFormatting) {
-                    paste = clip.getItemAt(i).coerceToStyledText(getContext());
-                } else {
-                    // Get an item as text and remove all spans by toString().
-                    final CharSequence text = clip.getItemAt(i).coerceToText(getContext());
-                    paste = (text instanceof Spanned) ? text.toString() : text;
-                }
-                if (paste != null) {
-                    if (!didFirst) {
-                        Selection.setSelection(mSpannable, max);
-                        ((Editable) mText).replace(min, max, paste);
-                        didFirst = true;
-                    } else {
-                        ((Editable) mText).insert(getSelectionEnd(), "\n");
-                        ((Editable) mText).insert(getSelectionEnd(), paste);
-                    }
-                }
-            }
-            sLastCutCopyOrTextChangedTime = 0;
+        if (clip == null) {
+            return;
         }
+        int flags = withFormatting ? 0 : RichContentReceiver.FLAG_CONVERT_TO_PLAIN_TEXT;
+        mRichContentReceiver.onReceive(this, clip, RichContentReceiver.SOURCE_MENU, flags);
+        sLastCutCopyOrTextChangedTime = 0;
     }
 
     private void shareSelectedText() {
@@ -13576,6 +13579,46 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             TextView.this.spanChange(buf, what, s, -1, e, -1);
         }
+    }
+
+    /**
+     * Returns the callback that handles insertion of content into this view (e.g. pasting from
+     * the clipboard). See {@link #setRichContentReceiver} for more info.
+     *
+     * @return The callback that this view is using to handle insertion of content. Returns
+     * {@link #DEFAULT_RICH_CONTENT_RECEIVER} if not custom callback has been
+     * {@link #setRichContentReceiver set}.
+     */
+    @NonNull
+    public RichContentReceiver<TextView> getRichContentReceiver() {
+        return mRichContentReceiver;
+    }
+
+    /**
+     * Sets the callback to handle insertion of content into this view.
+     *
+     * <p>"Content" and "rich content" here refers to both text and non-text: plain text, styled
+     * text, HTML, images, videos, audio files, etc.
+     *
+     * <p>The callback configured here should typically wrap {@link #DEFAULT_RICH_CONTENT_RECEIVER}
+     * to provide consistent behavior for text content.
+     *
+     * <p>This callback will be invoked for the following scenarios:
+     * <ol>
+     *     <li>Paste from the clipboard ("Paste" and "Paste as plain text" actions in the
+     *     insertion/selection menu)
+     *     <li>Content insertion from the keyboard ({@link InputConnection#commitContent})
+     *     <li>Drag and drop ({@link View#onDragEvent})
+     *     <li>Autofill, when the type for the field is
+     *     {@link android.view.View.AutofillType#AUTOFILL_TYPE_RICH_CONTENT}
+     * </ol>
+     *
+     * @param receiver The callback to use. This can be {@link #DEFAULT_RICH_CONTENT_RECEIVER} to
+     * reset to the default behavior.
+     */
+    public void setRichContentReceiver(@NonNull RichContentReceiver<TextView> receiver) {
+        mRichContentReceiver = Objects.requireNonNull(receiver,
+                "RichContentReceiver should not be null.");
     }
 
     private static void logCursor(String location, @Nullable String msgFormat, Object ... msgArgs) {

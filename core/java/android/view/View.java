@@ -728,6 +728,7 @@ import java.util.function.Predicate;
  * </p>
  *
  * @attr ref android.R.styleable#View_accessibilityHeading
+ * @attr ref android.R.styleable#View_allowClickWhenDisabled
  * @attr ref android.R.styleable#View_alpha
  * @attr ref android.R.styleable#View_background
  * @attr ref android.R.styleable#View_clickable
@@ -1260,7 +1261,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             AUTOFILL_TYPE_TEXT,
             AUTOFILL_TYPE_TOGGLE,
             AUTOFILL_TYPE_LIST,
-            AUTOFILL_TYPE_DATE
+            AUTOFILL_TYPE_DATE,
+            AUTOFILL_TYPE_RICH_CONTENT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutofillType {}
@@ -1311,7 +1313,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public static final int AUTOFILL_TYPE_LIST = 3;
 
-
     /**
      * Autofill type for a field that contains a date, which is represented by a long representing
      * the number of milliseconds since the standard base time known as "the epoch", namely
@@ -1324,6 +1325,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #getAutofillType()
      */
     public static final int AUTOFILL_TYPE_DATE = 4;
+
+    /**
+     * Autofill type for a field that can accept rich content (text, images, etc).
+     *
+     * <p>{@link AutofillValue} instances for autofilling a {@link View} can be obtained through
+     * {@link AutofillValue#forRichContent(ClipData)}, and the values passed to
+     * autofill a {@link View} can be fetched through {@link AutofillValue#getRichContentValue()}.
+     *
+     * @see #getAutofillType()
+     */
+    public static final int AUTOFILL_TYPE_RICH_CONTENT = 5;
+
 
     /** @hide */
     @IntDef(prefix = { "IMPORTANT_FOR_AUTOFILL_" }, value = {
@@ -5585,6 +5598,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         viewFlagValues |= CLICKABLE;
                         viewFlagMasks |= CLICKABLE;
                     }
+                    break;
+                case com.android.internal.R.styleable.View_allowClickWhenDisabled:
+                    setAllowClickWhenDisabled(a.getBoolean(attr, false));
                     break;
                 case com.android.internal.R.styleable.View_longClickable:
                     if (a.getBoolean(attr, false)) {
@@ -12140,6 +12156,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Enables or disables click events for this view when disabled.
      *
      * @param clickableWhenDisabled true to make the view clickable, false otherwise
+     *
+     * @attr ref android.R.styleable#View_allowClickWhenDisabled
      */
     public void setAllowClickWhenDisabled(boolean clickableWhenDisabled) {
         if (clickableWhenDisabled) {

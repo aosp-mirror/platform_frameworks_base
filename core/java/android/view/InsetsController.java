@@ -27,8 +27,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONT
 import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
@@ -39,11 +37,9 @@ import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.renderscript.Sampler.Value;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Property;
 import android.util.SparseArray;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
@@ -1064,6 +1060,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 }
                 mViewRoot.mView.dispatchWindowInsetsAnimationStart(animation, bounds);
                 mStartingAnimation = true;
+                controller.mReadyDispatched = true;
                 listener.onReady(controller, types);
                 mStartingAnimation = false;
                 return true;

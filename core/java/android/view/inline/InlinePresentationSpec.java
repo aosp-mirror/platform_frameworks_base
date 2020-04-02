@@ -18,11 +18,15 @@ package android.view.inline;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Size;
 
 import com.android.internal.util.DataClass;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents the presentation specification by which an inline suggestion
@@ -44,19 +48,61 @@ public final class InlinePresentationSpec implements Parcelable {
     private final Size mMaxSize;
 
     /**
-     * The extras encoding the UI style information. Defaults to {@code null} in which case the
-     * default system UI style will be used.
+     * The extras encoding the UI style information. Defaults to {@code Bundle.EMPTY} in which case
+     * the default system UI style will be used.
      */
-    @Nullable
+    @NonNull
     private final Bundle mStyle;
 
     private static Bundle defaultStyle() {
-        return null;
+        return Bundle.EMPTY;
     }
 
     /** @hide */
     @DataClass.Suppress({"setMaxSize", "setMinSize"})
     abstract static class BaseBuilder {
+    }
+
+    /**
+     * @hide
+     */
+    public android.widget.inline.InlinePresentationSpec toWidget() {
+        final android.widget.inline.InlinePresentationSpec.Builder builder =
+                new android.widget.inline.InlinePresentationSpec.Builder(
+                        getMinSize(), getMaxSize());
+        final Bundle style = getStyle();
+        if (style != null) {
+            builder.setStyle(style);
+        }
+        return builder.build();
+    }
+
+    /**
+     * @hide
+     */
+    public static android.view.inline.InlinePresentationSpec fromWidget(
+            android.widget.inline.InlinePresentationSpec widget) {
+        final android.view.inline.InlinePresentationSpec.Builder builder =
+                new android.view.inline.InlinePresentationSpec.Builder(
+                        widget.getMinSize(), widget.getMaxSize());
+        final Bundle style = widget.getStyle();
+        if (style != null) {
+            builder.setStyle(style);
+        }
+        return builder.build();
+    }
+
+    /**
+     * @hide
+     */
+    public static List<android.view.inline.InlinePresentationSpec> fromWidgets(
+            List<android.widget.inline.InlinePresentationSpec> widgets) {
+        final ArrayList<android.view.inline.InlinePresentationSpec> convertedSpecs =
+                new ArrayList<>();
+        for (int i = 0; i < widgets.size(); i++) {
+            convertedSpecs.add(fromWidget(widgets.get(i)));
+        }
+        return convertedSpecs;
     }
 
 
@@ -78,7 +124,7 @@ public final class InlinePresentationSpec implements Parcelable {
     /* package-private */ InlinePresentationSpec(
             @NonNull Size minSize,
             @NonNull Size maxSize,
-            @Nullable Bundle style) {
+            @NonNull Bundle style) {
         this.mMinSize = minSize;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mMinSize);
@@ -86,6 +132,8 @@ public final class InlinePresentationSpec implements Parcelable {
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mMaxSize);
         this.mStyle = style;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mStyle);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -93,6 +141,7 @@ public final class InlinePresentationSpec implements Parcelable {
     /**
      * The minimal size of the suggestion.
      */
+    @UnsupportedAppUsage
     @DataClass.Generated.Member
     public @NonNull Size getMinSize() {
         return mMinSize;
@@ -101,17 +150,18 @@ public final class InlinePresentationSpec implements Parcelable {
     /**
      * The maximal size of the suggestion.
      */
+    @UnsupportedAppUsage
     @DataClass.Generated.Member
     public @NonNull Size getMaxSize() {
         return mMaxSize;
     }
 
     /**
-     * The extras encoding the UI style information. Defaults to {@code null} in which case the
-     * default system UI style will be used.
+     * The extras encoding the UI style information. Defaults to {@code Bundle.EMPTY} in which case
+     * the default system UI style will be used.
      */
     @DataClass.Generated.Member
-    public @Nullable Bundle getStyle() {
+    public @NonNull Bundle getStyle() {
         return mStyle;
     }
 
@@ -165,12 +215,9 @@ public final class InlinePresentationSpec implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
-        byte flg = 0;
-        if (mStyle != null) flg |= 0x4;
-        dest.writeByte(flg);
         dest.writeSize(mMinSize);
         dest.writeSize(mMaxSize);
-        if (mStyle != null) dest.writeBundle(mStyle);
+        dest.writeBundle(mStyle);
     }
 
     @Override
@@ -184,10 +231,9 @@ public final class InlinePresentationSpec implements Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
-        byte flg = in.readByte();
         Size minSize = (Size) in.readSize();
         Size maxSize = (Size) in.readSize();
-        Bundle style = (flg & 0x4) == 0 ? null : in.readBundle();
+        Bundle style = in.readBundle();
 
         this.mMinSize = minSize;
         com.android.internal.util.AnnotationValidations.validate(
@@ -196,6 +242,8 @@ public final class InlinePresentationSpec implements Parcelable {
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mMaxSize);
         this.mStyle = style;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mStyle);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -223,7 +271,7 @@ public final class InlinePresentationSpec implements Parcelable {
 
         private @NonNull Size mMinSize;
         private @NonNull Size mMaxSize;
-        private @Nullable Bundle mStyle;
+        private @NonNull Bundle mStyle;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -235,6 +283,7 @@ public final class InlinePresentationSpec implements Parcelable {
          * @param maxSize
          *   The maximal size of the suggestion.
          */
+        @UnsupportedAppUsage
         public Builder(
                 @NonNull Size minSize,
                 @NonNull Size maxSize) {
@@ -247,8 +296,8 @@ public final class InlinePresentationSpec implements Parcelable {
         }
 
         /**
-         * The extras encoding the UI style information. Defaults to {@code null} in which case the
-         * default system UI style will be used.
+         * The extras encoding the UI style information. Defaults to {@code Bundle.EMPTY} in which case
+         * the default system UI style will be used.
          */
         @DataClass.Generated.Member
         public @NonNull Builder setStyle(@NonNull Bundle value) {
@@ -259,7 +308,9 @@ public final class InlinePresentationSpec implements Parcelable {
         }
 
         /** Builds the instance. This builder should not be touched after calling this! */
-        public @NonNull InlinePresentationSpec build() {
+        @UnsupportedAppUsage
+        @NonNull
+        public InlinePresentationSpec build() {
             checkNotUsed();
             mBuilderFieldsSet |= 0x8; // Mark builder used
 
@@ -282,10 +333,10 @@ public final class InlinePresentationSpec implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1585177087499L,
+            time = 1585691139012L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/view/inline/InlinePresentationSpec.java",
-            inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.Nullable android.os.Bundle mStyle\nprivate static  android.os.Bundle defaultStyle()\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.NonNull android.os.Bundle mStyle\nprivate static  android.os.Bundle defaultStyle()\npublic  android.widget.inline.InlinePresentationSpec toWidget()\npublic static  android.view.inline.InlinePresentationSpec fromWidget(android.widget.inline.InlinePresentationSpec)\npublic static  java.util.List<android.view.inline.InlinePresentationSpec> fromWidgets(java.util.List<android.widget.inline.InlinePresentationSpec>)\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

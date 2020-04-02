@@ -17,7 +17,6 @@
 package com.android.test.taskembed;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.window.WindowOrganizer.TaskOrganizer;
 
 import android.app.ActivityManager;
 import android.app.Activity;
@@ -37,8 +36,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.window.ITaskOrganizer;
 import android.window.IWindowContainerTransactionCallback;
+import android.window.TaskOrganizer;
 import android.window.WindowContainerTransaction;
 import android.widget.LinearLayout;
+import android.window.WindowContainerTransactionCallback;
 import android.window.WindowOrganizer;
 
 public class TaskOrganizerMultiWindowTest extends Activity {
@@ -97,7 +98,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
     class ResizingTaskView extends TaskView {
         final Intent mIntent;
         boolean launched = false;
-        ResizingTaskView(Context c, ITaskOrganizer o, int windowingMode, Intent i) {
+        ResizingTaskView(Context c, TaskOrganizer o, int windowingMode, Intent i) {
             super(c, o, windowingMode);
             mIntent = i;
         }
@@ -116,7 +117,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.setBounds(mWc, new Rect(0, 0, width, height));
             try {
-                WindowOrganizer.applySyncTransaction(wct, mOrganizer.mTransactionCallback);
+                mOrganizer.applySyncTransaction(wct, mOrganizer.mTransactionCallback);
             } catch (Exception e) {
                 // Oh well
             }
@@ -127,25 +128,19 @@ public class TaskOrganizerMultiWindowTest extends Activity {
     TaskView mTaskView2;
     boolean gotFirstTask = false;
 
-    class Organizer extends ITaskOrganizer.Stub {
+    class Organizer extends TaskOrganizer {
         private int receivedTransactions = 0;
         SurfaceControl.Transaction mergedTransaction = new SurfaceControl.Transaction();
-        IWindowContainerTransactionCallback mTransactionCallback =
-                new IWindowContainerTransactionCallback() {
+        WindowContainerTransactionCallback mTransactionCallback =
+                new WindowContainerTransactionCallback() {
             @Override
-            public void transactionReady(int id, SurfaceControl.Transaction t)
-                    throws RemoteException {
+            public void onTransactionReady(int id, SurfaceControl.Transaction t) {
                 mergedTransaction.merge(t);
                 receivedTransactions++;
                 if (receivedTransactions == 2) {
                     mergedTransaction.apply();
                     receivedTransactions = 0;
                 }
-            }
-
-            @Override
-            public IBinder asBinder() {
-                return null;
             }
         };
 
@@ -158,11 +153,6 @@ public class TaskOrganizerMultiWindowTest extends Activity {
                 mTaskView2.reparentTask(ti.token);
             }
         }
-        public void onTaskVanished(ActivityManager.RunningTaskInfo ti) {
-        }
-        @Override
-        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
-        }
     }
 
     Organizer mOrganizer = new Organizer();
@@ -171,10 +161,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        try {
-            TaskOrganizer.registerOrganizer(mOrganizer, WINDOWING_MODE_MULTI_WINDOW);
-        } catch (Exception e) {
-        }
+        mOrganizer.registerOrganizer(WINDOWING_MODE_MULTI_WINDOW);
 
         mTaskView1 = new ResizingTaskView(this, mOrganizer, WINDOWING_MODE_MULTI_WINDOW,
                 makeSettingsIntent());

@@ -100,7 +100,7 @@ class IconManager @Inject constructor(
         // TODO: This doesn't belong here
         shelfIcon.setOnVisibilityChangedListener { newVisibility: Int ->
             if (entry.row != null) {
-                entry.row.setIconsVisible(newVisibility != View.VISIBLE)
+                entry.row.setShelfIconVisible(newVisibility == View.VISIBLE)
             }
         }
 
@@ -258,7 +258,7 @@ class IconManager @Inject constructor(
         iconDescriptor: StatusBarIcon,
         iconView: StatusBarIconView
     ) {
-        iconView.setTintIcons(shouldTintIconView(entry, iconView))
+        iconView.setShowsConversation(showsConversation(entry, iconView, iconDescriptor))
         if (!iconView.set(iconDescriptor)) {
             throw InflationException("Couldn't create icon $iconDescriptor")
         }
@@ -312,15 +312,22 @@ class IconManager @Inject constructor(
     }
 
     /**
-     * Determines if this icon should be tinted based on the sensitivity of the icon, its context
-     * and the user's indicated sensitivity preference.
+     * Determines if this icon shows a conversation based on the sensitivity of the icon, its
+     * context and the user's indicated sensitivity preference. If we're using a fall back icon
+     * of the small icon, we don't consider this to be showing a conversation
      *
-     * @param iconView The icon that should/should not be tinted.
+     * @param iconView The icon that shows the conversation.
      */
-    private fun shouldTintIconView(entry: NotificationEntry, iconView: StatusBarIconView): Boolean {
+    private fun showsConversation(
+        entry: NotificationEntry,
+        iconView: StatusBarIconView,
+        iconDescriptor: StatusBarIcon
+    ): Boolean {
         val usedInSensitiveContext =
                 iconView === entry.icons.shelfIcon || iconView === entry.icons.aodIcon
-        return !isImportantConversation(entry) || usedInSensitiveContext && entry.isSensitive
+        val isSmallIcon = iconDescriptor.icon.equals(entry.sbn.notification.smallIcon)
+        return isImportantConversation(entry) && !isSmallIcon
+                && (!usedInSensitiveContext || !entry.isSensitive)
     }
 
     private fun isImportantConversation(entry: NotificationEntry): Boolean {

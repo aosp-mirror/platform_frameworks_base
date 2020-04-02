@@ -20,51 +20,130 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ParsingUtils;
+import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 
-import java.util.Arrays;
+import com.android.internal.util.CollectionUtils;
 
 /** @hide */
 public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
 
     private static final String TAG = ParsingUtils.TAG;
 
-    private static final boolean DEBUG_FILL_STACK_TRACE = false;
+    public static final boolean DEBUG_FILL_STACK_TRACE = false;
 
-    private static final boolean DEBUG_LOG_ON_ERROR = false;
+    public static final boolean DEBUG_LOG_ON_ERROR = false;
 
-    private Object result;
+    public static final boolean DEBUG_THROW_ALL_ERRORS = false;
 
-    private int errorCode = PackageManager.INSTALL_SUCCEEDED;
+    @NonNull
+    private Callback mCallback;
+
+    private Object mResult;
+
+    private int mErrorCode = PackageManager.INSTALL_SUCCEEDED;
 
     @Nullable
-    private String errorMessage;
+    private String mErrorMessage;
 
     @Nullable
-    private Exception exception;
+    private Exception mException;
+
+    /**
+     * Errors encountered before targetSdkVersion is known.
+     * The size upper bound is the number of longs in {@link DeferredError}
+     */
+    @Nullable
+    private ArrayMap<Long, String> mDeferredErrors = null;
+
+    private String mPackageName;
+    private Integer mTargetSdkVersion;
+
+    /**
+     * @param callback if nullable, fallback to manual targetSdk > Q check
+     */
+    public ParseTypeImpl(@NonNull Callback callback) {
+        mCallback = callback;
+    }
 
     public ParseInput reset() {
-        this.result = null;
-        this.errorCode = PackageManager.INSTALL_SUCCEEDED;
-        this.errorMessage = null;
-        this.exception = null;
+        mResult = null;
+        mErrorCode = PackageManager.INSTALL_SUCCEEDED;
+        mErrorMessage = null;
+        mException = null;
+        if (mDeferredErrors != null) {
+            // If the memory was already allocated, don't bother freeing and re-allocating,
+            // as this could occur hundreds of times depending on what the caller is doing and
+            // how many APKs they're going through.
+            mDeferredErrors.erase();
+        }
         return this;
     }
 
     @Override
-    public void ignoreError() {
-        reset();
+    public <ResultType> ParseResult<ResultType> success(ResultType result) {
+        if (mErrorCode != PackageManager.INSTALL_SUCCEEDED) {
+            Slog.wtf(ParsingUtils.TAG, "Cannot set to success after set to error, was "
+                    + mErrorMessage, mException);
+        }
+        mResult = result;
+        //noinspection unchecked
+        return (ParseResult<ResultType>) this;
     }
 
     @Override
-    public <ResultType> ParseResult<ResultType> success(ResultType result) {
-        if (errorCode != PackageManager.INSTALL_SUCCEEDED || errorMessage != null) {
-            throw new IllegalStateException("Cannot set to success after set to error, was "
-                    + errorMessage, exception);
+    public ParseResult<?> deferError(@NonNull String parseError, long deferredError) {
+        if (DEBUG_THROW_ALL_ERRORS) {
+            return error(parseError);
         }
-        this.result = result;
-        //noinspection unchecked
-        return (ParseResult<ResultType>) this;
+        if (mTargetSdkVersion != null) {
+            if (mDeferredErrors != null && mDeferredErrors.containsKey(deferredError)) {
+                // If the map already contains the key, that means it's already been checked and
+                // found to be disabled. Otherwise it would've failed when mTargetSdkVersion was
+                // set to non-null.
+                return success(null);
+            }
+
+            if (mCallback.isChangeEnabled(deferredError, mPackageName, mTargetSdkVersion)) {
+                return error(parseError);
+            } else {
+                if (mDeferredErrors == null) {
+                    mDeferredErrors = new ArrayMap<>();
+                }
+                mDeferredErrors.put(deferredError, null);
+                return success(null);
+            }
+        }
+
+        if (mDeferredErrors == null) {
+            mDeferredErrors = new ArrayMap<>();
+        }
+
+        // Only save the first occurrence of any particular error
+        mDeferredErrors.putIfAbsent(deferredError, parseError);
+        return success(null);
+    }
+
+    @Override
+    public ParseResult<?> enableDeferredError(String packageName, int targetSdkVersion) {
+        mPackageName = packageName;
+        mTargetSdkVersion = targetSdkVersion;
+
+        int size = CollectionUtils.size(mDeferredErrors);
+        for (int index = size - 1; index >= 0; index--) {
+            long changeId = mDeferredErrors.keyAt(index);
+            String errorMessage = mDeferredErrors.valueAt(index);
+            if (mCallback.isChangeEnabled(changeId, mPackageName, mTargetSdkVersion)) {
+                return error(errorMessage);
+            } else {
+                // No point holding onto the string, but need to maintain the key to signal
+                // that the error was checked with isChangeEnabled and found to be disabled.
+                mDeferredErrors.setValueAt(index, null);
+            }
+        }
+
+        return success(null);
     }
 
     @Override
@@ -84,25 +163,26 @@ public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
     }
 
     @Override
-    public <ResultType> ParseResult<ResultType> error(ParseResult intentResult) {
-        return error(intentResult.getErrorCode(), intentResult.getErrorMessage());
+    public <ResultType> ParseResult<ResultType> error(ParseResult<?> intentResult) {
+        return error(intentResult.getErrorCode(), intentResult.getErrorMessage(),
+                intentResult.getException());
     }
 
     @Override
     public <ResultType> ParseResult<ResultType> error(int errorCode, @Nullable String errorMessage,
             Exception exception) {
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
-        this.exception = exception;
+        mErrorCode = errorCode;
+        mErrorMessage = errorMessage;
+        mException = exception;
 
         if (DEBUG_FILL_STACK_TRACE) {
             if (exception == null) {
-                this.exception = new Exception();
+                mException = new Exception();
             }
         }
 
         if (DEBUG_LOG_ON_ERROR) {
-            Exception exceptionToLog = this.exception != null ? this.exception : new Exception();
+            Exception exceptionToLog = mException != null ? mException : new Exception();
             Log.w(TAG, "ParseInput set to error " + errorCode + ", " + errorMessage,
                     exceptionToLog);
         }
@@ -113,12 +193,12 @@ public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
 
     @Override
     public Object getResult() {
-        return this.result;
+        return mResult;
     }
 
     @Override
     public boolean isSuccess() {
-        return errorCode == PackageManager.INSTALL_SUCCEEDED;
+        return mErrorCode == PackageManager.INSTALL_SUCCEEDED;
     }
 
     @Override
@@ -128,18 +208,18 @@ public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
 
     @Override
     public int getErrorCode() {
-        return errorCode;
+        return mErrorCode;
     }
 
     @Nullable
     @Override
     public String getErrorMessage() {
-        return errorMessage;
+        return mErrorMessage;
     }
 
     @Nullable
     @Override
     public Exception getException() {
-        return exception;
+        return mException;
     }
 }
