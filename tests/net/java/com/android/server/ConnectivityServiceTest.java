@@ -6330,6 +6330,7 @@ public class ConnectivityServiceTest {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("tun0");
         lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE));
         // The uid range needs to cover the test app so the network is visible to it.
         final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(VPN_USER));
         final TestNetworkAgentWrapper vpnNetworkAgent = establishVpn(lp, VPN_UID, vpnRange);
@@ -6355,6 +6356,7 @@ public class ConnectivityServiceTest {
     public void testLegacyVpnDoesNotResultInInterfaceFilteringRule() throws Exception {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("tun0");
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
         lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
         // The uid range needs to cover the test app so the network is visible to it.
         final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(VPN_USER));
@@ -6386,6 +6388,7 @@ public class ConnectivityServiceTest {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("tun0");
         lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
         // The uid range needs to cover the test app so the network is visible to it.
         final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(VPN_USER));
         final TestNetworkAgentWrapper vpnNetworkAgent = establishVpn(lp, VPN_UID, vpnRange);
@@ -6422,6 +6425,7 @@ public class ConnectivityServiceTest {
         reset(mMockNetd);
         lp = new LinkProperties();
         lp.setInterfaceName("tun1");
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), RTN_UNREACHABLE));
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
         vpnNetworkAgent.sendLinkProperties(lp);
         waitForIdle();
@@ -6434,6 +6438,7 @@ public class ConnectivityServiceTest {
     public void testUidUpdateChangesInterfaceFilteringRule() throws Exception {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("tun0");
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), RTN_UNREACHABLE));
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
         // The uid range needs to cover the test app so the network is visible to it.
         final UidRange vpnRange = UidRange.createForUser(VPN_USER);
