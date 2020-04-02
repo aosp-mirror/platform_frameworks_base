@@ -3961,4 +3961,6 @@
 
   <!-- Set to true to make assistant show in front of the dream/screensaver. -->
   <java-symbol type="bool" name="config_assistantOnTopOfDream"/>
+
+  <java-symbol type="string" name="config_overrideComponentUiPackage" />
 </resources>
