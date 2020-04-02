@@ -676,8 +676,6 @@ status_t JMediaCodec::getOutputFrame(
     if (buffer->size() > 0) {
         std::shared_ptr<C2Buffer> c2Buffer = buffer->asC2Buffer();
         if (c2Buffer) {
-            // asC2Buffer clears internal reference, so set the reference again.
-            buffer->copy(c2Buffer);
             switch (c2Buffer->data().type()) {
                 case C2BufferData::LINEAR: {
                     std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
