@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.DataLoaderParamsParcel;
@@ -31,6 +32,8 @@ import android.content.pm.InstallationFile;
 import android.content.pm.InstallationFileParcel;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.incremental.IncrementalManager;
+import android.system.ErrnoException;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 
@@ -206,6 +209,25 @@ public abstract class DataLoaderService extends Service {
         }
 
         private final long mNativeInstance;
+    }
+
+    /* Used by native FileSystemConnector. */
+    private boolean setStorageParams(int storageId, boolean enableReadLogs) {
+        IncrementalManager incrementalManager = (IncrementalManager) getSystemService(
+                Context.INCREMENTAL_SERVICE);
+        if (incrementalManager == null) {
+            Slog.e(TAG, "Failed to obtain incrementalManager: " + storageId);
+            return false;
+        }
+        try {
+            // This has to be done directly in incrementalManager as the storage
+            // might be missing still.
+            incrementalManager.setStorageParams(storageId, enableReadLogs);
+        } catch (ErrnoException e) {
+            Slog.e(TAG, "Failed to set params for storage: " + storageId, e);
+            return false;
+        }
+        return true;
     }
 
     /* Native methods */
