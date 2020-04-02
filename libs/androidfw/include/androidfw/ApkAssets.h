@@ -119,29 +119,34 @@ class ApkAssets {
       package_property_t flags = 0U,
       std::unique_ptr<const AssetsProvider> override_asset = nullptr);
 
-  inline const std::string& GetPath() const {
+  const std::string& GetPath() const {
     return path_;
   }
 
-  inline const AssetsProvider* GetAssetsProvider() const {
+  const AssetsProvider* GetAssetsProvider() const {
     return assets_provider_.get();
   }
 
   // This is never nullptr.
-  inline const LoadedArsc* GetLoadedArsc() const {
+  const LoadedArsc* GetLoadedArsc() const {
     return loaded_arsc_.get();
   }
 
-  inline const LoadedIdmap* GetLoadedIdmap() const {
+  const LoadedIdmap* GetLoadedIdmap() const {
     return loaded_idmap_.get();
   }
 
-  inline bool IsLoader() const {
+  bool IsLoader() const {
     return (property_flags_ & PROPERTY_LOADER) != 0;
   }
 
-  inline bool IsOverlay() const {
+  bool IsOverlay() const {
     return loaded_idmap_ != nullptr;
+  }
+
+  // Returns whether the resources.arsc is allocated in RAM (not mmapped).
+  bool IsTableAllocated() const {
+    return resources_asset_ && resources_asset_->isAllocated();
   }
 
   bool IsUpToDate() const;

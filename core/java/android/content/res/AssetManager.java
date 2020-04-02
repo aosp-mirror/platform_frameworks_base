@@ -819,6 +819,19 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    /**
+     * Returns whether the {@code resources.arsc} of any loaded apk assets is allocated in RAM
+     * (not mmapped).
+     *
+     * @hide
+     */
+    public boolean containsAllocatedTable() {
+        synchronized (this) {
+            ensureValidLocked();
+            return nativeContainsAllocatedTable(mObject);
+        }
+    }
+
     CharSequence getPooledStringForCookie(int cookie, int id) {
         // Cookies map to ApkAssets starting at 1.
         return getApkAssets()[cookie - 1].getStringFromPool(id);
@@ -1482,6 +1495,7 @@ public final class AssetManager implements AutoCloseable {
             long ptr, boolean includeOverlays, boolean includeLoaders);
 
     // File native methods.
+    private static native boolean nativeContainsAllocatedTable(long ptr);
     private static native @Nullable String[] nativeList(long ptr, @NonNull String path)
             throws IOException;
     private static native long nativeOpenAsset(long ptr, @NonNull String fileName, int accessMode);
