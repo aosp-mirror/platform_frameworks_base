@@ -335,7 +335,17 @@ public class TimeUtils {
 
     /** @hide Just for debugging; not internationalized. */
     public static String formatUptime(long time) {
-        final long diff = time - SystemClock.uptimeMillis();
+        return formatTime(time, SystemClock.uptimeMillis());
+    }
+
+    /** @hide Just for debugging; not internationalized. */
+    public static String formatRealtime(long time) {
+        return formatTime(time, SystemClock.elapsedRealtime());
+    }
+
+    /** @hide Just for debugging; not internationalized. */
+    public static String formatTime(long time, long referenceTime) {
+        long diff = time - referenceTime;
         if (diff > 0) {
             return time + " (in " + diff + " ms)";
         }
