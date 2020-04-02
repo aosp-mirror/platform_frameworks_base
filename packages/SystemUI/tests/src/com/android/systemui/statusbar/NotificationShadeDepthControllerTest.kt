@@ -45,7 +45,6 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.doThrow
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import java.lang.IllegalArgumentException
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
@@ -64,6 +63,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var viewRootImpl: ViewRootImpl
     @Mock private lateinit var shadeSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var globalActionsSpring: NotificationShadeDepthController.DepthAnimation
+    @Mock private lateinit var brightnessSpring: NotificationShadeDepthController.DepthAnimation
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
     private lateinit var statusBarStateListener: StatusBarStateController.StateListener
@@ -83,6 +83,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 keyguardStateController, choreographer, wallpaperManager,
                 notificationShadeWindowController, dumpManager)
         notificationShadeDepthController.shadeSpring = shadeSpring
+        notificationShadeDepthController.brightnessMirrorSpring = brightnessSpring
         notificationShadeDepthController.globalActionsSpring = globalActionsSpring
         notificationShadeDepthController.root = root
 
@@ -132,6 +133,30 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 .setWallpaperZoomOut(any(), anyFloat())
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(wallpaperManager).setWallpaperZoomOut(any(), anyFloat())
+    }
+
+    @Test
+    fun brightnessMirrorVisible_whenVisible() {
+        notificationShadeDepthController.brightnessMirrorVisible = true
+        verify(brightnessSpring).animateTo(eq(maxBlur), any())
+    }
+
+    @Test
+    fun brightnessMirrorVisible_whenHidden() {
+        notificationShadeDepthController.brightnessMirrorVisible = false
+        verify(brightnessSpring).animateTo(eq(0), any())
+    }
+
+    @Test
+    fun brightnessMirror_hidesShadeBlur() {
+        // Brightness mirror is fully visible
+        `when`(brightnessSpring.ratio).thenReturn(1f)
+        // And shade is blurred
+        `when`(shadeSpring.radius).thenReturn(maxBlur)
+
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(notificationShadeWindowController).setBackgroundBlurRadius(0)
+        verify(blurUtils).applyBlur(safeEq(viewRootImpl), eq(0))
     }
 
     private fun <T : Any> safeEq(value: T): T {
