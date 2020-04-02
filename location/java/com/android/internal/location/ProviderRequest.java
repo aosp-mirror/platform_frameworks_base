@@ -23,7 +23,6 @@ import android.os.Parcelable;
 import android.os.WorkSource;
 import android.util.TimeUtils;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -83,18 +82,14 @@ public final class ProviderRequest implements Parcelable {
             new Parcelable.Creator<ProviderRequest>() {
                 @Override
                 public ProviderRequest createFromParcel(Parcel in) {
-                    boolean reportLocation = in.readInt() == 1;
-                    long interval = in.readLong();
-                    boolean lowPowerMode = in.readBoolean();
-                    boolean locationSettingsIgnored = in.readBoolean();
-                    int count = in.readInt();
-                    ArrayList<LocationRequest> locationRequests = new ArrayList<>(count);
-                    for (int i = 0; i < count; i++) {
-                        locationRequests.add(LocationRequest.CREATOR.createFromParcel(in));
-                    }
-                    WorkSource workSource = in.readParcelable(null);
-                    return new ProviderRequest(reportLocation, interval, lowPowerMode,
-                            locationSettingsIgnored, locationRequests, workSource);
+                    return new ProviderRequest(
+                            /* reportLocation= */ in.readBoolean(),
+                            /* interval= */ in.readLong(),
+                            /* lowPowerMode= */ in.readBoolean(),
+                            /* locationSettingsIgnored= */ in.readBoolean(),
+                            /* locationRequests= */
+                            in.createTypedArrayList(LocationRequest.CREATOR),
+                            /* workSource= */ in.readTypedObject(WorkSource.CREATOR));
                 }
 
                 @Override
@@ -110,15 +105,12 @@ public final class ProviderRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeInt(reportLocation ? 1 : 0);
+        parcel.writeBoolean(reportLocation);
         parcel.writeLong(interval);
         parcel.writeBoolean(lowPowerMode);
         parcel.writeBoolean(locationSettingsIgnored);
-        parcel.writeInt(locationRequests.size());
-        for (LocationRequest request : locationRequests) {
-            request.writeToParcel(parcel, flags);
-        }
-        parcel.writeParcelable(workSource, flags);
+        parcel.writeTypedList(locationRequests);
+        parcel.writeTypedObject(workSource, flags);
     }
 
     @Override
