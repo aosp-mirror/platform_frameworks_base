@@ -21,6 +21,9 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
@@ -695,6 +698,26 @@ public abstract class PackageSettingBase extends SettingBase {
     String getHarmfulAppWarning(int userId) {
         PackageUserState userState = readUserState(userId);
         return userState.harmfulAppWarning;
+    }
+
+    /**
+     * @see PackageUserState#overrideLabelAndIcon(ComponentName, String, Integer)
+     *
+     * @param userId the specific user to change the label/icon for
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public boolean overrideNonLocalizedLabelAndIcon(@NonNull ComponentName component,
+            @Nullable String label, @Nullable Integer icon, @UserIdInt int userId) {
+        return modifyUserState(userId).overrideLabelAndIcon(component, label, icon);
+    }
+
+    /**
+     * @see PackageUserState#resetOverrideComponentLabelIcon()
+     *
+     * @param userId the specific user to reset
+     */
+    public void resetOverrideComponentLabelIcon(@UserIdInt int userId) {
+        modifyUserState(userId).resetOverrideComponentLabelIcon();
     }
 
     protected PackageSettingBase updateFrom(PackageSettingBase other) {

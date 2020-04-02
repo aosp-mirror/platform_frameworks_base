@@ -18,6 +18,8 @@ package com.android.server.om
 
 import android.net.Uri
 import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.testutils.mockThrowOnUnmocked
+import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
