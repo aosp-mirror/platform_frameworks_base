@@ -2501,9 +2501,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // We need to copy the SurfaceControl instead of returning the original
             // because the Parcel FLAGS PARCELABLE_WRITE_RETURN_VALUE cause SurfaceControls
             // to release themselves.
-            SurfaceControl sc = new SurfaceControl();
-            sc.copyFrom(wc.getSurfaceControl());
-            return sc;
+            return new SurfaceControl(wc.getSurfaceControl());
         }
 
         WindowContainerToken toWindowContainerToken() {

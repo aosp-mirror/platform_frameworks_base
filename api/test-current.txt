@@ -4860,7 +4860,9 @@ package android.view {
   }
 
   public final class SurfaceControl implements android.os.Parcelable {
+    ctor public SurfaceControl(@NonNull android.view.SurfaceControl);
     method public static long acquireFrameRateFlexibilityToken();
+    method public boolean isSameSurface(@NonNull android.view.SurfaceControl);
     method public static void releaseFrameRateFlexibilityToken(long);
   }
 
