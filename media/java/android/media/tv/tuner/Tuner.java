@@ -602,6 +602,9 @@ public class Tuner implements AutoCloseable  {
      */
     @Nullable
     public FrontendStatus getFrontendStatus(@NonNull @FrontendStatusType int[] statusTypes) {
+        if (mFrontend == null) {
+            throw new IllegalStateException("frontend is not initialized");
+        }
         return nativeGetFrontendStatus(statusTypes);
     }
 
