@@ -67,7 +67,6 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void clipAfterAnim_boundsLayerIsCreated() {
         mActivity.mNeedsAnimationBoundsLayer = true;
 
@@ -91,7 +90,6 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void clipAfterAnim_boundsLayerIsDestroyed() {
         mActivity.mNeedsAnimationBoundsLayer = true;
         mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
@@ -126,7 +124,6 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void clipNoneAnim_boundsLayerIsNotCreated() {
         mActivity.mNeedsAnimationBoundsLayer = false;
 
