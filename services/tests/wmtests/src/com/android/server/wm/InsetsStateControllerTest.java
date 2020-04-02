@@ -106,7 +106,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
         getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
-        assertEquals(0, getController().getInsetsForDispatch(navBar).getSourcesCount());
+        assertNull(getController().getInsetsForDispatch(navBar).peekSource(ITYPE_IME));
+        assertNull(getController().getInsetsForDispatch(navBar).peekSource(ITYPE_STATUS_BAR));
     }
 
     @Test
