@@ -75,6 +75,7 @@ public class OpenAppWarmTest extends NonRotationTestBase {
                 .forAllEntries());
     }
 
+    @Ignore("Flaky. Pending debug")
     @Test
     public void checkVisibility_wallpaperLayerBecomesInvisible() {
         if (mBeginRotation == Surface.ROTATION_0) {

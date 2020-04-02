@@ -24,6 +24,7 @@ import androidx.test.filters.LargeTest;
 import com.android.server.wm.flicker.helpers.ImeAppHelper;
 
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -52,6 +53,7 @@ public class CloseImeWindowToAppTest extends NonRotationTestBase {
                 .includeJankyRuns().build();
     }
 
+    @Ignore("Flaky. Pending debug")
     @Test
     public void checkVisibility_imeLayerBecomesInvisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
