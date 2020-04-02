@@ -16,6 +16,7 @@
 #pragma once
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "annotations.h"
 
 namespace android {
 namespace os {
@@ -357,6 +358,56 @@ struct Value {
     Value& operator=(const Value& that);
 };
 
+class Annotations {
+public:
+    Annotations() {}
+
+    // This enum stores where particular annotations can be found in the
+    // bitmask. Note that these pos do not correspond to annotation ids.
+    enum {
+        NESTED_POS = 0x0,
+        PRIMARY_POS = 0x1,
+        EXCLUSIVE_POS = 0x2
+    };
+
+    inline void setNested(bool nested) { setBitmaskAtPos(NESTED_POS, nested); }
+
+    inline void setPrimaryField(bool primary) { setBitmaskAtPos(PRIMARY_POS, primary); }
+
+    inline void setExclusiveState(bool exclusive) { setBitmaskAtPos(EXCLUSIVE_POS, exclusive); }
+
+    inline void setResetState(int resetState) { mResetState = resetState; }
+
+    // Default value = false
+    inline bool isNested() const { return getValueFromBitmask(NESTED_POS); }
+
+    // Default value = false
+    inline bool isPrimaryField() const { return getValueFromBitmask(PRIMARY_POS); }
+
+    // Default value = false
+    inline bool isExclusiveState() const { return getValueFromBitmask(EXCLUSIVE_POS); }
+
+    // If a reset state is not sent in the StatsEvent, returns -1. Note that a
+    // reset satate is only sent if and only if a reset should be triggered.
+    inline int getResetState() const { return mResetState; }
+
+private:
+    inline void setBitmaskAtPos(int pos, bool value) {
+        mBooleanBitmask &= ~(1 << pos); // clear
+        mBooleanBitmask |= (value << pos); // set
+    }
+
+    inline bool getValueFromBitmask(int pos) const {
+        return (mBooleanBitmask >> pos) & 0x1;
+    }
+
+    // This is a bitmask over all annotations stored in boolean form. Because
+    // there are only 3 booleans, just one byte is required.
+    uint8_t mBooleanBitmask = 0;
+
+    int mResetState = -1;
+};
+
 /**
  * Represents a log item, or a dimension item (They are essentially the same).
  */
@@ -384,6 +435,7 @@ struct FieldValue {
 
     Field mField;
     Value mValue;
+    Annotations mAnnotations;
 };
 
 bool HasPositionANY(const FieldMatcher& matcher);
