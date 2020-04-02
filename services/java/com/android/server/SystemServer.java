@@ -30,6 +30,7 @@ import android.annotation.StringRes;
 import android.app.ActivityThread;
 import android.app.AppCompatCallbacks;
 import android.app.INotificationManager;
+import android.app.SystemServiceRegistry;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -512,6 +513,8 @@ public final class SystemServer {
             Looper.prepareMainLooper();
             Looper.getMainLooper().setSlowLogThresholdMs(
                     SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
+
+            SystemServiceRegistry.sEnableServiceNotFoundWtf = true;
 
             // Initialize native services.
             System.loadLibrary("android_servers");
