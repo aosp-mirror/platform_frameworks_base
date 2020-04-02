@@ -13091,6 +13091,7 @@ public class TelephonyManager {
                 sISub = null;
                 SubscriptionManager.invalidateDefaultSubIdCaches();
                 SubscriptionManager.invalidateDefaultDataSubIdCaches();
+                SubscriptionManager.invalidateActiveDataSubIdCaches();
             }
             if (sISms != null) {
                 sISms.asBinder().unlinkToDeath(sServiceDeath, 0);
