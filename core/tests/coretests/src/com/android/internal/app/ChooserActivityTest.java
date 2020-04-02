@@ -67,6 +67,7 @@ import android.graphics.drawable.Icon;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.service.chooser.ChooserTarget;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -75,6 +76,7 @@ import androidx.test.rule.ActivityTestRule;
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.app.chooser.DisplayResolveInfo;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -140,6 +142,10 @@ public class ChooserActivityTest {
     public void cleanOverrideData() {
         sOverrides.reset();
         sOverrides.createPackageManager = mPackageManagerOverride;
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.APPEND_DIRECT_SHARE_ENABLED,
+                Boolean.toString(false),
+                true /* makeDefault*/);
     }
 
     @Test
@@ -988,7 +994,7 @@ public class ChooserActivityTest {
                         serviceTargets,
                         TARGET_TYPE_CHOOSER_TARGET,
                         directShareToShortcutInfos,
-                        null)
+                        List.of())
         );
 
         // Thread.sleep shouldn't be a thing in an integration test but it's
@@ -1060,7 +1066,7 @@ public class ChooserActivityTest {
                         serviceTargets,
                         TARGET_TYPE_CHOOSER_TARGET,
                         directShareToShortcutInfos,
-                        null)
+                        List.of())
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
@@ -1148,7 +1154,7 @@ public class ChooserActivityTest {
                         serviceTargets,
                         TARGET_TYPE_CHOOSER_TARGET,
                         directShareToShortcutInfos,
-                        null)
+                        List.of())
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
