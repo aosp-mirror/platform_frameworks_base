@@ -62,11 +62,11 @@ import java.util.LinkedList;
  * String, Object, Object[])}, {@link #logVoidReturnWithObject(Object, String, Object[])} and {@link
  * #logExceptionWithObject(Object, String, Exception, Object[])}.
  */
-public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareService, Dumpable {
+public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInternal, Dumpable {
     private static final String TAG = "SoundTriggerMiddlewareLogging";
-    private final @NonNull ISoundTriggerMiddlewareService mDelegate;
+    private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
 
-    public SoundTriggerMiddlewareLogging(@NonNull ISoundTriggerMiddlewareService delegate) {
+    public SoundTriggerMiddlewareLogging(@NonNull ISoundTriggerMiddlewareInternal delegate) {
         mDelegate = delegate;
     }
 
@@ -96,12 +96,12 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareSer
     }
 
     @Override
-    public void setExternalCaptureState(boolean active) throws RemoteException {
+    public void setCaptureState(boolean active) throws RemoteException {
         try {
-            mDelegate.setExternalCaptureState(active);
-            logVoidReturn("setExternalCaptureState", active);
+            mDelegate.setCaptureState(active);
+            logVoidReturn("setCaptureState", active);
         } catch (Exception e) {
-            logException("setExternalCaptureState", e, active);
+            logException("setCaptureState", e, active);
             throw e;
         }
     }

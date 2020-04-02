@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ਪਤਾ &amp; ਪੋਰਟ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR ਕੋਡ ਸਕੈਨ ਕਰੋ"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR ਕੋਡ ਸਕੈਨ ਕਰਕੇ ਵਾਈ-ਫਾਈ \'ਤੇ ਡੀਵਾਈਸ ਜੋੜਾਬੱਧ ਕਰੋ"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ਕਿਰਪਾ ਕਰਕੇ ਕਿਸੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ਡੀਬੱਗ, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ਬੱਗ ਰਿਪੋਰਟ ਸ਼ਾਰਟਕੱਟ"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ਇੱਕ ਬੱਗ ਰਿਪੋਰਟ ਲੈਣ ਲਈ ਪਾਵਰ ਮੀਨੂ ਵਿੱਚ ਇੱਕ ਬਟਨ ਦਿਖਾਓ"</string>
@@ -432,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਚੱਲੇਗਾ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ ਚੱਲੇਗੀ"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ਬੈਟਰੀ <xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ ਖਤਮ ਹੋ ਸਕਦੀ ਹੈ"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ਤੋਂ ਘੱਟ ਸਮਾਂ ਬਾਕੀ"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ਤੋਂ ਘੱਟ ਸਮਾਂ ਬਾਕੀ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ਤੋਂ ਵੱਧ ਸਮਾਂ ਬਾਕੀ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -511,36 +509,21 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ਫ਼ੋਨ ਦਾ ਸਪੀਕਰ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ਕਨੈਕਟ ਕਰਨ ਵਿੱਚ ਸਮੱਸਿਆ ਆਈ। ਡੀਵਾਈਸ ਨੂੰ ਬੰਦ ਕਰਕੇ ਵਾਪਸ ਚਾਲੂ ਕਰੋ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ਤਾਰ ਵਾਲਾ ਆਡੀਓ ਡੀਵਾਈਸ"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
-    <skip />
-    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
-    <skip />
-    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"ਮਦਦ ਅਤੇ ਵਿਚਾਰ"</string>
+    <string name="storage_category" msgid="2287342585424631813">"ਸਟੋਰੇਜ"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"ਸਾਂਝਾ ਕੀਤਾ ਡਾਟਾ"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"ਸਾਂਝਾ ਕੀਤੇ ਡਾਟੇ ਨੂੰ ਦੇਖੋ ਅਤੇ ਸੋਧੋ"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ਇਸ ਵਰਤੋਂਕਾਰ ਲਈ ਕੋਈ ਸਾਂਝਾ ਕੀਤਾ ਡਾਟਾ ਨਹੀਂ ਹੈ।"</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"ਸਾਂਝੇ ਕੀਤੇ ਡਾਟੇ ਨੂੰ ਪ੍ਰਾਪਤ ਕਰਨ ਵੇਲੇ ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"ਸਾਂਝਾ ਕੀਤੇ ਡਾਟੇ ਦੀ ਆਈਡੀ: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"ਮਿਆਦ <xliff:g id="DATE">%s</xliff:g> ਨੂੰ ਮੁੱਕ ਜਾਵੇਗੀ"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"ਸਾਂਝੇ ਕੀਤੇ ਡਾਟੇ ਨੂੰ ਮਿਟਾਉਣ ਵੇਲੇ ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ।"</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"ਇਸ ਸਾਂਝੇ ਕੀਤੇ ਡਾਟੇ ਲਈ ਕੋਈ ਪਟਾ ਹਾਸਲ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ। ਕੀ ਤੁਸੀਂ ਇਸਨੂੰ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"ਡਾਟਾ ਸਾਂਝਾ ਕਰਨ ਵਾਲੀਆਂ ਐਪਾਂ"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"ਐਪ ਵੱਲੋਂ ਕੋਈ ਵਰਣਨ ਮੁਹੱਈਆ ਨਹੀਂ ਕਰਵਾਇਆ ਗਿਆ।"</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"ਲੀਜ਼ ਦੀ ਮਿਆਦ <xliff:g id="DATE">%s</xliff:g> ਨੂੰ ਮੁੱਕ ਜਾਵੇਗੀ"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"ਸਾਂਝਾ ਕੀਤੇ ਡਾਟੇ ਨੂੰ ਮਿਟਾਓ"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"ਕੀ ਤੁਸੀਂ ਪੱਕਾ ਇਸ ਸਾਂਝਾ ਕੀਤੇ ਡਾਟੇ ਨੂੰ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"ਉਪਭੋਗਤਾਵਾਂ ਕੋਲ ਉਹਨਾਂ ਦੀਆਂ ਆਪਣੀਆਂ ਐਪਾਂ ਅਤੇ ਸਮੱਗਰੀ ਹੁੰਦੀਆਂ ਹਨ"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"ਤੁਸੀਂ ਆਪਣੇ ਖਾਤੇ ਤੋਂ ਐਪਾਂ ਅਤੇ ਸਮੱਗਰੀ ਲਈ ਪਹੁੰਚ ਪ੍ਰਤਿਬੰਧ ਕਰ ਸਕਦੇ ਹੋ"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ਵਰਤੋਂਕਾਰ"</string>
@@ -560,4 +543,12 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"ਪ੍ਰੋਫਾਈਲ ਜਾਣਕਾਰੀ"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ਇਸਤੋਂ ਪਹਿਲਾਂ ਕਿ ਤੁਸੀਂ ਇੱਕ ਪ੍ਰਤਿਬੰਧਿਤ ਪ੍ਰੋਫਾਈਲ ਬਣਾ ਸਕੋ, ਤੁਹਾਨੂੰ ਆਪਣੀਆਂ ਐਪਾਂ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਸੁਰੱਖਿਅਤ ਕਰਨ ਲਈ ਇੱਕ ਸਕ੍ਰੀਨ  ਲਾਕ  ਸੈੱਟ ਅੱਪ ਕਰਨ ਦੀ ਲੋੜ ਹੈ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">" ਲਾਕ  ਸੈੱਟ ਕਰੋ"</string>
+    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
+    <skip />
+    <!-- no translation found for guest_new_guest (3482026122932643557) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
+    <skip />
+    <!-- no translation found for guest_nickname (6332276931583337261) -->
+    <skip />
 </resources>

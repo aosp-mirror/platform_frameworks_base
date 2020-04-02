@@ -3788,10 +3788,9 @@
                 android:protectionLevel="signature|installer" />
 
     <!-- @SystemApi Allows an application to manage the holders of a role.
-         @hide
-         STOPSHIP b/145526313: Remove wellbeing protection flag from MANAGE_ROLE_HOLDERS. -->
+         @hide -->
     <permission android:name="android.permission.MANAGE_ROLE_HOLDERS"
-                android:protectionLevel="signature|installer|wellbeing" />
+                android:protectionLevel="signature|installer" />
 
     <!-- @SystemApi Allows an application to observe role holder changes.
          @hide -->
@@ -4712,12 +4711,6 @@
          @SystemApi -->
     <permission android:name="android.permission.MANAGE_SOUND_TRIGGER"
         android:protectionLevel="signature|privileged" />
-
-    <!-- Allows preempting sound trigger recognitions for the sake of capturing audio on
-         implementations which do not support running both concurrently.
-         @hide -->
-    <permission android:name="android.permission.PREEMPT_SOUND_TRIGGER"
-                android:protectionLevel="signature|privileged" />
 
     <!-- Must be required by system/priv apps implementing sound trigger detection services
          @hide

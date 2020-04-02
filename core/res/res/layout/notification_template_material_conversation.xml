@@ -136,6 +136,7 @@
                         android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
                         android:textSize="16sp"
                         android:singleLine="true"
+                        android:layout_weight="1"
                         />
 
                     <TextView
@@ -166,6 +167,18 @@
                     />
 
                     <ImageView
+                        android:id="@+id/alerted_icon"
+                        android:layout_width="@dimen/notification_alerted_size"
+                        android:layout_height="@dimen/notification_alerted_size"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="4dp"
+                        android:paddingTop="2dp"
+                        android:scaleType="fitCenter"
+                        android:visibility="gone"
+                        android:contentDescription="@string/notification_alerted_content_description"
+                        android:src="@drawable/ic_notifications_alerted"/>
+
+                    <ImageView
                         android:id="@+id/profile_badge"
                         android:layout_width="@dimen/notification_badge_size"
                         android:layout_height="@dimen/notification_badge_size"
@@ -176,6 +189,44 @@
                         android:visibility="gone"
                         android:contentDescription="@string/notification_work_profile_content_description"
                     />
+                    <LinearLayout
+                        android:id="@+id/app_ops"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:paddingTop="3dp"
+                        android:layout_marginStart="2dp"
+                        android:orientation="horizontal" >
+                        <ImageButton
+                            android:layout_marginStart="4dp"
+                            android:id="@+id/camera"
+                            android:layout_width="?attr/notificationHeaderIconSize"
+                            android:layout_height="?attr/notificationHeaderIconSize"
+                            android:src="@drawable/ic_camera"
+                            android:background="?android:selectableItemBackgroundBorderless"
+                            android:visibility="gone"
+                            android:contentDescription="@string/notification_appops_camera_active"
+                            />
+                        <ImageButton
+                            android:id="@+id/mic"
+                            android:layout_width="?attr/notificationHeaderIconSize"
+                            android:layout_height="?attr/notificationHeaderIconSize"
+                            android:src="@drawable/ic_mic"
+                            android:background="?android:selectableItemBackgroundBorderless"
+                            android:layout_marginStart="4dp"
+                            android:visibility="gone"
+                            android:contentDescription="@string/notification_appops_microphone_active"
+                            />
+                        <ImageButton
+                            android:id="@+id/overlay"
+                            android:layout_width="?attr/notificationHeaderIconSize"
+                            android:layout_height="?attr/notificationHeaderIconSize"
+                            android:src="@drawable/ic_alert_window_layer"
+                            android:background="?android:selectableItemBackgroundBorderless"
+                            android:layout_marginStart="4dp"
+                            android:visibility="gone"
+                            android:contentDescription="@string/notification_appops_overlay_active"
+                            />
+                    </LinearLayout>
                 </LinearLayout>
 
                 <!-- App Name -->
@@ -199,10 +250,8 @@
                     android:clipChildren="false"
                     />
             </com.android.internal.widget.RemeasuringLinearLayout>
-            <!-- Unread Count -->
-            <!-- <TextView /> -->
 
-            <!-- This is where the expand button will be placed when collapsed-->
+            <!-- This is where the expand button container will be placed when collapsed-->
         </com.android.internal.widget.RemeasuringLinearLayout>
 
         <include layout="@layout/notification_template_smart_reply_container"
@@ -238,6 +287,21 @@
             android:clipToPadding="false"
             android:clipChildren="false"
             />
+        <!-- Unread Count -->
+        <TextView
+            android:id="@+id/conversation_unread_count"
+            android:layout_width="33sp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="11dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="2dp"
+            android:visibility="gone"
+            android:textAppearance="@style/TextAppearance.DeviceDefault.Notification"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:background="@drawable/conversation_unread_bg"
+        />
         <com.android.internal.widget.NotificationExpandButton
             android:id="@+id/expand_button"
             android:layout_width="@dimen/notification_header_expand_icon_size"
@@ -246,6 +310,6 @@
             android:drawable="@drawable/ic_expand_notification"
             android:clickable="false"
             android:importantForAccessibility="no"
-            />
+        />
     </LinearLayout>
 </com.android.internal.widget.ConversationLayout>

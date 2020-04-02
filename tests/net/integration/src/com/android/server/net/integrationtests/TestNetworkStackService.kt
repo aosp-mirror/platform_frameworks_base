@@ -24,7 +24,6 @@ import android.net.Network
 import android.net.metrics.IpConnectivityLog
 import android.net.util.SharedLog
 import android.os.IBinder
-import com.android.networkstack.metrics.DataStallStatsUtils
 import com.android.networkstack.netlink.TcpSocketTracker
 import com.android.server.NetworkStackService
 import com.android.server.NetworkStackService.NetworkMonitorConnector
@@ -91,7 +90,6 @@ class TestNetworkStackService : Service() {
                     mock(IpConnectivityLog::class.java), mock(SharedLog::class.java),
                     mock(NetworkStackService.NetworkStackServiceManager::class.java),
                     NetworkMonitorDeps(privateDnsBypassNetwork),
-                    mock(DataStallStatsUtils::class.java),
                     mock(TcpSocketTracker::class.java))
             cb.onNetworkMonitorCreated(NetworkMonitorConnector(nm, TestPermissionChecker()))
         }

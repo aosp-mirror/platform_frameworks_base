@@ -68,7 +68,6 @@ import android.util.Pools;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.window.IWindowContainer;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
@@ -77,6 +76,8 @@ import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.window.IWindowContainerToken;
+import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
@@ -726,6 +727,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     DisplayContent getDisplayContent() {
         return mDisplayContent;
+    }
+
+    /** Get the first node of type {@link DisplayArea} above or at this node. */
+    @Nullable
+    DisplayArea getDisplayArea() {
+        WindowContainer parent = getParent();
+        return parent != null ? parent.getDisplayArea() : null;
     }
 
     void setWaitingForDrawnIfResizingChanged() {
@@ -2442,8 +2450,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return RemoteToken.fromBinder(binder).getContainer();
     }
 
-    static class RemoteToken extends IWindowContainer.Stub {
+    static class RemoteToken extends IWindowContainerToken.Stub {
+
         final WeakReference<WindowContainer> mWeakRef;
+        private WindowContainerToken mWindowContainerToken;
 
         RemoteToken(WindowContainer container) {
             mWeakRef = new WeakReference<>(container);
@@ -2469,6 +2479,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return sc;
         }
 
+        WindowContainerToken toWindowContainerToken() {
+            if (mWindowContainerToken == null) {
+                mWindowContainerToken = new WindowContainerToken(this);
+            }
+            return mWindowContainerToken;
+        }
+
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder(128);
@@ -2482,11 +2499,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     @Override
-    public void transactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
+    public void onTransactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
         mergedTransaction.merge(mBLASTSyncTransaction);
         mUsingBLASTSyncTransaction = false;
 
-        mWaitingListener.transactionReady(mWaitingSyncId, mergedTransaction);
+        mWaitingListener.onTransactionReady(mWaitingSyncId, mergedTransaction);
 
         mWaitingListener = null;
         mWaitingSyncId = -1;

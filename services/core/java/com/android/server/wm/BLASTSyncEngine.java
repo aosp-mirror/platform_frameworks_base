@@ -16,10 +16,6 @@
 
 package com.android.server.wm;
 
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Slog;
-import android.window.ITaskOrganizer;
 import android.view.SurfaceControl;
 
 import java.util.HashMap;
@@ -50,7 +46,7 @@ class BLASTSyncEngine {
     private static final String TAG = "BLASTSyncEngine";
 
     interface TransactionReadyListener {
-        void transactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction);
+        void onTransactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction);
     };
 
     // Holds state associated with a single synchronous set of operations.
@@ -63,12 +59,12 @@ class BLASTSyncEngine {
 
         private void tryFinish() {
             if (mRemainingTransactions == 0 && mReady) {
-                mListener.transactionReady(mSyncId, mMergedTransaction);
+                mListener.onTransactionReady(mSyncId, mMergedTransaction);
                 mPendingSyncs.remove(mSyncId);
             }
         }
 
-        public void transactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
+        public void onTransactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
             mRemainingTransactions--;
             mMergedTransaction.merge(mergedTransaction);
             tryFinish();

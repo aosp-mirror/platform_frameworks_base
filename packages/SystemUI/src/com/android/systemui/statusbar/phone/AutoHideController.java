@@ -19,15 +19,12 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.AutoHideUiElement;
-
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -38,8 +35,9 @@ public class AutoHideController {
 
     private final IWindowManager mWindowManagerService;
     private final Handler mHandler;
-    private final Set<AutoHideUiElement> mElements;
 
+    private AutoHideUiElement mStatusBar;
+    private AutoHideUiElement mNavigationBar;
     private int mDisplayId;
 
     private boolean mAutoHideSuspended;
@@ -55,28 +53,24 @@ public class AutoHideController {
             IWindowManager iWindowManager) {
         mHandler = handler;
         mWindowManagerService = iWindowManager;
-        mElements = new ArraySet<>();
 
         mDisplayId = context.getDisplayId();
     }
 
     /**
-     * Adds an {@link AutoHideUiElement} whose behavior should be controlled by the
+     * Sets a {@link AutoHideUiElement} status bar that should be controlled by the
      * {@link AutoHideController}.
      */
-    public void addAutoHideUiElement(AutoHideUiElement element) {
-        if (element != null) {
-            mElements.add(element);
-        }
+    public void setStatusBar(AutoHideUiElement element) {
+        mStatusBar = element;
     }
 
     /**
-     * Remove an {@link AutoHideUiElement} that was previously added.
+     * Sets a {@link AutoHideUiElement} navigation bar that should be controlled by the
+     * {@link AutoHideController}.
      */
-    public void removeAutoHideUiElement(AutoHideUiElement element) {
-        if (element != null) {
-            mElements.remove(element);
-        }
+    public void setNavigationBar(AutoHideUiElement element) {
+        mNavigationBar = element;
     }
 
     private void hideTransientBars() {
@@ -86,8 +80,12 @@ public class AutoHideController {
             Log.w(TAG, "Cannot get WindowManager");
         }
 
-        for (AutoHideUiElement element : mElements) {
-            element.hide();
+        if (mStatusBar != null) {
+            mStatusBar.hide();
+        }
+
+        if (mNavigationBar != null) {
+            mNavigationBar.hide();
         }
     }
 
@@ -121,15 +119,13 @@ public class AutoHideController {
     }
 
     private Runnable getCheckBarModesRunnable() {
-        if (mElements.isEmpty()) {
+        if (mStatusBar != null) {
+            return () -> mStatusBar.synchronizeState();
+        } else if (mNavigationBar != null) {
+            return () -> mNavigationBar.synchronizeState();
+        } else {
             return null;
         }
-
-        return () -> {
-            for (AutoHideUiElement element : mElements) {
-                element.synchronizeState();
-            }
-        };
     }
 
     private void cancelAutoHide() {
@@ -147,8 +143,11 @@ public class AutoHideController {
                 && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar.
                 && event.getX() == 0 && event.getY() == 0;
 
-        for (AutoHideUiElement element : mElements) {
-            shouldHide &= element.shouldHideOnTouch();
+        if (mStatusBar != null) {
+            shouldHide &= mStatusBar.shouldHideOnTouch();
+        }
+        if (mNavigationBar != null) {
+            shouldHide &= mNavigationBar.shouldHideOnTouch();
         }
 
         if (shouldHide) {
@@ -162,11 +161,14 @@ public class AutoHideController {
     }
 
     private boolean isAnyTransientBarShown() {
-        for (AutoHideUiElement element : mElements) {
-            if (element.isVisible()) {
-                return true;
-            }
+        if (mStatusBar != null && mStatusBar.isVisible()) {
+            return true;
         }
+
+        if (mNavigationBar != null && mNavigationBar.isVisible()) {
+            return true;
+        }
+
         return false;
     }
 }

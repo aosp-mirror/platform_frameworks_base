@@ -36,7 +36,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
-import android.window.IWindowContainer;
+import android.window.WindowContainerToken;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -290,7 +290,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public boolean deleteRootTask(IWindowContainer token) {
+    public boolean deleteRootTask(WindowContainerToken token) {
         enforceStackPermission("deleteRootTask()");
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -367,7 +367,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public IWindowContainer getImeTarget(int displayId) {
+    public WindowContainerToken getImeTarget(int displayId) {
         enforceStackPermission("getImeTarget()");
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -382,7 +382,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 if (task == null) {
                     return null;
                 }
-                return task.getRootTask().mRemoteToken;
+                return task.getRootTask().mRemoteToken.toWindowContainerToken();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -390,30 +390,31 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public void setLaunchRoot(int displayId, @Nullable IWindowContainer token) {
+    public void setLaunchRoot(int displayId, @Nullable WindowContainerToken token) {
         enforceStackPermission("setLaunchRoot()");
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                DisplayContent display = mService.mRootWindowContainer.getDisplayContent(displayId);
-                if (display == null) {
+                TaskDisplayArea taskDisplayArea =
+                        mService.mRootWindowContainer.getDisplayContent(displayId).mTaskContainers;
+                if (taskDisplayArea == null) {
                     return;
                 }
                 Task task = token == null
                         ? null : WindowContainer.fromBinder(token.asBinder()).asTask();
                 if (task == null) {
-                    display.mLaunchRootTask = null;
+                    taskDisplayArea.mLaunchRootTask = null;
                     return;
                 }
                 if (!task.mCreatedByOrganizer) {
                     throw new IllegalArgumentException("Attempt to set task not created by "
                             + "organizer as launch root task=" + task);
                 }
-                if (task.getDisplayContent() != display) {
+                if (task.getDisplayArea() != taskDisplayArea) {
                     throw new RuntimeException("Can't set launch root for display " + displayId
                             + " to task on display " + task.getDisplayContent().getDisplayId());
                 }
-                display.mLaunchRootTask = task;
+                taskDisplayArea.mLaunchRootTask = task;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -421,7 +422,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public List<RunningTaskInfo> getChildTasks(IWindowContainer parent,
+    public List<RunningTaskInfo> getChildTasks(WindowContainerToken parent,
             @Nullable int[] activityTypes) {
         enforceStackPermission("getChildTasks()");
         final long ident = Binder.clearCallingIdentity();

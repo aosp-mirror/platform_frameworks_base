@@ -513,16 +513,12 @@
     <string name="storage_category" msgid="2287342585424631813">"Капацитет"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Споделени податоци"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Прегледајте и изменете ги споделените податоци"</string>
-    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
-    <skip />
-    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
-    <skip />
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Нема споделени податоци за корисников."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Грешка при вчитувањето на споделените податоци. Обидете се повторно."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID на споделените податоци: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Истекуваат на <xliff:g id="DATE">%s</xliff:g>"</string>
-    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
-    <skip />
-    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
-    <skip />
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Грешка при бришењето на споделените податоци."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Нема стекнати закупи за споделениве податоци. Дали сакате да ги избришете?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Апликации што споделуваат податоци"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"Апликацијата не дала опис."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Закупот истекува на <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -547,4 +543,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Информации за профил"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Пред да може да создадете ограничен профил, треба да поставите заклучување на екранот за да ги заштити вашите апликации и лични податоци."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Постави заклучување"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Префрли на <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Додај гостин"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Отстрани гостин"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Гостин"</string>
 </resources>

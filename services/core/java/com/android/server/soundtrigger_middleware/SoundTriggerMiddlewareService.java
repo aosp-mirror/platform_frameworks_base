@@ -63,14 +63,21 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
     static private final String TAG = "SoundTriggerMiddlewareService";
 
     @NonNull
-    private final ISoundTriggerMiddlewareService mDelegate;
+    private final ISoundTriggerMiddlewareInternal mDelegate;
 
     /**
      * Constructor for internal use only. Could be exposed for testing purposes in the future.
      * Users should access this class via {@link Lifecycle}.
      */
-    private SoundTriggerMiddlewareService(@NonNull ISoundTriggerMiddlewareService delegate) {
+    private SoundTriggerMiddlewareService(@NonNull ISoundTriggerMiddlewareInternal delegate) {
         mDelegate = Objects.requireNonNull(delegate);
+        new ExternalCaptureStateTracker(active -> {
+            try {
+                mDelegate.setCaptureState(active);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        });
     }
 
     @Override
@@ -84,11 +91,6 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
     ISoundTriggerModule attach(int handle, @NonNull ISoundTriggerCallback callback)
             throws RemoteException {
         return new ModuleService(mDelegate.attach(handle, callback));
-    }
-
-    @Override
-    public void setExternalCaptureState(boolean active) throws RemoteException {
-        mDelegate.setExternalCaptureState(active);
     }
 
     @Override protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {

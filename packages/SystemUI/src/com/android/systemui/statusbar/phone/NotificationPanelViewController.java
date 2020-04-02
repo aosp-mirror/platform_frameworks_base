@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 
+import static java.lang.Float.isNaN;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -86,6 +88,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
+import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -238,6 +241,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardUpdateMonitor mUpdateMonitor;
+    private final ConversationNotificationManager mConversationNotificationManager;
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -451,7 +455,8 @@ public class NotificationPanelViewController extends PanelViewController {
             ActivityManager activityManager, ZenModeController zenModeController,
             ConfigurationController configurationController,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
+            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            ConversationNotificationManager conversationNotificationManager) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
@@ -509,6 +514,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mShadeController = shadeController;
         mLockscreenUserManager = notificationLockscreenUserManager;
         mEntryManager = notificationEntryManager;
+        mConversationNotificationManager = conversationNotificationManager;
 
         mView.setBackgroundColor(Color.TRANSPARENT);
         OnAttachStateChangeListener onAttachStateChangeListener = new OnAttachStateChangeListener();
@@ -2005,7 +2011,12 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected float getOverExpansionAmount() {
-        return mNotificationStackScroller.getCurrentOverScrollAmount(true /* top */);
+        float result = mNotificationStackScroller.getCurrentOverScrollAmount(true /* top */);
+        if (isNaN(result)) {
+            Log.wtf(TAG, "OverExpansionAmount is NaN!");
+        }
+
+        return result;
     }
 
     @Override
@@ -2143,6 +2154,7 @@ public class NotificationPanelViewController extends PanelViewController {
         super.onExpandingFinished();
         mNotificationStackScroller.onExpansionStopped();
         mHeadsUpManager.onExpandingFinished();
+        mConversationNotificationManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());
         mIsExpanding = false;
         if (isFullyCollapsed()) {
             DejankUtils.postAfterTraversal(new Runnable() {

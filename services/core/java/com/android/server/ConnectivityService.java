@@ -653,8 +653,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     final MultipathPolicyTracker mMultipathPolicyTracker;
 
     @VisibleForTesting
-    final Map<IConnectivityDiagnosticsCallback, ConnectivityDiagnosticsCallbackInfo>
-            mConnectivityDiagnosticsCallbacks = new HashMap<>();
+    final Map<IBinder, ConnectivityDiagnosticsCallbackInfo> mConnectivityDiagnosticsCallbacks =
+            new HashMap<>();
 
     /**
      * Implements support for the legacy "one network per network type" model.
@@ -7835,11 +7835,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ensureRunningOnConnectivityServiceThread();
 
         final IConnectivityDiagnosticsCallback cb = cbInfo.mCb;
+        final IBinder iCb = cb.asBinder();
         final NetworkRequestInfo nri = cbInfo.mRequestInfo;
 
         // This means that the client registered the same callback multiple times. Do
         // not override the previous entry, and exit silently.
-        if (mConnectivityDiagnosticsCallbacks.containsKey(cb)) {
+        if (mConnectivityDiagnosticsCallbacks.containsKey(iCb)) {
             if (VDBG) log("Diagnostics callback is already registered");
 
             // Decrement the reference count for this NetworkRequestInfo. The reference count is
@@ -7849,40 +7850,75 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
-        mConnectivityDiagnosticsCallbacks.put(cb, cbInfo);
+        mConnectivityDiagnosticsCallbacks.put(iCb, cbInfo);
 
         try {
-            cb.asBinder().linkToDeath(cbInfo, 0);
+            iCb.linkToDeath(cbInfo, 0);
         } catch (RemoteException e) {
             cbInfo.binderDied();
+            return;
+        }
+
+        // Once registered, provide ConnectivityReports for matching Networks
+        final List<NetworkAgentInfo> matchingNetworks = new ArrayList<>();
+        synchronized (mNetworkForNetId) {
+            for (int i = 0; i < mNetworkForNetId.size(); i++) {
+                final NetworkAgentInfo nai = mNetworkForNetId.valueAt(i);
+                if (nai.satisfies(nri.request)) {
+                    matchingNetworks.add(nai);
+                }
+            }
+        }
+        for (final NetworkAgentInfo nai : matchingNetworks) {
+            final ConnectivityReport report = nai.getConnectivityReport();
+            if (report == null) {
+                continue;
+            }
+            if (!checkConnectivityDiagnosticsPermissions(
+                    nri.mPid, nri.mUid, nai, cbInfo.mCallingPackageName)) {
+                continue;
+            }
+
+            try {
+                cb.onConnectivityReportAvailable(report);
+            } catch (RemoteException e) {
+                // Exception while sending the ConnectivityReport. Move on to the next network.
+            }
         }
     }
 
     private void handleUnregisterConnectivityDiagnosticsCallback(
             @NonNull IConnectivityDiagnosticsCallback cb, int uid) {
         ensureRunningOnConnectivityServiceThread();
+        final IBinder iCb = cb.asBinder();
 
-        if (!mConnectivityDiagnosticsCallbacks.containsKey(cb)) {
+        final ConnectivityDiagnosticsCallbackInfo cbInfo =
+                mConnectivityDiagnosticsCallbacks.remove(iCb);
+        if (cbInfo == null) {
             if (VDBG) log("Removing diagnostics callback that is not currently registered");
             return;
         }
 
-        final NetworkRequestInfo nri = mConnectivityDiagnosticsCallbacks.get(cb).mRequestInfo;
+        final NetworkRequestInfo nri = cbInfo.mRequestInfo;
 
         if (uid != nri.mUid) {
             if (VDBG) loge("Different uid than registrant attempting to unregister cb");
             return;
         }
 
-        cb.asBinder().unlinkToDeath(mConnectivityDiagnosticsCallbacks.remove(cb), 0);
+        // Decrement the reference count for this NetworkRequestInfo. The reference count is
+        // incremented when the NetworkRequestInfo is created as part of
+        // enforceRequestCountLimit().
+        decrementNetworkRequestPerUidCount(nri);
+
+        iCb.unlinkToDeath(cbInfo, 0);
     }
 
     private void handleNetworkTestedWithExtras(
             @NonNull ConnectivityReportEvent reportEvent, @NonNull PersistableBundle extras) {
         final NetworkAgentInfo nai = reportEvent.mNai;
         final NetworkCapabilities networkCapabilities =
-                new NetworkCapabilities(nai.networkCapabilities);
-        clearNetworkCapabilitiesUids(networkCapabilities);
+                getNetworkCapabilitiesWithoutUids(nai.networkCapabilities);
         final ConnectivityReport report =
                 new ConnectivityReport(
                         reportEvent.mNai.network,
@@ -7890,6 +7926,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         nai.linkProperties,
                         networkCapabilities,
                         extras);
+        nai.setConnectivityReport(report);
         final List<IConnectivityDiagnosticsCallback> results =
                 getMatchingPermissionedCallbacks(nai);
         for (final IConnectivityDiagnosticsCallback cb : results) {
@@ -7905,8 +7942,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull NetworkAgentInfo nai, long timestampMillis, int detectionMethod,
             @NonNull PersistableBundle extras) {
         final NetworkCapabilities networkCapabilities =
-                new NetworkCapabilities(nai.networkCapabilities);
-        clearNetworkCapabilitiesUids(networkCapabilities);
+                getNetworkCapabilitiesWithoutUids(nai.networkCapabilities);
         final DataStallReport report =
                 new DataStallReport(
                         nai.network,
@@ -7939,23 +7975,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void clearNetworkCapabilitiesUids(@NonNull NetworkCapabilities nc) {
-        nc.setUids(null);
-        nc.setAdministratorUids(new int[0]);
-        nc.setOwnerUid(Process.INVALID_UID);
+    private NetworkCapabilities getNetworkCapabilitiesWithoutUids(@NonNull NetworkCapabilities nc) {
+        final NetworkCapabilities sanitized = new NetworkCapabilities(nc);
+        sanitized.setUids(null);
+        sanitized.setAdministratorUids(new int[0]);
+        sanitized.setOwnerUid(Process.INVALID_UID);
+        return sanitized;
     }
 
     private List<IConnectivityDiagnosticsCallback> getMatchingPermissionedCallbacks(
             @NonNull NetworkAgentInfo nai) {
         final List<IConnectivityDiagnosticsCallback> results = new ArrayList<>();
-        for (Entry<IConnectivityDiagnosticsCallback, ConnectivityDiagnosticsCallbackInfo> entry :
+        for (Entry<IBinder, ConnectivityDiagnosticsCallbackInfo> entry :
                 mConnectivityDiagnosticsCallbacks.entrySet()) {
             final ConnectivityDiagnosticsCallbackInfo cbInfo = entry.getValue();
             final NetworkRequestInfo nri = cbInfo.mRequestInfo;
             if (nai.satisfies(nri.request)) {
                 if (checkConnectivityDiagnosticsPermissions(
                         nri.mPid, nri.mUid, nai, cbInfo.mCallingPackageName)) {
-                    results.add(entry.getKey());
+                    results.add(entry.getValue().mCb);
                 }
             }
         }

@@ -20,6 +20,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.WallpaperManager
+import android.util.Log
 import android.view.Choreographer
 import android.view.View
 import androidx.annotation.VisibleForTesting
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.io.FileDescriptor
 import java.io.PrintWriter
+import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.max
@@ -58,6 +60,7 @@ class NotificationShadeDepthController @Inject constructor(
 ) : PanelExpansionListener, Dumpable {
     companion object {
         private const val WAKE_UP_ANIMATION_ENABLED = true
+        private const val TAG = "DepthController"
     }
 
     lateinit var root: View
@@ -84,12 +87,18 @@ class NotificationShadeDepthController @Inject constructor(
     /**
      * Callback that updates the window blur value and is called only once per frame.
      */
-    private val updateBlurCallback = Choreographer.FrameCallback {
+    @VisibleForTesting
+    val updateBlurCallback = Choreographer.FrameCallback {
         updateScheduled = false
 
         val blur = max(max(shadeSpring.radius, wakeAndUnlockBlurRadius), globalActionsSpring.radius)
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur)
-        wallpaperManager.setWallpaperZoomOut(root.windowToken, blurUtils.ratioOfBlurRadius(blur))
+        try {
+            wallpaperManager.setWallpaperZoomOut(root.windowToken,
+                    blurUtils.ratioOfBlurRadius(blur))
+        } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "Can't set zoom. Window is gone: ${root.windowToken}", e)
+        }
         notificationShadeWindowController.setBackgroundBlurRadius(blur)
     }
 
@@ -180,7 +189,7 @@ class NotificationShadeDepthController @Inject constructor(
         choreographer.postFrameCallback(updateBlurCallback)
     }
 
-    fun updateGlobalDialogVisibility(visibility: Float, dialogView: View) {
+    fun updateGlobalDialogVisibility(visibility: Float, dialogView: View?) {
         globalActionsSpring.animateTo(blurUtils.blurRadiusOfRatio(visibility), dialogView)
     }
 
@@ -230,7 +239,7 @@ class NotificationShadeDepthController @Inject constructor(
         init {
             springAnimation.spring = SpringForce(0.0f)
             springAnimation.spring.dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
-            springAnimation.spring.stiffness = SpringForce.STIFFNESS_MEDIUM
+            springAnimation.spring.stiffness = SpringForce.STIFFNESS_HIGH
             springAnimation.addEndListener { _, _, _, _ -> pendingRadius = -1 }
         }
 

@@ -29,7 +29,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.PatternMatcher;
-import android.text.TextUtils;
 import android.util.Slog;
 import android.util.TypedValue;
 
@@ -97,8 +96,13 @@ public class ParsedIntentInfoUtils {
                 case "action": {
                     String value = parser.getAttributeValue(PackageParser.ANDROID_RESOURCES,
                             "name");
-                    if (TextUtils.isEmpty(value)) {
+                    if (value == null) {
                         result = input.error("No value supplied for <android:name>");
+                    } else if (value.isEmpty()) {
+                        intentInfo.addAction(value);
+                        // Prior to R, this was not a failure
+                        result = input.deferError("No value supplied for <android:name>",
+                                ParseInput.DeferredError.EMPTY_INTENT_ACTION_CATEGORY);
                     } else {
                         intentInfo.addAction(value);
                         result = input.success(null);
@@ -108,8 +112,13 @@ public class ParsedIntentInfoUtils {
                 case "category": {
                     String value = parser.getAttributeValue(PackageParser.ANDROID_RESOURCES,
                             "name");
-                    if (TextUtils.isEmpty(value)) {
+                    if (value == null) {
                         result = input.error("No value supplied for <android:name>");
+                    } else if (value.isEmpty()) {
+                        intentInfo.addCategory(value);
+                        // Prior to R, this was not a failure
+                        result = input.deferError("No value supplied for <android:name>",
+                                ParseInput.DeferredError.EMPTY_INTENT_ACTION_CATEGORY);
                     } else {
                         intentInfo.addCategory(value);
                         result = input.success(null);
