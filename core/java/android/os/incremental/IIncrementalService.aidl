@@ -38,6 +38,13 @@ interface IIncrementalService {
     int createLinkedStorage(in @utf8InCpp String path, int otherStorageId, int createMode);
 
     /**
+     * Changes storage params. Returns 0 on success, and -errno on failure.
+     * Use enableReadLogs to switch pages read logs reporting on and off.
+     * Returns 0 on success, and - errno on failure: permission check or remount.
+     */
+    int setStorageParams(int storageId, boolean enableReadLogs);
+
+    /**
      * Bind-mounts a path under a storage to a full path. Can be permanent or temporary.
      */
     const int BIND_TEMPORARY = 0;
