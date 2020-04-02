@@ -98,8 +98,8 @@ public class RescueParty {
 
     private static final String PROP_DISABLE_RESCUE = "persist.sys.disable_rescue";
     private static final String PROP_VIRTUAL_DEVICE = "ro.hardware.virtual_device";
-
-    private static final String DEVICE_CONFIG_DISABLE_FLAG = "disable_rescue_party";
+    private static final String PROP_DEVICE_CONFIG_DISABLE_FLAG =
+            "persist.device_config.configuration.disable_rescue_party";
 
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
@@ -118,8 +118,7 @@ public class RescueParty {
 
         // We're disabled if the DeviceConfig disable flag is set to true.
         // This is in case that an emergency rollback of the feature is needed.
-        if (DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_CONFIGURATION, DEVICE_CONFIG_DISABLE_FLAG, false)) {
+        if (SystemProperties.getBoolean(PROP_DEVICE_CONFIG_DISABLE_FLAG, false)) {
             Slog.v(TAG, "Disabled because of DeviceConfig flag");
             return true;
         }
