@@ -147,19 +147,16 @@ public class DragDropControllerTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testDragFlow() {
         dragFlow(0, ClipData.newPlainText("label", "Test"), 0, 0);
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testPerformDrag_NullDataWithGrantUri() {
         dragFlow(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 0, 0);
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testPerformDrag_NullDataToOtherUser() {
         final WindowState otherUsersWindow =
                 createDropTargetWindow("Other user's window", 1 * UserHandle.PER_USER_RANGE);
