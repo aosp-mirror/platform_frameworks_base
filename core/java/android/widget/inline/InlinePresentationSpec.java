@@ -23,6 +23,7 @@ import android.os.Parcelable;
 import android.util.Size;
 
 import com.android.internal.util.DataClass;
+import com.android.internal.widget.InlinePresentationStyleUtils;
 
 /**
  * This class represents the presentation specification by which an inline suggestion
@@ -50,6 +51,10 @@ public final class InlinePresentationSpec implements Parcelable {
     @NonNull
     private static Bundle defaultStyle() {
         return Bundle.EMPTY;
+    }
+
+    private boolean styleEquals(@NonNull Bundle style) {
+        return InlinePresentationStyleUtils.bundleEquals(mStyle, style);
     }
 
     /** @hide */
@@ -143,7 +148,7 @@ public final class InlinePresentationSpec implements Parcelable {
         return true
                 && java.util.Objects.equals(mMinSize, that.mMinSize)
                 && java.util.Objects.equals(mMaxSize, that.mMaxSize)
-                && java.util.Objects.equals(mStyle, that.mStyle);
+                && styleEquals(that.mStyle);
     }
 
     @Override
@@ -280,10 +285,10 @@ public final class InlinePresentationSpec implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1585605466300L,
+            time = 1585768046898L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/widget/inline/InlinePresentationSpec.java",
-            inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.NonNull android.os.Bundle mStyle\nprivate static @android.annotation.NonNull android.os.Bundle defaultStyle()\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.NonNull android.os.Bundle mStyle\nprivate static @android.annotation.NonNull android.os.Bundle defaultStyle()\nprivate  boolean styleEquals(android.os.Bundle)\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 
