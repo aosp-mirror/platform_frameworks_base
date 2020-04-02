@@ -1024,7 +1024,9 @@ public class TelephonyManager {
             "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
 
     /**
-     * Broadcast intent that indicates multi-SIM configuration is changed. For example, it changed
+     * Broadcast action to be received by Broadcast receivers.
+     *
+     * Indicates multi-SIM configuration is changed. For example, it changed
      * from single SIM capable to dual-SIM capable (DSDS or DSDA) or triple-SIM mode.
      *
      * It doesn't indicate how many subscriptions are actually active, or which states SIMs are,
@@ -5209,8 +5211,8 @@ public class TelephonyManager {
      *      not present or not loaded
      * @hide
      */
+    @UnsupportedAppUsage
     @Nullable
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String[] getIsimImpu() {
         try {
@@ -8584,13 +8586,9 @@ public class TelephonyManager {
         return false;
     }
 
-    /**
-     * @deprecated use {@link #supplyPinReportPinResult(String pin)} instead.
-     *
-     * @hide */
+    /** @hide */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    @Deprecated
     public int[] supplyPinReportResult(String pin) {
         try {
             ITelephony telephony = getITelephony();
@@ -8602,13 +8600,9 @@ public class TelephonyManager {
         return new int[0];
     }
 
-    /**
-     * @deprecated use {@link #supplyPukReportPinResult(String puk, String pin)} instead.
-     *
-     * @hide */
+    /** @hide */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    @Deprecated
     public int[] supplyPukReportResult(String puk, String pin) {
         try {
             ITelephony telephony = getITelephony();
@@ -11056,6 +11050,8 @@ public class TelephonyManager {
      * PackageManager.FEATURE_TELEPHONY system feature, which is available
      * on any device with a telephony radio, even if the device is
      * voice-only.
+     *
+     * @hide
      */
     public boolean isDataCapable() {
         if (mContext == null) return true;
