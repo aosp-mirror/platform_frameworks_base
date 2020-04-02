@@ -674,7 +674,8 @@ public class AppsFilter {
             Trace.endSection();
 
             if (callingPkgSetting != null) {
-                if (!mFeatureConfig.packageIsEnabled(callingPkgSetting.pkg)) {
+                if (callingPkgSetting.pkg != null
+                        && !mFeatureConfig.packageIsEnabled(callingPkgSetting.pkg)) {
                     if (DEBUG_LOGGING) {
                         log(callingSetting, targetPkgSetting, "DISABLED");
                     }
@@ -682,7 +683,8 @@ public class AppsFilter {
                 }
             } else {
                 for (int i = callingSharedPkgSettings.size() - 1; i >= 0; i--) {
-                    if (!mFeatureConfig.packageIsEnabled(callingSharedPkgSettings.valueAt(i).pkg)) {
+                    final AndroidPackage pkg = callingSharedPkgSettings.valueAt(i).pkg;
+                    if (pkg != null && !mFeatureConfig.packageIsEnabled(pkg)) {
                         if (DEBUG_LOGGING) {
                             log(callingSetting, targetPkgSetting, "DISABLED");
                         }
