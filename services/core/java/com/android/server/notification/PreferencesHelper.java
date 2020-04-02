@@ -20,6 +20,7 @@ import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
+import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
@@ -1798,6 +1799,7 @@ public class PreferencesHelper implements RankingConfig {
                         .setAtomId(PACKAGE_NOTIFICATION_PREFERENCES);
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
                 event.writeInt(r.uid);
+                event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
                 event.writeInt(r.importance);
                 event.writeInt(r.visibility);
                 event.writeInt(r.lockedAppFields);
@@ -1825,6 +1827,7 @@ public class PreferencesHelper implements RankingConfig {
                     StatsEvent.Builder event = StatsEvent.newBuilder()
                             .setAtomId(PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES);
                     event.writeInt(r.uid);
+                    event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
                     event.writeString(channel.getId());
                     event.writeString(channel.getName().toString());
                     event.writeString(channel.getDescription());
@@ -1856,6 +1859,7 @@ public class PreferencesHelper implements RankingConfig {
                     StatsEvent.Builder event = StatsEvent.newBuilder()
                             .setAtomId(PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES);
                     event.writeInt(r.uid);
+                    event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
                     event.writeString(groupChannel.getId());
                     event.writeString(groupChannel.getName().toString());
                     event.writeString(groupChannel.getDescription());
