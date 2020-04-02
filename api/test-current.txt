@@ -4677,7 +4677,6 @@ package android.util {
     field public static final String FFLAG_OVERRIDE_PREFIX = "sys.fflag.override.";
     field public static final String FFLAG_PREFIX = "sys.fflag.";
     field public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
-    field public static final String NOTIF_CONVO_BYPASS_SHORTCUT_REQ = "settings_notif_convo_bypass_shortcut_req";
     field public static final String PERSIST_PREFIX = "persist.sys.fflag.override.";
     field public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
     field public static final String SEAMLESS_TRANSFER = "settings_seamless_transfer";

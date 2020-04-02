@@ -46,7 +46,6 @@ import android.service.notification.RankingHelperProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -180,8 +179,8 @@ public class PreferencesHelper implements RankingConfig {
         updateBadgingEnabled();
         updateBubblesEnabled();
         syncChannelsBypassingDnd(mContext.getUserId());
-        mAllowInvalidShortcuts = FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ);
+        mAllowInvalidShortcuts = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0) == 0;
     }
 
     public void readXml(XmlPullParser parser, boolean forRestore, int userId)
