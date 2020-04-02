@@ -82,7 +82,6 @@ import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.HardwareRenderer;
-import android.graphics.ImageDecoder;
 import android.hardware.display.DisplayManagerGlobal;
 import android.inputmethodservice.InputMethodService;
 import android.net.ConnectivityManager;
@@ -6280,12 +6279,9 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         Message.updateCheckRecycle(data.appInfo.targetSdkVersion);
 
-        // Prior to P, internal calls to decode Bitmaps used BitmapFactory,
-        // which may scale up to account for density. In P, we switched to
-        // ImageDecoder, which skips the upscale to save memory. ImageDecoder
-        // needs to still scale up in older apps, in case they rely on the
-        // size of the Bitmap without considering its density.
-        ImageDecoder.sApiLevel = data.appInfo.targetSdkVersion;
+        // Supply the targetSdkVersion to the UI rendering module, which may
+        // need it in cases where it does not have access to the appInfo.
+        android.graphics.Compatibility.setTargetSdkVersion(data.appInfo.targetSdkVersion);
 
         /*
          * Before spawning a new process, reset the time zone to be the system time zone.
