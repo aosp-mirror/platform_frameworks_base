@@ -168,7 +168,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastIsDocked;
     private boolean mLastPulsing;
     private int mLastBiometricMode;
-    private boolean mGoingToSleepVisibleNotOccluded;
     private boolean mLastLockVisible;
 
     private OnDismissAction mAfterKeyguardGoneAction;
@@ -450,34 +449,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
-    public boolean isGoingToSleepVisibleNotOccluded() {
-        return mGoingToSleepVisibleNotOccluded;
-    }
-
-    @Override
-    public void onStartedGoingToSleep() {
-        mGoingToSleepVisibleNotOccluded = isShowing() && !isOccluded();
-    }
-
     @Override
     public void onFinishedGoingToSleep() {
-        mGoingToSleepVisibleNotOccluded = false;
         mBouncer.onScreenTurnedOff();
-    }
-
-    @Override
-    public void onStartedWakingUp() {
-        // TODO: remove
-    }
-
-    @Override
-    public void onScreenTurningOn() {
-        // TODO: remove
-    }
-
-    @Override
-    public void onScreenTurnedOn() {
-        // TODO: remove
     }
 
     @Override
@@ -999,7 +973,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         pw.println("  mOccluded: " + mOccluded);
         pw.println("  mRemoteInputActive: " + mRemoteInputActive);
         pw.println("  mDozing: " + mDozing);
-        pw.println("  mGoingToSleepVisibleNotOccluded: " + mGoingToSleepVisibleNotOccluded);
         pw.println("  mAfterKeyguardGoneAction: " + mAfterKeyguardGoneAction);
         pw.println("  mAfterKeyguardGoneRunnables: " + mAfterKeyguardGoneRunnables);
         pw.println("  mPendingWakeupAction: " + mPendingWakeupAction);

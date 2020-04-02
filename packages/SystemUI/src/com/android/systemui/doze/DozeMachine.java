@@ -16,6 +16,9 @@
 
 package com.android.systemui.doze;
 
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
+
 import android.annotation.MainThread;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Trace;
@@ -368,8 +371,8 @@ public class DozeMachine {
             case DOZE_PULSE_DONE:
                 final State nextState;
                 @Wakefulness int wakefulness = mWakefulnessLifecycle.getWakefulness();
-                if (wakefulness == WakefulnessLifecycle.WAKEFULNESS_AWAKE
-                        || wakefulness == WakefulnessLifecycle.WAKEFULNESS_WAKING) {
+                if (state != State.INITIALIZED && (wakefulness == WAKEFULNESS_AWAKE
+                        || wakefulness == WAKEFULNESS_WAKING)) {
                     nextState = State.FINISH;
                 } else if (mDockManager.isDocked()) {
                     nextState = mDockManager.isHidden() ? State.DOZE : State.DOZE_AOD_DOCKED;
