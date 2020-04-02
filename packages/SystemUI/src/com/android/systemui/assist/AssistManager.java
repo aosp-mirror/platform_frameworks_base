@@ -109,7 +109,7 @@ public class AssistManager {
     protected static final String CONSTRAINED_KEY = "should_constrain";
 
     public static final int INVOCATION_TYPE_GESTURE = 1;
-    public static final int INVOCATION_TYPE_ACTIVE_EDGE = 2;
+    public static final int INVOCATION_TYPE_OTHER = 2;
     public static final int INVOCATION_TYPE_VOICE = 3;
     public static final int INVOCATION_TYPE_QUICK_SEARCH_BAR = 4;
     public static final int INVOCATION_HOME_BUTTON_LONG_PRESS = 5;
