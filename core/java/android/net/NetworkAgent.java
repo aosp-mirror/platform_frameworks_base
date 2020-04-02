@@ -556,12 +556,12 @@ public abstract class NetworkAgent {
     @NonNull
     public Network register() {
         if (VDBG) log("Registering NetworkAgent");
-        final ConnectivityManager cm = (ConnectivityManager) mInitialConfiguration.context
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
         synchronized (mRegisterLock) {
             if (mNetwork != null) {
                 throw new IllegalStateException("Agent already registered");
             }
+            final ConnectivityManager cm = (ConnectivityManager) mInitialConfiguration.context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
             mNetwork = cm.registerNetworkAgent(new Messenger(mHandler),
                     new NetworkInfo(mInitialConfiguration.info),
                     mInitialConfiguration.properties, mInitialConfiguration.capabilities,
