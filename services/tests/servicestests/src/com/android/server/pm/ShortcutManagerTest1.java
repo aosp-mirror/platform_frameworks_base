@@ -8595,6 +8595,56 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         }
     }
 
+    public void testIsSharingShortcut() throws IntentFilter.MalformedMimeTypeException {
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_share_targets);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        setCaller(CALLING_PACKAGE_1, USER_0);
+
+        final ShortcutInfo s1 = makeShortcutWithCategory("s1",
+                set("com.test.category.CATEGORY1", "com.test.category.CATEGORY2"));
+        final ShortcutInfo s2 = makeShortcutWithCategory("s2",
+                set("com.test.category.CATEGORY5", "com.test.category.CATEGORY6"));
+        final ShortcutInfo s3 = makeShortcut("s3");
+
+        assertTrue(mManager.setDynamicShortcuts(list(s1, s2, s3)));
+        assertShortcutIds(assertAllNotKeyFieldsOnly(mManager.getDynamicShortcuts()),
+                "s1", "s2", "s3");
+
+        IntentFilter filter_cat1 = new IntentFilter();
+        filter_cat1.addDataType("text/plain");
+        IntentFilter filter_cat5 = new IntentFilter();
+        filter_cat5.addDataType("video/*");
+        IntentFilter filter_any = new IntentFilter();
+        filter_any.addDataType("*/*");
+
+        setCaller(LAUNCHER_1, USER_0);
+        mCallerPermissions.add(permission.MANAGE_APP_PREDICTIONS);
+
+        assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s1", USER_0,
+                filter_cat1));
+        assertFalse(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s1", USER_0,
+                filter_cat5));
+        assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s1", USER_0,
+                filter_any));
+
+        assertFalse(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s2", USER_0,
+                filter_cat1));
+        assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s2", USER_0,
+                filter_cat5));
+        assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s2", USER_0,
+                filter_any));
+
+        assertFalse(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s3", USER_0,
+                filter_any));
+        assertFalse(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s4", USER_0,
+                filter_any));
+    }
+
     private Uri getFileUriFromResource(String fileName, int resId) throws IOException {
         File file = new File(getTestContext().getFilesDir(), fileName);
         // Make sure we are not leaving phantom files behind.
