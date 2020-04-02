@@ -818,12 +818,13 @@ public final class WindowInsets {
      * @return A modified copy of this WindowInsets
      * @deprecated Consuming of different parts individually of a {@link WindowInsets} instance is
      * deprecated, since {@link WindowInsets} contains many different insets. Use {@link #CONSUMED}
-     * instead to stop dispatching insets.
+     * instead to stop dispatching insets. On {@link android.os.Build.VERSION_CODES#R R}, this
+     * method has no effect.
      */
     @Deprecated
     @NonNull
     public WindowInsets consumeStableInsets() {
-        return consumeSystemWindowInsets();
+        return this;
     }
 
     /**
