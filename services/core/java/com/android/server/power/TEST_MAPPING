@@ -21,10 +21,7 @@
       "options": [
         {"include-filter": "com.android.server.power"},
         {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-        {
-          "exclude-filter": "com.android.server.power.PowerManagerServiceTest#testWakefulnessAwake_ShouldWakeUpWhenPluggedIn"
-        }
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
       ]
     }
   ],
