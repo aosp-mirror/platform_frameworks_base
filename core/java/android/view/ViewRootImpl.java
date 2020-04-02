@@ -130,6 +130,7 @@ import android.view.View.MeasureSpec;
 import android.view.Window.OnContentApplyWindowInsetsListener;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -1410,6 +1411,10 @@ public final class ViewRootImpl implements ViewParent,
                 mWindowAttributes.softInputMode = (mWindowAttributes.softInputMode
                         & ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
                         | (oldSoftInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST);
+            }
+
+            if ((changes & LayoutParams.SOFT_INPUT_MODE_CHANGED) != 0) {
+                requestFitSystemWindows();
             }
 
             mWindowAttributesChanged = true;
