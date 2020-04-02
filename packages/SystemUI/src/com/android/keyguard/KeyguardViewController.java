@@ -57,27 +57,27 @@ public interface KeyguardViewController {
     /**
      * Called when the device started going to sleep.
      */
-    void onStartedGoingToSleep();
+    default void onStartedGoingToSleep() {};
 
     /**
      * Called when the device has finished going to sleep.
      */
-    void onFinishedGoingToSleep();
+    default void onFinishedGoingToSleep() {};
 
     /**
      * Called when the device started waking up.
      */
-    void onStartedWakingUp();
+    default void onStartedWakingUp() {};
 
     /**
      * Called when the device started turning on.
      */
-    void onScreenTurningOn();
+    default void onScreenTurningOn() {};
 
     /**
      * Called when the device has finished turning on.
      */
-    void onScreenTurnedOn();
+    default void onScreenTurnedOn() {};
 
     /**
      * Sets whether the Keyguard needs input.
