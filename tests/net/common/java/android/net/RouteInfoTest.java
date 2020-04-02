@@ -31,6 +31,7 @@ import static org.junit.Assert.fail;
 
 import android.os.Build;
 
+import androidx.core.os.BuildCompat;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -60,6 +61,11 @@ public class RouteInfoTest {
 
     private IpPrefix Prefix(String prefix) {
         return new IpPrefix(prefix);
+    }
+
+    private static boolean isAtLeastR() {
+        // BuildCompat.isAtLeastR is documented to return false on release SDKs (including R)
+        return Build.VERSION.SDK_INT > Build.VERSION_CODES.Q || BuildCompat.isAtLeastR();
     }
 
     @Test
@@ -195,78 +201,130 @@ public class RouteInfoTest {
         assertTrue(r.isDefaultRoute());
         assertTrue(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(Prefix("::/0"), Address("::"), "wlan0");
         assertFalse(r.isHostRoute());
         assertTrue(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertTrue(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(Prefix("192.0.2.0/24"), null, "wlan0");
         assertFalse(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(Prefix("2001:db8::/48"), null, "wlan0");
         assertFalse(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(Prefix("192.0.2.0/32"), Address("0.0.0.0"), "wlan0");
         assertTrue(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(Prefix("2001:db8::/128"), Address("::"), "wlan0");
         assertTrue(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(Prefix("192.0.2.0/32"), null, "wlan0");
         assertTrue(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(Prefix("2001:db8::/128"), null, "wlan0");
         assertTrue(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(Prefix("::/128"), Address("fe80::"), "wlan0");
         assertTrue(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(Prefix("0.0.0.0/32"), Address("192.0.2.1"), "wlan0");
         assertTrue(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(Prefix("0.0.0.0/32"), Address("192.0.2.1"), "wlan0");
         assertTrue(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), RTN_UNREACHABLE);
         assertFalse(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertTrue(r.isIPv4UnreachableDefault());
+            assertFalse(r.isIPv6UnreachableDefault());
+        }
 
         r = new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE);
         assertFalse(r.isHostRoute());
         assertFalse(r.isDefaultRoute());
         assertFalse(r.isIPv4Default());
         assertFalse(r.isIPv6Default());
+        if (isAtLeastR()) {
+            assertFalse(r.isIPv4UnreachableDefault());
+            assertTrue(r.isIPv6UnreachableDefault());
+        }
     }
 
     @Test
