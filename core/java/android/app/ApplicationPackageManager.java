@@ -1610,7 +1610,10 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public Drawable getUserBadgeForDensityNoBackground(UserHandle user, int density) {
-        Drawable badge = getProfileIconForDensity(user,
+        if (!hasUserBadge(user.getIdentifier())) {
+            return null;
+        }
+        Drawable badge = getDrawableForDensity(
                 getUserManager().getUserBadgeNoBackgroundResId(user.getIdentifier()), density);
         if (badge != null) {
             badge.setTint(getUserBadgeColor(user));
