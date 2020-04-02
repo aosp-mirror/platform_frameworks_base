@@ -20,7 +20,6 @@ import android.car.hardware.power.CarPowerManager;
 import android.content.res.Configuration;
 
 import com.android.systemui.car.CarDeviceProvisionedController;
-import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.navigationbar.car.CarNavigationBarController;
 import com.android.systemui.statusbar.car.PowerManagerHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -36,7 +35,6 @@ public class NotificationPanelViewMediator implements OverlayViewMediator,
 
     private final CarNavigationBarController mCarNavigationBarController;
     private final NotificationPanelViewController mNotificationPanelViewController;
-    private final CarServiceProvider mCarServiceProvider;
     private final PowerManagerHelper mPowerManagerHelper;
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final ConfigurationController mConfigurationController;
@@ -46,7 +44,6 @@ public class NotificationPanelViewMediator implements OverlayViewMediator,
             CarNavigationBarController carNavigationBarController,
             NotificationPanelViewController notificationPanelViewController,
 
-            CarServiceProvider carServiceProvider,
             PowerManagerHelper powerManagerHelper,
 
             CarDeviceProvisionedController carDeviceProvisionedController,
@@ -54,7 +51,6 @@ public class NotificationPanelViewMediator implements OverlayViewMediator,
     ) {
         mCarNavigationBarController = carNavigationBarController;
         mNotificationPanelViewController = notificationPanelViewController;
-        mCarServiceProvider = carServiceProvider;
         mPowerManagerHelper = powerManagerHelper;
         mCarDeviceProvisionedController = carDeviceProvisionedController;
         mConfigurationController = configurationController;
@@ -72,7 +68,17 @@ public class NotificationPanelViewMediator implements OverlayViewMediator,
                 mNotificationPanelViewController.getNavBarNotificationTouchListener());
 
         mCarNavigationBarController.registerNotificationController(
-                () -> mNotificationPanelViewController.toggle());
+                new CarNavigationBarController.NotificationsShadeController() {
+                    @Override
+                    public void togglePanel() {
+                        mNotificationPanelViewController.toggle();
+                    }
+
+                    @Override
+                    public boolean isNotificationPanelOpen() {
+                        return mNotificationPanelViewController.isPanelExpanded();
+                    }
+                });
     }
 
     @Override
