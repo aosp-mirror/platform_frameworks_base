@@ -107,7 +107,6 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -155,6 +154,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -1727,6 +1727,11 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     ShortcutHelper getShortcutHelper() {
         return mShortcutHelper;
+    }
+
+    @VisibleForTesting
+    void setShortcutHelper(ShortcutHelper helper) {
+        mShortcutHelper = helper;
     }
 
     @VisibleForTesting
@@ -3459,10 +3464,14 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ConversationChannelWrapper> conversations =
                     mPreferencesHelper.getConversations(onlyImportant);
             for (ConversationChannelWrapper conversation : conversations) {
-                conversation.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
-                        conversation.getNotificationChannel().getConversationId(),
-                        conversation.getPkg(),
-                        UserHandle.of(UserHandle.getUserId(conversation.getUid()))));
+                if (mShortcutHelper == null) {
+                    conversation.setShortcutInfo(null);
+                } else {
+                    conversation.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
+                            conversation.getNotificationChannel().getConversationId(),
+                            conversation.getPkg(),
+                            UserHandle.of(UserHandle.getUserId(conversation.getUid()))));
+                }
             }
             return new ParceledListSlice<>(conversations);
         }
@@ -3482,10 +3491,14 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ConversationChannelWrapper> conversations =
                     mPreferencesHelper.getConversations(pkg, uid);
             for (ConversationChannelWrapper conversation : conversations) {
-                conversation.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
-                        conversation.getNotificationChannel().getConversationId(),
-                        pkg,
-                        UserHandle.of(UserHandle.getUserId(uid))));
+                if (mShortcutHelper == null) {
+                    conversation.setShortcutInfo(null);
+                } else {
+                    conversation.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
+                            conversation.getNotificationChannel().getConversationId(),
+                            pkg,
+                            UserHandle.of(UserHandle.getUserId(uid))));
+                }
             }
             return new ParceledListSlice<>(conversations);
         }
@@ -5680,8 +5693,10 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        r.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
-                notification.getShortcutId(), pkg, user));
+        ShortcutInfo info = mShortcutHelper != null
+                ? mShortcutHelper.getValidShortcutInfo(notification.getShortcutId(), pkg, user)
+                : null;
+        r.setShortcutInfo(info);
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
                 r.getSbn().getOverrideGroupKey() != null)) {
@@ -6214,8 +6229,11 @@ public class NotificationManagerService extends SystemService {
                     cancelGroupChildrenLocked(r, mCallingUid, mCallingPid, listenerName,
                             mSendDelete, childrenFlagChecker);
                     updateLightsLocked();
-                    mShortcutHelper.maybeListenForShortcutChangesForBubbles(r, true /* isRemoved */,
-                            mHandler);
+                    if (mShortcutHelper != null) {
+                        mShortcutHelper.maybeListenForShortcutChangesForBubbles(r,
+                                true /* isRemoved */,
+                                mHandler);
+                    }
                 } else {
                     // No notification was found, assume that it is snoozed and cancel it.
                     if (mReason != REASON_SNOOZED) {
@@ -6453,9 +6471,11 @@ public class NotificationManagerService extends SystemService {
                                 + n.getPackageName());
                     }
 
-                    mShortcutHelper.maybeListenForShortcutChangesForBubbles(r,
-                            false /* isRemoved */,
-                            mHandler);
+                    if (mShortcutHelper != null) {
+                        mShortcutHelper.maybeListenForShortcutChangesForBubbles(r,
+                                false /* isRemoved */,
+                                mHandler);
+                    }
 
                     maybeRecordInterruptionLocked(r);
 
