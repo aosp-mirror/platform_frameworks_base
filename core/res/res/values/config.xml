@@ -1910,6 +1910,9 @@
     <!-- The name of the package that will hold the system gallery role. -->
     <string name="config_systemGallery" translatable="false">com.android.gallery</string>
 
+    <!-- The name of the package that will be allowed to change its components' label/icon. -->
+    <string name="config_overrideComponentUiPackage" translatable="false"></string>
+
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
     <bool name="config_bluetooth_default_profiles">true</bool>
