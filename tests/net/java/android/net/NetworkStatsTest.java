@@ -503,6 +503,53 @@ public class NetworkStatsTest {
     }
 
     @Test
+    public void testRemoveEmptyEntries() throws Exception {
+        // Test empty stats.
+        final NetworkStats statsEmpty = new NetworkStats(TEST_START, 3);
+        assertEquals(0, statsEmpty.removeEmptyEntries().size());
+
+        // Test stats with non-zero entry.
+        final NetworkStats statsNonZero = new NetworkStats(TEST_START, 1)
+                .insertEntry(TEST_IFACE, 99, SET_DEFAULT, TAG_NONE, METERED_NO,
+                        ROAMING_NO, DEFAULT_NETWORK_NO, 1L, 128L, 0L, 2L, 20L);
+        assertEquals(1, statsNonZero.size());
+        final NetworkStats expectedNonZero = statsNonZero.removeEmptyEntries();
+        assertEquals(1, expectedNonZero.size());
+        assertValues(expectedNonZero, 0, TEST_IFACE, 99, SET_DEFAULT, TAG_NONE, METERED_NO,
+                ROAMING_NO, DEFAULT_NETWORK_NO, 1L, 128L, 0L, 2L, 20L);
+
+        // Test stats with empty entry.
+        final NetworkStats statsZero = new NetworkStats(TEST_START, 1)
+                .insertEntry(TEST_IFACE, 99, SET_DEFAULT, TAG_NONE, METERED_NO,
+                        ROAMING_NO, DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L);
+        assertEquals(1, statsZero.size());
+        final NetworkStats expectedZero = statsZero.removeEmptyEntries();
+        assertEquals(1, statsZero.size()); // Assert immutable.
+        assertEquals(0, expectedZero.size());
+
+        // Test stats with multiple entries.
+        final NetworkStats statsMultiple = new NetworkStats(TEST_START, 0)
+                .insertEntry(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 2L, 64L, 0L, 2L, 20L)
+                .insertEntry(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, 4L, 32L, 0L, 0L, 0L)
+                .insertEntry(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 0L, 0L, 0L, 0L, 0L)
+                .insertEntry(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 0L, 0L, 0L, 0L, 0L)
+                .insertEntry(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, 8L, 0L, 0L, 0L, 0L)
+                .insertEntry(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, 0L, 8L, 0L, 0L, 0L)
+                .insertEntry(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 0L, 0L, 4L, 0L, 0L)
+                .insertEntry(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 0L, 0L, 0L, 2L, 0L)
+                .insertEntry(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 0L, 0L, 0L, 0L, 1L);
+        assertEquals(9, statsMultiple.size());
+        final NetworkStats expectedMultiple = statsMultiple.removeEmptyEntries();
+        assertEquals(9, statsMultiple.size()); // Assert immutable.
+        assertEquals(7, expectedMultiple.size());
+        assertValues(expectedMultiple.getTotalIncludingTags(null), 14L, 104L, 4L, 4L, 21L);
+
+        // Test stats with multiple empty entries.
+        assertEquals(statsMultiple.size(), statsMultiple.subtract(statsMultiple).size());
+        assertEquals(0, statsMultiple.subtract(statsMultiple).removeEmptyEntries().size());
+    }
+
+    @Test
     public void testClone() throws Exception {
         final NetworkStats original = new NetworkStats(TEST_START, 5)
                 .insertEntry(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 2L, 20L)
