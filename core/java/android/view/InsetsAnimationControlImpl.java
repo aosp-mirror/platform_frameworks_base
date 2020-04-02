@@ -156,7 +156,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mPendingFraction = sanitize(fraction);
         mPendingInsets = sanitize(insets);
         mPendingAlpha = sanitize(alpha);
-        mController.scheduleApplyChangeInsets();
+        mController.scheduleApplyChangeInsets(this);
     }
 
     @VisibleForTesting
