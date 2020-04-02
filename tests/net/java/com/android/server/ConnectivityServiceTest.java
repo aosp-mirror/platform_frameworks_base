@@ -2913,7 +2913,7 @@ public class ConnectivityServiceTest {
         class ConfidentialMatchAllNetworkSpecifier extends NetworkSpecifier implements
                 Parcelable {
             @Override
-            public boolean satisfiedBy(NetworkSpecifier other) {
+            public boolean canBeSatisfiedBy(NetworkSpecifier other) {
                 return true;
             }
 
@@ -2941,7 +2941,7 @@ public class ConnectivityServiceTest {
             }
 
             @Override
-            public boolean satisfiedBy(NetworkSpecifier other) {
+            public boolean canBeSatisfiedBy(NetworkSpecifier other) {
                 if (other instanceof LocalStringNetworkSpecifier) {
                     return TextUtils.equals(mString,
                             ((LocalStringNetworkSpecifier) other).mString);
@@ -3062,7 +3062,10 @@ public class ConnectivityServiceTest {
         });
 
         class NonParcelableSpecifier extends NetworkSpecifier {
-            public boolean satisfiedBy(NetworkSpecifier other) { return false; }
+            @Override
+            public boolean canBeSatisfiedBy(NetworkSpecifier other) {
+                return false;
+            }
         };
         class ParcelableSpecifier extends NonParcelableSpecifier implements Parcelable {
             @Override public int describeContents() { return 0; }
