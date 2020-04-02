@@ -30,6 +30,7 @@ import android.widget.inline.InlinePresentationSpec;
 
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Preconditions;
+import com.android.internal.widget.InlinePresentationStyleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,6 +112,10 @@ public final class InlineSuggestionsRequest implements Parcelable {
      */
     public void setHostInputToken(IBinder hostInputToken) {
         mHostInputToken = hostInputToken;
+    }
+
+    private boolean extrasEquals(@NonNull Bundle extras) {
+        return InlinePresentationStyleUtils.bundleEquals(mExtras, extras);
     }
 
     // TODO(b/149609075): remove once IBinder parcelling is natively supported
@@ -331,7 +336,7 @@ public final class InlineSuggestionsRequest implements Parcelable {
                 && java.util.Objects.equals(mInlinePresentationSpecs, that.mInlinePresentationSpecs)
                 && java.util.Objects.equals(mHostPackageName, that.mHostPackageName)
                 && java.util.Objects.equals(mSupportedLocales, that.mSupportedLocales)
-                && java.util.Objects.equals(mExtras, that.mExtras)
+                && extrasEquals(that.mExtras)
                 && java.util.Objects.equals(mHostInputToken, that.mHostInputToken)
                 && mHostDisplayId == that.mHostDisplayId;
     }
@@ -603,10 +608,10 @@ public final class InlineSuggestionsRequest implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1585691147541L,
+            time = 1585768018462L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestionsRequest.java",
-            inputSignatures = "public static final  int SUGGESTION_COUNT_UNLIMITED\nprivate final  int mMaxSuggestionCount\nprivate final @android.annotation.NonNull java.util.List<android.widget.inline.InlinePresentationSpec> mInlinePresentationSpecs\nprivate @android.annotation.NonNull java.lang.String mHostPackageName\nprivate @android.annotation.NonNull android.os.LocaleList mSupportedLocales\nprivate @android.annotation.NonNull android.os.Bundle mExtras\nprivate @android.annotation.Nullable android.os.IBinder mHostInputToken\nprivate  int mHostDisplayId\npublic @android.compat.annotation.UnsupportedAppUsage @android.annotation.NonNull java.util.List<android.view.inline.InlinePresentationSpec> getPresentationSpecs()\npublic  void setHostInputToken(android.os.IBinder)\nprivate  void parcelHostInputToken(android.os.Parcel,int)\nprivate @android.annotation.Nullable android.os.IBinder unparcelHostInputToken(android.os.Parcel)\npublic  void setHostDisplayId(int)\nprivate  void onConstructed()\nprivate static  int defaultMaxSuggestionCount()\nprivate static  java.lang.String defaultHostPackageName()\nprivate static  android.os.LocaleList defaultSupportedLocales()\nprivate static @android.annotation.Nullable android.os.IBinder defaultHostInputToken()\nprivate static @android.annotation.Nullable int defaultHostDisplayId()\nprivate static @android.annotation.NonNull android.os.Bundle defaultExtras()\nclass InlineSuggestionsRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\npublic @android.compat.annotation.UnsupportedAppUsage @android.annotation.NonNull android.view.inputmethod.InlineSuggestionsRequest.Builder addPresentationSpecs(android.view.inline.InlinePresentationSpec)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setInlinePresentationSpecs(java.util.List<android.widget.inline.InlinePresentationSpec>)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostPackageName(java.lang.String)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostInputToken(android.os.IBinder)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostDisplayId(int)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "public static final  int SUGGESTION_COUNT_UNLIMITED\nprivate final  int mMaxSuggestionCount\nprivate final @android.annotation.NonNull java.util.List<android.widget.inline.InlinePresentationSpec> mInlinePresentationSpecs\nprivate @android.annotation.NonNull java.lang.String mHostPackageName\nprivate @android.annotation.NonNull android.os.LocaleList mSupportedLocales\nprivate @android.annotation.NonNull android.os.Bundle mExtras\nprivate @android.annotation.Nullable android.os.IBinder mHostInputToken\nprivate  int mHostDisplayId\npublic @android.compat.annotation.UnsupportedAppUsage @android.annotation.NonNull java.util.List<android.view.inline.InlinePresentationSpec> getPresentationSpecs()\npublic  void setHostInputToken(android.os.IBinder)\nprivate  boolean extrasEquals(android.os.Bundle)\nprivate  void parcelHostInputToken(android.os.Parcel,int)\nprivate @android.annotation.Nullable android.os.IBinder unparcelHostInputToken(android.os.Parcel)\npublic  void setHostDisplayId(int)\nprivate  void onConstructed()\nprivate static  int defaultMaxSuggestionCount()\nprivate static  java.lang.String defaultHostPackageName()\nprivate static  android.os.LocaleList defaultSupportedLocales()\nprivate static @android.annotation.Nullable android.os.IBinder defaultHostInputToken()\nprivate static @android.annotation.Nullable int defaultHostDisplayId()\nprivate static @android.annotation.NonNull android.os.Bundle defaultExtras()\nclass InlineSuggestionsRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\npublic @android.compat.annotation.UnsupportedAppUsage @android.annotation.NonNull android.view.inputmethod.InlineSuggestionsRequest.Builder addPresentationSpecs(android.view.inline.InlinePresentationSpec)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setInlinePresentationSpecs(java.util.List<android.widget.inline.InlinePresentationSpec>)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostPackageName(java.lang.String)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostInputToken(android.os.IBinder)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostDisplayId(int)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 
