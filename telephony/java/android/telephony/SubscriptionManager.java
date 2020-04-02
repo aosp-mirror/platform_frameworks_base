@@ -3323,4 +3323,14 @@ public class SubscriptionManager {
     public static void invalidateDefaultDataSubIdCaches() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY);
     }
+
+    /**
+     * Allows a test process to disable client-side caching operations.
+     *
+     * @hide
+     */
+    public static void disableCaching() {
+        sDefaultSubIdCache.disableLocal();
+        sDefaultDataSubIdCache.disableLocal();
+    }
 }
