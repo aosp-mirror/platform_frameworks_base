@@ -149,7 +149,6 @@ public final class NotificationEntry extends ListEntry {
      */
     public EditedSuggestionInfo editedSuggestionInfo;
 
-    private NotificationEntry parent; // our parent (if we're in a group)
     private ExpandableNotificationRow row; // the outer expanded view
     private ExpandableNotificationRowController mRowController;
 
@@ -719,7 +718,7 @@ public final class NotificationEntry extends ListEntry {
     }
 
     public boolean isChildInGroup() {
-        return parent == null;
+        return row != null && row.isChildInGroup();
     }
 
     /**
