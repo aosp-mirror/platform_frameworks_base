@@ -206,6 +206,32 @@ public:
         return &mValues;
     }
 
+    // Default value = false
+    inline bool shouldTruncateTimestamp() {
+        return mTruncateTimestamp;
+    }
+
+    // Returns the index of the uid field within the FieldValues vector if the
+    // uid exists. If there is no uid field, returns -1.
+    //
+    // If the index within the atom definition is desired, do the following:
+    //    int vectorIndex = LogEvent.getUidFieldIndex();
+    //    if (vectorIndex != -1) {
+    //        FieldValue& v = LogEvent.getValues()[vectorIndex];
+    //        int atomIndex = v.mField.getPosAtDepth(0);
+    //    }
+    // Note that atomIndex is 1-indexed.
+    inline int getUidFieldIndex() {
+        return mUidFieldIndex;
+    }
+
+    // Returns the index of (the first) attribution chain within the atom
+    // definition. Note that the value is 1-indexed. If there is no attribution
+    // chain, returns -1.
+    inline int getAttributionChainIndex() {
+        return mAttributionChainIndex;
+    }
+
     inline LogEvent makeCopy() {
         return LogEvent(*this);
     }
@@ -240,7 +266,13 @@ private:
     void parseByteArray(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
     void parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
     void parseAttributionChain(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
-    void parseAnnotations(uint8_t numAnnotations);
+
+    void parseAnnotations(uint8_t numAnnotations, int firstUidInChainIndex = -1);
+    void parseIsUidAnnotation(uint8_t annotationType);
+    void parseTruncateTimestampAnnotation(uint8_t annotationType);
+    void parseStateOptionAnnotation(uint8_t annotationType, int firstUidInChainIndex);
+    void parseResetStateAnnotation(uint8_t annotationType);
+    void parseStateNestedAnnotation(uint8_t annotationType);
 
     /**
      * The below three variables are only valid during the execution of
@@ -322,6 +354,11 @@ private:
 
     // The pid of the logging client (defaults to -1).
     int32_t mLogPid = -1;
+
+    // Annotations
+    bool mTruncateTimestamp = false;
+    int mUidFieldIndex = -1;
+    int mAttributionChainIndex = -1;
 };
 
 void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::vector<uint8_t>* protoOut);
