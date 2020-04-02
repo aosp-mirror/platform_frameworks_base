@@ -449,7 +449,6 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 74078662)
     public void testLayoutSeqResetOnReparent() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         app.mLayoutSeq = 1;
@@ -508,7 +507,6 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 74078662)
     public void testDisplayCutoutIsCalculatedRelativeToFrame() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         WindowFrames wf = app.getWindowFrames();
