@@ -44,6 +44,7 @@ import java.util.Set;
 public class PackageSetting extends PackageSettingBase {
     int appId;
 
+    @Nullable
     public AndroidPackage pkg;
     /**
      * WARNING. The object reference is important. We perform integer equality and NOT
