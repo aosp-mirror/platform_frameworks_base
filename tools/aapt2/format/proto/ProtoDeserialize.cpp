@@ -446,9 +446,12 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
     }
 
     for (const pb::Entry& pb_entry : pb_type.entry()) {
-      ResourceEntry* entry = type->FindOrCreateEntry(pb_entry.name());
+      ResourceEntry* entry;
       if (pb_entry.has_entry_id()) {
-        entry->id = static_cast<uint16_t>(pb_entry.entry_id().id());
+        auto entry_id = static_cast<uint16_t>(pb_entry.entry_id().id());
+        entry = type->FindOrCreateEntry(pb_entry.name(), entry_id);
+      } else {
+        entry = type->FindOrCreateEntry(pb_entry.name());
       }
 
       // Deserialize the symbol status (public/private with source and comments).

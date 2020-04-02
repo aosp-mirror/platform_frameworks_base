@@ -38,6 +38,15 @@ struct SerializeXmlOptions {
 struct SerializeTableOptions {
     /** Prevent serializing the source pool and source protos.  */
     bool exclude_sources = false;
+
+    // When true, all the entry names in pb:ResourceTable are collapsed to a
+    // single entry name. When the proto table is converted to binary
+    // resources.arsc, the key string pool is collapsed to a single entry. All
+    // resource entries have name indices that point to this single value.
+    bool collapse_key_stringpool = false;
+
+    // Set of resources to avoid collapsing to a single entry in key stringpool.
+    std::set<ResourceName> name_collapse_exemptions;
 };
 
 // Serializes a Value to its protobuf representation. An optional StringPool will hold the
