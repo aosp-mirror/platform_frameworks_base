@@ -727,9 +727,13 @@ class ActivityStack extends Task {
     private void setWindowingModeInSurfaceTransaction(int preferredWindowingMode, boolean animate,
             boolean showRecents, boolean enteringSplitScreenMode, boolean deferEnsuringVisibility,
             boolean creating) {
+        final TaskDisplayArea taskDisplayArea = getDisplayArea();
+        if (taskDisplayArea == null) {
+            Slog.d(TAG, "taskDisplayArea is null, bail early");
+            return;
+        }
         final int currentMode = getWindowingMode();
         final int currentOverrideMode = getRequestedOverrideWindowingMode();
-        final TaskDisplayArea taskDisplayArea = getDisplayArea();
         final Task topTask = getTopMostTask();
         int windowingMode = preferredWindowingMode;
         if (preferredWindowingMode == WINDOWING_MODE_UNDEFINED
