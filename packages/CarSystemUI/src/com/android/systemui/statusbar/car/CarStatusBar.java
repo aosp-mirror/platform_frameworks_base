@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
@@ -225,6 +226,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             KeyguardIndicationController keyguardIndicationController,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            Lazy<NotificationShadeDepthController> depthControllerLazy,
             /* Car Settings injected components. */
             CarNavigationBarController carNavigationBarController) {
         super(
@@ -304,6 +306,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 phoneStatusBarPolicy,
                 keyguardIndicationController,
                 dismissCallbackRegistry,
+                depthControllerLazy,
                 statusBarTouchableRegionManager);
         mUserSwitcherController = userSwitcherController;
         mScrimController = scrimController;
