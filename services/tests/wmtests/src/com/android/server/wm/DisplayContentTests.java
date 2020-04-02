@@ -56,6 +56,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
@@ -1006,6 +1007,13 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.computeScreenConfiguration(config);
         mDisplayContent.onRequestedOverrideConfigurationChanged(config);
 
+        final ActivityRecord closingApp = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+                .setDisplay(mDisplayContent).setOnTop(false).build().getTopMostActivity();
+        closingApp.nowVisible = true;
+        closingApp.startAnimation(closingApp.getPendingTransaction(), mock(AnimationAdapter.class),
+                false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
+        assertTrue(closingApp.isAnimating());
+
         final ActivityRecord app = mAppWindow.mActivityRecord;
         mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
                 false /* alwaysKeepCurrent */);
@@ -1033,6 +1041,8 @@ public class DisplayContentTests extends WindowTestsBase {
 
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
 
+        // The animation in old rotation should be cancelled.
+        assertFalse(closingApp.isAnimating());
         // The display should be rotated after the launch is finished.
         assertFalse(app.hasFixedRotationTransform());
         assertEquals(config90.orientation, mDisplayContent.getConfiguration().orientation);
@@ -1080,15 +1090,16 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testGetOrCreateRootHomeTask_defaultDisplay() {
         DisplayContent defaultDisplay = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
+        TaskDisplayArea defaultTaskDisplayArea = defaultDisplay.mTaskContainers;
 
         // Remove the current home stack if it exists so a new one can be created below.
-        ActivityStack homeTask = defaultDisplay.getRootHomeTask();
+        ActivityStack homeTask = defaultTaskDisplayArea.getRootHomeTask();
         if (homeTask != null) {
-            defaultDisplay.removeStack(homeTask);
+            defaultTaskDisplayArea.removeChild(homeTask);
         }
-        assertNull(defaultDisplay.getRootHomeTask());
+        assertNull(defaultTaskDisplayArea.getRootHomeTask());
 
-        assertNotNull(defaultDisplay.mTaskContainers.getOrCreateRootHomeTask());
+        assertNotNull(defaultTaskDisplayArea.getOrCreateRootHomeTask());
     }
 
     @Test
@@ -1098,31 +1109,34 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(false).when(display).isUntrustedVirtualDisplay();
 
         // Remove the current home stack if it exists so a new one can be created below.
-        ActivityStack homeTask = display.getRootHomeTask();
+        TaskDisplayArea taskDisplayArea = display.mTaskContainers;
+        ActivityStack homeTask = taskDisplayArea.getRootHomeTask();
         if (homeTask != null) {
-            display.removeStack(homeTask);
+            taskDisplayArea.removeChild(homeTask);
         }
-        assertNull(display.getRootHomeTask());
+        assertNull(taskDisplayArea.getRootHomeTask());
 
-        assertNotNull(display.mTaskContainers.getOrCreateRootHomeTask());
+        assertNotNull(taskDisplayArea.getOrCreateRootHomeTask());
     }
 
     @Test
     public void testGetOrCreateRootHomeTask_unsupportedSystemDecorations() {
         DisplayContent display = createNewDisplay();
+        TaskDisplayArea taskDisplayArea = display.mTaskContainers;
         doReturn(false).when(display).supportsSystemDecorations();
 
-        assertNull(display.getRootHomeTask());
-        assertNull(display.mTaskContainers.getOrCreateRootHomeTask());
+        assertNull(taskDisplayArea.getRootHomeTask());
+        assertNull(taskDisplayArea.getOrCreateRootHomeTask());
     }
 
     @Test
     public void testGetOrCreateRootHomeTask_untrustedVirtualDisplay() {
         DisplayContent display = createNewDisplay();
+        TaskDisplayArea taskDisplayArea = display.mTaskContainers;
         doReturn(true).when(display).isUntrustedVirtualDisplay();
 
-        assertNull(display.getRootHomeTask());
-        assertNull(display.mTaskContainers.getOrCreateRootHomeTask());
+        assertNull(taskDisplayArea.getRootHomeTask());
+        assertNull(taskDisplayArea.getOrCreateRootHomeTask());
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

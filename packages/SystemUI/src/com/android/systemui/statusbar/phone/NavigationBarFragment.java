@@ -1075,12 +1075,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     /** Sets {@link AutoHideController} to the navigation bar. */
     public void setAutoHideController(AutoHideController autoHideController) {
-        if (mAutoHideController != null) {
-            mAutoHideController.removeAutoHideUiElement(mAutoHideUiElement);
-        }
         mAutoHideController = autoHideController;
         if (mAutoHideController != null) {
-            mAutoHideController.addAutoHideUiElement(mAutoHideUiElement);
+            mAutoHideController.setNavigationBar(mAutoHideUiElement);
         }
     }
 

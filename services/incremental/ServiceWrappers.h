@@ -49,6 +49,7 @@ public:
     virtual binder::Status unmountIncFs(const std::string& dir) const = 0;
     virtual binder::Status bindMount(const std::string& sourceDir,
                                      const std::string& targetDir) const = 0;
+    virtual binder::Status setIncFsMountOptions(const ::android::os::incremental::IncrementalFileSystemControlParcel& control, bool enableReadLogs) const = 0;
 };
 
 class DataLoaderManagerWrapper {
@@ -76,7 +77,7 @@ public:
     virtual ErrorCode link(const Control& control, std::string_view from,
                            std::string_view to) const = 0;
     virtual ErrorCode unlink(const Control& control, std::string_view path) const = 0;
-    virtual base::unique_fd openWrite(const Control& control, FileId id) const = 0;
+    virtual base::unique_fd openForSpecialOps(const Control& control, FileId id) const = 0;
     virtual ErrorCode writeBlocks(Span<const DataBlock> blocks) const = 0;
 };
 
@@ -105,6 +106,9 @@ public:
     binder::Status bindMount(const std::string& sourceDir,
                              const std::string& targetDir) const override {
         return mInterface->bindMount(sourceDir, targetDir);
+    }
+    binder::Status setIncFsMountOptions(const ::android::os::incremental::IncrementalFileSystemControlParcel& control, bool enableReadLogs) const override {
+        return mInterface->setIncFsMountOptions(control, enableReadLogs);
     }
 
 private:
@@ -177,8 +181,8 @@ public:
     ErrorCode unlink(const Control& control, std::string_view path) const override {
         return incfs::unlink(control, path);
     }
-    base::unique_fd openWrite(const Control& control, FileId id) const override {
-        return base::unique_fd{incfs::openWrite(control, id)};
+    base::unique_fd openForSpecialOps(const Control& control, FileId id) const override {
+        return base::unique_fd{incfs::openForSpecialOps(control, id).release()};
     }
     ErrorCode writeBlocks(Span<const DataBlock> blocks) const override {
         return incfs::writeBlocks(blocks);

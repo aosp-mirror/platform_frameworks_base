@@ -478,7 +478,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     /**
      * The TaskOrganizer which is delegated presentation of this task. If set the Task will
-     * emit an IWindowContainer (allowing access to it's SurfaceControl leash) to the organizers
+     * emit an WindowContainerToken (allowing access to it's SurfaceControl leash) to the organizers
      * taskAppeared callback, and emit a taskRemoved callback when the Task is vanished.
      */
     ITaskOrganizer mTaskOrganizer;
@@ -825,7 +825,7 @@ class Task extends WindowContainer<WindowContainer> {
             // In some cases the focused stack isn't the front stack. E.g. pinned stack.
             // Whenever we are moving the top activity from the front stack we want to make sure to
             // move the stack to the front.
-            final boolean wasFront = r != null && sourceStack.isTopStackOnDisplay()
+            final boolean wasFront = r != null && sourceStack.isTopStackInDisplayArea()
                     && (sourceStack.topRunningActivity() == r);
 
             final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT
@@ -1386,7 +1386,7 @@ class Task extends WindowContainer<WindowContainer> {
         // A rootable task that is now being added to be the child of an organized task. Making
         // sure the stack references is keep updated.
         if (mTaskOrganizer != null && mCreatedByOrganizer && child.asTask() != null) {
-            mDisplayContent.mTaskContainers.addStackReferenceIfNeeded((ActivityStack) child);
+            getDisplayArea().addStackReferenceIfNeeded((ActivityStack) child);
         }
 
         // Make sure the list of display UID whitelists is updated
@@ -1432,7 +1432,7 @@ class Task extends WindowContainer<WindowContainer> {
         // A rootable child task that is now being removed from an organized task. Making sure
         // the stack references is keep updated.
         if (mTaskOrganizer != null && mCreatedByOrganizer && child.asTask() != null) {
-            mDisplayContent.mTaskContainers.removeStackReferenceIfNeeded((ActivityStack) child);
+            getDisplayArea().removeStackReferenceIfNeeded((ActivityStack) child);
         }
         removeChild(child, "removeChild");
     }
@@ -3068,8 +3068,14 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     public boolean isAttached() {
-        final DisplayContent display = getDisplayContent();
-        return display != null && !display.isRemoved();
+        final TaskDisplayArea taskDisplayArea = getDisplayArea();
+        return taskDisplayArea != null && !taskDisplayArea.isRemoved();
+    }
+
+    @Override
+    @Nullable
+    TaskDisplayArea getDisplayArea() {
+        return (TaskDisplayArea) super.getDisplayArea();
     }
 
     /**
@@ -3429,7 +3435,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
         info.configuration.setTo(getConfiguration());
-        info.token = mRemoteToken;
+        info.token = mRemoteToken.toWindowContainerToken();
 
         //TODO (AM refactor): Just use local once updateEffectiveIntent is run during all child
         //                    order changes.

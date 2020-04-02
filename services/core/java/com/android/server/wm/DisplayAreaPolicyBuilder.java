@@ -87,8 +87,8 @@ class DisplayAreaPolicyBuilder {
          *
          * Must be unique among the features added to a {@link DisplayAreaPolicyBuilder}.
          *
-         * @see android.window.WindowOrganizer.DisplayAreaOrganizer#FEATURE_SYSTEM_FIRST
-         * @see android.window.WindowOrganizer.DisplayAreaOrganizer#FEATURE_VENDOR_FIRST
+         * @see android.window.DisplayAreaOrganizer#FEATURE_SYSTEM_FIRST
+         * @see android.window.DisplayAreaOrganizer#FEATURE_VENDOR_FIRST
          */
         public int getId() {
             return mId;
@@ -201,8 +201,8 @@ class DisplayAreaPolicyBuilder {
 
         Result(WindowManagerService wmService, DisplayContent content, DisplayArea.Root root,
                 DisplayArea<? extends WindowContainer> imeContainer,
-                DisplayArea<? extends ActivityStack> taskStacks, ArrayList<Feature> features) {
-            super(wmService, content, root, imeContainer, taskStacks);
+                DisplayArea<? extends ActivityStack> taskDisplayArea, ArrayList<Feature> features) {
+            super(wmService, content, root, imeContainer, taskDisplayArea);
             mFeatures = features;
             mAreas = new HashMap<>(features.size());
             for (int i = 0; i < mFeatures.size(); i++) {
@@ -320,9 +320,9 @@ class DisplayAreaPolicyBuilder {
     Result build(WindowManagerService wmService,
             DisplayContent content, DisplayArea.Root root,
             DisplayArea<? extends WindowContainer> imeContainer,
-            DisplayArea<? extends ActivityStack> taskContainers) {
+            DisplayArea<? extends ActivityStack> taskDisplayArea) {
 
-        return new Result(wmService, content, root, imeContainer, taskContainers, new ArrayList<>(
+        return new Result(wmService, content, root, imeContainer, taskDisplayArea, new ArrayList<>(
                 mFeatures));
     }
 

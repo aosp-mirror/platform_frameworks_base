@@ -543,7 +543,8 @@ public class BubbleStackView extends FrameLayout {
                         .setStiffness(SpringForce.STIFFNESS_LOW)
                         .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
         mExpandedViewYAnim.addEndListener((anim, cancelled, value, velocity) -> {
-            if (mIsExpanded && mExpandedBubble != null) {
+            if (mIsExpanded && mExpandedBubble != null
+                    && mExpandedBubble.getExpandedView() != null) {
                 mExpandedBubble.getExpandedView().updateView();
             }
         });
@@ -562,7 +563,7 @@ public class BubbleStackView extends FrameLayout {
                     // Update the insets after we're done translating otherwise position
                     // calculation for them won't be correct.
                     () -> {
-                        if (mExpandedBubble != null) {
+                        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
                             mExpandedBubble.getExpandedView().updateInsets(insets);
                         }
                     });
@@ -577,7 +578,7 @@ public class BubbleStackView extends FrameLayout {
                     // Reposition & adjust the height for new orientation
                     if (mIsExpanded) {
                         mExpandedViewContainer.setTranslationY(getExpandedViewY());
-                        if (mExpandedBubble != null) {
+                        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
                             mExpandedBubble.getExpandedView().updateView();
                         }
                     }
@@ -1264,6 +1265,7 @@ public class BubbleStackView extends FrameLayout {
 
     void showExpandedViewContents(int displayId) {
         if (mExpandedBubble != null
+                && mExpandedBubble.getExpandedView() != null
                 && mExpandedBubble.getExpandedView().getVirtualDisplayId() == displayId) {
             mExpandedBubble.setContentVisibility(true);
         }
@@ -1439,7 +1441,7 @@ public class BubbleStackView extends FrameLayout {
 
     /** Expands the clicked bubble. */
     public void expandBubble(Bubble bubble) {
-        if (bubble.equals(mBubbleData.getSelectedBubble())) {
+        if (bubble != null && bubble.equals(mBubbleData.getSelectedBubble())) {
             // If the bubble we're supposed to expand is the selected bubble, that means the
             // overflow bubble is currently expanded. Don't tell BubbleData to set this bubble as
             // selected, since it already is. Just call the stack's setSelectedBubble to expand it.
