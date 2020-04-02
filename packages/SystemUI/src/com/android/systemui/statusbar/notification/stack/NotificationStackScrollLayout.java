@@ -3865,9 +3865,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         initVelocityTrackerIfNotExists();
         mVelocityTracker.addMovement(ev);
 
-        final int action = ev.getAction();
+        final int action = ev.getActionMasked();
+        if (ev.findPointerIndex(mActivePointerId) == -1 && action != MotionEvent.ACTION_DOWN) {
+            // Incomplete gesture, possibly due to window swap mid-gesture. Ignore until a new
+            // one starts.
+            Log.e(TAG, "Invalid pointerId=" + mActivePointerId + " in onTouchEvent "
+                    + MotionEvent.actionToString(ev.getActionMasked()));
+            return true;
+        }
 
-        switch (action & MotionEvent.ACTION_MASK) {
+        switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 if (getChildCount() == 0 || !isInContentBounds(ev)) {
                     return false;
