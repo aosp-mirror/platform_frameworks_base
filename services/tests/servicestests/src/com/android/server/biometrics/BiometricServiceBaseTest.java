@@ -17,6 +17,8 @@
 package com.android.server.biometrics;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -66,7 +68,6 @@ public class BiometricServiceBaseTest {
 
         @Override
         protected void updateActiveGroup(int userId, String clientPackage) {
-
         }
 
         @Override
@@ -96,7 +97,6 @@ public class BiometricServiceBaseTest {
 
         @Override
         protected void checkUseBiometricPermission() {
-
         }
 
         @Override
@@ -121,6 +121,8 @@ public class BiometricServiceBaseTest {
         }
     }
 
+    private static final int CLIENT_COOKIE = 0xc00c1e;
+
     private BiometricServiceBase mBiometricServiceBase;
 
     @Mock
@@ -129,17 +131,32 @@ public class BiometricServiceBaseTest {
     private Resources mResources;
     @Mock
     private BiometricAuthenticator.Identifier mIdentifier;
+    @Mock
+    private ClientMonitor mClient;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
         when(mContext.getResources()).thenReturn(mResources);
         when(mResources.getString(anyInt())).thenReturn("");
+        when(mClient.getCookie()).thenReturn(CLIENT_COOKIE);
+
         mBiometricServiceBase = new TestableBiometricServiceBase(mContext);
     }
 
     @Test
     public void testHandleEnumerate_doesNotCrash_withNullClient() {
         mBiometricServiceBase.handleEnumerate(mIdentifier, 0 /* remaining */);
+    }
+
+    @Test
+    public void testStartClient_sendsErrorAndRemovesClient_onNonzeroErrorCode() {
+        when(mClient.start()).thenReturn(1);
+
+        mBiometricServiceBase.startClient(mClient, false /* initiatedByClient */);
+
+        verify(mClient).onError(anyLong(), anyInt(), anyInt());
+        verify(mClient).destroy();
     }
 }
