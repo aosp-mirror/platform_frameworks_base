@@ -38,6 +38,7 @@ import android.content.pm.LauncherApps;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+import android.testing.TestableLooper;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
@@ -91,6 +92,7 @@ public class NotificationTestHelper {
     private static final String APP_NAME = "appName";
 
     private final Context mContext;
+    private final TestableLooper mTestLooper;
     private int mId;
     private final NotificationGroupManager mGroupManager;
     private ExpandableNotificationRow mRow;
@@ -101,8 +103,12 @@ public class NotificationTestHelper {
     private final IconManager mIconManager;
     private StatusBarStateController mStatusBarStateController;
 
-    public NotificationTestHelper(Context context, TestableDependency dependency) {
+    public NotificationTestHelper(
+            Context context,
+            TestableDependency dependency,
+            TestableLooper testLooper) {
         mContext = context;
+        mTestLooper = testLooper;
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(BubbleController.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
@@ -131,7 +137,10 @@ public class NotificationTestHelper {
 
         CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
-        mBindPipeline = new NotifBindPipeline(collection, mock(NotifBindPipelineLogger.class));
+        mBindPipeline = new NotifBindPipeline(
+                collection,
+                mock(NotifBindPipelineLogger.class),
+                mTestLooper.getLooper());
         mBindPipeline.setStage(mBindStage);
 
         ArgumentCaptor<NotifCollectionListener> collectionListenerCaptor =
@@ -410,7 +419,7 @@ public class NotificationTestHelper {
                 mStatusBarStateController);
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
-        inflateAndWait(entry, mBindStage);
+        inflateAndWait(entry);
 
         // This would be done as part of onAsyncInflationFinished, but we skip large amounts of
         // the callback chain, so we need to make up for not adding it to the group manager
@@ -419,10 +428,10 @@ public class NotificationTestHelper {
         return row;
     }
 
-    private static void inflateAndWait(NotificationEntry entry, RowContentBindStage stage)
-            throws Exception {
+    private void inflateAndWait(NotificationEntry entry) throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        stage.requestRebind(entry, en -> countDownLatch.countDown());
+        mBindStage.requestRebind(entry, en -> countDownLatch.countDown());
+        mTestLooper.processAllMessages();
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 

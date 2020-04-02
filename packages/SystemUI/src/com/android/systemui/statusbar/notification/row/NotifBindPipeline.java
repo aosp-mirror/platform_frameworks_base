@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.widget.FrameLayout;
@@ -25,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.os.CancellationSignal;
 
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -78,14 +82,17 @@ public final class NotifBindPipeline {
     private final Map<NotificationEntry, BindEntry> mBindEntries = new ArrayMap<>();
     private final NotifBindPipelineLogger mLogger;
     private final List<BindCallback> mScratchCallbacksList = new ArrayList<>();
+    private final Handler mMainHandler;
     private BindStage mStage;
 
     @Inject
     NotifBindPipeline(
             CommonNotifCollection collection,
-            NotifBindPipelineLogger logger) {
+            NotifBindPipelineLogger logger,
+            @Main Looper mainLooper) {
         collection.addCollectionListener(mCollectionListener);
         mLogger = logger;
+        mMainHandler = new NotifBindPipelineHandler(mainLooper);
     }
 
     /**
@@ -110,7 +117,7 @@ public final class NotifBindPipeline {
         final BindEntry bindEntry = getBindEntry(entry);
         bindEntry.row = row;
         if (bindEntry.invalidated) {
-            startPipeline(entry);
+            requestPipelineRun(entry);
         }
     }
 
@@ -133,7 +140,28 @@ public final class NotifBindPipeline {
             signal.setOnCancelListener(() -> callbacks.remove(callback));
         }
 
-        startPipeline(entry);
+        requestPipelineRun(entry);
+    }
+
+    /**
+     * Request pipeline to start.
+     *
+     * We avoid starting the pipeline immediately as multiple clients may request rebinds
+     * back-to-back due to a single change (e.g. notification update), and it's better to start
+     * the real work once rather than repeatedly start and cancel it.
+     */
+    private void requestPipelineRun(NotificationEntry entry) {
+        mLogger.logRequestPipelineRun(entry.getKey());
+
+        final BindEntry bindEntry = getBindEntry(entry);
+
+        // Abort any existing pipeline run
+        mStage.abortStage(entry, bindEntry.row);
+
+        if (!mMainHandler.hasMessages(START_PIPELINE_MSG, entry)) {
+            Message msg = Message.obtain(mMainHandler, START_PIPELINE_MSG, entry);
+            mMainHandler.sendMessage(msg);
+        }
     }
 
     /**
@@ -154,7 +182,6 @@ public final class NotifBindPipeline {
             return;
         }
 
-        mStage.abortStage(entry, row);
         mStage.executeStage(entry, row, (en) -> onPipelineComplete(en));
     }
 
@@ -191,6 +218,7 @@ public final class NotifBindPipeline {
                 mStage.abortStage(entry, row);
             }
             mStage.deleteStageParams(entry);
+            mMainHandler.removeMessages(START_PIPELINE_MSG, entry);
         }
     };
 
@@ -218,5 +246,26 @@ public final class NotifBindPipeline {
         public ExpandableNotificationRow row;
         public final Set<BindCallback> callbacks = new ArraySet<>();
         public boolean invalidated;
+    }
+
+    private static final int START_PIPELINE_MSG = 1;
+
+    private class NotifBindPipelineHandler extends Handler {
+
+        NotifBindPipelineHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case START_PIPELINE_MSG:
+                    NotificationEntry entry = (NotificationEntry) msg.obj;
+                    startPipeline(entry);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown message type: " + msg.what);
+            }
+        }
     }
 }
