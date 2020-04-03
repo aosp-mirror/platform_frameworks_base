@@ -109,7 +109,10 @@ public class BubbleDataTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mNotificationTestHelper = new NotificationTestHelper(mContext, mDependency);
+        mNotificationTestHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
         MockitoAnnotations.initMocks(this);
 
         mEntryA1 = createBubbleEntry(1, "a1", "package.a");

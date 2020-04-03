@@ -86,7 +86,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         when(mMenuRow.getLongpressMenuItem(any(Context.class))).thenReturn(mMenuItem);
         mDependency.injectMockDependency(BubbleController.class);
 
-        mHelper = new NotificationTestHelper(mContext, mDependency);
+        mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
 
         mBlockingHelperManager = new NotificationBlockingHelperManager(
                 mContext, mGutsManager, mEntryManager, mock(MetricsLogger.class));
