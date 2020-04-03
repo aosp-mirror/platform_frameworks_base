@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ Copyright (C) 2020 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +13,9 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-   -->
+  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="3523556473422419323">"વૉટરફૉલ કટઆઉટ"</string>
+<resources>
+    <public name="black16x16" type="drawable" id="0x7f080001"/>
+    <public name="white16x16" type="drawable" id="0x7f080002"/>
 </resources>

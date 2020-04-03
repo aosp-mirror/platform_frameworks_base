@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 
@@ -39,16 +40,19 @@ public class BrightnessMirrorController
     private final NotificationShadeWindowView mStatusBarWindow;
     private final Consumer<Boolean> mVisibilityCallback;
     private final NotificationPanelViewController mNotificationPanel;
+    private final NotificationShadeDepthController mDepthController;
     private final ArraySet<BrightnessMirrorListener> mBrightnessMirrorListeners = new ArraySet<>();
     private final int[] mInt2Cache = new int[2];
     private View mBrightnessMirror;
 
     public BrightnessMirrorController(NotificationShadeWindowView statusBarWindow,
             NotificationPanelViewController notificationPanelViewController,
+            NotificationShadeDepthController notificationShadeDepthController,
             @NonNull Consumer<Boolean> visibilityCallback) {
         mStatusBarWindow = statusBarWindow;
         mBrightnessMirror = statusBarWindow.findViewById(R.id.brightness_mirror);
         mNotificationPanel = notificationPanelViewController;
+        mDepthController = notificationShadeDepthController;
         mNotificationPanel.setPanelAlphaEndAction(() -> {
             mBrightnessMirror.setVisibility(View.INVISIBLE);
         });
@@ -59,11 +63,13 @@ public class BrightnessMirrorController
         mBrightnessMirror.setVisibility(View.VISIBLE);
         mVisibilityCallback.accept(true);
         mNotificationPanel.setPanelAlpha(0, true /* animate */);
+        mDepthController.setBrightnessMirrorVisible(true);
     }
 
     public void hideMirror() {
         mVisibilityCallback.accept(false);
         mNotificationPanel.setPanelAlpha(255, true /* animate */);
+        mDepthController.setBrightnessMirrorVisible(false);
     }
 
     public void setLocation(View original) {

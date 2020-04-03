@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
@@ -200,6 +201,7 @@ public class CarStatusBarModule {
             KeyguardIndicationController keyguardIndicationController,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            Lazy<NotificationShadeDepthController> notificationShadeDepthControllerLazy,
             CarNavigationBarController carNavigationBarController) {
         return new CarStatusBar(
                 context,
@@ -278,6 +280,7 @@ public class CarStatusBarModule {
                 keyguardIndicationController,
                 dismissCallbackRegistry,
                 statusBarTouchableRegionManager,
+                notificationShadeDepthControllerLazy,
                 carNavigationBarController);
     }
 }

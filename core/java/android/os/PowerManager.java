@@ -32,6 +32,7 @@ import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.service.dreams.Sandman;
+import android.sysprop.InitProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -1487,7 +1488,7 @@ public final class PowerManager {
      */
     // TODO(b/138605180): add link to documentation once it's ready.
     public boolean isRebootingUserspaceSupported() {
-        return SystemProperties.getBoolean("ro.init.userspace_reboot.is_supported", false);
+        return InitProperties.is_userspace_reboot_supported().orElse(false);
     }
 
     /**

@@ -17,6 +17,7 @@
 #define DEBUG false  // STOPSHIP if true
 #include "logd/LogEvent.h"
 
+#include "annotations.h"
 #include "stats_log_util.h"
 #include "statslog_statsd.h"
 
@@ -447,6 +448,7 @@ void LogEvent::parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last, uint8
 
 void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last,
                                      uint8_t numAnnotations) {
+    int firstUidInChainIndex = mValues.size();
     int32_t numNodes = readNextValue<uint8_t>();
     for (pos[1] = 1; pos[1] <= numNodes; pos[1]++) {
         last[1] = (pos[1] == numNodes);
@@ -461,26 +463,103 @@ void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last,
         parseString(pos, /*depth=*/2, last, /*numAnnotations=*/0);
     }
 
-    parseAnnotations(numAnnotations);
+    parseAnnotations(numAnnotations, firstUidInChainIndex);
 
     pos[1] = pos[2] = 1;
     last[1] = last[2] = false;
 }
 
-// TODO(b/151109630): store annotation information within LogEvent
-void LogEvent::parseAnnotations(uint8_t numAnnotations) {
+void LogEvent::parseIsUidAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    bool isUid = readNextValue<uint8_t>();
+    if (isUid) mUidFieldIndex = mValues.size() - 1;
+}
+
+void LogEvent::parseTruncateTimestampAnnotation(uint8_t annotationType) {
+    if (!mValues.empty() || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    mTruncateTimestamp = readNextValue<uint8_t>();
+}
+
+void LogEvent::parseStateOptionAnnotation(uint8_t annotationType, int firstUidInChainIndex) {
+    if (mValues.empty() || annotationType != INT32_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    int32_t stateOption = readNextValue<int32_t>();
+    switch (stateOption) {
+        case STATE_OPTION_EXCLUSIVE_STATE:
+            mValues[mValues.size() - 1].mAnnotations.setExclusiveState(true);
+            break;
+        case STATE_OPTION_PRIMARY_FIELD:
+            mValues[mValues.size() - 1].mAnnotations.setPrimaryField(true);
+            break;
+        case STATE_OPTION_PRIMARY_FIELD_FIRST_UID:
+            if (firstUidInChainIndex == -1) {
+                mValid = false;
+            } else {
+                mValues[firstUidInChainIndex].mAnnotations.setPrimaryField(true);
+            }
+            break;
+        default:
+            mValid = false;
+    }
+}
+
+void LogEvent::parseResetStateAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != INT32_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    int32_t resetState = readNextValue<int32_t>();
+    mValues[mValues.size() - 1].mAnnotations.setResetState(resetState);
+}
+
+void LogEvent::parseStateNestedAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    bool nested = readNextValue<uint8_t>();
+    mValues[mValues.size() - 1].mAnnotations.setNested(nested);
+}
+
+// firstUidInChainIndex is a default parameter that is only needed when parsing
+// annotations for attribution chains.
+void LogEvent::parseAnnotations(uint8_t numAnnotations, int firstUidInChainIndex) {
     for (uint8_t i = 0; i < numAnnotations; i++) {
-        /*uint8_t annotationId = */ readNextValue<uint8_t>();
+        uint8_t annotationId = readNextValue<uint8_t>();
         uint8_t annotationType = readNextValue<uint8_t>();
-        switch (annotationType) {
-            case BOOL_TYPE:
-                /*bool annotationValue = */ readNextValue<uint8_t>();
+
+        switch (annotationId) {
+            case ANNOTATION_ID_IS_UID:
+                parseIsUidAnnotation(annotationType);
                 break;
-            case INT32_TYPE:
-                /*int32_t annotationValue =*/ readNextValue<int32_t>();
+            case ANNOTATION_ID_TRUNCATE_TIMESTAMP:
+                parseTruncateTimestampAnnotation(annotationType);
+                break;
+            case ANNOTATION_ID_STATE_OPTION:
+                parseStateOptionAnnotation(annotationType, firstUidInChainIndex);
+                break;
+            case ANNOTATION_ID_RESET_STATE:
+                parseResetStateAnnotation(annotationType);
+                break;
+            case ANNOTATION_ID_STATE_NESTED:
+                parseStateNestedAnnotation(annotationType);
                 break;
             default:
                 mValid = false;
+                return;
         }
     }
 }
@@ -509,8 +588,8 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
     typeInfo = readNextValue<uint8_t>();
     if (getTypeId(typeInfo) != INT32_TYPE) mValid = false;
     mTagId = readNextValue<int32_t>();
-    parseAnnotations(getNumAnnotations(typeInfo)); // atom-level annotations
     numElements--;
+    parseAnnotations(getNumAnnotations(typeInfo)); // atom-level annotations
 
 
     for (pos[0] = 1; pos[0] <= numElements && mValid; pos[0]++) {
@@ -544,6 +623,7 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
                 break;
             case ATTRIBUTION_CHAIN_TYPE:
                 parseAttributionChain(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
+                if (mAttributionChainIndex == -1) mAttributionChainIndex = pos[0];
                 break;
             default:
                 mValid = false;

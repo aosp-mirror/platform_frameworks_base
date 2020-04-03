@@ -111,6 +111,8 @@ public:
     int unbind(StorageId storage, std::string_view target);
     void deleteStorage(StorageId storage);
 
+    int setStorageParams(StorageId storage, bool enableReadLogs);
+
     int makeFile(StorageId storage, std::string_view path, int mode, FileId id,
                  incfs::NewFileParams params);
     int makeDir(StorageId storage, std::string_view path, int mode = 0755);

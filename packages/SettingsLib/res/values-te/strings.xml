@@ -232,8 +232,6 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP చిరునామా &amp; పోర్ట్"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR కోడ్‌ను స్కాన్ చేయండి"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"పరికరాన్ని Wi-Fi ద్వారా పెయిర్ చేయడానికి QR కోడ్‌ను స్కాన్ చేయండి"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, డీబగ్, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"బగ్ నివేదిక షార్ట్‌కట్"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"బగ్ నివేదికను తీసుకోవడానికి పవర్ మెనూలో బటన్‌ను చూపు"</string>
@@ -257,7 +255,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"పేర్లు లేని బ్లూటూత్ పరికరాలు  చూపించు"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"సంపూర్ణ వాల్యూమ్‌‍ను నిలిపివేయి"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorscheను ఎనేబుల్ చేయి"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"మెరుగైన కనెక్టివిటీ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"బ్లూటూత్ AVRCP వెర్షన్"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"బ్లూటూత్ AVRCP సంస్కరణను ఎంచుకోండి"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"బ్లూటూత్ MAP వెర్షన్‌"</string>
@@ -311,7 +308,6 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"పేర్లు (MAC చిరునామాలు మాత్రమే) లేని బ్లూటూత్ పరికరాలు ప్రదర్శించబడతాయి"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"రిమోట్ పరికరాల్లో ఆమోదించలేని స్థాయిలో అధిక వాల్యూమ్ ఉండటం లేదా వాల్యూమ్ నియంత్రణ లేకపోవడం వంటి సమస్యలు ఉంటే బ్లూటూత్ సంపూర్ణ వాల్యూమ్ ఫీచర్‌ని నిలిపివేస్తుంది."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"బ్లూటూత్ Gabeldorsche ఫీచర్ స్ట్యాక్‌ను ఎనేబుల్ చేస్తుంది."</string>
-    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"మెరుగైన కనెక్టివిటీ ఫీచర్‌ను ఎనేబుల్ చేస్తుంది."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"స్థానిక టెర్మినల్"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"స్థానిక షెల్ ప్రాప్యతను అందించే టెర్మినల్ అనువర్తనాన్ని ప్రారంభించు"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP తనిఖీ"</string>
@@ -358,8 +354,6 @@
     <string name="track_frame_time" msgid="522674651937771106">"ప్రొఫైల్ HWUI రెండరింగ్"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU డీబగ్ లేయర్‌లను ప్రారంభించండి"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"డీబగ్ యాప్‌ల కోసం GPU డీబగ్ లేయర్‌లను లోడ్ చేయడాన్ని అనుమతించండి"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"వివరణాత్మక విక్రేత లాగింగ్‌ను ఎనేబుల్ చేయండి"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"బగ్ నివేదికలలో అదనపు పరికర-నిర్దిష్ట వెండార్ లాగ్‌లను చేర్చండి, అవి ప్రైవేట్ సమాచారాన్ని కలిగి ఉండవచ్చు, మరింత బ్యాటరీని, మరియు/లేదా మరింత స్టోరేజ్‌ను ఉపయోగించవచ్చు."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"విండో యానిమేషన్ ప్రమాణం"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"పరివర్తన యానిమేషన్ ప్రమాణం"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"యానిమేటర్ వ్యవధి ప్రమాణం"</string>
@@ -418,7 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ప్రొటానోమలీ (ఎరుపు-ఆకుపచ్చ రంగు)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ట్రైటనోమలీ (నీలం-పసుపు రంగు)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"రంగు సవరణ"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"రంగుల సరి చేసే ఫీచర్‌తో మీరు మీ పరికరంలో రంగులో కనిపించే పద్ధతిని సర్దుబాటు చేయగలుగుతారు"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"రంగులను సరి చేయడం వల్ల, కలర్ బ్లైండ్‌నెస్ ఉన్నవారు మరింత ఖచ్చితమైన రంగులను చూడగలుగుతారు"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ద్వారా భర్తీ చేయబడింది"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
@@ -432,8 +426,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు ఉండాలి (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు ఉండాలి"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> వరకు"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"గత <xliff:g id="TIME">%1$s</xliff:g> కంటే ఎక్కువ ఉండేలా బ్యాటరీ జీవిత కాలాన్ని పెంచుకోండి"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> కంటే తక్కువ సమయం మిగిలి ఉంది"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> కంటే తక్కువ సమయం మిగిలి ఉంది (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> కంటే ఎక్కువ సమయం మిగిలి ఉంది (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -508,60 +501,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ప్రతిసారి అడుగు"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"మీరు ఆఫ్‌ చేసే వరకు"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ఇప్పుడే"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ఫోన్ స్పీకర్"</string>
+    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"ఈ పరికరం"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"కనెక్ట్ చేయడంలో సమస్య ఉంది. పరికరాన్ని ఆఫ్ చేసి, ఆపై తిరిగి ఆన్ చేయండి"</string>
-    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"వైర్ గల ఆడియో పరికరం"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ఈ యూజర్ కోసం షేర్ చేసిన డేటా ఏదీ లేదు."</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"షేర్ చేసిన డేటా పొందడంలో ఎర్రర్ ఏర్పడింది. మళ్లీ ట్రై చేయండి."</string>
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"షేర్ చేసిన డేటాను తొలగించడంలో ఎర్రర్ ఏర్పడింది."</string>
-    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"ఈ షేర్ చేసిన డేటాకు సేకరించబడిన లీజులు ఏవీ లేవు. దీన్ని మీరు తొలగించాలనుకుంటున్నారా?"</string>
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"వినియోగదారులు వారి స్వంత అనువర్తనాలను మరియు కంటెంట్‌ను కలిగి ఉన్నారు"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"మీరు మీ ఖాతా నుండి అనువర్తనాలకు మరియు కంటెంట్‌కు ప్రాప్యతను పరిమితం చేయవచ్చు"</string>
-    <string name="user_add_user_item_title" msgid="2394272381086965029">"వినియోగదారు"</string>
-    <string name="user_add_profile_item_title" msgid="3111051717414643029">"పరిమితం చేయబడిన ప్రొఫైల్"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"కొత్త వినియోగదారుని జోడించాలా?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"అదనపు వినియోగదారులను సృష్టించడం ద్వారా మీరు ఈ పరికరాన్ని ఇతరులతో షేర్ చేయవచ్చు. ప్రతి వినియోగదారుకు వారికంటూ ప్రత్యేక స్థలం ఉంటుంది, వారు ఆ స్థలాన్ని యాప్‌లు, వాల్‌పేపర్ మొదలైనవాటితో అనుకూలీకరించవచ్చు. వినియోగదారులు ప్రతి ఒక్కరిపై ప్రభావం చూపే Wi‑Fi వంటి పరికర సెట్టింగ్‌లను కూడా సర్దుబాటు చేయవచ్చు.\n\nమీరు కొత్త వినియోగదారును జోడించినప్పుడు, ఆ వ్యక్తి వారికంటూ స్వంత స్థలం సెట్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగిలిన అందరు వినియోగదారుల కోసం యాప్‌లను అప్‌డేట్ చేయవచ్చు. యాక్సెస్ సామర్ధ్యం సెట్టింగ్‌లు మరియు సేవలు కొత్త వినియోగదారుకి బదిలీ కాకపోవచ్చు."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"మీరు కొత్త వినియోగదారుని జోడించినప్పుడు, ఆ వ్యక్తి తన స్థలాన్ని సెటప్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగతా అందరు వినియోగదారుల కోసం యాప్‌లను అప్‌డేట్‌ చేయగలరు."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ఇప్పుడు వినియోగదారుని సెటప్ చేయాలా?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"పరికరాన్ని తీసుకోవడానికి వ్యక్తి అందుబాటులో ఉన్నారని నిర్ధారించుకొని, ఆపై వారికి నిల్వ స్థలాన్ని సెటప్ చేయండి"</string>
-    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ఇప్పుడు ప్రొఫైల్‌ను సెటప్ చేయాలా?"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ఇప్పుడే సెట‌ప్ చేయి"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ఇప్పుడు కాదు"</string>
-    <string name="user_add_user_type_title" msgid="551279664052914497">"జోడించండి"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"కొత్త వినియోగదారు"</string>
-    <string name="user_new_profile_name" msgid="2405500423304678841">"కొత్త ప్రొఫైల్"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"వినియోగదారు సమాచారం"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"ప్రొఫైల్ సమాచారం"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"మీరు పరిమితం చేయబడిన ప్రొఫైల్‌ను సృష్టించడానికి ముందు, మీ అనువర్తనాలు మరియు వ్యక్తిగత డేటాను రక్షించడానికి స్క్రీన్ లాక్‌ను సెటప్ చేయాల్సి ఉంటుంది."</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"లాక్‌ను సెట్ చేయి"</string>
-    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (3482026122932643557) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
-    <skip />
-    <!-- no translation found for guest_nickname (6332276931583337261) -->
-    <skip />
 </resources>

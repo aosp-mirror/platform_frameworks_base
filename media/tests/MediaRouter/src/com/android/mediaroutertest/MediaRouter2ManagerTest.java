@@ -231,9 +231,10 @@ public class MediaRouter2ManagerTest {
         addRouterCallback(new RouteCallback() {});
         addManagerCallback(new MediaRouter2Manager.Callback() {
             @Override
-            public void onSessionCreated(MediaRouter2Manager.RoutingController controller) {
-                if (TextUtils.equals(mPackageName, controller.getClientPackageName())
-                        && createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1)) {
+            public void onTransferred(RoutingSessionInfo oldSessionInfo,
+                    RoutingSessionInfo newSessionInfo) {
+                if (TextUtils.equals(mPackageName, newSessionInfo.getClientPackageName())
+                        && newSessionInfo.getSelectedRoutes().contains(ROUTE_ID1)) {
                     latch.countDown();
                 }
             }
@@ -268,8 +269,9 @@ public class MediaRouter2ManagerTest {
 
         addManagerCallback(new MediaRouter2Manager.Callback() {
             @Override
-            public void onSessionCreated(MediaRouter2Manager.RoutingController controller) {
-                assertNotNull(controller);
+            public void onTransferred(RoutingSessionInfo oldSessionInfo,
+                    RoutingSessionInfo newSessionInfo) {
+                assertNotNull(newSessionInfo);
                 onSessionCreatedLatch.countDown();
             }
         });
@@ -352,8 +354,9 @@ public class MediaRouter2ManagerTest {
         // create a controller
         addManagerCallback(new MediaRouter2Manager.Callback() {
             @Override
-            public void onSessionCreated(MediaRouter2Manager.RoutingController controller) {
-                assertNotNull(controller);
+            public void onTransferred(RoutingSessionInfo oldSessionInfo,
+                    RoutingSessionInfo newSessionInfo) {
+                assertNotNull(newSessionInfo);
                 onSessionCreatedLatch.countDown();
             }
         });
@@ -383,13 +386,12 @@ public class MediaRouter2ManagerTest {
 
         addManagerCallback(new MediaRouter2Manager.Callback() {
             @Override
-            public void onSessionsUpdated() {
-                List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
-                if (sessions.size() != 2) {
+            public void onSessionUpdated(RoutingSessionInfo updatedSessionInfo) {
+                if (!TextUtils.equals(sessionInfo.getId(), updatedSessionInfo.getId())) {
                     return;
                 }
 
-                if (sessions.get(1).getVolume() == targetVolume) {
+                if (updatedSessionInfo.getVolume() == targetVolume) {
                     volumeChangedLatch.countDown();
                 }
             }

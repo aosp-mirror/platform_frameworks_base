@@ -6504,4 +6504,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertNull(conversations.get(0).getShortcutInfo());
         assertNull(conversations.get(1).getShortcutInfo());
     }
+
+    @Test
+    public void testShortcutHelperNull_doesntCrashEnqueue() throws RemoteException {
+        mService.setShortcutHelper(null);
+        NotificationRecord nr =
+                generateMessageBubbleNotifRecord(mTestNotificationChannel,
+                        "testShortcutHelperNull_doesntCrashEnqueue");
+        try {
+            mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                    nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+            waitForIdle();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
 }

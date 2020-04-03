@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.io.FileDescriptor
 import java.io.PrintWriter
-import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.max
@@ -74,6 +73,15 @@ class NotificationShadeDepthController @Inject constructor(
     @VisibleForTesting
     var globalActionsSpring = DepthAnimation()
 
+    @VisibleForTesting
+    var brightnessMirrorSpring = DepthAnimation()
+    var brightnessMirrorVisible: Boolean = false
+        set(value) {
+            field = value
+            brightnessMirrorSpring.animateTo(if (value) blurUtils.blurRadiusOfRatio(1f)
+                else 0)
+        }
+
     /**
      * Blur radius of the wake-up animation on this frame.
      */
@@ -91,7 +99,9 @@ class NotificationShadeDepthController @Inject constructor(
     val updateBlurCallback = Choreographer.FrameCallback {
         updateScheduled = false
 
-        val blur = max(max(shadeSpring.radius, wakeAndUnlockBlurRadius), globalActionsSpring.radius)
+        var shadeRadius = max(shadeSpring.radius, wakeAndUnlockBlurRadius)
+        shadeRadius = (shadeRadius * (1f - brightnessMirrorSpring.ratio)).toInt()
+        val blur = max(shadeRadius, globalActionsSpring.radius)
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur)
         try {
             wallpaperManager.setWallpaperZoomOut(root.windowToken,
@@ -148,6 +158,7 @@ class NotificationShadeDepthController @Inject constructor(
             if (isDozing) {
                 shadeSpring.finishIfRunning()
                 globalActionsSpring.finishIfRunning()
+                brightnessMirrorSpring.finishIfRunning()
             }
         }
     }
@@ -199,6 +210,7 @@ class NotificationShadeDepthController @Inject constructor(
             it.increaseIndent()
             it.println("shadeRadius: ${shadeSpring.radius}")
             it.println("globalActionsRadius: ${globalActionsSpring.radius}")
+            it.println("brightnessMirrorRadius: ${brightnessMirrorSpring.radius}")
             it.println("wakeAndUnlockBlur: $wakeAndUnlockBlurRadius")
         }
     }
@@ -212,7 +224,12 @@ class NotificationShadeDepthController @Inject constructor(
          * Blur radius visible on the UI, in pixels.
          */
         var radius = 0
-            private set
+
+        /**
+         * Depth ratio of the current blur radius.
+         */
+        val ratio
+            get() = blurUtils.ratioOfBlurRadius(radius)
 
         /**
          * Radius that we're animating to.
