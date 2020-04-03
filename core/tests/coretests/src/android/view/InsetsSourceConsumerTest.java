@@ -17,8 +17,8 @@
 package android.view;
 
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-
 import static android.view.WindowInsets.Type.statusBars;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -37,8 +37,8 @@ import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
 import android.widget.TextView;
 
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Test;

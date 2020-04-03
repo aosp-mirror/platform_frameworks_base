@@ -35,9 +35,9 @@ import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.FlakyTest;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,12 +45,18 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 
+/**
+ * Test {@link InsetsSourceConsumer} with IME type.
+ *
+ * Build/Install/Run:
+ *  atest FrameworksCoreTests:ImeInsetsSourceConsumerTest
+ */
 @Presubmit
 @FlakyTest(detail = "Promote once confirmed non-flaky")
 @RunWith(AndroidJUnit4.class)
 public class ImeInsetsSourceConsumerTest {
 
-    Context mContext = InstrumentationRegistry.getTargetContext();
+    Context mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
     ImeInsetsSourceConsumer mImeConsumer;
     InsetsController mController;
     SurfaceControl mLeash;
