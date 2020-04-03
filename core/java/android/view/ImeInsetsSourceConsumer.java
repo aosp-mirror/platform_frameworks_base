@@ -16,7 +16,6 @@
 
 package android.view;
 
-import static android.view.InsetsController.ANIMATION_TYPE_USER;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsState.ITYPE_IME;
 
@@ -104,13 +103,9 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     void hide(boolean animationFinished, @AnimationType int animationType) {
         super.hide();
 
-        if (!animationFinished) {
-            if (animationType == ANIMATION_TYPE_USER) {
-                // if controlWindowInsetsAnimation is hiding keyboard.
-                notifyHidden();
-            }
-        } else {
+        if (animationFinished) {
             // remove IME surface as IME has finished hide animation.
+            notifyHidden();
             removeSurface();
         }
     }

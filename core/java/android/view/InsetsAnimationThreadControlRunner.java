@@ -54,7 +54,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
         }
 
         @Override
-        public void scheduleApplyChangeInsets() {
+        public void scheduleApplyChangeInsets(InsetsAnimationControlRunner runner) {
             mControl.applyChangeInsets(mState);
         }
 
