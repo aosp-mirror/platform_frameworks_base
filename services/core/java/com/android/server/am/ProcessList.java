@@ -1682,7 +1682,9 @@ public final class ProcessList {
                         || mPlatformCompat.isChangeEnabled(NATIVE_MEMORY_TAGGING, app.info)) {
                     runtimeFlags |= Zygote.MEMORY_TAG_LEVEL_ASYNC;
                 }
-            } else {
+            } else if (Zygote.nativeSupportsTaggedPointers()) {
+                // Enable heap pointer tagging if supported by the kernel, unless disabled by the
+                // target sdk level or compat feature.
                 if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
                     runtimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
                 }
