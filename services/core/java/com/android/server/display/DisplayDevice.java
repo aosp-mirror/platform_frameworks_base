@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.graphics.Rect;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
+import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -75,6 +76,13 @@ abstract class DisplayDevice {
      */
     public final IBinder getDisplayTokenLocked() {
         return mDisplayToken;
+    }
+
+    /**
+     * Gets the id of the display to mirror.
+     */
+    public int getDisplayIdToMirrorLocked() {
+        return Display.DEFAULT_DISPLAY;
     }
 
     /**
