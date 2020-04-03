@@ -351,9 +351,6 @@ public class BugreportProgressService extends Service {
         @Override
         public void onProgress(float progress) {
             synchronized (mLock) {
-                if (progress == 0) {
-                    trackInfoWithIdLocked();
-                }
                 checkProgressUpdatedLocked(mInfo, (int) progress);
             }
         }
@@ -365,7 +362,6 @@ public class BugreportProgressService extends Service {
         @Override
         public void onError(@BugreportErrorCode int errorCode) {
             synchronized (mLock) {
-                trackInfoWithIdLocked();
                 stopProgressLocked(mInfo.id);
             }
             Log.e(TAG, "Bugreport API callback onError() errorCode = " + errorCode);
@@ -382,10 +378,10 @@ public class BugreportProgressService extends Service {
         }
 
         /**
-         * Reads bugreport id and links it to the bugreport info to track the bugreport's
-         * progress/completion/error. id is incremented in dumpstate code. This function is called
-         * when dumpstate calls one of the callback functions (onProgress, onFinished, onError)
-         * after the id has been incremented.
+         * Reads bugreport id and links it to the bugreport info to track a bugreport that is in
+         * process. id is incremented in the dumpstate code.
+         * We do not track a bugreport if there is already a bugreport with the same id being
+         * tracked.
          */
         @GuardedBy("mLock")
         private void trackInfoWithIdLocked() {
@@ -408,7 +404,6 @@ public class BugreportProgressService extends Service {
                 sendRemoteBugreportFinishedBroadcast(mContext, bugreportFilePath,
                         mInfo.bugreportFile);
             } else {
-                trackInfoWithIdLocked();
                 cleanupOldFiles(MIN_KEEP_COUNT, MIN_KEEP_AGE, mBugreportsDir);
                 final Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
                 intent.putExtra(EXTRA_BUGREPORT, bugreportFilePath);
@@ -638,8 +633,11 @@ public class BugreportProgressService extends Service {
 
         BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl(info);
         try {
-            mBugreportManager.startBugreport(bugreportFd, screenshotFd,
-                    new BugreportParams(bugreportType), executor, bugreportCallback);
+            synchronized (mLock) {
+                mBugreportManager.startBugreport(bugreportFd, screenshotFd,
+                        new BugreportParams(bugreportType), executor, bugreportCallback);
+                bugreportCallback.trackInfoWithIdLocked();
+            }
         } catch (RuntimeException e) {
             Log.i(TAG, "Error in generating bugreports: ", e);
             // The binder call didn't go through successfully, so need to close the fds.
