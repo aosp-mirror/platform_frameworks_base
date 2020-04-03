@@ -1513,6 +1513,10 @@ package android.media {
     field public static final String SAMPLE_RATE = "android.media.audiotrack.sampleRate";
   }
 
+  public final class MediaCas implements java.lang.AutoCloseable {
+    method public void forceResourceLost();
+  }
+
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(int, int, int, int, @NonNull android.util.Size);
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(@NonNull android.media.MediaCodecInfo.VideoCapabilities.PerformancePoint, @NonNull android.util.Size);
