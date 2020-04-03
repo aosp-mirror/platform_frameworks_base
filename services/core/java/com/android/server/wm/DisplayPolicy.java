@@ -3246,9 +3246,14 @@ public class DisplayPolicy {
                 mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState);
         final int dockedAppearance = updateLightStatusBarAppearanceLw(0 /* vis */,
                 mTopDockedOpaqueWindowState, mTopDockedOpaqueOrDimmingWindowState);
-        mService.getStackBounds(
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, mDockedStackBounds);
-        final boolean inSplitScreen = !mDockedStackBounds.isEmpty();
+        final boolean inSplitScreen =
+                mService.mRoot.getDefaultDisplay().mTaskContainers.isSplitScreenModeActivated();
+        if (inSplitScreen) {
+            mService.getStackBounds(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
+                    mDockedStackBounds);
+        } else {
+            mDockedStackBounds.setEmpty();
+        }
         mService.getStackBounds(inSplitScreen ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                         : WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_UNDEFINED, mNonDockedStackBounds);
