@@ -518,7 +518,6 @@ public class TaskPositionerTests extends WindowTestsBase {
         assertEquals(expected, actual);
     }
 
-    @FlakyTest(bugId = 129492888)
     @Test
     public void testFinishingMovingWhenBinderDied() {
         spyOn(mWm.mTaskPositioningController);

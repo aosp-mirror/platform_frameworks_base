@@ -677,7 +677,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 149760800)
     public void layoutWindowLw_withLongEdgeDisplayCutout() {
         addLongEdgeDisplayCutout();
 
@@ -698,7 +697,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 149760800)
     public void layoutWindowLw_withLongEdgeDisplayCutout_never() {
         addLongEdgeDisplayCutout();
 

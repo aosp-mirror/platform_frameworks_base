@@ -32,6 +32,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -49,7 +53,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class InsetsStateControllerTest extends WindowTestsBase {
@@ -68,7 +71,6 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testStripForDispatch_notOwn() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
@@ -102,7 +104,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
         getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
-        assertEquals(0, getController().getInsetsForDispatch(navBar).getSourcesCount());
+        assertNull(getController().getInsetsForDispatch(navBar).peekSource(ITYPE_IME));
+        assertNull(getController().getInsetsForDispatch(navBar).peekSource(ITYPE_STATUS_BAR));
     }
 
     @Test
@@ -166,6 +169,45 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
 
         assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_IME));
+    }
+
+    @Test
+    public void testStripForDispatch_imeOrderChanged() {
+        getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
+
+        // This window can be the IME target while app cannot be the IME target.
+        createWindow(null, TYPE_APPLICATION, "base");
+
+        // Send our spy window (app) into the system so that we can detect the invocation.
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowToken parent = win.mToken;
+        parent.removeChild(win);
+        final WindowState app = spy(win);
+        parent.addWindow(app);
+
+        // Adding FLAG_NOT_FOCUSABLE makes app above IME.
+        app.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+        mDisplayContent.computeImeTarget(true);
+        mDisplayContent.setLayoutNeeded();
+        mDisplayContent.applySurfaceChangesTransaction();
+
+        // app won't get IME insets while above IME.
+        assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_IME));
+
+        // Reset invocation counter.
+        clearInvocations(app);
+
+        // Removing FLAG_NOT_FOCUSABLE makes app below IME.
+        app.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
+        mDisplayContent.computeImeTarget(true);
+        mDisplayContent.setLayoutNeeded();
+        mDisplayContent.applySurfaceChangesTransaction();
+
+        // Make sure app got notified.
+        verify(app, atLeast(1)).notifyInsetsChanged();
+
+        // app will get IME insets while below IME.
+        assertNotNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_IME));
     }
 
     @Test
@@ -247,7 +289,6 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNull(getController().getControlsForDispatch(app));
     }
 
-    @FlakyTest(bugId = 124088319)
     @Test
     public void testControlRevoked_animation() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");

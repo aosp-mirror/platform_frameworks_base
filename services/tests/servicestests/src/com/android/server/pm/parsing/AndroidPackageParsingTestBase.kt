@@ -31,12 +31,12 @@ import android.os.Debug
 import android.os.Environment
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.om.mockThrowOnUnmocked
-import com.android.server.om.whenever
 import com.android.server.pm.PackageManagerService
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateUnserialized
+import com.android.server.testutils.mockThrowOnUnmocked
+import com.android.server.testutils.whenever
 import org.junit.BeforeClass
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
@@ -91,24 +91,35 @@ open class AndroidPackageParsingTestBase {
 
         lateinit var newPackages: List<AndroidPackage>
 
+        var failureInBeforeClass: Throwable? = null
+
         @Suppress("ConstantConditionIf")
         @JvmStatic
         @BeforeClass
         fun setUpPackages() {
-            this.oldPackages = apks.map {
-                packageParser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
-            }
+            failureInBeforeClass = null
+            try {
+                this.oldPackages = apks.map {
+                    packageParser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
+                }
 
-            this.newPackages = apks.map {
-                packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
-            }
+                this.newPackages = apks.map {
+                    packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
+                }
 
-            if (DUMP_HPROF_TO_EXTERNAL) {
-                System.gc()
-                Environment.getExternalStorageDirectory()
-                        .resolve("${AndroidPackageParsingTestBase::class.java.simpleName}.hprof")
-                        .absolutePath
-                        .run(Debug::dumpHprofData)
+                if (DUMP_HPROF_TO_EXTERNAL) {
+                    System.gc()
+                    Environment.getExternalStorageDirectory()
+                            .resolve(
+                                    "${AndroidPackageParsingTestBase::class.java.simpleName}.hprof")
+                            .absolutePath
+                            .run(Debug::dumpHprofData)
+                }
+            } catch (t: Throwable) {
+                // If we crash here we cause a tool failure (because we don't run any of the tests
+                // in the subclasses, leading to a difference between expected and actual test
+                // result counts).
+                failureInBeforeClass = t
             }
         }
 
@@ -134,6 +145,13 @@ open class AndroidPackageParsingTestBase {
         private fun mockPkgSetting(aPkg: AndroidPackage) = mockThrowOnUnmocked<PackageSetting> {
             this.pkg = aPkg
             whenever(pkgState) { PackageStateUnserialized() }
+        }
+    }
+
+    @org.junit.Before
+    fun verifySetUpPackages() {
+        failureInBeforeClass?.let {
+            throw AssertionError("setUpPackages failed:", it)
         }
     }
 

@@ -71,8 +71,7 @@ import com.android.internal.util.Preconditions;
  * heavy-weight work after receiving an update - such as using the network.
  *
  * <p>Activities should strongly consider removing all location
- * request when entering the background
- * (for example at {@link android.app.Activity#onPause}), or
+ * request when entering the background, or
  * at least swap the request to a larger interval and lower quality.
  * Future version of the location manager may automatically perform background
  * throttling on behalf of applications.
@@ -146,38 +145,32 @@ public final class LocationRequest implements Parcelable {
      */
     public static final int POWER_HIGH = 203;
 
-    /**
-     * By default, mFastestInterval = FASTEST_INTERVAL_MULTIPLE * mInterval
-     */
+    private static final long DEFAULT_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
     private static final double FASTEST_INTERVAL_FACTOR = 6.0;  // 6x
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private int mQuality = POWER_LOW;
     @UnsupportedAppUsage
-    private long mInterval = 60 * 60 * 1000;   // 60 minutes
+    private String mProvider;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private long mFastestInterval = (long) (mInterval / FASTEST_INTERVAL_FACTOR);  // 10 minutes
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private boolean mExplicitFastestInterval = false;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private long mExpireAt = Long.MAX_VALUE;  // no expiry
-    private long mExpireIn = Long.MAX_VALUE;  // no expiry
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private int mNumUpdates = Integer.MAX_VALUE;  // no expiry
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private float mSmallestDisplacement = 0.0f;    // meters
+    private int mQuality;
     @UnsupportedAppUsage
-    private WorkSource mWorkSource = null;
+    private long mInterval;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    private long mFastestInterval;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    private boolean mExplicitFastestInterval;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    private long mExpireAt;
+    private long mExpireIn;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    private int mNumUpdates;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    private float mSmallestDisplacement;
     @UnsupportedAppUsage
-    private boolean mHideFromAppOps = false; // True if this request shouldn't be counted by AppOps
-    private boolean mLocationSettingsIgnored = false;
-
+    private boolean mHideFromAppOps;
+    private boolean mLocationSettingsIgnored;
+    private boolean mLowPowerMode;
     @UnsupportedAppUsage
-    private String mProvider = LocationManager.FUSED_PROVIDER;
-            // for deprecated APIs that explicitly request a provider
-
-    /** If true, GNSS chipset will make strong tradeoffs to substantially restrict power use */
-    private boolean mLowPowerMode = false;
+    private @Nullable WorkSource mWorkSource;
 
     /**
      * Create a location request with default parameters.
@@ -260,23 +253,71 @@ public final class LocationRequest implements Parcelable {
 
     /** @hide */
     public LocationRequest() {
+        this(
+                /* provider= */ LocationManager.FUSED_PROVIDER,
+                /* quality= */ POWER_LOW,
+                /* interval= */ DEFAULT_INTERVAL_MS,
+                /* fastestInterval= */ (long) (DEFAULT_INTERVAL_MS / FASTEST_INTERVAL_FACTOR),
+                /* explicitFastestInterval= */ false,
+                /* expireAt= */ Long.MAX_VALUE,
+                /* expireIn= */ Long.MAX_VALUE,
+                /* numUpdates= */ Integer.MAX_VALUE,
+                /* smallestDisplacement= */ 0,
+                /* hideFromAppOps= */ false,
+                /* lowPowerMode= */ false,
+                /* locationSettingsIgnored= */ false,
+                /* workSource= */ null);
     }
 
     /** @hide */
     public LocationRequest(LocationRequest src) {
-        mQuality = src.mQuality;
-        mInterval = src.mInterval;
-        mFastestInterval = src.mFastestInterval;
-        mExplicitFastestInterval = src.mExplicitFastestInterval;
-        mExpireAt = src.mExpireAt;
-        mExpireIn = src.mExpireIn;
-        mNumUpdates = src.mNumUpdates;
-        mSmallestDisplacement = src.mSmallestDisplacement;
-        mProvider = src.mProvider;
-        mWorkSource = src.mWorkSource;
-        mHideFromAppOps = src.mHideFromAppOps;
-        mLowPowerMode = src.mLowPowerMode;
-        mLocationSettingsIgnored = src.mLocationSettingsIgnored;
+        this(
+                src.mProvider,
+                src.mQuality,
+                src.mInterval,
+                src.mFastestInterval,
+                src.mExplicitFastestInterval,
+                src.mExpireAt,
+                src.mExpireIn,
+                src.mNumUpdates,
+                src.mSmallestDisplacement,
+                src.mHideFromAppOps,
+                src.mLowPowerMode,
+                src.mLocationSettingsIgnored,
+                src.mWorkSource);
+    }
+
+    private LocationRequest(
+            @NonNull String provider,
+            int quality,
+            long intervalMs,
+            long fastestIntervalMs,
+            boolean explicitFastestInterval,
+            long expireAt,
+            long expireInMs,
+            int numUpdates,
+            float smallestDisplacementM,
+            boolean hideFromAppOps,
+            boolean locationSettingsIgnored,
+            boolean lowPowerMode,
+            WorkSource workSource) {
+        Preconditions.checkArgument(provider != null, "invalid provider: null");
+        checkQuality(quality);
+
+        mProvider = provider;
+        mQuality = quality;
+        mInterval = intervalMs;
+        mFastestInterval = fastestIntervalMs;
+        mExplicitFastestInterval = explicitFastestInterval;
+        mExpireAt = expireAt;
+        mExpireIn = expireInMs;
+        mNumUpdates = numUpdates;
+        mSmallestDisplacement = Preconditions.checkArgumentInRange(smallestDisplacementM, 0,
+                Float.MAX_VALUE, "smallestDisplacementM");
+        mHideFromAppOps = hideFromAppOps;
+        mLowPowerMode = lowPowerMode;
+        mLocationSettingsIgnored = locationSettingsIgnored;
+        mWorkSource = workSource;
     }
 
     /**
@@ -567,7 +608,7 @@ public final class LocationRequest implements Parcelable {
 
     /** Sets the provider to use for this location request. */
     public @NonNull LocationRequest setProvider(@NonNull String provider) {
-        checkProvider(provider);
+        Preconditions.checkArgument(provider != null, "invalid provider: null");
         mProvider = provider;
         return this;
     }
@@ -580,9 +621,9 @@ public final class LocationRequest implements Parcelable {
 
     /** @hide */
     @SystemApi
-    public @NonNull LocationRequest setSmallestDisplacement(float meters) {
-        checkDisplacement(meters);
-        mSmallestDisplacement = meters;
+    public @NonNull LocationRequest setSmallestDisplacement(float smallestDisplacementM) {
+        mSmallestDisplacement = Preconditions.checkArgumentInRange(smallestDisplacementM, 0,
+                Float.MAX_VALUE, "smallestDisplacementM");
         return this;
     }
 
@@ -653,40 +694,24 @@ public final class LocationRequest implements Parcelable {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private static void checkDisplacement(float meters) {
-        if (meters < 0.0f) {
-            throw new IllegalArgumentException("invalid displacement: " + meters);
-        }
-    }
-
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private static void checkProvider(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("invalid provider: null");
-        }
-    }
-
-    public static final @android.annotation.NonNull Parcelable.Creator<LocationRequest> CREATOR =
+    public static final @NonNull Parcelable.Creator<LocationRequest> CREATOR =
             new Parcelable.Creator<LocationRequest>() {
                 @Override
                 public LocationRequest createFromParcel(Parcel in) {
-                    LocationRequest request = new LocationRequest();
-                    request.setQuality(in.readInt());
-                    request.setFastestInterval(in.readLong());
-                    request.setInterval(in.readLong());
-                    request.setExpireAt(in.readLong());
-                    request.setExpireIn(in.readLong());
-                    request.setNumUpdates(in.readInt());
-                    request.setSmallestDisplacement(in.readFloat());
-                    request.setHideFromAppOps(in.readInt() != 0);
-                    request.setLowPowerMode(in.readInt() != 0);
-                    request.setLocationSettingsIgnored(in.readInt() != 0);
-                    String provider = in.readString();
-                    if (provider != null) request.setProvider(provider);
-                    WorkSource workSource = in.readParcelable(null);
-                    if (workSource != null) request.setWorkSource(workSource);
-                    return request;
+                    return new LocationRequest(
+                            /* provider= */ in.readString(),
+                            /* quality= */ in.readInt(),
+                            /* interval= */ in.readLong(),
+                            /* fastestInterval= */ in.readLong(),
+                            /* explicitFastestInterval= */ in.readBoolean(),
+                            /* expireAt= */ in.readLong(),
+                            /* expireIn= */ in.readLong(),
+                            /* numUpdates= */ in.readInt(),
+                            /* smallestDisplacement= */ in.readFloat(),
+                            /* hideFromAppOps= */ in.readBoolean(),
+                            /* locationSettingsIgnored= */ in.readBoolean(),
+                            /* lowPowerMode= */ in.readBoolean(),
+                            /* workSource= */ in.readTypedObject(WorkSource.CREATOR));
                 }
 
                 @Override
@@ -702,18 +727,19 @@ public final class LocationRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(mProvider);
         parcel.writeInt(mQuality);
-        parcel.writeLong(mFastestInterval);
         parcel.writeLong(mInterval);
+        parcel.writeLong(mFastestInterval);
+        parcel.writeBoolean(mExplicitFastestInterval);
         parcel.writeLong(mExpireAt);
         parcel.writeLong(mExpireIn);
         parcel.writeInt(mNumUpdates);
         parcel.writeFloat(mSmallestDisplacement);
-        parcel.writeInt(mHideFromAppOps ? 1 : 0);
-        parcel.writeInt(mLowPowerMode ? 1 : 0);
-        parcel.writeInt(mLocationSettingsIgnored ? 1 : 0);
-        parcel.writeString(mProvider);
-        parcel.writeParcelable(mWorkSource, 0);
+        parcel.writeBoolean(mHideFromAppOps);
+        parcel.writeBoolean(mLocationSettingsIgnored);
+        parcel.writeBoolean(mLowPowerMode);
+        parcel.writeTypedObject(mWorkSource, 0);
     }
 
     /** @hide */
@@ -740,16 +766,19 @@ public final class LocationRequest implements Parcelable {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append("Request[").append(qualityToString(mQuality));
-        if (mProvider != null) s.append(' ').append(mProvider);
+        s.append("Request[");
+        s.append(qualityToString(mQuality));
+        s.append(" ").append(mProvider);
         if (mQuality != POWER_NONE) {
-            s.append(" requested=");
+            s.append(" interval=");
             TimeUtils.formatDuration(mInterval, s);
+            if (mExplicitFastestInterval) {
+                s.append(" fastestInterval=");
+                TimeUtils.formatDuration(mFastestInterval, s);
+            }
         }
-        s.append(" fastest=");
-        TimeUtils.formatDuration(mFastestInterval, s);
         if (mExpireAt != Long.MAX_VALUE) {
-            s.append(" expireAt=").append(TimeUtils.formatUptime(mExpireAt));
+            s.append(" expireAt=").append(TimeUtils.formatRealtime(mExpireAt));
         }
         if (mExpireIn != Long.MAX_VALUE) {
             s.append(" expireIn=");

@@ -1076,8 +1076,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     @Override
-    public void scheduleApplyChangeInsets() {
-        if (mStartingAnimation) {
+    public void scheduleApplyChangeInsets(InsetsAnimationControlRunner runner) {
+        if (mStartingAnimation || runner.getAnimationType() == ANIMATION_TYPE_USER) {
             mAnimCallback.run();
             mAnimCallbackScheduled = false;
             return;

@@ -277,7 +277,6 @@ public class DisplayPolicyTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testOverlappingWithNavBar() {
         final WindowState targetWin = createApplicationWindow();
         final WindowFrames winFrame = targetWin.getWindowFrames();

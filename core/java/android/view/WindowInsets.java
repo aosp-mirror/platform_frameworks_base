@@ -818,12 +818,13 @@ public final class WindowInsets {
      * @return A modified copy of this WindowInsets
      * @deprecated Consuming of different parts individually of a {@link WindowInsets} instance is
      * deprecated, since {@link WindowInsets} contains many different insets. Use {@link #CONSUMED}
-     * instead to stop dispatching insets.
+     * instead to stop dispatching insets. On {@link android.os.Build.VERSION_CODES#R R}, this
+     * method has no effect.
      */
     @Deprecated
     @NonNull
     public WindowInsets consumeStableInsets() {
-        return consumeSystemWindowInsets();
+        return this;
     }
 
     /**
@@ -835,12 +836,24 @@ public final class WindowInsets {
 
     @Override
     public String toString() {
-        return "WindowInsets{systemWindowInsets=" + getSystemWindowInsets()
-                + " stableInsets=" + getStableInsets()
-                + " sysGestureInsets=" + getSystemGestureInsets()
-                + (mDisplayCutout != null ? " cutout=" + mDisplayCutout : "")
-                + (isRound() ? " round" : "")
-                + "}";
+        StringBuilder result = new StringBuilder("WindowInsets{\n    ");
+        for (int i = 0; i < SIZE; i++) {
+            Insets insets = mTypeInsetsMap[i];
+            Insets maxInsets = mTypeMaxInsetsMap[i];
+            boolean visible = mTypeVisibilityMap[i];
+            if (!Insets.NONE.equals(insets) || !Insets.NONE.equals(maxInsets) || visible) {
+                result.append(Type.toString(1 << i)).append("=").append(insets)
+                        .append(" max=").append(maxInsets)
+                        .append(" vis=").append(visible)
+                        .append("\n    ");
+            }
+        }
+
+        result.append(mDisplayCutout != null ? "cutout=" + mDisplayCutout : "");
+        result.append("\n    ");
+        result.append(isRound() ? "round" : "");
+        result.append("}");
+        return result.toString();
     }
 
     /**
@@ -1303,6 +1316,32 @@ public final class WindowInsets {
                     return 7;
                 case WINDOW_DECOR:
                     return 8;
+                default:
+                    throw new IllegalArgumentException("type needs to be >= FIRST and <= LAST,"
+                            + " type=" + type);
+            }
+        }
+
+        static String toString(@InsetsType int type) {
+            switch (type) {
+                case STATUS_BARS:
+                    return "statusBars";
+                case NAVIGATION_BARS:
+                    return "navigationBars";
+                case CAPTION_BAR:
+                    return "captionBar";
+                case IME:
+                    return "ime";
+                case SYSTEM_GESTURES:
+                    return "systemGestures";
+                case MANDATORY_SYSTEM_GESTURES:
+                    return "mandatorySystemGestures";
+                case TAPPABLE_ELEMENT:
+                    return "tappableElement";
+                case DISPLAY_CUTOUT:
+                    return "displayCutout";
+                case WINDOW_DECOR:
+                    return "windowDecor";
                 default:
                     throw new IllegalArgumentException("type needs to be >= FIRST and <= LAST,"
                             + " type=" + type);

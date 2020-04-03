@@ -493,7 +493,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    //TODO: Review this is handling multi-user properly.
+    //TODO(b/136703681): Review this is handling multi-user properly.
     void switchUser() {
         synchronized (mLock) {
             int userId = ActivityManager.getCurrentUser();
@@ -568,7 +568,9 @@ class MediaRouter2ServiceImpl {
 
         UserRecord userRecord = routerRecord.mUserRecord;
         userRecord.mRouterRecords.remove(routerRecord);
-        //TODO: update discovery request
+        userRecord.mHandler.sendMessage(
+                obtainMessage(UserHandler::updateDiscoveryPreferenceOnHandler,
+                        userRecord.mHandler));
         routerRecord.dispose();
         disposeUserIfNeededLocked(userRecord); // since router removed from user
     }
@@ -793,7 +795,7 @@ class MediaRouter2ServiceImpl {
         }
 
         long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
-        //TODO: Use MediaRouter2's OnCreateSessionListener to send proper session hints.
+        //TODO(b/152851868): Use MediaRouter2's OnCreateSessionListener to send session hints.
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::requestCreateSessionOnHandler,
                         routerRecord.mUserRecord.mHandler,
@@ -1146,7 +1148,6 @@ class MediaRouter2ServiceImpl {
             return mSessionToRouterMap.get(uniqueSessionId);
         }
 
-        //TODO: notify session info updates
         private void onProviderStateChangedOnHandler(@NonNull MediaRoute2Provider provider) {
             int providerInfoIndex = getLastProviderInfoIndex(provider.getUniqueId());
             MediaRoute2ProviderInfo providerInfo = provider.getProviderInfo();
@@ -1323,7 +1324,7 @@ class MediaRouter2ServiceImpl {
                 return true;
             }
 
-            //TODO: Handle RCN case.
+            //TODO(b/152950479): Handle RCN case.
             if (routerRecord == null) {
                 Slog.w(TAG, "Ignoring " + description + " route from unknown router.");
                 return false;
@@ -1403,7 +1404,8 @@ class MediaRouter2ServiceImpl {
 
         private void onSessionCreatedOnHandler(@NonNull MediaRoute2Provider provider,
                 long uniqueRequestId, @NonNull RoutingSessionInfo sessionInfo) {
-            notifySessionCreatedToManagers(getManagers(), sessionInfo);
+            notifySessionCreatedToManagers(getManagers(),
+                    toOriginalRequestId(uniqueRequestId), sessionInfo);
 
             if (uniqueRequestId == REQUEST_ID_NONE) {
                 // The session is created without any matching request.
@@ -1457,7 +1459,7 @@ class MediaRouter2ServiceImpl {
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
             List<IMediaRouter2Manager> managers = getManagers();
-            notifySessionInfosChangedToManagers(managers);
+            notifySessionInfoChangedToManagers(managers, sessionInfo);
 
             // For system provider, notify all routers.
             if (provider == mSystemProvider) {
@@ -1480,7 +1482,7 @@ class MediaRouter2ServiceImpl {
         private void onSessionReleasedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
             List<IMediaRouter2Manager> managers = getManagers();
-            notifySessionInfosChangedToManagers(managers);
+            notifySessionInfoChangedToManagers(managers, sessionInfo);
 
             RouterRecord routerRecord = mSessionToRouterMap.get(sessionInfo.getId());
             if (routerRecord == null) {
@@ -1558,7 +1560,8 @@ class MediaRouter2ServiceImpl {
         private void notifySessionCreationFailedToRouter(@NonNull RouterRecord routerRecord,
                 int requestId) {
             try {
-                routerRecord.mRouter.notifySessionCreated(requestId, /* sessionInfo= */ null);
+                routerRecord.mRouter.notifySessionCreated(requestId,
+                        /* sessionInfo= */ null);
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify router of the session creation failure."
                         + " Router probably died.", ex);
@@ -1731,10 +1734,10 @@ class MediaRouter2ServiceImpl {
         }
 
         private void notifySessionCreatedToManagers(@NonNull List<IMediaRouter2Manager> managers,
-                @NonNull RoutingSessionInfo sessionInfo) {
+                int requestId, @NonNull RoutingSessionInfo sessionInfo) {
             for (IMediaRouter2Manager manager : managers) {
                 try {
-                    manager.notifySessionCreated(sessionInfo);
+                    manager.notifySessionCreated(requestId, sessionInfo);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "notifySessionCreatedToManagers: "
                             + "failed to notify. Manager probably died.", ex);
@@ -1742,11 +1745,12 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifySessionInfosChangedToManagers(
-                @NonNull List<IMediaRouter2Manager> managers) {
+        private void notifySessionInfoChangedToManagers(
+                @NonNull List<IMediaRouter2Manager> managers,
+                @NonNull RoutingSessionInfo sessionInfo) {
             for (IMediaRouter2Manager manager : managers) {
                 try {
-                    manager.notifySessionsUpdated();
+                    manager.notifySessionUpdated(sessionInfo);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "notifySessionInfosChangedToManagers: "
                             + "failed to notify. Manager probably died.", ex);
