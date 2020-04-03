@@ -197,6 +197,7 @@ import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
+import android.window.ITaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -822,8 +823,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
             if (w.mHasSurface && isDisplayed) {
                 final int type = w.mAttrs.type;
-                if (type == TYPE_SYSTEM_DIALOG || type == TYPE_SYSTEM_ERROR
-                        || mWmService.mPolicy.isKeyguardShowing()) {
+                if (type == TYPE_SYSTEM_DIALOG
+                        || type == TYPE_SYSTEM_ERROR
+                        || (type == TYPE_NOTIFICATION_SHADE
+                            &&  mWmService.mPolicy.isKeyguardShowing())) {
                     mTmpApplySurfaceChangesTransactionState.syswin = true;
                 }
                 if (mTmpApplySurfaceChangesTransactionState.preferredRefreshRate == 0
