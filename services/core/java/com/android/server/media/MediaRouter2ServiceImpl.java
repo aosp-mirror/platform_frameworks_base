@@ -812,7 +812,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        // Can be null if the session is system's.
+        // Can be null if the session is system's or RCN.
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
 
@@ -833,7 +833,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        // Can be null if the session is system's.
+        // Can be null if the session is system's or RCN.
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
 
@@ -854,7 +854,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        // Can be null if the session is system's.
+        // Can be null if the session is system's or RCN.
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
 
@@ -1251,7 +1251,7 @@ class MediaRouter2ServiceImpl {
                     route.getOriginalId(), sessionHints);
         }
 
-        // routerRecord can be null if the session is system's.
+        // routerRecord can be null if the session is system's or RCN.
         private void selectRouteOnHandler(long uniqueRequestId, @Nullable RouterRecord routerRecord,
                 @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
             if (!checkArgumentsForSessionControl(routerRecord, uniqueSessionId, route,
@@ -1269,7 +1269,7 @@ class MediaRouter2ServiceImpl {
                     route.getOriginalId());
         }
 
-        // routerRecord can be null if the session is system's.
+        // routerRecord can be null if the session is system's or RCN.
         private void deselectRouteOnHandler(long uniqueRequestId,
                 @Nullable RouterRecord routerRecord,
                 @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
@@ -1289,7 +1289,7 @@ class MediaRouter2ServiceImpl {
                     route.getOriginalId());
         }
 
-        // routerRecord can be null if the session is system's.
+        // routerRecord can be null if the session is system's or RCN.
         private void transferToRouteOnHandler(long uniqueRequestId,
                 @Nullable RouterRecord routerRecord,
                 @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
@@ -1308,6 +1308,8 @@ class MediaRouter2ServiceImpl {
                     route.getOriginalId());
         }
 
+        // routerRecord is null if and only if the session is created without the request, which
+        // includes the system's session and RCN cases.
         private boolean checkArgumentsForSessionControl(@Nullable RouterRecord routerRecord,
                 @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route,
                 @NonNull String description) {
@@ -1322,12 +1324,6 @@ class MediaRouter2ServiceImpl {
             // Bypass checking router if it's the system session (routerRecord should be null)
             if (TextUtils.equals(getProviderId(uniqueSessionId), mSystemProvider.getUniqueId())) {
                 return true;
-            }
-
-            //TODO(b/152950479): Handle RCN case.
-            if (routerRecord == null) {
-                Slog.w(TAG, "Ignoring " + description + " route from unknown router.");
-                return false;
             }
 
             RouterRecord matchingRecord = mSessionToRouterMap.get(uniqueSessionId);
