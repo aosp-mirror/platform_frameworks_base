@@ -460,7 +460,7 @@ public class AlwaysOnHotwordDetector {
                     "Getting supported recognition modes for the keyphrase is not supported");
         }
 
-        return mKeyphraseMetadata.recognitionModeFlags;
+        return mKeyphraseMetadata.getRecognitionModeFlags();
     }
 
     /**
@@ -765,8 +765,8 @@ public class AlwaysOnHotwordDetector {
     private int startRecognitionLocked(int recognitionFlags) {
         KeyphraseRecognitionExtra[] recognitionExtra = new KeyphraseRecognitionExtra[1];
         // TODO: Do we need to do something about the confidence level here?
-        recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.id,
-                mKeyphraseMetadata.recognitionModeFlags, 0, new ConfidenceLevel[0]);
+        recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.getId(),
+                mKeyphraseMetadata.getRecognitionModeFlags(), 0, new ConfidenceLevel[0]);
         boolean captureTriggerAudio =
                 (recognitionFlags&RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO) != 0;
         boolean allowMultipleTriggers =
@@ -783,7 +783,7 @@ public class AlwaysOnHotwordDetector {
         int code;
         try {
             code = mModelManagementService.startRecognition(
-                    mKeyphraseMetadata.id, mLocale.toLanguageTag(), mInternalCallback,
+                    mKeyphraseMetadata.getId(), mLocale.toLanguageTag(), mInternalCallback,
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
                             recognitionExtra, null /* additional data */, audioCapabilities));
         } catch (RemoteException e) {
@@ -799,7 +799,7 @@ public class AlwaysOnHotwordDetector {
     private int stopRecognitionLocked() {
         int code;
         try {
-            code = mModelManagementService.stopRecognition(mKeyphraseMetadata.id,
+            code = mModelManagementService.stopRecognition(mKeyphraseMetadata.getId(),
                     mInternalCallback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -813,7 +813,7 @@ public class AlwaysOnHotwordDetector {
 
     private int setParameterLocked(@ModelParams int modelParam, int value) {
         try {
-            int code = mModelManagementService.setParameter(mKeyphraseMetadata.id, modelParam,
+            int code = mModelManagementService.setParameter(mKeyphraseMetadata.getId(), modelParam,
                     value);
 
             if (code != STATUS_OK) {
@@ -828,7 +828,7 @@ public class AlwaysOnHotwordDetector {
 
     private int getParameterLocked(@ModelParams int modelParam) {
         try {
-            return mModelManagementService.getParameter(mKeyphraseMetadata.id, modelParam);
+            return mModelManagementService.getParameter(mKeyphraseMetadata.getId(), modelParam);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -838,7 +838,7 @@ public class AlwaysOnHotwordDetector {
     private ModelParamRange queryParameterLocked(@ModelParams int modelParam) {
         try {
             SoundTrigger.ModelParamRange modelParamRange =
-                    mModelManagementService.queryParameter(mKeyphraseMetadata.id, modelParam);
+                    mModelManagementService.queryParameter(mKeyphraseMetadata.getId(), modelParam);
 
             if (modelParamRange == null) {
                 return null;
