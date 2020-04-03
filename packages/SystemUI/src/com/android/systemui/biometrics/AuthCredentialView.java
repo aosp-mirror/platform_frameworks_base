@@ -214,9 +214,11 @@ public abstract class AuthCredentialView extends LinearLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        setText(mTitleView, getTitle(mBiometricPromptBundle));
+        final CharSequence title = getTitle(mBiometricPromptBundle);
+        setText(mTitleView, title);
         setTextOrHide(mSubtitleView, getSubtitle(mBiometricPromptBundle));
         setTextOrHide(mDescriptionView, getDescription(mBiometricPromptBundle));
+        announceForAccessibility(title);
 
         final boolean isManagedProfile = Utils.isManagedProfile(mContext, mEffectiveUserId);
         final Drawable image;
