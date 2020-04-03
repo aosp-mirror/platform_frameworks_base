@@ -40,6 +40,7 @@
 #include <SkShader.h>
 #include <SkTemplates.h>
 #include <SkTextBlob.h>
+#include <SkVertices.h>
 
 #include <memory>
 #include <optional>

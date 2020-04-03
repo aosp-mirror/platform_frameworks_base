@@ -52,12 +52,12 @@ public final class TimeDetectorImpl implements TimeDetector {
     }
 
     @Override
-    public void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion) {
+    public boolean suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion) {
         if (DEBUG) {
             Log.d(TAG, "suggestManualTime called: " + timeSuggestion);
         }
         try {
-            mITimeDetectorService.suggestManualTime(timeSuggestion);
+            return mITimeDetectorService.suggestManualTime(timeSuggestion);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

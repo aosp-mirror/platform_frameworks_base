@@ -313,13 +313,16 @@ public interface IBinder {
      * then the given {@link DeathRecipient}'s
      * {@link DeathRecipient#binderDied DeathRecipient.binderDied()} method
      * will be called.
-     * 
+     *
+     * <p>This will automatically be unlinked when all references to the linked
+     * binder proxy are dropped.</p>
+     *
      * <p>You will only receive death notifications for remote binders,
-     * as local binders by definition can't die without you dying as well.
-     * 
+     * as local binders by definition can't die without you dying as well.</p>
+     *
      * @throws RemoteException if the target IBinder's
      * process has already died.
-     * 
+     *
      * @see #unlinkToDeath
      */
     public void linkToDeath(@NonNull DeathRecipient recipient, int flags)

@@ -186,6 +186,7 @@ import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyRegistryManager;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
@@ -221,6 +222,9 @@ import java.util.Objects;
 @SystemApi
 public final class SystemServiceRegistry {
     private static final String TAG = "SystemServiceRegistry";
+
+    /** @hide */
+    public static boolean sEnableServiceNotFoundWtf = false;
 
     // Service registry information.
     // This information is never changed once static initialization has completed.
@@ -1356,8 +1360,30 @@ public final class SystemServiceRegistry {
      * @hide
      */
     public static Object getSystemService(ContextImpl ctx, String name) {
-        ServiceFetcher<?> fetcher = SYSTEM_SERVICE_FETCHERS.get(name);
-        return fetcher != null ? fetcher.getService(ctx) : null;
+        if (name == null) {
+            return null;
+        }
+        final ServiceFetcher<?> fetcher = SYSTEM_SERVICE_FETCHERS.get(name);
+        if (fetcher == null) {
+            if (sEnableServiceNotFoundWtf) {
+                Slog.wtf(TAG, "Unknown manager requested: " + name);
+            }
+            return null;
+        }
+
+        final Object ret = fetcher.getService(ctx);
+        if (sEnableServiceNotFoundWtf && ret == null) {
+            // Some services do return null in certain situations, so don't do WTF for them.
+            switch (name) {
+                case Context.CONTENT_CAPTURE_MANAGER_SERVICE:
+                case Context.APP_PREDICTION_SERVICE:
+                case Context.INCREMENTAL_SERVICE:
+                    return null;
+            }
+            Slog.wtf(TAG, "Manager wrapper not available: " + name);
+            return null;
+        }
+        return ret;
     }
 
     /**
@@ -1365,7 +1391,15 @@ public final class SystemServiceRegistry {
      * @hide
      */
     public static String getSystemServiceName(Class<?> serviceClass) {
-        return SYSTEM_SERVICE_NAMES.get(serviceClass);
+        if (serviceClass == null) {
+            return null;
+        }
+        final String serviceName = SYSTEM_SERVICE_NAMES.get(serviceClass);
+        if (sEnableServiceNotFoundWtf && serviceName == null) {
+            // This should be a caller bug.
+            Slog.wtf(TAG, "Unknown manager requested: " + serviceClass.getCanonicalName());
+        }
+        return serviceName;
     }
 
     /**
@@ -1675,7 +1709,9 @@ public final class SystemServiceRegistry {
                         try {
                             cache.wait();
                         } catch (InterruptedException e) {
-                            Log.w(TAG, "getService() interrupted");
+                            // This shouldn't normally happen, but if someone interrupts the
+                            // thread, it will.
+                            Slog.wtf(TAG, "getService() interrupted");
                             Thread.currentThread().interrupt();
                             return null;
                         }

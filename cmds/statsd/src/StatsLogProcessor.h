@@ -24,6 +24,7 @@
 #include "external/StatsPullerManager.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "frameworks/base/cmds/statsd/src/statsd_metadata.pb.h"
 
 #include <stdio.h>
 #include <unordered_map>
@@ -88,6 +89,23 @@ public:
 
     /* Load configs containing metrics with active activations from disk. */
     void LoadActiveConfigsFromDisk();
+
+    /* Persist metadata for configs and metrics to disk. */
+    void SaveMetadataToDisk(int64_t currentWallClockTimeNs, int64_t systemElapsedTimeNs);
+
+    /* Writes the statsd metadata for all configs and metrics to StatsMetadataList. */
+    void WriteMetadataToProto(int64_t currentWallClockTimeNs,
+                              int64_t systemElapsedTimeNs,
+                              metadata::StatsMetadataList* metadataList);
+
+    /* Load stats metadata for configs and metrics from disk. */
+    void LoadMetadataFromDisk(int64_t currentWallClockTimeNs,
+                              int64_t systemElapsedTimeNs);
+
+    /* Sets the metadata for all configs and metrics */
+    void SetMetadataState(const metadata::StatsMetadataList& statsMetadataList,
+                          int64_t currentWallClockTimeNs,
+                          int64_t systemElapsedTimeNs);
 
     /* Sets the active status/ttl for all configs and metrics to the status in ActiveConfigList. */
     void SetConfigsActiveState(const ActiveConfigList& activeConfigList, int64_t currentTimeNs);
@@ -173,8 +191,17 @@ private:
     void SetConfigsActiveStateLocked(const ActiveConfigList& activeConfigList,
                                      int64_t currentTimeNs);
 
+    void SetMetadataStateLocked(const metadata::StatsMetadataList& statsMetadataList,
+                                int64_t currentWallClockTimeNs,
+                                int64_t systemElapsedTimeNs);
+
+    void WriteMetadataToProtoLocked(int64_t currentWallClockTimeNs,
+                                    int64_t systemElapsedTimeNs,
+                                    metadata::StatsMetadataList* metadataList);
+
     void WriteDataToDiskLocked(const DumpReportReason dumpReportReason,
                                const DumpLatency dumpLatency);
+
     void WriteDataToDiskLocked(const ConfigKey& key, const int64_t timestampNs,
                                const DumpReportReason dumpReportReason,
                                const DumpLatency dumpLatency);
@@ -241,6 +268,9 @@ private:
     // Last time we wrote active metrics to disk.
     int64_t mLastActiveMetricsWriteNs = 0;
 
+    //Last time we wrote metadata to disk.
+    int64_t mLastMetadataWriteNs = 0;
+
 #ifdef VERY_VERBOSE_PRINTING
     bool mPrintAllLogs = false;
 #endif
@@ -278,6 +308,9 @@ private:
 
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_multiple_buckets);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk_no_data_written);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_load_refractory_from_disk);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);
@@ -301,6 +334,11 @@ private:
     FRIEND_TEST(DurationMetricE2eTest, TestWithCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedState);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStateMapped);
+    FRIEND_TEST(DurationMetricE2eTest, TestSlicedStatePrimaryFieldsNotSubsetDimInWhat);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset);
 
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState);
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions);

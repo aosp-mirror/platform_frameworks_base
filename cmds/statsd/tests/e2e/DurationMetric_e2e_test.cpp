@@ -14,11 +14,12 @@
 
 #include <gtest/gtest.h>
 
+#include <vector>
+
 #include "src/StatsLogProcessor.h"
+#include "src/state/StateTracker.h"
 #include "src/stats_log_util.h"
 #include "tests/statsd_test_util.h"
-
-#include <vector>
 
 namespace android {
 namespace os {
@@ -101,7 +102,7 @@ TEST(DurationMetricE2eTest, TestOneBucket) {
             reports.reports(0).metrics(0).duration_metrics();
     EXPECT_EQ(1, durationMetrics.data_size());
 
-    auto data = durationMetrics.data(0);
+    DurationMetricData data = durationMetrics.data(0);
     EXPECT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(durationEndNs - durationStartNs, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(configAddedTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -183,7 +184,7 @@ TEST(DurationMetricE2eTest, TestTwoBuckets) {
             reports.reports(0).metrics(0).duration_metrics();
     EXPECT_EQ(1, durationMetrics.data_size());
 
-    auto data = durationMetrics.data(0);
+    DurationMetricData data = durationMetrics.data(0);
     EXPECT_EQ(1, data.bucket_info_size());
 
     auto bucketInfo = data.bucket_info(0);
@@ -353,7 +354,7 @@ TEST(DurationMetricE2eTest, TestWithActivation) {
             reports.reports(0).metrics(0).duration_metrics();
     EXPECT_EQ(1, durationMetrics.data_size());
 
-    auto data = durationMetrics.data(0);
+    DurationMetricData data = durationMetrics.data(0);
     EXPECT_EQ(1, data.bucket_info_size());
 
     auto bucketInfo = data.bucket_info(0);
@@ -434,7 +435,7 @@ TEST(DurationMetricE2eTest, TestWithCondition) {
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_EQ(1, reports.reports(0).metrics(0).duration_metrics().data_size());
 
-    auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
 
     // Validate bucket info.
     EXPECT_EQ(1, data.bucket_info_size());
@@ -533,7 +534,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedCondition) {
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_EQ(1, reports.reports(0).metrics(0).duration_metrics().data_size());
 
-    auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     util::WAKELOCK_STATE_CHANGED, appUid);
@@ -691,7 +692,7 @@ TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition) {
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_EQ(1, reports.reports(0).metrics(0).duration_metrics().data_size());
 
-    auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     util::WAKELOCK_STATE_CHANGED, appUid);
@@ -707,6 +708,734 @@ TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition) {
     EXPECT_EQ(durationEndNs, bucketInfo.start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, bucketInfo.end_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs - duration2StartNs, bucketInfo.duration_nanos());
+}
+
+TEST(DurationMetricE2eTest, TestWithSlicedState) {
+    // Initialize config.
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+
+    *config.add_atom_matcher() = CreateBatterySaverModeStartAtomMatcher();
+    *config.add_atom_matcher() = CreateBatterySaverModeStopAtomMatcher();
+
+    auto batterySaverModePredicate = CreateBatterySaverModePredicate();
+    *config.add_predicate() = batterySaverModePredicate;
+
+    auto screenState = CreateScreenState();
+    *config.add_state() = screenState;
+
+    // Create duration metric that slices by screen state.
+    auto durationMetric = config.add_duration_metric();
+    durationMetric->set_id(StringToId("DurationBatterySaverModeSliceScreen"));
+    durationMetric->set_what(batterySaverModePredicate.id());
+    durationMetric->add_slice_by_state(screenState.id());
+    durationMetric->set_aggregation_type(DurationMetric::SUM);
+    durationMetric->set_bucket(FIVE_MINUTES);
+
+    // Initialize StatsLogProcessor.
+    int uid = 12345;
+    int64_t cfgId = 98765;
+    ConfigKey cfgKey(uid, cfgId);
+    uint64_t bucketStartTimeNs = 10000000000;  // 0:10
+    uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
+    EXPECT_TRUE(metricsManager->isConfigValid());
+    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    EXPECT_TRUE(metricsManager->isActive());
+    sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
+    EXPECT_TRUE(metricProducer->mIsActive);
+    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), SCREEN_STATE_ATOM_ID);
+    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 0);
+
+    // Check that StateTrackers were initialized correctly.
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
+
+    /*
+               bucket #1                      bucket #2
+    |     1     2     3     4     5     6     7     8     9     10 (minutes)
+    |-----------------------------|-----------------------------|--
+        ON              OFF     ON                                  (BatterySaverMode)
+      |          |                   |                              (ScreenIsOnEvent)
+           |                  |                                     (ScreenIsOffEvent)
+              |                                                     (ScreenDozeEvent)
+    */
+    // Initialize log events.
+    std::vector<std::unique_ptr<LogEvent>> events;
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 10 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON));                       // 0:20
+    events.push_back(CreateBatterySaverOnEvent(bucketStartTimeNs + 20 * NS_PER_SEC));  // 0:30
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 50 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_OFF));  // 1:00
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 80 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_DOZE));  // 1:30
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 120 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON));                         // 2:10
+    events.push_back(CreateBatterySaverOffEvent(bucketStartTimeNs + 200 * NS_PER_SEC));  // 3:30
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 250 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_OFF));                       // 4:20
+    events.push_back(CreateBatterySaverOnEvent(bucketStartTimeNs + 280 * NS_PER_SEC));  // 4:50
+
+    // Bucket boundary.
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 310 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON));  // 5:20
+
+    // Send log events to StatsLogProcessor.
+    for (auto& event : events) {
+        processor->OnLogEvent(event.get());
+    }
+
+    // Check dump report.
+    vector<uint8_t> buffer;
+    ConfigMetricsReportList reports;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 360 * NS_PER_SEC,
+                            true /* include current partial bucket */, true, ADB_DUMP, FAST,
+                            &buffer);  // 6:10
+    EXPECT_GT(buffer.size(), 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
+    backfillDimensionPath(&reports);
+    backfillStringInReport(&reports);
+    backfillStartEndTimestamp(&reports);
+
+    EXPECT_EQ(1, reports.reports_size());
+    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
+    EXPECT_EQ(3, reports.reports(0).metrics(0).duration_metrics().data_size());
+
+    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF, data.slice_by_state(0).value());
+    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(50 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(1).duration_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
+    EXPECT_EQ(370 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(1);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
+    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(110 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(50 * NS_PER_SEC, data.bucket_info(1).duration_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
+    EXPECT_EQ(370 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(2);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_DOZE, data.slice_by_state(0).value());
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(40 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+}
+
+TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState) {
+    // Initialize config.
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+
+    *config.add_atom_matcher() = CreateBatterySaverModeStartAtomMatcher();
+    *config.add_atom_matcher() = CreateBatterySaverModeStopAtomMatcher();
+    *config.add_atom_matcher() = CreateBatteryStateNoneMatcher();
+    *config.add_atom_matcher() = CreateBatteryStateUsbMatcher();
+
+    auto batterySaverModePredicate = CreateBatterySaverModePredicate();
+    *config.add_predicate() = batterySaverModePredicate;
+
+    auto deviceUnpluggedPredicate = CreateDeviceUnpluggedPredicate();
+    *config.add_predicate() = deviceUnpluggedPredicate;
+
+    auto screenState = CreateScreenState();
+    *config.add_state() = screenState;
+
+    // Create duration metric that has a condition and slices by screen state.
+    auto durationMetric = config.add_duration_metric();
+    durationMetric->set_id(StringToId("DurationBatterySaverModeOnBatterySliceScreen"));
+    durationMetric->set_what(batterySaverModePredicate.id());
+    durationMetric->set_condition(deviceUnpluggedPredicate.id());
+    durationMetric->add_slice_by_state(screenState.id());
+    durationMetric->set_aggregation_type(DurationMetric::SUM);
+    durationMetric->set_bucket(FIVE_MINUTES);
+
+    // Initialize StatsLogProcessor.
+    int uid = 12345;
+    int64_t cfgId = 98765;
+    ConfigKey cfgKey(uid, cfgId);
+    uint64_t bucketStartTimeNs = 10000000000;  // 0:10
+    uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
+    EXPECT_TRUE(metricsManager->isConfigValid());
+    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    EXPECT_TRUE(metricsManager->isActive());
+    sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
+    EXPECT_TRUE(metricProducer->mIsActive);
+    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), SCREEN_STATE_ATOM_ID);
+    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 0);
+
+    // Check that StateTrackers were initialized correctly.
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
+
+    /*
+               bucket #1                      bucket #2
+    |       1       2       3       4       5     6     7     8  (minutes)
+    |---------------------------------------|------------------
+         ON                              OFF    ON             (BatterySaverMode)
+                  T            F    T                          (DeviceUnpluggedPredicate)
+             |          |              |                       (ScreenIsOnEvent)
+                |           |                       |          (ScreenIsOffEvent)
+                                |                              (ScreenDozeEvent)
+    */
+    // Initialize log events.
+    std::vector<std::unique_ptr<LogEvent>> events;
+    events.push_back(CreateBatterySaverOnEvent(bucketStartTimeNs + 20 * NS_PER_SEC));  // 0:30
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 60 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON));  // 1:10
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 80 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_OFF));  // 1:30
+    events.push_back(
+            CreateBatteryStateChangedEvent(bucketStartTimeNs + 110 * NS_PER_SEC,
+                                           BatteryPluggedStateEnum::BATTERY_PLUGGED_NONE));  // 2:00
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 145 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON));  // 2:35
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 170 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_OFF));  // 3:00
+    events.push_back(
+            CreateBatteryStateChangedEvent(bucketStartTimeNs + 180 * NS_PER_SEC,
+                                           BatteryPluggedStateEnum::BATTERY_PLUGGED_USB));  // 3:10
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 200 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_DOZE));  // 3:30
+    events.push_back(
+            CreateBatteryStateChangedEvent(bucketStartTimeNs + 230 * NS_PER_SEC,
+                                           BatteryPluggedStateEnum::BATTERY_PLUGGED_NONE));  // 4:00
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 260 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON));                         // 4:30
+    events.push_back(CreateBatterySaverOffEvent(bucketStartTimeNs + 280 * NS_PER_SEC));  // 4:50
+
+    // Bucket boundary.
+    events.push_back(CreateBatterySaverOnEvent(bucketStartTimeNs + 320 * NS_PER_SEC));  // 5:30
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 380 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_OFF));  // 6:30
+
+    // Send log events to StatsLogProcessor.
+    for (auto& event : events) {
+        processor->OnLogEvent(event.get());
+    }
+
+    // Check dump report.
+    vector<uint8_t> buffer;
+    ConfigMetricsReportList reports;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 410 * NS_PER_SEC,
+                            true /* include current partial bucket */, true, ADB_DUMP, FAST,
+                            &buffer);
+    EXPECT_GT(buffer.size(), 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
+    backfillDimensionPath(&reports);
+    backfillStringInReport(&reports);
+    backfillStartEndTimestamp(&reports);
+
+    EXPECT_EQ(1, reports.reports_size());
+    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
+    EXPECT_EQ(3, reports.reports(0).metrics(0).duration_metrics().data_size());
+
+    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF, data.slice_by_state(0).value());
+    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(45 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(30 * NS_PER_SEC, data.bucket_info(1).duration_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
+    EXPECT_EQ(420 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(2);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
+    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(45 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(60 * NS_PER_SEC, data.bucket_info(1).duration_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
+    EXPECT_EQ(420 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(1);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_DOZE, data.slice_by_state(0).value());
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(30 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+}
+
+TEST(DurationMetricE2eTest, TestWithSlicedStateMapped) {
+    // Initialize config.
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+
+    *config.add_atom_matcher() = CreateBatterySaverModeStartAtomMatcher();
+    *config.add_atom_matcher() = CreateBatterySaverModeStopAtomMatcher();
+
+    auto batterySaverModePredicate = CreateBatterySaverModePredicate();
+    *config.add_predicate() = batterySaverModePredicate;
+
+    auto screenStateWithMap = CreateScreenStateWithOnOffMap();
+    *config.add_state() = screenStateWithMap;
+
+    // Create duration metric that slices by mapped screen state.
+    auto durationMetric = config.add_duration_metric();
+    durationMetric->set_id(StringToId("DurationBatterySaverModeSliceScreenMapped"));
+    durationMetric->set_what(batterySaverModePredicate.id());
+    durationMetric->add_slice_by_state(screenStateWithMap.id());
+    durationMetric->set_aggregation_type(DurationMetric::SUM);
+    durationMetric->set_bucket(FIVE_MINUTES);
+
+    // Initialize StatsLogProcessor.
+    int uid = 12345;
+    int64_t cfgId = 98765;
+    ConfigKey cfgKey(uid, cfgId);
+    uint64_t bucketStartTimeNs = 10000000000;  // 0:10
+    uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
+    EXPECT_TRUE(metricsManager->isConfigValid());
+    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    EXPECT_TRUE(metricsManager->isActive());
+    sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
+    EXPECT_TRUE(metricProducer->mIsActive);
+    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), SCREEN_STATE_ATOM_ID);
+    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 1);
+
+    // Check that StateTrackers were initialized correctly.
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
+
+    /*
+               bucket #1                      bucket #2
+    |     1     2     3     4     5     6     7     8     9     10 (minutes)
+    |-----------------------------|-----------------------------|--
+        ON              OFF     ON                                  (BatterySaverMode)
+     ---------------------------------------------------------SCREEN_OFF events
+           |                  |                                  (ScreenStateOffEvent = 1)
+              |                                                  (ScreenStateDozeEvent = 3)
+                                                |                (ScreenStateDozeSuspendEvent = 4)
+     ---------------------------------------------------------SCREEN_ON events
+      |          |                   |                           (ScreenStateOnEvent = 2)
+                      |                                          (ScreenStateVrEvent = 5)
+                                            |                    (ScreenStateOnSuspendEvent = 6)
+    */
+    // Initialize log events.
+    std::vector<std::unique_ptr<LogEvent>> events;
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 10 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON));                       // 0:20
+    events.push_back(CreateBatterySaverOnEvent(bucketStartTimeNs + 20 * NS_PER_SEC));  // 0:30
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 70 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_OFF));  // 1:20
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 100 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_DOZE));  // 1:50
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 120 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON));  // 2:10
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 170 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_VR));                         // 3:00
+    events.push_back(CreateBatterySaverOffEvent(bucketStartTimeNs + 200 * NS_PER_SEC));  // 3:30
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 250 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_OFF));                       // 4:20
+    events.push_back(CreateBatterySaverOnEvent(bucketStartTimeNs + 280 * NS_PER_SEC));  // 4:50
+
+    // Bucket boundary 5:10.
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 320 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON));  // 5:30
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 390 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON_SUSPEND));  // 6:40
+    events.push_back(CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 430 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_DOZE_SUSPEND));  // 7:20
+    // Send log events to StatsLogProcessor.
+    for (auto& event : events) {
+        processor->OnLogEvent(event.get());
+    }
+
+    // Check dump report.
+    vector<uint8_t> buffer;
+    ConfigMetricsReportList reports;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 490 * NS_PER_SEC,
+                            true /* include current partial bucket */, true, ADB_DUMP, FAST,
+                            &buffer);
+    EXPECT_GT(buffer.size(), 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
+    backfillDimensionPath(&reports);
+    backfillStringInReport(&reports);
+    backfillStartEndTimestamp(&reports);
+
+    EXPECT_EQ(1, reports.reports_size());
+    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
+    EXPECT_EQ(2, reports.reports(0).metrics(0).duration_metrics().data_size());
+
+    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
+    EXPECT_EQ(StringToId("SCREEN_ON"), data.slice_by_state(0).group_id());
+    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(130 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(110 * NS_PER_SEC, data.bucket_info(1).duration_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
+    EXPECT_EQ(500 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(1);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
+    EXPECT_EQ(StringToId("SCREEN_OFF"), data.slice_by_state(0).group_id());
+    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(70 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(80 * NS_PER_SEC, data.bucket_info(1).duration_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
+    EXPECT_EQ(500 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
+}
+
+TEST(DurationMetricE2eTest, TestSlicedStatePrimaryFieldsNotSubsetDimInWhat) {
+    // Initialize config.
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+
+    *config.add_atom_matcher() = CreateAcquireWakelockAtomMatcher();
+    *config.add_atom_matcher() = CreateReleaseWakelockAtomMatcher();
+
+    auto holdingWakelockPredicate = CreateHoldingWakelockPredicate();
+    *config.add_predicate() = holdingWakelockPredicate;
+
+    auto uidProcessState = CreateUidProcessState();
+    *config.add_state() = uidProcessState;
+
+    // Create duration metric that slices by uid process state.
+    auto durationMetric = config.add_duration_metric();
+    durationMetric->set_id(StringToId("DurationHoldingWakelockSliceUidProcessState"));
+    durationMetric->set_what(holdingWakelockPredicate.id());
+    durationMetric->add_slice_by_state(uidProcessState.id());
+    durationMetric->set_aggregation_type(DurationMetric::SUM);
+    durationMetric->set_bucket(FIVE_MINUTES);
+
+    // The state has only one primary field (uid).
+    auto stateLink = durationMetric->add_state_link();
+    stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
+    auto fieldsInWhat = stateLink->mutable_fields_in_what();
+    *fieldsInWhat = CreateAttributionUidDimensions(util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+    auto fieldsInState = stateLink->mutable_fields_in_state();
+    *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
+
+    // Initialize StatsLogProcessor.
+    int uid = 12345;
+    int64_t cfgId = 98765;
+    ConfigKey cfgKey(uid, cfgId);
+    uint64_t bucketStartTimeNs = 10000000000;  // 0:10
+    uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+
+    // This config is rejected because the dimension in what fields are not a superset of the sliced
+    // state primary fields.
+    EXPECT_EQ(processor->mMetricsManagers.size(), 0);
+}
+
+TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
+    // Initialize config.
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+
+    *config.add_atom_matcher() = CreateAcquireWakelockAtomMatcher();
+    *config.add_atom_matcher() = CreateReleaseWakelockAtomMatcher();
+
+    auto holdingWakelockPredicate = CreateHoldingWakelockPredicate();
+    *config.add_predicate() = holdingWakelockPredicate;
+
+    auto uidProcessState = CreateUidProcessState();
+    *config.add_state() = uidProcessState;
+
+    // Create duration metric that slices by uid process state.
+    auto durationMetric = config.add_duration_metric();
+    durationMetric->set_id(StringToId("DurationPartialWakelockPerTagUidSliceProcessState"));
+    durationMetric->set_what(holdingWakelockPredicate.id());
+    durationMetric->add_slice_by_state(uidProcessState.id());
+    durationMetric->set_aggregation_type(DurationMetric::SUM);
+    durationMetric->set_bucket(FIVE_MINUTES);
+
+    // The metric is dimensioning by first uid of attribution node and tag.
+    *durationMetric->mutable_dimensions_in_what() = CreateAttributionUidAndOtherDimensions(
+            util::WAKELOCK_STATE_CHANGED, {Position::FIRST}, {3 /* tag */});
+    // The state has only one primary field (uid).
+    auto stateLink = durationMetric->add_state_link();
+    stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
+    auto fieldsInWhat = stateLink->mutable_fields_in_what();
+    *fieldsInWhat = CreateAttributionUidDimensions(util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+    auto fieldsInState = stateLink->mutable_fields_in_state();
+    *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
+
+    // Initialize StatsLogProcessor.
+    int uid = 12345;
+    int64_t cfgId = 98765;
+    ConfigKey cfgKey(uid, cfgId);
+    uint64_t bucketStartTimeNs = 10000000000;  // 0:10
+    uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
+    EXPECT_TRUE(metricsManager->isConfigValid());
+    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    EXPECT_TRUE(metricsManager->isActive());
+    sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
+    EXPECT_TRUE(metricProducer->mIsActive);
+    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), UID_PROCESS_STATE_ATOM_ID);
+    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 0);
+
+    // Check that StateTrackers were initialized correctly.
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(UID_PROCESS_STATE_ATOM_ID));
+
+    // Initialize log events.
+    int appUid1 = 1001;
+    int appUid2 = 1002;
+    std::vector<int> attributionUids1 = {appUid1};
+    std::vector<string> attributionTags1 = {"App1"};
+
+    std::vector<int> attributionUids2 = {appUid2};
+    std::vector<string> attributionTags2 = {"App2"};
+
+    std::vector<std::unique_ptr<LogEvent>> events;
+    events.push_back(CreateUidProcessStateChangedEvent(
+            bucketStartTimeNs + 10 * NS_PER_SEC, appUid1,
+            android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND));  // 0:20
+    events.push_back(CreateAcquireWakelockEvent(bucketStartTimeNs + 20 * NS_PER_SEC,
+                                                attributionUids1, attributionTags1,
+                                                "wakelock1"));  // 0:30
+    events.push_back(CreateAcquireWakelockEvent(bucketStartTimeNs + 25 * NS_PER_SEC,
+                                                attributionUids1, attributionTags1,
+                                                "wakelock2"));  // 0:35
+    events.push_back(CreateAcquireWakelockEvent(bucketStartTimeNs + 30 * NS_PER_SEC,
+                                                attributionUids2, attributionTags2,
+                                                "wakelock1"));  // 0:40
+    events.push_back(CreateAcquireWakelockEvent(bucketStartTimeNs + 35 * NS_PER_SEC,
+                                                attributionUids2, attributionTags2,
+                                                "wakelock2"));  // 0:45
+    events.push_back(CreateUidProcessStateChangedEvent(
+            bucketStartTimeNs + 50 * NS_PER_SEC, appUid2,
+            android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND));  // 1:00
+    events.push_back(CreateUidProcessStateChangedEvent(
+            bucketStartTimeNs + 60 * NS_PER_SEC, appUid1,
+            android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND));  // 1:10
+    events.push_back(CreateReleaseWakelockEvent(bucketStartTimeNs + 100 * NS_PER_SEC,
+                                                attributionUids2, attributionTags2,
+                                                "wakelock1"));  // 1:50
+    events.push_back(CreateUidProcessStateChangedEvent(
+            bucketStartTimeNs + 120 * NS_PER_SEC, appUid2,
+            android::app::ProcessStateEnum::PROCESS_STATE_FOREGROUND_SERVICE));  // 2:10
+    events.push_back(CreateReleaseWakelockEvent(bucketStartTimeNs + 200 * NS_PER_SEC,
+                                                attributionUids1, attributionTags1,
+                                                "wakelock2"));  // 3:30
+
+    // Send log events to StatsLogProcessor.
+    for (auto& event : events) {
+        processor->OnLogEvent(event.get());
+    }
+
+    // Check dump report.
+    vector<uint8_t> buffer;
+    ConfigMetricsReportList reports;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 320 * NS_PER_SEC,
+                            true /* include current partial bucket */, true, ADB_DUMP, FAST,
+                            &buffer);
+    EXPECT_GT(buffer.size(), 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
+    backfillDimensionPath(&reports);
+    backfillStringInReport(&reports);
+    backfillStartEndTimestamp(&reports);
+
+    EXPECT_EQ(1, reports.reports_size());
+    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
+    EXPECT_EQ(9, reports.reports(0).metrics(0).duration_metrics().data_size());
+
+    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
+                                                  "wakelock2");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(35 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(1);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
+                                                  "wakelock2");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(140 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(2);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
+                                                  "wakelock1");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(-1 /* StateTracker:: kStateUnknown */, data.slice_by_state(0).value());
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(3);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
+                                                  "wakelock1");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(240 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(1).duration_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
+    EXPECT_EQ(330 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(4);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
+                                                  "wakelock1");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(50 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(5);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
+                                                  "wakelock2");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_FOREGROUND_SERVICE,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(180 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(1).duration_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
+    EXPECT_EQ(330 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(6);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
+                                                  "wakelock2");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(-1 /* StateTracker:: kStateUnknown */, data.slice_by_state(0).value());
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(15 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(7);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
+                                                  "wakelock1");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(40 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = reports.reports(0).metrics(0).duration_metrics().data(8);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
+                                                  "wakelock2");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(70 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
 }
 
 #else

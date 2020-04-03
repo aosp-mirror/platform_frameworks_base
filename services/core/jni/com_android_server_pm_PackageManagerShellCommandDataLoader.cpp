@@ -392,6 +392,7 @@ private:
         mArgs = params.arguments();
         mIfs = ifs;
         mStatusListener = statusListener;
+        mIfs->setParams({.readLogsEnabled = true});
         return true;
     }
     bool onStart() final { return true; }
@@ -438,7 +439,7 @@ private:
             }
 
             const auto fileId = IncFs_FileIdFromMetadata(file.metadata);
-            const auto incfsFd(mIfs->openWrite(fileId));
+            const base::unique_fd incfsFd(mIfs->openForSpecialOps(fileId).release());
             if (incfsFd < 0) {
                 ALOGE("Failed to open an IncFS file for metadata: %.*s, final file name is: %s. "
                       "Error %d",
@@ -716,7 +717,7 @@ private:
 
                 auto& writeFd = writeFds[fileIdx];
                 if (writeFd < 0) {
-                    writeFd.reset(this->mIfs->openWrite(fileId));
+                    writeFd.reset(this->mIfs->openForSpecialOps(fileId).release());
                     if (writeFd < 0) {
                         ALOGE("Failed to open file %d for writing (%d). Aborting.", header.fileIdx,
                               -writeFd);

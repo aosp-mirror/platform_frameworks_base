@@ -123,7 +123,8 @@ message Atom {
         BatteryLevelChanged battery_level_changed =
                 30 [(module) = "framework", (module) = "statsdtest"];
         ChargingStateChanged charging_state_changed = 31 [(module) = "framework"];
-        PluggedStateChanged plugged_state_changed = 32 [(module) = "framework"];
+        PluggedStateChanged plugged_state_changed = 32
+                [(module) = "framework", (module) = "statsdtest"];
         InteractiveStateChanged interactive_state_changed = 33 [(module) = "framework"];
         TouchEventReported touch_event_reported = 34;
         WakeupAlarmOccurred wakeup_alarm_occurred = 35 [(module) = "framework"];
@@ -5810,7 +5811,7 @@ message NotificationRemoteViews {
  */
 message PackageNotificationPreferences {
     // Uid under which the package is installed.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     // Notification importance, which specifies when and how a notification is displayed.
     // Specified under core/java/android/app/NotificationManager.java.
     optional int32 importance = 2;
@@ -5827,7 +5828,7 @@ message PackageNotificationPreferences {
  */
 message PackageNotificationChannelPreferences {
     // Uid under which the package is installed.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     // Channel's ID. Should always be available.
     optional string channel_id = 2;
     // Channel's name. Should always be available.
@@ -5850,7 +5851,7 @@ message PackageNotificationChannelPreferences {
  */
 message PackageNotificationChannelGroupPreferences {
     // Uid under which the package is installed.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     // Channel Group's ID. Should always be available.
     optional string group_id = 2;
     // Channel Group's name. Should always be available.

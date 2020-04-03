@@ -267,8 +267,14 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
         return false;
       }
     } else if (format_ == ApkFormat::kProto && path == kProtoResourceTablePath) {
+      SerializeTableOptions proto_serialize_options;
+      proto_serialize_options.collapse_key_stringpool =
+          options.collapse_key_stringpool;
+      proto_serialize_options.name_collapse_exemptions =
+          options.name_collapse_exemptions;
       pb::ResourceTable pb_table;
-      SerializeTableToPb(*split_table, &pb_table, context->GetDiagnostics());
+      SerializeTableToPb(*split_table, &pb_table, context->GetDiagnostics(),
+                         proto_serialize_options);
       if (!io::CopyProtoToArchive(context,
                                   &pb_table,
                                   path,

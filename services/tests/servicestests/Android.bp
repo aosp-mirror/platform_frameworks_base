@@ -108,10 +108,28 @@ java_library {
     name: "servicestests-utils",
     srcs: [
         "utils/**/*.java",
+        "utils/**/*.kt",
+        "utils-mockito/**/*.kt",
     ],
     static_libs: [
         "junit",
         "mockito-target-minus-junit4",
+    ],
+    libs: [
+        "android.test.runner",
+    ],
+}
+
+java_library {
+    name: "servicestests-utils-mockito-extended",
+    srcs: [
+        "utils/**/*.java",
+        "utils/**/*.kt",
+        "utils-mockito/**/*.kt",
+    ],
+    static_libs: [
+        "junit",
+        "mockito-target-extended-minus-junit4",
     ],
     libs: [
         "android.test.runner",

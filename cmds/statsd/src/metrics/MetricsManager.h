@@ -23,6 +23,7 @@
 #include "config/ConfigKey.h"
 #include "external/StatsPullerManager.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "frameworks/base/cmds/statsd/src/statsd_metadata.pb.h"
 #include "logd/LogEvent.h"
 #include "matchers/LogMatchingTracker.h"
 #include "metrics/MetricProducer.h"
@@ -143,6 +144,14 @@ public:
     void writeActiveConfigToProtoOutputStream(
             int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
 
+    // Returns true if at least one piece of metadata is written.
+    bool writeMetadataToProto(int64_t currentWallClockTimeNs,
+                              int64_t systemElapsedTimeNs,
+                              metadata::StatsMetadata* statsMetadata);
+
+    void loadMetadata(const metadata::StatsMetadata& metadata,
+                      int64_t currentWallClockTimeNs,
+                      int64_t systemElapsedTimeNs);
 private:
     // For test only.
     inline int64_t getTtlEndNs() const { return mTtlEndNs; }
@@ -285,6 +294,9 @@ private:
 
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_multiple_buckets);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk_no_data_written);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_load_refractory_from_disk);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);
@@ -317,6 +329,11 @@ private:
     FRIEND_TEST(DurationMetricE2eTest, TestWithCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedState);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStateMapped);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSuperset);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset);
 
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState);
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions);

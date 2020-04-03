@@ -2385,6 +2385,30 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    public boolean isSharingShortcut(int callingUserId, @NonNull String callingPackage,
+            @NonNull String packageName, @NonNull String shortcutId, int userId,
+            @NonNull IntentFilter filter) {
+        verifyCaller(callingPackage, callingUserId);
+        enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS,
+                "isSharingShortcut");
+
+        synchronized (mLock) {
+            throwIfUserLockedL(userId);
+            throwIfUserLockedL(callingUserId);
+
+            final List<ShortcutManager.ShareShortcutInfo> matchedTargets =
+                    getPackageShortcutsLocked(packageName, userId)
+                            .getMatchingShareTargets(filter);
+            final int matchedSize = matchedTargets.size();
+            for (int i = 0; i < matchedSize; i++) {
+                if (matchedTargets.get(i).getShortcutInfo().getId().equals(shortcutId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @GuardedBy("mLock")
     private ParceledListSlice<ShortcutInfo> getShortcutsWithQueryLocked(@NonNull String packageName,
             @UserIdInt int userId, int cloneFlags, @NonNull Predicate<ShortcutInfo> query) {
@@ -2967,6 +2991,18 @@ public class ShortcutService extends IShortcutService.Stub {
                 @NonNull String callingPackage, @NonNull IntentFilter intentFilter, int userId) {
             return ShortcutService.this.getShareTargets(
                     callingPackage, intentFilter, userId).getList();
+        }
+
+        @Override
+        public boolean isSharingShortcut(int callingUserId, @NonNull String callingPackage,
+                @NonNull String packageName, @NonNull String shortcutId, int userId,
+                @NonNull IntentFilter filter) {
+            Preconditions.checkStringNotEmpty(callingPackage, "callingPackage");
+            Preconditions.checkStringNotEmpty(packageName, "packageName");
+            Preconditions.checkStringNotEmpty(shortcutId, "shortcutId");
+
+            return ShortcutService.this.isSharingShortcut(callingUserId, callingPackage,
+                    packageName, shortcutId, userId, filter);
         }
 
         private void updateCachedShortcutsInternal(int launcherUserId,

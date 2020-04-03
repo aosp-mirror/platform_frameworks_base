@@ -398,7 +398,7 @@ class InsetsPolicy {
 
             /** Called on SurfaceAnimationThread without global WM lock held. */
             @Override
-            public void scheduleApplyChangeInsets() {
+            public void scheduleApplyChangeInsets(InsetsAnimationControlRunner runner) {
                 InsetsState state = getState();
                 if (mAnimationControl.applyChangeInsets(state)) {
                     mAnimationControl.finish(mAnimatingShown);

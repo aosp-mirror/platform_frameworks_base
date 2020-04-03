@@ -171,9 +171,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *  </pre>
  */
 public final class ImageDecoder implements AutoCloseable {
-    /** @hide **/
-    public static int sApiLevel;
-
     /**
      *  Source of encoded image data.
      *
@@ -1933,7 +1930,8 @@ public final class ImageDecoder implements AutoCloseable {
 
         // For P and above, only resize if it would be a downscale. Scale up prior
         // to P in case the app relies on the Bitmap's size without considering density.
-        if (srcDensity < dstDensity && sApiLevel >= Build.VERSION_CODES.P) {
+        if (srcDensity < dstDensity
+                && Compatibility.getTargetSdkVersion() >= Build.VERSION_CODES.P) {
             return srcDensity;
         }
 
