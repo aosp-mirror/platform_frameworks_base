@@ -55,6 +55,7 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.view.InputMonitor;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -411,6 +412,19 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             long token = Binder.clearCallingIdentity();
             try {
                 mPipUI.setPinnedStackAnimationListener(listener);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {
+            if (!verifyCaller("onQuickSwitchToNewTask")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> notifyQuickSwitchToNewTask(rotation));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -785,6 +799,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void notifyQuickSwitchToNewTask(@Surface.Rotation int rotation) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onQuickSwitchToNewTask(rotation);
+        }
+    }
+
     public void notifyQuickScrubStarted() {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).onQuickScrubStarted();
@@ -850,6 +870,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public interface OverviewProxyListener {
         default void onConnectionChanged(boolean isConnected) {}
         default void onQuickStepStarted() {}
+        default void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {}
         default void onOverviewShown(boolean fromHome) {}
         default void onQuickScrubStarted() {}
         /** Notify changes in the nav bar button alpha */
