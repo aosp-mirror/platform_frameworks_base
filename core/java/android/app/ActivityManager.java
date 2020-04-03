@@ -74,8 +74,8 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
-import android.window.WindowContainerToken;
 import android.view.Surface;
+import android.window.WindowContainerToken;
 
 import com.android.internal.app.LocalePicker;
 import com.android.internal.app.procstats.ProcessStats;
@@ -3643,7 +3643,8 @@ public class ActivityManager {
      * Set custom state data for this process. It will be included in the record of
      * {@link ApplicationExitInfo} on the death of the current calling process; the new process
      * of the app can retrieve this state data by calling
-     * {@link ApplicationExitInfo#getProcessStateSummary} on the record returned by
+     * {@link android.app.ApplicationExitInfo#getProcessStateSummary()
+     * ApplicationExitInfo.getProcessStateSummary()} on the record returned by
      * {@link #getHistoricalProcessExitReasons}.
      *
      * <p> This would be useful for the calling app to save its stateful data: if it's
@@ -3668,7 +3669,7 @@ public class ActivityManager {
         }
     }
 
-    /*
+    /**
      * @return Whether or not the low memory kill will be reported in
      * {@link #getHistoricalProcessExitReasons}.
      *
