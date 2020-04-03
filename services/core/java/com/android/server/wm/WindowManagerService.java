@@ -2332,9 +2332,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
             if (toBeDisplayed && win.mIsWallpaper) {
-                DisplayInfo displayInfo = displayContent.getDisplayInfo();
-                displayContent.mWallpaperController.updateWallpaperOffset(
-                        win, displayInfo.logicalWidth, displayInfo.logicalHeight, false);
+                displayContent.mWallpaperController.updateWallpaperOffset(win, false /* sync */);
             }
             if (win.mActivityRecord != null) {
                 win.mActivityRecord.updateReportedVisibilityLocked();
