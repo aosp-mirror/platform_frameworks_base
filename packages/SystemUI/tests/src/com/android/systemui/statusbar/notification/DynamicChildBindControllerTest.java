@@ -83,8 +83,8 @@ public class DynamicChildBindControllerTest extends SysuiTestCase {
         mDynamicChildBindController.updateChildContentViews(mGroupNotifs);
 
         // THEN we free content views
-        verify(bindParams).freeContentViews(FLAG_CONTENT_VIEW_CONTRACTED);
-        verify(bindParams).freeContentViews(FLAG_CONTENT_VIEW_EXPANDED);
+        verify(bindParams).markContentViewsFreeable(FLAG_CONTENT_VIEW_CONTRACTED);
+        verify(bindParams).markContentViewsFreeable(FLAG_CONTENT_VIEW_EXPANDED);
         verify(mBindStage).requestRebind(eq(lastChild), any());
     }
 
