@@ -22,7 +22,10 @@ import static android.location.util.identity.CallerIdentity.PERMISSION_FINE;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.location.GnssAntennaInfo;
 import android.location.GnssMeasurementCorrections;
+import android.location.GnssMeasurementsEvent;
+import android.location.GnssNavigationMessage;
 import android.location.GnssRequest;
 import android.location.IBatchedLocationCallback;
 import android.location.IGnssAntennaInfoListener;
@@ -54,15 +57,15 @@ import java.io.PrintWriter;
 import java.util.List;
 
 /** Manages Gnss providers and related Gnss functions for LocationManagerService. */
-public class GnssManagerService {
+public class GnssManagerService implements GnssNative.Callbacks {
 
     public static final String TAG = "GnssManager";
     public static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final String FEATURE_ID = "GnssService";
+    private static final String ATTRIBUTION_ID = "GnssService";
 
     public static boolean isGnssSupported() {
-        return GnssLocationProvider.isSupported();
+        return GnssNative.isSupported();
     }
 
     private final Context mContext;
@@ -109,7 +112,9 @@ public class GnssManagerService {
             GnssLocationProvider gnssLocationProvider) {
         Preconditions.checkState(isGnssSupported());
 
-        mContext = context.createFeatureContext(FEATURE_ID);
+        GnssNative.initialize();
+
+        mContext = context.createAttributionContext(ATTRIBUTION_ID);
         mSettingsHelper = settingsHelper;
         mAppOpsHelper = appOpsHelper;
         mAppForegroundHelper = appForegroundHelper;
@@ -133,6 +138,9 @@ public class GnssManagerService {
         mGnssBatchingProvider = mGnssLocationProvider.getGnssBatchingProvider();
         mNetInitiatedListener = mGnssLocationProvider.getNetInitiatedListener();
         mGpsGeofenceProxy = mGnssLocationProvider.getGpsGeofenceProxy();
+
+        // allow gnss access to begin - we must assume that callbacks can start immediately
+        GnssNative.register(this);
     }
 
     /** Called when system is ready. */
@@ -140,6 +148,8 @@ public class GnssManagerService {
         mAppOpsHelper.onSystemReady();
         mSettingsHelper.onSystemReady();
         mAppForegroundHelper.onSystemReady();
+
+        mGnssLocationProvider.onSystemReady();
     }
 
     /** Retrieve the GnssLocationProvider. */
@@ -453,5 +463,159 @@ public class GnssManagerService {
                 ipw.println("GNSS batching in progress");
             }
         }
+    }
+
+    // all native callbacks - to be funneled to various locations as appropriate
+
+    @Override
+    public void reportLocation(boolean hasLatLong, Location location) {
+        mGnssLocationProvider.reportLocation(hasLatLong, location);
+    }
+
+    @Override
+    public void reportStatus(int status) {
+        mGnssLocationProvider.reportStatus(status);
+    }
+
+    @Override
+    public void reportSvStatus(int svCount, int[] svidWithFlags, float[] cn0DbHzs,
+            float[] elevations, float[] azimuths, float[] carrierFrequencies,
+            float[] basebandCn0DbHzs) {
+        mGnssLocationProvider.reportSvStatus(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
+                carrierFrequencies, basebandCn0DbHzs);
+    }
+
+    @Override
+    public void reportAGpsStatus(int agpsType, int agpsStatus, byte[] suplIpAddr) {
+        mGnssLocationProvider.reportAGpsStatus(agpsType, agpsStatus, suplIpAddr);
+    }
+
+    @Override
+    public void reportNmea(long timestamp) {
+        mGnssLocationProvider.reportNmea(timestamp);
+    }
+
+    @Override
+    public void reportMeasurementData(GnssMeasurementsEvent event) {
+        mGnssLocationProvider.reportMeasurementData(event);
+    }
+
+    @Override
+    public void reportAntennaInfo(List<GnssAntennaInfo> antennaInfos) {
+        mGnssLocationProvider.reportAntennaInfo(antennaInfos);
+    }
+
+    @Override
+    public void reportNavigationMessage(GnssNavigationMessage event) {
+        mGnssLocationProvider.reportNavigationMessage(event);
+    }
+
+    @Override
+    public void setTopHalCapabilities(int topHalCapabilities) {
+        mGnssLocationProvider.setTopHalCapabilities(topHalCapabilities);
+    }
+
+    @Override
+    public void setSubHalMeasurementCorrectionsCapabilities(int subHalCapabilities) {
+        mGnssLocationProvider.setSubHalMeasurementCorrectionsCapabilities(subHalCapabilities);
+    }
+
+    @Override
+    public void setGnssYearOfHardware(int yearOfHardware) {
+        mGnssLocationProvider.setGnssYearOfHardware(yearOfHardware);
+    }
+
+    @Override
+    public void setGnssHardwareModelName(String modelName) {
+        mGnssLocationProvider.setGnssHardwareModelName(modelName);
+    }
+
+    @Override
+    public void reportGnssServiceRestarted() {
+        mGnssLocationProvider.reportGnssServiceRestarted();
+    }
+
+    @Override
+    public void reportLocationBatch(Location[] locationArray) {
+        mGnssLocationProvider.reportLocationBatch(locationArray);
+    }
+
+    @Override
+    public void psdsDownloadRequest() {
+        mGnssLocationProvider.psdsDownloadRequest();
+    }
+
+    @Override
+    public void reportGeofenceTransition(int geofenceId, Location location, int transition,
+            long transitionTimestamp) {
+        mGnssLocationProvider.reportGeofenceTransition(geofenceId, location, transition,
+                transitionTimestamp);
+    }
+
+    @Override
+    public void reportGeofenceStatus(int status, Location location) {
+        mGnssLocationProvider.reportGeofenceStatus(status, location);
+    }
+
+    @Override
+    public void reportGeofenceAddStatus(int geofenceId, int status) {
+        mGnssLocationProvider.reportGeofenceAddStatus(geofenceId, status);
+    }
+
+    @Override
+    public void reportGeofenceRemoveStatus(int geofenceId, int status) {
+        mGnssLocationProvider.reportGeofenceRemoveStatus(geofenceId, status);
+    }
+
+    @Override
+    public void reportGeofencePauseStatus(int geofenceId, int status) {
+        mGnssLocationProvider.reportGeofencePauseStatus(geofenceId, status);
+    }
+
+    @Override
+    public void reportGeofenceResumeStatus(int geofenceId, int status) {
+        mGnssLocationProvider.reportGeofenceResumeStatus(geofenceId, status);
+    }
+
+    @Override
+    public void reportNiNotification(int notificationId, int niType, int notifyFlags,
+            int timeout, int defaultResponse, String requestorId, String text,
+            int requestorIdEncoding, int textEncoding) {
+        mGnssLocationProvider.reportNiNotification(notificationId, niType, notifyFlags, timeout,
+                defaultResponse, requestorId, text, requestorIdEncoding, textEncoding);
+    }
+
+    @Override
+    public void requestSetID(int flags) {
+        mGnssLocationProvider.requestSetID(flags);
+    }
+
+    @Override
+    public void requestLocation(boolean independentFromGnss, boolean isUserEmergency) {
+        mGnssLocationProvider.requestLocation(independentFromGnss, isUserEmergency);
+    }
+
+    @Override
+    public void requestUtcTime() {
+        mGnssLocationProvider.requestUtcTime();
+    }
+
+    @Override
+    public void requestRefLocation() {
+        mGnssLocationProvider.requestRefLocation();
+    }
+
+    @Override
+    public void reportNfwNotification(String proxyAppPackageName, byte protocolStack,
+            String otherProtocolStackName, byte requestor, String requestorId,
+            byte responseType, boolean inEmergencyMode, boolean isCachedLocation) {
+        mGnssLocationProvider.reportNfwNotification(proxyAppPackageName, protocolStack,
+                otherProtocolStackName, requestor, requestorId, responseType, inEmergencyMode,
+                isCachedLocation);
+    }
+
+    @Override
+    public boolean isInEmergencySession() {
+        return mGnssLocationProvider.isInEmergencySession();
     }
 }
