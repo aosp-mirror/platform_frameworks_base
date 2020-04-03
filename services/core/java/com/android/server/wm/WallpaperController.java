@@ -304,7 +304,11 @@ class WallpaperController {
         }
     }
 
-    boolean updateWallpaperOffset(WindowState wallpaperWin, int dw, int dh, boolean sync) {
+    boolean updateWallpaperOffset(WindowState wallpaperWin, boolean sync) {
+        final DisplayInfo displayInfo = wallpaperWin.getDisplayInfo();
+        final int dw = displayInfo.logicalWidth;
+        final int dh = displayInfo.logicalHeight;
+
         int xOffset = 0;
         int yOffset = 0;
         boolean rawChanged = false;
@@ -444,10 +448,6 @@ class WallpaperController {
     }
 
     private void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
-        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-        final int dw = displayInfo.logicalWidth;
-        final int dh = displayInfo.logicalHeight;
-
         WindowState target = mWallpaperTarget;
         if (target != null) {
             if (target.mWallpaperX >= 0) {
@@ -484,7 +484,7 @@ class WallpaperController {
         }
 
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            mWallpaperTokens.get(curTokenNdx).updateWallpaperOffset(dw, dh, sync);
+            mWallpaperTokens.get(curTokenNdx).updateWallpaperOffset(sync);
         }
     }
 
