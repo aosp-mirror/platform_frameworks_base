@@ -732,11 +732,11 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     /**
      * Returns an existing stack compatible with the windowing mode and activity type or creates one
      * if a compatible stack doesn't exist.
-     * @see #getOrCreateStack(int, int, boolean, Intent, Task, boolean)
+     * @see #getOrCreateStack(int, int, boolean, Intent, Task)
      */
     ActivityStack getOrCreateStack(int windowingMode, int activityType, boolean onTop) {
         return getOrCreateStack(windowingMode, activityType, onTop, null /* intent */,
-                null /* candidateTask */, false /* createdByOrganizer */);
+                null /* candidateTask */);
     }
 
     /**
@@ -748,7 +748,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
      * @see #createStack(int, int, boolean)
      */
     ActivityStack getOrCreateStack(int windowingMode, int activityType, boolean onTop,
-            Intent intent, Task candidateTask, boolean createdByOrganizer) {
+            Intent intent, Task candidateTask) {
         if (!alwaysCreateStack(windowingMode, activityType)) {
             ActivityStack stack = getStack(windowingMode, activityType);
             if (stack != null) {
@@ -757,13 +757,13 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         } else if (candidateTask != null) {
             final ActivityStack stack = (ActivityStack) candidateTask;
             final int position = onTop ? POSITION_TOP : POSITION_BOTTOM;
-            if (isSplitScreenModeActivated()) {
-                final Task splitRootSecondary = getTask(t -> t.mCreatedByOrganizer && t.isRootTask()
-                        && t.inSplitScreenSecondaryWindowingMode());
+            Task launchRootTask = updateLaunchRootTask(windowingMode);
+
+            if (launchRootTask != null) {
                 if (stack.getParent() == null) {
-                    splitRootSecondary.addChild(stack, position);
-                } else if (stack.getParent() != splitRootSecondary) {
-                    stack.reparent(splitRootSecondary, position);
+                    launchRootTask.addChild(stack, position);
+                } else if (stack.getParent() != launchRootTask) {
+                    stack.reparent(launchRootTask, position);
                 }
             } else if (stack.getDisplay() != mDisplayContent || !stack.isRootTask()) {
                 if (stack.getParent() == null) {
@@ -779,7 +779,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             return stack;
         }
         return createStack(windowingMode, activityType, onTop, null /*info*/, intent,
-                createdByOrganizer);
+                false /* createdByOrganizer */);
     }
 
     /**
@@ -798,7 +798,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         // it's display's windowing mode.
         windowingMode = validateWindowingMode(windowingMode, r, candidateTask, activityType);
         return getOrCreateStack(windowingMode, activityType, onTop, null /* intent */,
-                candidateTask, false /* createdByOrganizer */);
+                candidateTask);
     }
 
     @VisibleForTesting
