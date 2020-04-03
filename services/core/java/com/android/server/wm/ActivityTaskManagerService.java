@@ -2802,6 +2802,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     false /* includingParents */);
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
+        // Clear out current windowing mode before reparenting to split taks.
+        wct.setWindowingMode(
+                task.getStack().mRemoteToken.toWindowContainerToken(), WINDOWING_MODE_UNDEFINED);
         wct.reparent(task.getStack().mRemoteToken.toWindowContainerToken(),
                 primarySplitTask.mRemoteToken.toWindowContainerToken(), toTop);
         mWindowOrganizerController.applyTransaction(wct);
