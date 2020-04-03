@@ -68,7 +68,6 @@ import android.util.Log;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
@@ -90,10 +89,6 @@ import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -106,15 +101,6 @@ import java.util.List;
 public class GnssLocationProvider extends AbstractLocationProvider implements
         InjectNtpTimeCallback,
         GnssSatelliteBlacklistCallback {
-
-    /**
-     * Indicates that this method is a native entry point. Useful purely for IDEs which can
-     * understand entry points, and thus eliminate incorrect warnings about methods not used.
-     */
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.SOURCE)
-    private @interface NativeEntryPoint {
-    }
 
     private static final String TAG = "GnssLocationProvider";
 
@@ -311,9 +297,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final ExponentialBackOff mPsdsBackOff = new ExponentialBackOff(RETRY_INTERVAL,
             MAX_RETRY_INTERVAL);
 
-    private static boolean sIsInitialized = false;
-    private static boolean sStaticTestOverride = false;
-
     // True if we are enabled
     @GuardedBy("mLock")
     private boolean mGpsEnabled;
@@ -400,6 +383,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final GnssBatchingProvider mGnssBatchingProvider;
     private final GnssGeofenceProvider mGnssGeofenceProvider;
     private final GnssCapabilitiesProvider mGnssCapabilitiesProvider;
+    private final GnssSatelliteBlacklistHelper mGnssSatelliteBlacklistHelper;
 
     // Available only on GNSS HAL 2.0 implementations and later.
     private GnssVisibilityControl mGnssVisibilityControl;
@@ -590,29 +574,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    @VisibleForTesting
-    public static void setIsSupportedForTest(boolean override) {
-        sStaticTestOverride = override;
-    }
-
-    /**
-     * Indicates if GNSS location is supported.
-     */
-    public static boolean isSupported() {
-        if (sStaticTestOverride) {
-            return true;
-        }
-        ensureInitialized();
-        return native_is_supported();
-    }
-
-    private static synchronized void ensureInitialized() {
-        if (!sIsInitialized) {
-            class_init_native();
-        }
-        sIsInitialized = true;
-    }
-
     private void reloadGpsProperties() {
         mGnssConfiguration.reloadGpsProperties();
         setSuplHostPort();
@@ -631,8 +592,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
             AppForegroundHelper appForegroundHelper, LocationUsageLogger logger) {
         super(FgThread.getExecutor(), CallerIdentity.fromContext(context));
-
-        ensureInitialized();
 
         mContext = context;
         mLooper = FgThread.getHandler().getLooper();
@@ -675,8 +634,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mNetworkConnectivityHandler = new GnssNetworkConnectivityHandler(context,
                 GnssLocationProvider.this::onNetworkAvailable, mLooper, mNIHandler);
 
-        sendMessage(INITIALIZE_HANDLER, 0, null);
-
         mGnssStatusListenerHelper = new GnssStatusProvider(userInfoHelper, settingsHelper,
                 appOpsHelper, appForegroundHelper, logger);
         mGnssMeasurementsProvider = new GnssMeasurementsProvider(userInfoHelper,
@@ -689,13 +646,18 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         mGnssMetrics = new GnssMetrics(mContext, mBatteryStats);
         mNtpTimeHelper = new NtpTimeHelper(mContext, mLooper, this);
-        GnssSatelliteBlacklistHelper gnssSatelliteBlacklistHelper =
+        mGnssSatelliteBlacklistHelper =
                 new GnssSatelliteBlacklistHelper(mContext,
                         mLooper, this);
-        mHandler.post(gnssSatelliteBlacklistHelper::updateSatelliteBlacklist);
         mGnssBatchingProvider = new GnssBatchingProvider();
         mGnssGeofenceProvider = new GnssGeofenceProvider();
 
+        setProperties(PROPERTIES);
+        setAllowed(true);
+    }
+
+    /** Called when system is ready. */
+    public synchronized void onSystemReady() {
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -716,8 +678,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     }
                 }, UserHandle.USER_ALL);
 
-        setProperties(PROPERTIES);
-        setAllowed(true);
+        sendMessage(INITIALIZE_HANDLER, 0, null);
+        mHandler.post(mGnssSatelliteBlacklistHelper::updateSatelliteBlacklist);
     }
 
     /**
@@ -1327,8 +1289,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         return (mTopHalCapabilities & capability) != 0;
     }
 
-    @NativeEntryPoint
-    private void reportLocation(boolean hasLatLong, Location location) {
+    void reportLocation(boolean hasLatLong, Location location) {
         sendMessage(REPORT_LOCATION, hasLatLong ? 1 : 0, location);
     }
 
@@ -1410,8 +1371,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    @NativeEntryPoint
-    private void reportStatus(int status) {
+    void reportStatus(int status) {
         if (DEBUG) Log.v(TAG, "reportStatus status: " + status);
 
         boolean wasNavigating = mNavigating;
@@ -1434,8 +1394,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    @NativeEntryPoint
-    private void reportSvStatus(int svCount, int[] svidWithFlags, float[] cn0DbHzs,
+    void reportSvStatus(int svCount, int[] svidWithFlags, float[] cn0DbHzs,
             float[] elevations, float[] azimuths, float[] carrierFrequencies,
             float[] basebandCn0DbHzs) {
         sendMessage(REPORT_SV_STATUS, 0,
@@ -1475,13 +1434,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mGnssMetrics.logSvStatus(gnssStatus);
     }
 
-    @NativeEntryPoint
-    private void reportAGpsStatus(int agpsType, int agpsStatus, byte[] suplIpAddr) {
+    void reportAGpsStatus(int agpsType, int agpsStatus, byte[] suplIpAddr) {
         mNetworkConnectivityHandler.onReportAGpsStatus(agpsType, agpsStatus, suplIpAddr);
     }
 
-    @NativeEntryPoint
-    private void reportNmea(long timestamp) {
+    void reportNmea(long timestamp) {
         if (!mItarSpeedLimitExceeded) {
             int length = native_read_nmea(mNmeaBuffer, mNmeaBuffer.length);
             String nmea = new String(mNmeaBuffer, 0 /* offset */, length);
@@ -1489,29 +1446,25 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    @NativeEntryPoint
-    private void reportMeasurementData(GnssMeasurementsEvent event) {
+    void reportMeasurementData(GnssMeasurementsEvent event) {
         if (!mItarSpeedLimitExceeded) {
             // send to handler to allow native to return quickly
             mHandler.post(() -> mGnssMeasurementsProvider.onMeasurementsAvailable(event));
         }
     }
 
-    @NativeEntryPoint
-    private void reportAntennaInfo(List<GnssAntennaInfo> antennaInfos) {
+    void reportAntennaInfo(List<GnssAntennaInfo> antennaInfos) {
         mHandler.post(() -> mGnssAntennaInfoProvider.onGnssAntennaInfoAvailable(antennaInfos));
     }
 
-    @NativeEntryPoint
-    private void reportNavigationMessage(GnssNavigationMessage event) {
+    void reportNavigationMessage(GnssNavigationMessage event) {
         if (!mItarSpeedLimitExceeded) {
             // send to handler to allow native to return quickly
             mHandler.post(() -> mGnssNavigationMessageProvider.onNavigationMessageAvailable(event));
         }
     }
 
-    @NativeEntryPoint
-    private void setTopHalCapabilities(int topHalCapabilities) {
+    void setTopHalCapabilities(int topHalCapabilities) {
         mHandler.post(() -> {
             mTopHalCapabilities = topHalCapabilities;
 
@@ -1526,8 +1479,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         });
     }
 
-    @NativeEntryPoint
-    private void setSubHalMeasurementCorrectionsCapabilities(int subHalCapabilities) {
+    void setSubHalMeasurementCorrectionsCapabilities(int subHalCapabilities) {
         mHandler.post(() -> {
             if (!mGnssMeasurementCorrectionsProvider.onCapabilitiesUpdated(subHalCapabilities)) {
                 return;
@@ -1552,32 +1504,32 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         updateRequirements();
     }
 
-    @NativeEntryPoint
-    private void setGnssYearOfHardware(final int yearOfHardware) {
+    void setGnssYearOfHardware(final int yearOfHardware) {
         // mHardwareYear is simply set here, to be read elsewhere, and is volatile for safe sync
         if (DEBUG) Log.d(TAG, "setGnssYearOfHardware called with " + yearOfHardware);
         mHardwareYear = yearOfHardware;
     }
 
-    @NativeEntryPoint
-    private void setGnssHardwareModelName(final String modelName) {
+    void setGnssHardwareModelName(final String modelName) {
         // mHardwareModelName is simply set here, to be read elsewhere, and volatile for safe sync
         if (DEBUG) Log.d(TAG, "setGnssModelName called with " + modelName);
         mHardwareModelName = modelName;
     }
 
-    @NativeEntryPoint
-    private void reportGnssServiceDied() {
+    void reportGnssServiceRestarted() {
         if (DEBUG) Log.d(TAG, "reportGnssServiceDied");
-        mHandler.post(() -> {
-            setupNativeGnssService(/* reinitializeGnssServiceHandle = */ true);
-            // resend configuration into the restarted HAL service.
-            reloadGpsProperties();
-            if (isGpsEnabled()) {
-                setGpsEnabled(false);
-                updateEnabled();
-            }
-        });
+
+        // it *appears* that native_init() needs to be called at least once before invoking any
+        // other gnss methods, so we cycle once on initialization.
+        native_init();
+        native_cleanup();
+
+        // resend configuration into the restarted HAL service.
+        reloadGpsProperties();
+        if (isGpsEnabled()) {
+            setGpsEnabled(false);
+            updateEnabled();
+        }
     }
 
     /**
@@ -1643,8 +1595,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         return mGnssCapabilitiesProvider;
     }
 
-    @NativeEntryPoint
-    private void reportLocationBatch(Location[] locationArray) {
+    void reportLocationBatch(Location[] locationArray) {
         List<Location> locations = new ArrayList<>(Arrays.asList(locationArray));
         if (DEBUG) {
             Log.d(TAG, "Location batch of size " + locationArray.length + " reported");
@@ -1652,8 +1603,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         reportLocation(locations);
     }
 
-    @NativeEntryPoint
-    private void psdsDownloadRequest() {
+    void psdsDownloadRequest() {
         if (DEBUG) Log.d(TAG, "psdsDownloadRequest");
         sendMessage(DOWNLOAD_PSDS_DATA, 0, null);
     }
@@ -1680,8 +1630,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    @NativeEntryPoint
-    private void reportGeofenceTransition(int geofenceId, Location location, int transition,
+    void reportGeofenceTransition(int geofenceId, Location location, int transition,
             long transitionTimestamp) {
         mHandler.post(() -> {
             if (mGeofenceHardwareImpl == null) {
@@ -1698,8 +1647,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         });
     }
 
-    @NativeEntryPoint
-    private void reportGeofenceStatus(int status, Location location) {
+    void reportGeofenceStatus(int status, Location location) {
         mHandler.post(() -> {
             if (mGeofenceHardwareImpl == null) {
                 mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
@@ -1716,8 +1664,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         });
     }
 
-    @NativeEntryPoint
-    private void reportGeofenceAddStatus(int geofenceId, int status) {
+    void reportGeofenceAddStatus(int geofenceId, int status) {
         mHandler.post(() -> {
             if (mGeofenceHardwareImpl == null) {
                 mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
@@ -1726,8 +1673,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         });
     }
 
-    @NativeEntryPoint
-    private void reportGeofenceRemoveStatus(int geofenceId, int status) {
+    void reportGeofenceRemoveStatus(int geofenceId, int status) {
         mHandler.post(() -> {
             if (mGeofenceHardwareImpl == null) {
                 mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
@@ -1736,8 +1682,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         });
     }
 
-    @NativeEntryPoint
-    private void reportGeofencePauseStatus(int geofenceId, int status) {
+    void reportGeofencePauseStatus(int geofenceId, int status) {
         mHandler.post(() -> {
             if (mGeofenceHardwareImpl == null) {
                 mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
@@ -1746,8 +1691,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         });
     }
 
-    @NativeEntryPoint
-    private void reportGeofenceResumeStatus(int geofenceId, int status) {
+    void reportGeofenceResumeStatus(int geofenceId, int status) {
         mHandler.post(() -> {
             if (mGeofenceHardwareImpl == null) {
                 mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
@@ -1797,18 +1741,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     /** Reports a NI notification. */
-    @NativeEntryPoint
-    public void reportNiNotification(
-            int notificationId,
-            int niType,
-            int notifyFlags,
-            int timeout,
-            int defaultResponse,
-            String requestorId,
-            String text,
-            int requestorIdEncoding,
-            int textEncoding
-    ) {
+    void reportNiNotification(int notificationId, int niType, int notifyFlags, int timeout,
+            int defaultResponse, String requestorId, String text, int requestorIdEncoding,
+            int textEncoding) {
         Log.i(TAG, "reportNiNotification: entered");
         Log.i(TAG, "notificationId: " + notificationId
                 + ", niType: " + niType
@@ -1859,8 +1794,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      * We should be careful about receiving null string from the TelephonyManager,
      * because sending null String to JNI function would cause a crash.
      */
-    @NativeEntryPoint
-    private void requestSetID(int flags) {
+    void requestSetID(int flags) {
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
         int type = AGPS_SETID_TYPE_NONE;
@@ -1887,8 +1821,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         native_agps_set_id(type, (setId == null) ? "" : setId);
     }
 
-    @NativeEntryPoint
-    private void requestLocation(boolean independentFromGnss, boolean isUserEmergency) {
+    void requestLocation(boolean independentFromGnss, boolean isUserEmergency) {
         if (DEBUG) {
             Log.d(TAG, "requestLocation. independentFromGnss: " + independentFromGnss
                     + ", isUserEmergency: "
@@ -1897,14 +1830,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         sendMessage(REQUEST_LOCATION, independentFromGnss ? 1 : 0, isUserEmergency);
     }
 
-    @NativeEntryPoint
-    private void requestUtcTime() {
+    void requestUtcTime() {
         if (DEBUG) Log.d(TAG, "utcTimeRequest");
         sendMessage(INJECT_NTP_TIME, 0, null);
     }
 
-    @NativeEntryPoint
-    private void requestRefLocation() {
+    void requestRefLocation() {
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
         final int phoneType = phone.getPhoneType();
@@ -1936,8 +1867,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     // Implements method nfwNotifyCb() in IGnssVisibilityControlCallback.hal.
-    @NativeEntryPoint
-    private void reportNfwNotification(String proxyAppPackageName, byte protocolStack,
+    void reportNfwNotification(String proxyAppPackageName, byte protocolStack,
             String otherProtocolStackName, byte requestor, String requestorId, byte responseType,
             boolean inEmergencyMode, boolean isCachedLocation) {
         if (mGnssVisibilityControl == null) {
@@ -1951,7 +1881,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     // Implements method isInEmergencySession() in IGnssVisibilityControlCallback.hal.
-    @NativeEntryPoint
     boolean isInEmergencySession() {
         return mNIHandler.getInEmergency();
     }
@@ -2020,8 +1949,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
          * registering for events that will be posted to this handler.
          */
         private void handleInitialize() {
-            // class_init_native() already initializes the GNSS service handle during class loading.
-            setupNativeGnssService(/* reinitializeGnssServiceHandle = */ false);
+            // it *appears* that native_init() needs to be called at least once before invoking any
+            // other gnss methods, so we cycle once on initialization.
+            native_init();
+            native_cleanup();
 
             if (native_is_gnss_visibility_control_supported()) {
                 mGnssVisibilityControl = new GnssVisibilityControl(mContext, mLooper, mNIHandler);
@@ -2155,33 +2086,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         pw.append(s);
     }
 
-    private void setupNativeGnssService(boolean reinitializeGnssServiceHandle) {
-        native_init_once(reinitializeGnssServiceHandle);
-
-        /*
-         * A cycle of native_init() and native_cleanup() is needed so that callbacks are
-         * registered after bootup even when location is disabled.
-         * This will allow Emergency SUPL to work even when location is disabled before device
-         * restart.
-         */
-        boolean isInitialized = native_init();
-        if (!isInitialized) {
-            Log.w(TAG, "Native initialization failed.");
-        } else {
-            native_cleanup();
-        }
-    }
-
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
 
-    private static native void class_init_native();
-
-    private static native boolean native_is_supported();
-
     private static native boolean native_is_gnss_visibility_control_supported();
-
-    private static native void native_init_once(boolean reinitializeGnssServiceHandle);
 
     private native boolean native_init();
 
