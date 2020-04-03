@@ -946,13 +946,6 @@ sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const in
     return processor;
 }
 
-AttributionNodeInternal CreateAttribution(const int& uid, const string& tag) {
-    AttributionNodeInternal attribution;
-    attribution.set_uid(uid);
-    attribution.set_tag(tag);
-    return attribution;
-}
-
 void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events) {
   std::sort(events->begin(), events->end(),
             [](const std::unique_ptr<LogEvent>& a, const std::unique_ptr<LogEvent>& b) {

@@ -263,9 +263,6 @@ std::unique_ptr<LogEvent> CreateOverlayStateChangedEvent(int64_t timestampNs, co
                                                          const bool usingAlertWindow,
                                                          const OverlayStateChanged::State state);
 
-// Helper function to create an AttributionNodeInternal proto.
-AttributionNodeInternal CreateAttribution(const int& uid, const string& tag);
-
 // Create a statsd log event processor upon the start time in seconds, config and key.
 sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
                                               const StatsdConfig& config, const ConfigKey& key,
