@@ -54,9 +54,9 @@ import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -98,6 +98,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             Dependency.get(StatusBarStateController.class);
     private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
+    private final AssistantFeedbackController mAssistantFeedbackController;
 
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
@@ -133,7 +134,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             ShortcutManager shortcutManager,
             ChannelEditorDialogController channelEditorDialogController,
             CurrentUserContextTracker contextTracker,
-            Provider<PriorityOnboardingDialogController.Builder> builderProvider) {
+            Provider<PriorityOnboardingDialogController.Builder> builderProvider,
+            AssistantFeedbackController assistantFeedbackController
+    ) {
         mContext = context;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarLazy = statusBarLazy;
@@ -147,6 +150,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mContextTracker = contextTracker;
         mBuilderProvider = builderProvider;
         mChannelEditorDialogController = channelEditorDialogController;
+        mAssistantFeedbackController = assistantFeedbackController;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -337,8 +341,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
                 userHandle.getIdentifier());
 
-        if (NotificationViewHierarchyManager.showFeedback(row.getEntry())) {
-            feedbackInfo.bindGuts(pmUser, sbn, row.getEntry());
+        if (mAssistantFeedbackController.showFeedbackIndicator(row.getEntry())) {
+            feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), mAssistantFeedbackController);
         }
     }
 
@@ -391,7 +395,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 row.getIsNonblockable(),
                 mHighPriorityProvider.isHighPriority(row.getEntry()),
-                NotificationViewHierarchyManager.showFeedback(row.getEntry()));
+                mAssistantFeedbackController.isFeedbackEnabled());
     }
 
     /**

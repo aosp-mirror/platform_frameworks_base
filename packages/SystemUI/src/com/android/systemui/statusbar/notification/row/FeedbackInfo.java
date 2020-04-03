@@ -43,6 +43,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -62,6 +63,7 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
 
     private NotificationEntryManager mNotificationEntryManager;
     private IStatusBarService mStatusBarService;
+    private AssistantFeedbackController mFeedbackController;
 
     public FeedbackInfo(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -70,11 +72,13 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
     public void bindGuts(
             final PackageManager pm,
             final StatusBarNotification sbn,
-            final NotificationEntry entry) {
+            final NotificationEntry entry,
+            final AssistantFeedbackController controller) {
         mPkg = sbn.getPackageName();
         mPm = pm;
         mEntry = entry;
         mRanking = entry.getRanking();
+        mFeedbackController = controller;
         mAppName = mPkg;
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mStatusBarService = Dependency.get(IStatusBarService.class);
@@ -184,6 +188,10 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
     }
 
     private void sendFeedbackToAssistant(Bundle feedback) {
+        if (!mFeedbackController.isFeedbackEnabled()) {
+            return;
+        }
+
         //TODO(b/154257994): remove this when feedback apis are in place
         final int count = mNotificationEntryManager.getActiveNotificationsCount();
         final int rank = mEntry.getRanking().getRank();

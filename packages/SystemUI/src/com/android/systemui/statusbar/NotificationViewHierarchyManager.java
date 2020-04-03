@@ -31,6 +31,7 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -88,6 +89,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final KeyguardBypassController mBypassController;
     private final ForegroundServiceSectionController mFgsSectionController;
+    private AssistantFeedbackController mAssistantFeedbackController;
     private final Context mContext;
 
     private NotificationPresenter mPresenter;
@@ -115,7 +117,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             DynamicPrivacyController privacyController,
             ForegroundServiceSectionController fgsSectionController,
             DynamicChildBindController dynamicChildBindController,
-            LowPriorityInflationHelper lowPriorityInflationHelper) {
+            LowPriorityInflationHelper lowPriorityInflationHelper,
+            AssistantFeedbackController assistantFeedbackController) {
         mContext = context;
         mHandler = mainHandler;
         mLockscreenUserManager = notificationLockscreenUserManager;
@@ -132,6 +135,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mDynamicPrivacyController = privacyController;
         mDynamicChildBindController = dynamicChildBindController;
         mLowPriorityInflationHelper = lowPriorityInflationHelper;
+        mAssistantFeedbackController = assistantFeedbackController;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -488,7 +492,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             }
 
             row.showAppOpsIcons(entry.mActiveAppOps);
-            row.showFeedbackIcon(showFeedback(entry));
+            row.showFeedbackIcon(mAssistantFeedbackController.showFeedbackIndicator(entry));
             row.setLastAudiblyAlertedMs(entry.getLastAudiblyAlertedMs());
         }
 
@@ -529,11 +533,5 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             Log.wtf(TAG, "Manager state has become desynced", new Exception());
         }
         mPerformingUpdate = false;
-    }
-
-    public static boolean showFeedback(NotificationEntry entry) {
-        Ranking ranking = entry.getRanking();
-        return ranking.getImportance() != ranking.getChannel().getImportance()
-                || ranking.getRankingAdjustment() != Ranking.RANKING_UNCHANGED;
     }
 }

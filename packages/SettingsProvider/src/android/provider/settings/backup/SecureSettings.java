@@ -112,6 +112,7 @@ public class SecureSettings {
         Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
         Settings.Secure.VR_DISPLAY_MODE,
         Settings.Secure.NOTIFICATION_BADGING,
+        Settings.Secure.NOTIFICATION_FEEDBACK_ENABLED,
         Settings.Secure.NOTIFICATION_DISMISS_RTL,
         Settings.Secure.QS_AUTO_ADDED_TILES,
         Settings.Secure.SCREENSAVER_ENABLED,

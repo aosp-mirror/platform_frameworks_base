@@ -56,6 +56,7 @@ import android.widget.TextView;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -112,7 +113,8 @@ public class FeedbackInfoTest extends SysuiTestCase {
     @Test
     public void testBindNotification_SetsTextApplicationName() {
         when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
-        mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry());
+        mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(),
+                mock(AssistantFeedbackController.class));
         final TextView textView = mFeedbackInfo.findViewById(R.id.pkg_name);
         assertTrue(textView.getText().toString().contains("App Name"));
     }
@@ -122,7 +124,8 @@ public class FeedbackInfoTest extends SysuiTestCase {
         final Drawable iconDrawable = mock(Drawable.class);
         when(mMockPackageManager.getApplicationIcon(any(ApplicationInfo.class)))
                 .thenReturn(iconDrawable);
-        mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry());
+        mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(),
+                mock(AssistantFeedbackController.class));
         final ImageView iconView = mFeedbackInfo.findViewById(R.id.pkg_icon);
         assertEquals(iconDrawable, iconView.getDrawable());
     }
@@ -130,7 +133,8 @@ public class FeedbackInfoTest extends SysuiTestCase {
     @Test
     public void testOk() {
         final CountDownLatch latch = new CountDownLatch(1);
-        mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry());
+        mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(),
+                mock(AssistantFeedbackController.class));
 
         final View okButton = mFeedbackInfo.findViewById(R.id.ok);
         okButton.performClick();
@@ -141,7 +145,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
     @Test
     public void testPrompt_silenced() {
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(IMPORTANCE_DEFAULT,
-                IMPORTANCE_LOW, RANKING_UNCHANGED));
+                IMPORTANCE_LOW, RANKING_UNCHANGED), mock(AssistantFeedbackController.class));
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was silenced by the system. Was this correct?",
                 prompt.getText());
@@ -150,7 +154,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
     @Test
     public void testPrompt_promoted_importance() {
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(IMPORTANCE_DEFAULT,
-                IMPORTANCE_HIGH, RANKING_UNCHANGED));
+                IMPORTANCE_HIGH, RANKING_UNCHANGED), mock(AssistantFeedbackController.class));
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was promoted by the system. Was this correct?",
                 prompt.getText());
@@ -159,7 +163,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
     @Test
     public void testPrompt_promoted_ranking() {
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(IMPORTANCE_DEFAULT,
-                IMPORTANCE_DEFAULT, RANKING_PROMOTED));
+                IMPORTANCE_DEFAULT, RANKING_PROMOTED), mock(AssistantFeedbackController.class));
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was promoted by the system. Was this correct?",
                 prompt.getText());
@@ -168,7 +172,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
     @Test
     public void testPrompt_demoted_importance() {
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(IMPORTANCE_LOW,
-                IMPORTANCE_MIN, RANKING_UNCHANGED));
+                IMPORTANCE_MIN, RANKING_UNCHANGED), mock(AssistantFeedbackController.class));
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was demoted by the system. Was this correct?",
                 prompt.getText());
@@ -177,7 +181,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
     @Test
     public void testPrompt_demoted_ranking() {
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(IMPORTANCE_DEFAULT,
-                IMPORTANCE_DEFAULT, RANKING_DEMOTED));
+                IMPORTANCE_DEFAULT, RANKING_DEMOTED), mock(AssistantFeedbackController.class));
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was demoted by the system. Was this correct?",
                 prompt.getText());
