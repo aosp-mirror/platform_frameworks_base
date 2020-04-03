@@ -81,11 +81,15 @@ public class BubbleOverflowActivity extends Activity {
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        final int viewWidth = displayMetrics.widthPixels / columns;
+        final int recyclerViewWidth = (displayMetrics.widthPixels
+                - res.getDimensionPixelSize(R.dimen.bubble_overflow_padding));
+        final int viewWidth = recyclerViewWidth / columns;
 
         final int maxOverflowBubbles = res.getInteger(R.integer.bubbles_max_overflow);
         final int rows = (int) Math.ceil((double) maxOverflowBubbles / columns);
-        final int viewHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height) / rows;
+        final int recyclerViewHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height)
+                - res.getDimensionPixelSize(R.dimen.bubble_overflow_padding);
+        final int viewHeight = recyclerViewHeight / rows;
 
         mAdapter = new BubbleOverflowAdapter(mOverflowBubbles,
                 mBubbleController::promoteBubbleFromOverflow, viewWidth, viewHeight);

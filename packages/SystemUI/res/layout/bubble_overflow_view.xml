@@ -37,5 +37,6 @@
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:layout_gravity="center"
+        android:paddingTop="@dimen/bubble_overflow_text_padding"
         android:gravity="center"/>
 </LinearLayout>
