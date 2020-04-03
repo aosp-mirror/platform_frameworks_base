@@ -105,18 +105,6 @@ public final class NotificationEntry extends ListEntry {
     /** List of dismiss interceptors that are intercepting the dismissal of this notification. */
     final List<NotifDismissInterceptor> mDismissInterceptors = new ArrayList<>();
 
-    /** If this notification was filtered out, then the filter that did the filtering. */
-    @Nullable NotifFilter mExcludingFilter;
-
-    /**
-     * The NotifFilter, if any, that was active on this notification during the previous run of
-     * the list builder.
-     */
-    @Nullable NotifFilter mPreviousExcludingFilter;
-
-    /** If this was a group child that was promoted to the top level, then who did the promoting. */
-    @Nullable NotifPromoter mNotifPromoter;
-
     /**
      * If this notification was cancelled by system server, then the reason that was supplied.
      * Uncancelled notifications always have REASON_NOT_CANCELED. Note that lifetime-extended
@@ -281,6 +269,14 @@ public final class NotificationEntry extends ListEntry {
 
     void setDismissState(@NonNull DismissState dismissState) {
         mDismissState = requireNonNull(dismissState);
+    }
+
+    @Nullable public NotifFilter getExcludingFilter() {
+        return getAttachState().getExcludingFilter();
+    }
+
+    @Nullable public NotifPromoter getNotifPromoter() {
+        return getAttachState().getPromoter();
     }
 
     /*
