@@ -32,4 +32,8 @@ public class BadParcelableException extends AndroidRuntimeException {
     public BadParcelableException(Exception cause) {
         super(cause);
     }
+    /** @hide */
+    public BadParcelableException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }
