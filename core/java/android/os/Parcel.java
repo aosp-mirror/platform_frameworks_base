@@ -3264,15 +3264,15 @@ public final class Parcel {
         } catch (IllegalAccessException e) {
             Log.e(TAG, "Illegal access when unmarshalling: " + name, e);
             throw new BadParcelableException(
-                    "IllegalAccessException when unmarshalling: " + name);
+                    "IllegalAccessException when unmarshalling: " + name, e);
         } catch (ClassNotFoundException e) {
             Log.e(TAG, "Class not found when unmarshalling: " + name, e);
             throw new BadParcelableException(
-                    "ClassNotFoundException when unmarshalling: " + name);
+                    "ClassNotFoundException when unmarshalling: " + name, e);
         } catch (NoSuchFieldException e) {
             throw new BadParcelableException("Parcelable protocol requires a "
                     + "Parcelable.Creator object called "
-                    + "CREATOR on class " + name);
+                    + "CREATOR on class " + name, e);
         }
         if (creator == null) {
             throw new BadParcelableException("Parcelable protocol requires a "
