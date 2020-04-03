@@ -417,8 +417,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN each filtered notif records the NotifFilter that did it
-        assertEquals(preGroupFilter, mEntrySet.get(1).mExcludingFilter);
-        assertEquals(preGroupFilter, mEntrySet.get(3).mExcludingFilter);
+        assertEquals(preGroupFilter, mEntrySet.get(1).getExcludingFilter());
+        assertEquals(preGroupFilter, mEntrySet.get(3).getExcludingFilter());
     }
 
     @Test
@@ -447,8 +447,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN each filtered notif records the filter that did it
-        assertEquals(filter1, mEntrySet.get(1).mExcludingFilter);
-        assertEquals(filter1, mEntrySet.get(3).mExcludingFilter);
+        assertEquals(filter1, mEntrySet.get(1).getExcludingFilter());
+        assertEquals(filter1, mEntrySet.get(3).getExcludingFilter());
     }
 
     @Test
@@ -471,7 +471,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN each filtered notif records the filter that did it
-        assertEquals(filter1, mEntrySet.get(0).mExcludingFilter);
+        assertEquals(filter1, mEntrySet.get(0).getExcludingFilter());
     }
 
     @Test
@@ -502,8 +502,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN each filtered notif records the filter that did it
-        assertEquals(filter1, mEntrySet.get(1).mExcludingFilter);
-        assertEquals(filter2, mEntrySet.get(2).mExcludingFilter);
+        assertEquals(filter1, mEntrySet.get(1).getExcludingFilter());
+        assertEquals(filter2, mEntrySet.get(2).getExcludingFilter());
     }
 
     @Test
@@ -541,8 +541,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN each promoted notif records the promoter that did it
-        assertEquals(promoter, mEntrySet.get(2).mNotifPromoter);
-        assertEquals(promoter, mEntrySet.get(3).mNotifPromoter);
+        assertEquals(promoter, mEntrySet.get(2).getNotifPromoter());
+        assertEquals(promoter, mEntrySet.get(3).getNotifPromoter());
     }
 
     @Test
@@ -572,8 +572,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         verify(promoter2).shouldPromoteToTopLevel(mEntrySet.get(3));
 
         // THEN each promoter is recorded on each notif it promoted
-        assertEquals(promoter1, mEntrySet.get(2).mNotifPromoter);
-        assertEquals(promoter2, mEntrySet.get(3).mNotifPromoter);
+        assertEquals(promoter1, mEntrySet.get(2).getNotifPromoter());
+        assertEquals(promoter2, mEntrySet.get(3).getNotifPromoter());
     }
 
     @Test
@@ -650,34 +650,34 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         verify(pkg5Section).isInSection(mEntrySet.get(9));
 
         // THEN the correct section is assigned for entries in pkg1Section
-        assertEquals(pkg1Section, mEntrySet.get(2).mNotifSection);
+        assertEquals(pkg1Section, mEntrySet.get(2).getNotifSection());
         assertEquals(0, mEntrySet.get(2).getSection());
-        assertEquals(pkg1Section, mEntrySet.get(7).mNotifSection);
+        assertEquals(pkg1Section, mEntrySet.get(7).getNotifSection());
         assertEquals(0, mEntrySet.get(7).getSection());
 
         // THEN the correct section is assigned for entries in pkg2Section
-        assertEquals(pkg2Section, mEntrySet.get(1).mNotifSection);
+        assertEquals(pkg2Section, mEntrySet.get(1).getNotifSection());
         assertEquals(1, mEntrySet.get(1).getSection());
-        assertEquals(pkg2Section, mEntrySet.get(8).mNotifSection);
+        assertEquals(pkg2Section, mEntrySet.get(8).getNotifSection());
         assertEquals(1, mEntrySet.get(8).getSection());
-        assertEquals(pkg2Section, mBuiltList.get(3).mNotifSection);
+        assertEquals(pkg2Section, mBuiltList.get(3).getNotifSection());
         assertEquals(1, mBuiltList.get(3).getSection());
 
         // THEN no section was assigned to entries in pkg4Section (since they were filtered)
-        assertEquals(null, mEntrySet.get(0).mNotifSection);
+        assertEquals(null, mEntrySet.get(0).getNotifSection());
         assertEquals(-1, mEntrySet.get(0).getSection());
-        assertEquals(null, mEntrySet.get(10).mNotifSection);
+        assertEquals(null, mEntrySet.get(10).getNotifSection());
         assertEquals(-1, mEntrySet.get(10).getSection());
 
 
         // THEN the correct section is assigned for entries in pkg5Section
-        assertEquals(pkg5Section, mEntrySet.get(9).mNotifSection);
+        assertEquals(pkg5Section, mEntrySet.get(9).getNotifSection());
         assertEquals(3, mEntrySet.get(9).getSection());
 
         // THEN the children entries are assigned the same section as its parent
-        assertEquals(mBuiltList.get(3).mNotifSection, child(5).entry.mNotifSection);
+        assertEquals(mBuiltList.get(3).getNotifSection(), child(5).entry.getNotifSection());
         assertEquals(mBuiltList.get(3).getSection(), child(5).entry.getSection());
-        assertEquals(mBuiltList.get(3).mNotifSection, child(6).entry.mNotifSection);
+        assertEquals(mBuiltList.get(3).getNotifSection(), child(6).entry.getNotifSection());
         assertEquals(mBuiltList.get(3).getSection(), child(6).entry.getSection());
     }
 
@@ -700,7 +700,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         // THEN the entry that didn't have an explicit section gets assigned the DefaultSection
         assertEquals(1, notif(0).entry.getSection());
-        assertNotNull(notif(0).entry.mNotifSection);
+        assertNotNull(notif(0).entry.getNotifSection());
     }
 
     @Test
