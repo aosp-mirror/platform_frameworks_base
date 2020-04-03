@@ -117,7 +117,6 @@ public class Toast {
     private final Binder mToken;
     private final Context mContext;
     private final Handler mHandler;
-    private final ToastPresenter mPresenter;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final TN mTN;
     @UnsupportedAppUsage
@@ -165,8 +164,8 @@ public class Toast {
         looper = getLooper(looper);
         mHandler = new Handler(looper);
         mCallbacks = new ArrayList<>();
-        mPresenter = new ToastPresenter(context, AccessibilityManager.getInstance(context));
-        mTN = new TN(mPresenter, context.getPackageName(), mToken, mCallbacks, looper);
+        mTN = new TN(context, context.getPackageName(), mToken,
+                mCallbacks, looper);
         mTN.mY = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.toast_y_offset);
         mTN.mGravity = context.getResources().getInteger(
@@ -496,7 +495,7 @@ public class Toast {
             return result;
         } else {
             Toast result = new Toast(context, looper);
-            View v = result.mPresenter.getTextToastView(text);
+            View v = ToastPresenter.getTextToastView(context, text);
             result.mNextView = v;
             result.mDuration = duration;
 
@@ -565,13 +564,14 @@ public class Toast {
         if (sService != null) {
             return sService;
         }
-        sService = INotificationManager.Stub.asInterface(ServiceManager.getService("notification"));
+        sService = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         return sService;
     }
 
     private static class TN extends ITransientNotification.Stub {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-        private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
+        private final WindowManager.LayoutParams mParams;
 
         private static final int SHOW = 0;
         private static final int HIDE = 1;
@@ -608,9 +608,13 @@ public class Toast {
          * The parameter {@code callbacks} is not copied and is accessed with itself as its own
          * lock.
          */
-        TN(ToastPresenter presenter, String packageName, Binder token, List<Callback> callbacks,
+        TN(Context context, String packageName, Binder token, List<Callback> callbacks,
                 @Nullable Looper looper) {
-            mPresenter = presenter;
+            WindowManager windowManager = context.getSystemService(WindowManager.class);
+            AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(context);
+            mPresenter = new ToastPresenter(context, windowManager, accessibilityManager,
+                    getService(), packageName);
+            mParams = mPresenter.getLayoutParams();
             mPackageName = packageName;
             mToken = token;
             mCallbacks = callbacks;
@@ -645,8 +649,6 @@ public class Toast {
                     }
                 }
             };
-
-            presenter.startLayoutParams(mParams, packageName);
         }
 
         private List<Callback> getCallbacks() {
@@ -691,31 +693,9 @@ public class Toast {
                 // remove the old view if necessary
                 handleHide();
                 mView = mNextView;
-                Context context = mView.getContext().getApplicationContext();
-                if (context == null) {
-                    context = mView.getContext();
-                }
-                mWM = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                mPresenter.adjustLayoutParams(mParams, windowToken, mDuration, mGravity, mX, mY,
-                        mHorizontalMargin, mVerticalMargin);
-                if (mView.getParent() != null) {
-                    if (localLOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
-                    mWM.removeView(mView);
-                }
-                if (localLOGV) Log.v(TAG, "ADD! " + mView + " in " + this);
-                // Since the notification manager service cancels the token right
-                // after it notifies us to cancel the toast there is an inherent
-                // race and we may attempt to add a window after the token has been
-                // invalidated. Let us hedge against that.
-                try {
-                    mWM.addView(mView, mParams);
-                    mPresenter.trySendAccessibilityEvent(mView, mPackageName);
-                    for (Callback callback : getCallbacks()) {
-                        callback.onToastShown();
-                    }
-                } catch (WindowManager.BadTokenException e) {
-                    /* ignore */
-                }
+                mPresenter.show(mView, mToken, windowToken, mDuration, mGravity, mX, mY,
+                        mHorizontalMargin, mVerticalMargin,
+                        new CallbackBinder(getCallbacks(), mHandler));
             }
         }
 
@@ -723,25 +703,9 @@ public class Toast {
         public void handleHide() {
             if (localLOGV) Log.v(TAG, "HANDLE HIDE: " + this + " mView=" + mView);
             if (mView != null) {
-                // note: checking parent() just to make sure the view has
-                // been added...  i have seen cases where we get here when
-                // the view isn't yet added, so let's try not to crash.
-                if (mView.getParent() != null) {
-                    if (localLOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
-                    mWM.removeViewImmediate(mView);
-                }
-
-
-                // Now that we've removed the view it's safe for the server to release
-                // the resources.
-                try {
-                    getService().finishToken(mPackageName, mToken);
-                } catch (RemoteException e) {
-                }
-
-                for (Callback callback : getCallbacks()) {
-                    callback.onToastHidden();
-                }
+                checkState(mView == mPresenter.getView(),
+                        "Trying to hide toast view different than the last one displayed");
+                mPresenter.hide(new CallbackBinder(getCallbacks(), mHandler));
                 mView = null;
             }
         }
