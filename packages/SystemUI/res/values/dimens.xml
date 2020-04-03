@@ -477,6 +477,7 @@
     <dimen name="qs_tile_height">106dp</dimen>
     <dimen name="qs_tile_layout_margin_side">6dp</dimen>
     <dimen name="qs_tile_margin_horizontal">18dp</dimen>
+    <dimen name="qs_tile_margin_horizontal_two_line">2dp</dimen>
     <dimen name="qs_tile_margin_vertical">24dp</dimen>
     <dimen name="qs_tile_margin_top_bottom">12dp</dimen>
     <dimen name="qs_tile_margin_top_bottom_negative">-12dp</dimen>
