@@ -385,6 +385,7 @@ public class NotificationContentView extends FrameLayout {
      */
     public void setContractedChild(@Nullable View child) {
         if (mContractedChild != null) {
+            mOnContentViewInactiveListeners.remove(mContractedChild);
             mContractedChild.animate().cancel();
             removeView(mContractedChild);
         }
@@ -432,6 +433,7 @@ public class NotificationContentView extends FrameLayout {
                     ((ViewGroup)mExpandedRemoteInput.getParent()).removeView(mExpandedRemoteInput);
                 }
             }
+            mOnContentViewInactiveListeners.remove(mExpandedChild);
             mExpandedChild.animate().cancel();
             removeView(mExpandedChild);
             mExpandedRemoteInput = null;
@@ -470,6 +472,7 @@ public class NotificationContentView extends FrameLayout {
                     ((ViewGroup)mHeadsUpRemoteInput.getParent()).removeView(mHeadsUpRemoteInput);
                 }
             }
+            mOnContentViewInactiveListeners.remove(mHeadsUpChild);
             mHeadsUpChild.animate().cancel();
             removeView(mHeadsUpChild);
             mHeadsUpRemoteInput = null;
@@ -1108,7 +1111,6 @@ public class NotificationContentView extends FrameLayout {
 
     public void onNotificationUpdated(NotificationEntry entry) {
         mStatusBarNotification = entry.getSbn();
-        mOnContentViewInactiveListeners.clear();
         mBeforeN = entry.targetSdk < Build.VERSION_CODES.N;
         updateAllSingleLineViews();
         ExpandableNotificationRow row = entry.getRow();
@@ -1623,7 +1625,7 @@ public class NotificationContentView extends FrameLayout {
      * @param visibleType visible type corresponding to the content view to listen
      * @param listener runnable to run once when the content view becomes inactive
      */
-    public void performWhenContentInactive(int visibleType, Runnable listener) {
+    void performWhenContentInactive(int visibleType, Runnable listener) {
         View view = getViewForVisibleType(visibleType);
         // View is already inactive
         if (view == null || isContentViewInactive(visibleType)) {
@@ -1631,6 +1633,22 @@ public class NotificationContentView extends FrameLayout {
             return;
         }
         mOnContentViewInactiveListeners.put(view, listener);
+    }
+
+    /**
+     * Remove content inactive listeners for a given content view . See
+     * {@link #performWhenContentInactive}.
+     *
+     * @param visibleType visible type corresponding to the content type
+     */
+    void removeContentInactiveRunnable(int visibleType) {
+        View view = getViewForVisibleType(visibleType);
+        // View is already inactive
+        if (view == null) {
+            return;
+        }
+
+        mOnContentViewInactiveListeners.remove(view);
     }
 
     /**
