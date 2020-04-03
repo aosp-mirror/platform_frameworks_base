@@ -331,7 +331,8 @@ public class ConversationLayout extends FrameLayout
     @RemotableViewMethod
     public void setIsImportantConversation(boolean isImportantConversation) {
         mImportantConversation = isImportantConversation;
-        mImportanceRingView.setVisibility(isImportantConversation ? VISIBLE : GONE);
+        mImportanceRingView.setVisibility(isImportantConversation
+                && mIcon.getVisibility() != GONE ? VISIBLE : GONE);
     }
 
     public boolean isImportantConversation() {
