@@ -41,6 +41,40 @@ namespace android {
 namespace os {
 namespace statsd {
 
+// Stores the puller as a wp to avoid holding a reference in case it is unregistered and
+// pullAtomCallbackDied is never called.
+struct PullAtomCallbackDeathCookie {
+    PullAtomCallbackDeathCookie(sp<StatsPullerManager> pullerManager, const PullerKey& pullerKey,
+                                const wp<StatsPuller>& puller)
+        : mPullerManager(pullerManager), mPullerKey(pullerKey), mPuller(puller) {
+    }
+
+    sp<StatsPullerManager> mPullerManager;
+    PullerKey mPullerKey;
+    wp<StatsPuller> mPuller;
+};
+
+void StatsPullerManager::pullAtomCallbackDied(void* cookie) {
+    PullAtomCallbackDeathCookie* cookie_ = static_cast<PullAtomCallbackDeathCookie*>(cookie);
+    sp<StatsPullerManager>& thiz = cookie_->mPullerManager;
+    const PullerKey& pullerKey = cookie_->mPullerKey;
+    wp<StatsPuller> puller = cookie_->mPuller;
+
+    // Erase the mapping from the puller key to the puller if the mapping still exists.
+    // Note that we are removing the StatsPuller object, which internally holds the binder
+    // IPullAtomCallback. However, each new registration creates a new StatsPuller, so this works.
+    lock_guard<mutex> lock(thiz->mLock);
+    const auto& it = thiz->kAllPullAtomInfo.find(pullerKey);
+    if (it != thiz->kAllPullAtomInfo.end() && puller != nullptr && puller == it->second) {
+        StatsdStats::getInstance().notePullerCallbackRegistrationChanged(pullerKey.atomTag,
+                                                                         /*registered=*/false);
+        thiz->kAllPullAtomInfo.erase(pullerKey);
+    }
+    // The death recipient corresponding to this specific IPullAtomCallback can never
+    // be triggered again, so free up resources.
+    delete cookie_;
+}
+
 // Values smaller than this may require to update the alarm.
 const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
@@ -49,7 +83,8 @@ StatsPullerManager::StatsPullerManager()
               // TrainInfo.
               {{.atomTag = util::TRAIN_INFO, .uid = -1}, new TrainInfoPuller()},
       }),
-      mNextPullTimeNs(NO_ALARM_UPDATE) {
+      mNextPullTimeNs(NO_ALARM_UPDATE),
+      mPullAtomCallbackDeathRecipient(AIBinder_DeathRecipient_new(pullAtomCallbackDied)) {
 }
 
 bool StatsPullerManager::Pull(int tagId, const ConfigKey& configKey,
@@ -310,19 +345,28 @@ void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t a
                                                   bool useUid) {
     std::lock_guard<std::mutex> _l(mLock);
     VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
-    // TODO(b/146439412): linkToDeath with the callback so that we can remove it
-    // and delete the puller.
+
     StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
     int64_t actualCoolDownNs = coolDownNs < kMinCoolDownNs ? kMinCoolDownNs : coolDownNs;
     int64_t actualTimeoutNs = timeoutNs > kMaxTimeoutNs ? kMaxTimeoutNs : timeoutNs;
-    kAllPullAtomInfo[{.atomTag = atomTag, .uid = useUid ? uid : -1}] = new StatsCallbackPuller(
-            atomTag, callback, actualCoolDownNs, actualTimeoutNs, additiveFields);
+
+    sp<StatsCallbackPuller> puller = new StatsCallbackPuller(atomTag, callback, actualCoolDownNs,
+                                                             actualTimeoutNs, additiveFields);
+    PullerKey key = {.atomTag = atomTag, .uid = useUid ? uid : -1};
+    AIBinder_linkToDeath(callback->asBinder().get(), mPullAtomCallbackDeathRecipient.get(),
+                         new PullAtomCallbackDeathCookie(this, key, puller));
+    kAllPullAtomInfo[key] = puller;
 }
 
-void StatsPullerManager::UnregisterPullAtomCallback(const int uid, const int32_t atomTag) {
+void StatsPullerManager::UnregisterPullAtomCallback(const int uid, const int32_t atomTag,
+                                                    bool useUids) {
     std::lock_guard<std::mutex> _l(mLock);
-    StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/false);
-    kAllPullAtomInfo.erase({.atomTag = atomTag});
+    PullerKey key = {.atomTag = atomTag, .uid = useUids ? uid : -1};
+    if (kAllPullAtomInfo.find(key) != kAllPullAtomInfo.end()) {
+        StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag,
+                                                                         /*registered=*/false);
+        kAllPullAtomInfo.erase(key);
+    }
 }
 
 }  // namespace statsd
