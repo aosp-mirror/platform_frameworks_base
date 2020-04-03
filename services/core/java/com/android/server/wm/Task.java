@@ -4068,21 +4068,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     boolean isOrganized() {
-        final Task rootTask = getRootTask();
-        if (rootTask.mTaskOrganizer == null) {
-            // You are obviously not organized...
-            return false;
-        }
-        if (rootTask == this) {
-            // Root tasks can be organized.
-            return true;
-        }
-        if (rootTask.mCreatedByOrganizer && getParent() == rootTask) {
-            // Direct children of tasks added by the organizer can the organized.
-            return true;
-        }
-
-        return false;
+        return mTaskOrganizer != null;
     }
 
     @Override
@@ -4137,6 +4123,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
    }
 
+    @VisibleForTesting
     boolean setTaskOrganizer(ITaskOrganizer organizer) {
         if (mTaskOrganizer == organizer) {
             return false;
