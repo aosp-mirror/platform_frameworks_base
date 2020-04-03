@@ -166,7 +166,7 @@ open class BroadcastDispatcher @Inject constructor (
 
     @VisibleForTesting
     protected open fun createUBRForUser(userId: Int) =
-            UserBroadcastDispatcher(context, userId, mainHandler, bgLooper)
+            UserBroadcastDispatcher(context, userId, bgLooper)
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("Broadcast dispatcher:")
