@@ -69,6 +69,7 @@ public class DividerSnapAlgorithm {
     private final ArrayList<SnapTarget> mTargets = new ArrayList<>();
     private final Rect mInsets = new Rect();
     private final int mSnapMode;
+    private final boolean mFreeSnapMode;
     private final int mMinimalSizeResizableTask;
     private final int mTaskHeightInMinimizedMode;
     private final float mFixedRatio;
@@ -125,6 +126,8 @@ public class DividerSnapAlgorithm {
         mInsets.set(insets);
         mSnapMode = isMinimizedMode ? SNAP_MODE_MINIMIZED :
                 res.getInteger(com.android.internal.R.integer.config_dockedStackDividerSnapMode);
+        mFreeSnapMode = res.getBoolean(
+                com.android.internal.R.bool.config_dockedStackDividerFreeSnapMode);
         mFixedRatio = res.getFraction(
                 com.android.internal.R.fraction.docked_stack_divider_fixed_ratio, 1, 1);
         mMinimalSizeResizableTask = res.getDimensionPixelSize(
@@ -247,7 +250,20 @@ public class DividerSnapAlgorithm {
         }
     }
 
+    private boolean shouldApplyFreeSnapMode(int position) {
+        if (!mFreeSnapMode) {
+            return false;
+        }
+        if (!isFirstSplitTargetAvailable() || !isLastSplitTargetAvailable()) {
+            return false;
+        }
+        return mFirstSplitTarget.position < position && position < mLastSplitTarget.position;
+    }
+
     private SnapTarget snap(int position, boolean hardDismiss) {
+        if (shouldApplyFreeSnapMode(position)) {
+            return new SnapTarget(position, position, SnapTarget.FLAG_NONE);
+        }
         int minIndex = -1;
         float minDistance = Float.MAX_VALUE;
         int size = mTargets.size();
