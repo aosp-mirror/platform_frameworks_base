@@ -435,7 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"चित्र और वीडियो लें"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"यह ऐप्लिकेशन किसी भी समय कैमरे का उपयोग करके चित्र ले सकता है और वीडियो रिकॉर्ड कर सकता है."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"डिवाइस का कैमरे चालू या बंद होने पर, किसी ऐप्लिकेशन या सेवा को कॉलबैक पाने की मंज़ूरी दें."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"यह ऐप्लिकेशन, किसी भी कैमरा डिवाइस को खोलते या बंद करते समय (किसी ऐप्लिकेशन से) कॉलबैक पा सकता है."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"यह ऐप्लिकेशन, डिवाइस के कैमरे को चालू या बंद करते समय (किसी ऐप्लिकेशन से) कॉलबैक पा सकता है."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"कंपन (वाइब्रेशन) को नियंत्रित करें"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ऐप्स को कंपनकर्ता नियंत्रित करने देता है."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फ़ोन नंबर पर सीधे कॉल करें"</string>
@@ -750,7 +750,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"टेलीटाइपराइटर (TTY) टीडीडी (TDD)"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"कार्यालय का मोबाइल"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"कार्यालय का पेजर"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"सहायक"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"मल्टीमीडिया मैसेज (एमएमएस)"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"कस्टम"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"जन्‍मदिन"</string>

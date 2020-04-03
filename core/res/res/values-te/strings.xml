@@ -286,7 +286,7 @@
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"మీరు యాప్‌ను ఉపయోగిస్తున్నప్పుడు మాత్రమే స్థానానికి యాప్ యాక్సెస్ కలిగి ఉంటుంది"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"ఈ పరికరం యొక్క లొకేషన్‌ను &lt;b&gt;అన్ని సమయాలలో&lt;/b&gt; యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను అనుమతించాలా?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"యాప్ ప్రస్తుతం మీరు ఆ యాప్‌ను ఉపయోగిస్తున్నప్పుడు మాత్రమే స్థానాన్ని యాక్సెస్ చేయగలుగుతుంది"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"క్యాలెండర్"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"మీ క్యాలెండర్‌ని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
@@ -435,8 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"చిత్రాలు మరియు వీడియోలు తీయడం"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ఈ యాప్‌ కెమెరాను ఉపయోగించి ఎప్పుడైనా చిత్రాలను తీయగలదు మరియు వీడియోలను రికార్డ్ చేయగలదు."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"కెమెరా పరికరాలు తెరుచుకుంటున్నప్పుడు లేదా మూసుకుంటున్నప్పుడు కాల్‌బ్యాక్‌లను స్వీకరించడానికి యాప్‌ను లేదా సర్వీస్‌ను అనుమతించండి."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ఏదైనా కెమెరా పరికరం తెరుచుకుంటున్నప్పుడు (ఏదైనా యాప్ ద్వారా) లేదా మూసుకుంటున్నప్పుడు ఈ యాప్ కాల్‌బ్యాక్‌లను అందుకోగలదు."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"వైబ్రేషన్‌ను నియంత్రించడం"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"వైబ్రేటర్‌ను నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"నేరుగా కాల్ చేసే ఫోన్ నంబర్‌లు"</string>
@@ -751,7 +750,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"కార్యాలయ మొబైల్"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"కార్యాలయ పేజర్"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"అసిస్టెంట్"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"అనుకూలం"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"పుట్టినరోజు"</string>

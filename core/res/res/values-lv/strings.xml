@@ -227,7 +227,7 @@
     <string name="global_actions" product="tv" msgid="2020669784083287370">"TV opcijas"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Tālruņa opcijas"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Ekrāna bloķētājs"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"Strāvas padeve ir izslēgta."</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"Strāvas padeve izslēgta."</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Ārkārtas situācija"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Kļūdu ziņojums"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Beigt sesiju"</string>

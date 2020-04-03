@@ -286,7 +286,7 @@
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"तुम्ही अ‍ॅप वापरत असताना अ‍ॅपला फक्त स्थानाचा अ‍ॅक्सेस असेल"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला &lt;b&gt;प्रत्येक वेळी&lt;/b&gt; या डिव्हाइसच्या स्थानाचा अ‍ॅक्सेस द्यायचा?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"अ‍ॅप सध्या फक्त तुम्ही अ‍ॅप वापरत असतानाच स्थान अ‍ॅक्सेस करू शकते"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"कॅलेंडर"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"आपल्या कॅलेंडरवर प्रवेश"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे कॅलेंडर अ‍ॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>

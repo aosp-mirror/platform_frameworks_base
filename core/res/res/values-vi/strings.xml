@@ -224,7 +224,7 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Tùy chọn máy tính bảng"</string>
     <string name="global_actions" product="tv" msgid="2020669784083287370">"Tùy chọn TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Tùy chọn điện thoại"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"Phương thức khoá màn hình"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"Cách khóa màn hình"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Tắt nguồn"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Khẩn cấp"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Báo cáo lỗi"</string>
