@@ -179,7 +179,7 @@ struct JTuner : public RefBase {
     int stopScan();
     int setLnb(int id);
     int setLna(bool enable);
-    jobject getLnbIds();
+    jintArray getLnbIds();
     jobject openLnbById(int id);
     jobject openLnbByName(jstring name);
     jobject openFilter(DemuxFilterType type, int bufferSize);
