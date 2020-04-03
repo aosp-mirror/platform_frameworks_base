@@ -750,7 +750,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"কৰ্মস্থানৰ ম’বাইল নম্বৰ"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"কৰ্মস্থানৰ পেজাৰৰ নম্বৰ"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"সহায়ক"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"এমএমএছ"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"নিজৰ উপযোগিতা অনুযায়ী"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"জন্মদিন"</string>

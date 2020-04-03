@@ -1125,7 +1125,7 @@
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Уставіць як звычайны тэкст"</string>
     <string name="replace" msgid="7842675434546657444">"Замяніць..."</string>
     <string name="delete" msgid="1514113991712129054">"Выдаліць"</string>
-    <string name="copyUrl" msgid="6229645005987260230">"Скапіяваць URL"</string>
+    <string name="copyUrl" msgid="6229645005987260230">"Скапіраваць URL-адрас"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"Выбраць тэкст"</string>
     <string name="undo" msgid="3175318090002654673">"Адрабіць"</string>
     <string name="redo" msgid="7231448494008532233">"Узнавіць"</string>

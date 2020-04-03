@@ -441,7 +441,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"wykonywanie zdjęć i filmów wideo"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ta aplikacja może w dowolnym momencie robić zdjęcia i nagrywać filmy przy użyciu aparatu."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Zezwól na dostęp aplikacji lub usługi na otrzymywanie wywoływania zwrotnego o urządzeniach z aparatem, kiedy są one uruchamiane lub zamykane."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ta aplikacja może korzystać z wywoływania zwrotnego, kiedy urządzenie z aparatem jest uruchamiane (przez jaką aplikację) albo zamykane."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ta aplikacja może otrzymywać wywołania zwrotne, kiedy urządzenie z aparatem jest uruchamiane (przez jaką aplikację) albo zamykane."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"sterowanie wibracjami"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Pozwala aplikacji na sterowanie wibracjami."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"bezpośrednie wybieranie numerów telefonów"</string>

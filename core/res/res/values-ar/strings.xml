@@ -207,7 +207,7 @@
     <string name="power_dialog" product="default" msgid="1107775420270203046">"خيارات الهاتف"</string>
     <string name="silent_mode" msgid="8796112363642579333">"وضع صامت"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"تفعيل اللاسلكي"</string>
-    <string name="turn_off_radio" msgid="7222573978109933360">"إيقاف تفعيل الشبكة اللاسلكية"</string>
+    <string name="turn_off_radio" msgid="7222573978109933360">"إيقاف الشبكة اللاسلكية"</string>
     <string name="screen_lock" msgid="2072642720826409809">"قفل الشاشة"</string>
     <string name="power_off" msgid="4111692782492232778">"إيقاف التشغيل"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"إيقاف الرنين"</string>
@@ -220,10 +220,10 @@
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"إعادة الضبط على الإعدادات الأصلية"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"جارٍ إعادة التشغيل…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"جارٍ إيقاف التشغيل..."</string>
-    <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"سيتم إيقاف تفعيل الجهاز اللوحي."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"سيتم إيقاف الجهاز اللوحي."</string>
     <string name="shutdown_confirm" product="tv" msgid="9187068694573722129">"سيتم إيقاف التلفزيون."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"سيتم إيقاف المشاهدة."</string>
-    <string name="shutdown_confirm" product="default" msgid="136816458966692315">"سيتم إيقاف تفعيل هاتفك."</string>
+    <string name="shutdown_confirm" product="default" msgid="136816458966692315">"سيتم إيقاف هاتفك."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"هل تريد إيقاف التشغيل؟"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"إعادة تشغيل في الوضع الآمن"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"هل تريد إعادة تشغيل الكمبيوتر في الوضع الآمن؟ سيؤدي ذلك إلى إيقاف جميع تطبيقات الجهات الخارجية التي تم تثبيتها. ستتم استعادتها عند إعادة التشغيل مرة أخرى."</string>
@@ -447,7 +447,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"التقاط صور وفيديوهات"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"يمكن لهذا التطبيق التقاط صور وتسجيل فيديوهات باستخدام الكاميرا في أي وقت."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"يسمح الإذن لتطبيق أو خدمة بتلقّي استدعاءات عما إذا كانت أجهزة الكاميرات مفتوحة أو مغلقة."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"يمكن أن يتلقّى هذا التطبيق استدعاءات عندما يكون جهاز أي كاميرا مفتوحًا (بتطبيق) أو مغلقًا."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"يمكن أن يتلقّى هذا التطبيق استدعاءات عندما تكون هناك كاميرا مفتوحة (بواسطة هذا التطبيق) أو مغلقة."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"التحكم في الاهتزاز"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"للسماح للتطبيق بالتحكم في الهزّاز."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"اتصال مباشر بأرقام الهواتف"</string>
@@ -616,7 +616,7 @@
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"التبديل بين تفعيل المزامنة وإيقافها"</string>
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"للسماح للتطبيق بتعديل إعدادات المزامنة لحساب ما. على سبيل المثال، يمكن استخدام ذلك لتفعيل مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"قراءة إحصاءات المزامنة"</string>
-    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"للسماح للتطبيق بقراءة إحصائيات المزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
+    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"للسماح للتطبيق بقراءة إحصاءات المزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"قراءة محتوى مساحة التخزين المشتركة"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"للسماح للتطبيق بقراءة محتوى مساحة التخزين المشتركة."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"تعديل محتوى مساحة التخزين المشتركة أو حذفه"</string>

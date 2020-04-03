@@ -435,7 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"Bilder und Videos aufnehmen"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Diese App kann mit der Kamera jederzeit Bilder und Videos aufnehmen."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Einer App oder einem Dienst den Empfang von Callbacks erlauben, wenn eine Kamera geöffnet oder geschlossen wird."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Diese App kann Callbacks empfangen, wenn eine Kamera von einer Anwendung geöffnet oder geschlossen wird."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Diese App kann Callbacks empfangen, wenn eine der Kameras des Geräts von einer Anwendung geöffnet oder geschlossen wird."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"Vibrationsalarm steuern"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ermöglicht der App, den Vibrationsalarm zu steuern"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"Telefonnummern direkt anrufen"</string>
