@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.carrier;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -218,5 +219,19 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
                 mock(NetworkController.IconState.class),
                 mock(NetworkController.IconState.class),
                 0, 0, true, true, "", "", "", true, 0, true);
+    }
+
+    @Test
+    public void testNoEmptyVisibleView_airplaneMode() {
+        CarrierTextController.CarrierTextCallbackInfo
+                info = new CarrierTextController.CarrierTextCallbackInfo(
+                "",
+                new CharSequence[]{""},
+                true,
+                new int[]{0},
+                true /* airplaneMode */);
+        mCallback.updateCarrierInfo(info);
+        mTestableLooper.processAllMessages();
+        assertEquals(View.GONE, mQSCarrierGroup.getNoSimTextView().getVisibility());
     }
 }
