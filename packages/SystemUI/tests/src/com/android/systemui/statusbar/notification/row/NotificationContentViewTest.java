@@ -76,13 +76,13 @@ public class NotificationContentViewTest extends SysuiTestCase {
     @Test
     @UiThreadTest
     public void testShowAppOpsIcons() {
-        View mockContracted = mock(View.class);
+        View mockContracted = mock(NotificationHeaderView.class);
         when(mockContracted.findViewById(com.android.internal.R.id.mic))
                 .thenReturn(mockContracted);
-        View mockExpanded = mock(View.class);
+        View mockExpanded = mock(NotificationHeaderView.class);
         when(mockExpanded.findViewById(com.android.internal.R.id.mic))
                 .thenReturn(mockExpanded);
-        View mockHeadsUp = mock(View.class);
+        View mockHeadsUp = mock(NotificationHeaderView.class);
         when(mockHeadsUp.findViewById(com.android.internal.R.id.mic))
                 .thenReturn(mockHeadsUp);
 
