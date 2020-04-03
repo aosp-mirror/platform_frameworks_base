@@ -1148,11 +1148,13 @@
     <!-- Default (and minimum) height of the expanded view shown when the bubble is expanded -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
     <!-- Default height of bubble overflow -->
-    <dimen name="bubble_overflow_height">380dp</dimen>
+    <dimen name="bubble_overflow_height">460dp</dimen>
     <!-- Bubble overflow padding when there are no bubbles  -->
     <dimen name="bubble_overflow_empty_state_padding">16dp</dimen>
     <!-- Padding of container for overflow bubbles -->
-    <dimen name="bubble_overflow_padding">5dp</dimen>
+    <dimen name="bubble_overflow_padding">15dp</dimen>
+    <!-- Padding of label for bubble overflow view -->
+    <dimen name="bubble_overflow_text_padding">7dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
     <dimen name="bubble_pointer_height">4dp</dimen>
     <!-- Width of the triangle that points to the expanded bubble -->
