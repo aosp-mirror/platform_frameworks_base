@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Отвори ги деталите за батеријата"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Батерија <xliff:g id="NUMBER">%d</xliff:g> проценти."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Батерија <xliff:g id="PERCENTAGE">%1$s</xliff:g> отсто, уште околу <xliff:g id="TIME">%2$s</xliff:g> според вашето користење"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Полнење на батеријата, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Полнење на батеријата, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> отсто."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Поставки на систем."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Известувања"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Видете ги сите известувања"</string>
@@ -280,7 +280,7 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Локацијата е поставена со GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Активни барања за локација"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Исклучувањето на сензорите е активно"</string>
-    <string name="accessibility_clear_all" msgid="970525598287244592">"Исчисти ги сите известувања."</string>
+    <string name="accessibility_clear_all" msgid="970525598287244592">"Избриши ги сите известувања."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
       <item quantity="one">Уште <xliff:g id="NUMBER_1">%s</xliff:g> известување внатре.</item>
@@ -464,7 +464,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Избриши сѐ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управувајте"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Тивки известувања"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Исчисти ги сите тивки известувања"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Избриши ги сите тивки известувања"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Известувањата се паузирани од „Не вознемирувај“"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Започни сега"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Нема известувања"</string>
