@@ -130,10 +130,18 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         if (mNotificationHeader != null) {
             mNotificationHeader.setAppOpsOnClickListener(listener);
         }
-        mAppOps.setOnClickListener(listener);
-        mCameraIcon.setOnClickListener(listener);
-        mMicIcon.setOnClickListener(listener);
-        mOverlayIcon.setOnClickListener(listener);
+        if (mAppOps != null) {
+            mAppOps.setOnClickListener(listener);
+        }
+        if (mCameraIcon != null) {
+            mCameraIcon.setOnClickListener(listener);
+        }
+        if (mMicIcon != null) {
+            mMicIcon.setOnClickListener(listener);
+        }
+        if (mOverlayIcon != null) {
+            mOverlayIcon.setOnClickListener(listener);
+        }
     }
 
     /**
