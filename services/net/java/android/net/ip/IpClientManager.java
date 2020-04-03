@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.net.NattKeepalivePacketData;
 import android.net.ProxyInfo;
 import android.net.TcpKeepalivePacketData;
+import android.net.shared.Layer2Information;
 import android.net.shared.ProvisioningConfiguration;
 import android.net.util.KeepalivePacketDataUtil;
 import android.os.Binder;
@@ -287,6 +288,22 @@ public class IpClientManager {
             return true;
         } catch (RemoteException e) {
             log("Error notifying IpClient Preconnection completed", e);
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Update the bssid, L2 key and group hint layer2 information.
+     */
+    public boolean updateLayer2Information(Layer2Information info) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mIpClient.updateLayer2Information(info.toStableParcelable());
+            return true;
+        } catch (RemoteException e) {
+            log("Error updating layer2 information", e);
             return false;
         } finally {
             Binder.restoreCallingIdentity(token);
