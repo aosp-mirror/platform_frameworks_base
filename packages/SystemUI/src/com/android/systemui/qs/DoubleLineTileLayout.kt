@@ -25,13 +25,18 @@ import com.android.systemui.qs.TileLayout.exactly
 
 class DoubleLineTileLayout(context: Context) : ViewGroup(context), QSPanel.QSTileLayout {
 
+    companion object {
+        private const val NUM_LINES = 2
+    }
+
     protected val mRecords = ArrayList<QSPanel.TileRecord>()
     private var _listening = false
     private var smallTileSize = 0
     private val twoLineHeight
-        get() = smallTileSize * 2 + cellMarginVertical
+        get() = smallTileSize * NUM_LINES + cellMarginVertical * (NUM_LINES - 1)
     private var cellMarginHorizontal = 0
     private var cellMarginVertical = 0
+    private var tilesToShow = 0
 
     init {
         isFocusableInTouchMode = true
@@ -68,7 +73,7 @@ class DoubleLineTileLayout(context: Context) : ViewGroup(context), QSPanel.QSTil
     override fun updateResources(): Boolean {
         with(mContext.resources) {
             smallTileSize = getDimensionPixelSize(R.dimen.qs_quick_tile_size)
-            cellMarginHorizontal = getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal)
+            cellMarginHorizontal = getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal_two_line)
             cellMarginVertical = getDimensionPixelSize(R.dimen.new_qs_vertical_margin)
         }
         requestLayout()
@@ -83,11 +88,12 @@ class DoubleLineTileLayout(context: Context) : ViewGroup(context), QSPanel.QSTil
         }
     }
 
-    override fun getNumVisibleTiles() = mRecords.size
+    override fun getNumVisibleTiles() = tilesToShow
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         updateResources()
+        postInvalidate()
     }
 
     override fun onFinishInflate() {
@@ -95,39 +101,58 @@ class DoubleLineTileLayout(context: Context) : ViewGroup(context), QSPanel.QSTil
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        var previousView: View = this
-        var tiles = 0
 
         mRecords.forEach {
-            val tileView = it.tileView
-            if (tileView.visibility != View.GONE) {
-                tileView.updateAccessibilityOrder(previousView)
-                previousView = tileView
-                tiles++
-                tileView.measure(exactly(smallTileSize), exactly(smallTileSize))
-            }
+            it.tileView.measure(exactly(smallTileSize), exactly(smallTileSize))
         }
 
         val height = twoLineHeight
-        val columns = tiles / 2
-        val width = paddingStart + paddingEnd +
-                columns * smallTileSize +
-                (columns - 1) * cellMarginHorizontal
-        setMeasuredDimension(width, height)
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), height)
     }
 
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        val tiles = mRecords.filter { it.tileView.visibility != View.GONE }
-        tiles.forEachIndexed {
-            index, tile ->
-            val column = index % (tiles.size / 2)
-            val left = getLeftForColumn(column)
-            val top = if (index < tiles.size / 2) 0 else getTopBottomRow()
-            tile.tileView.layout(left, top, left + smallTileSize, top + smallTileSize)
+    private fun calculateMaxColumns(availableWidth: Int): Int {
+        if (smallTileSize + cellMarginHorizontal == 0) {
+            return 0
+        } else {
+            return (availableWidth - smallTileSize) / (smallTileSize + cellMarginHorizontal) + 1
         }
     }
 
-    private fun getLeftForColumn(column: Int) = column * (smallTileSize + cellMarginHorizontal)
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        val availableWidth = r - l - paddingLeft - paddingRight
+        val maxColumns = calculateMaxColumns(availableWidth)
+        val actualColumns = Math.min(maxColumns, mRecords.size / NUM_LINES)
+        if (actualColumns == 0) {
+            // No tileSize or horizontal margin
+            return
+        }
+        tilesToShow = actualColumns * NUM_LINES
+
+        val interTileSpace = if (actualColumns <= 2) {
+            // Extra "column" of padding to be distributed on each end
+            (availableWidth - actualColumns * smallTileSize) / actualColumns
+        } else {
+            (availableWidth - actualColumns * smallTileSize) / (actualColumns - 1)
+        }
+
+        for (index in 0 until mRecords.size) {
+            val tileView = mRecords[index].tileView
+            if (index >= tilesToShow) {
+                tileView.visibility = View.GONE
+            } else {
+                tileView.visibility = View.VISIBLE
+                if (index > 0) tileView.updateAccessibilityOrder(mRecords[index - 1].tileView)
+                val column = index % actualColumns
+                val left = getLeftForColumn(column, interTileSpace, actualColumns <= 2)
+                val top = if (index < actualColumns) 0 else getTopBottomRow()
+                tileView.layout(left, top, left + smallTileSize, top + smallTileSize)
+            }
+        }
+    }
+
+    private fun getLeftForColumn(column: Int, interSpace: Int, sideMargin: Boolean): Int {
+        return (if (sideMargin) interSpace / 2 else 0) + column * (smallTileSize + interSpace)
+    }
 
     private fun getTopBottomRow() = smallTileSize + cellMarginVertical
 }
