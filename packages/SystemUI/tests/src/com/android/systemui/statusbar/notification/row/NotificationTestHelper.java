@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
 import com.android.systemui.statusbar.notification.icon.IconManager;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpansionLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -100,6 +101,7 @@ public class NotificationTestHelper {
     private final RowContentBindStage mBindStage;
     private final IconManager mIconManager;
     private StatusBarStateController mStatusBarStateController;
+    private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
 
     public NotificationTestHelper(Context context, TestableDependency dependency) {
         mContext = context;
@@ -138,6 +140,7 @@ public class NotificationTestHelper {
                 ArgumentCaptor.forClass(NotifCollectionListener.class);
         verify(collection).addCollectionListener(collectionListenerCaptor.capture());
         mBindPipelineEntryListener = collectionListenerCaptor.getValue();
+        mPeopleNotificationIdentifier = mock(PeopleNotificationIdentifier.class);
     }
 
     /**
@@ -407,7 +410,8 @@ public class NotificationTestHelper {
                 mock(NotificationMediaManager.class),
                 mock(ExpandableNotificationRow.OnAppOpsClickListener.class),
                 mock(FalsingManager.class),
-                mStatusBarStateController);
+                mStatusBarStateController,
+                mPeopleNotificationIdentifier);
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
         inflateAndWait(entry, mBindStage);
