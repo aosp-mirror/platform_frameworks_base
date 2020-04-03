@@ -34,6 +34,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.contentcapture.ContentCaptureManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -306,7 +307,8 @@ import java.lang.annotation.RetentionPolicy;
  * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.java
  *      bind}
  */
-public abstract class Service extends ContextWrapper implements ComponentCallbacks2 {
+public abstract class Service extends ContextWrapper implements ComponentCallbacks2,
+        ContentCaptureManager.ContentCaptureClient {
     private static final String TAG = "Service";
 
     /**
@@ -817,6 +819,14 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         writer.println("nothing to dump");
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        if (newBase != null) {
+            newBase.setContentCaptureOptions(getContentCaptureOptions());
+        }
+    }
+
     // ------------------ Internal API ------------------
     
     /**
@@ -835,6 +845,8 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         mActivityManager = (IActivityManager)activityManager;
         mStartCompatibility = getApplicationInfo().targetSdkVersion
                 < Build.VERSION_CODES.ECLAIR;
+
+        setContentCaptureOptions(application.getContentCaptureOptions());
     }
 
     /**
@@ -847,6 +859,18 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
 
     final String getClassName() {
         return mClassName;
+    }
+
+    /** @hide */
+    @Override
+    public final ContentCaptureManager.ContentCaptureClient getContentCaptureClient() {
+        return this;
+    }
+
+    /** @hide */
+    @Override
+    public final ComponentName contentCaptureClientGetComponentName() {
+        return new ComponentName(this, mClassName);
     }
 
     // set by the thread after the constructor and before onCreate(Bundle icicle) is called.
