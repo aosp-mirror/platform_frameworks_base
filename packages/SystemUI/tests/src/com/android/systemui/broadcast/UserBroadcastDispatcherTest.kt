@@ -91,7 +91,7 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
 
         userBroadcastDispatcher = UserBroadcastDispatcher(
-                mockContext, USER_ID, handler, testableLooper.looper)
+                mockContext, USER_ID, testableLooper.looper)
         userBroadcastDispatcher.pendingResult = mPendingResult
     }
 
