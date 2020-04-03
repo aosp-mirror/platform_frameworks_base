@@ -14,9 +14,7 @@
   ~ limitations under the License.
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.apk.cts.shim"
-          android:versionCode="2"
-          android:versionName="2.0" >
+          package="com.android.cts.ctsshim">
 
-    <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="P" />
+    <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="P.123" />
 </manifest>
