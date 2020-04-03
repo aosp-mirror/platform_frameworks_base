@@ -35,6 +35,7 @@
 #include <uuid/uuid.h>
 #include <zlib.h>
 
+#include <charconv>
 #include <ctime>
 #include <filesystem>
 #include <iterator>
@@ -275,12 +276,15 @@ void IncrementalService::onDump(int fd) {
         const IncFsMount& mnt = *ifs.get();
         dprintf(fd, "\t[%d]:\n", id);
         dprintf(fd, "\t\tmountId: %d\n", mnt.mountId);
+        dprintf(fd, "\t\troot: %s\n", mnt.root.c_str());
         dprintf(fd, "\t\tnextStorageDirNo: %d\n", mnt.nextStorageDirNo.load());
         dprintf(fd, "\t\tdataLoaderStatus: %d\n", mnt.dataLoaderStatus.load());
         dprintf(fd, "\t\tconnectionLostTime: %s\n", toString(mnt.connectionLostTime));
-        if (mnt.savedDataLoaderParams) {
+        dprintf(fd, "\t\tsavedDataLoaderParams:\n");
+        if (!mnt.savedDataLoaderParams) {
+            dprintf(fd, "\t\t\tnone\n");
+        } else {
             const auto& params = mnt.savedDataLoaderParams.value();
-            dprintf(fd, "\t\tsavedDataLoaderParams:\n");
             dprintf(fd, "\t\t\ttype: %s\n", toString(params.type).c_str());
             dprintf(fd, "\t\t\tpackageName: %s\n", params.packageName.c_str());
             dprintf(fd, "\t\t\tclassName: %s\n", params.className.c_str());
@@ -987,13 +991,13 @@ void IncrementalService::mountExistingImages() {
             continue;
         }
         const auto root = path::join(mIncrementalDir, name);
-        if (!mountExistingImage(root, name)) {
+        if (!mountExistingImage(root)) {
             IncFsMount::cleanupFilesystem(path);
         }
     }
 }
 
-bool IncrementalService::mountExistingImage(std::string_view root, std::string_view key) {
+bool IncrementalService::mountExistingImage(std::string_view root) {
     auto mountTarget = path::join(root, constants().mount);
     const auto backing = path::join(root, constants().backing);
 
@@ -1044,16 +1048,24 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
             }
             auto name = std::string_view(e->d_name);
             if (name.starts_with(constants().storagePrefix)) {
-                auto md = parseFromIncfs<metadata::Storage>(mIncFs.get(), ifs->control,
-                                                            path::join(mountTarget, name));
-                auto [_, inserted] = mMounts.try_emplace(md.id(), ifs);
+                int storageId;
+                const auto res = std::from_chars(name.data() + constants().storagePrefix.size() + 1,
+                                                 name.data() + name.size(), storageId);
+                if (res.ec != std::errc{} || *res.ptr != '_') {
+                    LOG(WARNING) << "Ignoring storage with invalid name '" << name << "' for mount "
+                                 << root;
+                    continue;
+                }
+                auto [_, inserted] = mMounts.try_emplace(storageId, ifs);
                 if (!inserted) {
-                    LOG(WARNING) << "Ignoring storage with duplicate id " << md.id()
+                    LOG(WARNING) << "Ignoring storage with duplicate id " << storageId
                                  << " for mount " << root;
                     continue;
                 }
-                ifs->storages.insert_or_assign(md.id(), IncFsMount::Storage{std::string(name)});
-                mNextId = std::max(mNextId, md.id() + 1);
+                ifs->storages.insert_or_assign(storageId,
+                                               IncFsMount::Storage{
+                                                       path::join(root, constants().mount, name)});
+                mNextId = std::max(mNextId, storageId + 1);
             }
         }
     }
