@@ -18,6 +18,7 @@ package android.app.admin;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -28,14 +29,16 @@ import android.view.SurfaceControlViewHost;
 /**
  * Client interface for providing the SystemUI with secondary lockscreen information.
  *
- * <p>An implementation must be provided by the Profile Owner when
- * {@link DevicePolicyManager#setSecondaryLockscreenEnabled} is set to true and the service must be
- * declared in the manifest as handling the action
+ * <p>An implementation must be provided by the default configured supervision app that is set as
+ * Profile Owner or Device Owner when {@link DevicePolicyManager#setSecondaryLockscreenEnabled} is
+ * set to true and the service must be declared in the manifest as handling the action
  * {@link DevicePolicyManager#ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE}, otherwise the keyguard
  * will fail to bind to the service and continue to unlock.
  *
  * @see DevicePolicyManager#setSecondaryLockscreenEnabled
+ * @hide
  */
+@SystemApi
 public class DevicePolicyKeyguardService extends Service {
     private static final String TAG = "DevicePolicyKeyguardService";
     private IKeyguardCallback mCallback;
