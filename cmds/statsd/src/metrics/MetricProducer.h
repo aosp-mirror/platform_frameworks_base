@@ -187,7 +187,8 @@ public:
     };
 
     void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
-                        const HashableDimensionKey& primaryKey, int oldState, int newState){};
+                        const HashableDimensionKey& primaryKey, const int32_t oldState,
+                        const int32_t newState){};
 
     // Output the metrics data to [protoOutput]. All metrics reports end with the same timestamp.
     // This method clears all the past buckets.
@@ -379,11 +380,15 @@ protected:
         return (endNs - mTimeBaseNs) / mBucketSizeNs - 1;
     }
 
-    // Query StateManager for original state value.
-    // If no state map exists for this atom, return the original value.
-    // Otherwise, return the group_id mapped to the atom and original value.
-    void getMappedStateValue(const int32_t atomId, const HashableDimensionKey& queryKey,
-                             FieldValue* value);
+    // Query StateManager for original state value using the queryKey.
+    // The field and value are output.
+    void queryStateValue(const int32_t atomId, const HashableDimensionKey& queryKey,
+                         FieldValue* value);
+
+    // If a state map exists for the given atom, replace the original state
+    // value with the group id mapped to the value.
+    // If no state map exists, keep the original state value.
+    void mapStateValue(const int32_t atomId, FieldValue* value);
 
     DropEvent buildDropEvent(const int64_t dropTimeNs, const BucketDropReason reason);
 
@@ -467,6 +472,11 @@ protected:
     FRIEND_TEST(DurationMetricE2eTest, TestWithCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedState);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStateMapped);
+    FRIEND_TEST(DurationMetricE2eTest, TestSlicedStatePrimaryFieldsNotSubsetDimInWhat);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset);
 
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
