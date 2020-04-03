@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -227,24 +225,17 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
         final boolean useIncreasedCollapsedHeight =
                 mMessagingUtil.isImportantMessaging(sbn, entry.getImportance());
-        final boolean useIncreasedHeadsUp = useIncreasedCollapsedHeight
-                && !mPresenter.isPresenterFullyCollapsed();
         final boolean isLowPriority = entry.isAmbient();
 
         RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
-        params.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         params.setUseLowPriority(entry.isAmbient());
 
-        if (mNotificationInterruptStateProvider.shouldHeadsUp(entry)) {
-            params.requireContentViews(FLAG_CONTENT_VIEW_HEADS_UP);
-        }
         //TODO: Replace this API with RowContentBindParams directly
         row.setNeedsRedaction(mNotificationLockscreenUserManager.needsRedaction(entry));
         params.rebindAllContentViews();
         mRowContentBindStage.requestRebind(entry, en -> {
             row.setUsesIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
-            row.setUsesIncreasedHeadsUpHeight(useIncreasedHeadsUp);
             row.setIsLowPriority(isLowPriority);
             mInflationCallback.onAsyncInflationFinished(en);
         });
