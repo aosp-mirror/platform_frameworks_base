@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar.notification.stack
 
+import android.annotation.ColorInt
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin
 import com.android.systemui.statusbar.notification.people.DataListener
@@ -31,12 +33,14 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
         StackScrollerDecorView(context, attrs), SwipeableView {
 
     private lateinit var contents: ViewGroup
+    private lateinit var label: TextView
 
     lateinit var personViewAdapters: Sequence<DataListener<PersonViewModel?>>
         private set
 
     override fun onFinishInflate() {
         contents = requireViewById(R.id.people_list)
+        label = requireViewById(R.id.header_label)
         personViewAdapters = (0 until contents.childCount)
                 .asSequence() // so we can map
                 .mapNotNull { idx ->
@@ -48,6 +52,8 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
         super.onFinishInflate()
         setVisible(true /* nowVisible */, false /* animate */)
     }
+
+    fun setTextColor(@ColorInt color: Int) = label.setTextColor(color)
 
     override fun findContentView(): View = contents
     override fun findSecondaryView(): View? = null
