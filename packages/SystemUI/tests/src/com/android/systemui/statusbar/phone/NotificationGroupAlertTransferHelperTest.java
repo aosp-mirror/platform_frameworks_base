@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -236,8 +235,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         verify(mBindStage).requestRebind(eq(childEntry), callbackCaptor.capture());
         callbackCaptor.getValue().onBindFinished(childEntry);
 
-        verify(childEntry.getRow(), times(1)).freeContentViewWhenSafe(mHeadsUpManager
-            .getContentFlag());
+        assertTrue((params.getContentViews() & FLAG_CONTENT_VIEW_HEADS_UP) == 0);
         assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
     }
 
