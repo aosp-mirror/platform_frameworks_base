@@ -43,7 +43,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -66,6 +65,7 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MacAddress;
 import android.net.RouteInfo;
+import android.net.TetherOffloadRuleParcel;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServer;
 import android.net.dhcp.IDhcpServerCallbacks;
@@ -85,6 +85,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -92,6 +93,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -514,6 +516,65 @@ public class IpServerTest {
         mLooper.dispatchAll();
     }
 
+    /**
+     * Custom ArgumentMatcher for TetherOffloadRuleParcel. This is needed because generated stable
+     * AIDL classes don't have equals(), so we cannot just use eq(). A custom assert, such as:
+     *
+     * private void checkFooCalled(StableParcelable p, ...) {
+     *     ArgumentCaptor<FooParam> captor = ArgumentCaptor.forClass(FooParam.class);
+     *     verify(mMock).foo(captor.capture());
+     *     Foo foo = captor.getValue();
+     *     assertFooMatchesExpectations(foo);
+     * }
+     *
+     * almost works, but not quite. This is because if the code under test calls foo() twice, the
+     * first call to checkFooCalled() matches both the calls, putting both calls into the captor,
+     * and then fails with TooManyActualInvocations. It also makes it harder to use other mockito
+     * features such as never(), inOrder(), etc.
+     *
+     * This approach isn't great because if the match fails, the error message is unhelpful
+     * (actual: "android.net.TetherOffloadRuleParcel@8c827b0" or some such), but at least it does
+     * work.
+     *
+     * See ConnectivityServiceTest#assertRoutesAdded for an alternative approach which solves the
+     * TooManyActualInvocations problem described above by forcing the caller of the custom assert
+     * method to specify all expected invocations in one call. This is useful when the stable
+     * parcelable class being asserted on has a corresponding Java object (eg., RouteInfo and
+     * RouteInfoParcelable), and the caller can just pass in a list of them. It not useful here
+     * because there is no such object.
+     */
+    private static class TetherOffloadRuleParcelMatcher implements
+            ArgumentMatcher<TetherOffloadRuleParcel> {
+        public final int upstreamIfindex;
+        public final InetAddress dst;
+        public final MacAddress dstMac;
+
+        TetherOffloadRuleParcelMatcher(int upstreamIfindex, InetAddress dst, MacAddress dstMac) {
+            this.upstreamIfindex = upstreamIfindex;
+            this.dst = dst;
+            this.dstMac = dstMac;
+        }
+
+        public boolean matches(TetherOffloadRuleParcel parcel) {
+            return upstreamIfindex == parcel.inputInterfaceIndex
+                    && (TEST_IFACE_PARAMS.index == parcel.outputInterfaceIndex)
+                    && Arrays.equals(dst.getAddress(), parcel.destination)
+                    && (128 == parcel.prefixLength)
+                    && Arrays.equals(TEST_IFACE_PARAMS.macAddr.toByteArray(), parcel.srcL2Address)
+                    && Arrays.equals(dstMac.toByteArray(), parcel.dstL2Address);
+        }
+
+        public String toString() {
+            return String.format("TetherOffloadRuleParcelMatcher(%d, %s, %s",
+                    upstreamIfindex, dst.getHostAddress(), dstMac);
+        }
+    }
+
+    private TetherOffloadRuleParcel matches(
+            int upstreamIfindex, InetAddress dst, MacAddress dstMac) {
+        return argThat(new TetherOffloadRuleParcelMatcher(upstreamIfindex, dst, dstMac));
+    }
+
     @Test
     public void addRemoveipv6ForwardingRules() throws Exception {
         initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, false /* usingLegacyDhcp */);
@@ -537,13 +598,11 @@ public class IpServerTest {
 
         // Events on this interface are received and sent to netd.
         recvNewNeigh(myIfindex, neighA, NUD_REACHABLE, macA);
-        verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX),
-                eq(neighA.getAddress()), eq(myMac.toByteArray()), eq(macA.toByteArray()));
+        verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX, neighA, macA));
         reset(mNetd);
 
         recvNewNeigh(myIfindex, neighB, NUD_REACHABLE, macB);
-        verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX),
-                eq(neighB.getAddress()), eq(myMac.toByteArray()), eq(macB.toByteArray()));
+        verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX, neighB, macB));
         reset(mNetd);
 
         // Link-local and multicast neighbors are ignored.
@@ -554,12 +613,12 @@ public class IpServerTest {
 
         // A neighbor that is no longer valid causes the rule to be removed.
         recvNewNeigh(myIfindex, neighA, NUD_FAILED, macA);
-        verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX), eq(neighA.getAddress()));
+        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighA, macA));
         reset(mNetd);
 
         // A neighbor that is deleted causes the rule to be removed.
         recvDelNeigh(myIfindex, neighB, NUD_STALE, macB);
-        verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX), eq(neighB.getAddress()));
+        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighB, macB));
         reset(mNetd);
 
         // Upstream changes result in deleting and re-adding the rules.
@@ -571,22 +630,16 @@ public class IpServerTest {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName(UPSTREAM_IFACE2);
         dispatchTetherConnectionChanged(UPSTREAM_IFACE2, lp);
-        inOrder.verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX2),
-                eq(neighA.getAddress()), eq(myMac.toByteArray()), eq(macA.toByteArray()));
-        inOrder.verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX),
-                    eq(neighA.getAddress()));
-        inOrder.verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX2),
-                eq(neighB.getAddress()), eq(myMac.toByteArray()), eq(macB.toByteArray()));
-        inOrder.verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX),
-                eq(neighB.getAddress()));
+        inOrder.verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX2, neighA, macA));
+        inOrder.verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighA, macA));
+        inOrder.verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX2, neighB, macB));
+        inOrder.verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighB, macB));
         reset(mNetd);
 
         // When the upstream is lost, rules are removed.
         dispatchTetherConnectionChanged(null, null);
-        verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX2),
-                eq(neighA.getAddress()));
-        verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX2),
-                eq(neighB.getAddress()));
+        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX2, neighA, macA));
+        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX2, neighB, macB));
         reset(mNetd);
 
         // If the upstream is IPv4-only, no rules are added.
@@ -599,31 +652,27 @@ public class IpServerTest {
         lp.setInterfaceName(UPSTREAM_IFACE);
         dispatchTetherConnectionChanged(UPSTREAM_IFACE, lp);
         recvNewNeigh(myIfindex, neighB, NUD_REACHABLE, macB);
-        verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX),
-                eq(neighB.getAddress()), eq(myMac.toByteArray()), eq(macB.toByteArray()));
-        verify(mNetd, never()).tetherRuleAddDownstreamIpv6(anyInt(), anyInt(),
-                eq(neighA.getAddress()), any(), any());
+        verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX, neighB, macB));
+        verify(mNetd, never()).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX, neighA, macA));
 
         // If upstream IPv6 connectivity is lost, rules are removed.
         reset(mNetd);
         dispatchTetherConnectionChanged(UPSTREAM_IFACE, null);
-        verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX), eq(neighB.getAddress()));
+        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighB, macB));
 
         // When the interface goes down, rules are removed.
         lp.setInterfaceName(UPSTREAM_IFACE);
         dispatchTetherConnectionChanged(UPSTREAM_IFACE, lp);
         recvNewNeigh(myIfindex, neighA, NUD_REACHABLE, macA);
         recvNewNeigh(myIfindex, neighB, NUD_REACHABLE, macB);
-        verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX),
-                eq(neighA.getAddress()), eq(myMac.toByteArray()), eq(macA.toByteArray()));
-        verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX),
-                eq(neighB.getAddress()), eq(myMac.toByteArray()), eq(macB.toByteArray()));
+        verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX, neighA, macA));
+        verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX, neighB, macB));
         reset(mNetd);
 
         mIpServer.stop();
         mLooper.dispatchAll();
-        verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX), eq(neighA.getAddress()));
-        verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX), eq(neighB.getAddress()));
+        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighA, macA));
+        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighB, macB));
         reset(mNetd);
     }
 
