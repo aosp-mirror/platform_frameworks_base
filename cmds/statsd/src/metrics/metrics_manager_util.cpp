@@ -564,6 +564,33 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        std::vector<int> slicedStateAtoms;
+        unordered_map<int, unordered_map<int, int64_t>> stateGroupMap;
+        if (metric.slice_by_state_size() > 0) {
+            if (metric.aggregation_type() == DurationMetric::MAX_SPARSE) {
+                ALOGE("DurationMetric with aggregation type MAX_SPARSE cannot be sliced by state");
+                return false;
+            }
+            if (!handleMetricWithStates(config, metric.slice_by_state(), stateAtomIdMap,
+                                        allStateGroupMaps, slicedStateAtoms, stateGroupMap)) {
+                return false;
+            }
+        } else {
+            if (metric.state_link_size() > 0) {
+                ALOGW("DurationMetric has a MetricStateLink but doesn't have a sliced state");
+                return false;
+            }
+        }
+
+        // Check that all metric state links are a subset of dimensions_in_what fields.
+        std::vector<Matcher> dimensionsInWhat;
+        translateFieldMatcher(metric.dimensions_in_what(), &dimensionsInWhat);
+        for (const auto& stateLink : metric.state_link()) {
+            if (!handleMetricWithStateLink(stateLink.fields_in_what(), dimensionsInWhat)) {
+                return false;
+            }
+        }
+
         unordered_map<int, shared_ptr<Activation>> eventActivationMap;
         unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
         bool success = handleMetricActivation(config, metric.id(), metricIndex,
@@ -575,7 +602,8 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
                 key, metric, conditionIndex, trackerIndices[0], trackerIndices[1],
                 trackerIndices[2], nesting, wizard, internalDimensions, timeBaseTimeNs,
-                currentTimeNs, eventActivationMap, eventDeactivationMap);
+                currentTimeNs, eventActivationMap, eventDeactivationMap, slicedStateAtoms,
+                stateGroupMap);
 
         allMetricProducers.push_back(durationMetric);
     }
