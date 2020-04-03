@@ -1748,13 +1748,17 @@ public final class ViewRootImpl implements ViewParent,
             return null;
         }
 
+        Surface ret = null;
         if (mBlastBufferQueue == null) {
             mBlastBufferQueue = new BLASTBufferQueue(
                 mBlastSurfaceControl, width, height);
+            // We only return the Surface the first time, as otherwise
+            // it hasn't changed and there is no need to update.
+            ret = mBlastBufferQueue.getSurface();
         }
         mBlastBufferQueue.update(mBlastSurfaceControl, width, height);
 
-        return mBlastBufferQueue.getSurface();
+        return ret;
     }
 
     private void setBoundsLayerCrop() {
@@ -7349,8 +7353,14 @@ public final class ViewRootImpl implements ViewParent,
             if (!mUseBLASTAdapter) {
                 mSurface.copyFrom(mSurfaceControl);
             } else {
-                mSurface.transferFrom(getOrCreateBLASTSurface(mSurfaceSize.x,
-                        mSurfaceSize.y));
+                final Surface blastSurface = getOrCreateBLASTSurface(mSurfaceSize.x,
+                    mSurfaceSize.y);
+                // If blastSurface == null that means it hasn't changed since the last time we
+                // called. In this situation, avoid calling transferFrom as we would then
+                // inc the generation ID and cause EGL resources to be recreated.
+                if (blastSurface != null) {
+                    mSurface.transferFrom(blastSurface);
+                }
             }
         } else {
             destroySurface();
