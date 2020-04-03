@@ -235,7 +235,7 @@ public class ChooserActivity extends ResolverActivity implements
     private boolean mAppendDirectShareEnabled = DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_SYSTEMUI,
             SystemUiDeviceConfigFlags.APPEND_DIRECT_SHARE_ENABLED,
-            false);
+            true);
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
