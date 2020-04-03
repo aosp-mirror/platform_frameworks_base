@@ -435,7 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"사진과 동영상 찍기"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"이 앱은 언제든지 카메라를 사용하여 사진을 촬영하고 동영상을 녹화할 수 있습니다."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"애플리케이션 또는 서비스에서 카메라 기기 열림 또는 닫힘에 대한 콜백을 수신하도록 허용"</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"이 앱은 어떤 애플리케이션이든지 카메라 기기를 열 때나 닫을 때 콜백을 수신할 수 있습니다."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"이 앱은 애플리케이션이 카메라 기기를 열거나 닫을 때 콜백을 수신할 수 있습니다."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"진동 제어"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"앱이 진동을 제어할 수 있도록 허용합니다."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"전화번호 자동 연결"</string>

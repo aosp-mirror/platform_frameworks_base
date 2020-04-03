@@ -227,7 +227,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Заключване на екрана"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Изключване"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Спешно обаждане"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Сигнал за програмна грешка"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Сигнал за грешка"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Прекратяване на сесията"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Екранна снимка"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Сигнал за грешка"</string>

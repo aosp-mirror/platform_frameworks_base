@@ -435,7 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"拍摄照片和视频"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"此应用可随时使用相机拍摄照片和录制视频。"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"允许应用或服务接收与打开或关闭摄像头设备有关的回调。"</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"此应用可在任何摄像头设备（被某些应用）打开或关闭时接收相应回调。"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"此应用可在任何摄像头设备（被某些应用）打开或关闭时收到相应回调。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"控制振动"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允许应用控制振动器。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"拨打电话"</string>

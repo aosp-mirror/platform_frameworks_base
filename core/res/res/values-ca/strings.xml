@@ -435,7 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"fer fotos i vídeos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Aquesta aplicació pot fer fotos i gravar vídeos amb la càmera en qualsevol moment."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permet que una aplicació o un servei pugui rebre crides de retorn sobre els dispositius de càmera que s\'obren o es tanquen."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Aquesta aplicació pot rebre crides de retorn quan s\'obre o es tanca un dispositiu de càmera (segons l\'aplicació)."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Aquesta aplicació pot rebre crides de retorn quan s\'obre o es tanca un dispositiu de càmera mitjançant l\'aplicació en qüestió."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibració"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet que l\'aplicació controli el vibrador."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"trucar directament a números de telèfon"</string>

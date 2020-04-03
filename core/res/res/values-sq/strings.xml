@@ -227,7 +227,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Kyçja e ekranit"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Fik"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Urgjenca"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Raporti i defekteve në kod"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Raport i defektit në kod"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Jepi fund sesionit"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Pamja e ekranit"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Raporti i defekteve në kod"</string>

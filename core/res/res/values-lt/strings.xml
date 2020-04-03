@@ -230,7 +230,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Telefono parinktys"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Ekrano užraktas"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Išjungiamas maitinimas"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Skambutis pagalbos numeriu"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Skubus atvejis"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Pranešimas apie riktą"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Baigti seansą"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Ekrano kopija"</string>

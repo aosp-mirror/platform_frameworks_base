@@ -286,7 +286,7 @@
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"আপনি এই অ্যাপ ব্যবহার করার সময়েই শুধু সেটি আপনার লোকেশন অ্যাক্সেস করতে পারবে"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; অ্যাপকে এই ডিভাইসের লোকেশন &lt;b&gt;সব সময়&lt;/b&gt; অ্যাক্সেস করার অনুমতি দিতে চান?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"আপনি যখন অ্যাপটি ব্যবহার করবেন শুধুমাত্র তখনই অ্যাপটি বর্তমান লোকেশন অ্যাক্সেস করতে পারবে।"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"ক্যালেন্ডার"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে আপনার ক্যালেন্ডারে অ্যাক্সেস দেবেন?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
@@ -750,7 +750,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"অফিসের মোবাইল"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"কার্যক্ষেত্রের পেজার"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"সহায়ক"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"কাস্টম"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"জন্মদিন"</string>

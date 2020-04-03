@@ -224,11 +224,11 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
     <string name="global_actions" product="tv" msgid="2020669784083287370">"တီဗွီ ရွေးချယ်စရာများ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ဖုန်းဆိုင်ရာရွေးချယ်မှုများ"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"ဖန်သားပြင် လော့ခ်ချခြင်း"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"ဖန်သားပြင် လော့ခ်ချရန်"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"ပါဝါပိတ်ရန်"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"အရေးပေါ်"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်း"</string>
-    <string name="global_action_logout" msgid="6093581310002476511">"သတ်မှတ်ပေးထားသည့်အချိန် ပြီးဆုံးပြီ"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"အမှားရှာပြင် မှတ်တမ်း"</string>
+    <string name="global_action_logout" msgid="6093581310002476511">"စက်ရှင် ပြီးဆုံးပြီ"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"အမှားပြင် အစီရင်ခံစာ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
