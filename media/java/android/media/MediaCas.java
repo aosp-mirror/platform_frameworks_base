@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.hardware.cas.V1_0.HidlCasPluginDescriptor;
 import android.hardware.cas.V1_0.ICas;
@@ -1073,6 +1074,17 @@ public final class MediaCas implements AutoCloseable {
                     mICas.refreshEntitlements(refreshType, toByteArray(refreshData)));
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
+        }
+    }
+
+    /**
+     * Release Cas session. This is primarily used as a test API for CTS.
+     * @hide
+     */
+    @TestApi
+    public void forceResourceLost() {
+        if (mResourceListener != null) {
+            mResourceListener.onReclaimResources();
         }
     }
 
