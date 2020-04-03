@@ -46,6 +46,7 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_F
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
 import static com.android.server.wm.TaskDisplayArea.getStackAbove;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -140,9 +141,12 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testPrimarySplitScreenRestoresWhenMovedToBack() {
-        // Create primary splitscreen stack. This will create secondary stacks and places the
-        // existing fullscreen stack on the bottom.
+    public void testPrimarySplitScreenMoveToBack() {
+        TestSplitOrganizer organizer = new TestSplitOrganizer(mService);
+        // We're testing an edge case here where we have primary + fullscreen rather than secondary.
+        organizer.setMoveToSecondaryOnEnter(false);
+
+        // Create primary splitscreen stack.
         final ActivityStack primarySplitScreen = mDefaultTaskDisplayArea.createStack(
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
@@ -165,12 +169,14 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testPrimarySplitScreenRestoresPreviousWhenMovedToBack() {
+    public void testMoveToPrimarySplitScreenThenMoveToBack() {
+        TestSplitOrganizer organizer = new TestSplitOrganizer(mService);
         // This time, start with a fullscreen activitystack
         final ActivityStack primarySplitScreen = mDefaultTaskDisplayArea.createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
-        primarySplitScreen.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        primarySplitScreen.reparent((ActivityStack) organizer.mPrimary, POSITION_TOP,
+                false /*moveParents*/, "test");
 
         // Assert windowing mode.
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, primarySplitScreen.getWindowingMode());
@@ -180,11 +186,49 @@ public class ActivityStackTests extends ActivityTestsBase {
                 null /* task */);
 
         // Assert that stack is at the bottom.
-        assertEquals(0, mDefaultTaskDisplayArea.getIndexOf(primarySplitScreen));
+        assertEquals(primarySplitScreen, organizer.mSecondary.getChildAt(0));
 
         // Ensure that the override mode is restored to what it was (fullscreen)
-        assertEquals(WINDOWING_MODE_FULLSCREEN,
+        assertEquals(WINDOWING_MODE_UNDEFINED,
                 primarySplitScreen.getRequestedOverrideWindowingMode());
+    }
+
+    @Test
+    public void testSplitScreenMoveToBack() {
+        TestSplitOrganizer organizer = new TestSplitOrganizer(mService);
+        // Set up split-screen with primary on top and secondary containing the home task below
+        // another stack.
+        final ActivityStack primaryTask = mDefaultTaskDisplayArea.createStack(
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityStack homeRoot = mDefaultTaskDisplayArea.getStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
+        final ActivityStack secondaryTask = mDefaultTaskDisplayArea.createStack(
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        mDefaultTaskDisplayArea.positionStackAtTop((ActivityStack) organizer.mPrimary,
+                false /* includingParents */);
+
+        // Move primary to back.
+        primaryTask.moveToBack("test", null /* task */);
+
+        // Assert that the primaryTask is now below home in its parent but primary is left alone.
+        assertEquals(0, organizer.mPrimary.getChildCount());
+        assertEquals(primaryTask, organizer.mSecondary.getChildAt(0));
+        assertEquals(1, organizer.mPrimary.compareTo(organizer.mSecondary));
+        assertEquals(1, homeRoot.compareTo(primaryTask));
+        assertEquals(homeRoot.getParent(), primaryTask.getParent());
+
+        // Make sure windowing modes are correct
+        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, organizer.mPrimary.getWindowingMode());
+        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, primaryTask.getWindowingMode());
+
+        // Move secondary to back via parent (should be equivalent)
+        ((ActivityStack) organizer.mSecondary).moveToBack("test", secondaryTask);
+
+        // Assert that it is now in back but still in secondary split
+        assertEquals(1, homeRoot.compareTo(primaryTask));
+        assertEquals(secondaryTask, organizer.mSecondary.getChildAt(0));
+        assertEquals(1, primaryTask.compareTo(secondaryTask));
+        assertEquals(homeRoot.getParent(), secondaryTask.getParent());
     }
 
     @Test
