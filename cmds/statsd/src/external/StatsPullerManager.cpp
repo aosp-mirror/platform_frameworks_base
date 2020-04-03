@@ -81,7 +81,7 @@ const int64_t NO_ALARM_UPDATE = INT64_MAX;
 StatsPullerManager::StatsPullerManager()
     : kAllPullAtomInfo({
               // TrainInfo.
-              {{.atomTag = util::TRAIN_INFO, .uid = -1}, new TrainInfoPuller()},
+              {{.atomTag = util::TRAIN_INFO, .uid = AID_STATSD}, new TrainInfoPuller()},
       }),
       mNextPullTimeNs(NO_ALARM_UPDATE),
       mPullAtomCallbackDeathRecipient(AIBinder_DeathRecipient_new(pullAtomCallbackDied)) {
