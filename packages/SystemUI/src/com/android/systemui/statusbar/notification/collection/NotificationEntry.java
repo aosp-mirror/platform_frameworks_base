@@ -67,7 +67,6 @@ import com.android.systemui.statusbar.notification.icon.IconPack;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 
 import java.util.ArrayList;
@@ -577,10 +576,6 @@ public final class NotificationEntry extends ListEntry {
 
     public void resetUserExpansion() {
         if (row != null) row.resetUserExpansion();
-    }
-
-    public void freeContentViewWhenSafe(@InflationFlag int inflationFlag) {
-        if (row != null) row.freeContentViewWhenSafe(inflationFlag);
     }
 
     public boolean rowExists() {

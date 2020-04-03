@@ -33,9 +33,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.NotifInf
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -63,8 +61,6 @@ public class PreparationCoordinator implements Coordinator {
     private final NotifViewBarn mViewBarn;
     private final Map<NotificationEntry, Integer> mInflationStates = new ArrayMap<>();
     private final IStatusBarService mStatusBarService;
-    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
-    private final HeadsUpManager mHeadsUpManager;
 
     @Inject
     public PreparationCoordinator(
@@ -72,9 +68,7 @@ public class PreparationCoordinator implements Coordinator {
             NotifInflaterImpl notifInflater,
             NotifInflationErrorManager errorManager,
             NotifViewBarn viewBarn,
-            IStatusBarService service,
-            NotificationInterruptStateProvider notificationInterruptStateProvider,
-            HeadsUpManager headsUpManager
+            IStatusBarService service
     ) {
         mLogger = logger;
         mNotifInflater = notifInflater;
@@ -83,8 +77,6 @@ public class PreparationCoordinator implements Coordinator {
         mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
         mViewBarn = viewBarn;
         mStatusBarService = service;
-        mNotificationInterruptStateProvider = notificationInterruptStateProvider;
-        mHeadsUpManager = headsUpManager;
     }
 
     @Override
@@ -158,11 +150,6 @@ public class PreparationCoordinator implements Coordinator {
             mLogger.logNotifInflated(entry.getKey());
             mViewBarn.registerViewForEntry(entry, entry.getRow());
             mInflationStates.put(entry, STATE_INFLATED);
-
-            // TODO: should eventually be moved to HeadsUpCoordinator
-            if (mNotificationInterruptStateProvider.shouldHeadsUp(entry)) {
-                mHeadsUpManager.showNotification(entry);
-            }
             mNotifInflatingFilter.invalidateList();
         }
     };

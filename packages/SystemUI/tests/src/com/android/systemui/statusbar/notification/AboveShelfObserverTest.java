@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.widget.FrameLayout;
 
@@ -46,7 +47,10 @@ public class AboveShelfObserverTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         allowTestableLooperAsMainThread();
-        mNotificationTestHelper = new NotificationTestHelper(getContext(), mDependency);
+        mNotificationTestHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
         mHostLayout = new FrameLayout(getContext());
         mObserver = new AboveShelfObserver(mHostLayout);
         ExpandableNotificationRow row = mNotificationTestHelper.createRow();
