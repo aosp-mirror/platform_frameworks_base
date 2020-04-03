@@ -135,6 +135,27 @@ AtomMatcher CreateBatterySaverModeStopAtomMatcher() {
         "BatterySaverModeStop", BatterySaverModeStateChanged::OFF);
 }
 
+AtomMatcher CreateBatteryStateChangedAtomMatcher(const string& name,
+                                                 BatteryPluggedStateEnum state) {
+    AtomMatcher atom_matcher;
+    atom_matcher.set_id(StringToId(name));
+    auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
+    simple_atom_matcher->set_atom_id(util::PLUGGED_STATE_CHANGED);
+    auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
+    field_value_matcher->set_field(1);  // State field.
+    field_value_matcher->set_eq_int(state);
+    return atom_matcher;
+}
+
+AtomMatcher CreateBatteryStateNoneMatcher() {
+    return CreateBatteryStateChangedAtomMatcher("BatteryPluggedNone",
+                                                BatteryPluggedStateEnum::BATTERY_PLUGGED_NONE);
+}
+
+AtomMatcher CreateBatteryStateUsbMatcher() {
+    return CreateBatteryStateChangedAtomMatcher("BatteryPluggedUsb",
+                                                BatteryPluggedStateEnum::BATTERY_PLUGGED_USB);
+}
 
 AtomMatcher CreateScreenStateChangedAtomMatcher(
     const string& name, android::view::DisplayStateEnum state) {
@@ -231,6 +252,14 @@ Predicate CreateBatterySaverModePredicate() {
     predicate.set_id(StringToId("BatterySaverIsOn"));
     predicate.mutable_simple_predicate()->set_start(StringToId("BatterySaverModeStart"));
     predicate.mutable_simple_predicate()->set_stop(StringToId("BatterySaverModeStop"));
+    return predicate;
+}
+
+Predicate CreateDeviceUnpluggedPredicate() {
+    Predicate predicate;
+    predicate.set_id(StringToId("DeviceUnplugged"));
+    predicate.mutable_simple_predicate()->set_start(StringToId("BatteryPluggedNone"));
+    predicate.mutable_simple_predicate()->set_stop(StringToId("BatteryPluggedUsb"));
     return predicate;
 }
 
@@ -410,6 +439,74 @@ FieldMatcher CreateDimensions(const int atomId, const std::vector<int>& fields) 
     return dimensions;
 }
 
+FieldMatcher CreateAttributionUidAndOtherDimensions(const int atomId,
+                                                    const std::vector<Position>& positions,
+                                                    const std::vector<int>& fields) {
+    FieldMatcher dimensions = CreateAttributionUidDimensions(atomId, positions);
+
+    for (const int field : fields) {
+        dimensions.add_child()->set_field(field);
+    }
+    return dimensions;
+}
+
+// START: get primary key functions
+void getUidProcessKey(int uid, HashableDimensionKey* key) {
+    int pos1[] = {1, 0, 0};
+    Field field1(27 /* atom id */, pos1, 0 /* depth */);
+    Value value1((int32_t)uid);
+
+    key->addValue(FieldValue(field1, value1));
+}
+
+void getOverlayKey(int uid, string packageName, HashableDimensionKey* key) {
+    int pos1[] = {1, 0, 0};
+    int pos2[] = {2, 0, 0};
+
+    Field field1(59 /* atom id */, pos1, 0 /* depth */);
+    Field field2(59 /* atom id */, pos2, 0 /* depth */);
+
+    Value value1((int32_t)uid);
+    Value value2(packageName);
+
+    key->addValue(FieldValue(field1, value1));
+    key->addValue(FieldValue(field2, value2));
+}
+
+void getPartialWakelockKey(int uid, const std::string& tag, HashableDimensionKey* key) {
+    int pos1[] = {1, 1, 1};
+    int pos3[] = {2, 0, 0};
+    int pos4[] = {3, 0, 0};
+
+    Field field1(10 /* atom id */, pos1, 2 /* depth */);
+
+    Field field3(10 /* atom id */, pos3, 0 /* depth */);
+    Field field4(10 /* atom id */, pos4, 0 /* depth */);
+
+    Value value1((int32_t)uid);
+    Value value3((int32_t)1 /*partial*/);
+    Value value4(tag);
+
+    key->addValue(FieldValue(field1, value1));
+    key->addValue(FieldValue(field3, value3));
+    key->addValue(FieldValue(field4, value4));
+}
+
+void getPartialWakelockKey(int uid, HashableDimensionKey* key) {
+    int pos1[] = {1, 1, 1};
+    int pos3[] = {2, 0, 0};
+
+    Field field1(10 /* atom id */, pos1, 2 /* depth */);
+    Field field3(10 /* atom id */, pos3, 0 /* depth */);
+
+    Value value1((int32_t)uid);
+    Value value3((int32_t)1 /*partial*/);
+
+    key->addValue(FieldValue(field1, value1));
+    key->addValue(FieldValue(field3, value3));
+}
+// END: get primary key functions
+
 shared_ptr<LogEvent> CreateTwoValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value1,
                                             int32_t value2) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
@@ -584,6 +681,23 @@ std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs) {
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, BatterySaverModeStateChanged::OFF);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateBatteryStateChangedEvent(const uint64_t timestampNs, const BatteryPluggedStateEnum state) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, util::PLUGGED_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, state);
     AStatsEvent_build(statsEvent);
 
     size_t size;
@@ -962,6 +1076,22 @@ void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events) {
 
 int64_t StringToId(const string& str) {
     return static_cast<int64_t>(std::hash<std::string>()(str));
+}
+
+void ValidateWakelockAttributionUidAndTagDimension(const DimensionsValue& value, const int atomId,
+                                                   const int uid, const string& tag) {
+    EXPECT_EQ(value.field(), atomId);
+    EXPECT_EQ(value.value_tuple().dimensions_value_size(), 2);
+    // Attribution field.
+    EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
+    // Uid field.
+    EXPECT_EQ(value.value_tuple().dimensions_value(0).value_tuple().dimensions_value_size(), 1);
+    EXPECT_EQ(value.value_tuple().dimensions_value(0).value_tuple().dimensions_value(0).field(), 1);
+    EXPECT_EQ(value.value_tuple().dimensions_value(0).value_tuple().dimensions_value(0).value_int(),
+              uid);
+    // Tag field.
+    EXPECT_EQ(value.value_tuple().dimensions_value(1).field(), 3);
+    EXPECT_EQ(value.value_tuple().dimensions_value(1).value_str(), tag);
 }
 
 void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, int uid) {
