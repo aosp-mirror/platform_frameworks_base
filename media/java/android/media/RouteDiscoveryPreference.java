@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A media route discovery preference describing the features of routes that media router
@@ -169,8 +171,9 @@ public final class RouteDiscoveryPreference implements Parcelable {
         Bundle mExtras;
 
         public Builder(@NonNull List<String> preferredFeatures, boolean activeScan) {
-            mPreferredFeatures = new ArrayList<>(Objects.requireNonNull(preferredFeatures,
-                    "preferredFeatures must not be null"));
+            Objects.requireNonNull(preferredFeatures, "preferredFeatures must not be null");
+            mPreferredFeatures = preferredFeatures.stream().filter(str -> !TextUtils.isEmpty(str))
+                    .collect(Collectors.toList());
             mActiveScan = activeScan;
         }
 
@@ -211,8 +214,9 @@ public final class RouteDiscoveryPreference implements Parcelable {
          */
         @NonNull
         public Builder setPreferredFeatures(@NonNull List<String> preferredFeatures) {
-            mPreferredFeatures = new ArrayList<>(Objects.requireNonNull(preferredFeatures,
-                            "preferredFeatures must not be null"));
+            Objects.requireNonNull(preferredFeatures, "preferredFeatures must not be null");
+            mPreferredFeatures = preferredFeatures.stream().filter(str -> !TextUtils.isEmpty(str))
+                    .collect(Collectors.toList());
             return this;
         }
 

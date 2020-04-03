@@ -53,7 +53,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class InsetsStateControllerTest extends WindowTestsBase {
@@ -72,7 +71,6 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testStripForDispatch_notOwn() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
@@ -106,7 +104,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
         getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
-        assertEquals(0, getController().getInsetsForDispatch(navBar).getSourcesCount());
+        assertNull(getController().getInsetsForDispatch(navBar).peekSource(ITYPE_IME));
+        assertNull(getController().getInsetsForDispatch(navBar).peekSource(ITYPE_STATUS_BAR));
     }
 
     @Test
@@ -290,7 +289,6 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNull(getController().getControlsForDispatch(app));
     }
 
-    @FlakyTest(bugId = 124088319)
     @Test
     public void testControlRevoked_animation() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");

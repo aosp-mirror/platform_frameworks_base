@@ -91,6 +91,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -417,6 +418,21 @@ public final class Settings {
     public final KeySetManagerService mKeySetManagerService = new KeySetManagerService(mPackages);
     /** Settings and other information about permissions */
     final PermissionSettings mPermissions;
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public Settings(Map<String, PackageSetting> pkgSettings) {
+        mLock = new Object();
+        mPackages.putAll(pkgSettings);
+        mSystemDir = null;
+        mPermissions = null;
+        mRuntimePermissionsPersistence = null;
+        mSettingsFilename = null;
+        mBackupSettingsFilename = null;
+        mPackageListFilename = null;
+        mStoppedPackagesFilename = null;
+        mBackupStoppedPackagesFilename = null;
+        mKernelMappingFilename = null;
+    }
 
     Settings(File dataDir, PermissionSettings permission,
             Object lock) {
@@ -4328,8 +4344,9 @@ public final class Settings {
         return userState.isMatch(componentInfo, flags);
     }
 
-    boolean isEnabledAndMatchLPr(AndroidPackage pkg, ParsedMainComponent component, int flags,
-            int userId) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public boolean isEnabledAndMatchLPr(AndroidPackage pkg, ParsedMainComponent component,
+            int flags, int userId) {
         final PackageSetting ps = mPackages.get(component.getPackageName());
         if (ps == null) return false;
 
