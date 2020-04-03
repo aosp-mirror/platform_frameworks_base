@@ -89,6 +89,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
@@ -148,6 +149,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private KeyguardBypassController mBypassController;
     private LayoutListener mLayoutListener;
     private RowContentBindStage mRowContentBindStage;
+    private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     private int mIconTransformContentShift;
     private int mMaxHeadsUpHeightBeforeN;
     private int mMaxHeadsUpHeightBeforeP;
@@ -1145,7 +1147,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public void onPluginDisconnected(NotificationMenuRowPlugin plugin) {
         boolean existed = mMenuRow.getMenuView() != null;
-        mMenuRow = new NotificationMenuRow(mContext);
+        mMenuRow = new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
         if (existed) {
             createMenu();
         }
@@ -1582,7 +1584,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mMenuRow = new NotificationMenuRow(mContext);
         mImageResolver = new NotificationInlineImageResolver(context,
                 new NotificationInlineImageCache());
         initDimens();
@@ -1603,9 +1604,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             NotificationMediaManager notificationMediaManager,
             OnAppOpsClickListener onAppOpsClickListener,
             FalsingManager falsingManager,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            PeopleNotificationIdentifier peopleNotificationIdentifier) {
         mAppName = appName;
-        if (mMenuRow != null && mMenuRow.getMenuView() != null) {
+        if (mMenuRow == null) {
+            mMenuRow = new NotificationMenuRow(mContext, peopleNotificationIdentifier);
+        }
+        if (mMenuRow.getMenuView() != null) {
             mMenuRow.setAppName(mAppName);
         }
         mLogger = logger;
@@ -1620,6 +1625,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         setAppOpsOnClickListener(onAppOpsClickListener);
         mFalsingManager = falsingManager;
         mStatusbarStateController = statusBarStateController;
+        mPeopleNotificationIdentifier = peopleNotificationIdentifier;
     }
 
     private void initDimens() {
