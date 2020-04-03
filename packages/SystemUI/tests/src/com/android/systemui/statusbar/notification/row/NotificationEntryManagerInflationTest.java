@@ -131,6 +131,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
 
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
     @Mock private NotificationRowComponent.Builder mNotificationRowComponentBuilder;
+    @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
 
     private StatusBarNotification mSbn;
     private NotificationListenerService.RankingMap mRankingMap;
@@ -239,7 +240,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                                 mGutsManager,
                                 true,
                                 null,
-                                mFalsingManager
+                                mFalsingManager,
+                                mPeopleNotificationIdentifier
                         ));
 
         when(mNotificationRowComponentBuilder.activatableNotificationView(any()))
