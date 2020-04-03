@@ -2745,15 +2745,15 @@ public class NotificationManagerService extends SystemService {
         return userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId;
     }
 
-    private ToastRecord getToastRecord(int pid, String packageName, IBinder token,
+    private ToastRecord getToastRecord(int uid, int pid, String packageName, IBinder token,
             @Nullable CharSequence text, @Nullable ITransientNotification callback, int duration,
             Binder windowToken, int displayId,
             @Nullable ITransientNotificationCallback textCallback) {
         if (callback == null) {
-            return new TextToastRecord(this, mStatusBar, pid, packageName, token, text, duration,
-                    windowToken, displayId, textCallback);
+            return new TextToastRecord(this, mStatusBar, uid, pid, packageName, token, text,
+                    duration, windowToken, displayId, textCallback);
         } else {
-            return new CustomToastRecord(this, pid, packageName, token, callback, duration,
+            return new CustomToastRecord(this, uid, pid, packageName, token, callback, duration,
                     windowToken, displayId);
         }
     }
@@ -2878,8 +2878,8 @@ public class NotificationManagerService extends SystemService {
 
                         Binder windowToken = new Binder();
                         mWindowManagerInternal.addWindowToken(windowToken, TYPE_TOAST, displayId);
-                        record = getToastRecord(callingPid, pkg, token, text, callback, duration,
-                                windowToken, displayId, textCallback);
+                        record = getToastRecord(callingUid, callingPid, pkg, token, text, callback,
+                                duration, windowToken, displayId, textCallback);
                         mToastQueue.add(record);
                         index = mToastQueue.size() - 1;
                         keepProcessAliveForToastIfNeededLocked(callingPid);
