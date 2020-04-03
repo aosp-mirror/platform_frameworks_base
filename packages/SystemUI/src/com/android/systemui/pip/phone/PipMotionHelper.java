@@ -162,7 +162,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     }
 
     /**
-     * Synchronizes the current bounds with the pinned stack.
+     * Synchronizes the current bounds with the pinned stack, cancelling any ongoing animations.
      */
     void synchronizePinnedStackBounds() {
         cancelAnimations();
@@ -174,6 +174,21 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get pinned stack bounds");
+        }
+    }
+
+    /**
+     * Synchronizes the current bounds with either the pinned stack, or the ongoing animation. This
+     * is done to prepare for a touch gesture.
+     */
+    void synchronizePinnedStackBoundsForTouchGesture() {
+        if (mAnimatingToBounds.isEmpty()) {
+            // If we're not animating anywhere, sync normally.
+            synchronizePinnedStackBounds();
+        } else {
+            // If we're animating, set the current bounds to the animated bounds. That way, the
+            // touch gesture will begin at the most recent animated location of the bounds.
+            mBounds.set(mAnimatedBounds);
         }
     }
 
@@ -295,13 +310,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         final float estimatedFlingYEndValue =
                 PhysicsAnimator.estimateFlingEndValue(mBounds.top, velocityY, mFlingConfigY);
 
-        setAnimatingToBounds(new Rect(
-                (int) xEndValue,
-                (int) estimatedFlingYEndValue,
-                (int) xEndValue + mBounds.width(),
-                (int) estimatedFlingYEndValue + mBounds.height()));
-
-        startBoundsAnimation();
+        startBoundsAnimator(xEndValue /* toX */, estimatedFlingYEndValue /* toY */);
     }
 
     /**
@@ -322,9 +331,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mAnimatedBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_X, bounds.left, springConfig)
                 .spring(FloatProperties.RECT_Y, bounds.top, springConfig);
-        startBoundsAnimation();
-
-        setAnimatingToBounds(bounds);
+        startBoundsAnimator(bounds.left /* toX */, bounds.top /* toY */);
     }
 
     /**
@@ -349,7 +356,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     (target, values) -> updateAction.run());
         }
 
-        startBoundsAnimation();
+        startBoundsAnimator(dismissEndPoint.x /* toX */, dismissEndPoint.y /* toY */);
     }
 
     /**
@@ -418,11 +425,23 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * This will also add end actions to the bounds animator that cancel the TimeAnimator and update
      * the 'real' bounds to equal the final animated bounds.
      */
-    private void startBoundsAnimation() {
+    private void startBoundsAnimator(float toX, float toY) {
         cancelAnimations();
 
+        // Set animatingToBounds directly to avoid allocating a new Rect, but then call
+        // setAnimatingToBounds to run the normal logic for changing animatingToBounds.
+        mAnimatingToBounds.set(
+                (int) toX,
+                (int) toY,
+                (int) toX + mBounds.width(),
+                (int) toY + mBounds.height());
+        setAnimatingToBounds(mAnimatingToBounds);
+
         mAnimatedBoundsPhysicsAnimator
-                .withEndActions(() ->  mPipTaskOrganizer.scheduleFinishResizePip(mAnimatedBounds))
+                .withEndActions(() -> {
+                    mPipTaskOrganizer.scheduleFinishResizePip(mAnimatedBounds);
+                    mAnimatingToBounds.setEmpty();
+                })
                 .addUpdateListener(mResizePipUpdateListener)
                 .start();
     }
