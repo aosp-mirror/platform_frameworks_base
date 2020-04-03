@@ -1747,15 +1747,12 @@ public final class ViewRootImpl implements ViewParent,
                 || !mBlastSurfaceControl.isValid()) {
             return null;
         }
+
         if (mBlastBufferQueue == null) {
             mBlastBufferQueue = new BLASTBufferQueue(
                 mBlastSurfaceControl, width, height);
         }
         mBlastBufferQueue.update(mBlastSurfaceControl, width, height);
-
-        mTransaction.show(mBlastSurfaceControl)
-            .reparent(mBlastSurfaceControl, mSurfaceControl)
-            .apply();
 
         return mBlastBufferQueue.getSurface();
     }
