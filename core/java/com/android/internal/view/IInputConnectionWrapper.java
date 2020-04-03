@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
@@ -36,6 +37,9 @@ import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.ICharSequenceResultCallback;
+import com.android.internal.inputmethod.IExtractedTextResultCallback;
+import com.android.internal.inputmethod.IIntResultCallback;
 import com.android.internal.os.SomeArgs;
 
 public abstract class IInputConnectionWrapper extends IInputContext.Stub {
@@ -111,28 +115,31 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
 
     abstract protected boolean isActive();
 
-    public void getTextAfterCursor(int length, int flags, int seq, IInputContextCallback callback) {
-        dispatchMessage(obtainMessageIISC(DO_GET_TEXT_AFTER_CURSOR, length, flags, seq, callback));
-    }
-    
-    public void getTextBeforeCursor(int length, int flags, int seq, IInputContextCallback callback) {
-        dispatchMessage(obtainMessageIISC(DO_GET_TEXT_BEFORE_CURSOR, length, flags, seq, callback));
+    public void getTextAfterCursor(int length, int flags, ICharSequenceResultCallback callback) {
+        dispatchMessage(mH.obtainMessage(DO_GET_TEXT_AFTER_CURSOR, length, flags, callback));
     }
 
-    public void getSelectedText(int flags, int seq, IInputContextCallback callback) {
-        dispatchMessage(obtainMessageISC(DO_GET_SELECTED_TEXT, flags, seq, callback));
+    public void getTextBeforeCursor(int length, int flags, ICharSequenceResultCallback callback) {
+        dispatchMessage(mH.obtainMessage(DO_GET_TEXT_BEFORE_CURSOR, length, flags, callback));
     }
 
-    public void getCursorCapsMode(int reqModes, int seq, IInputContextCallback callback) {
-        dispatchMessage(obtainMessageISC(DO_GET_CURSOR_CAPS_MODE, reqModes, seq, callback));
+    public void getSelectedText(int flags, ICharSequenceResultCallback callback) {
+        dispatchMessage(mH.obtainMessage(DO_GET_SELECTED_TEXT, flags, 0 /* unused */, callback));
     }
 
-    public void getExtractedText(ExtractedTextRequest request,
-            int flags, int seq, IInputContextCallback callback) {
-        dispatchMessage(obtainMessageIOSC(DO_GET_EXTRACTED_TEXT, flags,
-                request, seq, callback));
+    public void getCursorCapsMode(int reqModes, IIntResultCallback callback) {
+        dispatchMessage(
+                mH.obtainMessage(DO_GET_CURSOR_CAPS_MODE, reqModes, 0 /* unused */, callback));
     }
-    
+
+    public void getExtractedText(ExtractedTextRequest request, int flags,
+            IExtractedTextResultCallback callback) {
+        final SomeArgs args = SomeArgs.obtain();
+        args.arg1 = request;
+        args.arg2 = callback;
+        dispatchMessage(mH.obtainMessage(DO_GET_EXTRACTED_TEXT, flags, 0 /* unused */, args));
+    }
+
     public void commitText(CharSequence text, int newCursorPosition) {
         dispatchMessage(obtainMessageIO(DO_COMMIT_TEXT, newCursorPosition, text));
     }
@@ -199,10 +206,9 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(obtainMessageOO(DO_PERFORM_PRIVATE_COMMAND, action, data));
     }
 
-    public void requestUpdateCursorAnchorInfo(int cursorUpdateMode, int seq,
-            IInputContextCallback callback) {
-        dispatchMessage(obtainMessageISC(DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO, cursorUpdateMode,
-                seq, callback));
+    public void requestUpdateCursorAnchorInfo(int cursorUpdateMode, IIntResultCallback callback) {
+        dispatchMessage(mH.obtainMessage(DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO, cursorUpdateMode,
+                0 /* unused */, callback));
     }
 
     public void closeConnection() {
@@ -210,9 +216,12 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     }
 
     public void commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts,
-            int seq, IInputContextCallback callback) {
-        dispatchMessage(obtainMessageIOOSC(DO_COMMIT_CONTENT, flags, inputContentInfo, opts, seq,
-                callback));
+            IIntResultCallback callback) {
+        final SomeArgs args = SomeArgs.obtain();
+        args.arg1 = inputContentInfo;
+        args.arg2 = opts;
+        args.arg3 = callback;
+        dispatchMessage(mH.obtainMessage(DO_COMMIT_CONTENT, flags, 0 /* unused */, args));
     }
 
     void dispatchMessage(Message msg) {
@@ -231,100 +240,97 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     void executeMessage(Message msg) {
         switch (msg.what) {
             case DO_GET_TEXT_AFTER_CURSOR: {
-                SomeArgs args = (SomeArgs)msg.obj;
+                final ICharSequenceResultCallback callback = (ICharSequenceResultCallback) msg.obj;
+                final InputConnection ic = getInputConnection();
+                final CharSequence result;
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "getTextAfterCursor on inactive InputConnection");
+                    result = null;
+                } else {
+                    result = ic.getTextAfterCursor(msg.arg1, msg.arg2);
+                }
                 try {
-                    final IInputContextCallback callback = (IInputContextCallback) args.arg6;
-                    final int callbackSeq = args.argi6;
-                    InputConnection ic = getInputConnection();
-                    if (ic == null || !isActive()) {
-                        Log.w(TAG, "getTextAfterCursor on inactive InputConnection");
-                        callback.setTextAfterCursor(null, callbackSeq);
-                        return;
-                    }
-                    callback.setTextAfterCursor(ic.getTextAfterCursor(
-                            msg.arg1, msg.arg2), callbackSeq);
+                    callback.onResult(result);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Got RemoteException calling setTextAfterCursor", e);
-                } finally {
-                    args.recycle();
+                    Log.w(TAG, "Failed to return the result to getTextAfterCursor()."
+                            + " result=" + result, e);
                 }
                 return;
             }
             case DO_GET_TEXT_BEFORE_CURSOR: {
-                SomeArgs args = (SomeArgs)msg.obj;
+                final ICharSequenceResultCallback callback = (ICharSequenceResultCallback) msg.obj;
+                final InputConnection ic = getInputConnection();
+                final CharSequence result;
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "getTextBeforeCursor on inactive InputConnection");
+                    result = null;
+                } else {
+                    result = ic.getTextBeforeCursor(msg.arg1, msg.arg2);
+                }
                 try {
-                    final IInputContextCallback callback = (IInputContextCallback) args.arg6;
-                    final int callbackSeq = args.argi6;
-                    InputConnection ic = getInputConnection();
-                    if (ic == null || !isActive()) {
-                        Log.w(TAG, "getTextBeforeCursor on inactive InputConnection");
-                        callback.setTextBeforeCursor(null, callbackSeq);
-                        return;
-                    }
-                    callback.setTextBeforeCursor(ic.getTextBeforeCursor(
-                            msg.arg1, msg.arg2), callbackSeq);
+                    callback.onResult(result);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Got RemoteException calling setTextBeforeCursor", e);
-                } finally {
-                    args.recycle();
+                    Log.w(TAG, "Failed to return the result to getTextBeforeCursor()."
+                            + " result=" + result, e);
                 }
                 return;
             }
             case DO_GET_SELECTED_TEXT: {
-                SomeArgs args = (SomeArgs)msg.obj;
+                final ICharSequenceResultCallback callback = (ICharSequenceResultCallback) msg.obj;
+                final InputConnection ic = getInputConnection();
+                final CharSequence result;
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "getSelectedText on inactive InputConnection");
+                    result = null;
+                } else {
+                    result = ic.getSelectedText(msg.arg1);
+                }
                 try {
-                    final IInputContextCallback callback = (IInputContextCallback) args.arg6;
-                    final int callbackSeq = args.argi6;
-                    InputConnection ic = getInputConnection();
-                    if (ic == null || !isActive()) {
-                        Log.w(TAG, "getSelectedText on inactive InputConnection");
-                        callback.setSelectedText(null, callbackSeq);
-                        return;
-                    }
-                    callback.setSelectedText(ic.getSelectedText(
-                            msg.arg1), callbackSeq);
+                    callback.onResult(result);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Got RemoteException calling setSelectedText", e);
-                } finally {
-                    args.recycle();
+                    Log.w(TAG, "Failed to return the result to getSelectedText()."
+                            + " result=" + result, e);
                 }
                 return;
             }
             case DO_GET_CURSOR_CAPS_MODE: {
-                SomeArgs args = (SomeArgs)msg.obj;
+                final IIntResultCallback callback = (IIntResultCallback) msg.obj;
+                final InputConnection ic = getInputConnection();
+                final int result;
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "getCursorCapsMode on inactive InputConnection");
+                    result = 0;
+                } else {
+                    result = ic.getCursorCapsMode(msg.arg1);
+                }
                 try {
-                    final IInputContextCallback callback = (IInputContextCallback) args.arg6;
-                    final int callbackSeq = args.argi6;
-                    InputConnection ic = getInputConnection();
-                    if (ic == null || !isActive()) {
-                        Log.w(TAG, "getCursorCapsMode on inactive InputConnection");
-                        callback.setCursorCapsMode(0, callbackSeq);
-                        return;
-                    }
-                    callback.setCursorCapsMode(ic.getCursorCapsMode(msg.arg1),
-                            callbackSeq);
+                    callback.onResult(result);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Got RemoteException calling setCursorCapsMode", e);
-                } finally {
-                    args.recycle();
+                    Log.w(TAG, "Failed to return the result to getCursorCapsMode()."
+                            + " result=" + result, e);
                 }
                 return;
             }
             case DO_GET_EXTRACTED_TEXT: {
-                SomeArgs args = (SomeArgs)msg.obj;
+                final SomeArgs args = (SomeArgs) msg.obj;
                 try {
-                    final IInputContextCallback callback = (IInputContextCallback) args.arg6;
-                    final int callbackSeq = args.argi6;
-                    InputConnection ic = getInputConnection();
+                    final ExtractedTextRequest request = (ExtractedTextRequest) args.arg1;
+                    final IExtractedTextResultCallback callback =
+                            (IExtractedTextResultCallback) args.arg2;
+                    final InputConnection ic = getInputConnection();
+                    final ExtractedText result;
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getExtractedText on inactive InputConnection");
-                        callback.setExtractedText(null, callbackSeq);
-                        return;
+                        result = null;
+                    } else {
+                        result = ic.getExtractedText(request, msg.arg1);
                     }
-                    callback.setExtractedText(ic.getExtractedText(
-                            (ExtractedTextRequest)args.arg1, msg.arg1), callbackSeq);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Got RemoteException calling setExtractedText", e);
+                    try {
+                        callback.onResult(result);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Failed to return the result to getExtractedText()."
+                                + " result=" + result, e);
+                    }
                 } finally {
                     args.recycle();
                 }
@@ -494,22 +500,20 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO: {
-                SomeArgs args = (SomeArgs)msg.obj;
+                final IIntResultCallback callback = (IIntResultCallback) msg.obj;
+                final InputConnection ic = getInputConnection();
+                final boolean result;
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
+                    result = false;
+                } else {
+                    result = ic.requestCursorUpdates(msg.arg1);
+                }
                 try {
-                    final IInputContextCallback callback = (IInputContextCallback) args.arg6;
-                    final int callbackSeq = args.argi6;
-                    InputConnection ic = getInputConnection();
-                    if (ic == null || !isActive()) {
-                        Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
-                        callback.setRequestUpdateCursorAnchorInfoResult(false, callbackSeq);
-                        return;
-                    }
-                    callback.setRequestUpdateCursorAnchorInfoResult(
-                            ic.requestCursorUpdates(msg.arg1), callbackSeq);
+                    callback.onResult(result ? 1 : 0);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Got RemoteException calling requestCursorAnchorInfo", e);
-                } finally {
-                    args.recycle();
+                    Log.w(TAG, "Failed to return the result to requestCursorUpdates()."
+                            + " result=" + result, e);
                 }
                 return;
             }
@@ -547,26 +551,28 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 final int flags = msg.arg1;
                 SomeArgs args = (SomeArgs) msg.obj;
                 try {
-                    final IInputContextCallback callback = (IInputContextCallback) args.arg6;
-                    final int callbackSeq = args.argi6;
-                    InputConnection ic = getInputConnection();
+                    final IIntResultCallback callback = (IIntResultCallback) args.arg3;
+                    final InputConnection ic = getInputConnection();
+                    final boolean result;
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "commitContent on inactive InputConnection");
-                        callback.setCommitContentResult(false, callbackSeq);
-                        return;
+                        result = false;
+                    } else {
+                        final InputContentInfo inputContentInfo = (InputContentInfo) args.arg1;
+                        if (inputContentInfo == null || !inputContentInfo.validate()) {
+                            Log.w(TAG, "commitContent with invalid inputContentInfo="
+                                    + inputContentInfo);
+                            result = false;
+                        } else {
+                            result = ic.commitContent(inputContentInfo, flags, (Bundle) args.arg2);
+                        }
                     }
-                    final InputContentInfo inputContentInfo = (InputContentInfo) args.arg1;
-                    if (inputContentInfo == null || !inputContentInfo.validate()) {
-                        Log.w(TAG, "commitContent with invalid inputContentInfo="
-                                + inputContentInfo);
-                        callback.setCommitContentResult(false, callbackSeq);
-                        return;
+                    try {
+                        callback.onResult(result ? 1 : 0);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Failed to return the result to commitContent()."
+                                + " result=" + result, e);
                     }
-                    final boolean result =
-                            ic.commitContent(inputContentInfo, flags, (Bundle) args.arg2);
-                    callback.setCommitContentResult(result, callbackSeq);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Got RemoteException calling commitContent", e);
                 } finally {
                     args.recycle();
                 }
@@ -586,40 +592,6 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
 
     Message obtainMessageO(int what, Object arg1) {
         return mH.obtainMessage(what, 0, 0, arg1);
-    }
-
-    Message obtainMessageISC(int what, int arg1, int callbackSeq, IInputContextCallback callback) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg6 = callback;
-        args.argi6 = callbackSeq;
-        return mH.obtainMessage(what, arg1, 0, args);
-    }
-
-    Message obtainMessageIISC(int what, int arg1, int arg2, int callbackSeq,
-            IInputContextCallback callback) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg6 = callback;
-        args.argi6 = callbackSeq;
-        return mH.obtainMessage(what, arg1, arg2, args);
-    }
-
-    Message obtainMessageIOOSC(int what, int arg1, Object objArg1, Object objArg2, int callbackSeq,
-            IInputContextCallback callback) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = objArg1;
-        args.arg2 = objArg2;
-        args.arg6 = callback;
-        args.argi6 = callbackSeq;
-        return mH.obtainMessage(what, arg1, 0, args);
-    }
-
-    Message obtainMessageIOSC(int what, int arg1, Object arg2, int callbackSeq,
-            IInputContextCallback callback) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = arg2;
-        args.arg6 = callback;
-        args.argi6 = callbackSeq;
-        return mH.obtainMessage(what, arg1, 0, args);
     }
 
     Message obtainMessageIO(int what, int arg1, Object arg2) {

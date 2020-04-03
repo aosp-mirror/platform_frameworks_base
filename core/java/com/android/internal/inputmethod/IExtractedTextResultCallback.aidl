@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
 import android.view.inputmethod.ExtractedText;
 
-/**
- * {@hide}
- */
-oneway interface IInputContextCallback {
-    void setTextBeforeCursor(CharSequence textBeforeCursor, int seq);
-    void setTextAfterCursor(CharSequence textAfterCursor, int seq);
-    void setCursorCapsMode(int capsMode, int seq);
-    void setExtractedText(in ExtractedText extractedText, int seq);
-    void setSelectedText(CharSequence selectedText, int seq);
-    void setRequestUpdateCursorAnchorInfoResult(boolean result, int seq);
-    void setCommitContentResult(boolean result, int seq);
+oneway interface IExtractedTextResultCallback {
+    void onResult(in ExtractedText result);
 }
