@@ -33,6 +33,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -4806,7 +4807,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mUsingLightTheme = lightTheme;
         Context context = new ContextThemeWrapper(mContext,
                 lightTheme ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI);
-        final int textColor = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor);
+        final @ColorInt int textColor =
+                Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor);
+        mSectionsManager.setHeaderForegroundColor(textColor);
         mFooterView.setTextColor(textColor);
         mEmptyShadeView.setTextColor(textColor);
     }
