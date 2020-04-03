@@ -685,7 +685,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @CallSuper
     void positionChildAt(int position, E child, boolean includingParents) {
-
         if (child.getParent() != this) {
             throw new IllegalArgumentException("positionChildAt: container=" + child.getName()
                     + " is not a child of container=" + getName()
