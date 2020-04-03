@@ -104,6 +104,8 @@ public class KeyguardStatusBarView extends RelativeLayout
 
     private DisplayCutout mDisplayCutout;
     private int mRoundedCornerPadding = 0;
+    // right and left padding applied to this view to account for cutouts and rounded corners
+    private Pair<Integer, Integer> mPadding = new Pair(0, 0);
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -158,10 +160,13 @@ public class KeyguardStatusBarView extends RelativeLayout
                 getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.text_size_small_material));
         lp = (MarginLayoutParams) mCarrierLabel.getLayoutParams();
-        lp.setMarginStart(
-                getResources().getDimensionPixelSize(R.dimen.keyguard_carrier_text_margin));
-        mCarrierLabel.setLayoutParams(lp);
 
+        int marginStart = calculateMargin(
+                getResources().getDimensionPixelSize(R.dimen.keyguard_carrier_text_margin),
+                mPadding.first);
+        lp.setMarginStart(marginStart);
+
+        mCarrierLabel.setLayoutParams(lp);
         updateKeyguardStatusBarHeight();
     }
 
@@ -220,6 +225,7 @@ public class KeyguardStatusBarView extends RelativeLayout
                 : 0;
         int marginEnd = mKeyguardUserSwitcherShowing ? mSystemIconsSwitcherHiddenExpandedMargin :
                 baseMarginEnd;
+        marginEnd = calculateMargin(marginEnd, mPadding.second);
         if (marginEnd != lp.getMarginEnd()) {
             lp.setMarginEnd(marginEnd);
             mSystemIconsContainer.setLayoutParams(lp);
@@ -252,10 +258,10 @@ public class KeyguardStatusBarView extends RelativeLayout
     private void updatePadding(Pair<Integer, Integer> cornerCutoutMargins) {
         final int waterfallTop =
                 mDisplayCutout == null ? 0 : mDisplayCutout.getWaterfallInsets().top;
-        Pair<Integer, Integer> padding =
+        mPadding =
                 StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
                         mDisplayCutout, cornerCutoutMargins, mRoundedCornerPadding);
-        setPadding(padding.first, waterfallTop, padding.second, 0);
+        setPadding(mPadding.first, waterfallTop, mPadding.second, 0);
     }
 
     private boolean updateLayoutParamsNoCutout() {
@@ -499,6 +505,17 @@ public class KeyguardStatusBarView extends RelativeLayout
         View v = findViewById(id);
         if (v instanceof DarkReceiver) {
             ((DarkReceiver) v).onDarkChanged(tintArea, intensity, color);
+        }
+    }
+
+    /**
+     * Calculates the margin that isn't already accounted for in the view's padding.
+     */
+    private int calculateMargin(int margin, int padding) {
+        if (padding >= margin) {
+            return 0;
+        } else {
+            return margin - padding;
         }
     }
 
