@@ -307,4 +307,10 @@ cc_library_shared {
             enabled: true,
         },
     },
+
+    product_variables: {
+        experimental_mte: {
+            cflags: ["-DANDROID_EXPERIMENTAL_MTE"],
+        },
+    },
 }
