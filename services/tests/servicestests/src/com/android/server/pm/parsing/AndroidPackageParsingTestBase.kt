@@ -29,14 +29,17 @@ import android.content.pm.PermissionInfo
 import android.content.pm.ProviderInfo
 import android.os.Debug
 import android.os.Environment
+import android.os.ServiceManager
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.internal.compat.IPlatformCompat
 import com.android.server.pm.PackageManagerService
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateUnserialized
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
+import org.junit.After
 import org.junit.BeforeClass
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
@@ -59,7 +62,27 @@ open class AndroidPackageParsingTestBase {
             setCallback { false /* hasFeature */ }
         }
 
-        protected val packageParser2 = TestPackageParser2()
+        private val platformCompat = IPlatformCompat.Stub
+                .asInterface(ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE))
+
+        protected val packageParser2 = PackageParser2(null /* separateProcesses */,
+                false /* onlyCoreApps */, context.resources.displayMetrics, null /* cacheDir */,
+                object : PackageParser2.Callback() {
+                    override fun isChangeEnabled(
+                        changeId: Long,
+                        appInfo: ApplicationInfo
+                    ): Boolean {
+                        // This test queries PlatformCompat because prebuilts in the tree
+                        // may not be updated to be compliant with the latest enforcement checks.
+                        return platformCompat.isChangeEnabled(changeId, appInfo)
+                    }
+
+                    // Assume the device doesn't support anything. This will affect permission
+                    // parsing and will force <uses-permission/> declarations to include all
+                    // requiredNotFeature permissions and exclude all requiredFeature permissions.
+                    // This mirrors the old behavior.
+                    override fun hasFeature(feature: String) = false
+                })
 
         /**
          * It would be difficult to mock all possibilities, so just use the APKs on device.
@@ -91,35 +114,31 @@ open class AndroidPackageParsingTestBase {
 
         lateinit var newPackages: List<AndroidPackage>
 
-        var failureInBeforeClass: Throwable? = null
+        private val thrownInSetUp = mutableListOf<Throwable>()
 
         @Suppress("ConstantConditionIf")
         @JvmStatic
         @BeforeClass
         fun setUpPackages() {
-            failureInBeforeClass = null
-            try {
-                this.oldPackages = apks.map {
+            this.oldPackages = apks.mapNotNull {
+                tryOrNull {
                     packageParser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
                 }
+            }
 
-                this.newPackages = apks.map {
+            this.newPackages = apks.mapNotNull {
+                tryOrNull {
                     packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
                 }
+            }
 
-                if (DUMP_HPROF_TO_EXTERNAL) {
-                    System.gc()
-                    Environment.getExternalStorageDirectory()
-                            .resolve(
-                                    "${AndroidPackageParsingTestBase::class.java.simpleName}.hprof")
-                            .absolutePath
-                            .run(Debug::dumpHprofData)
-                }
-            } catch (t: Throwable) {
-                // If we crash here we cause a tool failure (because we don't run any of the tests
-                // in the subclasses, leading to a difference between expected and actual test
-                // result counts).
-                failureInBeforeClass = t
+            if (DUMP_HPROF_TO_EXTERNAL) {
+                System.gc()
+                Environment.getExternalStorageDirectory()
+                        .resolve(
+                                "${AndroidPackageParsingTestBase::class.java.simpleName}.hprof")
+                        .absolutePath
+                        .run(Debug::dumpHprofData)
             }
         }
 
@@ -146,13 +165,36 @@ open class AndroidPackageParsingTestBase {
             this.pkg = aPkg
             whenever(pkgState) { PackageStateUnserialized() }
         }
+
+        private fun <T> tryOrNull(block: () -> T) = try {
+            block()
+        } catch (t: Throwable) {
+            thrownInSetUp.add(t)
+            null
+        }
     }
 
-    @org.junit.Before
+    @After
     fun verifySetUpPackages() {
-        failureInBeforeClass?.let {
-            throw AssertionError("setUpPackages failed:", it)
-        }
+        if (thrownInSetUp.isEmpty()) return
+        val exception = AssertionError("setUpPackages failed with ${thrownInSetUp.size} errors:\n" +
+                thrownInSetUp.joinToString(separator = "\n") { it.message.orEmpty() })
+
+        /*
+            Testing infrastructure doesn't currently support errors thrown in @AfterClass,
+            so instead it's thrown here. But to avoid throwing a massive repeated stack for every
+            test method, only throw on the first method run in the class, clearing the list so that
+            subsequent methods can run without failing. Doing this in @After lets true method
+            failures propagate, as those should throw before this does.
+
+            This will cause the failure to be attached to a different method depending on run order,
+            which could make comparisons difficult. So if a failure points here, it's worth
+            checking failures for all methods in all subclasses.
+
+            TODO: When infrastructure supports @AfterClass errors, move this
+        */
+        thrownInSetUp.clear()
+        throw exception
     }
 
     // The following methods dump an exact set of fields from the object to compare, because
