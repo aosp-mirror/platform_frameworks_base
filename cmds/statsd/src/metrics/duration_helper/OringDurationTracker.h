@@ -28,10 +28,9 @@ class OringDurationTracker : public DurationTracker {
 public:
     OringDurationTracker(const ConfigKey& key, const int64_t& id,
                          const MetricDimensionKey& eventKey, sp<ConditionWizard> wizard,
-                         int conditionIndex,
-                         bool nesting, int64_t currentBucketStartNs, int64_t currentBucketNum,
-                         int64_t startTimeNs, int64_t bucketSizeNs, bool conditionSliced,
-                         bool fullLink,
+                         int conditionIndex, bool nesting, int64_t currentBucketStartNs,
+                         int64_t currentBucketNum, int64_t startTimeNs, int64_t bucketSizeNs,
+                         bool conditionSliced, bool fullLink,
                          const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers);
 
     OringDurationTracker(const OringDurationTracker& tracker) = default;
@@ -45,6 +44,9 @@ public:
     void onSlicedConditionMayChange(bool overallCondition, const int64_t timestamp) override;
     void onConditionChanged(bool condition, const int64_t timestamp) override;
 
+    void onStateChanged(const int64_t timestamp, const int32_t atomId,
+                        const FieldValue& newState) override;
+
     bool flushCurrentBucket(
             const int64_t& eventTimeNs,
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) override;
@@ -55,6 +57,12 @@ public:
     int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                       const int64_t currentTimestamp) const override;
     void dumpStates(FILE* out, bool verbose) const override;
+
+    int64_t getCurrentStateKeyDuration() const override;
+
+    int64_t getCurrentStateKeyFullBucketDuration() const override;
+
+    void updateCurrentStateKey(const int32_t atomId, const FieldValue& newState);
 
 private:
     // We don't need to keep track of individual durations. The information that's needed is:
