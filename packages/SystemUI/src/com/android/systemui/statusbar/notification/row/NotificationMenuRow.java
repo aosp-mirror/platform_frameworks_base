@@ -45,8 +45,9 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGuts.GutsContent;
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
@@ -114,12 +115,16 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     private boolean mIsUserTouching;
 
-    public NotificationMenuRow(Context context) {
+    private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+
+    public NotificationMenuRow(Context context,
+            PeopleNotificationIdentifier peopleNotificationIdentifier) {
         mContext = context;
         mShouldShowMenu = context.getResources().getBoolean(R.bool.config_showNotificationGear);
         mHandler = new Handler(Looper.getMainLooper());
         mLeftMenuItems = new ArrayList<>();
         mRightMenuItems = new ArrayList<>();
+        mPeopleNotificationIdentifier = peopleNotificationIdentifier;
     }
 
     @Override
@@ -260,7 +265,10 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             mSnoozeItem = createSnoozeItem(mContext);
         }
         mAppOpsItem = createAppOpsItem(mContext);
-        if (mParent.getEntry().getBucket() == NotificationSectionsManager.BUCKET_PEOPLE) {
+        NotificationEntry entry = mParent.getEntry();
+        int personNotifType = mPeopleNotificationIdentifier
+                .getPeopleNotificationType(entry.getSbn(), entry.getRanking());
+        if (personNotifType != PeopleNotificationIdentifier.TYPE_NON_PERSON) {
             mInfoItem = createConversationItem(mContext);
         } else {
             mInfoItem = createInfoItem(mContext);
