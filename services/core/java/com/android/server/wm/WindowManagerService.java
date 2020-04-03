@@ -2782,7 +2782,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 aspectRatio);
     }
 
-    @Override
     public void getStackBounds(int windowingMode, int activityType, Rect bounds) {
         synchronized (mGlobalLock) {
             final ActivityStack stack = mRoot.getStack(windowingMode, activityType);
