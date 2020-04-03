@@ -196,7 +196,7 @@ private:
     using BindPathMap = std::map<std::string, IncFsMount::BindMap::iterator, path::PathLess>;
 
     void mountExistingImages();
-    bool mountExistingImage(std::string_view root, std::string_view key);
+    bool mountExistingImage(std::string_view root);
 
     IfsMountPtr getIfs(StorageId storage) const;
     const IfsMountPtr& getIfsLocked(StorageId storage) const;
