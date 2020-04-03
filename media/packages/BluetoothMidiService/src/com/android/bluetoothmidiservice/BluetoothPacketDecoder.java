@@ -70,7 +70,9 @@ public class BluetoothPacketDecoder extends PacketDecoder {
         }
 
         byte header = buffer[0];
-        if ((header & 0xC0) != 0x80) {
+        // Check for the header bit 7.
+        // Ignore the reserved bit 6.
+        if ((header & 0x80) != 0x80) {
             Log.e(TAG, "packet does not start with header");
             return;
         }
