@@ -58,7 +58,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
@@ -1254,13 +1253,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (type == TYPE_PRIVATE_PRESENTATION && !displayContent.isPrivate()) {
                 Slog.w(TAG_WM, "Attempted to add private presentation window to a non-private display.  Aborting.");
                 return WindowManagerGlobal.ADD_PERMISSION_DENIED;
-            }
-
-            if (type == TYPE_PRESENTATION && !displayContent.getDisplay().isPublicPresentation()) {
-                Slog.w(TAG_WM,
-                        "Attempted to add presentation window to a non-suitable display.  "
-                                + "Aborting.");
-                return WindowManagerGlobal.ADD_INVALID_DISPLAY;
             }
 
             AppWindowToken atoken = null;
