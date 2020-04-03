@@ -12328,6 +12328,9 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @IsMultiSimSupportedResult
     public int isMultiSimSupported() {
+        if (getSupportedModemCount() < 2) {
+            return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
+        }
         try {
             ITelephony service = getITelephony();
             if (service != null) {
