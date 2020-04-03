@@ -169,6 +169,7 @@ public final class NetworkCapabilities implements Parcelable {
             NET_CAPABILITY_OEM_PAID,
             NET_CAPABILITY_MCX,
             NET_CAPABILITY_PARTIAL_CONNECTIVITY,
+            NET_CAPABILITY_TEMPORARILY_NOT_METERED,
     })
     public @interface NetCapability { }
 
@@ -336,8 +337,16 @@ public final class NetworkCapabilities implements Parcelable {
     @SystemApi
     public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24;
 
+    /**
+     * This capability will be set for networks that are generally metered, but are currently
+     * unmetered, e.g., because the user is in a particular area. This capability can be changed at
+     * any time. When it is removed, applications are responsible for stopping any data transfer
+     * that should not occur on a metered network.
+     */
+    public static final int NET_CAPABILITY_TEMPORARILY_NOT_METERED = 25;
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_PARTIAL_CONNECTIVITY;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_TEMPORARILY_NOT_METERED;
 
     /**
      * Network capabilities that are expected to be mutable, i.e., can change while a particular
@@ -353,7 +362,8 @@ public final class NetworkCapabilities implements Parcelable {
             | (1 << NET_CAPABILITY_FOREGROUND)
             | (1 << NET_CAPABILITY_NOT_CONGESTED)
             | (1 << NET_CAPABILITY_NOT_SUSPENDED)
-            | (1 << NET_CAPABILITY_PARTIAL_CONNECTIVITY);
+            | (1 << NET_CAPABILITY_PARTIAL_CONNECTIVITY
+            | (1 << NET_CAPABILITY_TEMPORARILY_NOT_METERED));
 
     /**
      * Network capabilities that are not allowed in NetworkRequests. This exists because the
@@ -424,6 +434,7 @@ public final class NetworkCapabilities implements Parcelable {
      */
     private static final long TEST_NETWORKS_ALLOWED_CAPABILITIES =
             (1 << NET_CAPABILITY_NOT_METERED)
+            | (1 << NET_CAPABILITY_TEMPORARILY_NOT_METERED)
             | (1 << NET_CAPABILITY_NOT_RESTRICTED)
             | (1 << NET_CAPABILITY_NOT_VPN)
             | (1 << NET_CAPABILITY_NOT_ROAMING)
@@ -1864,6 +1875,7 @@ public final class NetworkCapabilities implements Parcelable {
             case NET_CAPABILITY_OEM_PAID:             return "OEM_PAID";
             case NET_CAPABILITY_MCX:                  return "MCX";
             case NET_CAPABILITY_PARTIAL_CONNECTIVITY: return "PARTIAL_CONNECTIVITY";
+            case NET_CAPABILITY_TEMPORARILY_NOT_METERED:    return "TEMPORARILY_NOT_METERED";
             default:                                  return Integer.toString(capability);
         }
     }
