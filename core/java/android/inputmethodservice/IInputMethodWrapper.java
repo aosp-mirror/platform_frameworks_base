@@ -18,6 +18,7 @@ package android.inputmethodservice;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -37,6 +38,7 @@ import android.view.inputmethod.InputMethodSession;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
@@ -52,7 +54,6 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Implements the internal IInputMethod interface to convert incoming calls
@@ -90,12 +91,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
      *
      * <p>This field must be set and cleared only from the binder thread(s), where the system
      * guarantees that {@link #bindInput(InputBinding)},
-     * {@link #startInput(IBinder, IInputContext, int, EditorInfo, boolean)}, and
+     * {@link #startInput(IBinder, IInputContext, int, EditorInfo, boolean, boolean)}, and
      * {@link #unbindInput()} are called with the same order as the original calls
      * in {@link com.android.server.inputmethod.InputMethodManagerService}.
      * See {@link IBinder#FLAG_ONEWAY} for detailed semantics.</p>
      */
-    AtomicBoolean mIsUnbindIssued = null;
+    @Nullable
+    CancellationGroup mCancellationGroup = null;
 
     // NOTE: we should have a cache of these.
     static final class InputMethodSessionCallbackWrapper implements InputMethod.SessionCallback {
@@ -187,11 +189,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 final IBinder startInputToken = (IBinder) args.arg1;
                 final IInputContext inputContext = (IInputContext) args.arg2;
                 final EditorInfo info = (EditorInfo) args.arg3;
-                final AtomicBoolean isUnbindIssued = (AtomicBoolean) args.arg4;
+                final CancellationGroup cancellationGroup = (CancellationGroup) args.arg4;
                 SomeArgs moreArgs = (SomeArgs) args.arg5;
                 final InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(
-                                mTarget, inputContext, moreArgs.argi3, isUnbindIssued)
+                                mTarget, inputContext, moreArgs.argi3, cancellationGroup)
                         : null;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.dispatchStartInputWithToken(
@@ -295,15 +297,15 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void bindInput(InputBinding binding) {
-        if (mIsUnbindIssued != null) {
+        if (mCancellationGroup != null) {
             Log.e(TAG, "bindInput must be paired with unbindInput.");
         }
-        mIsUnbindIssued = new AtomicBoolean();
+        mCancellationGroup = new CancellationGroup();
         // This IInputContext is guaranteed to implement all the methods.
         final int missingMethodFlags = 0;
         InputConnection ic = new InputConnectionWrapper(mTarget,
                 IInputContext.Stub.asInterface(binding.getConnectionToken()), missingMethodFlags,
-                mIsUnbindIssued);
+                mCancellationGroup);
         InputBinding nu = new InputBinding(ic, binding);
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_INPUT_CONTEXT, nu));
     }
@@ -311,10 +313,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void unbindInput() {
-        if (mIsUnbindIssued != null) {
+        if (mCancellationGroup != null) {
             // Signal the flag then forget it.
-            mIsUnbindIssued.set(true);
-            mIsUnbindIssued = null;
+            mCancellationGroup.cancelAll();
+            mCancellationGroup = null;
         } else {
             Log.e(TAG, "unbindInput must be paired with bindInput.");
         }
@@ -326,16 +328,16 @@ class IInputMethodWrapper extends IInputMethod.Stub
     public void startInput(IBinder startInputToken, IInputContext inputContext,
             @InputConnectionInspector.MissingMethodFlags final int missingMethods,
             EditorInfo attribute, boolean restarting, boolean shouldPreRenderIme) {
-        if (mIsUnbindIssued == null) {
+        if (mCancellationGroup == null) {
             Log.e(TAG, "startInput must be called after bindInput.");
-            mIsUnbindIssued = new AtomicBoolean();
+            mCancellationGroup = new CancellationGroup();
         }
         SomeArgs args = SomeArgs.obtain();
         args.argi1 = restarting ? 1 : 0;
         args.argi2 = shouldPreRenderIme ? 1 : 0;
         args.argi3 = missingMethods;
-        mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOO(
-                DO_START_INPUT, startInputToken, inputContext, attribute, mIsUnbindIssued, args));
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOO(DO_START_INPUT, startInputToken,
+                inputContext, attribute, mCancellationGroup, args));
     }
 
     @BinderThread
