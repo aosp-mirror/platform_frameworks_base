@@ -230,6 +230,47 @@ void getDimensionForState(const std::vector<FieldValue>& eventValues, const Metr
     }
 }
 
+bool containsLinkedStateValues(const HashableDimensionKey& whatKey,
+                               const HashableDimensionKey& primaryKey,
+                               const vector<Metric2State>& stateLinks, const int32_t stateAtomId) {
+    if (whatKey.getValues().size() < primaryKey.getValues().size()) {
+        ALOGE("Contains linked values false: whatKey is too small");
+        return false;
+    }
+
+    for (const auto& primaryValue : primaryKey.getValues()) {
+        bool found = false;
+        for (const auto& whatValue : whatKey.getValues()) {
+            if (linked(stateLinks, stateAtomId, primaryValue.mField, whatValue.mField) &&
+                primaryValue.mValue == whatValue.mValue) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool linked(const vector<Metric2State>& stateLinks, const int32_t stateAtomId,
+            const Field& stateField, const Field& metricField) {
+    for (auto stateLink : stateLinks) {
+        if (stateLink.stateAtomId != stateAtomId) {
+            continue;
+        }
+
+        for (size_t i = 0; i < stateLink.stateFields.size(); i++) {
+            if (stateLink.stateFields[i].mMatcher == stateField &&
+                stateLink.metricFields[i].mMatcher == metricField) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool LessThan(const vector<FieldValue>& s1, const vector<FieldValue>& s2) {
     if (s1.size() != s2.size()) {
         return s1.size() < s2.size();
