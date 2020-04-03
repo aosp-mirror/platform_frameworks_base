@@ -503,6 +503,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /** Windows removed since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
     final ArrayList<WindowState> mWinRemovedSinceNullFocus = new ArrayList<>();
 
+    /** Windows whose client's insets states are not up-to-date. */
+    final ArrayList<WindowState> mWinInsetsChanged = new ArrayList<>();
+
     private ScreenRotationAnimation mScreenRotationAnimation;
 
     /**
@@ -708,7 +711,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         // Sets mBehindIme for each window. Windows behind IME can get IME insets.
-        w.mBehindIme = mTmpWindowsBehindIme;
+        if (w.mBehindIme != mTmpWindowsBehindIme) {
+            w.mBehindIme = mTmpWindowsBehindIme;
+            mWinInsetsChanged.add(w);
+        }
         if (w == mInputMethodWindow) {
             mTmpWindowsBehindIme = true;
         }
