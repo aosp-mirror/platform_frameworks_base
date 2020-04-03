@@ -40,6 +40,7 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,8 +95,11 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 .setContentTitle("Title")
                 .setContentText("Text")
                 .setStyle(new Notification.BigTextStyle().bigText("big text"));
-        ExpandableNotificationRow row = new NotificationTestHelper(mContext, mDependency).createRow(
-                mBuilder.build());
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow(mBuilder.build());
         mRow = spy(row);
 
         final SmartReplyConstants smartReplyConstants = mock(SmartReplyConstants.class);
