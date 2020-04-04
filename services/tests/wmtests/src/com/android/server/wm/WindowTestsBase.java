@@ -134,6 +134,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 mChildAppWindowBelow = createCommonWindow(mAppWindow,
                         TYPE_APPLICATION_MEDIA_OVERLAY,
                         "mChildAppWindowBelow");
+                mDisplayContent.getDisplayPolicy().setForceShowSystemBars(false);
             }
 
             // Adding a display will cause freezing the display. Make sure to wait until it's

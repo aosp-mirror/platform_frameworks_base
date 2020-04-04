@@ -696,6 +696,10 @@ public class DisplayPolicy {
         mForceShowSystemBarsFromExternal = forceShowSystemBars;
     }
 
+    boolean getForceShowSystemBars() {
+        return mForceShowSystemBarsFromExternal;
+    }
+
     public boolean hasNavigationBar() {
         return mHasNavigationBar;
     }
