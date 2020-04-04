@@ -412,7 +412,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 final ActivityStack stack = (ActivityStack) task;
                 stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
                 if (mToDisplay.getDisplayId() != stack.getDisplayId()) {
-                    mToDisplay.moveStackToDisplay(stack, mOnTop);
+                    stack.reparent(mToDisplay.getDefaultTaskDisplayArea(), mOnTop);
                 } else if (mOnTop) {
                     mToDisplay.mTaskContainers.positionStackAtTop(stack,
                             false /* includingParents */);
@@ -566,8 +566,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void moveRecentsStackToFront(String reason) {
-        final ActivityStack recentsStack = mRootWindowContainer.getDefaultDisplay().getStack(
-                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
+        final ActivityStack recentsStack = mRootWindowContainer.getDefaultTaskDisplayArea()
+                .getStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
         if (recentsStack != null) {
             recentsStack.moveToFront(reason);
         }
@@ -2613,7 +2613,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // from whatever is started from the recents activity, so move the home stack
                 // forward.
                 // TODO (b/115289124): Multi-display supports for recents.
-                mRootWindowContainer.getDefaultDisplay().mTaskContainers.moveHomeStackToFront(
+                mRootWindowContainer.getDefaultTaskDisplayArea().moveHomeStackToFront(
                         "startActivityFromRecents");
             }
 

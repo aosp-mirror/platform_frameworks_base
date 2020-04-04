@@ -7328,8 +7328,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public boolean isStackVisibleLw(int windowingMode) {
-            final DisplayContent dc = getDefaultDisplayContentLocked();
-            return dc.isStackVisible(windowingMode);
+            // TODO(multi-display-area): Support multiple task display areas & displays
+            final TaskDisplayArea tc = mRoot.getDefaultTaskDisplayArea();
+            return tc.isStackVisible(windowingMode);
         }
 
         @Override
