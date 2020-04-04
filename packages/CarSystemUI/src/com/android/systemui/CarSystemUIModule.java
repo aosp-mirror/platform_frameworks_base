@@ -65,7 +65,7 @@ import dagger.Module;
 import dagger.Provides;
 
 @Module(includes = {DividerModule.class})
-abstract class CarSystemUIModule {
+public abstract class CarSystemUIModule {
 
     @Singleton
     @Provides
