@@ -18,6 +18,7 @@
 #define ANDROID_STATS_LOG_API_GEN_COLLATION_H
 
 #include <google/protobuf/descriptor.h>
+#include <stdint.h>
 
 #include <map>
 #include <set>
@@ -40,17 +41,16 @@ const int PULL_ATOM_START_ID = 10000;
 
 const int FIRST_UID_IN_CHAIN_ID = 0;
 
-const unsigned char ANNOTATION_ID_IS_UID = 1;
-const unsigned char ANNOTATION_ID_TRUNCATE_TIMESTAMP = 2;
-const unsigned char ANNOTATION_ID_STATE_OPTION = 3;
-const unsigned char ANNOTATION_ID_DEFAULT_STATE = 4;
-const unsigned char ANNOTATION_ID_RESET_STATE = 5;
-const unsigned char ANNOTATION_ID_STATE_NESTED = 6;
-
-const int STATE_OPTION_UNSET = os::statsd::StateField::STATE_FIELD_UNSET;
-const int STATE_OPTION_EXCLUSIVE = os::statsd::StateField::EXCLUSIVE_STATE;
-const int STATE_OPTION_PRIMARY_FIELD_FIRST_UID = os::statsd::StateField::PRIMARY_FIELD_FIRST_UID;
-const int STATE_OPTION_PRIMARY = os::statsd::StateField::PRIMARY_FIELD;
+enum AnnotationId : uint8_t {
+    ANNOTATION_ID_IS_UID = 1,
+    ANNOTATION_ID_TRUNCATE_TIMESTAMP = 2,
+    ANNOTATION_ID_PRIMARY_FIELD = 3,
+    ANNOTATION_ID_EXCLUSIVE_STATE = 4,
+    ANNOTATION_ID_PRIMARY_FIELD_FIRST_UID = 5,
+    ANNOTATION_ID_DEFAULT_STATE = 6,
+    ANNOTATION_ID_TRIGGER_STATE_RESET = 7,
+    ANNOTATION_ID_STATE_NESTED = 8,
+};
 
 const int ATOM_ID_FIELD_NUMBER = -1;
 
@@ -93,12 +93,12 @@ union AnnotationValue {
 };
 
 struct Annotation {
-    const unsigned char annotationId;
+    const AnnotationId annotationId;
     const int atomId;
     AnnotationType type;
     AnnotationValue value;
 
-    inline Annotation(unsigned char annotationId, int atomId, AnnotationType type,
+    inline Annotation(AnnotationId annotationId, int atomId, AnnotationType type,
                       AnnotationValue value)
         : annotationId(annotationId), atomId(atomId), type(type), value(value) {
     }
@@ -159,7 +159,7 @@ struct AtomDecl {
     vector<int> primaryFields;
     int exclusiveField = 0;
     int defaultState = INT_MAX;
-    int resetState = INT_MAX;
+    int triggerStateReset = INT_MAX;
     bool nested;
 
     int uidField = 0;

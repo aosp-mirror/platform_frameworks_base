@@ -208,8 +208,10 @@ private:
     void parseAnnotations(uint8_t numAnnotations, int firstUidInChainIndex = -1);
     void parseIsUidAnnotation(uint8_t annotationType);
     void parseTruncateTimestampAnnotation(uint8_t annotationType);
-    void parseStateOptionAnnotation(uint8_t annotationType, int firstUidInChainIndex);
-    void parseResetStateAnnotation(uint8_t annotationType);
+    void parsePrimaryFieldAnnotation(uint8_t annotationType);
+    void parsePrimaryFieldFirstUidAnnotation(uint8_t annotationType, int firstUidInChainIndex);
+    void parseExclusiveStateAnnotation(uint8_t annotationType);
+    void parseTriggerStateResetAnnotation(uint8_t annotationType);
     void parseStateNestedAnnotation(uint8_t annotationType);
 
     /**
