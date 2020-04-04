@@ -50,6 +50,7 @@ cc_defaults {
         "libbinder",
         "libcrypto",
         "libcutils",
+        "libdataloader",
         "libincfs",
         "liblog",
         "libz",

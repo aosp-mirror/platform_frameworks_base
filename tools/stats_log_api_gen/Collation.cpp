@@ -50,7 +50,7 @@ AtomDecl::AtomDecl(const AtomDecl& that)
       primaryFields(that.primaryFields),
       exclusiveField(that.exclusiveField),
       defaultState(that.defaultState),
-      resetState(that.resetState),
+      triggerStateReset(that.triggerStateReset),
       nested(that.nested),
       uidField(that.uidField),
       whitelisted(that.whitelisted),
@@ -153,7 +153,8 @@ void collate_enums(const EnumDescriptor& enumDescriptor, AtomField* atomField) {
 }
 
 static void addAnnotationToAtomDecl(AtomDecl* atomDecl, const int fieldNumber,
-                                    const int annotationId, const AnnotationType annotationType,
+                                    const AnnotationId annotationId,
+                                    const AnnotationType annotationType,
                                     const AnnotationValue annotationValue) {
     if (dbg) {
         printf("   Adding annotation to %s: [%d] = {id: %d, type: %d}\n", atomDecl->name.c_str(),
@@ -168,23 +169,35 @@ static int collate_field_annotations(AtomDecl* atomDecl, const FieldDescriptor* 
     int errorCount = 0;
 
     if (field->options().HasExtension(os::statsd::state_field_option)) {
-        const int option = field->options().GetExtension(os::statsd::state_field_option).option();
-        if (option != STATE_OPTION_UNSET) {
-            addAnnotationToAtomDecl(atomDecl, fieldNumber, ANNOTATION_ID_STATE_OPTION,
-                                    ANNOTATION_TYPE_INT, AnnotationValue(option));
+        const os::statsd::StateAtomFieldOption& stateFieldOption =
+                field->options().GetExtension(os::statsd::state_field_option);
+        const bool primaryField = stateFieldOption.primary_field();
+        const bool exclusiveState = stateFieldOption.exclusive_state();
+        const bool primaryFieldFirstUid = stateFieldOption.primary_field_first_uid();
+
+        // Check the field is only one of primaryField, exclusiveState, or primaryFieldFirstUid.
+        if (primaryField + primaryFieldFirstUid + exclusiveState > 1) {
+            print_error(field,
+                        "Field can be max 1 of primary_field, exclusive_state, "
+                        "or primary_field_first_uid: '%s'\n",
+                        atomDecl->message.c_str());
+            errorCount++;
         }
 
-        if (option == STATE_OPTION_PRIMARY) {
+        if (primaryField) {
             if (javaType == JAVA_TYPE_UNKNOWN || javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
                 javaType == JAVA_TYPE_OBJECT || javaType == JAVA_TYPE_BYTE_ARRAY) {
                 print_error(field, "Invalid primary state field: '%s'\n",
                             atomDecl->message.c_str());
                 errorCount++;
+            } else {
+                atomDecl->primaryFields.push_back(fieldNumber);
+                addAnnotationToAtomDecl(atomDecl, fieldNumber, ANNOTATION_ID_PRIMARY_FIELD,
+                                        ANNOTATION_TYPE_BOOL, AnnotationValue(true));
             }
-            atomDecl->primaryFields.push_back(fieldNumber);
         }
 
-        if (option == STATE_OPTION_PRIMARY_FIELD_FIRST_UID) {
+        if (primaryFieldFirstUid) {
             if (javaType != JAVA_TYPE_ATTRIBUTION_CHAIN) {
                 print_error(field,
                             "PRIMARY_FIELD_FIRST_UID annotation is only for AttributionChains: "
@@ -193,10 +206,13 @@ static int collate_field_annotations(AtomDecl* atomDecl, const FieldDescriptor* 
                 errorCount++;
             } else {
                 atomDecl->primaryFields.push_back(FIRST_UID_IN_CHAIN_ID);
+                addAnnotationToAtomDecl(atomDecl, fieldNumber,
+                                        ANNOTATION_ID_PRIMARY_FIELD_FIRST_UID, ANNOTATION_TYPE_BOOL,
+                                        AnnotationValue(true));
             }
         }
 
-        if (option == STATE_OPTION_EXCLUSIVE) {
+        if (exclusiveState) {
             if (javaType == JAVA_TYPE_UNKNOWN || javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
                 javaType == JAVA_TYPE_OBJECT || javaType == JAVA_TYPE_BYTE_ARRAY) {
                 print_error(field, "Invalid exclusive state field: '%s'\n",
@@ -204,43 +220,36 @@ static int collate_field_annotations(AtomDecl* atomDecl, const FieldDescriptor* 
                 errorCount++;
             }
 
-            if (atomDecl->exclusiveField == 0) {
-                atomDecl->exclusiveField = fieldNumber;
-            } else {
+            if (atomDecl->exclusiveField != 0) {
                 print_error(field,
                             "Cannot have more than one exclusive state field in an "
                             "atom: '%s'\n",
                             atomDecl->message.c_str());
                 errorCount++;
+            } else {
+                atomDecl->exclusiveField = fieldNumber;
+                addAnnotationToAtomDecl(atomDecl, fieldNumber, ANNOTATION_ID_EXCLUSIVE_STATE,
+                                        ANNOTATION_TYPE_BOOL, AnnotationValue(true));
             }
 
-            if (field->options()
-                        .GetExtension(os::statsd::state_field_option)
-                        .has_default_state_value()) {
-                const int defaultState = field->options()
-                                                 .GetExtension(os::statsd::state_field_option)
-                                                 .default_state_value();
+            if (stateFieldOption.has_default_state_value()) {
+                const int defaultState = stateFieldOption.default_state_value();
                 atomDecl->defaultState = defaultState;
 
                 addAnnotationToAtomDecl(atomDecl, fieldNumber, ANNOTATION_ID_DEFAULT_STATE,
                                         ANNOTATION_TYPE_INT, AnnotationValue(defaultState));
             }
 
-            if (field->options()
-                        .GetExtension(os::statsd::state_field_option)
-                        .has_reset_state_value()) {
-                const int resetState = field->options()
-                                               .GetExtension(os::statsd::state_field_option)
-                                               .reset_state_value();
+            if (stateFieldOption.has_trigger_state_reset_value()) {
+                const int triggerStateReset = stateFieldOption.trigger_state_reset_value();
 
-                atomDecl->resetState = resetState;
-                addAnnotationToAtomDecl(atomDecl, fieldNumber, ANNOTATION_ID_RESET_STATE,
-                                        ANNOTATION_TYPE_INT, AnnotationValue(resetState));
+                atomDecl->triggerStateReset = triggerStateReset;
+                addAnnotationToAtomDecl(atomDecl, fieldNumber, ANNOTATION_ID_TRIGGER_STATE_RESET,
+                                        ANNOTATION_TYPE_INT, AnnotationValue(triggerStateReset));
             }
 
-            if (field->options().GetExtension(os::statsd::state_field_option).has_nested()) {
-                const bool nested =
-                        field->options().GetExtension(os::statsd::state_field_option).nested();
+            if (stateFieldOption.has_nested()) {
+                const bool nested = stateFieldOption.nested();
                 atomDecl->nested = nested;
 
                 addAnnotationToAtomDecl(atomDecl, fieldNumber, ANNOTATION_ID_STATE_NESTED,

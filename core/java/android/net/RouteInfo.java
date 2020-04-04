@@ -426,6 +426,16 @@ public final class RouteInfo implements Parcelable {
     }
 
     /**
+     * Indicates if this route is an unreachable default route.
+     *
+     * @return {@code true} if it's an unreachable route with prefix length of 0.
+     * @hide
+     */
+    private boolean isUnreachableDefaultRoute() {
+        return mType == RTN_UNREACHABLE && mDestination.getPrefixLength() == 0;
+    }
+
+    /**
      * Indicates if this route is an IPv4 default route.
      * @hide
      */
@@ -434,11 +444,27 @@ public final class RouteInfo implements Parcelable {
     }
 
     /**
+     * Indicates if this route is an IPv4 unreachable default route.
+     * @hide
+     */
+    public boolean isIPv4UnreachableDefault() {
+        return isUnreachableDefaultRoute() && mDestination.getAddress() instanceof Inet4Address;
+    }
+
+    /**
      * Indicates if this route is an IPv6 default route.
      * @hide
      */
     public boolean isIPv6Default() {
         return isDefaultRoute() && mDestination.getAddress() instanceof Inet6Address;
+    }
+
+    /**
+     * Indicates if this route is an IPv6 unreachable default route.
+     * @hide
+     */
+    public boolean isIPv6UnreachableDefault() {
+        return isUnreachableDefaultRoute() && mDestination.getAddress() instanceof Inet6Address;
     }
 
     /**

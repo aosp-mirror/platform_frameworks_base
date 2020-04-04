@@ -240,7 +240,7 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"ძალა"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"გადატვირთვა"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"საგანგებო სამსახურები"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"ხარვეზის შესახებ ანგარიში"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"ხარვეზის ანგარიში"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"სესიის დასრულება"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ეკრანის ანაბეჭდი"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"ხარვეზის ანგარიში"</string>
@@ -2044,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"მიმოწერა"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ჯგუფური მიმოწერა"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"პირადი"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"სამსახური"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"პირადი ხედი"</string>

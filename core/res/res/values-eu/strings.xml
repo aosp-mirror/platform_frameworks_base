@@ -1351,8 +1351,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Ez da onartzen <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Gailuak ez du <xliff:g id="NAME">%s</xliff:g> onartzen. Sakatu onartzen den formatu batean konfiguratzeko."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Gailuak ez du <xliff:g id="NAME">%s</xliff:g> onartzen. Hauta ezazu onartzen den formatu batean konfiguratzeko."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (7657357085538772913) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Gailuak ez du onartzen <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> ustekabean kendu da"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Kendu aurretik, kanporatu euskarria edukirik ez galtzeko"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Kendu egin da <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -2045,6 +2044,8 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Elkarrizketa"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Taldeko elkarrizketa"</string>
+    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Pertsonala"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Lanekoa"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Ikuspegi pertsonala"</string>

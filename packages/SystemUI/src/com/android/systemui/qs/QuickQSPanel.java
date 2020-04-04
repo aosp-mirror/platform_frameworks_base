@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,7 +82,7 @@ public class QuickQSPanel extends QSPanel {
             QSLogger qsLogger,
             NotificationMediaManager notificationMediaManager,
             @Main Executor foregroundExecutor,
-            @Background Executor backgroundExecutor,
+            @Background DelayableExecutor backgroundExecutor,
             @Nullable LocalBluetoothManager localBluetoothManager
     ) {
         super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, notificationMediaManager,
