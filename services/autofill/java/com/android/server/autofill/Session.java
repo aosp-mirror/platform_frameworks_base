@@ -657,13 +657,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
-     * Reads a new structure and then request a new fill response from the fill service.
+     * Clears the existing response for the partition, reads a new structure, and then requests a
+     * new fill response from the fill service.
      *
      * <p> Also asks the IME to make an inline suggestions request if it's enabled.
      */
     @GuardedBy("mLock")
     private void requestNewFillResponseLocked(@NonNull ViewState viewState, int newState,
             int flags) {
+        final FillResponse existingResponse = viewState.getResponse();
+        if (existingResponse != null) {
+            setViewStatesLocked(
+                    existingResponse,
+                    ViewState.STATE_INITIAL,
+                    /* clearResponse= */ true);
+        }
         mExpiredResponse = false;
         if (mForAugmentedAutofillOnly || mRemoteFillService == null) {
             if (sVerbose) {
@@ -3226,7 +3234,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
-     * Sets the state of all views in the given dataset and response.
+     * Sets the state and response of all views in the given dataset.
      */
     @GuardedBy("mLock")
     private void setViewStatesLocked(@Nullable FillResponse response, @NonNull Dataset dataset,
@@ -3241,10 +3249,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (datasetId != null) {
                 viewState.setDatasetId(datasetId);
             }
-            if (response != null) {
-                viewState.setResponse(response);
-            } else if (clearResponse) {
+            if (clearResponse) {
                 viewState.setResponse(null);
+            } else if (response != null) {
+                viewState.setResponse(response);
             }
         }
     }
