@@ -205,7 +205,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Gaitu arazketa modua USBa konektatzean"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Baliogabetu USB bidezko arazketarako baimenak"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Akatsen txostenerako lasterbidea"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Bateriaren menuan, erakutsi akatsen txostena sortzeko botoia"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Pizteko menuan, erakutsi akatsen txostena sortzeko botoia"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Mantendu aktibo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Pantaila ez da ezarriko inoiz inaktibo kargatu bitartean"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Gaitu Bluetooth HCI miatze-erregistroa"</string>
