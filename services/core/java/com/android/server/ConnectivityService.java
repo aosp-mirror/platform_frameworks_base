@@ -6313,7 +6313,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 && !nai.networkAgentConfig.allowBypass
                 && nc.getOwnerUid() != Process.SYSTEM_UID
                 && lp.getInterfaceName() != null
-                && (lp.hasIPv4DefaultRoute() || lp.hasIPv6DefaultRoute());
+                && (lp.hasIPv4DefaultRoute() || lp.hasIpv4UnreachableDefaultRoute())
+                && (lp.hasIPv6DefaultRoute() || lp.hasIpv6UnreachableDefaultRoute());
     }
 
     private void updateUids(NetworkAgentInfo nai, NetworkCapabilities prevNc,
