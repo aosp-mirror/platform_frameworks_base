@@ -54,7 +54,7 @@ import java.util.Map;
  *      - DisplayArea.Root
  *        - Magnification
  *          - DisplayArea.Tokens (Wallpapers are attached here)
- *          - TaskContainers
+ *          - TaskDisplayArea
  *          - DisplayArea.Tokens (windows above Tasks up to IME are attached here)
  *          - ImeContainers
  *          - DisplayArea.Tokens (windows above IME up to TYPE_ACCESSIBILITY_OVERLAY attached here)

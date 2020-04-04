@@ -372,7 +372,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
         Task build() {
             if (mStack == null && mCreateStack) {
-                mStack = mSupervisor.mRootWindowContainer.getDefaultDisplay().createStack(
+                mStack = mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
                 spyOn(mStack);
             }
@@ -408,6 +408,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
     static class StackBuilder {
         private final RootWindowContainer mRootWindowContainer;
         private DisplayContent mDisplay;
+        private TaskDisplayArea mTaskDisplayArea;
         private int mStackId = -1;
         private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
         private int mActivityType = ACTIVITY_TYPE_STANDARD;
@@ -419,6 +420,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         StackBuilder(RootWindowContainer root) {
             mRootWindowContainer = root;
             mDisplay = mRootWindowContainer.getDefaultDisplay();
+            mTaskDisplayArea = mDisplay.getDefaultTaskDisplayArea();
         }
 
         StackBuilder setWindowingMode(int windowingMode) {
@@ -436,8 +438,20 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        /**
+         * Set the parent {@link DisplayContent} and use the default task display area. Overrides
+         * the task display area, if was set before.
+         */
         StackBuilder setDisplay(DisplayContent display) {
             mDisplay = display;
+            mTaskDisplayArea = mDisplay.getDefaultTaskDisplayArea();
+            return this;
+        }
+
+        /** Set the parent {@link TaskDisplayArea}. Overrides the display, if was set before. */
+        StackBuilder setTaskDisplayArea(TaskDisplayArea taskDisplayArea) {
+            mTaskDisplayArea = taskDisplayArea;
+            mDisplay = mTaskDisplayArea.mDisplayContent;
             return this;
         }
 
@@ -462,9 +476,8 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         }
 
         ActivityStack build() {
-            final int stackId = mStackId >= 0 ? mStackId
-                    : mDisplay.mTaskContainers.getNextStackId();
-            final ActivityStack stack = mDisplay.mTaskContainers.createStackUnchecked(
+            final int stackId = mStackId >= 0 ? mStackId : mTaskDisplayArea.getNextStackId();
+            final ActivityStack stack = mTaskDisplayArea.createStackUnchecked(
                     mWindowingMode, mActivityType, stackId, mOnTop, mInfo, mIntent,
                     false /* createdByOrganizer */);
             final ActivityStackSupervisor supervisor = mRootWindowContainer.mStackSupervisor;

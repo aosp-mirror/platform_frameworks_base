@@ -1400,8 +1400,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
             display = new TestDisplayContent.Builder(mService, 2000, 1000).setDensityDpi(300)
                     .setPosition(DisplayContent.POSITION_TOP).build();
         }
-        final ActivityStack stack = display.createStack(WINDOWING_MODE_UNDEFINED,
-                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityStack stack = display.getDefaultTaskDisplayArea()
+                .createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
         return new ActivityBuilder(mService).setTask(task).setUseProcess(process).build();
     }

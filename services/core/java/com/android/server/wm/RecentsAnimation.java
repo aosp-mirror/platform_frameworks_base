@@ -52,14 +52,14 @@ import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallback
  * cleanup. See {@link com.android.server.wm.RecentsAnimationController}.
  */
 class RecentsAnimation implements RecentsAnimationCallbacks,
-        DisplayContent.OnStackOrderChangedListener {
+        TaskDisplayArea.OnStackOrderChangedListener {
     private static final String TAG = RecentsAnimation.class.getSimpleName();
 
     private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
     private final ActivityStartController mActivityStartController;
     private final WindowManagerService mWindowManager;
-    private final DisplayContent mDefaultDisplay;
+    private final TaskDisplayArea mDefaultTaskDisplayArea;
     private final Intent mTargetIntent;
     private final ComponentName mRecentsComponent;
     private final @Nullable String mRecentsFeatureId;
@@ -84,7 +84,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             int recentsUid, @Nullable WindowProcessController caller) {
         mService = atm;
         mStackSupervisor = stackSupervisor;
-        mDefaultDisplay = mService.mRootWindowContainer.getDefaultDisplay();
+        mDefaultTaskDisplayArea = mService.mRootWindowContainer.getDefaultTaskDisplayArea();
         mActivityStartController = activityStartController;
         mWindowManager = wm;
         mTargetIntent = targetIntent;
@@ -107,7 +107,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     void preloadRecentsActivity() {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Preload recents with %s",
                 mTargetIntent);
-        ActivityStack targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
+        ActivityStack targetStack = mDefaultTaskDisplayArea.getStack(WINDOWING_MODE_UNDEFINED,
                 mTargetActivityType);
         ActivityRecord targetActivity = getTargetActivity(targetStack);
         if (targetActivity != null) {
@@ -128,7 +128,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // Create the activity record. Because the activity is invisible, this doesn't really
             // start the client.
             startRecentsActivityInBackground("preloadRecents");
-            targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED, mTargetActivityType);
+            targetStack = mDefaultTaskDisplayArea.getStack(WINDOWING_MODE_UNDEFINED,
+                    mTargetActivityType);
             targetActivity = getTargetActivity(targetStack);
             if (targetActivity == null) {
                 Slog.w(TAG, "Cannot start " + mTargetIntent);
@@ -176,12 +177,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
 
         // If the activity is associated with the recents stack, then try and get that first
-        ActivityStack targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
+        ActivityStack targetStack = mDefaultTaskDisplayArea.getStack(WINDOWING_MODE_UNDEFINED,
                 mTargetActivityType);
         ActivityRecord targetActivity = getTargetActivity(targetStack);
         final boolean hasExistingActivity = targetActivity != null;
         if (hasExistingActivity) {
-            final TaskDisplayArea taskDisplayArea = targetActivity.getDisplayArea();
             mRestoreTargetBehindStack = getStackAbove(targetStack);
             if (mRestoreTargetBehindStack == null) {
                 notifyAnimationCancelBeforeStart(recentsAnimationRunner);
@@ -209,7 +209,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         try {
             if (hasExistingActivity) {
                 // Move the recents activity into place for the animation if it is not top most
-                mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(targetStack);
+                mDefaultTaskDisplayArea.moveStackBehindBottomMostVisibleStack(targetStack);
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Moved stack=%s behind stack=%s",
                         targetStack, getStackAbove(targetStack));
 
@@ -225,10 +225,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 startRecentsActivityInBackground("startRecentsActivity_noTargetActivity");
 
                 // Move the recents activity into place for the animation
-                targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
+                targetStack = mDefaultTaskDisplayArea.getStack(WINDOWING_MODE_UNDEFINED,
                         mTargetActivityType);
                 targetActivity = getTargetActivity(targetStack);
-                mDefaultDisplay.mTaskContainers.moveStackBehindBottomMostVisibleStack(targetStack);
+                mDefaultTaskDisplayArea.moveStackBehindBottomMostVisibleStack(targetStack);
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Moved stack=%s behind stack=%s",
                         targetStack, getStackAbove(targetStack));
 
@@ -251,7 +251,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             mWindowManager.cancelRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION,
                     "startRecentsActivity");
             mWindowManager.initializeRecentsAnimation(mTargetActivityType, recentsAnimationRunner,
-                    this, mDefaultDisplay.getDisplayId(),
+                    this, mDefaultTaskDisplayArea.getDisplayId(),
                     mStackSupervisor.mRecentTasks.getRecentTaskIds(), targetActivity);
 
             // If we updated the launch-behind state, update the visibility of the activities after
@@ -262,7 +262,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     START_TASK_TO_FRONT, targetActivity);
 
             // Register for stack order changes
-            mDefaultDisplay.registerStackOrderChangedListener(this);
+            mDefaultTaskDisplayArea.registerStackOrderChangedListener(this);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to start recents activity", e);
             throw e;
@@ -280,7 +280,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                             mWindowManager.getRecentsAnimationController(), reorderMode);
 
             // Unregister for stack order changes
-            mDefaultDisplay.unregisterStackOrderChangedListener(this);
+            mDefaultTaskDisplayArea.unregisterStackOrderChangedListener(this);
 
             final RecentsAnimationController controller =
                     mWindowManager.getRecentsAnimationController();
@@ -308,7 +308,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 try {
                     mWindowManager.cleanupRecentsAnimation(reorderMode);
 
-                    final ActivityStack targetStack = mDefaultDisplay.getStack(
+                    final ActivityStack targetStack = mDefaultTaskDisplayArea.getStack(
                             WINDOWING_MODE_UNDEFINED, mTargetActivityType);
                     // Prefer to use the original target activity instead of top activity because
                     // we may have moved another task to top (starting 3p launcher).
@@ -422,7 +422,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     @Override
     public void onStackOrderChanged(ActivityStack stack) {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "onStackOrderChanged(): stack=%s", stack);
-        if (mDefaultDisplay.getIndexOf(stack) == -1 || !stack.shouldBeVisible(null)) {
+        if (mDefaultTaskDisplayArea.getIndexOf(stack) == -1 || !stack.shouldBeVisible(null)) {
             // The stack is not visible, so ignore this change
             return;
         }
@@ -480,8 +480,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
      * @return The top stack that is not always-on-top.
      */
     private ActivityStack getTopNonAlwaysOnTopStack() {
-        for (int i = mDefaultDisplay.getStackCount() - 1; i >= 0; i--) {
-            final ActivityStack s = mDefaultDisplay.getStackAt(i);
+        for (int i = mDefaultTaskDisplayArea.getStackCount() - 1; i >= 0; i--) {
+            final ActivityStack s = mDefaultTaskDisplayArea.getStackAt(i);
             if (s.getWindowConfiguration().isAlwaysOnTop()) {
                 continue;
             }
