@@ -41,6 +41,13 @@
         android:orientation="vertical"
         android:gravity="center">
 
+        <ImageView
+            android:layout_width="@dimen/bubble_empty_overflow_image_height"
+            android:layout_height="@dimen/bubble_empty_overflow_image_height"
+            android:id="@+id/bubble_overflow_empty_state_image"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center"/>
+
         <TextView
             android:id="@+id/bubble_overflow_empty_title"
             android:text="@string/bubble_overflow_empty_title"
@@ -59,6 +66,7 @@
             android:text="@string/bubble_overflow_empty_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/bubble_empty_overflow_subtitle_padding"
             android:gravity="center"/>
     </LinearLayout>
 </LinearLayout>
