@@ -151,8 +151,8 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
             fprintf(out, "    opt->defaultState = UNSET_VALUE;\n");
         }
 
-        if ((*atomIt)->resetState != INT_MAX) {
-            fprintf(out, "    opt->resetState = %d;\n", (*atomIt)->resetState);
+        if ((*atomIt)->triggerStateReset != INT_MAX) {
+            fprintf(out, "    opt->resetState = %d;\n", (*atomIt)->triggerStateReset);
         } else {
             fprintf(out, "    opt->resetState = UNSET_VALUE;\n");
         }
