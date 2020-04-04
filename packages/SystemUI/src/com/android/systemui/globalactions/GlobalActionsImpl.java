@@ -98,8 +98,21 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
     public void showShutdownUi(boolean isReboot, String reason) {
         ScrimDrawable background = new ScrimDrawable();
 
-        Dialog d = new Dialog(mContext,
+        final Dialog d = new Dialog(mContext,
                 com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
+
+        d.setOnShowListener(dialog -> {
+            if (mBlurUtils.supportsBlursOnWindows()) {
+                background.setAlpha((int) (ScrimController.BLUR_SCRIM_ALPHA * 255));
+                mBlurUtils.applyBlur(d.getWindow().getDecorView().getViewRootImpl(),
+                        mBlurUtils.blurRadiusOfRatio(1));
+            } else {
+                float backgroundAlpha = mContext.getResources().getFloat(
+                        com.android.systemui.R.dimen.shutdown_scrim_behind_alpha);
+                background.setAlpha((int) (backgroundAlpha * 255));
+            }
+        });
+
         // Window initialization
         Window window = d.getWindow();
         window.requestFeature(Window.FEATURE_NO_TITLE);
@@ -144,16 +157,6 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         if (rebootReasonMessage != null) {
             reasonView.setVisibility(View.VISIBLE);
             reasonView.setText(rebootReasonMessage);
-        }
-
-        if (mBlurUtils.supportsBlursOnWindows()) {
-            background.setAlpha((int) (ScrimController.BLUR_SCRIM_ALPHA * 255));
-            mBlurUtils.applyBlur(d.getWindow().getDecorView().getViewRootImpl(),
-                        mBlurUtils.blurRadiusOfRatio(1));
-        } else {
-            float backgroundAlpha = mContext.getResources().getFloat(
-                    com.android.systemui.R.dimen.shutdown_scrim_behind_alpha);
-            background.setAlpha((int) (backgroundAlpha * 255));
         }
 
         d.show();
