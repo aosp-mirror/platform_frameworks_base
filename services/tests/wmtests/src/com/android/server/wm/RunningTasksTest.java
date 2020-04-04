@@ -72,7 +72,8 @@ public class RunningTasksTest extends ActivityTestsBase {
         final int numTasks = 10;
         int activeTime = 0;
         for (int i = 0; i < numTasks; i++) {
-            createTask(display.getStackAt(i % numStacks), ".Task" + i, i, activeTime++, null);
+            createTask(display.getDefaultTaskDisplayArea().getStackAt(i % numStacks),
+                    ".Task" + i, i, activeTime++, null);
         }
 
         // Ensure that the latest tasks were returned in order of decreasing last active time,
