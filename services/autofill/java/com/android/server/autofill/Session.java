@@ -657,13 +657,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
-     * Reads a new structure and then request a new fill response from the fill service.
+     * Clears the existing response for the partition, reads a new structure, and then requests a
+     * new fill response from the fill service.
      *
      * <p> Also asks the IME to make an inline suggestions request if it's enabled.
      */
     @GuardedBy("mLock")
     private void requestNewFillResponseLocked(@NonNull ViewState viewState, int newState,
             int flags) {
+        final FillResponse existingResponse = viewState.getResponse();
+        if (existingResponse != null) {
+            setViewStatesLocked(
+                    existingResponse,
+                    ViewState.STATE_INITIAL,
+                    /* clearResponse= */ true);
+        }
         mExpiredResponse = false;
         if (mForAugmentedAutofillOnly || mRemoteFillService == null) {
             if (sVerbose) {
