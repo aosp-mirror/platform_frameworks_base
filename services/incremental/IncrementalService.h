@@ -40,6 +40,7 @@
 #include "ServiceWrappers.h"
 #include "android/content/pm/BnDataLoaderStatusListener.h"
 #include "incfs.h"
+#include "dataloader_ndk.h"
 #include "path.h"
 
 using namespace android::os::incremental;
@@ -132,6 +133,7 @@ public:
     bool startLoading(StorageId storage) const;
     bool configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
                                  std::string_view libDirRelativePath, std::string_view abi);
+
     class IncrementalDataLoaderListener : public android::content::pm::BnDataLoaderStatusListener {
     public:
         IncrementalDataLoaderListener(IncrementalService& incrementalService,
@@ -143,6 +145,16 @@ public:
     private:
         IncrementalService& incrementalService;
         DataLoaderStatusListener externalListener;
+    };
+
+    class AppOpsListener : public android::BnAppOpsCallback {
+    public:
+        AppOpsListener(IncrementalService& incrementalService, std::string packageName) : incrementalService(incrementalService), packageName(std::move(packageName)) {}
+        void opChanged(int32_t op, const String16& packageName) override;
+
+    private:
+        IncrementalService& incrementalService;
+        const std::string packageName;
     };
 
 private:
@@ -169,11 +181,11 @@ private:
         /*const*/ MountId mountId;
         StorageMap storages;
         BindMap bindPoints;
-        std::optional<DataLoaderParamsParcel> savedDataLoaderParams;
+        DataLoaderParamsParcel dataLoaderParams;
+        DataLoaderFilesystemParams dataLoaderFilesystemParams;
         std::atomic<int> nextStorageDirNo{0};
         std::atomic<int> dataLoaderStatus = -1;
         bool dataLoaderStartRequested = false;
-        TimePoint connectionLostTime = TimePoint();
         const IncrementalService& incrementalService;
 
         IncFsMount(std::string root, MountId mountId, Control control,
@@ -181,7 +193,9 @@ private:
               : root(std::move(root)),
                 control(std::move(control)),
                 mountId(mountId),
-                incrementalService(incrementalService) {}
+                incrementalService(incrementalService) {
+            dataLoaderFilesystemParams.readLogsEnabled = false;
+        }
         IncFsMount(IncFsMount&&) = delete;
         IncFsMount& operator=(IncFsMount&&) = delete;
         ~IncFsMount();
@@ -208,8 +222,7 @@ private:
                            std::string&& source, std::string&& target, BindKind kind,
                            std::unique_lock<std::mutex>& mainLock);
 
-    bool prepareDataLoader(IncFsMount& ifs, DataLoaderParamsParcel* params = nullptr,
-                           const DataLoaderStatusListener* externalListener = nullptr);
+    bool prepareDataLoader(IncFsMount& ifs, const DataLoaderStatusListener* externalListener = nullptr);
     bool startDataLoader(MountId mountId) const;
 
     BindPathMap::const_iterator findStorageLocked(std::string_view path) const;
@@ -221,16 +234,25 @@ private:
     std::string normalizePathToStorage(const IfsMountPtr incfs, StorageId storage,
                                        std::string_view path);
 
+    int applyStorageParams(IncFsMount& ifs);
+
+    void registerAppOpsCallback(const std::string& packageName);
+    void onAppOppChanged(const std::string& packageName);
+
     // Member variables
-    std::unique_ptr<VoldServiceWrapper> mVold;
-    std::unique_ptr<DataLoaderManagerWrapper> mDataLoaderManager;
-    std::unique_ptr<IncFsWrapper> mIncFs;
+    std::unique_ptr<VoldServiceWrapper> const mVold;
+    std::unique_ptr<DataLoaderManagerWrapper> const mDataLoaderManager;
+    std::unique_ptr<IncFsWrapper> const mIncFs;
+    std::unique_ptr<AppOpsManagerWrapper> const mAppOpsManager;
     const std::string mIncrementalDir;
 
     mutable std::mutex mLock;
     mutable std::mutex mMountOperationLock;
     MountMap mMounts;
     BindPathMap mBindsByPath;
+
+    std::mutex mCallbacksLock;
+    std::set<std::string> mCallbackRegistered;
 
     std::atomic_bool mSystemReady = false;
     StorageId mNextId = 0;

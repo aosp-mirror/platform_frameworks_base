@@ -24,6 +24,7 @@
 #include <android/content/pm/IDataLoaderManager.h>
 #include <android/content/pm/IDataLoaderStatusListener.h>
 #include <android/os/IVold.h>
+#include <binder/AppOpsManager.h>
 #include <binder/IServiceManager.h>
 #include <incfs.h>
 
@@ -81,12 +82,19 @@ public:
     virtual ErrorCode writeBlocks(Span<const DataBlock> blocks) const = 0;
 };
 
+class AppOpsManagerWrapper {
+public:
+    virtual ~AppOpsManagerWrapper() = default;
+    virtual void startWatchingMode(int32_t op, const String16& packageName, const sp<IAppOpsCallback>& callback) = 0;
+};
+
 class ServiceManagerWrapper {
 public:
     virtual ~ServiceManagerWrapper() = default;
     virtual std::unique_ptr<VoldServiceWrapper> getVoldService() = 0;
     virtual std::unique_ptr<DataLoaderManagerWrapper> getDataLoaderManager() = 0;
     virtual std::unique_ptr<IncFsWrapper> getIncFs() = 0;
+    virtual std::unique_ptr<AppOpsManagerWrapper> getAppOpsManager() = 0;
 };
 
 // --- Real stuff ---
@@ -137,13 +145,24 @@ private:
     sp<content::pm::IDataLoaderManager> mInterface;
 };
 
+class RealAppOpsManager : public AppOpsManagerWrapper {
+public:
+    ~RealAppOpsManager() = default;
+    void startWatchingMode(int32_t op, const String16& packageName, const sp<IAppOpsCallback>& callback) override {
+        mAppOpsManager.startWatchingMode(op, packageName, callback);
+    }
+private:
+    android::AppOpsManager mAppOpsManager;
+};
+
 class RealServiceManager : public ServiceManagerWrapper {
 public:
     RealServiceManager(sp<IServiceManager> serviceManager);
     ~RealServiceManager() = default;
-    std::unique_ptr<VoldServiceWrapper> getVoldService() override;
-    std::unique_ptr<DataLoaderManagerWrapper> getDataLoaderManager() override;
-    std::unique_ptr<IncFsWrapper> getIncFs() override;
+    std::unique_ptr<VoldServiceWrapper> getVoldService() final;
+    std::unique_ptr<DataLoaderManagerWrapper> getDataLoaderManager() final;
+    std::unique_ptr<IncFsWrapper> getIncFs() final;
+    std::unique_ptr<AppOpsManagerWrapper> getAppOpsManager() final;
 
 private:
     template <class INTERFACE>
