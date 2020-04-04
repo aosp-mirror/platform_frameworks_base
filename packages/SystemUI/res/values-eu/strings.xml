@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Ireki bateriaren xehetasunak"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Bateriaren karga: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Bateriak ehuneko <xliff:g id="PERCENTAGE">%1$s</xliff:g> dauka kargatuta. Zure erabilera kontuan izanda, <xliff:g id="TIME">%2$s</xliff:g> inguru gelditzen zaizkio."</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Kargatzen ari da bateria. %% <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> arte kargatu da oraingoz."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Kargatzen ari da bateria. Ehuneko <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> arte kargatu da oraingoz."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Sistemaren ezarpenak."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Jakinarazpenak."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Ikusi jakinarazpen guztiak"</string>
@@ -343,7 +343,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Izenik gabeko gailua"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Igortzeko prest"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Ez dago gailurik erabilgarri"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Ez zaude konektatuta Wi-Fi sarera"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Ez zaude konektatuta wifi-sarera"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Distira"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTOMATIKOA"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Alderantzikatu koloreak"</string>
@@ -748,7 +748,7 @@
     <string name="clock" msgid="8978017607326790204">"Erlojua"</string>
     <string name="headset" msgid="4485892374984466437">"Mikrofonodun entzungailua"</string>
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Ireki ezarpenak"</string>
-    <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Aurikularrak konektatu dira"</string>
+    <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Entzungailuak konektatu dira"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Mikrofonodun entzungailua konektatu da"</string>
     <string name="data_saver" msgid="3484013368530820763">"Datu-aurrezlea"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Aktibatuta dago datu-aurrezlea"</string>
@@ -903,7 +903,7 @@
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_2">%2$s</xliff:g> aplikazioaren zatiak erakusteko baimena eman nahi diozu <xliff:g id="APP_0">%1$s</xliff:g> aplikazioari?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- <xliff:g id="APP">%1$s</xliff:g> aplikazioaren informazioa irakur dezake."</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- <xliff:g id="APP">%1$s</xliff:g> aplikazioan ekintzak gauza ditzake."</string>
-    <string name="slice_permission_checkbox" msgid="4242888137592298523">"Baimendu <xliff:g id="APP">%1$s</xliff:g> aplikazioari edozein aplikazioren zatiak erakustea"</string>
+    <string name="slice_permission_checkbox" msgid="4242888137592298523">"Eman aplikazio guztien zatiak erakusteko baimena <xliff:g id="APP">%1$s</xliff:g> aplikazioari"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Baimendu"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Ukatu"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Sakatu bateria-aurrezlea noiz aktibatu antolatzeko"</string>
