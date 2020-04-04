@@ -4283,9 +4283,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
-                final Task primary = dc.getRootSplitScreenPrimaryTask();
-                final Task secondary = dc.getTask(t -> t.mCreatedByOrganizer && t.isRootTask()
+                final TaskDisplayArea tc = mRootWindowContainer.getDefaultTaskDisplayArea();
+                final Task primary = tc.getRootSplitScreenPrimaryTask();
+                final Task secondary = tc.getTask(t -> t.mCreatedByOrganizer && t.isRootTask()
                         && t.inSplitScreenSecondaryWindowingMode());
                 if (primary == null || secondary == null) {
                     return;
@@ -4301,7 +4301,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (otherRect == null) {
                     // Temporary estimation... again this is just for tests.
                     otherRect = new Rect(secondary.getBounds());
-                    if (dc.getBounds().width() > dc.getBounds().height()) {
+                    if (tc.getBounds().width() > tc.getBounds().height()) {
                         otherRect.left = primaryRect.right + 6;
                     } else {
                         otherRect.top = primaryRect.bottom + 6;

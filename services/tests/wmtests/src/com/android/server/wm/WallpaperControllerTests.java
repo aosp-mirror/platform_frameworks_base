@@ -254,7 +254,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
     private WindowState createWallpaperTargetWindow(DisplayContent dc) {
         final ActivityRecord homeActivity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                .setStack(dc.getRootHomeTask())
+                .setStack(dc.getDefaultTaskDisplayArea().getRootHomeTask())
                 .setCreateTask(true)
                 .build();
         homeActivity.setVisibility(true);
