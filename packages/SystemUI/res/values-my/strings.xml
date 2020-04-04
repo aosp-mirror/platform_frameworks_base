@@ -197,7 +197,7 @@
     <string name="accessibility_no_sims" msgid="5711270400476534667">"SIM ကတ် မရှိပါ"</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"ဝန်ဆောင်မှုပေးသူ ကွန်ရက် ပြောင်းလဲနေသည်။"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"ဘက်ထရီ အသေးစိတ် အချက်အလက်များကို ဖွင့်ပါ"</string>
-    <string name="accessibility_battery_level" msgid="5143715405241138822">"ဘတ္တရီ <xliff:g id="NUMBER">%d</xliff:g> ရာခိုင်နှုန်း။"</string>
+    <string name="accessibility_battery_level" msgid="5143715405241138822">"ဘက်ထရီ <xliff:g id="NUMBER">%d</xliff:g> ရာခိုင်နှုန်း။"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ဘက်ထရီ <xliff:g id="PERCENTAGE">%1$s</xliff:g> ရာခိုင်နှုန်း၊ သင်၏ အသုံးပြုမှုအပေါ် မူတည်၍ <xliff:g id="TIME">%2$s</xliff:g> ခန့်ကျန်သည်"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ဘက်ထရီအားသွင်းနေသည်၊ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%။"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"စနစ်အပြင်အဆင်များ"</string>

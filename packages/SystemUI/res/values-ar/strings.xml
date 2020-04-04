@@ -35,7 +35,7 @@
     <string name="battery_low_why" msgid="2056750982959359863">"الإعدادات"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"هل تريد تفعيل ميزة توفير شحن البطارية؟"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"لمحة حول ميزة \"توفير شحن البطارية\""</string>
-    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"تشغيل"</string>
+    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"تفعيل"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"هل تريد تفعيل ميزة توفير شحن البطارية؟"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"الإعدادات"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
@@ -60,7 +60,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"السماح دائمًا من هذا الكمبيوتر"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"سماح"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"‏لا يُسمح بتصحيح أخطاء USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تشغيل تصحيح أخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تفعيل تصحيح الأخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏تمّ إيقاف منفذ USB"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"‏لحماية جهازك من السوائل أو الشوائب، سيتمّ إيقاف منفذ USB ولن يتم رصد أيّ ملحقات.\n\nوسيتمّ إعلامك عندما يُسمح باستخدام منفذ USB مرة أخرى."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"‏تم تفعيل منفذ USB لاكتشاف أجهزة الشحن والملحقات."</string>
@@ -187,13 +187,13 @@
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"‏ليست هناك شريحة SIM."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"بيانات الجوّال"</string>
-    <string name="accessibility_cell_data_on" msgid="691666434519443162">"تشغيل بيانات الجوال"</string>
+    <string name="accessibility_cell_data_on" msgid="691666434519443162">"تفعيل بيانات الجوال"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"تم إيقاف بيانات الجوال"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"لم يتم الضبط على استخدام البيانات"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"إيقاف"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"التوصيل عبر البلوتوث"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطائرة."</string>
-    <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏الشبكة الافتراضية الخاصة (VPN) قيد التشغيل."</string>
+    <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏الشبكة الافتراضية الخاصة (VPN) قيد التفعيل."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"‏ليس هناك شريحة SIM."</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"جارٍ تغيير شبكة مشغِّل شبكة الجوّال."</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"فتح تفاصيل البطارية"</string>
@@ -223,13 +223,13 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"إغلاق"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"‏تم إيقاف Wifi."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"‏تم تشغيل Wifi."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"‏تم تفعيل Wifi."</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"الجوّال <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"البطارية <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"إيقاف وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"تشغيل وضع الطائرة."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"تفعيل وضع الطائرة."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"تم إيقاف وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"تم تشغيل وضع الطائرة."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"تم تفعيل وضع الطائرة."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"كتم الصوت تمامًا"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"المنبِّهات فقط"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"عدم الإزعاج"</string>
@@ -237,35 +237,35 @@
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"تم تفعيل \"عدم الإزعاج\"."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="3795983516942423240">"إيقاف البلوتوث."</string>
-    <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"تشغيل البلوتوث."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"تفعيل البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="7362294657419149294">"جارٍ توصيل البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_connected" msgid="5237625393869747261">"تم توصيل البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"تم إيقاف البلوتوث."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"تم تشغيل البلوتوث."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"تم تفعيل البلوتوث."</string>
     <string name="accessibility_quick_settings_location_off" msgid="6122523378294740598">"إيقاف الإبلاغ عن الموقع."</string>
-    <string name="accessibility_quick_settings_location_on" msgid="6869947200325467243">"تشغيل الإبلاغ عن الموقع."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="6869947200325467243">"تفعيل ميزة الإبلاغ عن الموقع الجغرافي."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"تم إيقاف الإبلاغ عن الموقع."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"تم تشغيل الإبلاغ عن الموقع."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"تم تفعيل ميزة الإبلاغ عن الموقع الجغرافي."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"تم ضبط المنبّه على <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="2974895537860082341">"إغلاق اللوحة."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"وقت أكثر."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"وقت أقل."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="7606563260714825190">"إيقاف الفلاش."</string>
     <string name="accessibility_quick_settings_flashlight_unavailable" msgid="7458591827288347635">"تطبيق المصباح اليدوي غير متاح."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"تشغيل الفلاش."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"تفعيل الفلاش."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"تم إيقاف الفلاش."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"تم تشغيل الفلاش."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"تم تفعيل الفلاش."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"تم إيقاف انعكاس اللون."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"تم تشغيل انعكاس اللون."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"تم تفعيل انعكاس اللون."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"تم إيقاف نقطة اتصال الجوّال."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"تم تشغيل نقطة اتصال الجوّال."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"تم تفعيل نقطة اتصال الجوّال."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"توقف إرسال الشاشة."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"وضع العمل معطَّل."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"وضع العمل قيد التشغيل."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"تم إيقاف وضع العمل."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"تم تشغيل وضع العمل."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"تم تفعيل وضع العمل."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"تم إيقاف توفير البيانات."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"تم تشغيل توفير البيانات."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"تم تفعيل توفير البيانات."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"تم إيقاف \"خصوصية أجهزة الاستشعار\"."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"تم تفعيل \"خصوصية أجهزة الاستشعار\"."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"سطوع الشاشة"</string>
@@ -339,7 +339,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"ليست متصلة"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"لا تتوفر شبكة"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"‏إيقاف Wi-Fi"</string>
-    <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"‏تم تشغيل Wi-Fi"</string>
+    <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"‏تم تفعيل Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"‏لا تتوفر أي شبكة Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"جارٍ التفعيل…"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"بث الشاشة"</string>
@@ -543,7 +543,7 @@
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"لا، شكرًا"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"إعداد"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="5901885672973736563">"إيقاف التشغيل الآن"</string>
+    <string name="volume_zen_end_now" msgid="5901885672973736563">"إيقاف التفعيل الآن"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"إعدادات الصوت"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"توسيع"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"تصغير"</string>
@@ -636,9 +636,9 @@
     <string name="qs_rearrange" msgid="484816665478662911">"إعادة ترتيب الإعدادات السريعة"</string>
     <string name="show_brightness" msgid="6700267491672470007">"عرض السطوع في الإعدادات السريعة"</string>
     <string name="experimental" msgid="3549865454812314826">"إعدادات تجريبية"</string>
-    <string name="enable_bluetooth_title" msgid="866883307336662596">"تشغيل البلوتوث؟"</string>
-    <string name="enable_bluetooth_message" msgid="6740938333772779717">"لتوصيل لوحة المفاتيح بالجهاز اللوحي، يلزمك تشغيل بلوتوث أولاً."</string>
-    <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"تشغيل"</string>
+    <string name="enable_bluetooth_title" msgid="866883307336662596">"تفعيل البلوتوث؟"</string>
+    <string name="enable_bluetooth_message" msgid="6740938333772779717">"لتوصيل لوحة المفاتيح بالجهاز اللوحي، يلزمك تفعيل بلوتوث أولاً."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"تفعيل"</string>
     <string name="show_silently" msgid="5629369640872236299">"عرض الإشعارات بدون تنبيه صوتي"</string>
     <string name="block" msgid="188483833983476566">"حظر كل الإشعارات"</string>
     <string name="do_not_silence" msgid="4982217934250511227">"عدم كتم التنبيه الصوتي"</string>
@@ -734,7 +734,7 @@
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"إيقاف"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"التالي"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"السابق"</string>
-    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"إرجاع"</string>
+    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"ترجيع"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"تقديم سريع"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
@@ -771,7 +771,7 @@
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"تم توصيل سماعات رأس"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"تم توصيل سماعات رأس"</string>
     <string name="data_saver" msgid="3484013368530820763">"توفير البيانات"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"تم تشغيل توفير البيانات"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"تم تفعيل توفير البيانات"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"تم إيقاف توفير البيانات"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"مفعّل"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"إيقاف"</string>
@@ -862,12 +862,12 @@
     <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"اسحب لأسفل للإلغاء"</string>
     <string name="pip_menu_title" msgid="6365909306215631910">"القائمة"</string>
     <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> يظهر في صورة داخل صورة"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"إذا كنت لا تريد أن يستخدم <xliff:g id="NAME">%s</xliff:g> هذه الميزة، فانقر لفتح الإعدادات، ثم أوقِف تشغيل هذه الميزة."</string>
+    <string name="pip_notification_message" msgid="4991831338795022227">"إذا كنت لا تريد أن يستخدم <xliff:g id="NAME">%s</xliff:g> هذه الميزة، فانقر لفتح الإعدادات، ثم أوقِف تفعيل هذه الميزة."</string>
     <string name="pip_play" msgid="333995977693142810">"تشغيل"</string>
     <string name="pip_pause" msgid="1139598607050555845">"إيقاف مؤقت"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"التخطي إلى التالي"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"التخطي إلى السابق"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"تم إيقاف تشغيل الهاتف بسبب الحرارة"</string>
+    <string name="thermal_shutdown_title" msgid="2702966892682930264">"تم إيقاف الهاتف بسبب الحرارة"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"يعمل هاتفك الآن بشكل طبيعي"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ارتفعت درجة حرارة هاتفك بشدة، لذا تم إيقاف تشغيله لخفض درجة حرارته. يعمل هاتفك الآن بشكل طبيعي.\n\nقد ترتفع بشدة درجة حرارة هاتفك إذا:\n	• استخدمت تطبيقات كثيفة الاستخدام لموارد الجهاز (مثل الألعاب أو الفيديو أو تطبيقات التنقل)\n	• نزَّلت أو حمَّلت ملفات كبيرة الحجم\n	• استخدمت هاتفك وسط أجواء مرتفعة الحرارة"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"تزداد درجة حرارة الهاتف"</string>
@@ -908,9 +908,9 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"‏تم إيقاف شبكة Wi-Fi"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"تم إيقاف البلوتوث."</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"تم إيقاف وضع \"عدم الإزعاج\""</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"تم تشغيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"تم تشغيل وضع \"عدم الإزعاج\" بواسطة تطبيق (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"تم تشغيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية أو تطبيق."</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة تطبيق (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية أو تطبيق."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"حتى <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="3829697305432866434">"الإبقاء على الإعدادات"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"استبدال"</string>

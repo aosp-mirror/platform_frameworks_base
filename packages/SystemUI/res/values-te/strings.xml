@@ -102,7 +102,7 @@
     <string name="accessibility_menu" msgid="2701163794470513040">"మెను"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"యాక్సెస్ సామర్థ్యం"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"స్క్రీన్‌ను తిప్పండి"</string>
-    <string name="accessibility_recent" msgid="901641734769533575">"అవలోకనం"</string>
+    <string name="accessibility_recent" msgid="901641734769533575">"ఓవర్‌వ్యూ"</string>
     <string name="accessibility_search_light" msgid="524741790416076988">"వెతుకు"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"కెమెరా"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ఫోన్"</string>
@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"బ్యాటరీ వివరాలను తెరుస్తుంది"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"బ్యాటరీ <xliff:g id="NUMBER">%d</xliff:g> శాతం."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"బ్యాటరీ <xliff:g id="PERCENTAGE">%1$s</xliff:g> శాతం ఉంది, మీ వినియోగాన్ని బట్టి <xliff:g id="TIME">%2$s</xliff:g> పని చేస్తుంది"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"బ్యాటరీ ఛార్జ్ అవుతోంది, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"బ్యాటరీ ఛార్జ్ అవుతోంది, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> శాతం వద్ద ఉంది."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"సిస్టమ్ సెట్టింగ్‌లు."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"నోటిఫికేషన్‌లు."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"అన్ని నోటిఫికేషన్‌లను చూడండి"</string>
@@ -218,7 +218,7 @@
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"శీఘ్ర సెట్టింగ్‌లు."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"లాక్ స్క్రీన్."</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"సెట్టింగ్‌లు"</string>
-    <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"అవలోకనం."</string>
+    <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"ఓవర్‌వ్యూ."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"కార్యాలయ లాక్ స్క్రీన్"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"మూసివేస్తుంది"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
@@ -594,7 +594,7 @@
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ఛార్జింగ్‌లో లేనప్పుడు స్థితి పట్టీ చిహ్నం లోపల బ్యాటరీ స్థాయి శాతం చూపుతుంది"</string>
     <string name="quick_settings" msgid="6211774484997470203">"శీఘ్ర సెట్టింగ్‌లు"</string>
     <string name="status_bar" msgid="4357390266055077437">"స్థితి పట్టీ"</string>
-    <string name="overview" msgid="3522318590458536816">"స్థూలదృష్టి"</string>
+    <string name="overview" msgid="3522318590458536816">"ఓవర్‌వ్యూ"</string>
     <string name="demo_mode" msgid="263484519766901593">"సిస్టమ్ UI డెమో మోడ్"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"డెమో మోడ్ ప్రారంభించండి"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"డెమో మోడ్ చూపు"</string>
@@ -642,7 +642,7 @@
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"ఈ నోటిఫికేషన్‌లు మిమ్మల్ని హెచ్చరిస్తాయి"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"మీరు సాధారణంగా ఈ నోటిఫికేషన్‌లను విస్మరిస్తారు. \nవాటి ప్రదర్శనను కొనసాగించాలా?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"పూర్తయింది"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"వర్తింపజేయి"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"అప్లై చేయి"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"ఈ నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"నోటిఫికేషన్‌లను ఆపివేయి"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"నిశ్శబ్దంగా బట్వాడా చేయండి"</string>
@@ -739,7 +739,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"సంగీతం"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"క్యాలెండర్"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"వాల్యూమ్ నియంత్రణలతో చూపు"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"అంతరాయం కలిగించవద్దు"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"వాల్యూమ్ బటన్‌ల షార్ట్‌కట్"</string>

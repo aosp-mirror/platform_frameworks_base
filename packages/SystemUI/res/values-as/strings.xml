@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"বেটাৰিৰ বিৱৰণসমূহ খোলক"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ বেটাৰি।"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"আপোনাৰ ব্যৱহাৰৰ ওপৰত ভিত্তি কৰি বেটাৰী <xliff:g id="PERCENTAGE">%1$s</xliff:g> শতাংশ, প্ৰায় <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"বেটাৰি চ্চাৰ্জ কৰি থকা হৈছে, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ।"</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"বেটাৰি চাৰ্জ হৈ আছে, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ।"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"ছিষ্টেমৰ ছেটিংসমূহ৷"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"জাননীসমূহ।"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"সকলো জাননীবোৰ চাওক"</string>
@@ -739,7 +739,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"এছএমএছ"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"সংগীত"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"কেলেণ্ডাৰ"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"ভলিউম নিয়ন্ত্ৰণৰ সৈতে দেখুৱাওক"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"অসুবিধা নিদিব"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ভলিউম বুটামসমূহৰ শ্বৰ্টকাট"</string>

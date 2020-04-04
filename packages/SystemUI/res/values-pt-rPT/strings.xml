@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Abrir detalhes da bateria"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Bateria a <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Bateria a <xliff:g id="PERCENTAGE">%1$s</xliff:g> por cento, resta(m) cerca de <xliff:g id="TIME">%2$s</xliff:g> com base na sua utilização."</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"A bateria está a carregar, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> por cento."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Bateria a carregar (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%)."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Definições do sistema"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Notificações."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Ver todas as notificações"</string>

@@ -25,7 +25,7 @@
     <string name="accessibility_recents_all_items_dismissed" msgid="2584965907377043255">"Se han ignorado todas las aplicaciones recientes."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5843409407745673280">"Abre la información de la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_launched" msgid="2439069760172103351">"Iniciando la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_empty_message" msgid="4718114148356836203">"No hay elementos recientes"</string>
+    <string name="recents_empty_message" msgid="4718114148356836203">"No hay nada reciente"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2873215505812268822">"Has borrado todo"</string>
     <string name="recents_app_info_button_label" msgid="5371319329151716224">"Información de la aplicación"</string>
     <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"fijar pantalla"</string>

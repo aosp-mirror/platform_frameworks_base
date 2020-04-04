@@ -349,7 +349,7 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Shkëmbe ngjyrat"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Modaliteti i korrigjimit të ngjyrës"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Cilësime të tjera"</string>
-    <string name="quick_settings_done" msgid="2163641301648855793">"U krye!"</string>
+    <string name="quick_settings_done" msgid="2163641301648855793">"U krye"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"I lidhur"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"E lidhur, bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Po lidhet..."</string>

@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Không có tiêu đề"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Nhấn để khởi động lại ứng dụng này và xem ở chế độ toàn màn hình."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Mở <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Tùy chọn cài đặt cho bong bóng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Bạn muốn cho phép bong bóng của <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Tùy chọn cài đặt cho bong bóng trò chuyện <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"Bạn muốn cho phép bong bóng trò chuyện của <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Quản lý"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Từ chối"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Cho phép"</string>

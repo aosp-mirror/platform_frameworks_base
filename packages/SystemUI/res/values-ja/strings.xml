@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"電池の詳細情報を開きます"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"電池残量: <xliff:g id="NUMBER">%d</xliff:g>パーセント"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"電池残量: <xliff:g id="PERCENTAGE">%1$s</xliff:g>、およそ <xliff:g id="TIME">%2$s</xliff:g> に電池切れ（使用状況に基づく）"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"電池充電中: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%"</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"電池充電中: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>パーセント"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"システム設定。"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"通知。"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"通知をすべて表示"</string>

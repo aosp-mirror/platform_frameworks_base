@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Obre els detalls de la bateria"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> per cent de bateria."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> per cent de bateria amb aproximadament <xliff:g id="TIME">%2$s</xliff:g> de temps restant segons l\'ús que en fas"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"La bateria s\'està carregant, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"La bateria s\'està carregant (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%)."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Configuració del sistema."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Notificacions."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Mostra totes les notificacions"</string>
@@ -370,7 +370,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Dades utilitzades: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Límit: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Advertiment: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Perfil professional"</string>
+    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Perfil de treball"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Llum nocturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Al vespre"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Fins a l\'alba"</string>
@@ -479,12 +479,12 @@
     <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> gestiona el dispositiu"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"Dispositiu gestionat per la teva organització i connectat a xarxes VPN"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> gestiona el dispositiu, que està connectat a xarxes VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"És possible que la teva organització supervisi el trànsit de xarxa al teu perfil professional"</string>
-    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"És possible que <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> supervisi el trànsit de xarxa del teu perfil professional"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"És possible que la teva organització supervisi el trànsit de xarxa al teu perfil de treball"</string>
+    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"És possible que <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> supervisi el trànsit de xarxa del teu perfil de treball"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"És possible que la xarxa estigui supervisada"</string>
     <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"El dispositiu està connectat a xarxes VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"El perfil professional està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"El perfil professional està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"El perfil de treball està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"El perfil de treball està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"El dispositiu està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestió del dispositiu"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Supervisió del perfil"</string>
@@ -498,12 +498,12 @@
     <string name="monitoring_description_named_management" msgid="7424612629468754552">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> gestiona el dispositiu.\n\nL\'administrador pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions, les dades associades al dispositiu, inclosa la informació d\'ubicació.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
     <string name="monitoring_description_management" msgid="8081910434889677718">"La teva organització gestiona el dispositiu.\n\nL\'administrador pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions, les dades associades al dispositiu, inclosa la informació d\'ubicació.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"La teva organització ha instal·lat una autoritat de certificació en aquest dispositiu. És possible que el trànsit a la xarxa segura se supervisi o es modifiqui."</string>
-    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"La teva organització ha instal·lat una autoritat de certificació al teu perfil professional. És possible que el trànsit de xarxa segura se supervisi o es modifiqui."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"La teva organització ha instal·lat una autoritat de certificació al teu perfil de treball. És possible que el trànsit de xarxa segura se supervisi o es modifiqui."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"S\'ha instal·lat una autoritat de certificació en aquest dispositiu. És possible que el trànsit de xarxa segura se supervisi o es modifiqui."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"L\'administrador ha activat el registre de xarxa, que supervisa el trànsit del teu dispositiu."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Estàs connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Estàs connectat a <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que poden supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"El teu perfil professional està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"El teu perfil de treball està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"El teu perfil personal està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>,que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"El teu dispositiu està gestionat per <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> utilitza <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> per gestionar el teu dispositiu."</string>
@@ -517,13 +517,13 @@
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Obre les credencials de confiança"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"L\'administrador ha activat el registre de xarxa, que supervisa el trànsit del teu dispositiu.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Has donat permís a una aplicació per configurar una connexió VPN.\n\nAquesta aplicació pot supervisar el dispositiu i l\'activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional.\n\nL\'administrador pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador.\n\nA més, estàs connectat a una VPN, que també pot supervisar la teva activitat a la xarxa."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil de treball.\n\nL\'administrador pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador.\n\nA més, estàs connectat a una VPN, que també pot supervisar la teva activitat a la xarxa."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
-    <string name="monitoring_description_app_work" msgid="3713084153786663662">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. El perfil està connectat a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pot supervisar la teva activitat a la xarxa de treball, com ara els correus electrònics, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
-    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. El perfil està connectat a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pot supervisar la teva activitat a la xarxa de treball, com ara els correus electrònics, les aplicacions i els llocs web.\n\nTambé estàs connectat a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa."</string>
+    <string name="monitoring_description_app_work" msgid="3713084153786663662">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil de treball. El perfil està connectat a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pot supervisar la teva activitat a la xarxa de treball, com ara els correus electrònics, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
+    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil de treball. El perfil està connectat a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pot supervisar la teva activitat a la xarxa de treball, com ara els correus electrònics, les aplicacions i els llocs web.\n\nTambé estàs connectat a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Desbloquejat per TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"El dispositiu continuarà bloquejat fins que no el desbloquegis manualment."</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Rep notificacions més ràpidament"</string>
@@ -600,7 +600,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Mostra el mode de demostració"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Perfil professional"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Perfil de treball"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode d\'avió"</string>
     <string name="add_tile" msgid="6239678623873086686">"Afegeix un mosaic"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"Mosaic d\'emissió"</string>
@@ -610,7 +610,7 @@
     <string name="alarm_template_far" msgid="3561752195856839456">"Dia: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Configuració ràpida, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Punt d\'accés Wi-Fi"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil professional"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de treball"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversió per a uns quants, però no per a tothom"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El Personalitzador d\'interfície d\'usuari presenta opcions addicionals per canviar i personalitzar la interfície d\'usuari d\'Android. És possible que aquestes funcions experimentals canviïn, deixin de funcionar o desapareguin en versions futures. Continua amb precaució."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"És possible que aquestes funcions experimentals canviïn, deixin de funcionar o desapareguin en versions futures. Continua amb precaució."</string>

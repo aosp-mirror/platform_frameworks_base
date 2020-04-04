@@ -739,7 +739,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"संगीत"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"कॅलेंडर"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"आवाज नियंत्रणांसह दर्शवा"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"व्यत्यय आणू नका"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"आवाजाच्या बटणांचा शार्टकट"</string>

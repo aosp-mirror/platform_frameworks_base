@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Quvvat sarfi tafsilotlari"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batareya quvvati <xliff:g id="PERCENTAGE">%1$s</xliff:g> foiz, joriy holatda yana <xliff:g id="TIME">%2$s</xliff:g> qoldi"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batareya quvvat olmoqda (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%)."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batareya quvvat olmoqda, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> foiz."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Tizim sozlamalari."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Eslatmalar."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Barcha bildirishnomalarni ko‘rish"</string>
@@ -463,8 +463,8 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Boshqa ko‘rsatilmasin"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hammasini tozalash"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Boshqarish"</string>
-    <string name="notification_section_header_gentle" msgid="3044910806569985386">"Tovushsiz bildirishnomalar"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Barcha tovushsiz bildirishnomalarni tozalash"</string>
+    <string name="notification_section_header_gentle" msgid="3044910806569985386">"Sokin bildirishnomalar"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Barcha sokin bildirishnomalarni tozalash"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bezovta qilinmasin rejimida bildirishnomalar pauza qilingan"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Boshlash"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Bildirishnomalar yo‘q"</string>

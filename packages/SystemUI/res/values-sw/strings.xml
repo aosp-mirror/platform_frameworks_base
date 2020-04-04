@@ -528,7 +528,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Kifaa kitaendelea kuwa katika hali ya kufungwa hadi utakapokifungua mwenyewe"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Pata arifa kwa haraka"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Zitazame kabla hujafungua"</string>
-    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Hapana, asante"</string>
+    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Hapana"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"Sanidi"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="5901885672973736563">"Izime sasa"</string>
@@ -551,7 +551,7 @@
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Ili ubandue skrini hii, gusa na ushikilie vitufe vya Nyuma na Mwanzo"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Ili ubandue skrini hii, telezesha kidole juu na ushikilie"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Nimeelewa"</string>
-    <string name="screen_pinning_negative" msgid="6882816864569211666">"Hapana, asante"</string>
+    <string name="screen_pinning_negative" msgid="6882816864569211666">"Hapana"</string>
     <string name="screen_pinning_start" msgid="5695091877402422575">"Skrini imebandikwa"</string>
     <string name="screen_pinning_exit" msgid="5114993350662745840">"Skrini imebanduliwa"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Ungependa kuficha <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -908,7 +908,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Kataa"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Gusa ili uratibu wakati wa kuwasha Kiokoa Betri"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Washa wakati betri inakaribia kuisha"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"Hapana, asante"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"Hapana"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Ratiba ya Kiokoa Betri imewashwa"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Kiokoa Betri kitawaka kiotomatiki baada ya chaji ya betri kufika chini ya <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Mipangilio"</string>
@@ -940,6 +940,6 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Sogeza chini kushoto"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Sogeza chini kulia"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ondoa"</string>
-    <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Umesasisha usogezaji kwenye mfumo. Ili ufanye mabadiliko, nenda kwenye Mipangilio."</string>
+    <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Umesasisha usogezaji kwenye mfumo. Ili ubadilishe, nenda kwenye Mipangilio."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Nenda kwenye mipangilio ili usasishe usogezaji kwenye mfumo"</string>
 </resources>
