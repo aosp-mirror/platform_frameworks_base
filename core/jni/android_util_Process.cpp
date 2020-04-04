@@ -641,7 +641,7 @@ static jlong android_os_Process_getTotalMemory(JNIEnv* env, jobject clazz)
         return -1;
     }
 
-    return si.totalram;
+    return static_cast<jlong>(si.totalram) * si.mem_unit;
 }
 
 /*
