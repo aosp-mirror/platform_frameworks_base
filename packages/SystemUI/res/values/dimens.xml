@@ -1155,6 +1155,10 @@
     <dimen name="bubble_overflow_padding">15dp</dimen>
     <!-- Padding of label for bubble overflow view -->
     <dimen name="bubble_overflow_text_padding">7dp</dimen>
+    <!-- Height of bubble overflow empty state illustration -->
+    <dimen name="bubble_empty_overflow_image_height">200dp</dimen>
+    <!-- Padding of bubble overflow empty state subtitle -->
+    <dimen name="bubble_empty_overflow_subtitle_padding">50dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
     <dimen name="bubble_pointer_height">4dp</dimen>
     <!-- Width of the triangle that points to the expanded bubble -->
