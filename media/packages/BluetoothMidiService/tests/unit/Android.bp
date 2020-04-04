@@ -14,22 +14,25 @@
 // limitations under the License.
 //
 
-android_library {
-    name: "BluetoothMidiLib",
-    srcs: [
-        "src/**/*.java",
-    ],
-    platform_apis: true,
-    plugins: ["java_api_finder"],
-    manifest: "AndroidManifestBase.xml",
-}
-
-android_app {
-    name: "BluetoothMidiService",
-    srcs: [
-        "src/**/*.java",
-    ],
-    platform_apis: true,
+android_test {
+    name: "BluetoothMidiTests",
+    srcs: ["src/**/*.java"],
     certificate: "platform",
-    manifest: "AndroidManifest.xml",
+    static_libs: [
+        //"frameworks-base-testutils",
+        "android-support-test",
+        "androidx.test.core",
+        "androidx.test.ext.truth",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "platform-test-annotations",
+        "BluetoothMidiLib",
+    ],
+    test_suites: ["device-tests"],
+    libs: [
+        "framework-res",
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
 }
