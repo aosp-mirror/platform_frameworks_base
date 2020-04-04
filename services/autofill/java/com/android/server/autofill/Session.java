@@ -3226,7 +3226,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
-     * Sets the state of all views in the given dataset and response.
+     * Sets the state and response of all views in the given dataset.
      */
     @GuardedBy("mLock")
     private void setViewStatesLocked(@Nullable FillResponse response, @NonNull Dataset dataset,
@@ -3241,10 +3241,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (datasetId != null) {
                 viewState.setDatasetId(datasetId);
             }
-            if (response != null) {
-                viewState.setResponse(response);
-            } else if (clearResponse) {
+            if (clearResponse) {
                 viewState.setResponse(null);
+            } else if (response != null) {
+                viewState.setResponse(response);
             }
         }
     }
