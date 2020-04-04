@@ -45,6 +45,9 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
     static {
         final List<PackageSharedLibraryUpdater> packageUpdaters = new ArrayList<>();
 
+        // Remove com.google.android.maps library.
+        packageUpdaters.add(new ComGoogleAndroidMapsUpdater());
+
         // Automatically add the org.apache.http.legacy library to the app classpath if the app
         // targets < P.
         packageUpdaters.add(new OrgApacheHttpLegacyUpdater());
