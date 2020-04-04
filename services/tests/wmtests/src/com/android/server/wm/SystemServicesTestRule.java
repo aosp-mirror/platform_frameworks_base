@@ -316,7 +316,7 @@ public class SystemServicesTestRule implements TestRule {
         // that the default display is in fullscreen mode.
         display.setDisplayWindowingMode(WINDOWING_MODE_FULLSCREEN);
         spyOn(display);
-        final TaskDisplayArea taskDisplayArea = display.mTaskContainers;
+        final TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
         spyOn(taskDisplayArea);
         final ActivityStack homeStack = taskDisplayArea.getStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
