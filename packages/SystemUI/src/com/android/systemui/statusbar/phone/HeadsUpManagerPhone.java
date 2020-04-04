@@ -337,7 +337,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     //  VisualStabilityManager.Callback overrides:
 
     @Override
-    public void onReorderingAllowed() {
+    public void onChangeAllowed() {
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (isAlerting(entry.getKey())) {
