@@ -98,8 +98,10 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mLockscreenUserManager);
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
+        when(mVisualStabilityManager.areGroupChangesAllowed()).thenReturn(true);
+        when(mVisualStabilityManager.isReorderingAllowed()).thenReturn(true);
 
-        mHelper = new NotificationTestHelper(mContext, mDependency);
+        mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
 
         mViewHierarchyManager = new NotificationViewHierarchyManager(mContext,
                 mHandler, mLockscreenUserManager, mGroupManager, mVisualStabilityManager,

@@ -645,33 +645,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
-     * Returns whether inline suggestions are enabled for Autofill.
+     * Returns whether inline suggestions are supported by Autofill provider (not augmented
+     * Autofill provider).
      */
-    private boolean isInlineSuggestionsEnabledLocked() {
-        return mService.isInlineSuggestionsEnabled()
-                || mService.getRemoteInlineSuggestionRenderServiceLocked() != null;
+    private boolean isInlineSuggestionsEnabledByAutofillProviderLocked() {
+        return mService.isInlineSuggestionsEnabled();
     }
 
-    /**
-     * Ask the IME to make an inline suggestions request if enabled.
-     */
-    private void maybeRequestInlineSuggestionsRequestThenFillLocked(@NonNull ViewState viewState,
-            int newState, int flags) {
-        if (isInlineSuggestionsEnabledLocked()) {
-            Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestConsumer =
-                    mAssistReceiver.newAutofillRequestLocked(/*isInlineRequest=*/ true);
-            if (inlineSuggestionsRequestConsumer != null) {
-                mInlineSuggestionSession.onCreateInlineSuggestionsRequest(mCurrentViewId,
-                        inlineSuggestionsRequestConsumer);
-            }
-        } else {
-            mAssistReceiver.newAutofillRequestLocked(/*isInlineRequest=*/ false);
-        }
-        requestNewFillResponseLocked(viewState, newState, flags);
+    private boolean isInlineSuggestionRenderServiceAvailable() {
+        return mService.getRemoteInlineSuggestionRenderServiceLocked() != null;
     }
 
     /**
      * Reads a new structure and then request a new fill response from the fill service.
+     *
+     * <p> Also asks the IME to make an inline suggestions request if it's enabled.
      */
     @GuardedBy("mLock")
     private void requestNewFillResponseLocked(@NonNull ViewState viewState, int newState,
@@ -717,6 +705,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // structure is taken. This causes only one fill request per bust of focus changes.
         cancelCurrentRequestLocked();
 
+        // Only ask IME to create inline suggestions request if Autofill provider supports it and
+        // the render service is available.
+        if (isInlineSuggestionsEnabledByAutofillProviderLocked()
+                && isInlineSuggestionRenderServiceAvailable()) {
+            Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestConsumer =
+                    mAssistReceiver.newAutofillRequestLocked(/*isInlineRequest=*/ true);
+            if (inlineSuggestionsRequestConsumer != null) {
+                mInlineSuggestionSession.onCreateInlineSuggestionsRequest(mCurrentViewId,
+                        inlineSuggestionsRequestConsumer);
+            }
+        } else {
+            mAssistReceiver.newAutofillRequestLocked(/*isInlineRequest=*/ false);
+        }
+
+        // Now request the assist structure data.
         try {
             final Bundle receiverExtras = new Bundle();
             receiverExtras.putInt(EXTRA_REQUEST_ID, requestId);
@@ -2322,8 +2325,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if ((flags & FLAG_MANUAL_REQUEST) != 0) {
             mForAugmentedAutofillOnly = false;
             if (sDebug) Slog.d(TAG, "Re-starting session on view " + id + " and flags " + flags);
-            maybeRequestInlineSuggestionsRequestThenFillLocked(viewState,
-                    ViewState.STATE_RESTARTED_SESSION, flags);
+            requestNewFillResponseLocked(viewState, ViewState.STATE_RESTARTED_SESSION, flags);
             return true;
         }
 
@@ -2333,8 +2335,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.d(TAG, "Starting partition or augmented request for view id " + id + ": "
                         + viewState.getStateAsString());
             }
-            maybeRequestInlineSuggestionsRequestThenFillLocked(viewState,
-                    ViewState.STATE_STARTED_PARTITION, flags);
+            requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_PARTITION, flags);
             return true;
         } else {
             if (sVerbose) {
@@ -2458,8 +2459,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // View is triggering autofill.
                 mCurrentViewId = viewState.id;
                 viewState.update(value, virtualBounds, flags);
-                maybeRequestInlineSuggestionsRequestThenFillLocked(viewState,
-                        ViewState.STATE_STARTED_SESSION, flags);
+                requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_SESSION, flags);
                 break;
             case ACTION_VALUE_CHANGED:
                 if (mCompatMode && (viewState.getState() & ViewState.STATE_URL_BAR) != 0) {
@@ -3107,12 +3107,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             }, mService.getRemoteInlineSuggestionRenderServiceLocked());
                 };
 
-        // There are 3 cases when augmented autofill should ask IME for a new request:
-        // 1. standard autofill provider is None
-        // 2. standard autofill provider doesn't support inline (and returns null response)
-        // 3. standard autofill provider supports inline, but isn't called because the field
-        // doesn't want autofill
-        if (mForAugmentedAutofillOnly || !isInlineSuggestionsEnabledLocked()) {
+        // When the inline suggestion render service is available, there are 2 cases when
+        // augmented autofill should ask IME for inline suggestion request, because standard
+        // autofill flow didn't:
+        // 1. the field is augmented autofill only (when standard autofill provider is None or
+        // when it returns null response)
+        // 2. standard autofill provider doesn't support inline suggestion
+        if (isInlineSuggestionRenderServiceAvailable()
+                && (mForAugmentedAutofillOnly
+                || !isInlineSuggestionsEnabledByAutofillProviderLocked())) {
             if (sDebug) Slog.d(TAG, "Create inline request for augmented autofill");
             mInlineSuggestionSession.onCreateInlineSuggestionsRequest(mCurrentViewId,
                     /*requestConsumer=*/ requestAugmentedAutofill);

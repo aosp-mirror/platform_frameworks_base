@@ -123,7 +123,8 @@ message Atom {
         BatteryLevelChanged battery_level_changed =
                 30 [(module) = "framework", (module) = "statsdtest"];
         ChargingStateChanged charging_state_changed = 31 [(module) = "framework"];
-        PluggedStateChanged plugged_state_changed = 32 [(module) = "framework"];
+        PluggedStateChanged plugged_state_changed = 32
+                [(module) = "framework", (module) = "statsdtest"];
         InteractiveStateChanged interactive_state_changed = 33 [(module) = "framework"];
         TouchEventReported touch_event_reported = 34;
         WakeupAlarmOccurred wakeup_alarm_occurred = 35 [(module) = "framework"];

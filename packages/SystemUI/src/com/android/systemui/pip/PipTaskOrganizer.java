@@ -37,7 +37,6 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
 import android.view.SurfaceControl;
@@ -541,7 +540,12 @@ public class PipTaskOrganizer extends TaskOrganizer {
             return null;
         }
         final ActivityInfo.WindowLayout windowLayout = activityInfo.windowLayout;
-        return new Size(windowLayout.minWidth, windowLayout.minHeight);
+        // -1 will be populated if an activity specifies defaultWidth/defaultHeight in <layout>
+        // without minWidth/minHeight
+        if (windowLayout.minWidth > 0 && windowLayout.minHeight > 0) {
+            return new Size(windowLayout.minWidth, windowLayout.minHeight);
+        }
+        return null;
     }
 
     private float getAspectRatioOrDefault(@Nullable PictureInPictureParams params) {

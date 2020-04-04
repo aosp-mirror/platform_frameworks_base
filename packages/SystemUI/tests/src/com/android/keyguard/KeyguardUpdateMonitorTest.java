@@ -590,7 +590,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mPackageManager.resolveService(any(Intent.class), eq(0))).thenReturn(resolveInfo);
         when(mDevicePolicyManager.isSecondaryLockscreenEnabled(eq(UserHandle.of(user))))
                 .thenReturn(true, false);
-        when(mDevicePolicyManager.getProfileOwnerAsUser(user))
+        when(mDevicePolicyManager.getProfileOwnerOrDeviceOwnerSupervisionComponent(
+                UserHandle.of(user)))
                 .thenReturn(new ComponentName(packageName, cls));
 
         // Initially null.

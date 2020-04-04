@@ -397,7 +397,8 @@ class WindowToken extends WindowContainer<WindowState> {
     void assignLayer(SurfaceControl.Transaction t, int layer) {
         if (windowType == TYPE_DOCK_DIVIDER) {
             // See {@link DisplayContent#mSplitScreenDividerAnchor}
-            super.assignRelativeLayer(t, mDisplayContent.getSplitScreenDividerAnchor(), 1);
+            super.assignRelativeLayer(t,
+                    mDisplayContent.getDefaultTaskDisplayArea().getSplitScreenDividerAnchor(), 1);
         } else if (mRoundedCornerOverlay) {
             super.assignLayer(t, WindowManagerPolicy.COLOR_FADE_LAYER + 1);
         } else {

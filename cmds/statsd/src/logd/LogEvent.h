@@ -28,27 +28,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-struct AttributionNodeInternal {
-    void set_uid(int32_t id) {
-        mUid = id;
-    }
-
-    void set_tag(const std::string& value) {
-        mTag = value;
-    }
-
-    int32_t uid() const {
-        return mUid;
-    }
-
-    const std::string& tag() const {
-        return mTag;
-    }
-
-    int32_t mUid;
-    std::string mTag;
-};
-
 struct InstallTrainInfo {
     int64_t trainVersionCode;
     std::string trainName;
@@ -82,28 +61,6 @@ public:
      * \return success of the initialization
      */
     bool parseBuffer(uint8_t* buf, size_t len);
-
-    // TODO(b/149590301): delete unused functions below once LogEvent uses the
-    // new socket schema within test code. Really we would like the only entry
-    // points into LogEvent to be the above constructor and parseBuffer functions.
-
-    /**
-     * Constructs a LogEvent with synthetic data for testing. Must call init() before reading.
-     */
-    explicit LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs);
-
-    // For testing. The timestamp is used as both elapsed real time and logd timestamp.
-    explicit LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid);
-
-    /**
-     * Constructs a KeyValuePairsAtom LogEvent from value maps.
-     */
-    explicit LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                      int32_t uid,
-                      const std::map<int32_t, int32_t>& int_map,
-                      const std::map<int32_t, int64_t>& long_map,
-                      const std::map<int32_t, std::string>& string_map,
-                      const std::map<int32_t, float>& float_map);
 
     // Constructs a BinaryPushStateChanged LogEvent from API call.
     explicit LogEvent(const std::string& trainName, int64_t trainVersionCode, bool requiresStaging,
@@ -150,25 +107,6 @@ public:
     bool GetBool(size_t key, status_t* err) const;
     float GetFloat(size_t key, status_t* err) const;
     std::vector<uint8_t> GetStorage(size_t key, status_t* err) const;
-
-    /**
-     * Write test data to the LogEvent. This can only be used when the LogEvent is constructed
-     * using LogEvent(tagId, timestampNs). You need to call init() before you can read from it.
-     */
-    bool write(uint32_t value);
-    bool write(int32_t value);
-    bool write(uint64_t value);
-    bool write(int64_t value);
-    bool write(const std::string& value);
-    bool write(float value);
-    bool write(const std::vector<AttributionNodeInternal>& nodes);
-    bool write(const AttributionNodeInternal& node);
-    bool writeBytes(const std::string& value);
-    bool writeKeyValuePairs(int32_t uid,
-                            const std::map<int32_t, int32_t>& int_map,
-                            const std::map<int32_t, int64_t>& long_map,
-                            const std::map<int32_t, std::string>& string_map,
-                            const std::map<int32_t, float>& float_map);
 
     /**
      * Return a string representation of this event.

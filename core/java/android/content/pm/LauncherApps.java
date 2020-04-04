@@ -1046,8 +1046,7 @@ public class LauncherApps {
             // changed callback, but that only returns shortcuts with the "key" information, so
             // that won't return disabled message.
             return maybeUpdateDisabledMessage(mService.getShortcuts(mContext.getPackageName(),
-                    query.mChangedSince, query.mPackage, query.mShortcutIds, query.mLocusIds,
-                    query.mActivity, query.mQueryFlags, user)
+                    new ShortcutQueryWrapper(query), user)
                     .getList());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1826,8 +1825,7 @@ public class LauncherApps {
             mShortcutChangeCallbacks.put(callback, new Pair<>(executor, proxy));
             try {
                 mService.registerShortcutChangeCallback(mContext.getPackageName(),
-                        query.mChangedSince, query.mPackage, query.mShortcutIds, query.mLocusIds,
-                        query.mActivity, query.mQueryFlags, proxy);
+                        new ShortcutQueryWrapper(query), proxy);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

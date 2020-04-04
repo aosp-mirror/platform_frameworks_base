@@ -67,7 +67,6 @@ import com.android.systemui.statusbar.notification.icon.IconPack;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 
 import java.util.ArrayList;
@@ -105,18 +104,6 @@ public final class NotificationEntry extends ListEntry {
     /** List of dismiss interceptors that are intercepting the dismissal of this notification. */
     final List<NotifDismissInterceptor> mDismissInterceptors = new ArrayList<>();
 
-    /** If this notification was filtered out, then the filter that did the filtering. */
-    @Nullable NotifFilter mExcludingFilter;
-
-    /**
-     * The NotifFilter, if any, that was active on this notification during the previous run of
-     * the list builder.
-     */
-    @Nullable NotifFilter mPreviousExcludingFilter;
-
-    /** If this was a group child that was promoted to the top level, then who did the promoting. */
-    @Nullable NotifPromoter mNotifPromoter;
-
     /**
      * If this notification was cancelled by system server, then the reason that was supplied.
      * Uncancelled notifications always have REASON_NOT_CANCELED. Note that lifetime-extended
@@ -149,7 +136,6 @@ public final class NotificationEntry extends ListEntry {
      */
     public EditedSuggestionInfo editedSuggestionInfo;
 
-    private NotificationEntry parent; // our parent (if we're in a group)
     private ExpandableNotificationRow row; // the outer expanded view
     private ExpandableNotificationRowController mRowController;
 
@@ -281,6 +267,14 @@ public final class NotificationEntry extends ListEntry {
 
     void setDismissState(@NonNull DismissState dismissState) {
         mDismissState = requireNonNull(dismissState);
+    }
+
+    @Nullable public NotifFilter getExcludingFilter() {
+        return getAttachState().getExcludingFilter();
+    }
+
+    @Nullable public NotifPromoter getNotifPromoter() {
+        return getAttachState().getPromoter();
     }
 
     /*
@@ -583,10 +577,6 @@ public final class NotificationEntry extends ListEntry {
         if (row != null) row.resetUserExpansion();
     }
 
-    public void freeContentViewWhenSafe(@InflationFlag int inflationFlag) {
-        if (row != null) row.freeContentViewWhenSafe(inflationFlag);
-    }
-
     public boolean rowExists() {
         return row != null;
     }
@@ -719,7 +709,7 @@ public final class NotificationEntry extends ListEntry {
     }
 
     public boolean isChildInGroup() {
-        return parent == null;
+        return row != null && row.isChildInGroup();
     }
 
     /**
