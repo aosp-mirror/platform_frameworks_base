@@ -234,7 +234,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (task.getParent() != newParent) {
                     if (newParent == null) {
                         // Re-parent task to display as a root task.
-                        dc.moveStackToDisplay(as, hop.getToTop());
+                        as.reparent(dc.getDefaultTaskDisplayArea(), hop.getToTop());
                     } else if (newParent.inMultiWindowMode() && !task.isResizeable()
                             && task.isLeafTask()) {
                         Slog.w(TAG, "Can't support task that doesn't support multi-window mode in"

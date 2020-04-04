@@ -176,7 +176,7 @@ public class ToastUITest extends SysuiTestCase {
 
         mToastUI.hideToast(PACKAGE_NAME_1, TOKEN_1);
 
-        verify(mNotificationManager).finishToken(PACKAGE_NAME_1, WINDOW_TOKEN_1);
+        verify(mNotificationManager).finishToken(PACKAGE_NAME_1, TOKEN_1);
     }
 
     @Test
@@ -218,7 +218,7 @@ public class ToastUITest extends SysuiTestCase {
         mToastUI.showToast(PACKAGE_NAME_2, TOKEN_2, TEXT, WINDOW_TOKEN_2, Toast.LENGTH_LONG, null);
 
         verify(mWindowManager).removeViewImmediate(view);
-        verify(mNotificationManager).finishToken(PACKAGE_NAME_1, WINDOW_TOKEN_1);
+        verify(mNotificationManager).finishToken(PACKAGE_NAME_1, TOKEN_1);
         verify(mCallback).onToastHidden();
     }
 

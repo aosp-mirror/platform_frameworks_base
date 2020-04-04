@@ -543,7 +543,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.priority = mPriority;
             wifiConfiguration.meteredOverride =
                     mIsMetered ? WifiConfiguration.METERED_OVERRIDE_METERED
-                            : WifiConfiguration.METERED_OVERRIDE_NONE;
+                            : WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
             wifiConfiguration.carrierId = mCarrierId;
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
             return wifiConfiguration;

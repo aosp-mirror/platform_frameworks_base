@@ -74,7 +74,9 @@ public interface NotifCollectionListener {
      * non-lifetime-extended notification entries will have their ranking object updated.
      *
      * Ranking updates occur whenever a notification is added, updated, or removed, or when a
-     * standalone ranking is sent from the server.
+     * standalone ranking is sent from the server. If a non-standalone ranking is applied, the event
+     * that accompanied the ranking is emitted first (e.g. {@link #onEntryAdded}), followed by the
+     * ranking event.
      */
     default void onRankingApplied() {
     }

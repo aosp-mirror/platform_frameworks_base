@@ -251,6 +251,11 @@ public final class BinderProxy implements IBinder {
                     }
                 }
             }
+            // For gathering this debug output, we're making synchronous binder calls
+            // out of system_server to all processes hosting binder objects it holds a reference to;
+            // since some of those processes might be frozen, we don't want to block here
+            // forever. Disable the freezer.
+            Process.enableFreezer(false);
             for (WeakReference<BinderProxy> weakRef : proxiesToQuery) {
                 BinderProxy bp = weakRef.get();
                 String key;
@@ -273,6 +278,7 @@ public final class BinderProxy implements IBinder {
                     counts.put(key, i + 1);
                 }
             }
+            Process.enableFreezer(true);
             Map.Entry<String, Integer>[] sorted = counts.entrySet().toArray(
                     new Map.Entry[counts.size()]);
 

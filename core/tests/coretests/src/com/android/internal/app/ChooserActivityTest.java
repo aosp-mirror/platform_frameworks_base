@@ -34,6 +34,8 @@ import static com.android.internal.app.ChooserListAdapter.SHORTCUT_TARGET_SCORE_
 import static com.android.internal.app.ChooserWrapperActivity.sOverrides;
 import static com.android.internal.app.MatcherUtils.first;
 
+import static junit.framework.Assert.assertTrue;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -1680,6 +1682,54 @@ public class ChooserActivityTest {
         assertThat(logger.get(7).event.getId(),
                 is(ChooserActivityLogger
                         .SharesheetStandardEvent.SHARESHEET_PROFILE_CHANGED.getId()));
+    }
+
+    @Test
+    public void testAutolaunch_singleTarget_wifthWorkProfileAndTabbedViewOff_noAutolaunch() {
+        ResolverActivity.ENABLE_TABBED_VIEW = false;
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(2, /* userId */ 10);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class)))
+                .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
+        Intent sendIntent = createSendTextIntent();
+        sendIntent.setType("TestType");
+        ResolveInfo[] chosen = new ResolveInfo[1];
+        sOverrides.onSafelyStartCallback = targetInfo -> {
+            chosen[0] = targetInfo.getResolveInfo();
+            return true;
+        };
+        waitForIdle();
+
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
+        waitForIdle();
+
+        assertTrue(chosen[0] == null);
+    }
+
+    @Test
+    public void testAutolaunch_singleTarget_noWorkProfile_autolaunch() {
+        ResolverActivity.ENABLE_TABBED_VIEW = false;
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(1);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class)))
+                .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
+        Intent sendIntent = createSendTextIntent();
+        sendIntent.setType("TestType");
+        ResolveInfo[] chosen = new ResolveInfo[1];
+        sOverrides.onSafelyStartCallback = targetInfo -> {
+            chosen[0] = targetInfo.getResolveInfo();
+            return true;
+        };
+        waitForIdle();
+
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
+        waitForIdle();
+
+        assertThat(chosen[0], is(personalResolvedComponentInfos.get(0).getResolveInfoAt(0)));
     }
 
     private Intent createSendTextIntent() {

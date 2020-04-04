@@ -137,12 +137,12 @@ public class AdbService extends IAdbManager.Stub {
 
         @Override
         public File getAdbKeysFile() {
-            return mDebuggingManager.getUserKeyFile();
+            return mDebuggingManager == null ? null : mDebuggingManager.getUserKeyFile();
         }
 
         @Override
         public File getAdbTempKeysFile() {
-            return mDebuggingManager.getAdbTempKeysFile();
+            return mDebuggingManager == null ? null : mDebuggingManager.getAdbTempKeysFile();
         }
 
         @Override

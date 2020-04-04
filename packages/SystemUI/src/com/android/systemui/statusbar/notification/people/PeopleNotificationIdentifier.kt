@@ -96,7 +96,7 @@ class PeopleNotificationIdentifierImpl @Inject constructor(
             return TYPE_NON_PERSON
         }
 
-        val childTypes = groupManager.getLogicalChildren(statusBarNotification)
+        val childTypes = groupManager.getChildren(statusBarNotification)
                 ?.asSequence()
                 ?.map { getPeopleNotificationType(it.sbn, it.ranking) }
                 ?: return TYPE_NON_PERSON

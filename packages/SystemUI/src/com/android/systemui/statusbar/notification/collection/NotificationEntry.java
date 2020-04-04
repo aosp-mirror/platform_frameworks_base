@@ -67,7 +67,6 @@ import com.android.systemui.statusbar.notification.icon.IconPack;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 
 import java.util.ArrayList;
@@ -137,7 +136,6 @@ public final class NotificationEntry extends ListEntry {
      */
     public EditedSuggestionInfo editedSuggestionInfo;
 
-    private NotificationEntry parent; // our parent (if we're in a group)
     private ExpandableNotificationRow row; // the outer expanded view
     private ExpandableNotificationRowController mRowController;
 
@@ -579,10 +577,6 @@ public final class NotificationEntry extends ListEntry {
         if (row != null) row.resetUserExpansion();
     }
 
-    public void freeContentViewWhenSafe(@InflationFlag int inflationFlag) {
-        if (row != null) row.freeContentViewWhenSafe(inflationFlag);
-    }
-
     public boolean rowExists() {
         return row != null;
     }
@@ -715,7 +709,7 @@ public final class NotificationEntry extends ListEntry {
     }
 
     public boolean isChildInGroup() {
-        return parent == null;
+        return row != null && row.isChildInGroup();
     }
 
     /**

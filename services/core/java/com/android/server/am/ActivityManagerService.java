@@ -18376,7 +18376,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
-                proc.thread.dumpHeap(managed, mallocInfo, runGc, path, fd, finishCallback);
+                Process.enableFreezer(false);
+
+                final RemoteCallback intermediateCallback = new RemoteCallback(
+                        new RemoteCallback.OnResultListener() {
+                        @Override
+                        public void onResult(Bundle result) {
+                            finishCallback.sendResult(result);
+                            Process.enableFreezer(true);
+                        }
+                    }, null);
+
+                proc.thread.dumpHeap(managed, mallocInfo, runGc, path, fd, intermediateCallback);
                 fd = null;
                 return true;
             }

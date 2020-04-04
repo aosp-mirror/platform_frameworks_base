@@ -816,29 +816,4 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         verify(mMockINotificationManager, never()).createConversationNotificationChannelForPackage(
                 anyString(), anyInt(), anyString(), any(), eq(CONVERSATION_ID));
     }
-
-    @Test
-    public void testAdjustImportanceTemporarilyAllowsReordering() {
-        mNotificationChannel.setImportance(IMPORTANCE_DEFAULT);
-        mConversationChannel.setImportance(IMPORTANCE_DEFAULT);
-        mNotificationInfo.bindNotification(
-                mShortcutManager,
-                mMockPackageManager,
-                mMockINotificationManager,
-                mVisualStabilityManager,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mEntry,
-                null,
-                null,
-                mIconFactory,
-                true);
-
-        mNotificationInfo.findViewById(R.id.silence).performClick();
-        mNotificationInfo.findViewById(R.id.done).performClick();
-
-        mTestableLooper.processAllMessages();
-
-        verify(mVisualStabilityManager).temporarilyAllowReordering();
-    }
 }

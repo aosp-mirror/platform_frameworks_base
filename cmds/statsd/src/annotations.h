@@ -22,13 +22,11 @@ namespace statsd {
 
 const uint8_t ANNOTATION_ID_IS_UID = 1;
 const uint8_t ANNOTATION_ID_TRUNCATE_TIMESTAMP = 2;
-const uint8_t ANNOTATION_ID_STATE_OPTION = 3;
-const uint8_t ANNOTATION_ID_RESET_STATE = 5;
-const uint8_t ANNOTATION_ID_STATE_NESTED = 6;
-
-const int32_t STATE_OPTION_PRIMARY_FIELD = 1;
-const int32_t STATE_OPTION_EXCLUSIVE_STATE = 2;
-const int32_t STATE_OPTION_PRIMARY_FIELD_FIRST_UID = 3;
+const uint8_t ANNOTATION_ID_PRIMARY_FIELD = 3;
+const uint8_t ANNOTATION_ID_EXCLUSIVE_STATE = 4;
+const uint8_t ANNOTATION_ID_PRIMARY_FIELD_FIRST_UID = 5;
+const uint8_t ANNOTATION_ID_TRIGGER_STATE_RESET = 7;
+const uint8_t ANNOTATION_ID_STATE_NESTED = 8;
 
 } // namespace statsd
 } // namespace os

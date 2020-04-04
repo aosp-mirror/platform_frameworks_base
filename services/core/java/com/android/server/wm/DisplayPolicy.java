@@ -2653,8 +2653,8 @@ public class DisplayPolicy {
                     if (mStatusBarController.setBarShowingLw(true)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
                     }
-                } else if (topIsFullscreen
-                        && !mDisplayContent.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
+                } else if (topIsFullscreen && !mDisplayContent.getDefaultTaskDisplayArea()
+                        .isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "** HIDING status bar");
                     if (mStatusBarController.setBarShowingLw(false)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
@@ -3462,10 +3462,10 @@ public class DisplayPolicy {
     }
 
     private Pair<Integer, WindowState> updateSystemBarsLw(WindowState win, int oldVis, int vis) {
-        final boolean dockedStackVisible =
-                mDisplayContent.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        final boolean freeformStackVisible =
-                mDisplayContent.isStackVisible(WINDOWING_MODE_FREEFORM);
+        final boolean dockedStackVisible = mDisplayContent.getDefaultTaskDisplayArea()
+                .isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        final boolean freeformStackVisible = mDisplayContent.getDefaultTaskDisplayArea()
+                .isStackVisible(WINDOWING_MODE_FREEFORM);
         final boolean resizing = mDisplayContent.getDockedDividerController().isResizing();
 
         // We need to force system bars when the docked stack is visible, when the freeform stack

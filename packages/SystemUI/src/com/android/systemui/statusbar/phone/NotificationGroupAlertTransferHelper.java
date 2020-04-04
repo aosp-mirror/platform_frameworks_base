@@ -391,7 +391,9 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
                         alertNotificationWhenPossible(entry, mHeadsUpManager);
                     } else {
                         // The transfer is no longer valid. Free the content.
-                        entry.getRow().freeContentViewWhenSafe(mHeadsUpManager.getContentFlag());
+                        mRowContentBindStage.getStageParams(entry).markContentViewsFreeable(
+                                contentFlag);
+                        mRowContentBindStage.requestRebind(entry, null);
                     }
                 }
             });

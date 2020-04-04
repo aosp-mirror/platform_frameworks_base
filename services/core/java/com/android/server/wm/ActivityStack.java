@@ -3553,9 +3553,8 @@ class ActivityStack extends Task {
         }
     }
 
-    void reparent(DisplayContent newParent, boolean onTop) {
-        // Real parent of stack is within display object, so we have to delegate re-parenting there.
-        newParent.moveStackToDisplay(this, onTop);
+    void reparent(TaskDisplayArea newParent, boolean onTop) {
+        reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
     }
 
     private void updateSurfaceBounds() {

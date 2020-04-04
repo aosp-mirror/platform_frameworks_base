@@ -182,7 +182,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         NotifRemoteViewCache cache = new NotifRemoteViewCacheImpl(mEntryManager);
         NotifBindPipeline pipeline = new NotifBindPipeline(
                 mEntryManager,
-                mock(NotifBindPipelineLogger.class));
+                mock(NotifBindPipelineLogger.class),
+                TestableLooper.get(this).getLooper());
         mBgExecutor = new FakeExecutor(new FakeSystemClock());
         NotificationContentInflater binder = new NotificationContentInflater(
                 cache,

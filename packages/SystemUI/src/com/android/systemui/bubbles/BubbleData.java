@@ -549,6 +549,7 @@ public class BubbleData {
                 Log.e(TAG, "Attempt to expand stack without selected bubble!");
                 return;
             }
+            mSelectedBubble.markUpdatedAt(mTimeSource.currentTimeMillis());
             mSelectedBubble.markAsAccessedAt(mTimeSource.currentTimeMillis());
             mStateChange.orderChanged |= repackAll();
         } else if (!mBubbles.isEmpty()) {
@@ -662,7 +663,7 @@ public class BubbleData {
 
     /**
      * This applies a full sort and group pass to all existing bubbles. The bubbles are grouped
-     * by groupId. Each group is then sorted by the max(lastUpdated) time of it's bubbles. Bubbles
+     * by groupId. Each group is then sorted by the max(lastUpdated) time of its bubbles. Bubbles
      * within each group are then sorted by lastUpdated descending.
      *
      * @return true if the position of any bubbles changed as a result

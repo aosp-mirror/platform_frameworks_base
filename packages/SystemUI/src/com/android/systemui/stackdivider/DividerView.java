@@ -1085,14 +1085,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         crop.offsetTo(-(otherTaskRect.left - otherRect.left),
                 -(otherTaskRect.top - otherRect.top));
         t.setWindowCrop(mTiles.mSecondarySurface, crop);
-        // Reposition home and recents surfaces or they would be positioned relatively to its
-        // parent (split-screen secondary task) position.
-        for (int i = mTiles.mHomeAndRecentsSurfaces.size() - 1; i >= 0; --i) {
-            t.setPosition(mTiles.mHomeAndRecentsSurfaces.get(i),
-                    mTiles.mHomeBounds.left - otherTaskRect.left,
-                    mTiles.mHomeBounds.top - otherTaskRect.top);
-            t.setWindowCrop(mTiles.mHomeAndRecentsSurfaces.get(i), null);
-        }
         final SurfaceControl dividerCtrl = getWindowSurfaceControl();
         if (dividerCtrl != null) {
             if (isHorizontalDivision()) {

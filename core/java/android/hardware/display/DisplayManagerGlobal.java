@@ -451,35 +451,26 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    public VirtualDisplay createVirtualDisplay(Context context, MediaProjection projection,
-            String name, int width, int height, int densityDpi, Surface surface, int flags,
-            VirtualDisplay.Callback callback, Handler handler, String uniqueId) {
-        if (TextUtils.isEmpty(name)) {
-            throw new IllegalArgumentException("name must be non-null and non-empty");
-        }
-        if (width <= 0 || height <= 0 || densityDpi <= 0) {
-            throw new IllegalArgumentException("width, height, and densityDpi must be "
-                    + "greater than 0");
-        }
-
+    public VirtualDisplay createVirtualDisplay(@NonNull Context context, MediaProjection projection,
+            @NonNull VirtualDisplayConfig virtualDisplayConfig, VirtualDisplay.Callback callback,
+            Handler handler) {
         VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, handler);
         IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
         try {
-            displayId = mDm.createVirtualDisplay(callbackWrapper, projectionToken,
-                    context.getPackageName(), name, width, height, densityDpi, surface, flags,
-                    uniqueId);
+            displayId = mDm.createVirtualDisplay(virtualDisplayConfig, callbackWrapper,
+                    projectionToken, context.getPackageName());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
         if (displayId < 0) {
-            Log.e(TAG, "Could not create virtual display: " + name);
+            Log.e(TAG, "Could not create virtual display: " + virtualDisplayConfig.getName());
             return null;
         }
         Display display = getRealDisplay(displayId);
         if (display == null) {
             Log.wtf(TAG, "Could not obtain display info for newly created "
-                    + "virtual display: " + name);
+                    + "virtual display: " + virtualDisplayConfig.getName());
             try {
                 mDm.releaseVirtualDisplay(callbackWrapper);
             } catch (RemoteException ex) {
@@ -487,7 +478,8 @@ public final class DisplayManagerGlobal {
             }
             return null;
         }
-        return new VirtualDisplay(this, display, callbackWrapper, surface);
+        return new VirtualDisplay(this, display, callbackWrapper,
+                virtualDisplayConfig.getSurface());
     }
 
     public void setVirtualDisplaySurface(IVirtualDisplayCallback token, Surface surface) {

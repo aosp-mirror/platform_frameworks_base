@@ -41,17 +41,17 @@ import java.lang.ref.WeakReference;
 public class DecorContext extends ContextThemeWrapper {
     private PhoneWindow mPhoneWindow;
     private WindowManager mWindowManager;
-    private Resources mResources;
+    private Resources mActivityResources;
     private ContentCaptureManager mContentCaptureManager;
 
-    private WeakReference<Context> mContext;
+    private WeakReference<Context> mActivityContext;
 
     // TODO(b/149928768): Non-activity context can be passed.
     @VisibleForTesting
-    public DecorContext(Context baseContext, Context context) {
-        super(baseContext.createDisplayContext(context.getDisplayNoVerify()), null);
-        mContext = new WeakReference<>(context);
-        mResources = context.getResources();
+    public DecorContext(Context context, Context activityContext) {
+        super(context.createDisplayContext(activityContext.getDisplayNoVerify()), null);
+        mActivityContext = new WeakReference<>(activityContext);
+        mActivityResources = activityContext.getResources();
     }
 
     void setPhoneWindow(PhoneWindow phoneWindow) {
@@ -61,56 +61,58 @@ public class DecorContext extends ContextThemeWrapper {
 
     @Override
     public Object getSystemService(String name) {
-        final Context context = mContext.get();
         if (Context.WINDOW_SERVICE.equals(name)) {
-            if (context != null && mWindowManager == null) {
-                WindowManagerImpl wm = (WindowManagerImpl) context.getSystemService(name);
+            if (mWindowManager == null) {
+                WindowManagerImpl wm =
+                        (WindowManagerImpl) super.getSystemService(Context.WINDOW_SERVICE);
                 mWindowManager = wm.createLocalWindowManager(mPhoneWindow);
             }
             return mWindowManager;
         }
         if (Context.CONTENT_CAPTURE_MANAGER_SERVICE.equals(name)) {
-            if (context != null && mContentCaptureManager == null) {
-                mContentCaptureManager = (ContentCaptureManager) context.getSystemService(name);
+            if (mContentCaptureManager == null) {
+                Context activityContext = mActivityContext.get();
+                if (activityContext != null) {
+                    mContentCaptureManager = (ContentCaptureManager) activityContext
+                            .getSystemService(name);
+                }
             }
             return mContentCaptureManager;
         }
-        // LayoutInflater and WallpaperManagerService should also be obtained from context
-        // instead of application context.
-        return (context != null) ? context.getSystemService(name) : super.getSystemService(name);
+        return super.getSystemService(name);
     }
 
     @Override
     public Resources getResources() {
-        Context context = mContext.get();
+        Context activityContext = mActivityContext.get();
         // Attempt to update the local cached Resources from the activity context. If the activity
         // is no longer around, return the old cached values.
-        if (context != null) {
-            mResources = context.getResources();
+        if (activityContext != null) {
+            mActivityResources = activityContext.getResources();
         }
 
-        return mResources;
+        return mActivityResources;
     }
 
     @Override
     public AssetManager getAssets() {
-        return mResources.getAssets();
+        return mActivityResources.getAssets();
     }
 
     @Override
     public AutofillOptions getAutofillOptions() {
-        Context context = mContext.get();
-        if (context != null) {
-            return context.getAutofillOptions();
+        Context activityContext = mActivityContext.get();
+        if (activityContext != null) {
+            return activityContext.getAutofillOptions();
         }
         return null;
     }
 
     @Override
     public ContentCaptureOptions getContentCaptureOptions() {
-        Context context = mContext.get();
-        if (context != null) {
-            return context.getContentCaptureOptions();
+        Context activityContext = mActivityContext.get();
+        if (activityContext != null) {
+            return activityContext.getContentCaptureOptions();
         }
         return null;
     }

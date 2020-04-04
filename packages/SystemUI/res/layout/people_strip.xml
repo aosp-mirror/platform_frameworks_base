@@ -43,6 +43,7 @@
             android:forceHasOverlappingRendering="false">
 
             <TextView
+                android:id="@+id/header_label"
                 style="@style/TextAppearance.NotificationSectionHeaderButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

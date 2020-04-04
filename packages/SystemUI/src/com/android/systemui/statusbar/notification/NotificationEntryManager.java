@@ -252,7 +252,7 @@ public class NotificationEntryManager implements
     }
 
     @Override
-    public void onReorderingAllowed() {
+    public void onChangeAllowed() {
         updateNotifications("reordering is now allowed");
     }
 
@@ -539,7 +539,8 @@ public class NotificationEntryManager implements
         }
     }
 
-    private void addNotificationInternal(StatusBarNotification notification,
+    private void addNotificationInternal(
+            StatusBarNotification notification,
             RankingMap rankingMap) throws InflationException {
         String key = notification.getKey();
         if (DEBUG) {
@@ -578,6 +579,9 @@ public class NotificationEntryManager implements
         }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryAdded(entry);
+        }
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onRankingApplied();
         }
     }
 
@@ -634,6 +638,9 @@ public class NotificationEntryManager implements
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPostEntryUpdated(entry);
+        }
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onRankingApplied();
         }
     }
 
@@ -692,6 +699,9 @@ public class NotificationEntryManager implements
         }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onRankingUpdate(rankingMap);
+        }
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onRankingApplied();
         }
     }
 
@@ -799,6 +809,9 @@ public class NotificationEntryManager implements
      */
     public void updateRanking(RankingMap rankingMap, String reason) {
         updateRankingAndSort(rankingMap, reason);
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onRankingApplied();
+        }
     }
 
     /** Resorts / filters the current notification set with the current RankingMap */

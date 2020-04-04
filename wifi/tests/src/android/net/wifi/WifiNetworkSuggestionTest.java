@@ -56,7 +56,7 @@ public class WifiNetworkSuggestionTest {
                 .get(WifiConfiguration.KeyMgmt.NONE));
         assertTrue(suggestion.isAppInteractionRequired);
         assertFalse(suggestion.isUserInteractionRequired);
-        assertEquals(WifiConfiguration.METERED_OVERRIDE_NONE,
+        assertEquals(WifiConfiguration.METERED_OVERRIDE_NOT_METERED,
                 suggestion.wifiConfiguration.meteredOverride);
         assertEquals(-1, suggestion.wifiConfiguration.priority);
         assertFalse(suggestion.isUserAllowedToManuallyConnect);
@@ -86,7 +86,7 @@ public class WifiNetworkSuggestionTest {
                 suggestion.wifiConfiguration.preSharedKey);
         assertTrue(suggestion.isAppInteractionRequired);
         assertFalse(suggestion.isUserInteractionRequired);
-        assertEquals(WifiConfiguration.METERED_OVERRIDE_NONE,
+        assertEquals(WifiConfiguration.METERED_OVERRIDE_NOT_METERED,
                 suggestion.wifiConfiguration.meteredOverride);
         assertEquals(0, suggestion.wifiConfiguration.priority);
         assertFalse(suggestion.isUserAllowedToManuallyConnect);

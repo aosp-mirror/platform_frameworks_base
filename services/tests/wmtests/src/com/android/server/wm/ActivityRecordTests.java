@@ -82,6 +82,7 @@ import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
+import android.view.DisplayInfo;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner.Stub;
 import android.view.RemoteAnimationAdapter;
@@ -399,6 +400,16 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mStack.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
         final Rect stableRect = new Rect();
         mStack.getDisplay().mDisplayContent.getStableRect(stableRect);
+
+        // Carve out non-decor insets from stableRect
+        final Rect insets = new Rect();
+        final DisplayInfo displayInfo = mStack.getDisplay().getDisplayInfo();
+        final DisplayPolicy policy = mStack.getDisplay().getDisplayPolicy();
+        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
+                displayInfo.logicalHeight, displayInfo.displayCutout, insets);
+        policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
+        Task.intersectWithInsetsIfFits(stableRect, stableRect, insets);
+
         final boolean isScreenPortrait = stableRect.width() <= stableRect.height();
         final Rect bounds = new Rect(stableRect);
         if (isScreenPortrait) {
@@ -427,7 +438,17 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void ignoreRequestedOrientationInSplitWindows() {
         mStack.setWindowingMode(WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         final Rect stableRect = new Rect();
-        mStack.getDisplay().mDisplayContent.getStableRect(stableRect);
+        mStack.getDisplay().getStableRect(stableRect);
+
+        // Carve out non-decor insets from stableRect
+        final Rect insets = new Rect();
+        final DisplayInfo displayInfo = mStack.getDisplay().getDisplayInfo();
+        final DisplayPolicy policy = mStack.getDisplay().getDisplayPolicy();
+        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
+                displayInfo.logicalHeight, displayInfo.displayCutout, insets);
+        policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
+        Task.intersectWithInsetsIfFits(stableRect, stableRect, insets);
+
         final boolean isScreenPortrait = stableRect.width() <= stableRect.height();
         final Rect bounds = new Rect(stableRect);
         if (isScreenPortrait) {
@@ -1379,8 +1400,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
             display = new TestDisplayContent.Builder(mService, 2000, 1000).setDensityDpi(300)
                     .setPosition(DisplayContent.POSITION_TOP).build();
         }
-        final ActivityStack stack = display.createStack(WINDOWING_MODE_UNDEFINED,
-                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityStack stack = display.getDefaultTaskDisplayArea()
+                .createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
         return new ActivityBuilder(mService).setTask(task).setUseProcess(process).build();
     }

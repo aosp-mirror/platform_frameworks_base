@@ -232,10 +232,11 @@ class ResetTargetTaskHelper {
         }
 
         final ActivityTaskManagerService atmService = mTargetStack.mAtmService;
-        DisplayContent display = mTargetStack.getDisplay();
-        final boolean singleTaskInstanceDisplay = display.isSingleTaskInstance();
+        TaskDisplayArea taskDisplayArea = mTargetStack.getDisplayArea();
+        final boolean singleTaskInstanceDisplay =
+                taskDisplayArea.mDisplayContent.isSingleTaskInstance();
         if (singleTaskInstanceDisplay) {
-            display = atmService.mRootWindowContainer.getDefaultDisplay();
+            taskDisplayArea = atmService.mRootWindowContainer.getDefaultTaskDisplayArea();
         }
 
         final int windowingMode = mTargetStack.getWindowingMode();
@@ -246,7 +247,7 @@ class ResetTargetTaskHelper {
             final boolean alwaysCreateTask = DisplayContent.alwaysCreateStack(windowingMode,
                     activityType);
             final Task task = alwaysCreateTask
-                    ? display.getBottomMostTask() : mTargetStack.getBottomMostTask();
+                    ? taskDisplayArea.getBottomMostTask() : mTargetStack.getBottomMostTask();
             Task targetTask = null;
             if (task != null && r.taskAffinity.equals(task.affinity)) {
                 // If the activity currently at the bottom has the same task affinity as
@@ -257,7 +258,7 @@ class ResetTargetTaskHelper {
             }
             if (targetTask == null) {
                 if (alwaysCreateTask) {
-                    targetTask = display.mTaskContainers.getOrCreateStack(windowingMode,
+                    targetTask = taskDisplayArea.getOrCreateStack(windowingMode,
                             activityType, false /* onTop */);
                 } else {
                     targetTask = mTargetStack.reuseOrCreateTask(r.info, null /*intent*/,

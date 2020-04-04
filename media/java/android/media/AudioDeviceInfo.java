@@ -280,6 +280,28 @@ public final class AudioDeviceInfo {
         }
     }
 
+    /**
+     * @hide
+     * Throws IAE on an invalid output device type
+     * @param type
+     */
+    public static void enforceValidAudioDeviceTypeOut(int type) {
+        if (!isValidAudioDeviceTypeOut(type)) {
+            throw new IllegalArgumentException("Illegal output device type " + type);
+        }
+    }
+
+    /**
+     * @hide
+     * Throws IAE on an invalid input device type
+     * @param type
+     */
+    public static void enforceValidAudioDeviceTypeIn(int type) {
+        if (!isValidAudioDeviceTypeIn(type)) {
+            throw new IllegalArgumentException("Illegal input device type " + type);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

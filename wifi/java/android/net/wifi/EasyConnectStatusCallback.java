@@ -42,7 +42,7 @@ public abstract class EasyConnectStatusCallback {
     public static final int EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_SENT = 0;
 
     /**
-     * East Connect R2 Success event: Configuration applied by Enrollee (Configurator mode).
+     * Easy Connect R2 Success event: Configuration applied by Enrollee (Configurator mode).
      * This is the last and final Easy Connect event when both the local device and remote device
      * implement R2. If either the local device or remote device implement R1, this event will never
      * be received, and the {@link #EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_SENT} will be received.

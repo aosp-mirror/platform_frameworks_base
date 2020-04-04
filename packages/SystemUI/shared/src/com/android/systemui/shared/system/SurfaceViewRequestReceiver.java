@@ -18,6 +18,7 @@ package com.android.systemui.shared.system;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Size;
@@ -59,6 +60,7 @@ public class SurfaceViewRequestReceiver {
         if (mSurfaceControlViewHost != null) {
             mSurfaceControlViewHost.die();
         }
+
         SurfaceControl surfaceControl = SurfaceViewRequestUtils.getSurfaceControl(bundle);
         if (surfaceControl != null) {
             if (viewSize == null) {
@@ -70,8 +72,10 @@ public class SurfaceViewRequestReceiver {
             WindowlessWindowManager windowlessWindowManager =
                     new WindowlessWindowManager(context.getResources().getConfiguration(),
                             surfaceControl, hostToken);
+            DisplayManager dm = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
             mSurfaceControlViewHost = new SurfaceControlViewHost(context,
-                    context.getDisplayNoVerify(), windowlessWindowManager);
+                    dm.getDisplay(SurfaceViewRequestUtils.getDisplayId(bundle)),
+                    windowlessWindowManager);
             WindowManager.LayoutParams layoutParams =
                     new WindowManager.LayoutParams(
                             viewSize.getWidth(),

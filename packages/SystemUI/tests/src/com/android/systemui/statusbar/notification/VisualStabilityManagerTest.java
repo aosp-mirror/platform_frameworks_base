@@ -110,7 +110,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
         mVisualStabilityManager.setScreenOn(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
         mVisualStabilityManager.setScreenOn(false);
-        verify(mCallback).onReorderingAllowed();
+        verify(mCallback).onChangeAllowed();
     }
 
     @Test
@@ -119,7 +119,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
         mVisualStabilityManager.setScreenOn(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
         mVisualStabilityManager.setPanelExpanded(false);
-        verify(mCallback).onReorderingAllowed();
+        verify(mCallback).onChangeAllowed();
     }
 
     @Test
@@ -130,7 +130,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
         mVisualStabilityManager.setScreenOn(false);
         mVisualStabilityManager.setScreenOn(true);
         mVisualStabilityManager.setScreenOn(false);
-        verify(mCallback).onReorderingAllowed();
+        verify(mCallback).onChangeAllowed();
     }
 
     @Test
@@ -190,7 +190,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
         mVisualStabilityManager.setPulsing(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
         mVisualStabilityManager.setPulsing(false);
-        verify(mCallback).onReorderingAllowed();
+        verify(mCallback).onChangeAllowed();
     }
 
     @Test
@@ -204,7 +204,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
         mVisualStabilityManager.temporarilyAllowReordering();
 
         // THEN callbacks are notified that reordering is allowed
-        verify(mCallback).onReorderingAllowed();
+        verify(mCallback).onChangeAllowed();
         assertTrue(mVisualStabilityManager.isReorderingAllowed());
     }
 
@@ -218,7 +218,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
         mVisualStabilityManager.temporarilyAllowReordering();
 
         // THEN reordering is still not allowed
-        verify(mCallback, never()).onReorderingAllowed();
+        verify(mCallback, never()).onChangeAllowed();
         assertFalse(mVisualStabilityManager.isReorderingAllowed());
     }
 

@@ -17,12 +17,7 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
-import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
-import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
 
 import android.animation.Animator;
@@ -463,41 +458,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * Marks a content view as freeable, setting it so that future inflations do not reinflate
      * and ensuring that the view is freed when it is safe to remove.
      *
-     * TODO: This should be moved to the respective coordinator and call
-     * {@link RowContentBindParams#freeContentViews} directly after disappear animation
-     * finishes instead of depending on binding API to know when it's "safe".
-     *
      * @param inflationFlag flag corresponding to the content view to be freed
+     * @deprecated By default, {@link NotificationContentInflater#unbindContent} will tell the
+     * view hierarchy to only free when the view is safe to remove so this method is no longer
+     * needed. Will remove when all uses are gone.
      */
+    @Deprecated
     public void freeContentViewWhenSafe(@InflationFlag int inflationFlag) {
-        // View should not be reinflated in the future
-        Runnable freeViewRunnable = () -> {
-            // Possible for notification to be removed after free request.
-            if (!isRemoved()) {
-                RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-                params.freeContentViews(inflationFlag);
-                mRowContentBindStage.requestRebind(mEntry, null /* callback */);
-            }
-        };
-        switch (inflationFlag) {
-            case FLAG_CONTENT_VIEW_CONTRACTED:
-                getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_CONTRACTED,
-                        freeViewRunnable);
-                break;
-            case FLAG_CONTENT_VIEW_EXPANDED:
-                getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_EXPANDED,
-                        freeViewRunnable);
-                break;
-            case FLAG_CONTENT_VIEW_HEADS_UP:
-                getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_HEADSUP,
-                        freeViewRunnable);
-                break;
-            case FLAG_CONTENT_VIEW_PUBLIC:
-                getPublicLayout().performWhenContentInactive(VISIBLE_TYPE_CONTRACTED,
-                        freeViewRunnable);
-            default:
-                break;
-        }
+        RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
+        params.markContentViewsFreeable(inflationFlag);
+        mRowContentBindStage.requestRebind(mEntry, null /* callback */);
     }
 
     /**
@@ -1571,7 +1541,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 if (needsRedaction) {
                     params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
                 } else {
-                    params.freeContentViews(FLAG_CONTENT_VIEW_PUBLIC);
+                    params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
                 }
                 mRowContentBindStage.requestRebind(mEntry, null /* callback */);
             }

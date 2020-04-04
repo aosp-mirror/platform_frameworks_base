@@ -16,9 +16,11 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -123,5 +125,10 @@ public class SectionHeaderView extends StackScrollerDecorView {
     void setHeaderText(@StringRes int resId) {
         mLabelTextId = resId;
         mLabelView.setText(resId);
+    }
+
+    void setForegroundColor(@ColorInt int color) {
+        mLabelView.setTextColor(color);
+        mClearAllButton.setImageTintList(ColorStateList.valueOf(color));
     }
 }

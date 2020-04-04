@@ -30,7 +30,6 @@ static void write_native_annotation_constants(FILE* out) {
     fprintf(out, "\n");
 }
 
-
 static void write_annotations(FILE* out, int argIndex,
                               const FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet,
                               const string& methodPrefix, const string& methodSuffix) {
@@ -47,11 +46,10 @@ static void write_annotations(FILE* out, int argIndex,
         int resetState = -1;
         int defaultState = -1;
         for (const shared_ptr<Annotation>& annotation : annotations) {
-            const string& annotationConstant =
-                    ANNOTATION_ID_CONSTANTS.at(annotation->annotationId);
+            const string& annotationConstant = ANNOTATION_ID_CONSTANTS.at(annotation->annotationId);
             switch (annotation->type) {
                 case ANNOTATION_TYPE_INT:
-                    if (ANNOTATION_ID_RESET_STATE == annotation->annotationId) {
+                    if (ANNOTATION_ID_TRIGGER_STATE_RESET == annotation->annotationId) {
                         resetState = annotation->value.intValue;
                     } else if (ANNOTATION_ID_DEFAULT_STATE == annotation->annotationId) {
                         defaultState = annotation->value.intValue;
@@ -74,7 +72,7 @@ static void write_annotations(FILE* out, int argIndex,
         }
         if (defaultState != -1 && resetState != -1) {
             const string& annotationConstant =
-                    ANNOTATION_ID_CONSTANTS.at(ANNOTATION_ID_RESET_STATE);
+                    ANNOTATION_ID_CONSTANTS.at(ANNOTATION_ID_TRIGGER_STATE_RESET);
             fprintf(out, "        if (arg%d == %d) {\n", argIndex, resetState);
             fprintf(out, "            %saddInt32Annotation(%s%s, %d);\n", methodPrefix.c_str(),
                     methodSuffix.c_str(), annotationConstant.c_str(), defaultState);

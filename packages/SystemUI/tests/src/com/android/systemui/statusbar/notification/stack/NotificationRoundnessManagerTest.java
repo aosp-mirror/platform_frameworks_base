@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
@@ -66,7 +67,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 mBypassController,
                 new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext));
         allowTestableLooperAsMainThread();
-        NotificationTestHelper testHelper = new NotificationTestHelper(getContext(), mDependency);
+        NotificationTestHelper testHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
         mFirst = testHelper.createRow();
         mFirst.setHeadsUpAnimatingAwayListener(animatingAway
                 -> mRoundnessManager.onHeadsupAnimatingAwayChanged(mFirst, animatingAway));
@@ -146,7 +150,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mFirst, mSecond),
                 createSection(null, null)
         });
-        NotificationTestHelper testHelper = new NotificationTestHelper(getContext(), mDependency);
+        NotificationTestHelper testHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
         ExpandableNotificationRow row = testHelper.createRow();
         NotificationEntry entry = mock(NotificationEntry.class);
         when(entry.getRow()).thenReturn(row);

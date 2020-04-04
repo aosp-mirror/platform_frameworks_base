@@ -21,15 +21,13 @@ import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.ITransientNotificationCallback;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.widget.Toast;
 import android.widget.ToastPresenter;
 
 import com.android.internal.R;
@@ -49,18 +47,14 @@ import javax.inject.Singleton;
 public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "ToastUI";
 
-    /**
-     * Values taken from {@link Toast}.
-     */
-    private static final long DURATION_SHORT = 4000;
-    private static final long DURATION_LONG = 7000;
-
     private final CommandQueue mCommandQueue;
     private final WindowManager mWindowManager;
     private final INotificationManager mNotificationManager;
     private final AccessibilityManager mAccessibilityManager;
-    private final ToastPresenter mPresenter;
-    private ToastEntry mCurrentToast;
+    private final int mGravity;
+    private final int mY;
+    @Nullable private ToastPresenter mPresenter;
+    @Nullable private ITransientNotificationCallback mCallback;
 
     @Inject
     public ToastUI(Context context, CommandQueue commandQueue) {
@@ -79,7 +73,9 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
         mWindowManager = windowManager;
         mNotificationManager = notificationManager;
         mAccessibilityManager = accessibilityManager;
-        mPresenter = new ToastPresenter(context, accessibilityManager);
+        Resources resources = mContext.getResources();
+        mGravity = resources.getInteger(R.integer.config_toastDefaultGravity);
+        mY = resources.getDimensionPixelSize(R.dimen.toast_y_offset);
     }
 
     @Override
@@ -91,33 +87,21 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
     @MainThread
     public void showToast(String packageName, IBinder token, CharSequence text,
             IBinder windowToken, int duration, @Nullable ITransientNotificationCallback callback) {
-        if (mCurrentToast != null) {
+        if (mPresenter != null) {
             hideCurrentToast();
         }
-        View view = mPresenter.getTextToastView(text);
-        LayoutParams params = getLayoutParams(packageName, windowToken, duration);
-        mCurrentToast = new ToastEntry(packageName, token, view, windowToken, callback);
-        try {
-            mWindowManager.addView(view, params);
-        } catch (WindowManager.BadTokenException e) {
-            Log.w(TAG, "Error while attempting to show toast from " + packageName, e);
-            return;
-        }
-        mPresenter.trySendAccessibilityEvent(view, packageName);
-        if (callback != null) {
-            try {
-                callback.onToastShown();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Error calling back " + packageName + " to notify onToastShow()", e);
-            }
-        }
+        View view = ToastPresenter.getTextToastView(mContext, text);
+        mCallback = callback;
+        mPresenter = new ToastPresenter(mContext, mWindowManager, mAccessibilityManager,
+                mNotificationManager, packageName);
+        mPresenter.show(view, token, windowToken, duration, mGravity, 0, mY, 0, 0, mCallback);
     }
 
     @Override
     @MainThread
     public void hideToast(String packageName, IBinder token) {
-        if (mCurrentToast == null || !Objects.equals(mCurrentToast.packageName, packageName)
-                || !Objects.equals(mCurrentToast.token, token)) {
+        if (mPresenter == null || !Objects.equals(mPresenter.getPackageName(), packageName)
+                || !Objects.equals(mPresenter.getToken(), token)) {
             Log.w(TAG, "Attempt to hide non-current toast from package " + packageName);
             return;
         }
@@ -126,51 +110,7 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
 
     @MainThread
     private void hideCurrentToast() {
-        if (mCurrentToast.view.getParent() != null) {
-            mWindowManager.removeViewImmediate(mCurrentToast.view);
-        }
-        String packageName = mCurrentToast.packageName;
-        try {
-            mNotificationManager.finishToken(packageName, mCurrentToast.windowToken);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error finishing toast window token from package " + packageName, e);
-        }
-        if (mCurrentToast.callback != null) {
-            try {
-                mCurrentToast.callback.onToastHidden();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Error calling back " + packageName + " to notify onToastHide()", e);
-            }
-        }
-        mCurrentToast = null;
-    }
-
-    private LayoutParams getLayoutParams(String packageName, IBinder windowToken, int duration) {
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        mPresenter.startLayoutParams(params, packageName);
-        int gravity = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_toastDefaultGravity);
-        int yOffset = mContext.getResources().getDimensionPixelSize(R.dimen.toast_y_offset);
-        mPresenter.adjustLayoutParams(params, windowToken, duration, gravity, 0, yOffset, 0, 0);
-        return params;
-    }
-
-    private static class ToastEntry {
-        public final String packageName;
-        public final IBinder token;
-        public final View view;
-        public final IBinder windowToken;
-
-        @Nullable
-        public final ITransientNotificationCallback callback;
-
-        private ToastEntry(String packageName, IBinder token, View view, IBinder windowToken,
-                @Nullable ITransientNotificationCallback callback) {
-            this.packageName = packageName;
-            this.token = token;
-            this.view = view;
-            this.windowToken = windowToken;
-            this.callback = callback;
-        }
+        mPresenter.hide(mCallback);
+        mPresenter = null;
     }
 }

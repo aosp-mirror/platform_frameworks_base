@@ -105,8 +105,11 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     @Test
     public void testSendRemoteInput_intentContainsResultsAndSource() throws Exception {
-        ExpandableNotificationRow row = new NotificationTestHelper(mContext, mDependency)
-                .createRow();
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
 
         setTestPendingIntent(view);
@@ -127,7 +130,11 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     private UserHandle getTargetInputMethodUser(UserHandle fromUser, UserHandle toUser)
             throws Exception {
-        ExpandableNotificationRow row = new NotificationTestHelper(mContext, mDependency).createRow(
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow(
                 DUMMY_MESSAGE_APP_PKG,
                 UserHandle.getUid(fromUser.getIdentifier(), DUMMY_MESSAGE_APP_ID),
                 toUser);
@@ -169,8 +176,11 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     @Test
     public void testNoCrashWithoutVisibilityListener() throws Exception {
-        ExpandableNotificationRow row = new NotificationTestHelper(mContext, mDependency)
-                .createRow();
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
 
         view.setOnVisibilityChangedListener(null);

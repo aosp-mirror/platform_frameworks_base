@@ -95,8 +95,8 @@ public class DynamicChildBindController {
 
     private void freeChildContent(NotificationEntry entry) {
         RowContentBindParams params = mStage.getStageParams(entry);
-        params.freeContentViews(FLAG_CONTENT_VIEW_CONTRACTED);
-        params.freeContentViews(FLAG_CONTENT_VIEW_EXPANDED);
+        params.markContentViewsFreeable(FLAG_CONTENT_VIEW_CONTRACTED);
+        params.markContentViewsFreeable(FLAG_CONTENT_VIEW_EXPANDED);
         mStage.requestRebind(entry, null);
     }
 

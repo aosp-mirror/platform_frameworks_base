@@ -118,6 +118,9 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             mRemoteViewCache.clearCache(entry);
         }
 
+        // Cancel any pending frees on any view we're trying to bind since we should be bound after.
+        cancelContentViewFrees(row, contentToBind);
+
         AsyncInflationTask task = new AsyncInflationTask(
                 mBgExecutor,
                 mInflateSynchronously,
@@ -198,41 +201,66 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     }
 
     /**
-     * Frees the content view associated with the inflation flag.  Will only succeed if the
-     * view is safe to remove.
+     * Frees the content view associated with the inflation flag as soon as the view is not showing.
      *
      * @param inflateFlag the flag corresponding to the content view which should be freed
      */
-    private void freeNotificationView(NotificationEntry entry, ExpandableNotificationRow row,
+    private void freeNotificationView(
+            NotificationEntry entry,
+            ExpandableNotificationRow row,
             @InflationFlag int inflateFlag) {
         switch (inflateFlag) {
             case FLAG_CONTENT_VIEW_CONTRACTED:
-                if (row.getPrivateLayout().isContentViewInactive(VISIBLE_TYPE_CONTRACTED)) {
+                row.getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_CONTRACTED, () -> {
                     row.getPrivateLayout().setContractedChild(null);
                     mRemoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED);
-                }
+                });
                 break;
             case FLAG_CONTENT_VIEW_EXPANDED:
-                if (row.getPrivateLayout().isContentViewInactive(VISIBLE_TYPE_EXPANDED)) {
+                row.getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_EXPANDED, () -> {
                     row.getPrivateLayout().setExpandedChild(null);
                     mRemoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED);
-                }
+                });
                 break;
             case FLAG_CONTENT_VIEW_HEADS_UP:
-                if (row.getPrivateLayout().isContentViewInactive(VISIBLE_TYPE_HEADSUP)) {
+                row.getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_HEADSUP, () -> {
                     row.getPrivateLayout().setHeadsUpChild(null);
                     mRemoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP);
                     row.getPrivateLayout().setHeadsUpInflatedSmartReplies(null);
-                }
+                });
                 break;
             case FLAG_CONTENT_VIEW_PUBLIC:
-                if (row.getPublicLayout().isContentViewInactive(VISIBLE_TYPE_CONTRACTED)) {
+                row.getPublicLayout().performWhenContentInactive(VISIBLE_TYPE_CONTRACTED, () -> {
                     row.getPublicLayout().setContractedChild(null);
                     mRemoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC);
-                }
+                });
                 break;
             default:
                 break;
+        }
+    }
+
+    /**
+     * Cancel any pending content view frees from {@link #freeNotificationView} for the provided
+     * content views.
+     *
+     * @param row top level notification row containing the content views
+     * @param contentViews content views to cancel pending frees on
+     */
+    private void cancelContentViewFrees(
+            ExpandableNotificationRow row,
+            @InflationFlag int contentViews) {
+        if ((contentViews & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
+            row.getPrivateLayout().removeContentInactiveRunnable(VISIBLE_TYPE_CONTRACTED);
+        }
+        if ((contentViews & FLAG_CONTENT_VIEW_EXPANDED) != 0) {
+            row.getPrivateLayout().removeContentInactiveRunnable(VISIBLE_TYPE_EXPANDED);
+        }
+        if ((contentViews & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
+            row.getPrivateLayout().removeContentInactiveRunnable(VISIBLE_TYPE_HEADSUP);
+        }
+        if ((contentViews & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
+            row.getPublicLayout().removeContentInactiveRunnable(VISIBLE_TYPE_CONTRACTED);
         }
     }
 

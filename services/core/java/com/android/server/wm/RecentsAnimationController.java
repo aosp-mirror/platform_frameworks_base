@@ -340,9 +340,11 @@ public class RecentsAnimationController implements DeathRecipient {
 
         // Make leashes for each of the visible/target tasks and add it to the recents animation to
         // be started
-        final ArrayList<Task> visibleTasks = mDisplayContent.getVisibleTasks();
-        final ActivityStack targetStack = mDisplayContent.getStack(WINDOWING_MODE_UNDEFINED,
-                targetActivityType);
+        // TODO(multi-display-area): Support Recents on multiple task display areas
+        final ArrayList<Task> visibleTasks = mDisplayContent.getDefaultTaskDisplayArea()
+                .getVisibleTasks();
+        final ActivityStack targetStack = mDisplayContent.getDefaultTaskDisplayArea()
+                .getStack(WINDOWING_MODE_UNDEFINED, targetActivityType);
         if (targetStack != null) {
             final PooledConsumer c = PooledLambda.obtainConsumer((t, outList) ->
 	            { if (!outList.contains(t)) outList.add(t); }, PooledLambda.__(Task.class),
@@ -385,7 +387,8 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         // Save the minimized home height
-        mMinimizedHomeBounds = mDisplayContent.getRootHomeTask().getBounds();
+        mMinimizedHomeBounds = mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask()
+                .getBounds();
 
         mService.mWindowPlacerLocked.performSurfacePlacement();
 

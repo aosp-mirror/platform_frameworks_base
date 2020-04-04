@@ -1369,16 +1369,26 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
         calculateDefaultMinimalSizeOfResizeableTasks();
 
-        final DisplayContent defaultDisplay = getDefaultDisplay();
-
-        defaultDisplay.mTaskContainers.getOrCreateStack(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_HOME, ON_TOP);
-        positionChildAt(POSITION_TOP, defaultDisplay, false /* includingParents */);
+        final TaskDisplayArea defaultTaskDisplayArea = getDefaultTaskDisplayArea();
+        defaultTaskDisplayArea.getOrCreateStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME,
+                ON_TOP);
+        positionChildAt(POSITION_TOP, defaultTaskDisplayArea.mDisplayContent,
+                false /* includingParents */);
     }
 
     // TODO(multi-display): Look at all callpoints to make sure they make sense in multi-display.
     DisplayContent getDefaultDisplay() {
         return mDefaultDisplay;
+    }
+
+    /**
+     * Get the default display area on the device dedicated to app windows. This one should be used
+     * only as a fallback location for activity launches when no target display area is specified,
+     * or for cases when multi-instance is not supported yet (like Split-screen, Freeform, PiP or
+     * Recents).
+     */
+    TaskDisplayArea getDefaultTaskDisplayArea() {
+        return mDefaultDisplay.getDefaultTaskDisplayArea();
     }
 
     /**
@@ -1436,12 +1446,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return displayContent;
     }
 
-    ActivityRecord getDefaultDisplayHomeActivity() {
-        return getDefaultDisplayHomeActivityForUser(mCurrentUser);
-    }
-
     ActivityRecord getDefaultDisplayHomeActivityForUser(int userId) {
-        return getDisplayContent(DEFAULT_DISPLAY).mTaskContainers.getHomeActivityForUser(userId);
+        return getDefaultTaskDisplayArea().getHomeActivityForUser(userId);
     }
 
     boolean startHomeOnAllDisplays(int userId, String reason) {
@@ -1972,8 +1978,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final int focusStackId = topFocusedStack != null
                 ? topFocusedStack.getRootTaskId() : INVALID_TASK_ID;
         // We dismiss the docked stack whenever we switch users.
-        if (getDefaultDisplay().mTaskContainers.isSplitScreenModeActivated()) {
-            getDefaultDisplay().mTaskContainers.onSplitScreenModeDismissed();
+        if (getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
+            getDefaultTaskDisplayArea().onSplitScreenModeDismissed();
         }
         // Also dismiss the pinned stack whenever we switch users. Removing the pinned stack will
         // also cause all tasks to be moved to the fullscreen stack at a position that is
@@ -1995,7 +2001,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final int restoreStackId = mUserStackInFront.get(userId);
         ActivityStack stack = getStack(restoreStackId);
         if (stack == null) {
-            stack = getDefaultDisplay().mTaskContainers.getOrCreateRootHomeTask();
+            stack = getDefaultTaskDisplayArea().getOrCreateRootHomeTask();
         }
         final boolean homeInFront = stack.isActivityTypeHome();
         if (stack.isOnHomeDisplay()) {
@@ -2018,7 +2024,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void updateUserStack(int userId, ActivityStack stack) {
         if (userId != mCurrentUser) {
             if (stack == null) {
-                stack = getDefaultDisplay().mTaskContainers.getOrCreateRootHomeTask();
+                stack = getDefaultTaskDisplayArea().getOrCreateRootHomeTask();
             }
 
             mUserStackInFront.put(userId, stack.getRootTaskId());
@@ -2061,7 +2067,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return;
         }
 
-        stack.reparent(displayContent.mDisplayContent, onTop);
+        stack.reparent(displayContent.getDefaultTaskDisplayArea(), onTop);
         // TODO(multi-display): resize stacks properly if moved from split-screen.
     }
 
@@ -2155,8 +2161,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Looking up task on preferred display first
         final DisplayContent preferredDisplay = getDisplayContent(preferredDisplayId);
         if (preferredDisplay != null) {
-            preferredDisplay.mTaskContainers.findTaskLocked(r, true /* isPreferredDisplay */,
-                    mTmpFindTaskResult);
+            preferredDisplay.getDefaultTaskDisplayArea().findTaskLocked(r,
+                    true /* isPreferredDisplay */, mTmpFindTaskResult);
             if (mTmpFindTaskResult.mIdealMatch) {
                 return mTmpFindTaskResult.mRecord;
             }
@@ -2168,7 +2174,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 continue;
             }
 
-            display.mTaskContainers.findTaskLocked(r, false /* isPreferredDisplay */,
+            display.getDefaultTaskDisplayArea().findTaskLocked(r, false /* isPreferredDisplay */,
                     mTmpFindTaskResult);
             if (mTmpFindTaskResult.mIdealMatch) {
                 return mTmpFindTaskResult.mRecord;
@@ -2788,8 +2794,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
             final DisplayContent display = getDisplayContentOrCreate(displayId);
             if (display != null) {
-                stack = display.mTaskContainers.getOrCreateStack(r, options, candidateTask,
-                        activityType, onTop);
+                // Falling back to default task container
+                final TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
+                stack = taskDisplayArea.getOrCreateStack(r, options, candidateTask, activityType,
+                        onTop);
                 if (stack != null) {
                     return stack;
                 }
@@ -2835,7 +2843,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (container == null
                 || !canLaunchOnDisplay(r, container.mDisplayContent.mDisplayId)) {
-            container = getDefaultDisplay().mTaskContainers;
+            container = getDefaultTaskDisplayArea();
             if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
                 windowingMode = container.resolveWindowingMode(r, options, candidateTask,
                         activityType);
@@ -2887,7 +2895,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // it to the target display.
             if (candidateTask.isRootTask()) {
                 final ActivityStack stack = candidateTask.getStack();
-                displayContent.moveStackToDisplay(stack, true /* onTop */);
+                stack.reparent(displayContent.getDefaultTaskDisplayArea(), true /* onTop */);
                 return stack;
             }
         }
@@ -2918,7 +2926,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final int activityType =
                     options != null && options.getLaunchActivityType() != ACTIVITY_TYPE_UNDEFINED
                             ? options.getLaunchActivityType() : r.getActivityType();
-            return displayContent.createStack(windowingMode, activityType, true /*onTop*/);
+            final TaskDisplayArea taskDisplayArea = displayContent.getDefaultTaskDisplayArea();
+            return taskDisplayArea.createStack(windowingMode, activityType, true /*onTop*/);
         }
 
         return null;
@@ -2989,7 +2998,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (preferredDisplayArea == null) {
             // Stack is currently detached because it is being removed. Use the previous display it
             // was on.
-            preferredDisplayArea = getDisplayContent(currentFocus.mPrevDisplayId).mTaskContainers;
+            preferredDisplayArea = getDisplayContent(currentFocus.mPrevDisplayId)
+                    .getDefaultTaskDisplayArea();
         }
         final ActivityStack preferredFocusableStack = preferredDisplayArea.getNextFocusableStack(
                 currentFocus, ignoreCurrent);
@@ -3010,38 +3020,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // We've already checked this one
                 continue;
             }
-            final ActivityStack nextFocusableStack = display.mTaskContainers
+            final ActivityStack nextFocusableStack = display.getDefaultTaskDisplayArea()
                     .getNextFocusableStack(currentFocus, ignoreCurrent);
             if (nextFocusableStack != null) {
                 return nextFocusableStack;
             }
         }
 
-        return null;
-    }
-
-    /**
-     * Get next valid stack for launching provided activity in the system. This will search across
-     * displays and stacks in last-focused order for a focusable and visible stack, except those
-     * that are on a currently focused display.
-     *
-     * @param r The activity that is being launched.
-     * @param currentFocus The display that previously had focus and thus needs to be ignored when
-     *                     searching for the next candidate.
-     * @return Next valid {@link ActivityStack}, null if not found.
-     */
-    ActivityStack getNextValidLaunchStack(@NonNull ActivityRecord r, int currentFocus) {
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final DisplayContent display = getChildAt(i);
-            if (display.mDisplayId == currentFocus) {
-                continue;
-            }
-            final ActivityStack stack = getValidLaunchStackOnDisplay(display.mDisplayId, r,
-                    null /* options */, null /* launchParams */);
-            if (stack != null) {
-                return stack;
-            }
-        }
         return null;
     }
 

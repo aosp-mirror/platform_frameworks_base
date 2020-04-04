@@ -169,7 +169,7 @@ public class AppTransitionTests extends WindowTestsBase {
         assertTrue(dc1.mOpeningApps.size() > 0);
 
         // Move stack to another display.
-        stack1.reparent(dc2, true);
+        stack1.reparent(dc2.getDefaultTaskDisplayArea(), true);
 
         // Verify if token are cleared from both pending transition list in former display.
         assertFalse(dc1.mOpeningApps.contains(activity1));

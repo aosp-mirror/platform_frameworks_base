@@ -286,7 +286,8 @@ class PinnedStackController {
             }
             try {
                 final Rect animatingBounds = new Rect();
-                final ActivityStack pinnedStack = mDisplayContent.getRootPinnedTask();
+                final ActivityStack pinnedStack = mDisplayContent.getDefaultTaskDisplayArea()
+                        .getRootPinnedTask();
                 if (pinnedStack != null) {
                     pinnedStack.getAnimationOrCurrentBounds(animatingBounds);
                 }

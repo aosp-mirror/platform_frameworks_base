@@ -176,8 +176,12 @@ public class TestHarnessModeService extends SystemService {
     private void setUpAdbFiles(PersistentData persistentData) {
         AdbManagerInternal adbManager = LocalServices.getService(AdbManagerInternal.class);
 
-        writeBytesToFile(persistentData.mAdbKeys, adbManager.getAdbKeysFile().toPath());
-        writeBytesToFile(persistentData.mAdbTempKeys, adbManager.getAdbTempKeysFile().toPath());
+        if (adbManager.getAdbKeysFile() != null) {
+            writeBytesToFile(persistentData.mAdbKeys, adbManager.getAdbKeysFile().toPath());
+        }
+        if (adbManager.getAdbTempKeysFile() != null) {
+            writeBytesToFile(persistentData.mAdbTempKeys, adbManager.getAdbTempKeysFile().toPath());
+        }
     }
 
     private void configureUser() {
@@ -310,12 +314,6 @@ public class TestHarnessModeService extends SystemService {
             AdbManagerInternal adbManager = LocalServices.getService(AdbManagerInternal.class);
             File adbKeys = adbManager.getAdbKeysFile();
             File adbTempKeys = adbManager.getAdbTempKeysFile();
-            if (adbKeys == null && adbTempKeys == null) {
-                // This should only be accessible on eng builds that haven't yet set up ADB keys
-                getErrPrintWriter()
-                    .println("No ADB keys stored; not enabling test harness mode");
-                return 1;
-            }
 
             try {
                 byte[] adbKeysBytes = getBytesFromFile(adbKeys);
