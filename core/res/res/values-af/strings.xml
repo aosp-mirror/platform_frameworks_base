@@ -2044,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Gesprek"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Groepsgesprek"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Persoonlik"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Werk"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Persoonlike aansig"</string>

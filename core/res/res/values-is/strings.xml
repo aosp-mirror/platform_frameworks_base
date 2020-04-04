@@ -1623,7 +1623,7 @@
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Kveikt er á aðgengiseiginleikum þegar báðum hljóðstyrkstökkunum er haldið inni í nokkrar sekúndur. Þetta getur breytt því hvernig tækið virkar.\n\nNúverandi eiginleikar:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nÞú getur breytt völdum eiginleikum í Stillingar &gt; Aðgengi."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Viltu kveikja á TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ef báðum hljóðstyrkstökkunum er haldið niðri í nokkrar sekúndur er kveikt á TalkBack, sem er skjálesari sem gagnast blindum eða sjónskertum einstaklingum. TalkBack breytir því algjörlega hvernig tækið virkar.\n\nÞú getur breytt þessari flýtileið í annan eiginleika í Stillingar &gt; Aðgengi."</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ef báðum hljóðstyrkstökkunum er haldið niðri í nokkrar sekúndur er kveikt á skjálesaranum TalkBack sem gagnast blindum eða sjónskertum. TalkBack breytir því algjörlega hvernig tækið virkar.\n\nÞú getur breytt þessari flýtileið í annan eiginleika í Stillingar &gt; Aðgengi."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Viltu kveikja á <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ef báðum hljóðstyrkstökkunum er haldið inni í nokkrar sekúndur er kveikt á aðgengiseiginleikanum <xliff:g id="SERVICE">%1$s</xliff:g>. Þetta getur breytt því hvernig tækið virkar.\n\nÞú getur breytt þessari flýtileið í annan eiginleika í Stillingar &gt; Aðgengi."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Kveikja"</string>
@@ -2026,7 +2026,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> skrá</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> skrá</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Engir einstaklingar sem mælt er með að deila með"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Engar tillögur um einstaklinga til að deila með"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Forritalisti"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Þetta forrit hefur ekki fengið heimild fyrir upptöku en gæti tekið upp hljóð í gegnum þetta USB-tæki."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Heim"</string>
@@ -2044,6 +2044,8 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Samtal"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Hópsamtal"</string>
+    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Persónulegt"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Vinna"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Persónulegt yfirlit"</string>
@@ -2062,20 +2064,20 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Engin vinnuforrit geta opnað þetta efni"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Engin forrit til einkanota styðja þetta efni"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Engin forrit til einkanota geta opnað þetta efni"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-númer fyrir opnun SIM netkerfis"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-númer fyrir opnun SIM netkerfishlutmengis"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-númer til að opna SIM fyrirtækis"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"PIN-númer fyrir opnun SIM þjónustuaðila"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-númer fyrir opnun á SIM-korti netkerfis"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-númer fyrir opnun á SIM-korti netkerfishlutmengis"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-númer fyrir opnun á SIM-korti fyrirtækis"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"PIN-númer fyrir opnun þjónustuaðila SIM"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"PIN-númer fyrir opnun SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"Slá inn PUK-númer"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"Slá inn PUK-númer"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"Slá inn PUK-númer"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"Slá inn PUK-númer"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"Slá inn PUK-númer"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"PIN-númer fyrir opnun RUIM netkerfis 1"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"PIN-númer fyrir opnun RUIM netkerfis 2"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"PIN-númer fyrir opnun á RUIM-korti netkerfis 1"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"PIN-númer fyrir opnun á RUIM-korti netkerfis 2"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"PIN-númer fyrir opnun RUIM hrpd"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"PIN-númer fyrir opnun RUIM fyrirtækis"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"PIN-númer fyrir opnun á RUIM-korti fyrirtækis"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"PIN-númer fyrir opnun þjónustuaðila RUIM"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"PIN-númer fyrir opnun RUIM"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"Slá inn PUK-númer"</string>
@@ -2089,82 +2091,82 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"PIN-númer fyrir opnun ICCID"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"PIN-númer fyrir opnun IMPI"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"PIN-númer fyrir opnun þjónustuaðila netkerfishlutmengis"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"Biður um opnun SIM netkerfis…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"Biður um opnun SIM netkerfishlutmengis…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"Biður um opnun á SIM-korti netkerfis…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"Biður um opnun á SIM-korti netkerfishlutmengis…"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"Biður um opnun þjónustuaðila SIM…"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"Biður um opnun SIM fyrirtækis…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"Biður um PUK-opnun…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"Biður um PUK-opnun…"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"Biður um PUK-opnun…"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Biður um PUK-opnun…"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Biður um PUK-opnun…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"Biður um opnun á SIM-korti fyrirtækis…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"Biður um opnun með PUK-númeri…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"Biður um opnun með PUK-númeri…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"Biður um opnun með PUK-númeri…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Biður um opnun með PUK-númeri…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Biður um opnun með PUK-númeri…"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"Biður um opnun SIM…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Biður um opnun RUIM netkerfis 1…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Biður um opnun RUIM netkerfis 2…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Biður um opnun á RUIM-korti netkerfis 1…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Biður um opnun á RUIM-korti netkerfis 2…"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"Biður um opnun RUIM hrpd…"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"Biður um opnun þjónustuaðila RUIM…"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"Biður um opnun RUIM fyrirtækis…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"Biður um opnun á RUIM-korti fyrirtækis…"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"Biður um opnun SPN…"</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"Biður um opnun SP Equivalent Home PLMN…"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"Biður um opnun ICCID…"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"Biður um opnun IMPI…"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"Biður um opnun þjónustuaðila netkerfishlutmengis…"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"Biður um opnun RUIM…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"Biður um PUK-opnun…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"Biður um PUK-opnun…"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"Biður um PUK-opnun…"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"Biður um PUK-opnun…"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"Biður um PUK-opnun…"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"Biður um PUK-opnun…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"Beiðni um opnun SIM netkerfis tókst ekki."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"Beiðni um opnun SIM netkerfishlutmengis tókst ekki."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"Beiðni um opnun þjónustuaðila SIM tókst ekki."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"Beiðni um opnun SIM fyrirtækis tókst ekki."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"Beiðni um opnun SIM tókst ekki."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"Beiðni um opnun RUIM netkerfis 1 tókst ekki."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"Beiðni um opnun RUIM netkerfis 2 tókst ekki."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"Biður um opnun með PUK-númeri…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"Biður um opnun með PUK-númeri…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"Biður um opnun með PUK-númeri…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"Biður um opnun með PUK-númeri…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"Biður um opnun með PUK-númeri…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"Biður um opnun með PUK-númeri…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"Beiðni um opnun á SIM-korti netkerfis mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"Beiðni um opnun á SIM-korti netkerfishlutmengis mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"Beiðni um opnun þjónustuaðila SIM mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"Beiðni um opnun á SIM-korti fyrirtækis mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"Beiðni um opnun SIM mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"Beiðni um opnun á RUIM-korti netkerfis 1 mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"Beiðni um opnun á RUIM-korti netkerfis 2 mistókst."</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"Beiðni um opnun RUIM Hrpd tókst ekki."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"Beiðni um opnun RUIM fyrirtækis tókst ekki."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"Beiðni um opnun þjónustuaðila RUIM tókst ekki."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"Beiðni um opnun á RUIM-korti fyrirtækis mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"Beiðni um opnun þjónustuaðila RUIM mistókst."</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"Beiðni um opnun RUIM tókst ekki."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK-opnun mistókst."</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"Beiðni um opnun SPN tókst ekki."</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"Beiðni um opnun SP Equivalent Home PLMN tókst ekki."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"Opnun með PUK-númeri mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"Beiðni um opnun SPN mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"Beiðni um opnun SP Equivalent Home PLMN mistókst."</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"Beiðni um opnun ICCID tókst ekki."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"Beiðni um opnun IMPI tókst ekki."</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"Beiðni um opnun þjónustuaðila netkerfishlutmengis tókst."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"Opnun SIM netkerfis tókst."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"Opnun SIM netkerfishlutmengis tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"Beiðni um opnun þjónustuaðila netkerfishlutmengis mistókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"Opnun á SIM-korti netkerfis tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"Opnun á SIM-korti netkerfishlutmengis tókst."</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"Opnun þjónustuaðila SIM tókst."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"Opnun SIM fyrirtækis tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"Opnun á SIM-korti fyrirtækis tókst."</string>
     <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"Opnun SIM tókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"Opnun RUIM netkerfis 1 tókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"Opnun RUIM netkerfis 2 tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"Opnun á RUIM-korti netkerfis 1 tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"Opnun á RUIM-korti netkerfis 2 tókst."</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"Opnun RUIM Hrpd tókst."</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"Beiðni um opnun þjónustuaðila RUIM tókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"Opnun RUIM fyrirtækis tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"Opnun á RUIM-korti fyrirtækis tókst."</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"Opnun RUIM tókst."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK-opnun tókst."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK-opnun tókst."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK-opnun tókst."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK-opnun tókst."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK-opnun tókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK-opnun tókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK-opnun tókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK-opnun tókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK-opnun tókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK-opnun tókst."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK-opnun tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"Opnun með PUK-númeri tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"Opnun með PUK-númeri tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"Opnun með PUK-númeri tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"Opnun með PUK-númeri tókst."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"Opnun með PUK-númeri tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"Opnun með PUK-númeri tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"Opnun með PUK-númeri tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"Opnun með PUK-númeri tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"Opnun með PUK-númeri tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"Opnun með PUK-númeri tókst."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"Opnun með PUK-númeri tókst."</string>
     <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"Opnun SPN tókst."</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"Opnun SP Equivalent Home PLMN tókst."</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"Opnun ICCID tókst."</string>

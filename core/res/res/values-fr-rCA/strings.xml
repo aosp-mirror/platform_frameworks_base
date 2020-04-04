@@ -2044,6 +2044,8 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g> :"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversation"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversation de groupe"</string>
+    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personnel"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Bureau"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Affichage personnel"</string>

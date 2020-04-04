@@ -1351,8 +1351,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"対応していない<xliff:g id="NAME">%s</xliff:g>です"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。タップして、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。サポートされるフォーマットで設定するには選択してください。"</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (7657357085538772913) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>が不適切に取り外されました"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"コンテンツの喪失を防ぐため、メディアを取り出してから取り外してください"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g>の取り外し"</string>
@@ -2045,6 +2044,8 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"会話"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"グループの会話"</string>
+    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"個人用"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"仕事用"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"個人用ビュー"</string>
