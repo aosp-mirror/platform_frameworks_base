@@ -49,10 +49,14 @@ using namespace std;
  */
 void mapAndMergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const sp<UidMap>& uidMap,
                                       int tagId, const vector<int>& additiveFieldsVec) {
-    if ((android::util::AtomsInfo::kAtomsWithAttributionChain.find(tagId) ==
-         android::util::AtomsInfo::kAtomsWithAttributionChain.end()) &&
-        (android::util::AtomsInfo::kAtomsWithUidField.find(tagId) ==
-         android::util::AtomsInfo::kAtomsWithUidField.end())) {
+    bool hasAttributionChain = (android::util::AtomsInfo::kAtomsWithAttributionChain.find(tagId) !=
+                                android::util::AtomsInfo::kAtomsWithAttributionChain.end());
+    // To check if any LogEvent has a uid field, we can just check the first
+    // LogEvent because all atoms with this tagId should have the uid
+    // annotation.
+    bool hasUidField = (data[0]->getUidFieldIndex() != -1);
+
+    if (!hasAttributionChain && !hasUidField) {
         VLOG("No uid or attribution chain to merge, atom %d", tagId);
         return;
     }
@@ -75,19 +79,13 @@ void mapAndMergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const 
                 }
             }
         } else {
-            auto it = android::util::AtomsInfo::kAtomsWithUidField.find(tagId);
-            if (it != android::util::AtomsInfo::kAtomsWithUidField.end()) {
-                int uidField = it->second;  // uidField is the field number in proto,
-                // starting from 1
-                if (uidField > 0 && (int)event->getValues().size() >= uidField &&
-                    (event->getValues())[uidField - 1].mValue.getType() == INT) {
-                    Value& value = (*event->getMutableValues())[uidField - 1].mValue;
-                    const int hostUid = uidMap->getHostUidOrSelf(value.int_value);
-                    value.setInt(hostUid);
-                } else {
-                    ALOGE("Malformed log, uid not found. %s", event->ToString().c_str());
-                    return;
-                }
+            int uidFieldIndex = event->getUidFieldIndex();
+            if (uidFieldIndex != -1) {
+                Value& value = (*event->getMutableValues())[uidFieldIndex].mValue;
+                const int hostUid = uidMap->getHostUidOrSelf(value.int_value);
+                value.setInt(hostUid);
+            } else {
+                ALOGE("Malformed log, uid not found. %s", event->ToString().c_str());
             }
         }
     }
