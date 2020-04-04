@@ -136,6 +136,47 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Seek Bar -->
+        <SeekBar
+            android:id="@+id/media_progress_bar"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="3dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp"
+            android:layout_marginBottom="-24dp"
+            android:layout_marginTop="-24dp"
+            android:splitTrack="false"
+        />
+
+        <FrameLayout
+            android:id="@+id/notification_media_progress_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            >
+            <!-- width is set to "match_parent" to avoid extra layout calls -->
+            <TextView
+                android:id="@+id/media_elapsed_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:fontFamily="@*android:string/config_bodyFontFamily"
+                android:textSize="14sp"
+                android:gravity="left"
+            />
+            <TextView
+                android:id="@+id/media_total_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@*android:string/config_bodyFontFamily"
+                android:layout_alignParentRight="true"
+                android:textSize="14sp"
+                android:gravity="right"
+            />
+        </FrameLayout>
+
         <!-- Controls -->
         <LinearLayout
             android:id="@+id/media_actions"
