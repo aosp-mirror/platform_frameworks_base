@@ -81,7 +81,6 @@ java_library {
     libs: [
         "framework-annotations-lib",
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
-        "framework-telephony-stubs",
     ],
     srcs: [
         ":framework-wifi-updatable-sources",
