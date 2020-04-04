@@ -860,6 +860,8 @@ public class DisplayRotationTests {
             mMockDisplayContent.isDefaultDisplay = mIsDefaultDisplay;
             when(mMockDisplayContent.calculateDisplayCutoutForRotation(anyInt()))
                     .thenReturn(WmDisplayCutout.NO_CUTOUT);
+            when(mMockDisplayContent.getDefaultTaskDisplayArea())
+                    .thenReturn(mock(TaskDisplayArea.class));
 
             mMockDisplayPolicy = mock(DisplayPolicy.class);
 
