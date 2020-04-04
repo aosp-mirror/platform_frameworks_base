@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -118,6 +119,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private INotificationManager mINotificationManager;
     @Mock private LauncherApps mLauncherApps;
     @Mock private ShortcutManager mShortcutManager;
+    @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
 
     @Before
     public void setUp() {
@@ -465,7 +467,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     }
 
     private NotificationMenuRowPlugin.MenuItem createTestMenuItem(ExpandableNotificationRow row) {
-        NotificationMenuRowPlugin menuRow = new NotificationMenuRow(mContext);
+        NotificationMenuRowPlugin menuRow =
+                new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
         menuRow.createMenu(row, row.getEntry().getSbn());
 
         NotificationMenuRowPlugin.MenuItem menuItem = menuRow.getLongpressMenuItem(mContext);

@@ -227,7 +227,11 @@ message DurationMetric {
 
   optional int64 condition = 3;
 
+  repeated int64 slice_by_state = 9;
+
   repeated MetricConditionLink links = 4;
+
+  repeated MetricStateLink state_link = 10;
 
   enum AggregationType {
     SUM = 1;
@@ -238,9 +242,9 @@ message DurationMetric {
 
   optional FieldMatcher dimensions_in_what = 6;
 
-  optional FieldMatcher dimensions_in_condition = 8 [deprecated = true];
-
   optional TimeUnit bucket = 7;
+
+  optional FieldMatcher dimensions_in_condition = 8 [deprecated = true];
 }
 
 message GaugeMetric {

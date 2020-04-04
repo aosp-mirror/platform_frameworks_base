@@ -351,9 +351,6 @@ public class BugreportProgressService extends Service {
         @Override
         public void onProgress(float progress) {
             synchronized (mLock) {
-                if (progress == 0) {
-                    trackInfoWithIdLocked();
-                }
                 checkProgressUpdatedLocked(mInfo, (int) progress);
             }
         }
@@ -365,7 +362,6 @@ public class BugreportProgressService extends Service {
         @Override
         public void onError(@BugreportErrorCode int errorCode) {
             synchronized (mLock) {
-                trackInfoWithIdLocked();
                 stopProgressLocked(mInfo.id);
             }
             Log.e(TAG, "Bugreport API callback onError() errorCode = " + errorCode);
@@ -382,10 +378,10 @@ public class BugreportProgressService extends Service {
         }
 
         /**
-         * Reads bugreport id and links it to the bugreport info to track the bugreport's
-         * progress/completion/error. id is incremented in dumpstate code. This function is called
-         * when dumpstate calls one of the callback functions (onProgress, onFinished, onError)
-         * after the id has been incremented.
+         * Reads bugreport id and links it to the bugreport info to track a bugreport that is in
+         * process. id is incremented in the dumpstate code.
+         * We do not track a bugreport if there is already a bugreport with the same id being
+         * tracked.
          */
         @GuardedBy("mLock")
         private void trackInfoWithIdLocked() {
@@ -408,7 +404,6 @@ public class BugreportProgressService extends Service {
                 sendRemoteBugreportFinishedBroadcast(mContext, bugreportFilePath,
                         mInfo.bugreportFile);
             } else {
-                trackInfoWithIdLocked();
                 cleanupOldFiles(MIN_KEEP_COUNT, MIN_KEEP_AGE, mBugreportsDir);
                 final Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
                 intent.putExtra(EXTRA_BUGREPORT, bugreportFilePath);
@@ -638,8 +633,11 @@ public class BugreportProgressService extends Service {
 
         BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl(info);
         try {
-            mBugreportManager.startBugreport(bugreportFd, screenshotFd,
-                    new BugreportParams(bugreportType), executor, bugreportCallback);
+            synchronized (mLock) {
+                mBugreportManager.startBugreport(bugreportFd, screenshotFd,
+                        new BugreportParams(bugreportType), executor, bugreportCallback);
+                bugreportCallback.trackInfoWithIdLocked();
+            }
         } catch (RuntimeException e) {
             Log.i(TAG, "Error in generating bugreports: ", e);
             // The binder call didn't go through successfully, so need to close the fds.
@@ -756,7 +754,7 @@ public class BugreportProgressService extends Service {
                 != (info.lastProgress.intValue() / LOG_PROGRESS_STEP))) {
             Log.d(TAG, "Progress #" + info.id + ": " + percentageText);
         }
-        info.lastProgress = new AtomicInteger(progress);
+        info.lastProgress.set(progress);
 
         sendForegroundabledNotification(info.id, builder.build());
     }
@@ -1025,7 +1023,7 @@ public class BugreportProgressService extends Service {
         }
         Log.d(TAG, "Bugreport finished with title: " + info.getTitle()
                 + " and shareDescription: " + info.shareDescription);
-        info.finished = new AtomicBoolean(true);
+        info.finished.set(true);
 
         synchronized (mLock) {
             // Stop running on foreground, otherwise share notification cannot be dismissed.
@@ -1809,18 +1807,18 @@ public class BugreportProgressService extends Service {
          * Current value of progress (in percentage) of the bugreport generation as
          * displayed by the UI.
          */
-        AtomicInteger progress = new AtomicInteger(0);
+        final AtomicInteger progress = new AtomicInteger(0);
 
         /**
          * Last value of progress (in percentage) of the bugreport generation for which
          * system notification was updated.
          */
-        AtomicInteger lastProgress = new AtomicInteger(0);
+        final AtomicInteger lastProgress = new AtomicInteger(0);
 
         /**
          * Time of the last progress update.
          */
-        AtomicLong lastUpdate = new AtomicLong(System.currentTimeMillis());
+        final AtomicLong lastUpdate = new AtomicLong(System.currentTimeMillis());
 
         /**
          * Time of the last progress update when Parcel was created.
@@ -1840,7 +1838,7 @@ public class BugreportProgressService extends Service {
         /**
          * Whether dumpstate sent an intent informing it has finished.
          */
-        AtomicBoolean finished = new AtomicBoolean(false);
+        final AtomicBoolean finished = new AtomicBoolean(false);
 
         /**
          * Whether the details entries have been added to the bugreport yet.
@@ -2075,8 +2073,8 @@ public class BugreportProgressService extends Service {
             initialName = in.readString();
             title = in.readString();
             description = in.readString();
-            progress = new AtomicInteger(in.readInt());
-            lastUpdate = new AtomicLong(in.readLong());
+            progress.set(in.readInt());
+            lastUpdate.set(in.readLong());
             formattedLastUpdate = in.readString();
             bugreportFile = readFile(in);
 
@@ -2085,7 +2083,7 @@ public class BugreportProgressService extends Service {
                   screenshotFiles.add(readFile(in));
             }
 
-            finished = new AtomicBoolean(in.readInt() == 1);
+            finished.set(in.readInt() == 1);
             screenshotCounter = in.readInt();
             shareDescription = in.readString();
             shareTitle = in.readString();
@@ -2157,8 +2155,8 @@ public class BugreportProgressService extends Service {
                         + ") from " + info.progress.intValue() + " to " + progress);
             }
         }
-        info.progress = new AtomicInteger(progress);
-        info.lastUpdate = new AtomicLong(System.currentTimeMillis());
+        info.progress.set(progress);
+        info.lastUpdate.set(System.currentTimeMillis());
 
         updateProgress(info);
     }
