@@ -59,4 +59,8 @@ std::unique_ptr<IncFsWrapper> RealServiceManager::getIncFs() {
     return std::make_unique<RealIncFs>();
 }
 
+std::unique_ptr<AppOpsManagerWrapper> RealServiceManager::getAppOpsManager() {
+    return std::make_unique<RealAppOpsManager>();
+}
+
 } // namespace android::os::incremental
