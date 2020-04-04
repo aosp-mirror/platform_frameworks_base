@@ -220,24 +220,32 @@ public:
     }
 };
 
+class MockAppOpsManager : public AppOpsManagerWrapper {
+    MOCK_METHOD3(startWatchingMode, void(int32_t, const String16&, const sp<IAppOpsCallback>&));
+};
+
 class MockServiceManager : public ServiceManagerWrapper {
 public:
     MockServiceManager(std::unique_ptr<MockVoldService> vold,
                        std::unique_ptr<MockDataLoaderManager> manager,
-                       std::unique_ptr<MockIncFs> incfs)
+                       std::unique_ptr<MockIncFs> incfs,
+                       std::unique_ptr<MockAppOpsManager> appOpsManager)
           : mVold(std::move(vold)),
             mDataLoaderManager(std::move(manager)),
-            mIncFs(std::move(incfs)) {}
+            mIncFs(std::move(incfs)),
+            mAppOpsManager(std::move(appOpsManager)) {}
     std::unique_ptr<VoldServiceWrapper> getVoldService() final { return std::move(mVold); }
     std::unique_ptr<DataLoaderManagerWrapper> getDataLoaderManager() final {
         return std::move(mDataLoaderManager);
     }
     std::unique_ptr<IncFsWrapper> getIncFs() final { return std::move(mIncFs); }
+    std::unique_ptr<AppOpsManagerWrapper> getAppOpsManager() final { return std::move(mAppOpsManager); }
 
 private:
     std::unique_ptr<MockVoldService> mVold;
     std::unique_ptr<MockDataLoaderManager> mDataLoaderManager;
     std::unique_ptr<MockIncFs> mIncFs;
+    std::unique_ptr<MockAppOpsManager> mAppOpsManager;
 };
 
 // --- IncrementalServiceTest ---
@@ -251,11 +259,13 @@ public:
         mDataLoaderManager = dataloaderManager.get();
         auto incFs = std::make_unique<NiceMock<MockIncFs>>();
         mIncFs = incFs.get();
+        auto appOps = std::make_unique<NiceMock<MockAppOpsManager>>();
+        mAppOpsManager = appOps.get();
         mIncrementalService =
                 std::make_unique<IncrementalService>(MockServiceManager(std::move(vold),
-                                                                        std::move(
-                                                                                dataloaderManager),
-                                                                        std::move(incFs)),
+                                                                        std::move(dataloaderManager),
+                                                                        std::move(incFs),
+                                                                        std::move(appOps)),
                                                      mRootDir.path);
         mDataLoaderParcel.packageName = "com.test";
         mDataLoaderParcel.arguments = "uri";
@@ -287,6 +297,7 @@ protected:
     NiceMock<MockVoldService>* mVold;
     NiceMock<MockIncFs>* mIncFs;
     NiceMock<MockDataLoaderManager>* mDataLoaderManager;
+    NiceMock<MockAppOpsManager>* mAppOpsManager;
     std::unique_ptr<IncrementalService> mIncrementalService;
     TemporaryDir mRootDir;
     DataLoaderParamsParcel mDataLoaderParcel;
