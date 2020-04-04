@@ -240,7 +240,7 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"Quvvat"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Qayta ishga tushirish"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Favqulodda chaqiruv"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Nosozlik haqida ma’lumot berish"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Xatoliklar hisoboti"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Seansni yakunlash"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Skrinshot"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Xatoliklar hisoboti"</string>
@@ -1623,7 +1623,7 @@
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Maxsus imkoniyatlarni yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nJoriy funksiyalar:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nTanlangan funksiyalarni Sozlamalar ichidagi Maxsus imkoniyatlar ustiga bosib oʻzgartirishingiz mumkin."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack yoqilsinmi?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"TalkBack funksiyasini yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. U ekrandan oʻqish dasturi hisoblanib, koʻzi xira koʻradigan va koʻzi ojiz insonlar uchun juda foydali. TalkBack funksiyasi qulringizning ishlashini butunlay oʻzgartirib yuborishi mumkin.\n\nBu tezkor tugmalarni boshqa funksiyaga Sozlamalar ichidagi Maxsus imkoniyatlar orqali tayinlash mumkin."</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"TalkBack funksiyasini yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. U ekrandan oʻqish dasturi hisoblanib, koʻzi xira koʻradigan va koʻzi ojiz insonlar uchun juda foydali. TalkBack funksiyasi qurilmangiz ishlashini butunlay oʻzgartirib yuborishi mumkin.\n\nBu tezkor tugmalarni boshqa funksiyaga Sozlamalar ichidagi Maxsus imkoniyatlar orqali tayinlash mumkin."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> yoqilsinmi?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> funksiyasini yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nBu tezkor tugmalarni boshqa funksiyaga Sozlamalar ichidagi Maxsus imkoniyatlar orqali tayinlash mumkin."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Yoqilsin"</string>
@@ -1653,7 +1653,7 @@
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Maxsus imkoniyatlar tugmasi bosilganda ishga tushadigan funksiyani tanlang:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Maxsus imkoniyatlar ishorasi bilan ishga tushadigan funksiyani tanlang (ikkita barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Maxsus imkoniyatlar ishorasi bilan ishga tushadigan funksiyani tanlang (uchta barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Funksiyalarni almashtirihs uchun maxsus imkoniyatlar tugmasini bosib turing."</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Funksiyalarni almashtirish uchun maxsus imkoniyatlar tugmasini bosib turing."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Funksiyalarni almashtirish uchun ikkita barmoq bilan tepaga suring va bosib turing."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Funksiyalarni almashtirish uchun uchta barmoq bilan tepaga suring va bosib turing."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Kattalashtirish"</string>
@@ -2026,7 +2026,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ta fayl</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ta fayl</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ulashish uchun hech qanday odam tavsiya qilinmagan"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ulashish uchun hech kim tavsiya qilinmagan"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Ilovalar roʻyxati"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Bu ilovaga yozib olish ruxsati berilmagan, lekin shu USB orqali ovozlarni yozib olishi mumkin."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Bosh sahifa"</string>
@@ -2044,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Suhbat"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Guruh suhbati"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Shaxsiy"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Ish"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Shaxsiy rejim"</string>
@@ -2072,8 +2073,8 @@
     <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"PUK kodni kiriting"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"PUK kodni kiriting"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"PUK kodni kiriting"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIM kartalaridagi tarmoq1 qulfini ochish uchun PIN kod"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIM kartalaridagi tarmoq2 qulfini ochish uchun PIN kod"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIM kartalaridagi network1 qulfini ochish uchun PIN kod"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIM kartalaridagi network2 qulfini ochish uchun PIN kod"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"RUIM HRPD kartalari qulfini ochish uchun PIN kod"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"Korporativ RUIM kartalar qulfini ochish uchun PIN kod"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"RUIM kartalari aloqa operatori qulfini ochish uchun PIN kod"</string>
@@ -2085,7 +2086,7 @@
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"PUK kodni kiriting"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"PUK kodni kiriting"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPN qulfini ochish uchun PIN kod"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"PLMN operatorining muqobil uy tarmoqlarini qulfini ochish uchun PIN kod"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"PLMN operatorining muqobil uy tarmoqlari qulfini ochish uchun PIN kod"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCID qulfini ochish uchun PIN kod"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPI qulfini ochish uchun PIN kod"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"SIM karta tarmoq qismi aloqa operatorini qulfdan chiqarish uchun PIN kod"</string>
@@ -2099,13 +2100,13 @@
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"PUK kod bilan qulfni ochish soʻralmoqda…"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"PUK kod bilan qulfni ochish soʻralmoqda…"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"SIM karta qulfini ochish soʻralmoqda…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"RUIM kartalaridagi tarmoq1 qulfini ochish soʻralmoqda…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"RUIM kartalaridagi tarmoq2 qulfini ochish soʻralmoqda…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"RUIM kartalaridagi network1 qulfini ochish soʻralmoqda…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"RUIM kartalaridagi network2 qulfini ochish soʻralmoqda…"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"RUIM HRPD kartalari qulfini ochish soʻralmoqda…"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"RUIM kartalari aloqa operatori qulfini ochish soʻralmoqda…"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"Korporativ RUIM kartalari qulfini ochish soʻralmoqda…"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"SPN qulfini ochish soʻralmoqda…"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"PLMN operatorining muqobil uy tarmoqlarini qulfini ochish soʻralmoqda…"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"PLMN operatorining muqobil uy tarmoqlari qulfini ochish soʻralmoqda…"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"ICCID qulfini ochish soʻralmoqda…"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"IMPI qulfini ochish soʻralmoqda…"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"Aloqa operatori tarmoq qismini qulfdan chiqarish soʻralmoqda…"</string>
@@ -2121,8 +2122,8 @@
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"SIM karta tegishli aloqa operatori qulfini ochish soʻrovi yuborilmadi."</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"Korporativ SIM kartalar qulfini ochish soʻrovi yuborilmadi."</string>
     <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"SIM karta qulfini ochish soʻrovi yuborilmadi."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"RUIM kartalaridagi tarmoq1 qulfini ochish soʻrovi yuborilmadi."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"RUIM kartalaridagi tarmoq2 qulfini ochish soʻrovi yuborilmadi."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"RUIM kartalaridagi network1 qulfini ochish soʻrovi yuborilmadi."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"RUIM kartalaridagi network2 qulfini ochish soʻrovi yuborilmadi."</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"RUIM HRPD kartalari qulfini ochish soʻrovi yuborilmadi."</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"Korporativ RUIM kartalar qulfini ochish soʻrovi yuborilmadi."</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"RUIM kartalari aloqa operatori qulfini ochish soʻrovi yuborilmadi."</string>
@@ -2139,7 +2140,7 @@
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK kod bilan qulf ochilmadi."</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK kod bilan qulf ochilmadi."</string>
     <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"SPN qulfini ochish soʻrovi yuborilmadi."</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"PLMN operatorining muqobil uy tarmoqlarini qulfi ochilmadi."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"PLMN operatorining muqobil uy tarmoqlari qulfi ochilmadi."</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"ICCID qulfini ochish soʻrovi yuborilmadi."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"IMPI qulfini ochish soʻrovi yuborilmadi."</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"Aloqa operatori tarmoq qismini qulfdan chiqarish soʻrovi yuborilmadi."</string>
@@ -2148,8 +2149,8 @@
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"SIM karta tegishli aloqa operatori qulfi ochildi"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"Korporativ SIM kartalar qulfi ochildi."</string>
     <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"SIM karta qulfi ochildi."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM kartalaridagi tarmoq1 qulfi ochildi."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM kartalaridagi tarmoq2 qulfi ochildi."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM kartalaridagi network1 qulfi ochildi."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM kartalaridagi network2 qulfi ochildi."</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM HRPD kartalari qulfi ochilmadi"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM kartalari aloqa operatori qulfi ochildi."</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"Korporativ RUIM kartasi qulfi ochildi."</string>

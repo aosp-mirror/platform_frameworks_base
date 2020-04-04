@@ -1309,9 +1309,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"Đã kết nối chế độ gỡ lỗi qua USB"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Nhấn để tắt chế độ gỡ lỗi qua USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Chọn để tắt chế độ gỡ lỗi qua USB."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Đã kết nối tính năng gỡ lỗi không dây"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Nhấn để tắt tính năng gỡ lỗi không dây"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Chọn để tắt tính năng gỡ lỗi không dây."</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Đã kết nối tính năng gỡ lỗi qua Wi-Fi"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Nhấn để tắt tính năng gỡ lỗi qua Wi-Fi"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Chọn để tắt tính năng gỡ lỗi qua Wi-Fi."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Đã bật Chế độ khai thác kiểm thử"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Khôi phục cài đặt gốc để tắt Chế độ khai thác kiểm thử."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Đã bật bảng điều khiển cổng nối tiếp"</string>
@@ -1351,8 +1351,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> không được hỗ trợ"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Thiết bị này không hỗ trợ <xliff:g id="NAME">%s</xliff:g> này. Nhấn để thiết lập ở định dạng được hỗ trợ."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Thiết bị này không hỗ trợ <xliff:g id="NAME">%s</xliff:g> này. Chọn để thiết lập ở định dạng được hỗ trợ."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (7657357085538772913) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Thiết bị này không hỗ trợ <xliff:g id="NAME">%s</xliff:g> này."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Đã tháo đột ngột <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Hãy ngắt kết nối phương tiện trước khi tháo để tránh mất nội dung"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Đã xóa <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -2045,6 +2044,8 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Cuộc trò chuyện"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Cuộc trò chuyện nhóm"</string>
+    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Cá nhân"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Cơ quan"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Chế độ xem cá nhân"</string>

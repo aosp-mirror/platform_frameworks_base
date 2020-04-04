@@ -1391,8 +1391,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Úložiště <xliff:g id="NAME">%s</xliff:g> není podporováno"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Úložiště <xliff:g id="NAME">%s</xliff:g> není v tomto zařízení podporováno. Klepnutím zahájíte nastavení v podporovaném formátu."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Úložiště <xliff:g id="NAME">%s</xliff:g> není v tomto zařízení podporováno. Vyberte ho a zahajte nastavení v podporovaném formátu."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (7657357085538772913) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Úložiště <xliff:g id="NAME">%s</xliff:g> není v tomto zařízení podporováno."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Úložiště <xliff:g id="NAME">%s</xliff:g> neočekávaně odpojeno"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Před odebráním médium nejprve odpojte, zabráníte tak ztrátě obsahu"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Médium <xliff:g id="NAME">%s</xliff:g> bylo odebráno"</string>
@@ -2113,6 +2112,8 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Konverzace"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Skupinová konverzace"</string>
+    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Osobní"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Pracovní"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Osobní zobrazení"</string>

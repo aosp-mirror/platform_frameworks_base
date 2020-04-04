@@ -484,8 +484,8 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh tablet. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Mengizinkan aplikasi mendapatkan daftar akun yang dikenal oleh perangkat Android TV. Ini mungkin mencakup akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh ponsel. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
-    <string name="permlab_accessNetworkState" msgid="2349126720783633918">"lihat sambungan jaringan"</string>
-    <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Memungkinkan aplikasi melihat informasi tentang sambungan jaringan, misalnya jaringan yang ada dan tersambung."</string>
+    <string name="permlab_accessNetworkState" msgid="2349126720783633918">"lihat koneksi jaringan"</string>
+    <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Memungkinkan aplikasi melihat informasi tentang koneksi jaringan, misalnya jaringan yang ada dan tersambung."</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"dapatkan akses jaringan penuh"</string>
     <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"Memungkinkan aplikasi membuat soket jaringan dan menggunakan protokol jaringan khusus. Browser dan aplikasi lain menyediakan sarana untuk mengirim data ke internet sehingga izin ini tidak diperlukan untuk mengirim data ke internet."</string>
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"ubah konektivitas jaringan"</string>
@@ -2044,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Percakapan"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Percakapan Grup"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Pribadi"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Kerja"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Tampilan pribadi"</string>
