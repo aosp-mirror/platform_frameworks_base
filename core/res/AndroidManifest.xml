@@ -3787,10 +3787,9 @@
                 android:protectionLevel="signature|installer" />
 
     <!-- @SystemApi Allows an application to manage the holders of a role.
-         @hide
-         STOPSHIP b/145526313: Remove wellbeing protection flag from MANAGE_ROLE_HOLDERS. -->
+         @hide -->
     <permission android:name="android.permission.MANAGE_ROLE_HOLDERS"
-                android:protectionLevel="signature|installer|wellbeing" />
+                android:protectionLevel="signature|installer" />
 
     <!-- @SystemApi Allows an application to observe role holder changes.
          @hide -->

@@ -88,7 +88,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
     @Test
     public void testRecentsActivityVisiblility() {
-        TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultDisplay().mTaskContainers;
+        TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         ActivityStack recentsStack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_RECENTS, true /* onTop */);
         ActivityRecord recentActivity = new ActivityBuilder(mService)
@@ -116,8 +116,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
     @Test
     public void testPreloadRecentsActivity() {
-        TaskDisplayArea defaultTaskDisplayArea = mRootWindowContainer.getDefaultDisplay()
-                .mTaskContainers;
+        TaskDisplayArea defaultTaskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final ActivityStack homeStack =
                 defaultTaskDisplayArea.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
         defaultTaskDisplayArea.positionStackAtTop(homeStack, false /* includingParents */);
@@ -178,8 +177,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
     @Test
     public void testRestartRecentsActivity() throws Exception {
         // Have a recents activity that is not attached to its process (ActivityRecord.app = null).
-        TaskDisplayArea defaultTaskDisplayArea = mRootWindowContainer.getDefaultDisplay()
-                .mTaskContainers;
+        TaskDisplayArea defaultTaskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         ActivityStack recentsStack = defaultTaskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_RECENTS, true /* onTop */);
         ActivityRecord recentActivity = new ActivityBuilder(mService).setComponent(
@@ -208,7 +206,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
     @Test
     public void testSetLaunchTaskBehindOfTargetActivity() {
-        TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultDisplay().mTaskContainers;
+        TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         ActivityStack homeStack = taskDisplayArea.getRootHomeTask();
         // Assume the home activity support recents.
         ActivityRecord targetActivity = homeStack.getTopNonFinishingActivity();
@@ -253,7 +251,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
     @Test
     public void testCancelAnimationOnVisibleStackOrderChange() {
-        TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultDisplay().mTaskContainers;
+        TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         ActivityStack fullscreenStack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         new ActivityBuilder(mService)
@@ -298,7 +296,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
     @Test
     public void testKeepAnimationOnHiddenStackOrderChange() {
-        TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultDisplay().mTaskContainers;
+        TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         ActivityStack fullscreenStack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         new ActivityBuilder(mService)
@@ -334,7 +332,8 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
     @Test
     public void testMultipleUserHomeActivity_findUserHomeTask() {
-        TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultDisplay().mTaskContainers;
+        TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultDisplay()
+                .getDefaultTaskDisplayArea();
         ActivityStack homeStack = taskDisplayArea.getStack(WINDOWING_MODE_UNDEFINED,
                 ACTIVITY_TYPE_HOME);
         ActivityRecord otherUserHomeActivity = new ActivityBuilder(mService)

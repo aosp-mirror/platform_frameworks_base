@@ -2713,6 +2713,7 @@ public class SettingsProvider extends ContentProvider {
                 if (settingsState.isNewConfigBannedLocked(prefix, keyValues)) {
                     return false;
                 }
+                settingsState.unbanAllConfigIfBannedConfigUpdatedLocked(prefix);
                 List<String> changedSettings =
                         settingsState.setSettingsLocked(prefix, keyValues, packageName);
                 if (!changedSettings.isEmpty()) {

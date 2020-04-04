@@ -1578,6 +1578,7 @@ public class ResolverActivity extends Activity implements
                 viewPager.setCurrentItem(1);
             }
             setupViewVisibilities();
+            maybeLogProfileChange();
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.RESOLVER_SWITCH_TABS)
                     .setInt(viewPager.getCurrentItem())
@@ -1998,4 +1999,6 @@ public class ResolverActivity extends Activity implements
             }
         }
     }
+
+    protected void maybeLogProfileChange() {}
 }

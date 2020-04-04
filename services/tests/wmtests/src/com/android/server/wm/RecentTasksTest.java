@@ -28,7 +28,6 @@ import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -119,7 +118,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void setUp() throws Exception {
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
         spyOn(mTaskPersister);
-        mTaskContainer = mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY).mTaskContainers;
+        mTaskContainer = mRootWindowContainer.getDefaultTaskDisplayArea();
 
         // Set the recent tasks we should use for testing in this class.
         mRecentTasks = new TestRecentTasks(mService, mTaskPersister);

@@ -1102,7 +1102,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
 
-            final ActivityStack stack = getRootTask();
             layoutDisplayFrame = new Rect(windowFrames.mDisplayFrame);
             windowFrames.mDisplayFrame.set(windowFrames.mContainingFrame);
             layoutXDiff = mInsetFrame.left - windowFrames.mContainingFrame.left;
@@ -1206,8 +1205,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mIsWallpaper && (fw != windowFrames.mFrame.width()
                 || fh != windowFrames.mFrame.height())) {
-            dc.mWallpaperController.updateWallpaperOffset(this,
-                    displayInfo.logicalWidth, displayInfo.logicalHeight, false /* sync */);
+            dc.mWallpaperController.updateWallpaperOffset(this, false /* sync */);
         }
 
         // Calculate relative frame
@@ -1519,7 +1517,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
         // associate them with some stack to enable dimming.
         final DisplayContent dc = getDisplayContent();
-        return mAttrs.type >= FIRST_SYSTEM_WINDOW && dc != null ? dc.getRootHomeTask() : null;
+        return mAttrs.type >= FIRST_SYSTEM_WINDOW
+                && dc != null ? dc.getDefaultTaskDisplayArea().getRootHomeTask() : null;
     }
 
     /**

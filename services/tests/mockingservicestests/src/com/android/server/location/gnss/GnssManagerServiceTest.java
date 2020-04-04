@@ -126,6 +126,9 @@ public class GnssManagerServiceTest {
     @Mock
     private LocationManagerInternal mLocationManagerInternal;
 
+    @Mock
+    private GnssNative.GnssNativeInitNative mGnssInitNative;
+
     // Context and handler
     @Mock
     private Handler mMockHandler;
@@ -138,9 +141,12 @@ public class GnssManagerServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        GnssLocationProvider.setIsSupportedForTest(true);
 
-        when(mMockContext.createFeatureContext(anyString())).thenReturn(mMockContext);
+        when(mGnssInitNative.isSupported()).thenReturn(true);
+        GnssNative.setInitNativeForTest(mGnssInitNative);
+        GnssNative.resetCallbacksForTest();
+
+        when(mMockContext.createAttributionContext(anyString())).thenReturn(mMockContext);
         when(mMockContext.getSystemServiceName(AppOpsManager.class)).thenReturn(
                 Context.APP_OPS_SERVICE);
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(

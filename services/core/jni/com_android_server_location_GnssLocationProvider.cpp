@@ -1905,7 +1905,7 @@ static void android_location_GnssLocationProvider_set_gps_service_handle() {
 }
 
 /* One time initialization at system boot */
-static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
+static void android_location_GnssNative_class_init_once(JNIEnv* env, jclass clazz) {
     // Initialize the top level gnss HAL handle.
     android_location_GnssLocationProvider_set_gps_service_handle();
 
@@ -2085,8 +2085,8 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
 }
 
 /* Initialization needed at system boot and whenever GNSS service dies. */
-static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass clazz,
-        jboolean reinitializeGnssServiceHandle) {
+static void android_location_GnssNative_init_once(JNIEnv* env, jobject obj,
+                                                  jboolean reinitializeGnssServiceHandle) {
     /*
      * Save a pointer to JVM.
      */
@@ -2331,10 +2331,15 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
             gnssVisibilityControlIface = gnssVisibilityControl;
         }
     }
+
+    if (mCallbacksObj) {
+        ALOGE("Callbacks already initialized");
+    } else {
+        mCallbacksObj = env->NewGlobalRef(obj);
+    }
 }
 
-static jboolean android_location_GnssLocationProvider_is_supported(
-        JNIEnv* /* env */, jclass /* clazz */) {
+static jboolean android_location_GnssNative_is_supported(JNIEnv* /* env */, jclass /* clazz */) {
     return (gnssHal != nullptr) ?  JNI_TRUE : JNI_FALSE;
 }
 
@@ -2367,12 +2372,14 @@ static jobject android_location_GnssConfiguration_get_gnss_configuration_version
 }
 
 /* Initialization needed each time the GPS service is shutdown. */
-static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject obj) {
+static jboolean android_location_GnssLocationProvider_init(JNIEnv* /* env */, jobject /* obj */) {
     /*
      * This must be set before calling into the HAL library.
      */
-    if (!mCallbacksObj)
-        mCallbacksObj = env->NewGlobalRef(obj);
+    if (!mCallbacksObj) {
+        ALOGE("No callbacks set during GNSS HAL initialization.");
+        return JNI_FALSE;
+    }
 
     /*
      * Fail if the main interface fails to initialize
@@ -3581,49 +3588,54 @@ static jboolean android_location_GnssVisibilityControl_enable_nfw_location_acces
     return checkHidlReturn(result, "IGnssVisibilityControl enableNfwLocationAccess() failed.");
 }
 
-static const JNINativeMethod sMethods[] = {
-     /* name, signature, funcPtr */
-    {"class_init_native", "()V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_class_init_native)},
-    {"native_is_supported", "()Z", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_is_supported)},
-    {"native_init_once", "(Z)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_init_once)},
-    {"native_init", "()Z", reinterpret_cast<void *>(android_location_GnssLocationProvider_init)},
-    {"native_cleanup", "()V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_cleanup)},
-    {"native_set_position_mode", "(IIIIIZ)Z", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_set_position_mode)},
-    {"native_start", "()Z", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_start)},
-    {"native_stop", "()Z", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_stop)},
-    {"native_delete_aiding_data", "(I)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_delete_aiding_data)},
-    {"native_read_nmea", "([BI)I", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_read_nmea)},
-    {"native_inject_time", "(JJI)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_inject_time)},
-    {"native_inject_best_location", "(IDDDFFFFFFJIJD)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_inject_best_location)},
-    {"native_inject_location", "(DDF)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_inject_location)},
-    {"native_supports_psds", "()Z", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_supports_psds)},
-    {"native_inject_psds_data", "([BI)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_inject_psds_data)},
-    {"native_agps_set_id", "(ILjava/lang/String;)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_agps_set_id)},
-    {"native_agps_set_ref_location_cellid", "(IIIII)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_agps_set_reference_location_cellid)},
-    {"native_set_agps_server", "(ILjava/lang/String;I)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_set_agps_server)},
-    {"native_send_ni_response", "(II)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_send_ni_response)},
-    {"native_get_internal_state", "()Ljava/lang/String;", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_get_internal_state)},
-    {"native_is_gnss_visibility_control_supported", "()Z", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_is_gnss_visibility_control_supported)},
+static const JNINativeMethod sCoreMethods[] = {
+        /* name, signature, funcPtr */
+        {"native_class_init_once", "()V",
+         reinterpret_cast<void*>(android_location_GnssNative_class_init_once)},
+        {"native_is_supported", "()Z",
+         reinterpret_cast<void*>(android_location_GnssNative_is_supported)},
+        {"native_init_once", "(Z)V",
+         reinterpret_cast<void*>(android_location_GnssNative_init_once)},
+};
+
+static const JNINativeMethod sLocationProviderMethods[] = {
+        /* name, signature, funcPtr */
+        {"native_init", "()Z", reinterpret_cast<void*>(android_location_GnssLocationProvider_init)},
+        {"native_cleanup", "()V",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_cleanup)},
+        {"native_set_position_mode", "(IIIIIZ)Z",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_set_position_mode)},
+        {"native_start", "()Z",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_start)},
+        {"native_stop", "()Z", reinterpret_cast<void*>(android_location_GnssLocationProvider_stop)},
+        {"native_delete_aiding_data", "(I)V",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_delete_aiding_data)},
+        {"native_read_nmea", "([BI)I",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_read_nmea)},
+        {"native_inject_time", "(JJI)V",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_inject_time)},
+        {"native_inject_best_location", "(IDDDFFFFFFJIJD)V",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_inject_best_location)},
+        {"native_inject_location", "(DDF)V",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_inject_location)},
+        {"native_supports_psds", "()Z",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_supports_psds)},
+        {"native_inject_psds_data", "([BI)V",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_inject_psds_data)},
+        {"native_agps_set_id", "(ILjava/lang/String;)V",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_agps_set_id)},
+        {"native_agps_set_ref_location_cellid", "(IIIII)V",
+         reinterpret_cast<void*>(
+                 android_location_GnssLocationProvider_agps_set_reference_location_cellid)},
+        {"native_set_agps_server", "(ILjava/lang/String;I)V",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_set_agps_server)},
+        {"native_send_ni_response", "(II)V",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_send_ni_response)},
+        {"native_get_internal_state", "()Ljava/lang/String;",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_get_internal_state)},
+        {"native_is_gnss_visibility_control_supported", "()Z",
+         reinterpret_cast<void*>(
+                 android_location_GnssLocationProvider_is_gnss_visibility_control_supported)},
 };
 
 static const JNINativeMethod sMethodsBatching[] = {
@@ -3791,8 +3803,10 @@ int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
                              sConfigurationMethods, NELEM(sConfigurationMethods));
     jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssVisibilityControl",
                              sVisibilityControlMethods, NELEM(sVisibilityControlMethods));
-    return jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssLocationProvider",
-                                    sMethods, NELEM(sMethods));
+    jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssLocationProvider",
+                             sLocationProviderMethods, NELEM(sLocationProviderMethods));
+    return jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssNative",
+                                    sCoreMethods, NELEM(sCoreMethods));
 }
 
 } /* namespace android */

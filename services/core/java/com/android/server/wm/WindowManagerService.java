@@ -2332,9 +2332,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
             if (toBeDisplayed && win.mIsWallpaper) {
-                DisplayInfo displayInfo = displayContent.getDisplayInfo();
-                displayContent.mWallpaperController.updateWallpaperOffset(
-                        win, displayInfo.logicalWidth, displayInfo.logicalHeight, false);
+                displayContent.mWallpaperController.updateWallpaperOffset(win, false /* sync */);
             }
             if (win.mActivityRecord != null) {
                 win.mActivityRecord.updateReportedVisibilityLocked();
@@ -2782,7 +2780,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 aspectRatio);
     }
 
-    @Override
     public void getStackBounds(int windowingMode, int activityType, Rect bounds) {
         synchronized (mGlobalLock) {
             final ActivityStack stack = mRoot.getStack(windowingMode, activityType);
@@ -7331,8 +7328,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public boolean isStackVisibleLw(int windowingMode) {
-            final DisplayContent dc = getDefaultDisplayContentLocked();
-            return dc.isStackVisible(windowingMode);
+            // TODO(multi-display-area): Support multiple task display areas & displays
+            final TaskDisplayArea tc = mRoot.getDefaultTaskDisplayArea();
+            return tc.isStackVisible(windowingMode);
         }
 
         @Override

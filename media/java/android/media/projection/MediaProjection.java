@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.hardware.display.VirtualDisplayConfig;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
@@ -100,11 +101,18 @@ public final class MediaProjection {
             int width, int height, int dpi, boolean isSecure, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         DisplayManager dm = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-        int flags = isSecure ? DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE : 0;
-        return dm.createVirtualDisplay(this, name, width, height, dpi, surface,
-                    flags | DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR |
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION, callback, handler,
-                    null /* uniqueId */);
+        int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
+                | DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+        if (isSecure) {
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+        }
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
+                height, dpi);
+        builder.setFlags(flags);
+        if (surface != null) {
+            builder.setSurface(surface);
+        }
+        return dm.createVirtualDisplay(this, builder.build(), callback, handler);
     }
 
     /**
@@ -133,9 +141,35 @@ public final class MediaProjection {
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int dpi, int flags, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        DisplayManager dm = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-        return dm.createVirtualDisplay(this, name, width, height, dpi, surface, flags, callback,
-                handler, null /* uniqueId */);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
+                height, dpi);
+        builder.setFlags(flags);
+        if (surface != null) {
+            builder.setSurface(surface);
+        }
+        return createVirtualDisplay(builder.build(), callback, handler);
+    }
+
+    /**
+     * Creates a {@link android.hardware.display.VirtualDisplay} to capture the
+     * contents of the screen.
+     *
+     * @param virtualDisplayConfig The arguments for the virtual display configuration. See
+     * {@link VirtualDisplayConfig} for using it.
+     * @param callback Callback to call when the virtual display's state
+     * changes, or null if none.
+     * @param handler The {@link android.os.Handler} on which the callback should be
+     * invoked, or null if the callback should be invoked on the calling
+     * thread's main {@link android.os.Looper}.
+     *
+     * @see android.hardware.display.VirtualDisplay
+     * @hide
+     */
+    @Nullable
+    public VirtualDisplay createVirtualDisplay(@NonNull VirtualDisplayConfig virtualDisplayConfig,
+            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+        DisplayManager dm = mContext.getSystemService(DisplayManager.class);
+        return dm.createVirtualDisplay(this, virtualDisplayConfig, callback, handler);
     }
 
     /**

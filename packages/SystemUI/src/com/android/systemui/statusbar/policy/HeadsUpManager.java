@@ -161,7 +161,6 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, false);
         }
-        entry.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
     }
 
     protected void updatePinnedMode() {

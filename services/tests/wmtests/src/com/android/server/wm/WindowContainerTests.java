@@ -811,8 +811,8 @@ public class WindowContainerTests extends WindowTestsBase {
                 WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
 
         final DisplayContent newDc = createNewDisplay();
-        mDisplayContent.removeStack(stack);
-        newDc.mTaskContainers.addChild(stack, POSITION_TOP);
+        stack.getDisplayArea().removeStack(stack);
+        newDc.getDefaultTaskDisplayArea().addChild(stack, POSITION_TOP);
 
         verify(stack).onDisplayChanged(newDc);
         verify(task).onDisplayChanged(newDc);

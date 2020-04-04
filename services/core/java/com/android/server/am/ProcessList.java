@@ -109,6 +109,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -340,6 +341,14 @@ public final class ProcessList {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
+
+    /**
+     * Enable memory tag checks in non-system apps. This flag will only have an effect on
+     * hardware supporting the ARM Memory Tagging Extension (MTE).
+     */
+    @ChangeId
+    @Disabled
+    private static final long NATIVE_MEMORY_TAGGING = 135772972; // This is a bug id.
 
     /**
      * Enable sampled memory bug detection in the app.
@@ -1845,11 +1854,21 @@ public final class ProcessList {
                 runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
             }
 
-            // Enable heap pointer tagging, unless disabled by the app manifest, target sdk level,
-            // or the compat feature.
-            if (app.info.allowsNativeHeapPointerTagging()
-                    && mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
-                runtimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
+            if (Zygote.nativeSupportsMemoryTagging()) {
+                // System apps are generally more privileged than regular apps, and don't have the
+                // same app compat concerns as regular apps, so we enable async tag checks for all
+                // of their processes.
+                if ((app.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                        || mPlatformCompat.isChangeEnabled(NATIVE_MEMORY_TAGGING, app.info)) {
+                    runtimeFlags |= Zygote.MEMORY_TAG_LEVEL_ASYNC;
+                }
+            } else {
+                // Enable heap pointer tagging, unless disabled by the app manifest, target sdk
+                // level, or the compat feature.
+                if (app.info.allowsNativeHeapPointerTagging()
+                        && mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
+                    runtimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
+                }
             }
 
             runtimeFlags |= decideGwpAsanLevel(app);
