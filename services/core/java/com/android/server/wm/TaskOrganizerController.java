@@ -25,6 +25,7 @@ import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_CONFI
 import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_WINDOW_CONFIGS;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Intent;
@@ -38,6 +39,7 @@ import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.WindowContainerToken;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
@@ -46,6 +48,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.WeakHashMap;
+import java.util.function.Consumer;
 
 /**
  * Stores the TaskOrganizers associated with a given windowing mode and
@@ -81,17 +84,95 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 }
             }
         }
-    };
+    }
+
+    /**
+     * A wrapper class around ITaskOrganizer to ensure that the calls are made in the right
+     * lifecycle order since we may be updating the visibility of task surface controls in a pending
+     * transaction before they are presented to the task org.
+     */
+    private class TaskOrganizerCallbacks {
+        final WindowManagerService mService;
+        final ITaskOrganizer mTaskOrganizer;
+        final Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
+
+        TaskOrganizerCallbacks(WindowManagerService wm, ITaskOrganizer taskOrg,
+                Consumer<Runnable> deferTaskOrgCallbacksConsumer) {
+            mService = wm;
+            mDeferTaskOrgCallbacksConsumer = deferTaskOrgCallbacksConsumer;
+            mTaskOrganizer = taskOrg;
+        }
+
+        IBinder getBinder() {
+            return mTaskOrganizer.asBinder();
+        }
+
+        void onTaskAppeared(Task task) {
+            final RunningTaskInfo taskInfo = task.getTaskInfo();
+            mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                try {
+                    mTaskOrganizer.onTaskAppeared(taskInfo);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception sending onTaskAppeared callback", e);
+                }
+            });
+        }
+
+
+        void onTaskVanished(Task task) {
+            final RunningTaskInfo taskInfo = task.getTaskInfo();
+            mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                try {
+                    mTaskOrganizer.onTaskVanished(taskInfo);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception sending onTaskVanished callback", e);
+                }
+            });
+        }
+
+        void onTaskInfoChanged(Task task, ActivityManager.RunningTaskInfo taskInfo) {
+            mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                if (!task.isOrganized()) {
+                    // This is safe to ignore if the task is no longer organized
+                    return;
+                }
+                try {
+                    mTaskOrganizer.onTaskInfoChanged(taskInfo);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception sending onTaskInfoChanged callback", e);
+                }
+            });
+        }
+
+        void onBackPressedOnTaskRoot(Task task) {
+            mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                if (!task.isOrganized()) {
+                    // This is safe to ignore if the task is no longer organized
+                    return;
+                }
+                try {
+                   mTaskOrganizer.onBackPressedOnTaskRoot(task.getTaskInfo());
+                } catch (Exception e) {
+                    Slog.e(TAG, "Exception sending onBackPressedOnTaskRoot callback", e);
+                }
+            });
+        }
+    }
 
     private class TaskOrganizerState {
-        private final ITaskOrganizer mOrganizer;
+        private final TaskOrganizerCallbacks mOrganizer;
         private final DeathRecipient mDeathRecipient;
         private final ArrayList<Task> mOrganizedTasks = new ArrayList<>();
         private final int mUid;
         private boolean mInterceptBackPressedOnTaskRoot;
 
         TaskOrganizerState(ITaskOrganizer organizer, int uid) {
-            mOrganizer = organizer;
+            final Consumer<Runnable> deferTaskOrgCallbacksConsumer =
+                    mDeferTaskOrgCallbacksConsumer != null
+                            ? mDeferTaskOrgCallbacksConsumer
+                            : mService.mWindowManager.mAnimator::addAfterPrepareSurfacesRunnable;
+            mOrganizer = new TaskOrganizerCallbacks(mService.mWindowManager, organizer,
+                    deferTaskOrgCallbacksConsumer);
             mDeathRecipient = new DeathRecipient(organizer);
             try {
                 organizer.asBinder().linkToDeath(mDeathRecipient, 0);
@@ -107,26 +188,18 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         void addTask(Task t) {
             mOrganizedTasks.add(t);
-            try {
-                mOrganizer.onTaskAppeared(t.getTaskInfo());
-            } catch (Exception e) {
-                Slog.e(TAG, "Exception sending taskAppeared callback" + e);
-            }
+            mOrganizer.onTaskAppeared(t);
         }
 
         void removeTask(Task t) {
-            try {
-                mOrganizer.onTaskVanished(t.getTaskInfo());
-            } catch (Exception e) {
-                Slog.e(TAG, "Exception sending taskVanished callback" + e);
-            }
             mOrganizedTasks.remove(t);
+            mOrganizer.onTaskVanished(t);
         }
 
         void dispose() {
             releaseTasks();
             for (int i = mTaskOrganizersForWindowingMode.size() - 1; i >= 0; --i) {
-                mTaskOrganizersForWindowingMode.valueAt(i).remove(mOrganizer.asBinder());
+                mTaskOrganizersForWindowingMode.valueAt(i).remove(mOrganizer.getBinder());
             }
         }
 
@@ -139,7 +212,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void unlinkDeath() {
-            mOrganizer.asBinder().unlinkToDeath(mDeathRecipient, 0);
+            mOrganizer.getBinder().unlinkToDeath(mDeathRecipient, 0);
         }
     }
 
@@ -149,9 +222,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private final WeakHashMap<Task, RunningTaskInfo> mLastSentTaskInfos = new WeakHashMap<>();
     private final ArrayList<Task> mPendingTaskInfoChanges = new ArrayList<>();
 
-    final ActivityTaskManagerService mService;
+    private final ActivityTaskManagerService mService;
 
-    RunningTaskInfo mTmpTaskInfo;
+    private RunningTaskInfo mTmpTaskInfo;
+    private Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
 
     TaskOrganizerController(ActivityTaskManagerService atm) {
         mService = atm;
@@ -160,6 +234,15 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     private void enforceStackPermission(String func) {
         mService.mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, func);
+    }
+
+    /**
+     * Specifies the consumer to run to defer the task org callbacks. Can be overridden while
+     * testing to allow the callbacks to be sent synchronously.
+     */
+    @VisibleForTesting
+    public void setDeferTaskOrgCallbacksConsumer(Consumer<Runnable> consumer) {
+        mDeferTaskOrgCallbacksConsumer = consumer;
     }
 
     /**
@@ -253,7 +336,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         if (state == null) {
             return null;
         }
-        return state.mOrganizer;
+        return state.mOrganizer.mTaskOrganizer;
     }
 
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {
@@ -358,11 +441,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         // change.
         mTmpTaskInfo = null;
 
-        if (task.mTaskOrganizer != null) {
-            try {
-                task.mTaskOrganizer.onTaskInfoChanged(newInfo);
-            } catch (RemoteException e) {
-            }
+        if (task.isOrganized()) {
+            final TaskOrganizerState state = mTaskOrganizerStates.get(
+                    task.mTaskOrganizer.asBinder());
+            state.mOrganizer.onTaskInfoChanged(task, newInfo);
         }
     }
 
@@ -517,11 +599,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             return false;
         }
 
-        try {
-            state.mOrganizer.onBackPressedOnTaskRoot(task.getTaskInfo());
-        } catch (Exception e) {
-            Slog.e(TAG, "Exception sending interceptBackPressedOnTaskRoot callback" + e);
-        }
+        state.mOrganizer.onBackPressedOnTaskRoot(task);
         return true;
     }
 
@@ -538,7 +616,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 final TaskOrganizerState state =  mTaskOrganizerStates.get(taskOrgs.get(j));
                 final ArrayList<Task> tasks = state.mOrganizedTasks;
                 pw.print(innerPrefix + "    ");
-                pw.println(state.mOrganizer + " uid=" + state.mUid + ":");
+                pw.println(state.mOrganizer.mTaskOrganizer + " uid=" + state.mUid + ":");
                 for (int k = 0; k < tasks.size(); k++) {
                     pw.println(innerPrefix + "      " + tasks.get(k));
                 }
