@@ -127,6 +127,12 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
      * the new stack becomes resumed after which it will be set to current focused stack.
      */
     ActivityStack mLastFocusedStack;
+    /**
+     * All of the stacks on this display. Order matters, topmost stack is in front of all other
+     * stacks, bottommost behind. Accessed directly by ActivityManager package classes. Any calls
+     * changing the list should also call {@link #onStackOrderChanged()}.
+     */
+    private ArrayList<OnStackOrderChangedListener> mStackOrderChangedCallbacks = new ArrayList<>();
 
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service) {
         super(service, Type.ANY, "TaskContainers", FEATURE_TASK_CONTAINER);
@@ -336,9 +342,9 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             // Since a stack could be repositioned while being one of the child, return
             // current index if that's the same stack we are positioning and it is always on
             // top.
-            final boolean sameStack = mDisplayContent.getStacks().get(i) == stack;
+            final boolean sameStack = mChildren.get(i) == stack;
             if ((sameStack && stack.isAlwaysOnTop())
-                    || (!sameStack && !mDisplayContent.getStacks().get(i).isAlwaysOnTop())) {
+                    || (!sameStack && !mChildren.get(i).isAlwaysOnTop())) {
                 belowAlwaysOnTopPosition = i;
                 break;
             }
@@ -352,7 +358,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         if (stack.isAlwaysOnTop()) {
             if (hasPinnedTask()) {
                 // Always-on-top stacks go below the pinned stack.
-                maxPosition = mDisplayContent.getStacks().indexOf(mRootPinnedTask) - 1;
+                maxPosition = mChildren.indexOf(mRootPinnedTask) - 1;
             }
             // Always-on-top stacks need to be above all other stacks.
             minPosition = belowAlwaysOnTopPosition
@@ -375,7 +381,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         targetPosition = Math.min(targetPosition, maxPosition);
         targetPosition = Math.max(targetPosition, minPosition);
 
-        int prevPosition = mDisplayContent.getStacks().indexOf(stack);
+        int prevPosition = mChildren.indexOf(stack);
         // The positions we calculated above (maxPosition, minPosition) do not take into
         // consideration the following edge cases.
         // 1) We need to adjust the position depending on the value "adding".
@@ -471,7 +477,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
 
     @Override
     int getOrientation(int candidate) {
-        if (mDisplayContent.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
+        if (isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
             // Apps and their containers are not allowed to specify an orientation while using
             // root tasks...except for the home stack if it is not resizable and currently
             // visible (top of) its root task.
@@ -637,7 +643,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             mPreferredTopFocusableStack = null;
         }
         mDisplayContent.releaseSelfIfNeeded();
-        mDisplayContent.onStackOrderChanged(stack);
+        onStackOrderChanged(stack);
     }
 
     void positionStackAt(int position, ActivityStack child, boolean includingParents) {
@@ -716,7 +722,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             }
         }
 
-        mDisplayContent.onStackOrderChanged(stack);
+        onStackOrderChanged(stack);
     }
 
     ActivityStack getStack(int rootTaskId) {
@@ -765,11 +771,11 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
                 } else if (stack.getParent() != launchRootTask) {
                     stack.reparent(launchRootTask, position);
                 }
-            } else if (stack.getDisplay() != mDisplayContent || !stack.isRootTask()) {
+            } else if (stack.getDisplayArea() != this || !stack.isRootTask()) {
                 if (stack.getParent() == null) {
                     addStack(stack, position);
                 } else {
-                    stack.reparent(mDisplayContent, onTop);
+                    stack.reparent(this, onTop);
                 }
             }
             // Update windowing mode if necessary, e.g. moving a pinned task to fullscreen.
@@ -832,7 +838,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             // Create stack on default display instead since this display can only contain 1 stack.
             // TODO: Kinda a hack, but better that having the decision at each call point. Hoping
             // this goes away once ActivityView is no longer using virtual displays.
-            return mRootWindowContainer.getDefaultDisplay().mTaskContainers.createStack(
+            return mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
                     windowingMode, activityType, onTop, info, intent, createdByOrganizer);
         }
 
@@ -1551,11 +1557,56 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         return (index < wc.mChildren.size()) ? (ActivityStack) wc.mChildren.get(index) : null;
     }
 
+    /** Returns true if the stack in the windowing mode is visible. */
+    boolean isStackVisible(int windowingMode) {
+        final ActivityStack stack = getTopStackInWindowingMode(windowingMode);
+        return stack != null && stack.isVisible();
+    }
+
+    void removeStack(ActivityStack stack) {
+        removeChild(stack);
+    }
+
     int getDisplayId() {
         return mDisplayContent.getDisplayId();
     }
 
     boolean isRemoved() {
         return mDisplayContent.isRemoved();
+    }
+
+    /**
+     * Adds a listener to be notified whenever the stack order in the display changes. Currently
+     * only used by the {@link RecentsAnimation} to determine whether to interrupt and cancel the
+     * current animation when the system state changes.
+     */
+    void registerStackOrderChangedListener(OnStackOrderChangedListener listener) {
+        if (!mStackOrderChangedCallbacks.contains(listener)) {
+            mStackOrderChangedCallbacks.add(listener);
+        }
+    }
+
+    /**
+     * Removes a previously registered stack order change listener.
+     */
+    void unregisterStackOrderChangedListener(OnStackOrderChangedListener listener) {
+        mStackOrderChangedCallbacks.remove(listener);
+    }
+
+    /**
+     * Notifies of a stack order change
+     * @param stack The stack which triggered the order change
+     */
+    void onStackOrderChanged(ActivityStack stack) {
+        for (int i = mStackOrderChangedCallbacks.size() - 1; i >= 0; i--) {
+            mStackOrderChangedCallbacks.get(i).onStackOrderChanged(stack);
+        }
+    }
+
+    /**
+     * Callback for when the order of the stacks in the display changes.
+     */
+    interface OnStackOrderChangedListener {
+        void onStackOrderChanged(ActivityStack stack);
     }
 }
