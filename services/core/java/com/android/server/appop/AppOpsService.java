@@ -5853,10 +5853,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (pkg == null) {
             return false;
         }
-        if (pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.Q) {
-            return false;
-        }
-
         String[] requestedPermissions = pkg.requestedPermissions;
         if (requestedPermissions == null) {
             return false;
