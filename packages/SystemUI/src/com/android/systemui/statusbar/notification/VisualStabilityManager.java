@@ -42,12 +42,14 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
 
     private static final long TEMPORARY_REORDERING_ALLOWED_DURATION = 1000;
 
-    private final ArrayList<Callback> mCallbacks =  new ArrayList<>();
+    private final ArrayList<Callback> mReorderingAllowedCallbacks = new ArrayList<>();
+    private final ArrayList<Callback> mGroupChangesAllowedCallbacks = new ArrayList<>();
     private final Handler mHandler;
 
     private boolean mPanelExpanded;
     private boolean mScreenOn;
     private boolean mReorderingAllowed;
+    private boolean mGroupChangedAllowed;
     private boolean mIsTemporaryReorderingAllowed;
     private long mTemporaryReorderingStart;
     private VisibilityLocationProvider mVisibilityLocationProvider;
@@ -83,13 +85,22 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
 
     /**
      * Add a callback to invoke when reordering is allowed again.
-     * @param callback
      */
     public void addReorderingAllowedCallback(Callback callback) {
-        if (mCallbacks.contains(callback)) {
+        if (mReorderingAllowedCallbacks.contains(callback)) {
             return;
         }
-        mCallbacks.add(callback);
+        mReorderingAllowedCallbacks.add(callback);
+    }
+
+    /**
+     * Add a callback to invoke when group changes are allowed again.
+     */
+    public void addGroupChangesAllowedCallback(Callback callback) {
+        if (mGroupChangesAllowedCallbacks.contains(callback)) {
+            return;
+        }
+        mGroupChangesAllowedCallbacks.add(callback);
     }
 
     /**
@@ -97,7 +108,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
      */
     public void setPanelExpanded(boolean expanded) {
         mPanelExpanded = expanded;
-        updateReorderingAllowed();
+        updateAllowedStates();
     }
 
     /**
@@ -105,7 +116,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
      */
     public void setScreenOn(boolean screenOn) {
         mScreenOn = screenOn;
-        updateReorderingAllowed();
+        updateAllowedStates();
     }
 
     /**
@@ -116,25 +127,30 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
             return;
         }
         mPulsing = pulsing;
-        updateReorderingAllowed();
+        updateAllowedStates();
     }
 
-    private void updateReorderingAllowed() {
+    private void updateAllowedStates() {
         boolean reorderingAllowed =
                 (!mScreenOn || !mPanelExpanded || mIsTemporaryReorderingAllowed) && !mPulsing;
         boolean changedToTrue = reorderingAllowed && !mReorderingAllowed;
         mReorderingAllowed = reorderingAllowed;
         if (changedToTrue) {
-            notifyCallbacks();
+            notifyChangeAllowed(mReorderingAllowedCallbacks);
+        }
+        boolean groupChangesAllowed = (!mScreenOn || !mPanelExpanded) && !mPulsing;
+        changedToTrue = groupChangesAllowed && !mGroupChangedAllowed;
+        mGroupChangedAllowed = groupChangesAllowed;
+        if (changedToTrue) {
+            notifyChangeAllowed(mGroupChangesAllowedCallbacks);
         }
     }
 
-    private void notifyCallbacks() {
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            Callback callback = mCallbacks.get(i);
-            callback.onReorderingAllowed();
+    private void notifyChangeAllowed(ArrayList<Callback> callbacks) {
+        for (int i = 0; i < callbacks.size(); i++) {
+            callbacks.get(i).onChangeAllowed();
         }
-        mCallbacks.clear();
+        callbacks.clear();
     }
 
     /**
@@ -142,6 +158,13 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
      */
     public boolean isReorderingAllowed() {
         return mReorderingAllowed;
+    }
+
+    /**
+     * @return whether changes in the grouping should be allowed right now.
+     */
+    public boolean areGroupChangesAllowed() {
+        return mGroupChangedAllowed;
     }
 
     /**
@@ -197,12 +220,12 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
             mTemporaryReorderingStart = SystemClock.elapsedRealtime();
         }
         mIsTemporaryReorderingAllowed = true;
-        updateReorderingAllowed();
+        updateAllowedStates();
     }
 
     private final Runnable mOnTemporaryReorderingExpired = () -> {
         mIsTemporaryReorderingAllowed = false;
-        updateReorderingAllowed();
+        updateAllowedStates();
     };
 
     /**
@@ -229,9 +252,9 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
 
     public interface Callback {
         /**
-         * Called when reordering is allowed again.
+         * Called when changing is allowed again.
          */
-        void onReorderingAllowed();
+        void onChangeAllowed();
     }
 
 }
