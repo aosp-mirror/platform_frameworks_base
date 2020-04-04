@@ -121,6 +121,7 @@ public class ConversationLayout extends FrameLayout
     private CachingIconView mConversationIconBadgeBg;
     private Icon mLargeIcon;
     private View mExpandButtonContainer;
+    private View mExpandButtonInnerContainer;
     private ViewGroup mExpandButtonAndContentContainer;
     private NotificationExpandButton mExpandButton;
     private MessagingLinearLayout mImageMessageContainer;
@@ -242,6 +243,7 @@ public class ConversationLayout extends FrameLayout
         mConversationHeader = findViewById(R.id.conversation_header);
         mContentContainer = findViewById(R.id.notification_action_list_margin_target);
         mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
+        mExpandButtonInnerContainer = findViewById(R.id.expand_button_inner_container);
         mExpandButton = findViewById(R.id.expand_button);
         mExpandButtonExpandedTopMargin = getResources().getDimensionPixelSize(
                 R.dimen.conversation_expand_button_top_margin_expanded);
@@ -1169,7 +1171,7 @@ public class ConversationLayout extends FrameLayout
         layoutParams.topMargin = topMargin;
         mExpandButton.setLayoutParams(layoutParams);
 
-        mExpandButtonContainer.setContentDescription(mContext.getText(contentDescriptionId));
+        mExpandButtonInnerContainer.setContentDescription(mContext.getText(contentDescriptionId));
     }
 
     private void updateContentEndPaddings() {
@@ -1213,7 +1215,7 @@ public class ConversationLayout extends FrameLayout
         mExpandable = expandable;
         if (expandable) {
             mExpandButtonContainer.setVisibility(VISIBLE);
-            mExpandButtonContainer.setOnClickListener(onClickListener);
+            mExpandButtonInnerContainer.setOnClickListener(onClickListener);
         } else {
             // TODO: handle content paddings to end of layout
             mExpandButtonContainer.setVisibility(GONE);
