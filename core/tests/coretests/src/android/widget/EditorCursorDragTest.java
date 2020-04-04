@@ -528,6 +528,47 @@ public class EditorCursorDragTest {
     }
 
     @Test
+    public void testCursorDrag_multiTouch() throws Throwable {
+        String text = "line1: This is the 1st line: A";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        TextView tv = mActivity.findViewById(R.id.textview);
+        Editor editor = tv.getEditorForTesting();
+        final int startIndex = text.indexOf("1st line");
+        Layout layout = tv.getLayout();
+        final float cursorStartX =
+                layout.getPrimaryHorizontal(startIndex) + tv.getTotalPaddingLeft();
+        final float cursorStartY = layout.getLineTop(1) + tv.getTotalPaddingTop();
+
+        // Taps to show the insertion handle.
+        tapAtPoint(tv, cursorStartX, cursorStartY);
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(startIndex));
+        View handleView = editor.getInsertionController().getHandle();
+
+        // Taps & holds the insertion handle.
+        long handleDownTime = sTicker.addAndGet(10_000);
+        long eventTime = handleDownTime;
+        dispatchTouchEvent(handleView, downEvent(handleView, handleDownTime, eventTime++, 0, 0));
+
+        // Tries to Drag the cursor, with the pointer id > 0 (meaning the 2nd finger).
+        long cursorDownTime = eventTime++;
+        dispatchTouchEvent(tv, obtainTouchEventWithPointerId(
+                tv, MotionEvent.ACTION_DOWN, cursorDownTime, eventTime++, 1,
+                cursorStartX - 50, cursorStartY));
+        dispatchTouchEvent(tv, obtainTouchEventWithPointerId(
+                tv, MotionEvent.ACTION_MOVE, cursorDownTime, eventTime++, 1,
+                cursorStartX - 100, cursorStartY));
+        dispatchTouchEvent(tv, obtainTouchEventWithPointerId(
+                tv, MotionEvent.ACTION_UP, cursorDownTime, eventTime++, 1,
+                cursorStartX - 100, cursorStartY));
+
+        // Checks the cursor drag doesn't work while the handle is being hold.
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(startIndex));
+
+        // Finger up on the  insertion handle.
+        dispatchTouchEvent(handleView, upEvent(handleView, handleDownTime, eventTime, 0, 0));
+    }
+
+    @Test
     public void testCursorDrag_snapDistance() throws Throwable {
         String text = "line1: This is the 1st line: A\n"
                 + "line2: This is the 2nd line: B\n"
@@ -621,6 +662,24 @@ public class EditorCursorDragTest {
         float rawY = y + r.top;
         MotionEvent event =
                 MotionEvent.obtain(downTime, eventTime, action, rawX, rawY, 0);
+        view.toLocalMotionEvent(event);
+        mMotionEvents.add(event);
+        return event;
+    }
+
+    private MotionEvent obtainTouchEventWithPointerId(
+            View view, int action, long downTime, long eventTime, int pointerId, float x, float y) {
+        Rect r = new Rect();
+        view.getBoundsOnScreen(r);
+        float rawX = x + r.left;
+        float rawY = y + r.top;
+        MotionEvent.PointerCoords coordinates = new MotionEvent.PointerCoords();
+        coordinates.x = rawX;
+        coordinates.y = rawY;
+        MotionEvent event = MotionEvent.obtain(
+                downTime, eventTime, action, 1, new int[] {pointerId},
+                new MotionEvent.PointerCoords[] {coordinates},
+                0, 1f, 1f, 0, 0, 0, 0);
         view.toLocalMotionEvent(event);
         mMotionEvents.add(event);
         return event;
