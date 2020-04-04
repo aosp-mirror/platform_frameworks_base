@@ -41,7 +41,8 @@ inline int fromBinderStatus(const binder::Status& status) {
             : -EIO;
 }
 
-inline binder::Status CheckPermissionForDataDelivery(const char* permission, const char* operation) {
+inline binder::Status CheckPermissionForDataDelivery(const char* permission, const char* operation,
+                                                     const char* package) {
     using android::base::StringPrintf;
 
     int32_t pid;
@@ -52,23 +53,23 @@ inline binder::Status CheckPermissionForDataDelivery(const char* permission, con
                          StringPrintf("UID %d / PID %d lacks permission %s", uid, pid, permission));
     }
 
+    String16 packageName{package};
+
     // Caller must also have op granted.
     PermissionController pc;
-    // Package is a required parameter. Need to obtain one.
-    Vector<String16> packages;
-    pc.getPackagesForUid(uid, packages);
-    if (packages.empty()) {
+    if (auto packageUid = pc.getPackageUid(packageName, 0); packageUid != uid) {
         return Exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d / PID %d has no packages", uid, pid));
+                         StringPrintf("UID %d / PID %d does not own package %s", uid, pid,
+                                      package));
     }
-    switch (auto result = pc.noteOp(String16(operation), uid, packages[0]); result) {
+    switch (auto result = pc.noteOp(String16(operation), uid, packageName); result) {
         case PermissionController::MODE_ALLOWED:
         case PermissionController::MODE_DEFAULT:
             return binder::Status::ok();
         default:
             return Exception(binder::Status::EX_SECURITY,
-                             StringPrintf("UID %d / PID %d lacks app-op %s, error %d", uid, pid,
-                                          operation, result));
+                             StringPrintf("UID %d / PID %d / package %s lacks app-op %s, error %d",
+                                          uid, pid, package, operation, result));
     }
 }
 
