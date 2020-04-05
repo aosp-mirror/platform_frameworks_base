@@ -189,9 +189,10 @@ public class ActivityStartController {
         mSupervisor.beginDeferResume();
         final ActivityStack homeStack;
         try {
+            // TODO(multi-display-area): Support starting home in a task display area
             // Make sure home stack exist on display.
-            homeStack = display.mTaskContainers.getOrCreateStack(WINDOWING_MODE_FULLSCREEN,
-                    ACTIVITY_TYPE_HOME, ON_TOP);
+            homeStack = display.getDefaultTaskDisplayArea().getOrCreateStack(
+                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
         } finally {
             mSupervisor.endDeferResume();
         }
