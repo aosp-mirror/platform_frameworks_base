@@ -63,6 +63,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.protolog.common.ProtoLog;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,6 +134,12 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
      * changing the list should also call {@link #onStackOrderChanged()}.
      */
     private ArrayList<OnStackOrderChangedListener> mStackOrderChangedCallbacks = new ArrayList<>();
+
+    /**
+     * The task display area is removed from the system and we are just waiting for all activities
+     * on it to be finished before removing this object.
+     */
+    private boolean mRemoved;
 
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service) {
         super(service, Type.ANY, "TaskContainers", FEATURE_TASK_CONTAINER);
@@ -986,7 +993,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         return candidate;
     }
 
-    ActivityRecord getResumedActivity() {
+    ActivityRecord getFocusedActivity() {
         final ActivityStack focusedStack = getFocusedStack();
         if (focusedStack == null) {
             return null;
@@ -1572,7 +1579,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     }
 
     boolean isRemoved() {
-        return mDisplayContent.isRemoved();
+        return mRemoved;
     }
 
     /**
@@ -1608,5 +1615,83 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
      */
     interface OnStackOrderChangedListener {
         void onStackOrderChanged(ActivityStack stack);
+    }
+
+    void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
+            boolean preserveWindows, boolean notifyClients) {
+        for (int stackNdx = getStackCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = getStackAt(stackNdx);
+            stack.ensureActivitiesVisible(starting, configChanges, preserveWindows,
+                    notifyClients);
+        }
+    }
+
+    void prepareFreezingTaskBounds() {
+        for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = getChildAt(stackNdx);
+            stack.prepareFreezingTaskBounds();
+        }
+    }
+
+    /**
+     * Removes the stacks in the node applying the content removal node from the display.
+     * @return last reparented stack, or {@code null} if the stacks had to be destroyed.
+     */
+    ActivityStack remove() {
+        mPreferredTopFocusableStack = null;
+        // TODO(b/153090332): Allow setting content removal mode per task display area
+        final boolean destroyContentOnRemoval = mDisplayContent.shouldDestroyContentOnRemove();
+        final TaskDisplayArea toDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
+        ActivityStack lastReparentedStack = null;
+
+        // Stacks could be reparented from the removed display area to other display area. After
+        // reparenting the last stack of the removed display area, the display area becomes ready to
+        // be released (no more ActivityStack-s). But, we cannot release it at that moment or the
+        // related WindowContainer will also be removed. So, we set display area as removed after
+        // reparenting stack finished.
+        // Keep the order from bottom to top.
+        int numStacks = getStackCount();
+        for (int stackNdx = 0; stackNdx < numStacks; stackNdx++) {
+            final ActivityStack stack = getStackAt(stackNdx);
+            // Always finish non-standard type stacks.
+            if (destroyContentOnRemoval || !stack.isActivityTypeStandardOrUndefined()) {
+                stack.finishAllActivitiesImmediately();
+            } else {
+                // If default display is in split-window mode, set windowing mode of the
+                // stack to split-screen secondary. Otherwise, set the windowing mode to
+                // undefined by default to let stack inherited the windowing mode from the
+                // new display.
+                final int windowingMode = toDisplayArea.isSplitScreenModeActivated()
+                        ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                        : WINDOWING_MODE_UNDEFINED;
+                stack.reparent(toDisplayArea, true /* onTop */);
+                stack.setWindowingMode(windowingMode);
+                lastReparentedStack = stack;
+            }
+            // Stacks may be removed from this display. Ensure each stack will be processed
+            // and the loop will end.
+            stackNdx -= numStacks - getStackCount();
+            numStacks = getStackCount();
+        }
+        mRemoved = true;
+
+        return lastReparentedStack;
+    }
+
+
+    @Override
+    void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        pw.println(prefix + "TaskDisplayArea " + getName());
+        if (mPreferredTopFocusableStack != null) {
+            pw.println(prefix + "  mPreferredTopFocusableStack=" + mPreferredTopFocusableStack);
+        }
+        if (mLastFocusedStack != null) {
+            pw.println(prefix + "  mLastFocusedStack=" + mLastFocusedStack);
+        }
+        pw.println(prefix + "  Application tokens in top down Z order:");
+        for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = getChildAt(stackNdx);
+            stack.dump(pw, prefix + "    ", dumpAll);
+        }
     }
 }
