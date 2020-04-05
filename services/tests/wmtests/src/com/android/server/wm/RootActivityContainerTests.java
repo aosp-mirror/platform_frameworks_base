@@ -349,8 +349,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         // Create Recents on secondary display.
         final TestDisplayContent secondDisplay = addNewDisplayContentAt(
                 DisplayContent.POSITION_TOP);
-        final ActivityStack stack = secondDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_RECENTS, true /* onTop */);
+        final ActivityStack stack = secondDisplay.getDefaultTaskDisplayArea()
+                .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS, true /* onTop */);
         final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
         new ActivityBuilder(mService).setTask(task).build();
 
