@@ -159,7 +159,7 @@ public class PackageInstallerSessionTest {
             params.isMultiPackage = true;
         }
         InstallSource installSource = InstallSource.create("testInstallInitiator",
-                "testInstallOriginator", "testInstaller");
+                "testInstallOriginator", "testInstaller", "testAttributionTag");
         return new PackageInstallerSession(
                 /* callback */ null,
                 /* context */null,
