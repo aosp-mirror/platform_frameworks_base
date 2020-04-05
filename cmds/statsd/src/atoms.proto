@@ -610,7 +610,7 @@ message ThermalThrottlingStateChanged {
 message ScreenStateChanged {
     // New screen state, from frameworks/base/core/proto/android/view/enums.proto.
     optional android.view.DisplayStateEnum state = 1
-            [(state_field_option).option = EXCLUSIVE_STATE, (state_field_option).nested = false];
+            [(state_field_option).exclusive_state = true, (state_field_option).nested = false];
 }
 
 /**
@@ -621,11 +621,11 @@ message ScreenStateChanged {
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message UidProcessStateChanged {
-    optional int32 uid = 1 [(state_field_option).option = PRIMARY_FIELD, (is_uid) = true];
+    optional int32 uid = 1 [(state_field_option).primary_field = true, (is_uid) = true];
 
     // The state, from frameworks/base/core/proto/android/app/enums.proto.
     optional android.app.ProcessStateEnum state = 2
-            [(state_field_option).option = EXCLUSIVE_STATE, (state_field_option).nested = false];
+            [(state_field_option).exclusive_state = true, (state_field_option).nested = false];
 }
 
 /**
@@ -657,7 +657,7 @@ message ActivityManagerSleepStateChanged {
         ASLEEP = 1;
         AWAKE = 2;
     }
-    optional State state = 1 [(state_field_option).option = EXCLUSIVE_STATE];
+    optional State state = 1 [(state_field_option).exclusive_state = true];
 }
 
 /**
@@ -676,7 +676,7 @@ message MemoryFactorStateChanged {
         CRITICAL = 4;   // critical memory.
 
     }
-    optional State factor = 1 [(state_field_option).option = EXCLUSIVE_STATE];
+    optional State factor = 1 [(state_field_option).exclusive_state = true];
 }
 
 /**
@@ -854,7 +854,7 @@ message ProcessLifeCycleStateChanged {
  */
 message BleScanStateChanged {
     repeated AttributionNode attribution_node = 1
-            [(state_field_option).option = PRIMARY_FIELD_FIRST_UID];
+            [(state_field_option).primary_field_first_uid = true];
 
     enum State {
         OFF = 0;
@@ -863,18 +863,18 @@ message BleScanStateChanged {
         RESET = 2;
     }
     optional State state = 2 [
-        (state_field_option).option = EXCLUSIVE_STATE,
+        (state_field_option).exclusive_state = true,
         (state_field_option).default_state_value = 0 /* State.OFF */,
-        (state_field_option).reset_state_value = 2 /* State.RESET */,
+        (state_field_option).trigger_state_reset_value = 2 /* State.RESET */,
         (state_field_option).nested = true
     ];
 
     // Does the scan have a filter.
-    optional bool is_filtered = 3 [(state_field_option).option = PRIMARY_FIELD];
+    optional bool is_filtered = 3 [(state_field_option).primary_field = true];
     // Whether the scan is a CALLBACK_TYPE_FIRST_MATCH scan. Called 'background' scan internally.
-    optional bool is_first_match = 4 [(state_field_option).option = PRIMARY_FIELD];
+    optional bool is_first_match = 4 [(state_field_option).primary_field = true];
     // Whether the scan set to piggy-back off the results of other scans (SCAN_MODE_OPPORTUNISTIC).
-    optional bool is_opportunistic = 5 [(state_field_option).option = PRIMARY_FIELD];
+    optional bool is_opportunistic = 5 [(state_field_option).primary_field = true];
 }
 
 /**
@@ -1105,15 +1105,14 @@ message CameraStateChanged {
  */
 message WakelockStateChanged {
     repeated AttributionNode attribution_node = 1
-            [(state_field_option).option = PRIMARY_FIELD_FIRST_UID];
+            [(state_field_option).primary_field_first_uid = true];
 
     // The type (level) of the wakelock; e.g. a partial wakelock or a full wakelock.
     // From frameworks/base/core/proto/android/os/enums.proto.
-    optional android.os.WakeLockLevelEnum type = 2 [(state_field_option).option = PRIMARY_FIELD];
-    ;
+    optional android.os.WakeLockLevelEnum type = 2 [(state_field_option).primary_field = true];
 
     // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
-    optional string tag = 3 [(state_field_option).option = PRIMARY_FIELD];
+    optional string tag = 3 [(state_field_option).primary_field = true];
 
     enum State {
         RELEASE = 0;
@@ -1122,7 +1121,7 @@ message WakelockStateChanged {
         CHANGE_ACQUIRE = 3;
     }
     optional State state = 4 [
-        (state_field_option).option = EXCLUSIVE_STATE,
+        (state_field_option).exclusive_state = true,
         (state_field_option).default_state_value = 0,
         (state_field_option).nested = true
     ];
@@ -3494,9 +3493,9 @@ message PictureInPictureStateChanged {
  *     services/core/java/com/android/server/wm/Session.java
  */
 message OverlayStateChanged {
-    optional int32 uid = 1 [(state_field_option).option = PRIMARY_FIELD, (is_uid) = true];
+    optional int32 uid = 1 [(state_field_option).primary_field = true, (is_uid) = true];
 
-    optional string package_name = 2 [(state_field_option).option = PRIMARY_FIELD];
+    optional string package_name = 2 [(state_field_option).primary_field = true];
 
     optional bool using_alert_window = 3;
 
@@ -3505,7 +3504,7 @@ message OverlayStateChanged {
         EXITED = 2;
     }
     optional State state = 4 [
-        (state_field_option).option = EXCLUSIVE_STATE,
+        (state_field_option).exclusive_state = true,
         (state_field_option).nested = false,
         (state_field_option).default_state_value = 2
     ];
@@ -3713,7 +3712,7 @@ message LmkKillOccurred {
  */
 message AppDied {
     // timestamp(elapsedRealtime) of record creation
-    optional uint64 timestamp_millis = 1 [(state_field_option).option = EXCLUSIVE_STATE];
+    optional uint64 timestamp_millis = 1 [(state_field_option).exclusive_state = true];
 }
 
 /**
@@ -4235,7 +4234,7 @@ message PrivacyIndicatorsInteracted {
         DIALOG_LINE_ITEM = 5;
     }
 
-    optional Type type = 1 [(state_field_option).option = EXCLUSIVE_STATE];
+    optional Type type = 1 [(state_field_option).exclusive_state = true];
 
     // Used if the type is LINE_ITEM
     optional string package_name = 2;
@@ -8698,13 +8697,12 @@ message RuntimeAppOpAccess {
     // Name of the package accessing app op
     optional string package_name = 2;
 
-    // operation string id per OPSTR_ constants in AppOpsManager.java
-    optional string op = 3;
+    // deprecated - set to empty string
+    optional string op_deprecated = 3 [deprecated = true];
 
     // attribution_tag; provided by developer when accessing related API, limited at 50 chars by
-    // API.
-    // Attributions must be provided through manifest using <attribution> tag available in R and
-    // above.
+    // API. Attributions must be provided through manifest using <attribution> tag available in R
+    // and above.
     optional string attribution_tag = 4;
 
     // message related to app op access, limited to 600 chars by API
@@ -8719,6 +8717,9 @@ message RuntimeAppOpAccess {
 
     // sampling strategy used to collect this message
     optional SamplingStrategy sampling_strategy = 6;
+
+    // operation id
+    optional android.app.AppOpEnum op = 7 [default = APP_OP_NONE];
 }
 
 /*

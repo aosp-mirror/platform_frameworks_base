@@ -252,7 +252,7 @@ public class NotificationEntryManager implements
     }
 
     @Override
-    public void onReorderingAllowed() {
+    public void onChangeAllowed() {
         updateNotifications("reordering is now allowed");
     }
 

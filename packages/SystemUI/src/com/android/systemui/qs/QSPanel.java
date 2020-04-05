@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -103,7 +104,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final NotificationMediaManager mNotificationMediaManager;
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final Executor mForegroundExecutor;
-    private final Executor mBackgroundExecutor;
+    private final DelayableExecutor mBackgroundExecutor;
     private LocalMediaManager mLocalMediaManager;
     private MediaDevice mDevice;
     private boolean mUpdateCarousel = false;
@@ -166,7 +167,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             QSLogger qsLogger,
             NotificationMediaManager notificationMediaManager,
             @Main Executor foregroundExecutor,
-            @Background Executor backgroundExecutor,
+            @Background DelayableExecutor backgroundExecutor,
             @Nullable LocalBluetoothManager localBluetoothManager
     ) {
         super(context, attrs);
@@ -278,7 +279,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             Log.d(TAG, "creating new player");
             player = new QSMediaPlayer(mContext, this, mNotificationMediaManager,
                     mForegroundExecutor, mBackgroundExecutor);
-
+            player.setListening(mListening);
             if (player.isPlaying()) {
                 mMediaCarousel.addView(player.getView(), 0, lp); // add in front
             } else {
@@ -583,6 +584,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
         if (mListening) {
             refreshAllTiles();
+        }
+        for (QSMediaPlayer player : mMediaPlayers) {
+            player.setListening(mListening);
         }
     }
 

@@ -44,6 +44,7 @@ import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +88,7 @@ public class QSPanelTest extends SysuiTestCase {
     @Mock
     private Executor mForegroundExecutor;
     @Mock
-    private Executor mBackgroundExecutor;
+    private DelayableExecutor mBackgroundExecutor;
     @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
 

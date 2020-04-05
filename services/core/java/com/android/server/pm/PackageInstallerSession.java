@@ -176,6 +176,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_SESSION_ID = "sessionId";
     private static final String ATTR_USER_ID = "userId";
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
+    private static final String ATTR_INSTALLER_ATTRIBUTION_TAG = "installerAttributionTag";
     private static final String ATTR_INSTALLER_UID = "installerUid";
     private static final String ATTR_INITIATING_PACKAGE_NAME =
             "installInitiatingPackageName";
@@ -640,6 +641,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.sessionId = sessionId;
             info.userId = userId;
             info.installerPackageName = mInstallSource.installerPackageName;
+            info.installerAttributionTag = mInstallSource.installerAttributionTag;
             info.resolvedBaseCodePath = (mResolvedBaseFile != null) ?
                     mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = mProgress;
@@ -1576,7 +1578,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             mInstallerUid = newOwnerAppInfo.uid;
-            mInstallSource = InstallSource.create(packageName, null, packageName);
+            mInstallSource = InstallSource.create(packageName, null, packageName, null);
         }
 
         // Persist the fact that we've sealed ourselves to prevent
@@ -2258,6 +2260,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     String getInstallerPackageName() {
         return getInstallSource().installerPackageName;
+    }
+
+    String getInstallerAttributionTag() {
+        return getInstallSource().installerAttributionTag;
     }
 
     InstallSource getInstallSource() {
@@ -3071,6 +3077,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeIntAttribute(out, ATTR_USER_ID, userId);
             writeStringAttribute(out, ATTR_INSTALLER_PACKAGE_NAME,
                     mInstallSource.installerPackageName);
+            writeStringAttribute(out, ATTR_INSTALLER_ATTRIBUTION_TAG,
+                    mInstallSource.installerAttributionTag);
             writeIntAttribute(out, ATTR_INSTALLER_UID, mInstallerUid);
             writeStringAttribute(out, ATTR_INITIATING_PACKAGE_NAME,
                     mInstallSource.initiatingPackageName);
@@ -3203,6 +3211,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final int sessionId = readIntAttribute(in, ATTR_SESSION_ID);
         final int userId = readIntAttribute(in, ATTR_USER_ID);
         final String installerPackageName = readStringAttribute(in, ATTR_INSTALLER_PACKAGE_NAME);
+        final String installerAttributionTag = readStringAttribute(in,
+                ATTR_INSTALLER_ATTRIBUTION_TAG);
         final int installerUid = readIntAttribute(in, ATTR_INSTALLER_UID, pm.getPackageUid(
                 installerPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId));
         final String installInitiatingPackageName =
@@ -3333,7 +3343,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
-                installOriginatingPackageName, installerPackageName);
+                installOriginatingPackageName, installerPackageName, installerAttributionTag);
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 installerThread, stagingManager, sessionId, userId, installerUid,
                 installSource, params, createdMillis, stageDir, stageCid, fileArray,

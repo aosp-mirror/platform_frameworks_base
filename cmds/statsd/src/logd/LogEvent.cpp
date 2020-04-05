@@ -17,13 +17,13 @@
 #define DEBUG false  // STOPSHIP if true
 #include "logd/LogEvent.h"
 
+#include <android-base/stringprintf.h>
+#include <android/binder_ibinder.h>
+#include <private/android_filesystem_config.h>
+
 #include "annotations.h"
 #include "stats_log_util.h"
 #include "statslog_statsd.h"
-
-#include <android/binder_ibinder.h>
-#include <android-base/stringprintf.h>
-#include <private/android_filesystem_config.h>
 
 namespace android {
 namespace os {
@@ -76,9 +76,7 @@ LogEvent::LogEvent(const LogEvent& event) {
 }
 
 LogEvent::LogEvent(int32_t uid, int32_t pid)
-    : mLogdTimestampNs(time(nullptr)),
-      mLogUid(uid),
-      mLogPid(pid) {
+    : mLogdTimestampNs(time(nullptr)), mLogUid(uid), mLogPid(pid) {
 }
 
 LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requiresStaging,
@@ -193,7 +191,7 @@ void LogEvent::parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last, uint8
         uint8_t typeInfo = readNextValue<uint8_t>();
         switch (getTypeId(typeInfo)) {
             case INT32_TYPE:
-                pos[2] = 2; // pos[2] determined by index of type in KeyValuePair in atoms.proto
+                pos[2] = 2;  // pos[2] determined by index of type in KeyValuePair in atoms.proto
                 parseInt32(pos, /*depth=*/2, last, /*numAnnotations=*/0);
                 break;
             case INT64_TYPE:
@@ -261,33 +259,38 @@ void LogEvent::parseTruncateTimestampAnnotation(uint8_t annotationType) {
     mTruncateTimestamp = readNextValue<uint8_t>();
 }
 
-void LogEvent::parseStateOptionAnnotation(uint8_t annotationType, int firstUidInChainIndex) {
-    if (mValues.empty() || annotationType != INT32_TYPE) {
+void LogEvent::parsePrimaryFieldAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != BOOL_TYPE) {
         mValid = false;
         return;
     }
 
-    int32_t stateOption = readNextValue<int32_t>();
-    switch (stateOption) {
-        case STATE_OPTION_EXCLUSIVE_STATE:
-            mValues[mValues.size() - 1].mAnnotations.setExclusiveState(true);
-            break;
-        case STATE_OPTION_PRIMARY_FIELD:
-            mValues[mValues.size() - 1].mAnnotations.setPrimaryField(true);
-            break;
-        case STATE_OPTION_PRIMARY_FIELD_FIRST_UID:
-            if (firstUidInChainIndex == -1) {
-                mValid = false;
-            } else {
-                mValues[firstUidInChainIndex].mAnnotations.setPrimaryField(true);
-            }
-            break;
-        default:
-            mValid = false;
-    }
+    const bool primaryField = readNextValue<uint8_t>();
+    mValues[mValues.size() - 1].mAnnotations.setPrimaryField(primaryField);
 }
 
-void LogEvent::parseResetStateAnnotation(uint8_t annotationType) {
+void LogEvent::parsePrimaryFieldFirstUidAnnotation(uint8_t annotationType,
+                                                   int firstUidInChainIndex) {
+    if (mValues.empty() || annotationType != BOOL_TYPE || -1 == firstUidInChainIndex) {
+        mValid = false;
+        return;
+    }
+
+    const bool primaryField = readNextValue<uint8_t>();
+    mValues[firstUidInChainIndex].mAnnotations.setPrimaryField(primaryField);
+}
+
+void LogEvent::parseExclusiveStateAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    const bool exclusiveState = readNextValue<uint8_t>();
+    mValues[mValues.size() - 1].mAnnotations.setExclusiveState(exclusiveState);
+}
+
+void LogEvent::parseTriggerStateResetAnnotation(uint8_t annotationType) {
     if (mValues.empty() || annotationType != INT32_TYPE) {
         mValid = false;
         return;
@@ -321,11 +324,17 @@ void LogEvent::parseAnnotations(uint8_t numAnnotations, int firstUidInChainIndex
             case ANNOTATION_ID_TRUNCATE_TIMESTAMP:
                 parseTruncateTimestampAnnotation(annotationType);
                 break;
-            case ANNOTATION_ID_STATE_OPTION:
-                parseStateOptionAnnotation(annotationType, firstUidInChainIndex);
+            case ANNOTATION_ID_PRIMARY_FIELD:
+                parsePrimaryFieldAnnotation(annotationType);
                 break;
-            case ANNOTATION_ID_RESET_STATE:
-                parseResetStateAnnotation(annotationType);
+            case ANNOTATION_ID_PRIMARY_FIELD_FIRST_UID:
+                parsePrimaryFieldFirstUidAnnotation(annotationType, firstUidInChainIndex);
+                break;
+            case ANNOTATION_ID_EXCLUSIVE_STATE:
+                parseExclusiveStateAnnotation(annotationType);
+                break;
+            case ANNOTATION_ID_TRIGGER_STATE_RESET:
+                parseTriggerStateResetAnnotation(annotationType);
                 break;
             case ANNOTATION_ID_STATE_NESTED:
                 parseStateNestedAnnotation(annotationType);
@@ -362,8 +371,7 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
     if (getTypeId(typeInfo) != INT32_TYPE) mValid = false;
     mTagId = readNextValue<int32_t>();
     numElements--;
-    parseAnnotations(getNumAnnotations(typeInfo)); // atom-level annotations
-
+    parseAnnotations(getNumAnnotations(typeInfo));  // atom-level annotations
 
     for (pos[0] = 1; pos[0] <= numElements && mValid; pos[0]++) {
         last[0] = (pos[0] == numElements);
@@ -372,7 +380,7 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
         uint8_t typeId = getTypeId(typeInfo);
 
         // TODO(b/144373276): handle errors passed to the socket
-        switch(typeId) {
+        switch (typeId) {
             case BOOL_TYPE:
                 parseBool(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
@@ -409,11 +417,11 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
 }
 
 uint8_t LogEvent::getTypeId(uint8_t typeInfo) {
-    return typeInfo & 0x0F; // type id in lower 4 bytes
+    return typeInfo & 0x0F;  // type id in lower 4 bytes
 }
 
 uint8_t LogEvent::getNumAnnotations(uint8_t typeInfo) {
-    return (typeInfo >> 4) & 0x0F; // num annotations in upper 4 bytes
+    return (typeInfo >> 4) & 0x0F;  // num annotations in upper 4 bytes
 }
 
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {
@@ -524,17 +532,17 @@ float LogEvent::GetFloat(size_t key, status_t* err) const {
 std::vector<uint8_t> LogEvent::GetStorage(size_t key, status_t* err) const {
     int field = getSimpleField(key);
     for (const auto& value : mValues) {
-      if (value.mField.getField() == field) {
-        if (value.mValue.getType() == STORAGE) {
-          return value.mValue.storage_value;
-        } else {
-          *err = BAD_TYPE;
-          return vector<uint8_t>();
+        if (value.mField.getField() == field) {
+            if (value.mValue.getType() == STORAGE) {
+                return value.mValue.storage_value;
+            } else {
+                *err = BAD_TYPE;
+                return vector<uint8_t>();
+            }
         }
-      }
-      if ((size_t)value.mField.getPosAtDepth(0) > key) {
-        break;
-      }
+        if ((size_t)value.mField.getPosAtDepth(0) > key) {
+            break;
+        }
     }
 
     *err = BAD_INDEX;

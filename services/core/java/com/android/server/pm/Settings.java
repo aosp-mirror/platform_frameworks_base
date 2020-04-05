@@ -2884,6 +2884,10 @@ public final class Settings {
         if (installSource.installerPackageName != null) {
             serializer.attribute(null, "installer", installSource.installerPackageName);
         }
+        if (installSource.installerAttributionTag != null) {
+            serializer.attribute(null, "installerAttributionTag",
+                    installSource.installerAttributionTag);
+        }
         if (installSource.isOrphaned) {
             serializer.attribute(null, "isOrphaned", "true");
         }
@@ -3655,6 +3659,7 @@ public final class Settings {
         String cpuAbiOverrideString = null;
         String systemStr = null;
         String installerPackageName = null;
+        String installerAttributionTag = null;
         String isOrphaned = null;
         String installOriginatingPackageName = null;
         String installInitiatingPackageName = null;
@@ -3703,6 +3708,7 @@ public final class Settings {
                 }
             }
             installerPackageName = parser.getAttributeValue(null, "installer");
+            installerAttributionTag = parser.getAttributeValue(null, "installerAttributionTag");
             isOrphaned = parser.getAttributeValue(null, "isOrphaned");
             installInitiatingPackageName = parser.getAttributeValue(null, "installInitiator");
             installOriginatingPackageName = parser.getAttributeValue(null, "installOriginator");
@@ -3865,7 +3871,7 @@ public final class Settings {
             packageSetting.uidError = "true".equals(uidError);
             InstallSource installSource = InstallSource.create(
                     installInitiatingPackageName, installOriginatingPackageName,
-                    installerPackageName, "true".equals(isOrphaned),
+                    installerPackageName, installerAttributionTag, "true".equals(isOrphaned),
                     "true".equals(installInitiatorUninstalled));
             packageSetting.installSource = installSource;
             packageSetting.volumeUuid = volumeUuid;
@@ -4580,6 +4586,8 @@ public final class Settings {
             pw.print(",");
             pw.print(ps.installSource.installerPackageName != null
                     ? ps.installSource.installerPackageName : "?");
+            pw.print(ps.installSource.installerAttributionTag != null
+                    ? "(" + ps.installSource.installerAttributionTag + ")" : "");
             pw.println();
             if (pkg != null) {
                 pw.print(checkinTag); pw.print("-"); pw.print("splt,");
@@ -4795,6 +4803,10 @@ public final class Settings {
         if (ps.installSource.installerPackageName != null) {
             pw.print(prefix); pw.print("  installerPackageName=");
             pw.println(ps.installSource.installerPackageName);
+        }
+        if (ps.installSource.installerAttributionTag != null) {
+            pw.print(prefix); pw.print("  installerAttributionTag=");
+            pw.println(ps.installSource.installerAttributionTag);
         }
         if (ps.volumeUuid != null) {
             pw.print(prefix); pw.print("  volumeUuid=");

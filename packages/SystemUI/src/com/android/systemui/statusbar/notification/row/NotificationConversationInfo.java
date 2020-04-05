@@ -20,7 +20,6 @@ import static android.app.Notification.EXTRA_IS_GROUP_CONVERSATION;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-import static android.provider.Settings.Secure.BUBBLE_IMPORTANT_CONVERSATIONS;
 
 import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
 
@@ -44,7 +43,6 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.transition.ChangeBounds;
@@ -56,15 +54,12 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.notification.ConversationIconFactory;
-import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -517,7 +512,6 @@ public class NotificationConversationInfo extends LinearLayout implements
         bgHandler.post(
                 new UpdateChannelRunnable(mINotificationManager, mPackageName,
                         mAppUid, mSelectedAction, mNotificationChannel));
-        mVisualStabilityManager.temporarilyAllowReordering();
     }
 
     /**

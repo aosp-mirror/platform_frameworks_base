@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.annotation.Nullable;
+import android.app.NotificationChannel;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.Log;
@@ -85,6 +86,17 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
         return group.expanded;
     }
 
+    /**
+     * @return if the group that this notification is associated with logically is expanded
+     */
+    public boolean isLogicalGroupExpanded(StatusBarNotification sbn) {
+        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        if (group == null) {
+            return false;
+        }
+        return group.expanded;
+    }
+
     public void setGroupExpanded(StatusBarNotification sbn, boolean expanded) {
         NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
         if (group == null) {
@@ -147,7 +159,15 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
         }
     }
 
+    /**
+     * Notify the group manager that a new entry was added
+     */
     public void onEntryAdded(final NotificationEntry added) {
+        updateIsolation(added);
+        onEntryAddedInternal(added);
+    }
+
+    private void onEntryAddedInternal(final NotificationEntry added) {
         if (added.isRowRemoved()) {
             added.setDebugThrowable(new Throwable());
         }
@@ -193,9 +213,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
     }
 
     private void onEntryBecomingChild(NotificationEntry entry) {
-        if (shouldIsolate(entry)) {
-            isolateNotification(entry);
-        }
+        updateIsolation(entry);
     }
 
     private void updateSuppression(NotificationGroup group) {
@@ -242,15 +260,6 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
         return count;
     }
 
-    private NotificationEntry getIsolatedChild(String groupKey) {
-        for (StatusBarNotification sbn : mIsolatedEntries.values()) {
-            if (sbn.getGroupKey().equals(groupKey) && isIsolated(sbn.getKey())) {
-                return mGroupMap.get(sbn.getKey()).summary;
-            }
-        }
-        return null;
-    }
-
     /**
      * Update an entry's group information
      * @param entry notification entry to update
@@ -278,7 +287,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
         if (mGroupMap.get(getGroupKey(entry.getKey(), oldGroupKey)) != null) {
             onEntryRemovedInternal(entry, oldGroupKey, oldIsGroup, oldIsGroupSummary);
         }
-        onEntryAdded(entry);
+        onEntryAddedInternal(entry);
         mIsUpdatingUnchangedGroup = false;
         if (isIsolated(entry.getSbn().getKey())) {
             mIsolatedEntries.put(entry.getKey(), entry.getSbn());
@@ -413,11 +422,26 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
             return null;
         }
         ArrayList<NotificationEntry> children = new ArrayList<>(group.children.values());
-        NotificationEntry isolatedChild = getIsolatedChild(summary.getGroupKey());
-        if (isolatedChild != null) {
-            children.add(isolatedChild);
+        for (StatusBarNotification sbn : mIsolatedEntries.values()) {
+            if (sbn.getGroupKey().equals(summary.getGroupKey())) {
+                children.add(mGroupMap.get(sbn.getKey()).summary);
+            }
         }
         return children;
+    }
+
+    /**
+     * Get the children that are in the summary's group, not including those isolated.
+     *
+     * @param summary summary of a group
+     * @return list of the children
+     */
+    public @Nullable ArrayList<NotificationEntry> getChildren(StatusBarNotification summary) {
+        NotificationGroup group = mGroupMap.get(summary.getGroupKey());
+        if (group == null) {
+            return null;
+        }
+        return new ArrayList<>(group.children.values());
     }
 
     /**
@@ -495,17 +519,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
 
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        onAlertStateChanged(entry, isHeadsUp);
-    }
-
-    private void onAlertStateChanged(NotificationEntry entry, boolean isAlerting) {
-        if (isAlerting) {
-            if (shouldIsolate(entry)) {
-                isolateNotification(entry);
-            }
-        } else {
-            stopIsolatingNotification(entry);
-        }
+        updateIsolation(entry);
     }
 
     /**
@@ -519,13 +533,17 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
 
     private boolean shouldIsolate(NotificationEntry entry) {
         StatusBarNotification sbn = entry.getSbn();
-        NotificationGroup notificationGroup = mGroupMap.get(sbn.getGroupKey());
         if (!sbn.isGroup() || sbn.getNotification().isGroupSummary()) {
             return false;
+        }
+        NotificationChannel channel = entry.getChannel();
+        if (channel != null && channel.isImportantConversation()) {
+            return true;
         }
         if (mHeadsUpManager != null && !mHeadsUpManager.isAlerting(entry.getKey())) {
             return false;
         }
+        NotificationGroup notificationGroup = mGroupMap.get(sbn.getGroupKey());
         return (sbn.getNotification().fullScreenIntent != null
                     || notificationGroup == null
                     || !notificationGroup.expanded
@@ -545,7 +563,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
 
         mIsolatedEntries.put(sbn.getKey(), sbn);
 
-        onEntryAdded(entry);
+        onEntryAddedInternal(entry);
         // We also need to update the suppression of the old group, because this call comes
         // even before the groupManager knows about the notification at all.
         // When the notification gets added afterwards it is already isolated and therefore
@@ -557,17 +575,31 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
     }
 
     /**
+     * Update the isolation of an entry, splitting it from the group.
+     */
+    public void updateIsolation(NotificationEntry entry) {
+        boolean isIsolated = isIsolated(entry.getSbn().getKey());
+        if (shouldIsolate(entry)) {
+            if (!isIsolated) {
+                isolateNotification(entry);
+            }
+        } else if (isIsolated) {
+            stopIsolatingNotification(entry);
+        }
+    }
+
+    /**
      * Stop isolating a notification and re-group it with its original logical group.
      *
      * @param entry the notification to un-isolate
      */
     private void stopIsolatingNotification(NotificationEntry entry) {
         StatusBarNotification sbn = entry.getSbn();
-        if (mIsolatedEntries.containsKey(sbn.getKey())) {
+        if (isIsolated(sbn.getKey())) {
             // not isolated anymore, we need to update the groups
             onEntryRemovedInternal(entry, entry.getSbn());
             mIsolatedEntries.remove(sbn.getKey());
-            onEntryAdded(entry);
+            onEntryAddedInternal(entry);
             for (OnGroupChangeListener listener : mListeners) {
                 listener.onGroupsChanged();
             }

@@ -56,6 +56,7 @@ public class InstallStart extends Activity {
         mIPermissionManager = AppGlobals.getPermissionManager();
         Intent intent = getIntent();
         String callingPackage = getCallingPackage();
+        String callingAttributionTag = null;
 
         final boolean isSessionInstall =
                 PackageInstaller.ACTION_CONFIRM_INSTALL.equals(intent.getAction());
@@ -69,6 +70,8 @@ public class InstallStart extends Activity {
             PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
             PackageInstaller.SessionInfo sessionInfo = packageInstaller.getSessionInfo(sessionId);
             callingPackage = (sessionInfo != null) ? sessionInfo.getInstallerPackageName() : null;
+            callingAttributionTag =
+                    (sessionInfo != null) ? sessionInfo.getInstallerAttributionTag() : null;
         }
 
         final ApplicationInfo sourceInfo = getSourceInfo(callingPackage);
@@ -104,6 +107,8 @@ public class InstallStart extends Activity {
         // The the installation source as the nextActivity thinks this activity is the source, hence
         // set the originating UID and sourceInfo explicitly
         nextActivity.putExtra(PackageInstallerActivity.EXTRA_CALLING_PACKAGE, callingPackage);
+        nextActivity.putExtra(PackageInstallerActivity.EXTRA_CALLING_ATTRIBUTION_TAG,
+                callingAttributionTag);
         nextActivity.putExtra(PackageInstallerActivity.EXTRA_ORIGINAL_SOURCE_INFO, sourceInfo);
         nextActivity.putExtra(Intent.EXTRA_ORIGINATING_UID, originatingUid);
 

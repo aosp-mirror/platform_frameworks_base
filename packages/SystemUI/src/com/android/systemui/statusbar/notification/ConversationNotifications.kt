@@ -26,6 +26,7 @@ import com.android.internal.widget.ConversationLayout
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationContentView
+import com.android.systemui.statusbar.phone.NotificationGroupManager
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -60,6 +61,7 @@ class ConversationNotificationProcessor @Inject constructor(
 @Singleton
 class ConversationNotificationManager @Inject constructor(
     private val notificationEntryManager: NotificationEntryManager,
+    private val notificationGroupManager: NotificationGroupManager,
     private val context: Context
 ) {
     // Need this state to be thread safe, since it's accessed from the ui thread
@@ -81,10 +83,19 @@ class ConversationNotificationManager @Inject constructor(
                             if (rankingMap.getRanking(entry.sbn.key, ranking) &&
                                     ranking.isConversation) {
                                 val important = ranking.channel.isImportantConversation
+                                var changed = false
                                 entry.row?.layouts?.asSequence()
                                         ?.flatMap(::getLayouts)
                                         ?.mapNotNull { it as? ConversationLayout }
-                                        ?.forEach { it.setIsImportantConversation(important) }
+                                        ?.forEach {
+                                            if (important != it.isImportantConversation) {
+                                                it.setIsImportantConversation(important)
+                                                changed = true
+                                            }
+                                        }
+                                if (changed) {
+                                    notificationGroupManager.updateIsolation(entry)
+                                }
                             }
                         }
             }

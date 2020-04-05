@@ -7413,7 +7413,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     boolean isResumedActivityOnDisplay() {
         final DisplayContent display = getDisplay();
-        return display != null && this == display.mTaskContainers.getResumedActivity();
+        if (display == null) {
+            return false;
+        }
+        for (int tdaNdx = display.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
+            final TaskDisplayArea taskDisplayArea = display.getTaskDisplayAreaAt(tdaNdx);
+            final ActivityRecord resumedActivity = taskDisplayArea.getFocusedActivity();
+            if (resumedActivity != null) {
+                return resumedActivity == this;
+            }
+        }
+        return false;
     }
 
 

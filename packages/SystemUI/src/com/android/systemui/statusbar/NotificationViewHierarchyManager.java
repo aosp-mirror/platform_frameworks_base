@@ -177,12 +177,32 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                     currentUserId);
             ent.setSensitive(sensitive, deviceSensitive);
             ent.getRow().setNeedsRedaction(needsRedaction);
-            if (mGroupManager.isChildInGroupWithSummary(ent.getSbn())) {
-                NotificationEntry summary = mGroupManager.getGroupSummary(ent.getSbn());
-                List<NotificationEntry> orderedChildren = mTmpChildOrderMap.get(summary);
+            boolean isChildInGroup = mGroupManager.isChildInGroupWithSummary(ent.getSbn());
+
+            boolean groupChangesAllowed = mVisualStabilityManager.areGroupChangesAllowed()
+                    || !ent.hasFinishedInitialization();
+            NotificationEntry parent = mGroupManager.getGroupSummary(ent.getSbn());
+            if (!groupChangesAllowed) {
+                // We don't to change groups while the user is looking at them
+                boolean wasChildInGroup = ent.isChildInGroup();
+                if (isChildInGroup && !wasChildInGroup) {
+                    isChildInGroup = wasChildInGroup;
+                    mVisualStabilityManager.addGroupChangesAllowedCallback(mEntryManager);
+                } else if (!isChildInGroup && wasChildInGroup) {
+                    // We allow grouping changes if the group was collapsed
+                    if (mGroupManager.isLogicalGroupExpanded(ent.getSbn())) {
+                        isChildInGroup = wasChildInGroup;
+                        parent = ent.getRow().getNotificationParent().getEntry();
+                        mVisualStabilityManager.addGroupChangesAllowedCallback(mEntryManager);
+                    }
+                }
+            }
+
+            if (isChildInGroup) {
+                List<NotificationEntry> orderedChildren = mTmpChildOrderMap.get(parent);
                 if (orderedChildren == null) {
                     orderedChildren = new ArrayList<>();
-                    mTmpChildOrderMap.put(summary, orderedChildren);
+                    mTmpChildOrderMap.put(parent, orderedChildren);
                 }
                 orderedChildren.add(ent);
             } else {
@@ -205,7 +225,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         }
 
         for (ExpandableNotificationRow viewToRemove : viewsToRemove) {
-            if (mGroupManager.isChildInGroupWithSummary(viewToRemove.getEntry().getSbn())) {
+            if (mEntryManager.getPendingOrActiveNotif(viewToRemove.getEntry().getKey()) != null) {
                 // we are only transferring this notification to its parent, don't generate an
                 // animation
                 mListContainer.setChildTransferInProgress(true);

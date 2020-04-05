@@ -406,14 +406,16 @@ public class PackageInstaller {
     private final IPackageInstaller mInstaller;
     private final int mUserId;
     private final String mInstallerPackageName;
+    private final String mAttributionTag;
 
     private final ArrayList<SessionCallbackDelegate> mDelegates = new ArrayList<>();
 
     /** {@hide} */
     public PackageInstaller(IPackageInstaller installer,
-            String installerPackageName, int userId) {
+            String installerPackageName, String installerAttributionTag, int userId) {
         mInstaller = installer;
         mInstallerPackageName = installerPackageName;
+        mAttributionTag = installerAttributionTag;
         mUserId = userId;
     }
 
@@ -437,7 +439,8 @@ public class PackageInstaller {
      */
     public int createSession(@NonNull SessionParams params) throws IOException {
         try {
-            return mInstaller.createSession(params, mInstallerPackageName, mUserId);
+            return mInstaller.createSession(params, mInstallerPackageName, mAttributionTag,
+                    mUserId);
         } catch (RuntimeException e) {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
@@ -2079,6 +2082,8 @@ public class PackageInstaller {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String installerPackageName;
         /** {@hide} */
+        public String installerAttributionTag;
+        /** {@hide} */
         @UnsupportedAppUsage
         public String resolvedBaseCodePath;
         /** {@hide} */
@@ -2167,6 +2172,7 @@ public class PackageInstaller {
             sessionId = source.readInt();
             userId = source.readInt();
             installerPackageName = source.readString();
+            installerAttributionTag = source.readString();
             resolvedBaseCodePath = source.readString();
             progress = source.readFloat();
             sealed = source.readInt() != 0;
@@ -2225,6 +2231,14 @@ public class PackageInstaller {
          */
         public @Nullable String getInstallerPackageName() {
             return installerPackageName;
+        }
+
+        /**
+         * @return {@link android.content.Context#getAttributionTag attribution tag} of the context
+         * that created this session
+         */
+        public @Nullable String getInstallerAttributionTag() {
+            return installerAttributionTag;
         }
 
         /**
@@ -2699,6 +2713,7 @@ public class PackageInstaller {
             dest.writeInt(sessionId);
             dest.writeInt(userId);
             dest.writeString(installerPackageName);
+            dest.writeString(installerAttributionTag);
             dest.writeString(resolvedBaseCodePath);
             dest.writeFloat(progress);
             dest.writeInt(sealed ? 1 : 0);

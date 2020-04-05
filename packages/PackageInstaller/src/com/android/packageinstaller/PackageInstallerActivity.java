@@ -71,6 +71,7 @@ public class PackageInstallerActivity extends AlertActivity {
     static final String SCHEME_PACKAGE = "package";
 
     static final String EXTRA_CALLING_PACKAGE = "EXTRA_CALLING_PACKAGE";
+    static final String EXTRA_CALLING_ATTRIBUTION_TAG = "EXTRA_CALLING_ATTRIBUTION_TAG";
     static final String EXTRA_ORIGINAL_SOURCE_INFO = "EXTRA_ORIGINAL_SOURCE_INFO";
     private static final String ALLOW_UNKNOWN_SOURCES_KEY =
             PackageInstallerActivity.class.getName() + "ALLOW_UNKNOWN_SOURCES_KEY";
@@ -90,6 +91,7 @@ public class PackageInstallerActivity extends AlertActivity {
     PackageInstaller mInstaller;
     PackageInfo mPkgInfo;
     String mCallingPackage;
+    private String mCallingAttributionTag;
     ApplicationInfo mSourceInfo;
 
     // ApplicationInfo object primarily used for already existing applications
@@ -200,7 +202,9 @@ public class PackageInstallerActivity extends AlertActivity {
             // allowed to do it yet).
             int appOpCode =
                     AppOpsManager.permissionToOpCode(Manifest.permission.REQUEST_INSTALL_PACKAGES);
-            mAppOpsManager.noteOpNoThrow(appOpCode, mOriginatingUid, mOriginatingPackage);
+            mAppOpsManager.noteOpNoThrow(appOpCode, mOriginatingUid, mOriginatingPackage,
+                    mCallingAttributionTag,
+                    "Successfully started package installation activity");
 
             DialogFragment currentDialog =
                     (DialogFragment) getFragmentManager().findFragmentByTag("dialog");
@@ -299,12 +303,12 @@ public class PackageInstallerActivity extends AlertActivity {
         final Intent intent = getIntent();
 
         mCallingPackage = intent.getStringExtra(EXTRA_CALLING_PACKAGE);
+        mCallingAttributionTag = intent.getStringExtra(EXTRA_CALLING_ATTRIBUTION_TAG);
         mSourceInfo = intent.getParcelableExtra(EXTRA_ORIGINAL_SOURCE_INFO);
         mOriginatingUid = intent.getIntExtra(Intent.EXTRA_ORIGINATING_UID,
                 PackageInstaller.SessionParams.UID_UNKNOWN);
         mOriginatingPackage = (mOriginatingUid != PackageInstaller.SessionParams.UID_UNKNOWN)
                 ? getPackageNameForUid(mOriginatingUid) : null;
-
 
         final Uri packageUri;
 
@@ -472,8 +476,9 @@ public class PackageInstallerActivity extends AlertActivity {
         // Shouldn't use static constant directly, see b/65534401.
         final int appOpCode =
                 AppOpsManager.permissionToOpCode(Manifest.permission.REQUEST_INSTALL_PACKAGES);
-        final int appOpMode = mAppOpsManager.noteOpNoThrow(appOpCode,
-                mOriginatingUid, mOriginatingPackage);
+        final int appOpMode = mAppOpsManager.noteOpNoThrow(appOpCode, mOriginatingUid,
+                mOriginatingPackage, mCallingAttributionTag,
+                "Started package installation activity");
         switch (appOpMode) {
             case AppOpsManager.MODE_DEFAULT:
                 mAppOpsManager.setMode(appOpCode, mOriginatingUid,

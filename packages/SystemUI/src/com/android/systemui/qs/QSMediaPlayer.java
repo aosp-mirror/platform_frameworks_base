@@ -16,11 +16,14 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.util.SysuiLifecycle.viewAttachLifecycle;
+
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.util.Log;
 import android.view.View;
@@ -28,12 +31,16 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 import com.android.systemui.media.MediaControlPanel;
+import com.android.systemui.media.SeekBarObserver;
+import com.android.systemui.media.SeekBarViewModel;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.concurrent.Executor;
 
@@ -54,6 +61,9 @@ public class QSMediaPlayer extends MediaControlPanel {
     };
 
     private final QSPanel mParent;
+    private final DelayableExecutor mBackgroundExecutor;
+    private final SeekBarViewModel mSeekBarViewModel;
+    private final SeekBarObserver mSeekBarObserver;
 
     /**
      * Initialize quick shade version of player
@@ -64,10 +74,20 @@ public class QSMediaPlayer extends MediaControlPanel {
      * @param backgroundExecutor
      */
     public QSMediaPlayer(Context context, ViewGroup parent, NotificationMediaManager manager,
-            Executor foregroundExecutor, Executor backgroundExecutor) {
+            Executor foregroundExecutor, DelayableExecutor backgroundExecutor) {
         super(context, parent, manager, R.layout.qs_media_panel, QS_ACTION_IDS, foregroundExecutor,
                 backgroundExecutor);
         mParent = (QSPanel) parent;
+        mBackgroundExecutor = backgroundExecutor;
+        mSeekBarViewModel = new SeekBarViewModel(backgroundExecutor);
+        mSeekBarObserver = new SeekBarObserver(getView());
+        // Can't use the viewAttachLifecycle of media player because remove/add is used to adjust
+        // priority of players. As soon as it is removed, the lifecycle will end and the seek bar
+        // will stop updating. So, use the lifecycle of the parent instead.
+        mSeekBarViewModel.getProgress().observe(viewAttachLifecycle(parent), mSeekBarObserver);
+        SeekBar bar = getView().findViewById(R.id.media_progress_bar);
+        bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());
+        bar.setOnTouchListener(mSeekBarViewModel.getSeekBarTouchListener());
     }
 
     /**
@@ -115,6 +135,11 @@ public class QSMediaPlayer extends MediaControlPanel {
             thisBtn.setVisibility(View.GONE);
         }
 
+        // Seek Bar
+        final MediaController controller = new MediaController(getContext(), token);
+        mBackgroundExecutor.execute(
+                () -> mSeekBarViewModel.updateController(controller, iconColor));
+
         // Set up long press menu
         View guts = mMediaNotifView.findViewById(R.id.media_guts);
         View options = mMediaNotifView.findViewById(R.id.qs_media_controls_options);
@@ -154,5 +179,17 @@ public class QSMediaPlayer extends MediaControlPanel {
             options.setVisibility(View.VISIBLE);
             return true; // consumed click
         });
+    }
+
+    /**
+     * Sets the listening state of the player.
+     *
+     * Should be set to true when the QS panel is open. Otherwise, false. This is a signal to avoid
+     * unnecessary work when the QS panel is closed.
+     *
+     * @param listening True when player should be active. Otherwise, false.
+     */
+    public void setListening(boolean listening) {
+        mSeekBarViewModel.setListening(listening);
     }
 }
