@@ -19,14 +19,18 @@ package com.android.server.textclassifier;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -39,6 +43,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.textclassifier.ConversationAction;
 import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.SystemTextClassifierMetadata;
@@ -69,6 +74,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 /**
  * A manager for TextClassifier services.
@@ -203,7 +209,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 request.getSystemTextClassifierMetadata(),
                 /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ true,
-                service -> service.onClassifyText(sessionId, request, callback),
+                service -> service.onClassifyText(sessionId, request, wrap(callback)),
                 "onClassifyText",
                 callback);
     }
@@ -289,7 +295,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 request.getSystemTextClassifierMetadata(),
                 /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ true,
-                service -> service.onSuggestConversationActions(sessionId, request, callback),
+                service -> service.onSuggestConversationActions(
+                        sessionId, request, wrap(callback)),
                 "onSuggestConversationActions",
                 callback);
     }
@@ -462,6 +469,10 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                                 Binder.getCallingUid()));
             }
         }
+    }
+
+    private static ITextClassifierCallback wrap(ITextClassifierCallback orig) {
+        return new CallbackWrapper(orig);
     }
 
     private void onTextClassifierServicePackageOverrideChanged(String overriddenPackage) {
@@ -1002,6 +1013,114 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             }
             mServicePackageOverride = currentServicePackageOverride;
             onTextClassifierServicePackageOverrideChanged(currentServicePackageOverride);
+        }
+    }
+
+    /**
+     * Wraps an ITextClassifierCallback and modifies the response to it where necessary.
+     */
+    private static final class CallbackWrapper extends ITextClassifierCallback.Stub {
+
+        private final ITextClassifierCallback mWrapped;
+
+        CallbackWrapper(ITextClassifierCallback wrapped) {
+            mWrapped = Objects.requireNonNull(wrapped);
+        }
+
+        @Override
+        public void onSuccess(Bundle result) {
+            final Parcelable parcelled = TextClassifierService.getResponse(result);
+            if (parcelled instanceof TextClassification) {
+                rewriteTextClassificationIcons(result);
+            } else if (parcelled instanceof ConversationActions) {
+                rewriteConversationActionsIcons(result);
+            } else {
+                // do nothing.
+            }
+            try {
+                mWrapped.onSuccess(result);
+            } catch (RemoteException e) {
+                Slog.e(LOG_TAG, "Callback error", e);
+            }
+        }
+
+        private static void rewriteTextClassificationIcons(Bundle result) {
+            final TextClassification classification = TextClassifierService.getResponse(result);
+            boolean rewrite = false;
+            for (RemoteAction action : classification.getActions()) {
+                rewrite |= shouldRewriteIcon(action);
+            }
+            if (rewrite) {
+                TextClassifierService.putResponse(
+                        result,
+                        classification.toBuilder()
+                                .clearActions()
+                                .addActions(classification.getActions()
+                                        .stream()
+                                        .map(action -> validAction(action))
+                                        .collect(Collectors.toList()))
+                                .build());
+            }
+        }
+
+        private static void rewriteConversationActionsIcons(Bundle result) {
+            final ConversationActions convActions = TextClassifierService.getResponse(result);
+            boolean rewrite = false;
+            for (ConversationAction convAction : convActions.getConversationActions()) {
+                rewrite |= shouldRewriteIcon(convAction.getAction());
+            }
+            if (rewrite) {
+                TextClassifierService.putResponse(
+                        result,
+                        new ConversationActions(
+                                convActions.getConversationActions()
+                                        .stream()
+                                        .map(convAction -> convAction.toBuilder()
+                                                .setAction(validAction(convAction.getAction()))
+                                                .build())
+                                        .collect(Collectors.toList()),
+                                convActions.getId()));
+            }
+        }
+
+        @Nullable
+        private static RemoteAction validAction(@Nullable RemoteAction action) {
+            if (!shouldRewriteIcon(action)) {
+                return action;
+            }
+
+            final RemoteAction newAction = new RemoteAction(
+                    changeIcon(action.getIcon()),
+                    action.getTitle(),
+                    action.getContentDescription(),
+                    action.getActionIntent());
+            newAction.setEnabled(action.isEnabled());
+            newAction.setShouldShowIcon(action.shouldShowIcon());
+            return newAction;
+        }
+
+        private static boolean shouldRewriteIcon(@Nullable RemoteAction action) {
+            // Check whether to rewrite the icon.
+            // Rewrite icons to ensure that the icons do not:
+            // 1. Leak package names
+            // 2. are renderable in the client process.
+            return action != null && action.getIcon().getType() == Icon.TYPE_RESOURCE;
+        }
+
+        /** Changes icon of type=RESOURCES to icon of type=URI. */
+        private static Icon changeIcon(Icon icon) {
+            final Uri uri = IconsUriHelper.getInstance()
+                    .getContentUri(icon.getResPackage(), icon.getResId());
+            return Icon.createWithContentUri(uri);
+        }
+
+        @Override
+        public void onFailure() {
+            try {
+                mWrapped.onFailure();
+            } catch (RemoteException e) {
+                Slog.e(LOG_TAG, "Callback error", e);
+            }
         }
     }
 }

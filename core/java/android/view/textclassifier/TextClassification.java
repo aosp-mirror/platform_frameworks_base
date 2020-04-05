@@ -48,6 +48,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -270,6 +271,20 @@ public final class TextClassification implements Parcelable {
         return mExtras;
     }
 
+    /** @hide */
+    public Builder toBuilder() {
+        return new Builder()
+                .setId(mId)
+                .setText(mText)
+                .addActions(mActions)
+                .setEntityConfidence(mEntityConfidence)
+                .setIcon(mLegacyIcon)
+                .setLabel(mLegacyLabel)
+                .setIntent(mLegacyIntent)
+                .setOnClickListener(mLegacyOnClickListener)
+                .setExtras(mExtras);
+    }
+
     @Override
     public String toString() {
         return String.format(Locale.US,
@@ -323,7 +338,7 @@ public final class TextClassification implements Parcelable {
      */
     public static final class Builder {
 
-        @NonNull private List<RemoteAction> mActions = new ArrayList<>();
+        @NonNull private final List<RemoteAction> mActions = new ArrayList<>();
         @NonNull private final Map<String, Float> mTypeScoreMap = new ArrayMap<>();
         @Nullable private String mText;
         @Nullable private Drawable mLegacyIcon;
@@ -332,8 +347,6 @@ public final class TextClassification implements Parcelable {
         @Nullable private OnClickListener mLegacyOnClickListener;
         @Nullable private String mId;
         @Nullable private Bundle mExtras;
-        @NonNull private final ArrayList<Intent> mActionIntents = new ArrayList<>();
-        @Nullable private Bundle mForeignLanguageExtra;
 
         /**
          * Sets the classified text.
@@ -361,6 +374,18 @@ public final class TextClassification implements Parcelable {
             return this;
         }
 
+        Builder setEntityConfidence(EntityConfidence scores) {
+            mTypeScoreMap.clear();
+            mTypeScoreMap.putAll(scores.toMap());
+            return this;
+        }
+
+        /** @hide */
+        public Builder clearEntityTypes() {
+            mTypeScoreMap.clear();
+            return this;
+        }
+
         /**
          * Adds an action that may be performed on the classified text. Actions should be added in
          * order of likelihood that the user will use them, with the most likely action being added
@@ -368,19 +393,21 @@ public final class TextClassification implements Parcelable {
          */
         @NonNull
         public Builder addAction(@NonNull RemoteAction action) {
-            return addAction(action, null);
-        }
-
-        /**
-         * @param intent the intent in the remote action.
-         * @see #addAction(RemoteAction)
-         * @hide
-         */
-        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public Builder addAction(RemoteAction action, @Nullable Intent intent) {
             Preconditions.checkArgument(action != null);
             mActions.add(action);
-            mActionIntents.add(intent);
+            return this;
+        }
+
+        /** @hide */
+        public Builder addActions(Collection<RemoteAction> actions) {
+            Objects.requireNonNull(actions);
+            mActions.addAll(actions);
+            return this;
+        }
+
+        /** @hide */
+        public Builder clearActions() {
+            mActions.clear();
             return this;
         }
 
@@ -462,16 +489,6 @@ public final class TextClassification implements Parcelable {
         @NonNull
         public Builder setExtras(@Nullable Bundle extras) {
             mExtras = extras;
-            return this;
-        }
-
-        /**
-         * @see #setExtras(Bundle)
-         * @hide
-         */
-        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public Builder setForeignLanguageExtra(@Nullable Bundle extra) {
-            mForeignLanguageExtra = extra;
             return this;
         }
 
