@@ -354,7 +354,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         spyOn(parentWindowContainer);
         parentWindowContainer.setBounds(fullScreenBounds);
         doReturn(parentWindowContainer).when(task).getParent();
-        doReturn(display.mTaskContainers).when(task).getDisplayArea();
+        doReturn(display.getDefaultTaskDisplayArea()).when(task).getDisplayArea();
         doReturn(stack).when(task).getStack();
         doReturn(true).when(parentWindowContainer).handlesOrientationChangeFromDescendant();
 

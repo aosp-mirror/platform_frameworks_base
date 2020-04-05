@@ -477,26 +477,27 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                TaskDisplayArea taskDisplayArea =
-                        mService.mRootWindowContainer.getDisplayContent(displayId).mTaskContainers;
-                if (taskDisplayArea == null) {
+                TaskDisplayArea defaultTaskDisplayArea = mService.mRootWindowContainer
+                        .getDisplayContent(displayId).getDefaultTaskDisplayArea();
+                if (defaultTaskDisplayArea == null) {
                     return;
                 }
                 Task task = token == null
                         ? null : WindowContainer.fromBinder(token.asBinder()).asTask();
                 if (task == null) {
-                    taskDisplayArea.mLaunchRootTask = null;
+                    defaultTaskDisplayArea.mLaunchRootTask = null;
                     return;
                 }
                 if (!task.mCreatedByOrganizer) {
                     throw new IllegalArgumentException("Attempt to set task not created by "
                             + "organizer as launch root task=" + task);
                 }
-                if (task.getDisplayArea() != taskDisplayArea) {
+                if (task.getDisplayArea() == null
+                        || task.getDisplayArea().getDisplayId() != displayId) {
                     throw new RuntimeException("Can't set launch root for display " + displayId
                             + " to task on display " + task.getDisplayContent().getDisplayId());
                 }
-                taskDisplayArea.mLaunchRootTask = task;
+                task.getDisplayArea().mLaunchRootTask = task;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -557,13 +558,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     throw new IllegalArgumentException("Display " + displayId + " doesn't exist");
                 }
                 ArrayList<RunningTaskInfo> out = new ArrayList<>();
-                for (int i = dc.getStackCount() - 1; i >= 0; --i) {
-                    final Task task = dc.getStackAt(i);
-                    if (activityTypes != null
-                            && !ArrayUtils.contains(activityTypes, task.getActivityType())) {
-                        continue;
+                for (int tdaNdx = dc.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
+                    final TaskDisplayArea taskDisplayArea = dc.getTaskDisplayAreaAt(tdaNdx);
+                    for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
+                        final Task task = taskDisplayArea.getStackAt(sNdx);
+                        if (activityTypes != null
+                                && !ArrayUtils.contains(activityTypes, task.getActivityType())) {
+                            continue;
+                        }
+                        out.add(task.getTaskInfo());
                     }
-                    out.add(task.getTaskInfo());
                 }
                 return out;
             }
