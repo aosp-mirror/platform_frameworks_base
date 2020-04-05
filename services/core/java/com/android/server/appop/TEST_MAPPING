@@ -41,6 +41,9 @@
         },
         {
             "name": "CtsAppTestCases:ActivityManagerApi29Test"
+        },
+        {
+            "name": "UidAtomTests:testAppOps"
         }
     ]
 }
