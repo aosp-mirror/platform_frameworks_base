@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"此应用或您所在的单位不允许进行屏幕截图"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"关闭屏幕截图"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"打开屏幕截图"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"屏幕录制工具"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"屏幕录制器"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持续显示屏幕录制会话通知"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"要开始录制吗？"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"在录制内容时，Android 系统可以捕捉到您屏幕上显示或设备中播放的敏感信息，其中包括密码、付款信息、照片、消息和音频。"</string>
@@ -708,12 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"不会发出提示音或振动，可帮助您保持专注。"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"通过提示音或振动吸引您的注意。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"通过可链接到这项内容的浮动快捷方式吸引您的注意。"</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"以气泡形式显示在会话部分顶部。"</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"默认情况下，<xliff:g id="APP_NAME_0">%1$s</xliff:g>中的所有会话都会以气泡形式显示。在“<xliff:g id="APP_NAME_1">%2$s</xliff:g>”中管理。"</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"以对话泡形式显示在对话部分顶部。"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"默认情况下，<xliff:g id="APP_NAME_0">%1$s</xliff:g>中的所有对话都会以对话泡形式显示。在“<xliff:g id="APP_NAME_1">%2$s</xliff:g>”中管理。"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"设置"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"优先级"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近没有气泡"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"此处会显示最近的气泡和已关闭的气泡"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近没有对话泡"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"此处会显示最近的对话泡和已关闭的对话泡"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"无法修改这些通知。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"您无法在此处配置这组通知"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
@@ -741,7 +741,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"已静音"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"提醒"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"显示气泡"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除气泡"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除对话泡"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"添加到主屏幕"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g><xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"通知设置"</string>
@@ -983,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"设备服务"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"无标题"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"点按即可重启此应用并进入全屏模式。"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g>气泡的相关设置"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g>对话泡的设置"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"管理"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g>：<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g>和另外 <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> 个应用：<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -993,11 +993,11 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"移至左下角"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"移至右下角"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"关闭"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"不以气泡形式显示会话"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"使用气泡聊天"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"新会话会以浮动图标或气泡形式显示。点按即可打开气泡。拖动即可移动气泡。"</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"随时控制气泡"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"点按“管理”按钮，可关闭来自此应用的气泡"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"不以对话泡形式显示对话"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"使用对话泡聊天"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"新对话会以浮动图标或对话泡形式显示。点按即可打开对话泡。拖动即可移动对话泡。"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"随时控制对话泡"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"点按“管理”按钮，可关闭来自此应用的对话泡"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"知道了"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系统导航已更新。要进行更改，请转到“设置”。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"转到“设置”即可更新系统导航"</string>

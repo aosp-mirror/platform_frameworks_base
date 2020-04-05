@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Vytváranie snímok obrazovky je zakázané aplikáciou alebo vašou organizáciou"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zavrieť snímku obrazovky"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Otvoriť snímku obrazovky"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Nahrávanie obrazovky"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Zobrazuje sa upozornenie týkajúce sa relácie záznamu obrazovky"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Chcete spustiť nahrávanie?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Počas nahrávania zaznamená systém Android všetky citlivé údaje, ktoré sa zobrazia na obrazovke alebo prehrajú v zariadení. Zahrnuje to heslá, platobné údaje, fotky, správy a zvuky."</string>
@@ -715,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Upúta vás zvukom alebo vibráciami."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Upúta vás plávajúcim odkazom na tento obsah."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Zobrazuje sa v hornej časti konverzácie ako bublina."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Predvolene zahrnúť všetky konverzácie z bubliny <xliff:g id="APP_NAME_0">%1$s</xliff:g>. Spravujte v aplikácii <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Predvolene zobrazovať všetky konverzácie z aplikácie <xliff:g id="APP_NAME_0">%1$s</xliff:g> ako bubliny. Spravujte v aplikácii <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavenia"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Žiadne nedávne bubliny"</string>

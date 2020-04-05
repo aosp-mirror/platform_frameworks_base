@@ -154,36 +154,21 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ಪ್ಯಾಟರ್ನ್ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ಪಾಸ್‌ವರ್ಡ್ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"ಹಲವಾರು ತಪ್ಪು ಪ್ರಯತ್ನಗಳು.\nಮತ್ತೆ <xliff:g id="NUMBER">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <!-- no translation found for biometric_dialog_credential_attempts_before_wipe (6751859711975516999) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_attempt_before_wipe_dialog_title (2874250099278693477) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_device (6562299244825817598) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_device (9151756675698215723) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_device (2363778585575998317) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_user (8400180746043407270) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_user (4159878829962411168) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_user (4695682515465063885) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_profile (6045224069529284686) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_profile (545567685899091757) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_profile (8538032972389729253) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_device (6585503524026243042) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_user (7015008539146949115) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_profile (5239378521440749682) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_now_wiping_dialog_dismiss (7189432882125106154) -->
-    <skip />
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ. <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> ಪ್ರಯತ್ನಗಳು."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"ನಿಮ್ಮ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"ಮುಂದಿನ ಪ್ರಯತ್ನದಲ್ಲಿ ನೀವು ತಪ್ಪಾದ ಪ್ಯಾಟರ್ನ್‌ ನಮೂದಿಸಿದರೆ, ಈ ಸಾಧನದ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"ಮುಂದಿನ ಪ್ರಯತ್ನದಲ್ಲಿ ನೀವು ತಪ್ಪಾದ ಪಿನ್ ನಮೂದಿಸಿದರೆ, ಈ ಸಾಧನದ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"ಮುಂದಿನ ಪ್ರಯತ್ನದಲ್ಲಿ ನೀವು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ನಮೂದಿಸಿದರೆ, ಈ ಸಾಧನದ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"ಮುಂದಿನ ಪ್ರಯತ್ನದಲ್ಲಿ ನೀವು ತಪ್ಪಾದ ಪ್ಯಾಟರ್ನ್ ನಮೂದಿಸಿದರೆ, ಈ ಬಳಕೆದಾರರನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"ಮುಂದಿನ ಪ್ರಯತ್ನದಲ್ಲಿ ನೀವು ತಪ್ಪಾದ ಪಿನ್ ನಮೂದಿಸಿದರೆ, ಈ ಬಳಕೆದಾರರನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"ಮುಂದಿನ ಪ್ರಯತ್ನದಲ್ಲಿ ನೀವು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿದರೆ, ಈ ಬಳಕೆದಾರರನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"ಮುಂದಿನ ಪ್ರಯತ್ನದಲ್ಲಿ ನೀವು ತಪ್ಪಾದ ಪ್ಯಾಟರ್ನ್ ನಮೂದಿಸಿದರೆ, ನಿಮ್ಮ ಉದ್ಯೋಗದ ಪ್ರೊಫೈಲ್ ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"ಮುಂದಿನ ಪ್ರಯತ್ನದಲ್ಲಿ ನೀವು ತಪ್ಪಾದ ಪಿನ್ ನಮೂದಿಸಿದರೆ, ನಿಮ್ಮ ಉದ್ಯೋಗದ ಪ್ರೊಫೈಲ್ ಮತ್ತು ಅದರ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"ಮುಂದಿನ ಪ್ರಯತ್ನದಲ್ಲಿ ನೀವು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿದರೆ, ನಿಮ್ಮ ಉದ್ಯೋಗದ ಪ್ರೊಫೈಲ್ ಮತ್ತು ಅದರ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"ಹಲವಾರು ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಈ ಸಾಧನದ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"ಹಲವಾರು ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಈ ಬಳಕೆದಾರರನ್ನು ಅಳಿಸಲಾಗುವುದು."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"ಹಲವಾರು ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಈ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಮತ್ತು ಅದರ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"ನಿಮಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
@@ -723,17 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ಶಬ್ದ ಅಥವಾ ವೈಬ್ರೇಷನ್ ಇರದಂತೆ ನಿಮಗೆ ಗಮನಹರಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ಧ್ವನಿ ಅಥವಾ ವೈಬ್ರೇಷನ್ ಮೂಲಕ ನಿಮ್ಮ ಗಮನವನ್ನು ಸೆಳೆಯುತ್ತದೆ."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ಈ ವಿಷಯಕ್ಕೆ ಲಿಂಕ್ ಮಾಡಿ ಕೊಂಡೊಯ್ಯುವ ಶಾರ್ಟ್‌ಕಟ್‌ ಕಡೆಗೆ ಗಮನ ಇರಿಸಿ."</string>
-    <!-- no translation found for notification_channel_summary_priority (7415770044553264622) -->
-    <skip />
-    <!-- no translation found for notification_conversation_channel_all_bubble (5389290797101635297) -->
-    <skip />
-    <!-- no translation found for notification_conversation_channel_settings (2409977688430606835) -->
-    <skip />
-    <!-- no translation found for notification_priority_title (2079708866333537093) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"ಸಂಭಾಷಣೆ ವಿಭಾಗದ ಮೇಲ್ಬಾಗದಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ ಮತ್ತು ಬಬಲ್‌ನಂತೆ ಗೋಚರಿಸುತ್ತದೆ."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"ಡೀಫಾಲ್ಟ್ ಆಗಿ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ನ ಎಲ್ಲಾ ಸಂಭಾಷಣೆಗಳನ್ನು ಬಬಲ್‌ ಆಗಿ ತೋರಿಸಿ. <xliff:g id="APP_NAME_1">%2$s</xliff:g> ನಲ್ಲಿ ನಿರ್ವಹಿಸಿ."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"ಆದ್ಯತೆ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ಯಾವುದೇ ಇತ್ತೀಚಿನ ಬಬಲ್‌ಗಳಿಲ್ಲ"</string>
-    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
-    <skip />
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ಇತ್ತೀಚಿನ ಬಬಲ್ಸ್ ಮತ್ತು ವಜಾಗೊಳಿಸಿದ ಬಬಲ್ಸ್ ಇಲ್ಲಿ ಗೋಚರಿಸುತ್ತವೆ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ಈ ಗುಂಪಿನ ಅಧಿಸೂಚನೆಗಳನ್ನು ಇಲ್ಲಿ ಕಾನ್ಫಿಗರ್‌ ಮಾಡಲಾಗಿರುವುದಿಲ್ಲ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ಪ್ರಾಕ್ಸಿ ಮಾಡಿದ ಅಧಿಸೂಚನೆಗಳು"</string>
@@ -823,7 +803,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"ಎಸ್ಎಂಎಸ್"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"ಸಂಗೀತ"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"ಕ್ಯಾಲೆಂಡರ್"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"ವಾಲ್ಯೂಮ್ ನಿಯಂತ್ರಣಗಳ ಜೊತೆಗೆ ತೋರಿಸು"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ಅಡಚಣೆ ಮಾಡಬೇಡ"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ವಾಲ್ಯೂಮ್ ಬಟನ್‌ಗಳ ಶಾರ್ಟ್‌ಕಟ್‌"</string>
@@ -1013,77 +993,50 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ಸ್ಕ್ರೀನ್‌ನ ಎಡ ಕೆಳಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ಕೆಳಗಿನ ಬಲಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"ವಜಾಗೊಳಿಸಿ"</string>
-    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ಸಂಭಾಷಣೆಯನ್ನು ಬಬಲ್ ಮಾಡಬೇಡಿ"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"ಬಬಲ್ಸ್ ಬಳಸಿ ಚಾಟ್ ಮಾಡಿ"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"ಹೊಸ ಸಂಭಾಷಣೆಗಳು ತೇಲುವ ಐಕಾನ್‌ಗಳು ಅಥವಾ ಬಬಲ್ಸ್ ಆಗಿ ಗೋಚರಿಸುತ್ತವೆ. ಬಬಲ್ ತೆರೆಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಅದನ್ನು ಡ್ರ್ಯಾಗ್ ಮಾಡಲು ಎಳೆಯಿರಿ."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಬಬಲ್ಸ್ ಅನ್ನು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ಈ ಆ್ಯಪ್‌ನಿಂದ ಬಬಲ್‌ಗಳನ್ನು ಆಫ್ ಮಾಡಲು ನಿರ್ವಹಿಸಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ಅರ್ಥವಾಯಿತು"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ ಬದಲಾವಣೆಗಳನ್ನು ಮಾಡಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಲು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ಸ್ಟ್ಯಾಂಡ್‌ಬೈ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ವರ್ಧನೆಯ ಓವರ್‌ಲೇ ವಿಂಡೋ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ವರ್ಧನೆಯ ವಿಂಡೋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ವರ್ಧನೆಯ ವಿಂಡೋ ನಿಯಂತ್ರಣಗಳು"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
-    <!-- no translation found for quick_controls_subtitle (1667408093326318053) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_title" msgid="1686913115679255053">"ತ್ವರಿತ ನಿಯಂತ್ರಣಗಳು"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"ನಿಮ್ಮ ಸಂಪರ್ಕಿತ ಸಾಧನಗಳಿಗೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"ತ್ವರಿತ ನಿಯಂತ್ರಣಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ನಿಮ್ಮ ನಿಯಂತ್ರಣಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಪವರ್ ಬಟನ್ ಅನ್ನು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ನಿಯಂತ್ರಣಗಳು"</string>
-    <!-- no translation found for controls_favorite_subtitle (6604402232298443956) -->
-    <skip />
-    <!-- no translation found for controls_favorite_rearrange (7364147066539766260) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ಪವರ್ ಮೆನುವಿನಿಂದ ಪ್ರವೇಶಿಸಲು ನಿಯಂತ್ರಣಗಳನ್ನು ಆರಿಸಿ"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ಅದನ್ನು ಸರಿಸಲು ನಿಯಂತ್ರಣವೊಂದನ್ನು ಹಿಡಿದುಕೊಂಡು ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ಎಲ್ಲಾ ನಿಯಂತ್ರಣಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಆಗಲಿಲ್ಲ."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ಇತರ"</string>
-    <!-- no translation found for controls_dialog_title (3475025327938684220) -->
-    <skip />
+    <string name="controls_dialog_title" msgid="3475025327938684220">"ತ್ವರಿತ ನಿಯಂತ್ರಣಗಳಿಗೆ ಸೇರಿಸಿ"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿ"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"ಈ ನಿಯಂತ್ರಣವನ್ನು ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಲು <xliff:g id="APP">%s</xliff:g> ಸೂಚಿಸಿದೆ."</string>
-    <!-- no translation found for controls_dialog_confirmation (586517302736263447) -->
-    <skip />
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"ನಿಯಂತ್ರಣಗಳನ್ನು ನವೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ಪಿನ್ ಅಕ್ಷರಗಳು ಅಥವಾ ಸಂಕೇತಗಳನ್ನು ಒಳಗೊಂಡಿದೆ"</string>
-    <!-- no translation found for controls_pin_verify (3452778292918877662) -->
-    <skip />
-    <!-- no translation found for controls_pin_verifying (3755045989392131746) -->
-    <skip />
+    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ಅನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"ಪಿನ್ ನಮೂದಿಸಿ"</string>
-    <!-- no translation found for controls_pin_instructions_retry (1566667581012131046) -->
-    <skip />
-    <!-- no translation found for controls_confirmation_confirming (2596071302617310665) -->
-    <skip />
-    <!-- no translation found for controls_confirmation_message (7744104992609594859) -->
-    <skip />
-    <!-- no translation found for controls_structure_tooltip (4355922222944447867) -->
-    <skip />
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"ಮತ್ತೊಂದು ಪಿನ್ ಅನ್ನು ಪ್ರಯತ್ನಿಸಿ"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"ಖಚಿತಪಡಿಸಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> ಸಾಧನಕ್ಕಾಗಿ ಬದಲಾವಣೆಯನ್ನು ದೃಢೀಕರಿಸಿ"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"ಇನ್ನಷ್ಟು ನೋಡಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ಶಿಫಾರಸುಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ"</string>
-    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
-    <skip />
-    <!-- no translation found for controls_error_timeout (794197289772728958) -->
-    <skip />
-    <!-- no translation found for controls_error_failed (960228639198558525) -->
-    <skip />
-    <!-- no translation found for controls_in_progress (4421080500238215939) -->
-    <skip />
-    <!-- no translation found for controls_added_tooltip (4842812921719153085) -->
-    <skip />
-    <!-- no translation found for controls_menu_add (4447246119229920050) -->
-    <skip />
-    <!-- no translation found for controls_menu_edit (890623986951347062) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="9023534788828414585">"ಈ ಮಾಧ್ಯಮ ಸೆಶನ್ ಅನ್ನು ಮುಚ್ಚಿರಿ"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"ನಿಷ್ಕ್ರಿಯ, ಆ್ಯಪ್ ಪರಿಶೀಲಿಸಿ"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"ದೋಷ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"ಪ್ರಗತಿಯಲ್ಲಿದೆ"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"ಹೊಸ ನಿಯಂತ್ರಣಗಳನ್ನು ನೋಡಲು ಪವರ್ ಬಟನ್ ಹಿಡಿದುಕೊಳ್ಳಿ"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"ನಿಯಂತ್ರಣಗಳನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
 </resources>

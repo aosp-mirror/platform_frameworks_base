@@ -159,9 +159,9 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"अगर आप फिर से गलत पैटर्न डालते हैं, तो इस डिवाइस का डेटा मिटा दिया जाएगा."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"अगर आप फिर से गलत पिन डालते हैं, तो इस डिवाइस का डेटा मिटा दिया जाएगा."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"अगर आप फिर से गलत पासवर्ड डालते हैं, तो इस डिवाइस का डेटा मिटा दिया जाएगा."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"अगर आप फिर से गलत पैटर्न डालते हैं, तो इस उपयोगकर्ता का डेटा मिटा दिया जाएगा."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"अगर आप फिर से गलत पिन डालते हैं, तो इस उपयोगकर्ता का डेटा मिटा दिया जाएगा."</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"अगर आप फिर से गलत पासवर्ड डालते हैं, तो इस उपयोगकर्ता का डेटा मिटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"अगर आप फिर से गलत पैटर्न डालते हैं, तो इस उपयोगकर्ता को हटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"अगर आप फिर से गलत पिन डालते हैं, तो इस उपयोगकर्ता को हटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"अगर आप फिर से गलत पासवर्ड डालते हैं, तो इस उपयोगकर्ता को हटा दिया जाएगा."</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"अगर आप फिर से गलत पैटर्न डालते हैं, तो आपकी वर्क प्रोफ़ाइल और उसका डेटा मिटा दिया जाएगा."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"अगर आप फिर से गलत पिन डालते हैं, तो आपकी वर्क प्रोफ़ाइल और उसका डेटा मिटा दिया जाएगा."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"अगर आप फिर से गलत पासवर्ड डालते हैं, तो आपकी वर्क प्रोफ़ाइल और उसका डेटा मिटा दिया जाएगा."</string>
@@ -1007,9 +1007,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Magnification Overlay Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"स्क्रीन को बड़ा करके दिखाने वाली विंडो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"स्क्रीन को बड़ा करके दिखाने वाली विंडो के नियंत्रण"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"फटाफट कंट्रोल"</string>
+    <string name="quick_controls_title" msgid="1686913115679255053">"क्विक कंट्रोल"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"कनेक्ट किए गए डिवाइस के लिए कंट्रोल जोड़ें"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"फटाफट कंट्रोल सेट अप करें"</string>
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"क्विक कंट्रोल सेट अप करें"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"कंट्रोल ऐक्सेस करने के लिए पावर बटन को दबाकर रखें"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"कंट्रोल जोड़ने के लिए ऐप्लिकेशन चुनें"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">

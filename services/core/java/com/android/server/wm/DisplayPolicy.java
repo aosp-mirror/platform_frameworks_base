@@ -3247,7 +3247,7 @@ public class DisplayPolicy {
         final int dockedAppearance = updateLightStatusBarAppearanceLw(0 /* vis */,
                 mTopDockedOpaqueWindowState, mTopDockedOpaqueOrDimmingWindowState);
         final boolean inSplitScreen =
-                mService.mRoot.getDefaultDisplay().mTaskContainers.isSplitScreenModeActivated();
+                mService.mRoot.getDefaultTaskDisplayArea().isSplitScreenModeActivated();
         if (inSplitScreen) {
             mService.getStackBounds(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
                     mDockedStackBounds);

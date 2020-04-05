@@ -154,8 +154,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"نقش غير صحيح"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"كلمة مرور غير صحيحة"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"تم إجراء عدد كبير جدًا من المحاولات غير الصحيحة.\nأعد المحاولة خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية."</string>
-    <!-- no translation found for biometric_dialog_credential_attempts_before_wipe (6751859711975516999) -->
-    <skip />
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"يُرجى إعادة المحاولة. المحاولة <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> من <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>"</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"سيتم حذف بياناتك"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"عند إدخال نقش غير صحيح في المحاولة التالية، سيتم حذف بيانات هذا الجهاز."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"عند إدخال رقم تعريف شخصي غير صحيح في المحاولة التالية، سيتم حذف بيانات هذا الجهاز."</string>
@@ -166,14 +165,10 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"عند إدخال نقش غير صحيح في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"عند إدخال رقم تعريف شخصي غير صحيح في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"عند إدخال كلمة مرور غير صحيحة في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_device (6585503524026243042) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_user (7015008539146949115) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_profile (5239378521440749682) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_now_wiping_dialog_dismiss (7189432882125106154) -->
-    <skip />
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف بيانات هذا الجهاز."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف هذا المستخدم."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف الملف الشخصي للعمل وبياناته."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"إغلاق"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس زر استشعار بصمة الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"رمز بصمة الإصبع"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"جارٍ البحث عن وجهك…"</string>
@@ -725,17 +720,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"يساعدك هذا الإشعار على التركيز بدون صوت أو اهتزاز."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"يلفت هذا الإشعار انتباهك باستخدام الصوت والاهتزاز."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"يلفِت هذا الإشعار انتباهك لهذا المحتوى باستخدام اختصار عائم."</string>
-    <!-- no translation found for notification_channel_summary_priority (7415770044553264622) -->
-    <skip />
-    <!-- no translation found for notification_conversation_channel_all_bubble (5389290797101635297) -->
-    <skip />
-    <!-- no translation found for notification_conversation_channel_settings (2409977688430606835) -->
-    <skip />
-    <!-- no translation found for notification_priority_title (2079708866333537093) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"تظهر كفقاعة في أعلى قسم المحادثات"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"تظهر كل المحادثات من تطبيق <xliff:g id="APP_NAME_0">%1$s</xliff:g> كفقاعات تلقائيًا. يمكنك إدارة هذا الإعداد في <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"الإعدادات"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"الأولوية"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ليس هناك فقاعات حديثة"</string>
-    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
-    <skip />
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ستظهر هنا أحدث الفقاعات والفقاعات التي تم إغلاقها."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"يتعذّر تعديل هذه الإشعارات."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"يتعذّر ضبط مجموعة الإشعارات هذه هنا."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"إشعار مستند إلى خادم وكيل"</string>
@@ -942,7 +932,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"إيقاف مؤقت"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"التخطي إلى التالي"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"التخطي إلى السابق"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"تم إيقاف تفعيل الهاتف بسبب الحرارة"</string>
+    <string name="thermal_shutdown_title" msgid="2702966892682930264">"تم إيقاف الهاتف بسبب الحرارة"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"يعمل هاتفك الآن بشكل طبيعي"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ارتفعت درجة حرارة هاتفك بشدة، لذا تم إيقاف تشغيله لخفض درجة حرارته. يعمل هاتفك الآن بشكل طبيعي.\n\nقد ترتفع بشدة درجة حرارة هاتفك إذا:\n	• استخدمت تطبيقات كثيفة الاستخدام لموارد الجهاز (مثل الألعاب أو الفيديو أو تطبيقات التنقل)\n	• نزَّلت أو حمَّلت ملفات كبيرة الحجم\n	• استخدمت هاتفك وسط أجواء مرتفعة الحرارة"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"تزداد درجة حرارة الهاتف"</string>
@@ -1023,17 +1013,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"نقل إلى أسفل يمين الشاشة"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"نقل إلى أسفل اليسار"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"تجاهل"</string>
-    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"عدم عرض المحادثة كفقاعة"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"الدردشة باستخدام الفقاعات"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"تظهر المحادثات الجديدة كرموز عائمة أو فقاعات. انقر عليها لفتحها كفقاعة أو اسحبها لتحريكها."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"التحكّم في الفقاعات في أي وقت"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"انقر على \"إدارة\" لإيقاف الفقاعات من هذا التطبيق."</string>
-    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"حسنًا"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"تم تحديث التنقل داخل النظام. لإجراء التغييرات، يُرجى الانتقال إلى \"الإعدادات\"."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"الانتقال إلى \"الإعدادات\" لتعديل التنقل داخل النظام"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"وضع الاستعداد"</string>
@@ -1041,8 +1026,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"نافذة التكبير"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"عناصر التحكم في نافذة التكبير"</string>
     <string name="quick_controls_title" msgid="1686913115679255053">"عناصر التحكّم السريعة"</string>
-    <!-- no translation found for quick_controls_subtitle (1667408093326318053) -->
-    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"إضافة عناصر تحكّم لأجهزتك المتصلة"</string>
     <string name="quick_controls_setup_title" msgid="9079435969373471268">"إعداد عناصر التحكّم السريعة"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"اضغط مع الاستمرار على زر التشغيل للوصول إلى عناصر التحكّم"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"اختيار تطبيق لإضافة عناصر التحكّم"</string>
@@ -1055,45 +1039,28 @@
       <item quantity="one">تمت إضافة عنصر تحكّم واحد (<xliff:g id="NUMBER_0">%s</xliff:g>).</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"عناصر التحكّم"</string>
-    <!-- no translation found for controls_favorite_subtitle (6604402232298443956) -->
-    <skip />
-    <!-- no translation found for controls_favorite_rearrange (7364147066539766260) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"اختيار عناصر التحكّم التي تريد الوصول إليها من قائمة التشغيل"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"اضغط مع الاستمرار على عنصر تحكّم واسحبه لتحريكه."</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"تعذّر تحميل قائمة كل عناصر التحكّم."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"غير ذلك"</string>
-    <!-- no translation found for controls_dialog_title (3475025327938684220) -->
-    <skip />
+    <string name="controls_dialog_title" msgid="3475025327938684220">"إضافة إلى عناصر التحكم السريعة"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"إضافة إلى الإعدادات المفضّلة"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"اقترح تطبيق <xliff:g id="APP">%s</xliff:g> إضافة عنصر التحكّم هذا إلى الإعدادات المفضّلة."</string>
-    <!-- no translation found for controls_dialog_confirmation (586517302736263447) -->
-    <skip />
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"تم تعديل عناصر التحكّم."</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"يشتمل رقم التعريف الشخصي على أحرف أو رموز."</string>
-    <!-- no translation found for controls_pin_verify (3452778292918877662) -->
-    <skip />
-    <!-- no translation found for controls_pin_verifying (3755045989392131746) -->
-    <skip />
+    <string name="controls_pin_verify" msgid="3452778292918877662">"إثبات ملكية <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"جارٍ التحقّق…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"إدخال رقم التعريف الشخصي"</string>
-    <!-- no translation found for controls_pin_instructions_retry (1566667581012131046) -->
-    <skip />
-    <!-- no translation found for controls_confirmation_confirming (2596071302617310665) -->
-    <skip />
-    <!-- no translation found for controls_confirmation_message (7744104992609594859) -->
-    <skip />
-    <!-- no translation found for controls_structure_tooltip (4355922222944447867) -->
-    <skip />
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"حاوِل إدخال رقم تعريف شخصي آخر"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"جارٍ التأكيد…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"تأكيد التغيير لـ <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"مرّر سريعًا لرؤية المزيد."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"جارٍ تحميل الاقتراحات"</string>
-    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
-    <skip />
-    <!-- no translation found for controls_error_timeout (794197289772728958) -->
-    <skip />
-    <!-- no translation found for controls_error_failed (960228639198558525) -->
-    <skip />
-    <!-- no translation found for controls_in_progress (4421080500238215939) -->
-    <skip />
-    <!-- no translation found for controls_added_tooltip (4842812921719153085) -->
-    <skip />
-    <!-- no translation found for controls_menu_add (4447246119229920050) -->
-    <skip />
-    <!-- no translation found for controls_menu_edit (890623986951347062) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="9023534788828414585">"إغلاق جلسة تشغيل الوسائط هذه"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"حدث خطأ، يُرجى إعادة المحاولة."</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"قيد التقدم"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"اضغط مع الاستمرار على زر التشغيل لعرض عناصر التحكّم الجديدة."</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"إضافة عناصر تحكّم"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"تعديل عناصر التحكّم"</string>
 </resources>
