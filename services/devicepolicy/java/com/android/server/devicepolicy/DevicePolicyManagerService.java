@@ -87,6 +87,9 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
+import static android.os.UserManagerInternal.OWNER_TYPE_DEVICE_OWNER;
+import static android.os.UserManagerInternal.OWNER_TYPE_PROFILE_OWNER;
+import static android.os.UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Telephony.Carriers.DPC_URI;
@@ -284,6 +287,7 @@ import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.pm.RestrictionsSet;
 import com.android.server.pm.UserRestrictionsUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.storage.DeviceStorageMonitorInternal;
@@ -322,6 +326,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Implementation of the device policy APIs.
@@ -1828,6 +1833,50 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             info = deviceAdminInfo;
         }
 
+        Bundle addSyntheticRestrictions(Bundle restrictions) {
+            if (disableCamera) {
+                restrictions.putBoolean(UserManager.DISALLOW_CAMERA, true);
+            } else {
+                restrictions.remove(UserManager.DISALLOW_CAMERA);
+            }
+            return restrictions;
+        }
+
+        static Bundle removeDeprecatedRestrictions(Bundle restrictions) {
+            for (String deprecatedRestriction: DEPRECATED_USER_RESTRICTIONS) {
+                restrictions.remove(deprecatedRestriction);
+            }
+            return restrictions;
+        }
+
+        static Bundle filterRestrictions(Bundle restrictions, Predicate<String> filter) {
+            Bundle result = new Bundle();
+            for (String key : restrictions.keySet()) {
+                if (!restrictions.getBoolean(key)) {
+                    continue;
+                }
+                if (filter.test(key)) {
+                    result.putBoolean(key, true);
+                }
+            }
+            return result;
+        }
+
+        Bundle getEffectiveRestrictions() {
+            return addSyntheticRestrictions(
+                    removeDeprecatedRestrictions(ensureUserRestrictions()));
+        }
+
+        Bundle getLocalUserRestrictions(int adminType) {
+            return filterRestrictions(getEffectiveRestrictions(),
+                    key -> UserRestrictionsUtils.isLocal(adminType, key));
+        }
+
+        Bundle getGlobalUserRestrictions(int adminType) {
+            return filterRestrictions(getEffectiveRestrictions(),
+                    key -> UserRestrictionsUtils.isGlobal(adminType, key));
+        }
+
         void dump(IndentingPrintWriter pw) {
             pw.print("uid="); pw.println(getUid());
             pw.print("testOnlyAdmin=");
@@ -2772,7 +2821,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId) != 0) {
             profileOwner.ensureUserRestrictions().putBoolean(
                     UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
-            saveUserRestrictionsLocked(userId, /* parent = */ false);
+            saveUserRestrictionsLocked(userId);
             mInjector.settingsSecurePutIntForUser(
                     Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId);
         }
@@ -2803,7 +2852,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             admin.defaultEnabledRestrictionsAlreadySet.addAll(restrictionsToSet);
             Slog.i(LOG_TAG, "Enabled the following restrictions by default: " + restrictionsToSet);
-            saveUserRestrictionsLocked(userId, /* parent = */ false);
+            saveUserRestrictionsLocked(userId);
         }
     }
 
@@ -8222,9 +8271,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
         // Tell the user manager that the restrictions have changed.
-        final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
-        pushUserRestrictions(affectedUserId);
+        pushUserRestrictions(userHandle);
 
+        final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
         if (SecurityLog.isLoggingEnabled()) {
             SecurityLog.writeEvent(SecurityLog.TAG_CAMERA_POLICY_SET,
                     who.getPackageName(), userHandle, affectedUserId, disabled ? 1 : 0);
@@ -10806,10 +10855,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             "Cannot use the parent instance in Device Owner mode");
                 }
             } else {
-                if (!(UserRestrictionsUtils.canProfileOwnerChange(key, userHandle) || (
-                        isProfileOwnerOfOrganizationOwnedDevice(activeAdmin) && parent
-                        && UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(
-                                key)))) {
+                boolean profileOwnerCanChangeOnItself = !parent
+                        && UserRestrictionsUtils.canProfileOwnerChange(key, userHandle);
+                boolean orgOwnedProfileOwnerCanChangesGlobally = parent
+                        && isProfileOwnerOfOrganizationOwnedDevice(activeAdmin)
+                        && UserRestrictionsUtils
+                                .canProfileOwnerOfOrganizationOwnedDeviceChange(key);
+
+                if (!profileOwnerCanChangeOnItself && !orgOwnedProfileOwnerCanChangesGlobally) {
                     throw new SecurityException("Profile owner cannot set user restriction " + key);
                 }
             }
@@ -10821,7 +10874,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } else {
                 restrictions.remove(key);
             }
-            saveUserRestrictionsLocked(userHandle, parent);
+            saveUserRestrictionsLocked(userHandle);
         }
         final int eventId = enabledFromThisOwner
                 ? DevicePolicyEnums.ADD_USER_RESTRICTION
@@ -10839,91 +10892,65 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void saveUserRestrictionsLocked(int userId, boolean parent) {
+    private void saveUserRestrictionsLocked(int userId) {
         saveSettingsLocked(userId);
-        pushUserRestrictions(parent ? getProfileParentId(userId) : userId);
+        pushUserRestrictions(userId);
         sendChangedNotification(userId);
     }
 
-    private void pushUserRestrictions(int userId) {
+    /**
+     * Pushes the user restrictions originating from a specific user.
+     *
+     * If called by the profile owner of an organization-owned device, the global and local
+     * user restrictions will be an accumulation of the global user restrictions from the profile
+     * owner active admin and its parent active admin. The key of the local user restrictions set
+     * will be the target user id.
+     */
+    private void pushUserRestrictions(int originatingUserId) {
+        final Bundle global;
+        final RestrictionsSet local = new RestrictionsSet();
+        final boolean isDeviceOwner;
         synchronized (getLockObject()) {
-            final boolean isDeviceOwner = mOwners.isDeviceOwnerUserId(userId);
-            Bundle userRestrictions = null;
-            final int restrictionOwnerType;
-            final int originatingUserId;
-
+            isDeviceOwner = mOwners.isDeviceOwnerUserId(originatingUserId);
             if (isDeviceOwner) {
                 final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
                 if (deviceOwner == null) {
                     return; // Shouldn't happen.
                 }
-                userRestrictions = addOrRemoveDisableCameraRestriction(
-                        deviceOwner.userRestrictions, deviceOwner);
-                restrictionOwnerType = UserManagerInternal.OWNER_TYPE_DEVICE_OWNER;
-                originatingUserId = deviceOwner.getUserHandle().getIdentifier();
+                global = deviceOwner.getGlobalUserRestrictions(OWNER_TYPE_DEVICE_OWNER);
+                local.updateRestrictions(originatingUserId, deviceOwner.getLocalUserRestrictions(
+                        OWNER_TYPE_DEVICE_OWNER));
             } else {
-                final ActiveAdmin profileOwnerOfOrganizationOwnedDevice =
-                        getProfileOwnerOfOrganizationOwnedDeviceLocked(userId);
-
-                // If profile owner of an organization owned device, the restrictions will be
-                // pushed to the parent instance.
-                if (profileOwnerOfOrganizationOwnedDevice != null && !isManagedProfile(userId)) {
-                    restrictionOwnerType =
-                          UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE;
-                    final ActiveAdmin parent = profileOwnerOfOrganizationOwnedDevice
-                            .getParentActiveAdmin();
-                    userRestrictions = parent.userRestrictions;
-                    userRestrictions = addOrRemoveDisableCameraRestriction(userRestrictions,
-                            parent);
-                    originatingUserId =
-                            profileOwnerOfOrganizationOwnedDevice.getUserHandle().getIdentifier();
-                } else {
-                    final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
-
-                    if (profileOwner != null) {
-                        userRestrictions = profileOwner.userRestrictions;
-                        restrictionOwnerType = UserManagerInternal.OWNER_TYPE_PROFILE_OWNER;
-                        originatingUserId = profileOwner.getUserHandle().getIdentifier();
-                    } else {
-                        restrictionOwnerType = UserManagerInternal.OWNER_TYPE_NO_OWNER;
-                        originatingUserId = userId;
-                    }
-                    userRestrictions = addOrRemoveDisableCameraRestriction(
-                            userRestrictions, userId);
+                final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(originatingUserId);
+                if (profileOwner == null) {
+                    return;
+                }
+                global = profileOwner.getGlobalUserRestrictions(OWNER_TYPE_PROFILE_OWNER);
+                local.updateRestrictions(originatingUserId, profileOwner.getLocalUserRestrictions(
+                        OWNER_TYPE_PROFILE_OWNER));
+                // Global (device-wide) and local user restrictions set by the profile owner of an
+                // organization-owned device are stored in the parent ActiveAdmin instance.
+                if (isProfileOwnerOfOrganizationOwnedDevice(
+                        profileOwner.getUserHandle().getIdentifier())) {
+                    // The global restrictions set on the parent ActiveAdmin instance need to be
+                    // merged with the global restrictions set on the profile owner ActiveAdmin
+                    // instance, since both are to be applied device-wide.
+                    UserRestrictionsUtils.merge(global,
+                            profileOwner.getParentActiveAdmin().getGlobalUserRestrictions(
+                                    OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE));
+                    // The local restrictions set on the parent ActiveAdmin instance are only to be
+                    // applied to the primary user. They therefore need to be added the local
+                    // restriction set with the primary user id as the key, in this case the
+                    // primary user id is the target user.
+                    local.updateRestrictions(
+                            getProfileParentId(profileOwner.getUserHandle().getIdentifier()),
+                            profileOwner.getParentActiveAdmin().getLocalUserRestrictions(
+                                    OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE));
                 }
             }
-            // Remove deprecated restrictions.
-            for (String deprecatedRestriction: DEPRECATED_USER_RESTRICTIONS) {
-                userRestrictions.remove(deprecatedRestriction);
-            }
-            mUserManagerInternal.setDevicePolicyUserRestrictions(originatingUserId,
-                    userRestrictions, restrictionOwnerType);
         }
-    }
-
-    private Bundle addOrRemoveDisableCameraRestriction(Bundle userRestrictions, ActiveAdmin admin) {
-        if (userRestrictions == null) {
-            userRestrictions = new Bundle();
-        }
-        if (admin.disableCamera) {
-            userRestrictions.putBoolean(UserManager.DISALLOW_CAMERA, true);
-        } else {
-            userRestrictions.remove(UserManager.DISALLOW_CAMERA);
-        }
-        return userRestrictions;
-    }
-
-    private Bundle addOrRemoveDisableCameraRestriction(Bundle userRestrictions, int userId) {
-        if (userRestrictions == null) {
-            userRestrictions = new Bundle();
-        }
-        if (getCameraDisabled(/* who= */ null, userId, /* mergeDeviceOwnerRestriction= */
-                false)) {
-            userRestrictions.putBoolean(UserManager.DISALLOW_CAMERA, true);
-        } else {
-            userRestrictions.remove(UserManager.DISALLOW_CAMERA);
-        }
-        return userRestrictions;
+        mUserManagerInternal.setDevicePolicyUserRestrictions(originatingUserId, global, local,
+                isDeviceOwner);
     }
 
     @Override
