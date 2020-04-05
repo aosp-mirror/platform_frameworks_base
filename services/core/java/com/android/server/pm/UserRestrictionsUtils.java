@@ -233,6 +233,13 @@ public class UserRestrictionsUtils {
     );
 
     /**
+     * Special user restrictions that profile owner of an organization-owned managed profile can
+     * set on the parent profile instance to apply them on the personal profile.
+     */
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS =
+            Sets.newArraySet();
+
+    /**
      * User restrictions that default to {@code true} for managed profile owners.
      *
      * NB: {@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES} is also set by default but it is
@@ -416,7 +423,8 @@ public class UserRestrictionsUtils {
      * @return true if a restriction is settable by profile owner of an organization owned device.
      */
     public static boolean canProfileOwnerOfOrganizationOwnedDeviceChange(String restriction) {
-        return PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(restriction);
+        return PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(restriction)
+                || PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS.contains(restriction);
     }
 
     /**
@@ -427,31 +435,9 @@ public class UserRestrictionsUtils {
     }
 
     /**
-     * Takes restrictions that can be set by device owner, and sort them into what should be applied
-     * globally and what should be applied only on the current user.
-     */
-    public static void sortToGlobalAndLocal(@Nullable Bundle in,
-            @UserManagerInternal.OwnerType int restrictionOwnerType, @NonNull Bundle global,
-            @NonNull Bundle local) {
-        if (in == null || in.size() == 0) {
-            return;
-        }
-        for (String key : in.keySet()) {
-            if (!in.getBoolean(key)) {
-                continue;
-            }
-            if (isGlobal(restrictionOwnerType, key)) {
-                global.putBoolean(key, true);
-            } else {
-                local.putBoolean(key, true);
-            }
-        }
-    }
-
-    /**
      * Whether given user restriction should be enforced globally.
      */
-    private static boolean isGlobal(@UserManagerInternal.OwnerType int restrictionOwnerType,
+    public static boolean isGlobal(@UserManagerInternal.OwnerType int restrictionOwnerType,
             String key) {
         return ((restrictionOwnerType == UserManagerInternal.OWNER_TYPE_DEVICE_OWNER) && (
                 PRIMARY_USER_ONLY_RESTRICTIONS.contains(key) || GLOBAL_RESTRICTIONS.contains(key)))
@@ -460,6 +446,14 @@ public class UserRestrictionsUtils {
                 && PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(key))
                 || PROFILE_GLOBAL_RESTRICTIONS.contains(key)
                 || DEVICE_OWNER_ONLY_RESTRICTIONS.contains(key);
+    }
+
+    /**
+     * Whether given user restriction should be enforced locally.
+     */
+    public static boolean isLocal(@UserManagerInternal.OwnerType int restrictionOwnerType,
+            String key) {
+        return !isGlobal(restrictionOwnerType, key);
     }
 
     /**
