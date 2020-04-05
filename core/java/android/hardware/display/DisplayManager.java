@@ -634,17 +634,39 @@ public final class DisplayManager {
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int densityDpi, @Nullable Surface surface, int flags,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        return createVirtualDisplay(null /* projection */, name, width, height, densityDpi, surface,
-                flags, callback, handler, null /* uniqueId */);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
+                height, densityDpi);
+        builder.setFlags(flags);
+        if (surface != null) {
+            builder.setSurface(surface);
+        }
+        return createVirtualDisplay(null /* projection */, builder.build(), callback, handler);
     }
 
+    // TODO : Remove this hidden API after remove all callers. (Refer to MultiDisplayService)
     /** @hide */
     public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
             @NonNull String name, int width, int height, int densityDpi, @Nullable Surface surface,
             int flags, @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
             @Nullable String uniqueId) {
-        return mGlobal.createVirtualDisplay(mContext, projection,
-                name, width, height, densityDpi, surface, flags, callback, handler, uniqueId);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
+                height, densityDpi);
+        builder.setFlags(flags);
+        if (uniqueId != null) {
+            builder.setUniqueId(uniqueId);
+        }
+        if (surface != null) {
+            builder.setSurface(surface);
+        }
+        return createVirtualDisplay(projection, builder.build(), callback, handler);
+    }
+
+    /** @hide */
+    public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
+            @NonNull VirtualDisplayConfig virtualDisplayConfig,
+            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+        return mGlobal.createVirtualDisplay(mContext, projection, virtualDisplayConfig, callback,
+                handler);
     }
 
     /**

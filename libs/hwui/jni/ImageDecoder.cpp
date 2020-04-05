@@ -305,9 +305,6 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     }
 
     SkImageInfo bitmapInfo = decoder->getOutputInfo();
-    if (decoder->opaque()) {
-        bitmapInfo = bitmapInfo.makeAlphaType(kOpaque_SkAlphaType);
-    }
     if (asAlphaMask && colorType == kGray_8_SkColorType) {
         bitmapInfo = bitmapInfo.makeColorType(kAlpha_8_SkColorType);
     }

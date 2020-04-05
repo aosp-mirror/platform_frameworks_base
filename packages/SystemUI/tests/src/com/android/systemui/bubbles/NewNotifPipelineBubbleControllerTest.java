@@ -210,7 +210,10 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         mNotificationShadeWindowController.attach();
 
         // Need notifications for bubbles
-        mNotificationTestHelper = new NotificationTestHelper(mContext, mDependency);
+        mNotificationTestHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
         mRow = mNotificationTestHelper.createBubble(mDeleteIntent);
         mRow2 = mNotificationTestHelper.createBubble(mDeleteIntent);
         mNonBubbleNotifRow = mNotificationTestHelper.createRow();

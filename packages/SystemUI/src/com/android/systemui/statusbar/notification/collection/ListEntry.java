@@ -16,7 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
-import android.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 
@@ -27,12 +28,10 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 public abstract class ListEntry {
     private final String mKey;
 
-    @Nullable private GroupEntry mParent;
-    @Nullable private GroupEntry mPreviousParent;
-    @Nullable NotifSection mNotifSection;
-
-    private int mSection = -1;
     int mFirstAddedIteration = -1;
+
+    private final ListAttachState mPreviousAttachState = ListAttachState.create();
+    private final ListAttachState mAttachState = ListAttachState.create();
 
     ListEntry(String key) {
         mKey = key;
@@ -51,27 +50,40 @@ public abstract class ListEntry {
     public abstract @Nullable NotificationEntry getRepresentativeEntry();
 
     @Nullable public GroupEntry getParent() {
-        return mParent;
+        return mAttachState.getParent();
     }
 
     void setParent(@Nullable GroupEntry parent) {
-        mParent = parent;
+        mAttachState.setParent(parent);
     }
 
     @Nullable public GroupEntry getPreviousParent() {
-        return mPreviousParent;
-    }
-
-    void setPreviousParent(@Nullable GroupEntry previousParent) {
-        mPreviousParent = previousParent;
+        return mPreviousAttachState.getParent();
     }
 
     /** The section this notification was assigned to (0 to N-1, where N is number of sections). */
     public int getSection() {
-        return mSection;
+        return mAttachState.getSectionIndex();
     }
 
-    void setSection(int section) {
-        mSection = section;
+    @Nullable public NotifSection getNotifSection() {
+        return mAttachState.getSection();
+    }
+
+    ListAttachState getAttachState() {
+        return mAttachState;
+    }
+
+    ListAttachState getPreviousAttachState() {
+        return mPreviousAttachState;
+    }
+
+    /**
+     * Stores the current attach state into {@link #getPreviousAttachState()}} and then starts a
+     * fresh attach state (all entries will be null/default-initialized).
+     */
+    void beginNewAttachState() {
+        mPreviousAttachState.clone(mAttachState);
+        mAttachState.reset();
     }
 }

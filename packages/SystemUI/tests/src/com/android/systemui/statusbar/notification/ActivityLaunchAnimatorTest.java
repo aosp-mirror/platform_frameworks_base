@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +30,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
@@ -39,8 +39,12 @@ import com.android.systemui.statusbar.phone.NotificationShadeWindowViewControlle
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -48,14 +52,22 @@ import org.junit.runner.RunWith;
 public class ActivityLaunchAnimatorTest extends SysuiTestCase {
 
     private ActivityLaunchAnimator mLaunchAnimator;
-    private ActivityLaunchAnimator.Callback mCallback = mock(ActivityLaunchAnimator.Callback.class);
-    private NotificationShadeWindowViewController mNotificationShadeWindowViewController = mock(
-            NotificationShadeWindowViewController.class);
-    private NotificationShadeWindowView mNotificationShadeWindowView = mock(
-            NotificationShadeWindowView.class);
-    private NotificationListContainer mNotificationContainer
-            = mock(NotificationListContainer.class);
-    private ExpandableNotificationRow mRow = mock(ExpandableNotificationRow.class);
+    @Mock
+    private ActivityLaunchAnimator.Callback mCallback;
+    @Mock
+    private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
+    @Mock
+    private NotificationShadeWindowView mNotificationShadeWindowView;
+    @Mock
+    private NotificationListContainer mNotificationContainer;
+    @Mock
+    private ExpandableNotificationRow mRow;
+    @Mock
+    private NotificationShadeDepthController mNotificationShadeDepthController;
+    @Mock
+    private NotificationPanelViewController mNotificationPanelViewController;
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Before
     public void setUp() throws Exception {
@@ -66,7 +78,8 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
         mLaunchAnimator = new ActivityLaunchAnimator(
                 mNotificationShadeWindowViewController,
                 mCallback,
-                mock(NotificationPanelViewController.class),
+                mNotificationPanelViewController,
+                mNotificationShadeDepthController,
                 mNotificationContainer);
 
     }

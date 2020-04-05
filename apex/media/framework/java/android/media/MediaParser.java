@@ -499,20 +499,58 @@ public final class MediaParser {
             })
     public @interface ParserName {}
 
+    /** Parser name returned by {@link #getParserName()} when no parser has been selected yet. */
     public static final String PARSER_NAME_UNKNOWN = "android.media.mediaparser.UNKNOWN";
+    /**
+     * Parser for the Matroska container format, as defined in the <a
+     * href="https://matroska.org/technical/specs/">spec</a>.
+     */
     public static final String PARSER_NAME_MATROSKA = "android.media.mediaparser.MatroskaParser";
+    /**
+     * Parser for fragmented files using the MP4 container format, as defined in ISO/IEC 14496-12.
+     */
     public static final String PARSER_NAME_FMP4 = "android.media.mediaparser.FragmentedMp4Parser";
+    /**
+     * Parser for non-fragmented files using the MP4 container format, as defined in ISO/IEC
+     * 14496-12.
+     */
     public static final String PARSER_NAME_MP4 = "android.media.mediaparser.Mp4Parser";
+    /** Parser for the MP3 container format, as defined in ISO/IEC 11172-3. */
     public static final String PARSER_NAME_MP3 = "android.media.mediaparser.Mp3Parser";
+    /** Parser for the ADTS container format, as defined in ISO/IEC 13818-7. */
     public static final String PARSER_NAME_ADTS = "android.media.mediaparser.AdtsParser";
+    /**
+     * Parser for the AC-3 container format, as defined in Digital Audio Compression Standard
+     * (AC-3).
+     */
     public static final String PARSER_NAME_AC3 = "android.media.mediaparser.Ac3Parser";
+    /** Parser for the TS container format, as defined in ISO/IEC 13818-1. */
     public static final String PARSER_NAME_TS = "android.media.mediaparser.TsParser";
+    /**
+     * Parser for the FLV container format, as defined in Adobe Flash Video File Format
+     * Specification.
+     */
     public static final String PARSER_NAME_FLV = "android.media.mediaparser.FlvParser";
+    /** Parser for the OGG container format, as defined in RFC 3533. */
     public static final String PARSER_NAME_OGG = "android.media.mediaparser.OggParser";
+    /** Parser for the PS container format, as defined in ISO/IEC 11172-1. */
     public static final String PARSER_NAME_PS = "android.media.mediaparser.PsParser";
+    /**
+     * Parser for the WAV container format, as defined in Multimedia Programming Interface and Data
+     * Specifications.
+     */
     public static final String PARSER_NAME_WAV = "android.media.mediaparser.WavParser";
+    /** Parser for the AMR container format, as defined in RFC 4867. */
     public static final String PARSER_NAME_AMR = "android.media.mediaparser.AmrParser";
+    /**
+     * Parser for the AC-4 container format, as defined by Dolby AC-4: Audio delivery for
+     * Next-Generation Entertainment Services.
+     */
     public static final String PARSER_NAME_AC4 = "android.media.mediaparser.Ac4Parser";
+    /**
+     * Parser for the FLAC container format, as defined in the <a
+     * href="https://xiph.org/flac/">spec</a>.
+     */
     public static final String PARSER_NAME_FLAC = "android.media.mediaparser.FlacParser";
 
     // MediaParser parameters.

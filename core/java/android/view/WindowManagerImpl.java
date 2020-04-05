@@ -36,7 +36,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 
 import java.util.List;
@@ -70,8 +69,7 @@ import java.util.List;
 public final class WindowManagerImpl implements WindowManager {
     @UnsupportedAppUsage
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
-    @VisibleForTesting
-    public final Context mContext;
+    private final Context mContext;
     private final Window mParentWindow;
 
     private IBinder mDefaultToken;

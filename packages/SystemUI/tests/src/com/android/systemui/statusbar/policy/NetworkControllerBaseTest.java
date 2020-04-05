@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.provider.Settings;
@@ -101,6 +102,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected NetworkRegistrationInfo mFakeRegInfo;
     protected ConnectivityManager mMockCm;
     protected WifiManager mMockWm;
+    protected NetworkScoreManager mMockNsm;
     protected SubscriptionManager mMockSm;
     protected TelephonyManager mMockTm;
     protected BroadcastDispatcher mMockBd;
@@ -148,6 +150,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockSm = mock(SubscriptionManager.class);
         mMockCm = mock(ConnectivityManager.class);
         mMockBd = mock(BroadcastDispatcher.class);
+        mMockNsm = mock(NetworkScoreManager.class);
         mMockSubDefaults = mock(SubscriptionDefaults.class);
         mNetCapabilities = new NetworkCapabilities();
         when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
@@ -196,8 +199,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             return null;
         }).when(mMockProvisionController).addCallback(any());
 
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
-                mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
+                mMockNsm, mMockSm, mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mMockProvisionController, mMockBd);
         setupNetworkController();
@@ -244,18 +247,17 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     protected NetworkControllerImpl setUpNoMobileData() {
-      when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
-      NetworkControllerImpl networkControllerNoMobile
-              = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
+        when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
+        NetworkControllerImpl networkControllerNoMobile =
+                new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockNsm, mMockSm,
                         mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
                         mock(DeviceProvisionedController.class), mMockBd);
 
-      setupNetworkController();
+        setupNetworkController();
 
-      return networkControllerNoMobile;
-
+        return networkControllerNoMobile;
     }
 
     // 2 Bars 3G GSM.

@@ -17,6 +17,7 @@
 #define LOG_TAG "IncrementalService"
 
 #include "IncrementalService.h"
+#include "IncrementalServiceValidation.h"
 
 #include <android-base/file.h>
 #include <android-base/logging.h>
@@ -35,6 +36,7 @@
 #include <uuid/uuid.h>
 #include <zlib.h>
 
+#include <charconv>
 #include <ctime>
 #include <filesystem>
 #include <iterator>
@@ -48,6 +50,9 @@
 using namespace std::literals;
 using namespace android::content::pm;
 namespace fs = std::filesystem;
+
+constexpr const char* kDataUsageStats = "android.permission.LOADER_USAGE_STATS";
+constexpr const char* kOpUsage = "android:get_usage_stats";
 
 namespace android::incremental {
 
@@ -231,12 +236,16 @@ IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_v
       : mVold(sm.getVoldService()),
         mDataLoaderManager(sm.getDataLoaderManager()),
         mIncFs(sm.getIncFs()),
+        mAppOpsManager(sm.getAppOpsManager()),
         mIncrementalDir(rootDir) {
     if (!mVold) {
         LOG(FATAL) << "Vold service is unavailable";
     }
     if (!mDataLoaderManager) {
         LOG(FATAL) << "DataLoaderManagerService is unavailable";
+    }
+    if (!mAppOpsManager) {
+        LOG(FATAL) << "AppOpsManager is unavailable";
     }
     mountExistingImages();
 }
@@ -275,12 +284,12 @@ void IncrementalService::onDump(int fd) {
         const IncFsMount& mnt = *ifs.get();
         dprintf(fd, "\t[%d]:\n", id);
         dprintf(fd, "\t\tmountId: %d\n", mnt.mountId);
+        dprintf(fd, "\t\troot: %s\n", mnt.root.c_str());
         dprintf(fd, "\t\tnextStorageDirNo: %d\n", mnt.nextStorageDirNo.load());
         dprintf(fd, "\t\tdataLoaderStatus: %d\n", mnt.dataLoaderStatus.load());
-        dprintf(fd, "\t\tconnectionLostTime: %s\n", toString(mnt.connectionLostTime));
-        if (mnt.savedDataLoaderParams) {
-            const auto& params = mnt.savedDataLoaderParams.value();
-            dprintf(fd, "\t\tsavedDataLoaderParams:\n");
+        {
+            const auto& params = mnt.dataLoaderParams;
+            dprintf(fd, "\t\tdataLoaderParams:\n");
             dprintf(fd, "\t\t\ttype: %s\n", toString(params.type).c_str());
             dprintf(fd, "\t\t\tpackageName: %s\n", params.packageName.c_str());
             dprintf(fd, "\t\t\tclassName: %s\n", params.className.c_str());
@@ -328,6 +337,7 @@ std::optional<std::future<void>> IncrementalService::onSystemReady() {
     }
 
     std::thread([this, mounts = std::move(mounts)]() {
+        /* TODO(b/151241369): restore data loaders on reboot.
         for (auto&& ifs : mounts) {
             if (prepareDataLoader(*ifs)) {
                 LOG(INFO) << "Successfully started data loader for mount " << ifs->mountId;
@@ -336,6 +346,7 @@ std::optional<std::future<void>> IncrementalService::onSystemReady() {
                 LOG(WARNING) << "Failed to start data loader for mount " << ifs->mountId;
             }
         }
+        */
         mPrepareDataLoaders.set_value_at_thread_exit();
     }).detach();
     return mPrepareDataLoaders.get_future();
@@ -455,13 +466,15 @@ StorageId IncrementalService::createStorage(
         return kInvalidStorageId;
     }
 
+    ifs->dataLoaderParams = std::move(dataLoaderParams);
+
     {
         metadata::Mount m;
         m.mutable_storage()->set_id(ifs->mountId);
-        m.mutable_loader()->set_type((int)dataLoaderParams.type);
-        m.mutable_loader()->set_package_name(dataLoaderParams.packageName);
-        m.mutable_loader()->set_class_name(dataLoaderParams.className);
-        m.mutable_loader()->set_arguments(dataLoaderParams.arguments);
+        m.mutable_loader()->set_type((int)ifs->dataLoaderParams.type);
+        m.mutable_loader()->set_package_name(ifs->dataLoaderParams.packageName);
+        m.mutable_loader()->set_class_name(ifs->dataLoaderParams.className);
+        m.mutable_loader()->set_arguments(ifs->dataLoaderParams.arguments);
         const auto metadata = m.SerializeAsString();
         m.mutable_loader()->release_arguments();
         m.mutable_loader()->release_class_name();
@@ -489,7 +502,7 @@ StorageId IncrementalService::createStorage(
     // Done here as well, all data structures are in good state.
     secondCleanupOnFailure.release();
 
-    if (!prepareDataLoader(*ifs, &dataLoaderParams, &dataLoaderStatusListener)) {
+    if (!prepareDataLoader(*ifs, &dataLoaderStatusListener)) {
         LOG(ERROR) << "prepareDataLoader() failed";
         deleteStorageLocked(*ifs, std::move(l));
         return kInvalidStorageId;
@@ -569,11 +582,30 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
         return -EINVAL;
     }
 
+    ifs->dataLoaderFilesystemParams.readLogsEnabled = enableReadLogs;
+    if (enableReadLogs) {
+        // We never unregister the callbacks, but given a restricted number of data loaders and even fewer asking for read log access, should be ok.
+        registerAppOpsCallback(ifs->dataLoaderParams.packageName);
+    }
+
+    return applyStorageParams(*ifs);
+}
+
+int IncrementalService::applyStorageParams(IncFsMount& ifs) {
+    const bool enableReadLogs = ifs.dataLoaderFilesystemParams.readLogsEnabled;
+    if (enableReadLogs) {
+        if (auto status = CheckPermissionForDataDelivery(kDataUsageStats, kOpUsage);
+            !status.isOk()) {
+            LOG(ERROR) << "CheckPermissionForDataDelivery failed: " << status.toString8();
+            return fromBinderStatus(status);
+        }
+    }
+
     using unique_fd = ::android::base::unique_fd;
     ::android::os::incremental::IncrementalFileSystemControlParcel control;
-    control.cmd.reset(unique_fd(dup(ifs->control.cmd())));
-    control.pendingReads.reset(unique_fd(dup(ifs->control.pendingReads())));
-    auto logsFd = ifs->control.logs();
+    control.cmd.reset(unique_fd(dup(ifs.control.cmd())));
+    control.pendingReads.reset(unique_fd(dup(ifs.control.pendingReads())));
+    auto logsFd = ifs.control.logs();
     if (logsFd >= 0) {
         control.log.reset(unique_fd(dup(logsFd)));
     }
@@ -582,12 +614,7 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
     const auto status = mVold->setIncFsMountOptions(control, enableReadLogs);
     if (!status.isOk()) {
         LOG(ERROR) << "Calling Vold::setIncFsMountOptions() failed: " << status.toString8();
-        return status.exceptionCode() == binder::Status::EX_SERVICE_SPECIFIC
-                ? status.serviceSpecificErrorCode() > 0 ? -status.serviceSpecificErrorCode()
-                                                        : status.serviceSpecificErrorCode() == 0
-                                ? -EFAULT
-                                : status.serviceSpecificErrorCode()
-                : -EIO;
+        return fromBinderStatus(status);
     }
 
     return 0;
@@ -987,13 +1014,13 @@ void IncrementalService::mountExistingImages() {
             continue;
         }
         const auto root = path::join(mIncrementalDir, name);
-        if (!mountExistingImage(root, name)) {
+        if (!mountExistingImage(root)) {
             IncFsMount::cleanupFilesystem(path);
         }
     }
 }
 
-bool IncrementalService::mountExistingImage(std::string_view root, std::string_view key) {
+bool IncrementalService::mountExistingImage(std::string_view root) {
     auto mountTarget = path::join(root, constants().mount);
     const auto backing = path::join(root, constants().backing);
 
@@ -1011,15 +1038,25 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
 
     auto ifs = std::make_shared<IncFsMount>(std::string(root), -1, std::move(control), *this);
 
-    auto m = parseFromIncfs<metadata::Mount>(mIncFs.get(), ifs->control,
-                                             path::join(mountTarget, constants().infoMdName));
-    if (!m.has_loader() || !m.has_storage()) {
+    auto mount = parseFromIncfs<metadata::Mount>(mIncFs.get(), ifs->control,
+                                                 path::join(mountTarget, constants().infoMdName));
+    if (!mount.has_loader() || !mount.has_storage()) {
         LOG(ERROR) << "Bad mount metadata in mount at " << root;
         return false;
     }
 
-    ifs->mountId = m.storage().id();
+    ifs->mountId = mount.storage().id();
     mNextId = std::max(mNextId, ifs->mountId + 1);
+
+    // DataLoader params
+    {
+        auto& dlp = ifs->dataLoaderParams;
+        const auto& loader = mount.loader();
+        dlp.type = (android::content::pm::DataLoaderType)loader.type();
+        dlp.packageName = loader.package_name();
+        dlp.className = loader.class_name();
+        dlp.arguments = loader.arguments();
+    }
 
     std::vector<std::pair<std::string, metadata::BindPoint>> bindPoints;
     auto d = openDir(path::c_str(mountTarget));
@@ -1044,16 +1081,24 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
             }
             auto name = std::string_view(e->d_name);
             if (name.starts_with(constants().storagePrefix)) {
-                auto md = parseFromIncfs<metadata::Storage>(mIncFs.get(), ifs->control,
-                                                            path::join(mountTarget, name));
-                auto [_, inserted] = mMounts.try_emplace(md.id(), ifs);
+                int storageId;
+                const auto res = std::from_chars(name.data() + constants().storagePrefix.size() + 1,
+                                                 name.data() + name.size(), storageId);
+                if (res.ec != std::errc{} || *res.ptr != '_') {
+                    LOG(WARNING) << "Ignoring storage with invalid name '" << name << "' for mount "
+                                 << root;
+                    continue;
+                }
+                auto [_, inserted] = mMounts.try_emplace(storageId, ifs);
                 if (!inserted) {
-                    LOG(WARNING) << "Ignoring storage with duplicate id " << md.id()
+                    LOG(WARNING) << "Ignoring storage with duplicate id " << storageId
                                  << " for mount " << root;
                     continue;
                 }
-                ifs->storages.insert_or_assign(md.id(), IncFsMount::Storage{std::string(name)});
-                mNextId = std::max(mNextId, md.id() + 1);
+                ifs->storages.insert_or_assign(storageId,
+                                               IncFsMount::Storage{
+                                                       path::join(root, constants().mount, name)});
+                mNextId = std::max(mNextId, storageId + 1);
             }
         }
     }
@@ -1083,23 +1128,9 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
 }
 
 bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
-                                           DataLoaderParamsParcel* params,
                                            const DataLoaderStatusListener* externalListener) {
     if (!mSystemReady.load(std::memory_order_relaxed)) {
         std::unique_lock l(ifs.lock);
-        if (params) {
-            if (ifs.savedDataLoaderParams) {
-                LOG(WARNING) << "Trying to pass second set of data loader parameters, ignored it";
-            } else {
-                ifs.savedDataLoaderParams = std::move(*params);
-            }
-        } else {
-            if (!ifs.savedDataLoaderParams) {
-                LOG(ERROR) << "Mount " << ifs.mountId
-                           << " is broken: no data loader params (system is not ready yet)";
-                return false;
-            }
-        }
         return true; // eventually...
     }
 
@@ -1109,12 +1140,6 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
         return true;
     }
 
-    auto* dlp = params ? params
-                       : ifs.savedDataLoaderParams ? &ifs.savedDataLoaderParams.value() : nullptr;
-    if (!dlp) {
-        LOG(ERROR) << "Mount " << ifs.mountId << " is broken: no data loader params";
-        return false;
-    }
     FileSystemControlParcel fsControlParcel;
     fsControlParcel.incremental = aidl::make_nullable<IncrementalFileSystemControlParcel>();
     fsControlParcel.incremental->cmd.reset(base::unique_fd(::dup(ifs.control.cmd())));
@@ -1126,13 +1151,11 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
                                               externalListener ? *externalListener
                                                                : DataLoaderStatusListener());
     bool created = false;
-    auto status = mDataLoaderManager->initializeDataLoader(ifs.mountId, *dlp, fsControlParcel,
-                                                           listener, &created);
+    auto status = mDataLoaderManager->initializeDataLoader(ifs.mountId, ifs.dataLoaderParams, fsControlParcel, listener, &created);
     if (!status.isOk() || !created) {
         LOG(ERROR) << "Failed to create a data loader for mount " << ifs.mountId;
         return false;
     }
-    ifs.savedDataLoaderParams.reset();
     return true;
 }
 
@@ -1256,6 +1279,42 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
     return success;
 }
 
+void IncrementalService::registerAppOpsCallback(const std::string& packageName) {
+    if (packageName.empty()) {
+        return;
+    }
+
+    {
+        std::unique_lock lock{mCallbacksLock};
+        if (!mCallbackRegistered.insert(packageName).second) {
+            return;
+        }
+    }
+
+    /* TODO(b/152633648): restore callback after it's not crashing Binder anymore.
+    sp<AppOpsListener> listener = new AppOpsListener(*this, packageName);
+    mAppOpsManager->startWatchingMode(AppOpsManager::OP_GET_USAGE_STATS, String16(packageName.c_str()), listener);
+    */
+}
+
+void IncrementalService::onAppOppChanged(const std::string& packageName) {
+    std::vector<IfsMountPtr> affected;
+    {
+        std::lock_guard l(mLock);
+        affected.reserve(mMounts.size());
+        for (auto&& [id, ifs] : mMounts) {
+            if (ifs->dataLoaderFilesystemParams.readLogsEnabled && ifs->dataLoaderParams.packageName == packageName) {
+                affected.push_back(ifs);
+            }
+        }
+    }
+    /* TODO(b/152633648): restore callback after it's not crashing Kernel anymore.
+    for (auto&& ifs : affected) {
+        applyStorageParams(*ifs);
+    }
+    */
+}
+
 binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChanged(MountId mountId,
                                                                                   int newStatus) {
     if (externalListener) {
@@ -1317,6 +1376,10 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
     }
 
     return binder::Status::ok();
+}
+
+void IncrementalService::AppOpsListener::opChanged(int32_t op, const String16&) {
+    incrementalService.onAppOppChanged(packageName);
 }
 
 } // namespace android::incremental

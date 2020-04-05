@@ -124,6 +124,7 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.GridLayoutManager;
 import com.android.internal.widget.RecyclerView;
 import com.android.internal.widget.ResolverDrawerLayout;
@@ -178,7 +179,7 @@ public class ChooserActivity extends ResolverActivity implements
     private static final boolean USE_PREDICTION_MANAGER_FOR_SHARE_ACTIVITIES = true;
     // TODO(b/123088566) Share these in a better way.
     private static final String APP_PREDICTION_SHARE_UI_SURFACE = "share";
-    public static final String LAUNCH_LOCATON_DIRECT_SHARE = "direct_share";
+    public static final String LAUNCH_LOCATION_DIRECT_SHARE = "direct_share";
     private static final int APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
     public static final String APP_PREDICTION_INTENT_FILTER_KEY = "intent_filter";
 
@@ -193,6 +194,14 @@ public class ChooserActivity extends ResolverActivity implements
     public static final int TARGET_TYPE_CHOOSER_TARGET = 1;
     public static final int TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER = 2;
     public static final int TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE = 3;
+
+    public static final int SELECTION_TYPE_SERVICE = 1;
+    public static final int SELECTION_TYPE_APP = 2;
+    public static final int SELECTION_TYPE_STANDARD = 3;
+    public static final int SELECTION_TYPE_COPY = 4;
+
+    // statsd logger wrapper
+    protected ChooserActivityLogger mChooserActivityLogger;
 
     private static final boolean USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS = true;
 
@@ -226,7 +235,7 @@ public class ChooserActivity extends ResolverActivity implements
     private boolean mAppendDirectShareEnabled = DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_SYSTEMUI,
             SystemUiDeviceConfigFlags.APPEND_DIRECT_SHARE_ENABLED,
-            false);
+            true);
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
@@ -270,9 +279,9 @@ public class ChooserActivity extends ResolverActivity implements
 
     // Starting at 1 since 0 is considered "undefined" for some of the database transformations
     // of tron logs.
-    private static final int CONTENT_PREVIEW_IMAGE = 1;
-    private static final int CONTENT_PREVIEW_FILE = 2;
-    private static final int CONTENT_PREVIEW_TEXT = 3;
+    protected static final int CONTENT_PREVIEW_IMAGE = 1;
+    protected static final int CONTENT_PREVIEW_FILE = 2;
+    protected static final int CONTENT_PREVIEW_TEXT = 3;
     protected MetricsLogger mMetricsLogger;
 
     private ContentPreviewCoordinator mPreviewCoord;
@@ -500,6 +509,9 @@ public class ChooserActivity extends ResolverActivity implements
 
                 case CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT:
                     mMinTimeoutPassed = true;
+                    if (!mServiceConnections.isEmpty()) {
+                        getChooserActivityLogger().logSharesheetDirectLoadTimeout();
+                    }
                     unbindRemainingServices();
                     maybeStopServiceRequestTimer();
                     break;
@@ -533,6 +545,7 @@ public class ChooserActivity extends ResolverActivity implements
                     logDirectShareTargetReceived(
                             MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER);
                     sendVoiceChoicesIfNeeded();
+                    getChooserActivityLogger().logSharesheetDirectLoadComplete();
                     break;
 
                 default:
@@ -544,6 +557,7 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         final long intentReceivedTime = System.currentTimeMillis();
+        getChooserActivityLogger().logSharesheetTriggered();
         // This is the only place this value is being set. Effectively final.
         mIsAppPredictorComponentAvailable = isAppPredictionServiceAvailable();
 
@@ -707,6 +721,8 @@ public class ChooserActivity extends ResolverActivity implements
                                 incrementNumSheetExpansions();
                                 mWrittenOnce = true;
                             }
+                            getChooserActivityLogger()
+                                    .logSharesheetExpansionChanged(isCollapsed);
                         }
                     });
         }
@@ -715,6 +731,16 @@ public class ChooserActivity extends ResolverActivity implements
             Log.d(TAG, "System Time Cost is " + systemCost);
         }
 
+        getChooserActivityLogger().logShareStarted(
+                FrameworkStatsLog.SHARESHEET_STARTED,
+                getReferrerPackageName(),
+                target.getType(),
+                initialIntents == null ? 0 : initialIntents.length,
+                mCallerChooserTargets == null ? 0 : mCallerChooserTargets.length,
+                isWorkProfile(),
+                findPreferredContentPreview(getTargetIntent(), getContentResolver()),
+                target.getAction()
+        );
         mDirectShareShortcutInfoCache = new HashMap<>();
     }
 
@@ -969,6 +995,10 @@ public class ChooserActivity extends ResolverActivity implements
             LogMaker targetLogMaker = new LogMaker(
                     MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SYSTEM_TARGET).setSubtype(1);
             getMetricsLogger().write(targetLogMaker);
+            getChooserActivityLogger().logShareTargetSelected(
+                    SELECTION_TYPE_COPY,
+                    "",
+                    -1);
 
             finish();
         }
@@ -1644,18 +1674,33 @@ public class ChooserActivity extends ResolverActivity implements
                     if (mCallerChooserTargets != null) {
                         numCallerProvided = mCallerChooserTargets.length;
                     }
+                    getChooserActivityLogger().logShareTargetSelected(
+                            SELECTION_TYPE_SERVICE,
+                            targetInfo.getResolveInfo().activityInfo.processName,
+                            value
+                    );
                     break;
                 case ChooserListAdapter.TARGET_CALLER:
                 case ChooserListAdapter.TARGET_STANDARD:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET;
                     value -= currentListAdapter.getSelectableServiceTargetCount();
                     numCallerProvided = currentListAdapter.getCallerTargetCount();
+                    getChooserActivityLogger().logShareTargetSelected(
+                            SELECTION_TYPE_APP,
+                            targetInfo.getResolveInfo().activityInfo.processName,
+                            value
+                    );
                     break;
                 case ChooserListAdapter.TARGET_STANDARD_AZ:
                     // A-Z targets are unranked standard targets; we use -1 to mark that they
                     // are from the alphabetical pool.
                     value = -1;
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET;
+                    getChooserActivityLogger().logShareTargetSelected(
+                            SELECTION_TYPE_STANDARD,
+                            targetInfo.getResolveInfo().activityInfo.processName,
+                            value
+                    );
                     break;
             }
 
@@ -2131,7 +2176,7 @@ public class ChooserActivity extends ResolverActivity implements
         if (appTarget != null) {
             directShareAppPredictor.notifyAppTargetEvent(
                     new AppTargetEvent.Builder(appTarget, AppTargetEvent.ACTION_LAUNCH)
-                        .setLaunchLocation(LAUNCH_LOCATON_DIRECT_SHARE)
+                        .setLaunchLocation(LAUNCH_LOCATION_DIRECT_SHARE)
                         .build());
         }
     }
@@ -2288,6 +2333,13 @@ public class ChooserActivity extends ResolverActivity implements
             mMetricsLogger = new MetricsLogger();
         }
         return mMetricsLogger;
+    }
+
+    protected ChooserActivityLogger getChooserActivityLogger() {
+        if (mChooserActivityLogger == null) {
+            mChooserActivityLogger = new ChooserActivityLoggerImpl();
+        }
+        return mChooserActivityLogger;
     }
 
     public class ChooserListController extends ResolverListController {
@@ -2601,6 +2653,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         // don't support direct share on low ram devices
         if (ActivityManager.isLowRamDeviceStatic()) {
+            getChooserActivityLogger().logSharesheetAppLoadComplete();
             return;
         }
 
@@ -2619,6 +2672,8 @@ public class ChooserActivity extends ResolverActivity implements
 
             queryTargetServices(chooserListAdapter);
         }
+
+        getChooserActivityLogger().logSharesheetAppLoadComplete();
     }
 
     private void setupScrollListener() {
@@ -3776,5 +3831,10 @@ public class ChooserActivity extends ResolverActivity implements
 
             canvas.drawRoundRect(x, y, width, height, mRadius, mRadius, mRoundRectPaint);
         }
+    }
+
+    @Override
+    protected void maybeLogProfileChange() {
+        getChooserActivityLogger().logShareheetProfileChanged();
     }
 }

@@ -34,6 +34,7 @@ import android.view.View;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Interpolators;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
@@ -57,6 +58,7 @@ public class ActivityLaunchAnimator {
     private final NotificationListContainer mNotificationContainer;
     private final float mWindowCornerRadius;
     private final NotificationShadeWindowViewController mNotificationShadeWindowViewController;
+    private final NotificationShadeDepthController mDepthController;
     private Callback mCallback;
     private final Runnable mTimeoutRunnable = () -> {
         setAnimationPending(false);
@@ -70,9 +72,11 @@ public class ActivityLaunchAnimator {
             NotificationShadeWindowViewController notificationShadeWindowViewController,
             Callback callback,
             NotificationPanelViewController notificationPanel,
+            NotificationShadeDepthController depthController,
             NotificationListContainer container) {
         mNotificationPanel = notificationPanel;
         mNotificationContainer = container;
+        mDepthController = depthController;
         mNotificationShadeWindowViewController = notificationShadeWindowViewController;
         mCallback = callback;
         mWindowCornerRadius = ScreenDecorationsUtils
@@ -212,7 +216,7 @@ public class ActivityLaunchAnimator {
                                 mWindowCornerRadius, progress);
                         applyParamsToWindow(primary);
                         applyParamsToNotification(mParams);
-                        applyParamsToNotificationList(mParams);
+                        applyParamsToNotificationShade(mParams);
                     }
                 });
                 anim.addListener(new AnimatorListenerAdapter() {
@@ -256,14 +260,15 @@ public class ActivityLaunchAnimator {
             if (!running) {
                 mCallback.onExpandAnimationFinished(mIsFullScreenLaunch);
                 applyParamsToNotification(null);
-                applyParamsToNotificationList(null);
+                applyParamsToNotificationShade(null);
             }
 
         }
 
-        private void applyParamsToNotificationList(ExpandAnimationParameters params) {
+        private void applyParamsToNotificationShade(ExpandAnimationParameters params) {
             mNotificationContainer.applyExpandAnimationParams(params);
             mNotificationPanel.applyExpandAnimationParams(params);
+            mDepthController.setNotificationLaunchAnimationParams(params);
         }
 
         private void applyParamsToNotification(ExpandAnimationParameters params) {
@@ -295,7 +300,7 @@ public class ActivityLaunchAnimator {
     };
 
     public static class ExpandAnimationParameters {
-        float linearProgress;
+        public float linearProgress;
         int[] startPosition;
         float startTranslationZ;
         int left;

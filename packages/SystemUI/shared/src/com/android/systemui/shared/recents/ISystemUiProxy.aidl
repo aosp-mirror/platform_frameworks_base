@@ -26,7 +26,7 @@ import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 
 /**
  * Temporary callbacks into SystemUI.
- * Next id = 25
+ * Next id = 26
  */
 interface ISystemUiProxy {
 
@@ -140,4 +140,10 @@ interface ISystemUiProxy {
      * Sets listener to get pinned stack animation callbacks.
      */
     void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) = 24;
+
+    /**
+     * Notifies that quickstep will switch to a new task
+     * @param rotation indicates which Surface.Rotation the gesture was started in
+     */
+    void onQuickSwitchToNewTask(int rotation) = 25;
 }

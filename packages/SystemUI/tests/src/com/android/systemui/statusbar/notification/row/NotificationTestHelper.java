@@ -38,6 +38,7 @@ import android.content.pm.LauncherApps;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+import android.testing.TestableLooper;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
@@ -57,6 +58,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
 import com.android.systemui.statusbar.notification.icon.IconManager;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpansionLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -91,6 +93,7 @@ public class NotificationTestHelper {
     private static final String APP_NAME = "appName";
 
     private final Context mContext;
+    private final TestableLooper mTestLooper;
     private int mId;
     private final NotificationGroupManager mGroupManager;
     private ExpandableNotificationRow mRow;
@@ -100,9 +103,14 @@ public class NotificationTestHelper {
     private final RowContentBindStage mBindStage;
     private final IconManager mIconManager;
     private StatusBarStateController mStatusBarStateController;
+    private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
 
-    public NotificationTestHelper(Context context, TestableDependency dependency) {
+    public NotificationTestHelper(
+            Context context,
+            TestableDependency dependency,
+            TestableLooper testLooper) {
         mContext = context;
+        mTestLooper = testLooper;
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(BubbleController.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
@@ -131,13 +139,17 @@ public class NotificationTestHelper {
 
         CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
-        mBindPipeline = new NotifBindPipeline(collection, mock(NotifBindPipelineLogger.class));
+        mBindPipeline = new NotifBindPipeline(
+                collection,
+                mock(NotifBindPipelineLogger.class),
+                mTestLooper.getLooper());
         mBindPipeline.setStage(mBindStage);
 
         ArgumentCaptor<NotifCollectionListener> collectionListenerCaptor =
                 ArgumentCaptor.forClass(NotifCollectionListener.class);
         verify(collection).addCollectionListener(collectionListenerCaptor.capture());
         mBindPipelineEntryListener = collectionListenerCaptor.getValue();
+        mPeopleNotificationIdentifier = mock(PeopleNotificationIdentifier.class);
     }
 
     /**
@@ -407,10 +419,11 @@ public class NotificationTestHelper {
                 mock(NotificationMediaManager.class),
                 mock(ExpandableNotificationRow.OnAppOpsClickListener.class),
                 mock(FalsingManager.class),
-                mStatusBarStateController);
+                mStatusBarStateController,
+                mPeopleNotificationIdentifier);
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
-        inflateAndWait(entry, mBindStage);
+        inflateAndWait(entry);
 
         // This would be done as part of onAsyncInflationFinished, but we skip large amounts of
         // the callback chain, so we need to make up for not adding it to the group manager
@@ -419,10 +432,10 @@ public class NotificationTestHelper {
         return row;
     }
 
-    private static void inflateAndWait(NotificationEntry entry, RowContentBindStage stage)
-            throws Exception {
+    private void inflateAndWait(NotificationEntry entry) throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        stage.requestRebind(entry, en -> countDownLatch.countDown());
+        mBindStage.requestRebind(entry, en -> countDownLatch.countDown());
+        mTestLooper.processAllMessages();
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 

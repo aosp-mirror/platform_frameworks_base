@@ -171,7 +171,7 @@ public class TaskStackTests extends WindowTestsBase {
 
         // Reparent
         clearInvocations(task1); // reset the number of onDisplayChanged for task.
-        stack1.reparent(dc, true /* onTop */);
+        stack1.reparent(dc.getDefaultTaskDisplayArea(), true /* onTop */);
         assertEquals(dc, stack1.getDisplayContent());
         final int stack1PositionInParent = stack1.getParent().mChildren.indexOf(stack1);
         final int stack2PositionInParent = stack1.getParent().mChildren.indexOf(stack2);

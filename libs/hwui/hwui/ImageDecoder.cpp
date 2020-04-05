@@ -50,10 +50,8 @@ ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChu
 }
 
 SkAlphaType ImageDecoder::getOutAlphaType() const {
-    // While an SkBitmap may want to use kOpaque_SkAlphaType for a performance
-    // optimization, this class just outputs raw pixels. Using either
-    // premultiplication choice has no effect on decoding an opaque encoded image.
-    return mUnpremultipliedRequired ? kUnpremul_SkAlphaType : kPremul_SkAlphaType;
+    return opaque() ? kOpaque_SkAlphaType
+                    : mUnpremultipliedRequired ? kUnpremul_SkAlphaType : kPremul_SkAlphaType;
 }
 
 bool ImageDecoder::setTargetSize(int width, int height) {
@@ -82,8 +80,7 @@ bool ImageDecoder::setTargetSize(int width, int height) {
     SkISize targetSize = { width, height }, decodeSize = targetSize;
     int sampleSize = mCodec->computeSampleSize(&decodeSize);
 
-    if (decodeSize != targetSize && mUnpremultipliedRequired
-            && !mCodec->getInfo().isOpaque()) {
+    if (decodeSize != targetSize && mUnpremultipliedRequired && !opaque()) {
         return false;
     }
 

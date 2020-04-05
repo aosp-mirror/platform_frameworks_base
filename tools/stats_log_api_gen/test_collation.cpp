@@ -308,10 +308,10 @@ TEST(CollationTest, RecognizeModuleAtom) {
     EXPECT_EQ(1ul, annotationSet->size());
     annotationSetIt = annotationSet->begin();
     annotation = annotationSetIt->get();
-    EXPECT_EQ(ANNOTATION_ID_STATE_OPTION, annotation->annotationId);
+    EXPECT_EQ(ANNOTATION_ID_EXCLUSIVE_STATE, annotation->annotationId);
     EXPECT_EQ(3, annotation->atomId);
-    EXPECT_EQ(ANNOTATION_TYPE_INT, annotation->type);
-    EXPECT_EQ(os::statsd::StateField::EXCLUSIVE_STATE, annotation->value.intValue);
+    EXPECT_EQ(ANNOTATION_TYPE_BOOL, annotation->type);
+    EXPECT_TRUE(annotation->value.boolValue);
 
     signatureInfoMapIt++;
     signature = &signatureInfoMapIt->first;
@@ -378,10 +378,10 @@ TEST(CollationTest, RecognizeModule1Atom) {
     EXPECT_EQ(1ul, annotationSet->size());
     annotationSetIt = annotationSet->begin();
     annotation = annotationSetIt->get();
-    EXPECT_EQ(ANNOTATION_ID_STATE_OPTION, annotation->annotationId);
+    EXPECT_EQ(ANNOTATION_ID_EXCLUSIVE_STATE, annotation->annotationId);
     EXPECT_EQ(3, annotation->atomId);
-    EXPECT_EQ(ANNOTATION_TYPE_INT, annotation->type);
-    EXPECT_EQ(os::statsd::StateField::EXCLUSIVE_STATE, annotation->value.intValue);
+    EXPECT_EQ(ANNOTATION_TYPE_BOOL, annotation->type);
+    EXPECT_TRUE(annotation->value.boolValue);
 }
 
 }  // namespace stats_log_api_gen

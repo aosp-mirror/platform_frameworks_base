@@ -170,10 +170,15 @@ public final class ImeFocusController {
         }
         if (DEBUG) Log.d(TAG, "onViewFocusChanged, view=" + view + ", mServedView=" + mServedView);
 
+        // We don't need to track the next served view when the view lost focus here because:
+        // 1) The current view focus may be cleared temporary when in touch mode, closing input
+        //    at this moment isn't the right way.
+        // 2) We only care about the served view change when it focused, since changing input
+        //    connection when the focus target changed is reasonable.
+        // 3) Setting the next served view as null when no more served view should be handled in
+        //    other special events (e.g. view detached from window or the window dismissed).
         if (hasFocus) {
             mNextServedView = view;
-        } else if (view == mServedView) {
-            mNextServedView = null;
         }
         mViewRootImpl.dispatchCheckFocus();
     }

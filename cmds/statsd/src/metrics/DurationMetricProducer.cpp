@@ -55,6 +55,7 @@ const int FIELD_ID_DATA = 1;
 const int FIELD_ID_DIMENSION_IN_WHAT = 1;
 const int FIELD_ID_BUCKET_INFO = 3;
 const int FIELD_ID_DIMENSION_LEAF_IN_WHAT = 4;
+const int FIELD_ID_SLICE_BY_STATE = 6;
 // for DurationBucketInfo
 const int FIELD_ID_DURATION = 3;
 const int FIELD_ID_BUCKET_NUM = 4;
@@ -115,6 +116,14 @@ DurationMetricProducer::DurationMetricProducer(
     }
     mUnSlicedPartCondition = ConditionState::kUnknown;
 
+    for (const auto& stateLink : metric.state_link()) {
+        Metric2State ms;
+        ms.stateAtomId = stateLink.state_atom_id();
+        translateFieldMatcher(stateLink.fields_in_what(), &ms.metricFields);
+        translateFieldMatcher(stateLink.fields_in_state(), &ms.stateFields);
+        mMetric2StateLinks.push_back(ms);
+    }
+
     mUseWhatDimensionAsInternalDimension = equalDimensions(mDimensionsInWhat, mInternalDimensions);
     if (mWizard != nullptr && mConditionTrackerIndex >= 0 &&
             mMetric2ConditionLinks.size() == 1) {
@@ -150,21 +159,49 @@ sp<AnomalyTracker> DurationMetricProducer::addAnomalyTracker(
     return anomalyTracker;
 }
 
+void DurationMetricProducer::onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
+                                            const HashableDimensionKey& primaryKey,
+                                            const int32_t oldState, const int32_t newState) {
+    // Create a FieldValue object to hold the new state.
+    FieldValue value;
+    value.mValue.setInt(newState);
+    // Check if this metric has a StateMap. If so, map the new state value to
+    // the correct state group id.
+    mapStateValue(atomId, &value);
+
+    flushIfNeededLocked(eventTimeNs);
+
+    // Each duration tracker is mapped to a different whatKey (a set of values from the
+    // dimensionsInWhat fields). We notify all trackers iff the primaryKey field values from the
+    // state change event are a subset of the tracker's whatKey field values.
+    //
+    // Ex. For a duration metric dimensioned on uid and tag:
+    // DurationTracker1 whatKey = uid: 1001, tag: 1
+    // DurationTracker2 whatKey = uid: 1002, tag 1
+    //
+    // If the state change primaryKey = uid: 1001, we only notify DurationTracker1 of a state
+    // change.
+    for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
+        if (!containsLinkedStateValues(whatIt.first, primaryKey, mMetric2StateLinks, atomId)) {
+            continue;
+        }
+        whatIt.second->onStateChanged(eventTimeNs, atomId, value);
+    }
+}
+
 unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
         const MetricDimensionKey& eventKey) const {
     switch (mAggregationType) {
         case DurationMetric_AggregationType_SUM:
             return make_unique<OringDurationTracker>(
-                    mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex,
-                    mNested, mCurrentBucketStartTimeNs, mCurrentBucketNum,
-                    mTimeBaseNs, mBucketSizeNs, mConditionSliced,
-                    mHasLinksToAllConditionDimensionsInTracker, mAnomalyTrackers);
+                    mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex, mNested,
+                    mCurrentBucketStartTimeNs, mCurrentBucketNum, mTimeBaseNs, mBucketSizeNs,
+                    mConditionSliced, mHasLinksToAllConditionDimensionsInTracker, mAnomalyTrackers);
         case DurationMetric_AggregationType_MAX_SPARSE:
             return make_unique<MaxDurationTracker>(
-                    mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex,
-                    mNested, mCurrentBucketStartTimeNs, mCurrentBucketNum,
-                    mTimeBaseNs, mBucketSizeNs, mConditionSliced,
-                    mHasLinksToAllConditionDimensionsInTracker, mAnomalyTrackers);
+                    mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex, mNested,
+                    mCurrentBucketStartTimeNs, mCurrentBucketNum, mTimeBaseNs, mBucketSizeNs,
+                    mConditionSliced, mHasLinksToAllConditionDimensionsInTracker, mAnomalyTrackers);
     }
 }
 
@@ -364,6 +401,13 @@ void DurationMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
             writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInWhat(),
                                            FIELD_ID_DIMENSION_LEAF_IN_WHAT, str_set, protoOutput);
         }
+        // Then fill slice_by_state.
+        for (auto state : dimensionKey.getStateValuesKey().getValues()) {
+            uint64_t stateToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                                     FIELD_ID_SLICE_BY_STATE);
+            writeStateToProto(state, protoOutput);
+            protoOutput->end(stateToken);
+        }
         // Then fill bucket_info (DurationBucketInfo).
         for (const auto& bucket : pair.second) {
             uint64_t bucketInfoToken = protoOutput->start(
@@ -460,7 +504,6 @@ void DurationMetricProducer::handleStartEvent(const MetricDimensionKey& eventKey
                                               const ConditionKey& conditionKeys,
                                               bool condition, const LogEvent& event) {
     const auto& whatKey = eventKey.getDimensionKeyInWhat();
-
     auto whatIt = mCurrentSlicedDurationTrackerMap.find(whatKey);
     if (whatIt == mCurrentSlicedDurationTrackerMap.end()) {
         if (hitGuardRailLocked(eventKey)) {
@@ -471,19 +514,18 @@ void DurationMetricProducer::handleStartEvent(const MetricDimensionKey& eventKey
 
     auto it = mCurrentSlicedDurationTrackerMap.find(whatKey);
     if (mUseWhatDimensionAsInternalDimension) {
-        it->second->noteStart(whatKey, condition,
-                              event.GetElapsedTimestampNs(), conditionKeys);
+        it->second->noteStart(whatKey, condition, event.GetElapsedTimestampNs(), conditionKeys);
         return;
     }
 
     if (mInternalDimensions.empty()) {
-        it->second->noteStart(DEFAULT_DIMENSION_KEY, condition,
-                              event.GetElapsedTimestampNs(), conditionKeys);
+        it->second->noteStart(DEFAULT_DIMENSION_KEY, condition, event.GetElapsedTimestampNs(),
+                              conditionKeys);
     } else {
         HashableDimensionKey dimensionKey = DEFAULT_DIMENSION_KEY;
         filterValues(mInternalDimensions, event.getValues(), &dimensionKey);
-        it->second->noteStart(
-            dimensionKey, condition, event.GetElapsedTimestampNs(), conditionKeys);
+        it->second->noteStart(dimensionKey, condition, event.GetElapsedTimestampNs(),
+                              conditionKeys);
     }
 
 }
@@ -517,6 +559,41 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
     HashableDimensionKey dimensionInWhat = DEFAULT_DIMENSION_KEY;
     if (!mDimensionsInWhat.empty()) {
         filterValues(mDimensionsInWhat, event.getValues(), &dimensionInWhat);
+    }
+
+    // Stores atom id to primary key pairs for each state atom that the metric is
+    // sliced by.
+    std::map<int, HashableDimensionKey> statePrimaryKeys;
+
+    // For states with primary fields, use MetricStateLinks to get the primary
+    // field values from the log event. These values will form a primary key
+    // that will be used to query StateTracker for the correct state value.
+    for (const auto& stateLink : mMetric2StateLinks) {
+        getDimensionForState(event.getValues(), stateLink,
+                             &statePrimaryKeys[stateLink.stateAtomId]);
+    }
+
+    // For each sliced state, query StateTracker for the state value using
+    // either the primary key from the previous step or the DEFAULT_DIMENSION_KEY.
+    //
+    // Expected functionality: for any case where the MetricStateLinks are
+    // initialized incorrectly (ex. # of state links != # of primary fields, no
+    // links are provided for a state with primary fields, links are provided
+    // in the wrong order, etc.), StateTracker will simply return kStateUnknown
+    // when queried using an incorrect key.
+    HashableDimensionKey stateValuesKey = DEFAULT_DIMENSION_KEY;
+    for (auto atomId : mSlicedStateAtoms) {
+        FieldValue value;
+        if (statePrimaryKeys.find(atomId) != statePrimaryKeys.end()) {
+            // found a primary key for this state, query using the key
+            queryStateValue(atomId, statePrimaryKeys[atomId], &value);
+        } else {
+            // if no MetricStateLinks exist for this state atom,
+            // query using the default dimension key (empty HashableDimensionKey)
+            queryStateValue(atomId, DEFAULT_DIMENSION_KEY, &value);
+        }
+        mapStateValue(atomId, &value);
+        stateValuesKey.addValue(value);
     }
 
     // Handles Stop events.
@@ -559,8 +636,8 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
 
     condition = condition && mIsActive;
 
-    handleStartEvent(MetricDimensionKey(dimensionInWhat, DEFAULT_DIMENSION_KEY), conditionKey,
-                     condition, event);
+    handleStartEvent(MetricDimensionKey(dimensionInWhat, stateValuesKey), conditionKey, condition,
+                     event);
 }
 
 size_t DurationMetricProducer::byteSizeLocked() const {

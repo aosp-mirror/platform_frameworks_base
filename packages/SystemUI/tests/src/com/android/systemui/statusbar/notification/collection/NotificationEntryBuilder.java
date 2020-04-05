@@ -57,7 +57,7 @@ public class NotificationEntryBuilder {
 
         /* ListEntry properties */
         entry.setParent(mParent);
-        entry.setSection(mSection);
+        entry.getAttachState().setSectionIndex(mSection);
         return entry;
     }
 

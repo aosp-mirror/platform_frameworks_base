@@ -101,11 +101,11 @@ public:
     // If the metric wants to make any change to the data, like timestamps, they
     // should make a copy as this data may be shared with multiple metrics.
     virtual bool Pull(int tagId, const ConfigKey& configKey,
-                      vector<std::shared_ptr<LogEvent>>* data, bool useUids = false);
+                      vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
 
     // Same as above, but directly specify the allowed uids to pull from.
     virtual bool Pull(int tagId, const vector<int32_t>& uids,
-                      vector<std::shared_ptr<LogEvent>>* data, bool useUids = false);
+                      vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
 
     // Clear pull data cache immediately.
     int ForceClearPullerCache();
@@ -118,9 +118,9 @@ public:
     void RegisterPullAtomCallback(const int uid, const int32_t atomTag, const int64_t coolDownNs,
                                   const int64_t timeoutNs, const vector<int32_t>& additiveFields,
                                   const shared_ptr<IPullAtomCallback>& callback,
-                                  bool useUid = false);
+                                  bool useUid = true);
 
-    void UnregisterPullAtomCallback(const int uid, const int32_t atomTag);
+    void UnregisterPullAtomCallback(const int uid, const int32_t atomTag, bool useUids = true);
 
     std::map<const PullerKey, sp<StatsPuller>> kAllPullAtomInfo;
 
@@ -152,7 +152,7 @@ private:
     std::map<ConfigKey, wp<PullUidProvider>> mPullUidProviders;
 
     bool PullLocked(int tagId, const ConfigKey& configKey, vector<std::shared_ptr<LogEvent>>* data,
-                    bool useUids = false);
+                    bool useUids = true);
 
     bool PullLocked(int tagId, const vector<int32_t>& uids, vector<std::shared_ptr<LogEvent>>* data,
                     bool useUids);
@@ -163,6 +163,15 @@ private:
     void updateAlarmLocked();
 
     int64_t mNextPullTimeNs;
+
+    // Death recipient that is triggered when the process holding the IPullAtomCallback has died.
+    ::ndk::ScopedAIBinder_DeathRecipient mPullAtomCallbackDeathRecipient;
+
+    /**
+     * Death recipient callback that is called when a pull atom callback dies.
+     * The cookie is a pointer to a PullAtomCallbackDeathCookie.
+     */
+    static void pullAtomCallbackDied(void* cookie);
 
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm);

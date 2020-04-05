@@ -26,6 +26,8 @@ import com.google.protobuf.TextFormat;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -49,7 +51,7 @@ public class LocalDrive {
     public static final String HELP_STRING =
         "Usage:\n\n" +
 
-        "statsd_localdrive upload CONFIG_FILE [CONFIG_ID] [--binary]\n" +
+        "statsd_localdrive [-s DEVICE_SERIAL] upload CONFIG_FILE [CONFIG_ID] [--binary]\n" +
         "  Uploads the given statsd config file (in binary or human-readable-text format).\n" +
         "  If a config with this id already exists, removes it first.\n" +
         "    CONFIG_FILE    Location of config file on host.\n" +
@@ -59,12 +61,12 @@ public class LocalDrive {
         // Similar to: adb shell cmd stats config update SHELL_UID CONFIG_ID
         "\n" +
 
-        "statsd_localdrive update CONFIG_FILE [CONFIG_ID] [--binary]\n" +
+        "statsd_localdrive [-s DEVICE_SERIAL] update CONFIG_FILE [CONFIG_ID] [--binary]\n" +
         "  Same as upload, but does not remove the old config first (if it already exists).\n" +
         // Similar to: adb shell cmd stats config update SHELL_UID CONFIG_ID
         "\n" +
 
-        "statsd_localdrive get-data [CONFIG_ID] [--clear] [--binary] [--no-uid-map]\n" +
+        "statsd_localdrive [-s DEVICE_SERIAL] get-data [CONFIG_ID] [--clear] [--binary] [--no-uid-map]\n" +
         "  Prints the output statslog data (in binary or human-readable-text format).\n" +
         "    CONFIG_ID      Long ID of the config. If absent, uses " + DEFAULT_CONFIG_ID + ".\n" +
         "    --binary       Output should be in binary, instead of default human-readable text.\n" +
@@ -75,13 +77,13 @@ public class LocalDrive {
         //                                                      --include_current_bucket --proto
         "\n" +
 
-        "statsd_localdrive remove [CONFIG_ID]\n" +
+        "statsd_localdrive [-s DEVICE_SERIAL] remove [CONFIG_ID]\n" +
         "  Removes the config.\n" +
         "    CONFIG_ID      Long ID of the config. If absent, uses " + DEFAULT_CONFIG_ID + ".\n" +
         // Equivalent to: adb shell cmd stats config remove SHELL_UID CONFIG_ID
         "\n" +
 
-        "statsd_localdrive clear [CONFIG_ID]\n" +
+        "statsd_localdrive [-s DEVICE_SERIAL] clear [CONFIG_ID]\n" +
         "  Clears the data associated with the config.\n" +
         "    CONFIG_ID      Long ID of the config. If absent, uses " + DEFAULT_CONFIG_ID + ".\n" +
         // Similar to: adb shell cmd stats dump-report SHELL_UID CONFIG_ID
@@ -94,29 +96,59 @@ public class LocalDrive {
     /** Usage: make statsd_localdrive && statsd_localdrive */
     public static void main(String[] args) {
         Utils.setUpLogger(sLogger, DEBUG);
+        if (args.length == 0) {
+            printHelp();
+            return;
+        }
 
-        if (!Utils.isAcceptableStatsd(sLogger, MIN_SDK, MIN_CODENAME)) {
+        int remainingArgsLength = args.length;
+        String deviceSerial = null;
+        if (args[0].equals("-s")) {
+            if (args.length == 1) {
+                printHelp();
+            }
+            deviceSerial = args[1];
+            remainingArgsLength -= 2;
+        }
+
+        List<String> connectedDevices = Utils.getDeviceSerials(sLogger);
+        if (connectedDevices == null || connectedDevices.size() == 0) {
+            sLogger.log(Level.SEVERE, "No device connected.");
+            return;
+        }
+        if (connectedDevices.size() == 1 && deviceSerial == null) {
+            deviceSerial = connectedDevices.get(0);
+        }
+
+        if (deviceSerial == null) {
+            sLogger.log(Level.SEVERE, "More than one devices connected. Please specify"
+                    + " with -s DEVICE_SERIAL");
+            return;
+        }
+
+        if (!Utils.isAcceptableStatsd(sLogger, MIN_SDK, MIN_CODENAME, deviceSerial)) {
             sLogger.severe("LocalDrive only works with statsd versions for Android "
                     + MIN_CODENAME + " or higher.");
             return;
         }
 
-        if (args.length > 0) {
-            switch (args[0]) {
+        int idx = args.length - remainingArgsLength;
+        if (remainingArgsLength > 0) {
+            switch (args[idx]) {
                 case "clear":
-                    cmdClear(args);
+                    cmdClear(args, idx, deviceSerial);
                     return;
                 case "get-data":
-                    cmdGetData(args);
+                    cmdGetData(args, idx, deviceSerial);
                     return;
                 case "remove":
-                    cmdRemove(args);
+                    cmdRemove(args, idx);
                     return;
                 case "update":
-                    cmdUpdate(args);
+                    cmdUpdate(args, idx, deviceSerial);
                     return;
                 case "upload":
-                    cmdUpload(args);
+                    cmdUpload(args, idx, deviceSerial);
                     return;
             }
         }
@@ -128,17 +160,18 @@ public class LocalDrive {
     }
 
     // upload CONFIG_FILE [CONFIG_ID] [--binary]
-    private static boolean cmdUpload(String[] args) {
-        return updateConfig(args, true);
+    private static boolean cmdUpload(String[] args, int idx, String deviceSerial) {
+        return updateConfig(args, idx, true, deviceSerial);
     }
 
     // update CONFIG_FILE [CONFIG_ID] [--binary]
-    private static boolean cmdUpdate(String[] args) {
-        return updateConfig(args, false);
+    private static boolean cmdUpdate(String[] args, int idx, String deviceSerial) {
+        return updateConfig(args, idx, false, deviceSerial);
     }
 
-    private static boolean updateConfig(String[] args, boolean removeOldConfig) {
-        int argCount = args.length - 1; // Used up one for upload/update.
+    private static boolean updateConfig(String[] args, int idx, boolean removeOldConfig,
+            String deviceSerial) {
+        int argCount = args.length - 1 - idx; // Used up one for upload/update.
 
         // Get CONFIG_FILE
         if (argCount < 1) {
@@ -146,7 +179,7 @@ public class LocalDrive {
             printHelp();
             return false;
         }
-        final String origConfigLocation = args[1];
+        final String origConfigLocation = args[idx + 1];
         if (!new File(origConfigLocation).exists()) {
             sLogger.severe("Error - Cannot find the provided config file: " + origConfigLocation);
             return false;
@@ -154,13 +187,13 @@ public class LocalDrive {
         argCount--;
 
         // Get --binary
-        boolean binary = contains(args, 2, BINARY_FLAG);
+        boolean binary = contains(args, idx + 2, BINARY_FLAG);
         if (binary) argCount --;
 
         // Get CONFIG_ID
         long configId;
         try {
-            configId = getConfigId(argCount < 1, args, 2);
+            configId = getConfigId(argCount < 1, args, idx + 2);
         } catch (NumberFormatException e) {
             sLogger.severe("Invalid config id provided.");
             printHelp();
@@ -174,7 +207,8 @@ public class LocalDrive {
             try {
                 Utils.runCommand(null, sLogger, "adb", "shell", Utils.CMD_REMOVE_CONFIG,
                         Utils.SHELL_UID, String.valueOf(configId));
-                Utils.getReportList(configId, true /* clearData */, true /* SHELL_UID */, sLogger);
+                Utils.getReportList(configId, true /* clearData */, true /* SHELL_UID */, sLogger,
+                        deviceSerial);
             } catch (InterruptedException | IOException e) {
                 sLogger.severe("Failed to remove config: " + e.getMessage());
                 return false;
@@ -218,19 +252,19 @@ public class LocalDrive {
     }
 
     // get-data [CONFIG_ID] [--clear] [--binary] [--no-uid-map]
-    private static boolean cmdGetData(String[] args) {
-        boolean binary = contains(args, 1, BINARY_FLAG);
-        boolean noUidMap = contains(args, 1, NO_UID_MAP_FLAG);
-        boolean clearData = contains(args, 1, CLEAR_DATA);
+    private static boolean cmdGetData(String[] args, int idx, String deviceSerial) {
+        boolean binary = contains(args, idx + 1, BINARY_FLAG);
+        boolean noUidMap = contains(args, idx + 1, NO_UID_MAP_FLAG);
+        boolean clearData = contains(args, idx + 1, CLEAR_DATA);
 
         // Get CONFIG_ID
-        int argCount = args.length - 1; // Used up one for get-data.
+        int argCount = args.length - 1 - idx; // Used up one for get-data.
         if (binary) argCount--;
         if (noUidMap) argCount--;
         if (clearData) argCount--;
         long configId;
         try {
-            configId = getConfigId(argCount < 1, args, 1);
+            configId = getConfigId(argCount < 1, args, idx + 1);
         } catch (NumberFormatException e) {
             sLogger.severe("Invalid config id provided.");
             printHelp();
@@ -243,7 +277,8 @@ public class LocalDrive {
         // Even if the args request no modifications, we still parse it to make sure it's valid.
         ConfigMetricsReportList reportList;
         try {
-            reportList = Utils.getReportList(configId, clearData, true /* SHELL_UID */, sLogger);
+            reportList = Utils.getReportList(configId, clearData, true /* SHELL_UID */, sLogger,
+                    deviceSerial);
         } catch (IOException | InterruptedException e) {
             sLogger.severe("Failed to get report list: " + e.getMessage());
             return false;
@@ -274,11 +309,11 @@ public class LocalDrive {
     }
 
     // clear [CONFIG_ID]
-    private static boolean cmdClear(String[] args) {
+    private static boolean cmdClear(String[] args, int idx, String deviceSerial) {
         // Get CONFIG_ID
         long configId;
         try {
-            configId = getConfigId(false, args, 1);
+            configId = getConfigId(false, args, idx + 1);
         } catch (NumberFormatException e) {
             sLogger.severe("Invalid config id provided.");
             printHelp();
@@ -287,7 +322,8 @@ public class LocalDrive {
         sLogger.fine(String.format("cmdClear with %d", configId));
 
         try {
-            Utils.getReportList(configId, true /* clearData */, true /* SHELL_UID */, sLogger);
+            Utils.getReportList(configId, true /* clearData */, true /* SHELL_UID */, sLogger,
+                    deviceSerial);
         } catch (IOException | InterruptedException e) {
             sLogger.severe("Failed to get report list: " + e.getMessage());
             return false;
@@ -296,11 +332,11 @@ public class LocalDrive {
     }
 
     // remove [CONFIG_ID]
-    private static boolean cmdRemove(String[] args) {
+    private static boolean cmdRemove(String[] args, int idx) {
         // Get CONFIG_ID
         long configId;
         try {
-            configId = getConfigId(false, args, 1);
+            configId = getConfigId(false, args, idx + 1);
         } catch (NumberFormatException e) {
             sLogger.severe("Invalid config id provided.");
             printHelp();

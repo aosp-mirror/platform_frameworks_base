@@ -37,6 +37,8 @@ import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkScoreManager;
+import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -193,6 +195,12 @@ public class SystemServicesModule {
         return LocalBluetoothManager.create(context, bgHandler, UserHandle.ALL);
     }
 
+    @Provides
+    @Singleton
+    static NetworkScoreManager provideNetworkScoreManager(Context context) {
+        return context.getSystemService(NetworkScoreManager.class);
+    }
+
     @Singleton
     @Provides
     static NotificationManager provideNotificationManager(Context context) {
@@ -271,6 +279,12 @@ public class SystemServicesModule {
     @Provides
     static WallpaperManager provideWallpaperManager(Context context) {
         return (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
+    }
+
+    @Provides
+    @Singleton
+    static WifiManager provideWifiManager(Context context) {
+        return context.getSystemService(WifiManager.class);
     }
 
     @Singleton

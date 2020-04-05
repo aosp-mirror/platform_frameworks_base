@@ -243,6 +243,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testRollbackWhitelistedApp() throws Exception {
+        assumeTrue(hasMainlineModule());
         runPhase("testRollbackWhitelistedApp_Phase1");
         getDevice().reboot();
         runPhase("testRollbackWhitelistedApp_Phase2");
@@ -455,6 +456,18 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     private boolean isCheckpointSupported() throws Exception {
         try {
             runPhase("isCheckpointSupported");
+            return true;
+        } catch (AssertionError ignore) {
+            return false;
+        }
+    }
+
+    /**
+     * True if this build has mainline modules installed.
+     */
+    private boolean hasMainlineModule() throws Exception {
+        try {
+            runPhase("hasMainlineModule");
             return true;
         } catch (AssertionError ignore) {
             return false;

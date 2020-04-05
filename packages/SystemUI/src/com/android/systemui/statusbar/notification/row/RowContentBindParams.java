@@ -109,11 +109,14 @@ public final class RowContentBindParams {
     }
 
     /**
-     * Free the content view so that it will no longer be bound after the rebind request.
+     * Mark the content view to be freed. The view may not be immediately freeable since it may
+     * be visible and animating out but this lets the binder know to free the view when safe.
+     * Note that the callback passed into {@link RowContentBindStage#requestRebind}
+     * may return before the view is actually freed since the view is considered up-to-date.
      *
      * @see InflationFlag
      */
-    public void freeContentViews(@InflationFlag int contentViews) {
+    public void markContentViewsFreeable(@InflationFlag int contentViews) {
         mContentViews &= ~contentViews;
         mDirtyContentViews &= ~contentViews;
     }

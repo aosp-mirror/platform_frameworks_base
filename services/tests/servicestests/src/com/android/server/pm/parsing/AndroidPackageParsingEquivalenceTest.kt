@@ -18,7 +18,9 @@ package com.android.server.pm.parsing
 
 import android.content.pm.PackageManager
 import android.platform.test.annotations.Presubmit
+import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertWithMessage
+import org.junit.Rule
 import org.junit.Test
 
 /**
@@ -27,6 +29,9 @@ import org.junit.Test
  */
 @Presubmit
 class AndroidPackageParsingEquivalenceTest : AndroidPackageParsingTestBase() {
+
+    @get:Rule
+    val expect = Expect.create()
 
     @Test
     fun applicationInfoEquality() {
@@ -41,7 +46,8 @@ class AndroidPackageParsingEquivalenceTest : AndroidPackageParsingTestBase() {
             } else {
                 "$firstName | $secondName"
             }
-            assertWithMessage(packageName).that(it.first?.dumpToString())
+            expect.withMessage("${it.first?.sourceDir} $packageName")
+                    .that(it.first?.dumpToString())
                     .isEqualTo(it.second?.dumpToString())
         }
     }
@@ -71,7 +77,8 @@ class AndroidPackageParsingEquivalenceTest : AndroidPackageParsingTestBase() {
             } else {
                 "$firstName | $secondName"
             }
-            assertWithMessage(packageName).that(it.first?.dumpToString())
+            expect.withMessage("${it.first?.applicationInfo?.sourceDir} $packageName")
+                    .that(it.first?.dumpToString())
                     .isEqualTo(it.second?.dumpToString())
         }
     }

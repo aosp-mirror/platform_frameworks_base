@@ -105,7 +105,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mDefaultDisplay = mWm.mRoot.getDefaultDisplay();
         mController = spy(new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
                 DEFAULT_DISPLAY));
-        mRootHomeTask = mDefaultDisplay.getRootHomeTask();
+        mRootHomeTask = mDefaultDisplay.getDefaultTaskDisplayArea().getRootHomeTask();
         assertNotNull(mRootHomeTask);
     }
 

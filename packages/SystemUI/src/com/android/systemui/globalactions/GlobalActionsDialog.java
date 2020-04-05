@@ -78,10 +78,13 @@ import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.colorextraction.drawable.ScrimDrawable;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.EmergencyAffordanceManager;
@@ -171,6 +174,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final IActivityManager mIActivityManager;
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
+    private final UiEventLogger mUiEventLogger;
     private final NotificationShadeDepthController mDepthController;
     private final BlurUtils mBlurUtils;
 
@@ -203,6 +207,23 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final ControlsListingController mControlsListingController;
     private boolean mAnyControlsProviders = false;
 
+    @VisibleForTesting
+    public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "The global actions / power menu surface became visible on the screen.")
+        GA_POWER_MENU_OPEN(337);
+
+        private final int mId;
+
+        GlobalActionsEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+    }
+
     /**
      * @param context everything needs a context :(
      */
@@ -223,7 +244,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             ControlsUiController controlsUiController, IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
             ControlsListingController controlsListingController,
-            ControlsController controlsController) {
+            ControlsController controlsController, UiEventLogger uiEventLogger) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -240,6 +261,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mIActivityManager = iActivityManager;
         mTelecomManager = telecomManager;
         mMetricsLogger = metricsLogger;
+        mUiEventLogger = uiEventLogger;
         mDepthController = depthController;
         mSysuiColorExtractor = colorExtractor;
         mStatusBarService = statusBarService;
@@ -997,6 +1019,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     public void onShow(DialogInterface dialog) {
         mMetricsLogger.visible(MetricsEvent.POWER_MENU);
+        mUiEventLogger.log(GlobalActionsEvent.GA_POWER_MENU_OPEN);
     }
 
     /**

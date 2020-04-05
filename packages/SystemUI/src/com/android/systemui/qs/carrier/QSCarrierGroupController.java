@@ -25,6 +25,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -260,7 +261,9 @@ public class QSCarrierGroupController {
                 mCarrierGroups[i].setVisibility(View.GONE);
             }
             mNoSimTextView.setText(info.carrierText);
-            mNoSimTextView.setVisibility(View.VISIBLE);
+            if (!TextUtils.isEmpty(info.carrierText)) {
+                mNoSimTextView.setVisibility(View.VISIBLE);
+            }
         }
         handleUpdateState(); // handleUpdateCarrierInfo is always called from main thread.
     }

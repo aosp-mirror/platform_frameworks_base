@@ -59,7 +59,10 @@ public class NotifBindPipelineTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
-        mBindPipeline = new NotifBindPipeline(collection, mock(NotifBindPipelineLogger.class));
+        mBindPipeline = new NotifBindPipeline(
+                collection,
+                mock(NotifBindPipelineLogger.class),
+                TestableLooper.get(this).getLooper());
         mBindPipeline.setStage(mStage);
 
         ArgumentCaptor<NotifCollectionListener> collectionListenerCaptor =
@@ -78,6 +81,7 @@ public class NotifBindPipelineTest extends SysuiTestCase {
         // WHEN content is invalidated
         BindCallback callback = mock(BindCallback.class);
         mStage.requestRebind(mEntry, callback);
+        TestableLooper.get(this).processAllMessages();
 
         // WHEN stage finishes its work
         mStage.doWorkSynchronously();
@@ -94,6 +98,7 @@ public class NotifBindPipelineTest extends SysuiTestCase {
         // GIVEN an in-progress pipeline run
         BindCallback callback = mock(BindCallback.class);
         CancellationSignal signal = mStage.requestRebind(mEntry, callback);
+        TestableLooper.get(this).processAllMessages();
 
         // WHEN the callback is cancelled.
         signal.cancel();
@@ -113,10 +118,12 @@ public class NotifBindPipelineTest extends SysuiTestCase {
         // WHEN the pipeline is invalidated.
         BindCallback callback = mock(BindCallback.class);
         mStage.requestRebind(mEntry, callback);
+        TestableLooper.get(this).processAllMessages();
 
         // WHEN the pipeline is invalidated again before the work completes.
         BindCallback callback2 = mock(BindCallback.class);
         mStage.requestRebind(mEntry, callback2);
+        TestableLooper.get(this).processAllMessages();
 
         // WHEN the stage finishes all work.
         mStage.doWorkSynchronously();

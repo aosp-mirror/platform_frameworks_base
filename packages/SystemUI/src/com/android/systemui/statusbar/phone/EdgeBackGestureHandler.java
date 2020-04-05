@@ -19,6 +19,7 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -26,10 +27,14 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.input.InputManager;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.ISystemGestureExclusionListener;
 import android.view.InputChannel;
@@ -40,6 +45,7 @@ import android.view.InputMonitor;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -53,8 +59,10 @@ import com.android.systemui.plugins.NavigationEdgeBackPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
@@ -72,6 +80,8 @@ public class EdgeBackGestureHandler implements DisplayListener,
     private static final String TAG = "EdgeBackGestureHandler";
     private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
             "gestures.back_timeout", 250);
+    private static final String FIXED_ROTATION_TRANSFORM_SETTING_NAME = "fixed_rotation_transform";
+
 
     private ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
@@ -87,6 +97,33 @@ public class EdgeBackGestureHandler implements DisplayListener,
                     }
                 }
             };
+
+    private OverviewProxyService.OverviewProxyListener mQuickSwitchListener =
+            new OverviewProxyService.OverviewProxyListener() {
+                @Override
+                public void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {
+                    mStartingQuickstepRotation = rotation;
+                    updateDisabledForQuickstep();
+                }
+            };
+
+    private TaskStackChangeListener mTaskStackChangeListener = new TaskStackChangeListener() {
+        @Override
+        public void onRecentTaskListFrozenChanged(boolean frozen) {
+            if (!frozen) {
+                mStartingQuickstepRotation = -1;
+                mDisabledForQuickstep = false;
+            }
+        }
+    };
+
+    private final ContentObserver mFixedRotationObserver = new ContentObserver(
+            new Handler(Looper.getMainLooper())) {
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updatedFixedRotation();
+        }
+    };
 
     private final Context mContext;
     private final OverviewProxyService mOverviewProxyService;
@@ -110,6 +147,11 @@ public class EdgeBackGestureHandler implements DisplayListener,
     private final float mTouchSlop;
     // Duration after which we consider the event as longpress.
     private final int mLongPressTimeout;
+    private int mStartingQuickstepRotation = -1;
+    // We temporarily disable back gesture when user is quickswitching
+    // between apps of different orientations
+    private boolean mDisabledForQuickstep;
+    private boolean mFixedRotationFlagEnabled;
 
     private final PointF mDownPoint = new PointF();
     private final PointF mEndPoint = new PointF();
@@ -193,6 +235,13 @@ public class EdgeBackGestureHandler implements DisplayListener,
      */
     public void onNavBarAttached() {
         mIsAttached = true;
+        updatedFixedRotation();
+        if (mFixedRotationFlagEnabled) {
+            setRotationCallbacks(true);
+        }
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(FIXED_ROTATION_TRANSFORM_SETTING_NAME),
+                false /* notifyForDescendants */, mFixedRotationObserver, UserHandle.USER_ALL);
         updateIsEnabled();
     }
 
@@ -201,7 +250,23 @@ public class EdgeBackGestureHandler implements DisplayListener,
      */
     public void onNavBarDetached() {
         mIsAttached = false;
+        if (mFixedRotationFlagEnabled) {
+            setRotationCallbacks(false);
+        }
+        mContext.getContentResolver().unregisterContentObserver(mFixedRotationObserver);
         updateIsEnabled();
+    }
+
+    private void setRotationCallbacks(boolean enable) {
+        if (enable) {
+            ActivityManagerWrapper.getInstance().registerTaskStackListener(
+                    mTaskStackChangeListener);
+            mOverviewProxyService.addCallback(mQuickSwitchListener);
+        } else {
+            ActivityManagerWrapper.getInstance().unregisterTaskStackListener(
+                    mTaskStackChangeListener);
+            mOverviewProxyService.removeCallback(mQuickSwitchListener);
+        }
     }
 
     public void onNavigationModeChanged(int mode, Context currentUserContext) {
@@ -405,7 +470,8 @@ public class EdgeBackGestureHandler implements DisplayListener,
             mLogGesture = false;
             mInRejectedExclusion = false;
             mAllowGesture = !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
-                    && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
+                    && isWithinTouchRegion((int) ev.getX(), (int) ev.getY())
+                    && !mDisabledForQuickstep;
             if (mAllowGesture) {
                 mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
                 mEdgeBackPlugin.onMotionEvent(ev);
@@ -466,6 +532,11 @@ public class EdgeBackGestureHandler implements DisplayListener,
         Dependency.get(ProtoTracer.class).update();
     }
 
+    private void updateDisabledForQuickstep() {
+        int rotation = mContext.getResources().getConfiguration().windowConfiguration.getRotation();
+        mDisabledForQuickstep = mStartingQuickstepRotation != rotation;
+    }
+
     @Override
     public void onDisplayAdded(int displayId) { }
 
@@ -474,6 +545,10 @@ public class EdgeBackGestureHandler implements DisplayListener,
 
     @Override
     public void onDisplayChanged(int displayId) {
+        if (mStartingQuickstepRotation > -1) {
+            updateDisabledForQuickstep();
+        }
+
         if (displayId == mDisplayId) {
             updateDisplaySize();
         }
@@ -502,6 +577,17 @@ public class EdgeBackGestureHandler implements DisplayListener,
         InputManager.getInstance().injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
+    private void updatedFixedRotation() {
+        boolean oldFlag = mFixedRotationFlagEnabled;
+        mFixedRotationFlagEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                FIXED_ROTATION_TRANSFORM_SETTING_NAME, 0) != 0;
+        if (oldFlag == mFixedRotationFlagEnabled) {
+            return;
+        }
+
+        setRotationCallbacks(mFixedRotationFlagEnabled);
+    }
+
     public void setInsets(int leftInset, int rightInset) {
         mLeftInset = leftInset;
         mRightInset = rightInset;
@@ -514,6 +600,7 @@ public class EdgeBackGestureHandler implements DisplayListener,
         pw.println("EdgeBackGestureHandler:");
         pw.println("  mIsEnabled=" + mIsEnabled);
         pw.println("  mAllowGesture=" + mAllowGesture);
+        pw.println("  mDisabledForQuickstep=" + mDisabledForQuickstep);
         pw.println("  mInRejectedExclusion" + mInRejectedExclusion);
         pw.println("  mExcludeRegion=" + mExcludeRegion);
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);

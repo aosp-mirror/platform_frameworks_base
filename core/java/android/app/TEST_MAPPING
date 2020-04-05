@@ -44,7 +44,7 @@
             "name": "CtsWindowManagerDeviceTestCases",
             "options": [
                 {
-                    "include-filter": "android.server.wm.ToastTest"
+                    "include-filter": "android.server.wm.ToastWindowTest"
                 }
             ],
             "file_patterns": ["INotificationManager\\.aidl"]

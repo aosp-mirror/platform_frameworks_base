@@ -108,7 +108,8 @@ final class RemoteSystemCaptionsManagerService {
             }
             mBinding = true;
 
-            int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
+            int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE
+                    | Context.BIND_INCLUDE_CAPABILITIES;
             boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection, flags,
                     mHandler, new UserHandle(mUserId));
             if (!willBind) {

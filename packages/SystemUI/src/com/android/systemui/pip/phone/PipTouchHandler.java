@@ -384,7 +384,7 @@ public class PipTouchHandler {
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN: {
-                mMotionHelper.synchronizePinnedStackBounds();
+                mMotionHelper.synchronizePinnedStackBoundsForTouchGesture();
                 mGesture.onDown(mTouchState);
                 break;
             }

@@ -40,6 +40,14 @@ class NotifBindPipelineLogger @Inject constructor(
         })
     }
 
+    fun logRequestPipelineRun(notifKey: String) {
+        buffer.log(TAG, INFO, {
+            str1 = notifKey
+        }, {
+            "Request pipeline run for notif: $str1"
+        })
+    }
+
     fun logStartPipeline(notifKey: String) {
         buffer.log(TAG, INFO, {
             str1 = notifKey

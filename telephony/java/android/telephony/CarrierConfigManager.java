@@ -52,6 +52,14 @@ public class CarrierConfigManager {
     public static final String EXTRA_SLOT_INDEX = "android.telephony.extra.SLOT_INDEX";
 
     /**
+     * Extra included in {@link #ACTION_CARRIER_CONFIG_CHANGED} to indicate whether this is a
+     * rebroadcast on unlock. Defaults to {@code false} if not specified.
+     * @hide
+     */
+    public static final String EXTRA_REBROADCAST_ON_UNLOCK =
+            "android.telephony.extra.REBROADCAST_ON_UNLOCK";
+
+    /**
      * Optional extra included in {@link #ACTION_CARRIER_CONFIG_CHANGED} to indicate the
      * subscription index that the broadcast is for, if a valid one is available.
      */

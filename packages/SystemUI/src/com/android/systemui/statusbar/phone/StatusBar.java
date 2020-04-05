@@ -1235,6 +1235,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Set up the initial notification state.
         mActivityLaunchAnimator = new ActivityLaunchAnimator(
                 mNotificationShadeWindowViewController, this, mNotificationPanelViewController,
+                mNotificationShadeDepthControllerLazy.get(),
                 (NotificationListContainer) mStackScroller);
 
         // TODO: inject this.

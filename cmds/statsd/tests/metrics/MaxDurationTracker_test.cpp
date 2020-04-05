@@ -62,9 +62,8 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     int64_t bucketNum = 0;
 
     int64_t metricId = 1;
-    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1,
-                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               false, false, {});
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, false, bucketStartTimeNs,
+                               bucketNum, bucketStartTimeNs, bucketSizeNs, false, false, {});
 
     tracker.noteStart(key1, true, bucketStartTimeNs, ConditionKey());
     // Event starts again. This would not change anything as it already starts.
@@ -97,9 +96,8 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
     int64_t bucketNum = 0;
 
     int64_t metricId = 1;
-    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1,
-                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               false, false, {});
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, false, bucketStartTimeNs,
+                               bucketNum, bucketStartTimeNs, bucketSizeNs, false, false, {});
 
     tracker.noteStart(key1, true, bucketStartTimeNs + 1, ConditionKey());
 
@@ -132,9 +130,8 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     int64_t bucketNum = 0;
 
     int64_t metricId = 1;
-    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1,
-                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               false, false, {});
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, false, bucketStartTimeNs,
+                               bucketNum, bucketStartTimeNs, bucketSizeNs, false, false, {});
 
     // The event starts.
     tracker.noteStart(DEFAULT_DIMENSION_KEY, true, bucketStartTimeNs + 1, ConditionKey());
@@ -172,9 +169,8 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
     int64_t bucketNum = 0;
 
     int64_t metricId = 1;
-    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1,
-                               true, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               false, false, {});
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, true, bucketStartTimeNs,
+                               bucketNum, bucketStartTimeNs, bucketSizeNs, false, false, {});
 
     // 2 starts
     tracker.noteStart(DEFAULT_DIMENSION_KEY, true, bucketStartTimeNs + 1, ConditionKey());
@@ -218,9 +214,8 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     int64_t eventStopTimeNs = conditionStops2 + 8 * NS_PER_SEC;
 
     int64_t metricId = 1;
-    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                               false, bucketStartTimeNs, 0, bucketStartTimeNs, bucketSizeNs, true,
-                               false, {});
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false, bucketStartTimeNs,
+                               0, bucketStartTimeNs, bucketSizeNs, true, false, {});
     EXPECT_TRUE(tracker.mAnomalyTrackers.empty());
 
     tracker.noteStart(key1, false, eventStartTimeNs, conditionKey1);
@@ -267,9 +262,9 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     sp<AlarmMonitor> alarmMonitor;
     sp<DurationAnomalyTracker> anomalyTracker =
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
-    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               true, false, {anomalyTracker});
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false, bucketStartTimeNs,
+                               bucketNum, bucketStartTimeNs, bucketSizeNs, true, false,
+                               {anomalyTracker});
 
     tracker.noteStart(key1, true, eventStartTimeNs, conditionKey1);
     sp<const InternalAlarm> alarm = anomalyTracker->mAlarms.begin()->second;
@@ -326,9 +321,9 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
     sp<AlarmMonitor> alarmMonitor;
     sp<DurationAnomalyTracker> anomalyTracker =
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
-    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               true, false, {anomalyTracker});
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false, bucketStartTimeNs,
+                               bucketNum, bucketStartTimeNs, bucketSizeNs, true, false,
+                               {anomalyTracker});
 
     tracker.noteStart(key1, false, eventStartTimeNs, conditionKey1);
     tracker.noteConditionChanged(key1, true, conditionStarts1);
@@ -408,9 +403,9 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp_UpdatedOnStop) {
     sp<AlarmMonitor> alarmMonitor;
     sp<DurationAnomalyTracker> anomalyTracker =
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
-    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               true, false, {anomalyTracker});
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false, bucketStartTimeNs,
+                               bucketNum, bucketStartTimeNs, bucketSizeNs, true, false,
+                               {anomalyTracker});
 
     tracker.noteStart(key1, true, eventStartTimeNs1, conditionKey1);
     tracker.noteStart(key2, true, eventStartTimeNs2, conditionKey2);

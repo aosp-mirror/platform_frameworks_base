@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -48,7 +49,11 @@ public class NotificationViewWrapperTest extends SysuiTestCase {
     public void setup() throws Exception {
         allowTestableLooperAsMainThread();
         mView = mock(View.class);
-        mRow = new NotificationTestHelper(getContext(), mDependency).createRow();
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        mRow = helper.createRow();
         mNotificationViewWrapper = new TestableNotificationViewWrapper(mContext, mView, mRow);
     }
 

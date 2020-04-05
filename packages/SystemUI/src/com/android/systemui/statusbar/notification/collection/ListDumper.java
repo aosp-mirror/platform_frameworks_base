@@ -102,11 +102,11 @@ public class ListDumper {
                     .append(")");
         }
 
-        if (entry.mNotifSection != null) {
+        if (entry.getNotifSection() != null) {
             sb.append(" sectionIndex=")
                     .append(entry.getSection())
                     .append(" sectionName=")
-                    .append(entry.mNotifSection.getName());
+                    .append(entry.getNotifSection().getName());
         }
 
         if (includeRecordKeeping) {
@@ -133,15 +133,15 @@ public class ListDumper {
                         .append(" ");
             }
 
-            if (notifEntry.mExcludingFilter != null) {
+            if (notifEntry.getExcludingFilter() != null) {
                 rksb.append("filter=")
-                        .append(notifEntry.mExcludingFilter)
+                        .append(notifEntry.getExcludingFilter().getName())
                         .append(" ");
             }
 
-            if (notifEntry.mNotifPromoter != null) {
+            if (notifEntry.getNotifPromoter() != null) {
                 rksb.append("promoter=")
-                        .append(notifEntry.mNotifPromoter)
+                        .append(notifEntry.getNotifPromoter().getName())
                         .append(" ");
             }
 

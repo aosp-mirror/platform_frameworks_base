@@ -542,12 +542,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         void unregisterPointerEventListener(PointerEventListener listener, int displayId);
 
         /**
-         * Retrieves the {@param outBounds} from the stack matching the {@param windowingMode} and
-         * {@param activityType}.
-         */
-        void getStackBounds(int windowingMode, int activityType, Rect outBounds);
-
-        /**
          * @return The currently active input method window.
          */
         WindowState getInputMethodWindowLw();

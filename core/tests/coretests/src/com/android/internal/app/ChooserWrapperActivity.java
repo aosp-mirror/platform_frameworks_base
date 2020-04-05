@@ -146,6 +146,11 @@ public class ChooserWrapperActivity extends ChooserActivity {
     }
 
     @Override
+    protected ChooserActivityLogger getChooserActivityLogger() {
+        return sOverrides.chooserActivityLogger;
+    }
+
+    @Override
     public Cursor queryResolver(ContentResolver resolver, Uri uri) {
         if (sOverrides.resolverCursor != null) {
             return sOverrides.resolverCursor;
@@ -205,6 +210,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public boolean resolverForceException;
         public Bitmap previewThumbnail;
         public MetricsLogger metricsLogger;
+        public ChooserActivityLogger chooserActivityLogger;
         public int alternateProfileSetting;
         public Resources resources;
         public UserHandle workProfileUserHandle;
@@ -223,6 +229,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
             resolverListController = mock(ResolverListController.class);
             workResolverListController = mock(ResolverListController.class);
             metricsLogger = mock(MetricsLogger.class);
+            chooserActivityLogger = new ChooserActivityLoggerFake();
             alternateProfileSetting = 0;
             resources = null;
             workProfileUserHandle = null;

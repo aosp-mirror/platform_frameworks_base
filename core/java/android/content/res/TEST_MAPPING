@@ -1,7 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksResourceLoaderTests"
+      "name": "CtsResourcesLoaderTests"
     }
   ]
 }

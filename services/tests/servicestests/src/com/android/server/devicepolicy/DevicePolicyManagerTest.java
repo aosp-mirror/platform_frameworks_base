@@ -4274,6 +4274,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Profile owner can set enabled state.
         setAsProfileOwner(admin1);
+        when(mServiceContext.resources
+                .getString(R.string.config_defaultSupervisionProfileOwnerComponent))
+                .thenReturn(admin1.flattenToString());
         dpm.setSecondaryLockscreenEnabled(admin1, true);
         assertTrue(dpm.isSecondaryLockscreenEnabled(UserHandle.of(
                 DpmMockContext.CALLER_USER_HANDLE)));
@@ -4297,6 +4300,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Device owners can set enabled state.
         setupDeviceOwner();
+        when(mServiceContext.resources
+                .getString(R.string.config_defaultSupervisionProfileOwnerComponent))
+                .thenReturn(admin1.flattenToString());
         dpm.setSecondaryLockscreenEnabled(admin1, true);
         assertTrue(dpm.isSecondaryLockscreenEnabled(UserHandle.of(UserHandle.USER_SYSTEM)));
     }
@@ -4309,7 +4315,34 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 DpmMockContext.CALLER_USER_HANDLE)));
 
         // Non-DO/PO cannot set enabled state.
+        when(mServiceContext.resources
+                .getString(R.string.config_defaultSupervisionProfileOwnerComponent))
+                .thenReturn(admin1.flattenToString());
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setSecondaryLockscreenEnabled(admin1, true));
+        assertFalse(dpm.isSecondaryLockscreenEnabled(UserHandle.of(
+                DpmMockContext.CALLER_USER_HANDLE)));
+    }
+
+    public void testSecondaryLockscreen_nonSupervisionApp() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+
+        // Initial state is disabled.
+        assertFalse(dpm.isSecondaryLockscreenEnabled(UserHandle.of(
+                DpmMockContext.CALLER_USER_HANDLE)));
+
+        // Caller is Profile Owner, but no supervision app is configured.
+        setAsProfileOwner(admin1);
+        assertExpectException(SecurityException.class, "no default supervision component defined",
+                () -> dpm.setSecondaryLockscreenEnabled(admin1, true));
+        assertFalse(dpm.isSecondaryLockscreenEnabled(UserHandle.of(
+                DpmMockContext.CALLER_USER_HANDLE)));
+
+        // Caller is Profile Owner, but is not the default configured supervision app.
+        when(mServiceContext.resources
+                .getString(R.string.config_defaultSupervisionProfileOwnerComponent))
+                .thenReturn(admin2.flattenToString());
+        assertExpectException(SecurityException.class, "is not the default supervision component",
                 () -> dpm.setSecondaryLockscreenEnabled(admin1, true));
         assertFalse(dpm.isSecondaryLockscreenEnabled(UserHandle.of(
                 DpmMockContext.CALLER_USER_HANDLE)));

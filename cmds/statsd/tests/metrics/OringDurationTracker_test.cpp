@@ -61,9 +61,9 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
     int64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                                 false, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
-                                 bucketSizeNs, false, false, {});
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false,
+                                 bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                                 false, false, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, ConditionKey());
     EXPECT_EQ((long long)eventStartTimeNs, tracker.mLastStartTime);
@@ -92,9 +92,8 @@ TEST(OringDurationTrackerTest, TestDurationNested) {
     int64_t bucketNum = 0;
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                                 true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
-                                 bucketSizeNs, false, false, {});
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true, bucketStartTimeNs,
+                                 bucketNum, bucketStartTimeNs, bucketSizeNs, false, false, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, ConditionKey());
     tracker.noteStart(kEventKey1, true, eventStartTimeNs + 10, ConditionKey());  // overlapping wl
@@ -124,9 +123,8 @@ TEST(OringDurationTrackerTest, TestStopAll) {
     int64_t bucketNum = 0;
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                                 true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
-                                 bucketSizeNs, false, false, {});
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true, bucketStartTimeNs,
+                                 bucketNum, bucketStartTimeNs, bucketSizeNs, false, false, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, ConditionKey());
     tracker.noteStart(kEventKey2, true, eventStartTimeNs + 10, ConditionKey());  // overlapping wl
@@ -154,9 +152,8 @@ TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
     int64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                                 true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
-                                 bucketSizeNs, false, false, {});
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true, bucketStartTimeNs,
+                                 bucketNum, bucketStartTimeNs, bucketSizeNs, false, false, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, ConditionKey());
     EXPECT_EQ((long long)eventStartTimeNs, tracker.mLastStartTime);
@@ -198,9 +195,9 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
     int64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                                 false, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
-                                 bucketSizeNs, true, false, {});
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false,
+                                 bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                                 true, false, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
 
@@ -237,9 +234,9 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
     int64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                                 false, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
-                                 bucketSizeNs, true, false, {});
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false,
+                                 bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                                 true, false, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
     // condition to false; record duration 5n
@@ -275,9 +272,8 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
     int64_t bucketNum = 0;
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                                 true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
-                                 bucketSizeNs, true, false, {});
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true, bucketStartTimeNs,
+                                 bucketNum, bucketStartTimeNs, bucketSizeNs, true, false, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
     tracker.noteStart(kEventKey1, true, eventStartTimeNs + 2, key1);
@@ -316,9 +312,9 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     sp<AlarmMonitor> alarmMonitor;
     sp<DurationAnomalyTracker> anomalyTracker =
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                                 true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
-                                 bucketSizeNs, true, false, {anomalyTracker});
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true, bucketStartTimeNs,
+                                 bucketNum, bucketStartTimeNs, bucketSizeNs, true, false,
+                                 {anomalyTracker});
 
     // Nothing in the past bucket.
     tracker.noteStart(DEFAULT_DIMENSION_KEY, true, eventStartTimeNs, ConditionKey());
@@ -422,9 +418,8 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp3) {
             sp<AlarmMonitor> alarmMonitor;
             sp<DurationAnomalyTracker> anomalyTracker =
                 new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
-            OringDurationTracker tracker(kConfigKey, metricId, DEFAULT_METRIC_DIMENSION_KEY,
-                                         wizard, 1,
-                                         true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
+            OringDurationTracker tracker(kConfigKey, metricId, DEFAULT_METRIC_DIMENSION_KEY, wizard,
+                                         1, true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                          bucketSizeNs, true, false, {anomalyTracker});
 
             int64_t eventStartTimeNs = bucketStartTimeNs + 9 * NS_PER_SEC;
@@ -481,15 +476,15 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm) {
     sp<AlarmMonitor> alarmMonitor;
     sp<DurationAnomalyTracker> anomalyTracker =
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                                 true /*nesting*/, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
-                                 bucketSizeNs, false, false, {anomalyTracker});
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true /*nesting*/,
+                                 bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                                 false, false, {anomalyTracker});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, ConditionKey());
     tracker.noteStop(kEventKey1, eventStartTimeNs + 10, false);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
     EXPECT_TRUE(tracker.mStarted.empty());
-    EXPECT_EQ(10LL, tracker.mDuration); // 10ns
+    EXPECT_EQ(10LL, tracker.mStateKeyDurationMap[DEFAULT_DIMENSION_KEY].mDuration);  // 10ns
 
     EXPECT_EQ(0u, tracker.mStarted.size());
 
@@ -530,11 +525,11 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm) {
     sp<AlarmMonitor> alarmMonitor;
     sp<DurationAnomalyTracker> anomalyTracker =
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
-                                 true /*nesting*/, bucketStartTimeNs, 0, bucketStartTimeNs,
-                                 bucketSizeNs, false, false, {anomalyTracker});
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true /*nesting*/,
+                                 bucketStartTimeNs, 0, bucketStartTimeNs, bucketSizeNs, false,
+                                 false, {anomalyTracker});
 
-    tracker.noteStart(kEventKey1, true, 15 * NS_PER_SEC, conkey); // start key1
+    tracker.noteStart(kEventKey1, true, 15 * NS_PER_SEC, conkey);  // start key1
     EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
     sp<const InternalAlarm> alarm = anomalyTracker->mAlarms.begin()->second;
     EXPECT_EQ((long long)(55ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
@@ -544,13 +539,13 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm) {
     EXPECT_EQ(0u, anomalyTracker->mAlarms.size());
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
 
-    tracker.noteStart(kEventKey1, true, 22 * NS_PER_SEC, conkey); // start key1 again
+    tracker.noteStart(kEventKey1, true, 22 * NS_PER_SEC, conkey);  // start key1 again
     EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
     alarm = anomalyTracker->mAlarms.begin()->second;
     EXPECT_EQ((long long)(60ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
 
-    tracker.noteStart(kEventKey2, true, 32 * NS_PER_SEC, conkey); // start key2
+    tracker.noteStart(kEventKey2, true, 32 * NS_PER_SEC, conkey);  // start key2
     EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
     alarm = anomalyTracker->mAlarms.begin()->second;
     EXPECT_EQ((long long)(60ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));

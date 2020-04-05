@@ -73,11 +73,11 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
-    void updateWallpaperOffset(int dw, int dh, boolean sync) {
+    void updateWallpaperOffset(boolean sync) {
         final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
-            if (wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, sync)) {
+            if (wallpaperController.updateWallpaperOffset(wallpaper, sync)) {
                 // We only want to be synchronous with one wallpaper.
                 sync = false;
             }
@@ -85,10 +85,6 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     void updateWallpaperVisibility(boolean visible) {
-        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-        final int dw = displayInfo.logicalWidth;
-        final int dh = displayInfo.logicalHeight;
-
         if (isVisible() != visible) {
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
@@ -98,7 +94,7 @@ class WallpaperWindowToken extends WindowToken {
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
             if (visible) {
-                wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, false);
+                wallpaperController.updateWallpaperOffset(wallpaper, false /* sync */);
             }
 
             wallpaper.dispatchWallpaperVisibility(visible);
@@ -145,19 +141,11 @@ class WallpaperWindowToken extends WindowToken {
             }
         }
 
-        DisplayInfo displayInfo = getFixedRotationTransformDisplayInfo();
-        if (displayInfo == null) {
-            displayInfo = mDisplayContent.getDisplayInfo();
-        }
-
-        final int dw = displayInfo.logicalWidth;
-        final int dh = displayInfo.logicalHeight;
-
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
 
             if (visible) {
-                wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, false);
+                wallpaperController.updateWallpaperOffset(wallpaper, false /* sync */);
             }
 
             // First, make sure the client has the current visibility state.

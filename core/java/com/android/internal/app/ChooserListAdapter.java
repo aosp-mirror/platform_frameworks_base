@@ -64,7 +64,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private boolean mAppendDirectShareEnabled = DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_SYSTEMUI,
             SystemUiDeviceConfigFlags.APPEND_DIRECT_SHARE_ENABLED,
-            false);
+            true);
 
     private boolean mEnableStackedApps = true;
 

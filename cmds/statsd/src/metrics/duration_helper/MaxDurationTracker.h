@@ -54,9 +54,18 @@ public:
     void onSlicedConditionMayChange(bool overallCondition, const int64_t timestamp) override;
     void onConditionChanged(bool condition, const int64_t timestamp) override;
 
+    void onStateChanged(const int64_t timestamp, const int32_t atomId,
+                        const FieldValue& newState) override;
+
     int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                       const int64_t currentTimestamp) const override;
     void dumpStates(FILE* out, bool verbose) const override;
+
+    int64_t getCurrentStateKeyDuration() const override;
+
+    int64_t getCurrentStateKeyFullBucketDuration() const override;
+
+    void updateCurrentStateKey(const int32_t atomId, const FieldValue& newState);
 
 private:
     // Returns true if at least one of the mInfos is started.

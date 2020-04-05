@@ -39,6 +39,7 @@ import android.view.inputmethod.ExtractedText;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IMultiClientInputMethodSession;
+import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.view.IInputContext;
@@ -46,7 +47,6 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputConnectionWrapper;
 
 import java.lang.ref.WeakReference;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Re-dispatches all the incoming per-client events to the specified {@link Looper} thread.
@@ -80,19 +80,19 @@ final class MultiClientInputMethodClientCallbackAdaptor {
     @Nullable
     InputEventReceiver mInputEventReceiver;
 
-    private final AtomicBoolean mFinished = new AtomicBoolean(false);
+    private final CancellationGroup mCancellationGroup = new CancellationGroup();
 
     IInputMethodSession.Stub createIInputMethodSession() {
         synchronized (mSessionLock) {
             return new InputMethodSessionImpl(
-                    mSessionLock, mCallbackImpl, mHandler, mFinished);
+                    mSessionLock, mCallbackImpl, mHandler, mCancellationGroup);
         }
     }
 
     IMultiClientInputMethodSession.Stub createIMultiClientInputMethodSession() {
         synchronized (mSessionLock) {
             return new MultiClientInputMethodSessionImpl(
-                    mSessionLock, mCallbackImpl, mHandler, mFinished);
+                    mSessionLock, mCallbackImpl, mHandler, mCancellationGroup);
         }
     }
 
@@ -105,7 +105,7 @@ final class MultiClientInputMethodClientCallbackAdaptor {
             mHandler = new Handler(looper, null, true);
             mReadChannel = readChannel;
             mInputEventReceiver = new ImeInputEventReceiver(mReadChannel, mHandler.getLooper(),
-                    mFinished, mDispatcherState, mCallbackImpl.mOriginalCallback);
+                    mCancellationGroup, mDispatcherState, mCallbackImpl.mOriginalCallback);
         }
     }
 
@@ -139,16 +139,17 @@ final class MultiClientInputMethodClientCallbackAdaptor {
     }
 
     private static final class ImeInputEventReceiver extends InputEventReceiver {
-        private final AtomicBoolean mFinished;
+        private final CancellationGroup mCancellationGroupOnFinishSession;
         private final KeyEvent.DispatcherState mDispatcherState;
         private final MultiClientInputMethodServiceDelegate.ClientCallback mClientCallback;
         private final KeyEventCallbackAdaptor mKeyEventCallbackAdaptor;
 
-        ImeInputEventReceiver(InputChannel readChannel, Looper looper, AtomicBoolean finished,
+        ImeInputEventReceiver(InputChannel readChannel, Looper looper,
+                CancellationGroup cancellationGroupOnFinishSession,
                 KeyEvent.DispatcherState dispatcherState,
                 MultiClientInputMethodServiceDelegate.ClientCallback callback) {
             super(readChannel, looper);
-            mFinished = finished;
+            mCancellationGroupOnFinishSession = cancellationGroupOnFinishSession;
             mDispatcherState = dispatcherState;
             mClientCallback = callback;
             mKeyEventCallbackAdaptor = new KeyEventCallbackAdaptor(callback);
@@ -156,7 +157,7 @@ final class MultiClientInputMethodClientCallbackAdaptor {
 
         @Override
         public void onInputEvent(InputEvent event) {
-            if (mFinished.get()) {
+            if (mCancellationGroupOnFinishSession.isCanceled()) {
                 // The session has been finished.
                 finishInputEvent(event, false);
                 return;
@@ -187,14 +188,14 @@ final class MultiClientInputMethodClientCallbackAdaptor {
         private CallbackImpl mCallbackImpl;
         @GuardedBy("mSessionLock")
         private Handler mHandler;
-        private final AtomicBoolean mSessionFinished;
+        private final CancellationGroup mCancellationGroupOnFinishSession;
 
         InputMethodSessionImpl(Object lock, CallbackImpl callback, Handler handler,
-                AtomicBoolean sessionFinished) {
+                CancellationGroup cancellationGroupOnFinishSession) {
             mSessionLock = lock;
             mCallbackImpl = callback;
             mHandler = handler;
-            mSessionFinished = sessionFinished;
+            mCancellationGroupOnFinishSession = cancellationGroupOnFinishSession;
         }
 
         @Override
@@ -272,7 +273,7 @@ final class MultiClientInputMethodClientCallbackAdaptor {
                 if (mCallbackImpl == null || mHandler == null) {
                     return;
                 }
-                mSessionFinished.set(true);
+                mCancellationGroupOnFinishSession.cancelAll();
                 mHandler.sendMessage(PooledLambda.obtainMessage(
                         CallbackImpl::finishSession, mCallbackImpl));
                 mCallbackImpl = null;
@@ -311,14 +312,14 @@ final class MultiClientInputMethodClientCallbackAdaptor {
         private CallbackImpl mCallbackImpl;
         @GuardedBy("mSessionLock")
         private Handler mHandler;
-        private final AtomicBoolean mSessionFinished;
+        private final CancellationGroup mCancellationGroupOnFinishSession;
 
         MultiClientInputMethodSessionImpl(Object lock, CallbackImpl callback,
-                Handler handler, AtomicBoolean sessionFinished) {
+                Handler handler, CancellationGroup cancellationGroupOnFinishSession) {
             mSessionLock = lock;
             mCallbackImpl = callback;
             mHandler = handler;
-            mSessionFinished = sessionFinished;
+            mCancellationGroupOnFinishSession = cancellationGroupOnFinishSession;
         }
 
         @Override
@@ -335,7 +336,7 @@ final class MultiClientInputMethodClientCallbackAdaptor {
                         new WeakReference<>(null);
                 args.arg1 = (inputContext == null) ? null
                         : new InputConnectionWrapper(fakeIMS, inputContext, missingMethods,
-                                mSessionFinished);
+                                mCancellationGroupOnFinishSession);
                 args.arg2 = editorInfo;
                 args.argi1 = controlFlags;
                 args.argi2 = softInputMode;

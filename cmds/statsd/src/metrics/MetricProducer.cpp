@@ -120,12 +120,13 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
         FieldValue value;
         if (statePrimaryKeys.find(atomId) != statePrimaryKeys.end()) {
             // found a primary key for this state, query using the key
-            getMappedStateValue(atomId, statePrimaryKeys[atomId], &value);
+            queryStateValue(atomId, statePrimaryKeys[atomId], &value);
         } else {
             // if no MetricStateLinks exist for this state atom,
             // query using the default dimension key (empty HashableDimensionKey)
-            getMappedStateValue(atomId, DEFAULT_DIMENSION_KEY, &value);
+            queryStateValue(atomId, DEFAULT_DIMENSION_KEY, &value);
         }
+        mapStateValue(atomId, &value);
         stateValuesKey.addValue(value);
     }
 
@@ -264,15 +265,17 @@ void MetricProducer::writeActiveMetricToProtoOutputStream(
     }
 }
 
-void MetricProducer::getMappedStateValue(const int32_t atomId, const HashableDimensionKey& queryKey,
-                                         FieldValue* value) {
+void MetricProducer::queryStateValue(const int32_t atomId, const HashableDimensionKey& queryKey,
+                                     FieldValue* value) {
     if (!StateManager::getInstance().getStateValue(atomId, queryKey, value)) {
         value->mValue = Value(StateTracker::kStateUnknown);
         value->mField.setTag(atomId);
         ALOGW("StateTracker not found for state atom %d", atomId);
         return;
     }
+}
 
+void MetricProducer::mapStateValue(const int32_t atomId, FieldValue* value) {
     // check if there is a state map for this atom
     auto atomIt = mStateGroupMap.find(atomId);
     if (atomIt == mStateGroupMap.end()) {

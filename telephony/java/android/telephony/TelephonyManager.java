@@ -11776,6 +11776,7 @@ public class TelephonyManager {
      * subscription, the key is {@link SubscriptionManager#getDefaultSubscriptionId}) and the value
      * as the list of {@link EmergencyNumber}; empty Map if this information is not available;
      * or throw a SecurityException if the caller does not have the permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @NonNull
@@ -11823,6 +11824,7 @@ public class TelephonyManager {
      * @param number - the number to look up
      * @return {@code true} if the given number is an emergency number based on current locale,
      * SIM card(s), Android database, modem, network or defaults; {@code false} otherwise.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     public boolean isEmergencyNumber(@NonNull String number) {
         try {
@@ -11858,7 +11860,7 @@ public class TelephonyManager {
      * the same digits of any current emergency number based on current locale, sim, modem and
      * network; {@code false} if it is not; or throw an SecurityException if the caller does not
      * have the required permission/privileges
-     *
+     * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
     @SystemApi
@@ -12344,6 +12346,9 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @IsMultiSimSupportedResult
     public int isMultiSimSupported() {
+        if (getSupportedModemCount() < 2) {
+            return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
+        }
         try {
             ITelephony service = getITelephony();
             if (service != null) {

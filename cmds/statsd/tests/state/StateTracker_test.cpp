@@ -105,63 +105,6 @@ std::unique_ptr<LogEvent> buildOverlayEventBadStateType(int uid, const std::stri
 }
 // END: build event functions.
 
-// START: get primary key functions
-void getUidProcessKey(int uid, HashableDimensionKey* key) {
-    int pos1[] = {1, 0, 0};
-    Field field1(27 /* atom id */, pos1, 0 /* depth */);
-    Value value1((int32_t)uid);
-
-    key->addValue(FieldValue(field1, value1));
-}
-
-void getOverlayKey(int uid, string packageName, HashableDimensionKey* key) {
-    int pos1[] = {1, 0, 0};
-    int pos2[] = {2, 0, 0};
-
-    Field field1(59 /* atom id */, pos1, 0 /* depth */);
-    Field field2(59 /* atom id */, pos2, 0 /* depth */);
-
-    Value value1((int32_t)uid);
-    Value value2(packageName);
-
-    key->addValue(FieldValue(field1, value1));
-    key->addValue(FieldValue(field2, value2));
-}
-
-void getPartialWakelockKey(int uid, const std::string& tag, HashableDimensionKey* key) {
-    int pos1[] = {1, 1, 1};
-    int pos3[] = {2, 0, 0};
-    int pos4[] = {3, 0, 0};
-
-    Field field1(10 /* atom id */, pos1, 2 /* depth */);
-
-    Field field3(10 /* atom id */, pos3, 0 /* depth */);
-    Field field4(10 /* atom id */, pos4, 0 /* depth */);
-
-    Value value1((int32_t)uid);
-    Value value3((int32_t)1 /*partial*/);
-    Value value4(tag);
-
-    key->addValue(FieldValue(field1, value1));
-    key->addValue(FieldValue(field3, value3));
-    key->addValue(FieldValue(field4, value4));
-}
-
-void getPartialWakelockKey(int uid, HashableDimensionKey* key) {
-    int pos1[] = {1, 1, 1};
-    int pos3[] = {2, 0, 0};
-
-    Field field1(10 /* atom id */, pos1, 2 /* depth */);
-    Field field3(10 /* atom id */, pos3, 0 /* depth */);
-
-    Value value1((int32_t)uid);
-    Value value3((int32_t)1 /*partial*/);
-
-    key->addValue(FieldValue(field1, value1));
-    key->addValue(FieldValue(field3, value3));
-}
-// END: get primary key functions
-
 TEST(StateListenerTest, TestStateListenerWeakPointer) {
     sp<TestStateListener> listener = new TestStateListener();
     wp<TestStateListener> wListener = listener;

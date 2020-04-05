@@ -2395,9 +2395,11 @@ public class DevicePolicyManager {
     public static final int MAX_PASSWORD_LENGTH = 16;
 
     /**
-     * Service Action: Service implemented by a device owner or profile owner to provide a
-     * secondary lockscreen.
+     * Service Action: Service implemented by a device owner or profile owner supervision app to
+     * provide a secondary lockscreen.
+     * @hide
      */
+    @SystemApi
     public static final String ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE =
             "android.app.action.BIND_SECONDARY_LOCKSCREEN_SERVICE";
 
@@ -7001,6 +7003,22 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns the configured supervision app if it exists and is the device owner or policy owner.
+     * @hide
+     */
+    public @Nullable ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(
+            @NonNull UserHandle user) {
+        if (mService != null) {
+            try {
+                return mService.getProfileOwnerOrDeviceOwnerSupervisionComponent(user);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
      * @hide
      * @return the human readable name of the organisation associated with this DPM or {@code null}
      *         if one is not set.
@@ -8637,11 +8655,16 @@ public class DevicePolicyManager {
      * <p>Relevant interactions on the secondary lockscreen should be communicated back to the
      * keyguard via {@link IKeyguardCallback}, such as when the screen is ready to be dismissed.
      *
+     * <p>This API, and associated APIs, can only be called by the default supervision app when it
+     * is set as the device owner or profile owner.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled Whether or not the lockscreen needs to be shown.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      * @see #isSecondaryLockscreenEnabled
+     * @hide
      **/
+    @SystemApi
     public void setSecondaryLockscreenEnabled(@NonNull ComponentName admin, boolean enabled) {
         throwIfParentInstance("setSecondaryLockscreenEnabled");
         if (mService != null) {

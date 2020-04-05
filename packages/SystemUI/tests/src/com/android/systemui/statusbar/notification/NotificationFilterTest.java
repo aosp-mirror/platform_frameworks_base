@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.annotation.UiThreadTest;
@@ -98,7 +99,11 @@ public class NotificationFilterTest extends SysuiTestCase {
         mDependency.injectTestDependency(KeyguardEnvironment.class, mEnvironment);
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
-        mRow = new NotificationTestHelper(getContext(), mDependency).createRow();
+        NotificationTestHelper testHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        mRow = testHelper.createRow();
         mNotificationFilter = new NotificationFilter(mock(StatusBarStateController.class));
     }
 

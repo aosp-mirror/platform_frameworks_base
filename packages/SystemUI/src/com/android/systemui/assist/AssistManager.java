@@ -482,8 +482,12 @@ public class AssistManager {
     }
 
     public void onLockscreenShown() {
-        // TODO(b/140052478)
-        whitelistIpcs(mAssistUtils::onLockscreenShown);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                mAssistUtils.onLockscreenShown();
+            }
+        });
     }
 
     public long getAssistHandleShowAndGoRemainingDurationMs() {

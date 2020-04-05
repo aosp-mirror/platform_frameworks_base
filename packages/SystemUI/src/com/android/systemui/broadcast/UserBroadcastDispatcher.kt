@@ -27,7 +27,6 @@ import android.os.UserHandle
 import android.util.ArrayMap
 import android.util.ArraySet
 import android.util.Log
-import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import com.android.internal.util.Preconditions
 import com.android.systemui.Dumpable
@@ -46,11 +45,13 @@ private const val DEBUG = false
  *
  * Created by [BroadcastDispatcher] as needed by users. The value of [userId] can be
  * [UserHandle.USER_ALL].
+ *
+ * Each instance of this class will register itself exactly once with [Context]. Updates to the
+ * [IntentFilter] will be done in the background thread.
  */
 class UserBroadcastDispatcher(
     private val context: Context,
     private val userId: Int,
-    private val mainHandler: Handler,
     private val bgLooper: Looper
 ) : BroadcastReceiver(), Dumpable {
 
@@ -168,7 +169,7 @@ class UserBroadcastDispatcher(
     // Only call this from a BG thread
     private fun createFilterAndRegisterReceiverBG() {
         val intentFilter = createFilter()
-        mainHandler.post(RegisterReceiverRunnable(intentFilter))
+        bgHandler.post(RegisterReceiverRunnable(intentFilter))
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
@@ -207,10 +208,7 @@ class UserBroadcastDispatcher(
 
         /*
          * Registers and unregisters the BroadcastReceiver
-         *
-         * Must be called from Main Thread
          */
-        @MainThread
         override fun run() {
             if (registered.get()) {
                 context.unregisterReceiver(this@UserBroadcastDispatcher)

@@ -34,14 +34,17 @@ import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.hardware.display.IVirtualDisplayCallback;
+import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.input.InputManagerInternal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.SurfaceControl;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -67,6 +70,8 @@ import java.util.stream.LongStream;
 public class DisplayManagerServiceTest {
     private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS = 1;
     private static final long SHORT_DEFAULT_DISPLAY_TIMEOUT_MILLIS = 10;
+    private static final String VIRTUAL_DISPLAY_NAME = "Test Virtual Display";
+    private static final String PACKAGE_NAME = "com.android.frameworks.servicestests";
 
     private Context mContext;
 
@@ -97,6 +102,7 @@ public class DisplayManagerServiceTest {
 
     @Mock InputManagerInternal mMockInputManagerInternal;
     @Mock IVirtualDisplayCallback.Stub mMockAppToken;
+    @Mock IVirtualDisplayCallback.Stub mMockAppToken2;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock LightsManager mMockLightsManager;
     @Mock VirtualDisplayAdapter mMockVirtualDisplayAdapter;
@@ -135,10 +141,12 @@ public class DisplayManagerServiceTest {
         int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
 
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
-        int displayId = bs.createVirtualDisplay(mMockAppToken /* callback */,
-                null /* projection */, "com.android.frameworks.servicestests",
-                "Test Virtual Display", width, height, dpi, null /* surface */, flags /* flags */,
-                uniqueId);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi);
+        builder.setUniqueId(uniqueId);
+        builder.setFlags(flags);
+        int displayId = bs.createVirtualDisplay(builder.build(), mMockAppToken /* callback */,
+                null /* projection */, PACKAGE_NAME);
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -241,10 +249,12 @@ public class DisplayManagerServiceTest {
         int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
 
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
-        int displayId = bs.createVirtualDisplay(mMockAppToken /* callback */,
-                null /* projection */, "com.android.frameworks.servicestests",
-                "Test Virtual Display", width, height, dpi, null /* surface */, flags /* flags */,
-                uniqueId);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi);
+        builder.setFlags(flags);
+        builder.setUniqueId(uniqueId);
+        int displayId = bs.createVirtualDisplay(builder.build(), mMockAppToken /* callback */,
+                null /* projection */, PACKAGE_NAME);
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -407,6 +417,87 @@ public class DisplayManagerServiceTest {
 
         samples = sample.getSampleComponent(DisplayedContentSample.ColorComponent.CHANNEL3);
         assertTrue(samples.length == 0 || LongStream.of(samples).sum() == numPixels);
+    }
+
+    /**
+     * Tests that the virtual display is created with
+     * {@link VirtualDisplayConfig.Builder#setDisplayIdToMirror(int)}
+     */
+    @Test
+    @FlakyTest(bugId = 127687569)
+    public void testCreateVirtualDisplay_displayIdToMirror() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+
+        // This is effectively the DisplayManager service published to ServiceManager.
+        DisplayManagerService.BinderService binderService = displayManager.new BinderService();
+
+        final String uniqueId = "uniqueId --- displayIdToMirrorTest";
+        final int width = 600;
+        final int height = 800;
+        final int dpi = 320;
+
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi);
+        builder.setUniqueId(uniqueId);
+        final int firstDisplayId = binderService.createVirtualDisplay(builder.build(),
+                mMockAppToken /* callback */, null /* projection */, PACKAGE_NAME);
+
+        // The second virtual display requests to mirror the first virtual display.
+        final String uniqueId2 = "uniqueId --- displayIdToMirrorTest #2";
+        when(mMockAppToken2.asBinder()).thenReturn(mMockAppToken2);
+        final VirtualDisplayConfig.Builder builder2 = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi).setUniqueId(uniqueId2);
+        builder2.setUniqueId(uniqueId2);
+        builder2.setDisplayIdToMirror(firstDisplayId);
+        final int secondDisplayId = binderService.createVirtualDisplay(builder2.build(),
+                mMockAppToken2 /* callback */, null /* projection */, PACKAGE_NAME);
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+
+        // flush the handler
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
+
+        // The displayId to mirror should be a default display if there is none initially.
+        assertEquals(displayManager.getDisplayIdToMirrorInternal(firstDisplayId),
+                Display.DEFAULT_DISPLAY);
+        assertEquals(displayManager.getDisplayIdToMirrorInternal(secondDisplayId),
+                firstDisplayId);
+    }
+
+    /**
+     * Tests that the virtual display is created with
+     * {@link VirtualDisplayConfig.Builder#setSurface(Surface)}
+     */
+    @Test
+    @FlakyTest(bugId = 127687569)
+    public void testCreateVirtualDisplay_setSurface() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+
+        // This is effectively the DisplayManager service published to ServiceManager.
+        DisplayManagerService.BinderService binderService = displayManager.new BinderService();
+
+        final String uniqueId = "uniqueId --- setSurface";
+        final int width = 600;
+        final int height = 800;
+        final int dpi = 320;
+        final Surface surface = new Surface();
+
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi);
+        builder.setSurface(surface);
+        builder.setUniqueId(uniqueId);
+        final int displayId = binderService.createVirtualDisplay(builder.build(),
+                mMockAppToken /* callback */, null /* projection */, PACKAGE_NAME);
+
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+
+        // flush the handler
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
+
+        assertEquals(displayManager.getVirtualDisplaySurfaceInternal(mMockAppToken), surface);
     }
 
     private void registerDefaultDisplays(DisplayManagerService displayManager) {

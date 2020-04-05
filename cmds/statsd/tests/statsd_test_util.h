@@ -68,6 +68,12 @@ AtomMatcher CreateBatterySaverModeStartAtomMatcher();
 // Create AtomMatcher proto for stopping battery save mode.
 AtomMatcher CreateBatterySaverModeStopAtomMatcher();
 
+// Create AtomMatcher proto for battery state none mode.
+AtomMatcher CreateBatteryStateNoneMatcher();
+
+// Create AtomMatcher proto for battery state usb mode.
+AtomMatcher CreateBatteryStateUsbMatcher();
+
 // Create AtomMatcher proto for process state changed.
 AtomMatcher CreateUidProcessStateChangedAtomMatcher();
 
@@ -109,6 +115,9 @@ Predicate CreateScheduledJobPredicate();
 
 // Create Predicate proto for battery saver mode.
 Predicate CreateBatterySaverModePredicate();
+
+// Create Predicate proto for device unplogged mode.
+Predicate CreateDeviceUnpluggedPredicate();
 
 // Create Predicate proto for holding wakelock.
 Predicate CreateHoldingWakelockPredicate();
@@ -164,6 +173,22 @@ FieldMatcher CreateAttributionUidAndTagDimensions(const int atomId,
 FieldMatcher CreateAttributionUidDimensions(const int atomId,
                                             const std::vector<Position>& positions);
 
+FieldMatcher CreateAttributionUidAndOtherDimensions(const int atomId,
+                                                    const std::vector<Position>& positions,
+                                                    const std::vector<int>& fields);
+
+// START: get primary key functions
+// These functions take in atom field information and create FieldValues which are stored in the
+// given HashableDimensionKey.
+void getUidProcessKey(int uid, HashableDimensionKey* key);
+
+void getOverlayKey(int uid, string packageName, HashableDimensionKey* key);
+
+void getPartialWakelockKey(int uid, const std::string& tag, HashableDimensionKey* key);
+
+void getPartialWakelockKey(int uid, HashableDimensionKey* key);
+// END: get primary key functions
+
 shared_ptr<LogEvent> CreateTwoValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value1,
                                             int32_t value2);
 
@@ -212,6 +237,9 @@ std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(uint64_t timestampNs,
 std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs);
 // Create log event when battery saver stops.
 std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs);
+
+// Create log event when battery state changes.
+std::unique_ptr<LogEvent> CreateBatteryStateChangedEvent(const uint64_t timestampNs, const BatteryPluggedStateEnum state);
 
 // Create log event for app moving to background.
 std::unique_ptr<LogEvent> CreateMoveToBackgroundEvent(uint64_t timestampNs, const int uid);
@@ -263,9 +291,6 @@ std::unique_ptr<LogEvent> CreateOverlayStateChangedEvent(int64_t timestampNs, co
                                                          const bool usingAlertWindow,
                                                          const OverlayStateChanged::State state);
 
-// Helper function to create an AttributionNodeInternal proto.
-AttributionNodeInternal CreateAttribution(const int& uid, const string& tag);
-
 // Create a statsd log event processor upon the start time in seconds, config and key.
 sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
                                               const StatsdConfig& config, const ConfigKey& key,
@@ -277,6 +302,8 @@ void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events);
 
 int64_t StringToId(const string& str);
 
+void ValidateWakelockAttributionUidAndTagDimension(const DimensionsValue& value, const int atomId,
+                                                   const int uid, const string& tag);
 void ValidateUidDimension(const DimensionsValue& value, int node_idx, int atomId, int uid);
 void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, int uid);
 void ValidateAttributionUidAndTagDimension(

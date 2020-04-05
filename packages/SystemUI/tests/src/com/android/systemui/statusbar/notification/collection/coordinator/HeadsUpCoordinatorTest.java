@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +39,9 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpViewBinder;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
+import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -63,6 +68,8 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
 
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private HeadsUpManager mHeadsUpManager;
+    @Mock private HeadsUpViewBinder mHeadsUpViewBinder;
+    @Mock private NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private NotifLifetimeExtender.OnEndLifetimeExtensionCallback mEndLifetimeExtension;
@@ -76,6 +83,8 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
 
         mCoordinator = new HeadsUpCoordinator(
                 mHeadsUpManager,
+                mHeadsUpViewBinder,
+                mNotificationInterruptStateProvider,
                 mRemoteInputManager
         );
 
@@ -165,6 +174,36 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
 
         // THEN the old entry's lifetime extension should be cancelled
         verify(mEndLifetimeExtension).onEndLifetimeExtension(mNotifLifetimeExtender, mEntry);
+    }
+
+    @Test
+    public void testShowHUNOnInflationFinished() {
+        // WHEN a notification should HUN and its inflation is finished
+        when(mNotificationInterruptStateProvider.shouldHeadsUp(mEntry)).thenReturn(true);
+
+        ArgumentCaptor<BindCallback> bindCallbackCaptor =
+                ArgumentCaptor.forClass(BindCallback.class);
+        mCollectionListener.onEntryAdded(mEntry);
+        verify(mHeadsUpViewBinder).bindHeadsUpView(eq(mEntry), bindCallbackCaptor.capture());
+
+        bindCallbackCaptor.getValue().onBindFinished(mEntry);
+
+        // THEN we tell the HeadsUpManager to show the notification
+        verify(mHeadsUpManager).showNotification(mEntry);
+    }
+
+    @Test
+    public void testNoHUNOnInflationFinished() {
+        // WHEN a notification shouldn't HUN and its inflation is finished
+        when(mNotificationInterruptStateProvider.shouldHeadsUp(mEntry)).thenReturn(false);
+        ArgumentCaptor<BindCallback> bindCallbackCaptor =
+                ArgumentCaptor.forClass(BindCallback.class);
+        mCollectionListener.onEntryAdded(mEntry);
+
+        // THEN we never bind the heads up view or tell HeadsUpManager to show the notification
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(
+                eq(mEntry), bindCallbackCaptor.capture());
+        verify(mHeadsUpManager, never()).showNotification(mEntry);
     }
 
     @Test

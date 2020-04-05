@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
@@ -553,6 +554,12 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     void hidePeopleRow() {
         mPeopleHubVisible = false;
         updateSectionBoundaries();
+    }
+
+    void setHeaderForegroundColor(@ColorInt int color) {
+        mPeopleHubView.setTextColor(color);
+        mGentleHeader.setForegroundColor(color);
+        mAlertingHeader.setForegroundColor(color);
     }
 
     /**

@@ -111,6 +111,29 @@ class NotifCollectionLogger @Inject constructor(
             "RemoteException while attempting to clear all notifications:\n$str1"
         })
     }
+
+    fun logLifetimeExtended(key: String, extender: NotifLifetimeExtender) {
+        buffer.log(TAG, INFO, {
+            str1 = key
+            str2 = extender.name
+        }, {
+            "LIFETIME EXTENDED: $str1 by $str2"
+        })
+    }
+
+    fun logLifetimeExtensionEnded(
+        key: String,
+        extender: NotifLifetimeExtender,
+        totalExtenders: Int
+    ) {
+        buffer.log(TAG, INFO, {
+            str1 = key
+            str2 = extender.name
+            int1 = totalExtenders
+        }, {
+            "LIFETIME EXTENSION ENDED for $str1 by '$str2'; $int1 remaining extensions"
+        })
+    }
 }
 
 private const val TAG = "NotifCollection"

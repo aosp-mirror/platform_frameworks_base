@@ -1887,12 +1887,20 @@ public class WifiManager {
      * <li> If user reset network settings, all added suggestions will be discarded. Apps can use
      * {@link #getNetworkSuggestions()} to check if their suggestions are in the device.</li>
      * <li> In-place modification of existing suggestions are allowed.
-     * If the provided suggestions {@link WifiNetworkSuggestion#equals(Object)} any previously
-     * provided suggestions by the app. Previous suggestions will be updated</li>
+     * <li>If the provided suggestions includes any previously provided suggestions by the app,
+     * previous suggestions will be updated.</li>
+     * <li>If one of the provided suggestions marks a previously unmetered suggestion as metered and
+     * the device is currently connected to that suggested network, then the device will disconnect
+     * from that network. The system will immediately re-evaluate all the network candidates
+     * and possibly reconnect back to the same suggestion. This disconnect is to make sure that any
+     * traffic flowing over unmetered networks isn't accidentally continued over a metered network.
+     * </li>
+     * </li>
      *
      * @param networkSuggestions List of network suggestions provided by the app.
      * @return Status code for the operation. One of the STATUS_NETWORK_SUGGESTIONS_ values.
      * @throws {@link SecurityException} if the caller is missing required permissions.
+     * @see WifiNetworkSuggestion#equals(Object)
      */
     @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
     public @NetworkSuggestionsStatusCode int addNetworkSuggestions(
@@ -4152,6 +4160,10 @@ public class WifiManager {
      *
      * This function is used instead of a enableNetwork() and reconnect()
      *
+     * <li> This API will cause reconnect if the credentials of the current active
+     * connection has been changed.</li>
+     * <li> This API will cause reconnect if the current active connection is marked metered.</li>
+     *
      * @param networkId the ID of the network as returned by {@link #addNetwork} or {@link
      *        getConfiguredNetworks}.
      * @param listener for callbacks on success or failure. Can be null.
@@ -4180,8 +4192,9 @@ public class WifiManager {
      *
      * For an existing network, it accomplishes the task of updateNetwork()
      *
-     * This API will cause reconnect if the crecdentials of the current active
-     * connection has been changed.
+     * <li> This API will cause reconnect if the credentials of the current active
+     * connection has been changed.</li>
+     * <li> This API will cause disconnect if the current active connection is marked metered.</li>
      *
      * @param config the set of variables that describe the configuration,
      *            contained in a {@link WifiConfiguration} object.

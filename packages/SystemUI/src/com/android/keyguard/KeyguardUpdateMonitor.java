@@ -971,13 +971,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         boolean changed = false;
 
         if (enabled && (oldIntent == null)) {
-            ComponentName poComponent = mDevicePolicyManager.getProfileOwnerAsUser(userId);
-            if (poComponent == null) {
-                Log.e(TAG, "No profile owner found for User " + userId);
+            ComponentName supervisorComponent =
+                    mDevicePolicyManager.getProfileOwnerOrDeviceOwnerSupervisionComponent(
+                            UserHandle.of(userId));
+            if (supervisorComponent == null) {
+                Log.e(TAG, "No Profile Owner or Device Owner supervision app found for User "
+                        + userId);
             } else {
                 Intent intent =
                         new Intent(DevicePolicyManager.ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE)
-                                .setPackage(poComponent.getPackageName());
+                                .setPackage(supervisorComponent.getPackageName());
                 ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent, 0);
                 if (resolveInfo != null && resolveInfo.serviceInfo != null) {
                     Intent launchIntent =

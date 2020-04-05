@@ -110,6 +110,10 @@ public:
         return mStateValuesKey;
     }
 
+    inline HashableDimensionKey* getMutableStateValuesKey() {
+        return &mStateValuesKey;
+    }
+
     inline void setStateValuesKey(const HashableDimensionKey& key) {
         mStateValuesKey = key;
     }
@@ -169,6 +173,32 @@ void getDimensionForCondition(const std::vector<FieldValue>& eventValues,
 void getDimensionForState(const std::vector<FieldValue>& eventValues, const Metric2State& link,
                           HashableDimensionKey* statePrimaryKey);
 
+/**
+ * Returns true if the primaryKey values are a subset of the whatKey values.
+ * The values from the primaryKey come from the state atom, so we need to
+ * check that a link exists between the state atom field and what atom field.
+ *
+ * Example:
+ * whatKey = [Atom: 10, {uid: 1005, wakelock_name: "compose"}]
+ * statePrimaryKey = [Atom: 27, {uid: 1005}]
+ * Returns true IF one of the Metric2State links Atom 10's uid to Atom 27's uid
+ *
+ * Example:
+ * whatKey = [Atom: 10, {uid: 1005, wakelock_name: "compose"}]
+ * statePrimaryKey = [Atom: 59, {uid: 1005, package_name: "system"}]
+ * Returns false
+ */
+bool containsLinkedStateValues(const HashableDimensionKey& whatKey,
+                               const HashableDimensionKey& primaryKey,
+                               const std::vector<Metric2State>& stateLinks,
+                               const int32_t stateAtomId);
+
+/**
+ * Returns true if there is a Metric2State link that links the stateField and
+ * the metricField (they are equal fields from different atoms).
+ */
+bool linked(const std::vector<Metric2State>& stateLinks, const int32_t stateAtomId,
+            const Field& stateField, const Field& metricField);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

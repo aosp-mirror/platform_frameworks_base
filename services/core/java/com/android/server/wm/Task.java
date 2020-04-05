@@ -4068,21 +4068,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     boolean isOrganized() {
-        final Task rootTask = getRootTask();
-        if (rootTask.mTaskOrganizer == null) {
-            // You are obviously not organized...
-            return false;
-        }
-        if (rootTask == this) {
-            // Root tasks can be organized.
-            return true;
-        }
-        if (rootTask.mCreatedByOrganizer && getParent() == rootTask) {
-            // Direct children of tasks added by the organizer can the organized.
-            return true;
-        }
-
-        return false;
+        return mTaskOrganizer != null;
     }
 
     @Override
@@ -4137,6 +4123,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
    }
 
+    @VisibleForTesting
     boolean setTaskOrganizer(ITaskOrganizer organizer) {
         if (mTaskOrganizer == organizer) {
             return false;
@@ -4144,6 +4131,17 @@ class Task extends WindowContainer<WindowContainer> {
         // Let the old organizer know it has lost control.
         sendTaskVanished();
         mTaskOrganizer = organizer;
+
+        // If the task is not yet visible when it is added to the task organizer, then we should
+        // hide it to allow the task organizer to show it when it is properly reparented. We skip
+        // this for tasks created by the organizer because they can synchronously update the leash
+        // before new children are added to the task.
+        if (!mCreatedByOrganizer && organizer != null
+                && (!getHasBeenVisible() || !hasVisibleChildren())) {
+            getPendingTransaction().hide(getSurfaceControl());
+            commitPendingTransaction();
+        }
+
         sendTaskAppeared();
         onTaskOrganizerChanged();
         return true;

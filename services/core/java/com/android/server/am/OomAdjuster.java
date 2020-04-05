@@ -2385,7 +2385,7 @@ public final class OomAdjuster {
                     "Changes in " + app + ": " + changes);
             ActivityManagerService.ProcessChangeItem item =
                     mService.enqueueProcessChangeItemLocked(app.pid, app.info.uid);
-            item.changes = changes;
+            item.changes |= changes;
             item.foregroundActivities = app.repForegroundActivities;
             item.capability = app.setCapability;
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,

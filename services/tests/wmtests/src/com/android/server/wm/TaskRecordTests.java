@@ -203,9 +203,9 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     public void testFitWithinBounds() {
         final Rect parentBounds = new Rect(10, 10, 200, 200);
-        DisplayContent display = mService.mRootWindowContainer.getDefaultDisplay();
-        ActivityStack stack = display.createStack(WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD,
-                true /* onTop */);
+        TaskDisplayArea taskDisplayArea = mService.mRootWindowContainer.getDefaultTaskDisplayArea();
+        ActivityStack stack = taskDisplayArea.createStack(WINDOWING_MODE_FREEFORM,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
         Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
         final Configuration parentConfig = stack.getConfiguration();
         parentConfig.windowConfiguration.setBounds(parentBounds);
@@ -438,9 +438,9 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     @Test
     public void testInsetDisregardedWhenFreeformOverlapsNavBar() {
-        DisplayContent display = mService.mRootWindowContainer.getDefaultDisplay();
-        ActivityStack stack = display.createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
-                true /* onTop */);
+        TaskDisplayArea taskDisplayArea = mService.mRootWindowContainer.getDefaultTaskDisplayArea();
+        ActivityStack stack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
         DisplayInfo displayInfo = new DisplayInfo();
         mService.mContext.getDisplay().getDisplayInfo(displayInfo);
         final int displayHeight = displayInfo.logicalHeight;
@@ -959,8 +959,8 @@ public class TaskRecordTests extends ActivityTestsBase {
     private void testStackBoundsConfiguration(int windowingMode, Rect parentBounds, Rect bounds,
             Rect expectedConfigBounds) {
 
-        DisplayContent display = mService.mRootWindowContainer.getDefaultDisplay();
-        ActivityStack stack = display.createStack(windowingMode, ACTIVITY_TYPE_STANDARD,
+        TaskDisplayArea taskDisplayArea = mService.mRootWindowContainer.getDefaultTaskDisplayArea();
+        ActivityStack stack = taskDisplayArea.createStack(windowingMode, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
         Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
 

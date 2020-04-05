@@ -326,8 +326,9 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         if (mockGetLaunchStack) {
             // Instrument the stack and task used.
-            final ActivityStack stack = mRootWindowContainer.getDefaultDisplay().createStack(
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+            final ActivityStack stack = mRootWindowContainer.getDefaultTaskDisplayArea()
+                    .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
+                            true /* onTop */);
 
             // Direct starter to use spy stack.
             doReturn(stack).when(mRootWindowContainer)
@@ -742,7 +743,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final TestDisplayContent secondaryDisplay =
                 new TestDisplayContent.Builder(mService, 1000, 1500)
                         .setPosition(POSITION_BOTTOM).build();
-        final TaskDisplayArea secondaryTaskContainer = secondaryDisplay.mTaskContainers;
+        final TaskDisplayArea secondaryTaskContainer = secondaryDisplay.getDefaultTaskDisplayArea();
         final ActivityStack stack = secondaryTaskContainer.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
@@ -783,7 +784,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 new TestDisplayContent.Builder(mService, 1000, 1500).build();
         mRootWindowContainer.positionChildAt(POSITION_TOP, secondaryDisplay,
                 false /* includingParents */);
-        final TaskDisplayArea secondaryTaskContainer = secondaryDisplay.mTaskContainers;
+        final TaskDisplayArea secondaryTaskContainer = secondaryDisplay.getDefaultTaskDisplayArea();
         final ActivityRecord singleTaskActivity = createSingleTaskActivityOn(
                 secondaryTaskContainer.createStack(WINDOWING_MODE_FULLSCREEN,
                         ACTIVITY_TYPE_STANDARD, false /* onTop */));
@@ -835,7 +836,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Create a secondary display at bottom.
         final TestDisplayContent secondaryDisplay = addNewDisplayContentAt(POSITION_BOTTOM);
-        final TaskDisplayArea secondaryTaskContainer = secondaryDisplay.mTaskContainers;
+        final TaskDisplayArea secondaryTaskContainer = secondaryDisplay.getDefaultTaskDisplayArea();
         secondaryTaskContainer.createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
 
@@ -951,7 +952,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final ActivityStarter starter = prepareStarter(0 /* flags */);
         starter.mStartActivity = new ActivityBuilder(mService).build();
         final Task task = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(mService.mRootWindowContainer.getDefaultDisplay().createStack(
+                .setStack(mService.mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
                 .setUserId(10)
                 .build();

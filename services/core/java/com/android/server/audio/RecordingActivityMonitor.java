@@ -150,14 +150,14 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         final AudioRecordingConfiguration config = createRecordingConfiguration(
                 uid, session, source, recordingInfo,
                 portId, silenced, activeSource, clientEffects, effects);
-        if (source == MediaRecorder.AudioSource.REMOTE_SUBMIX) {
+        if (source == MediaRecorder.AudioSource.REMOTE_SUBMIX
+                && (event == AudioManager.RECORD_CONFIG_EVENT_START
+                        || event == AudioManager.RECORD_CONFIG_EVENT_UPDATE)) {
             final AudioDeviceInfo device = config.getAudioDevice();
-            if (AudioSystem.LEGACY_REMOTE_SUBMIX_ADDRESS.equals(device.getAddress())) {
+            if (device != null
+                    && AudioSystem.LEGACY_REMOTE_SUBMIX_ADDRESS.equals(device.getAddress())) {
                 mLegacyRemoteSubmixRiid.set(riid);
-                if (event == AudioManager.RECORD_CONFIG_EVENT_START
-                        || event == AudioManager.RECORD_CONFIG_EVENT_UPDATE) {
-                    mLegacyRemoteSubmixActive.set(true);
-                }
+                mLegacyRemoteSubmixActive.set(true);
             }
         }
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {

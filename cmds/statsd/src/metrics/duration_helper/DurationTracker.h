@@ -56,11 +56,19 @@ struct DurationBucket {
     int64_t mDuration;
 };
 
+struct DurationValues {
+    // Recorded duration for current partial bucket.
+    int64_t mDuration;
+
+    // Sum of past partial bucket durations in current full bucket.
+    // Used for anomaly detection.
+    int64_t mDurationFullBucket;
+};
+
 class DurationTracker {
 public:
     DurationTracker(const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
-                    sp<ConditionWizard> wizard, int conditionIndex,
-                    bool nesting,
+                    sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                     int64_t currentBucketStartNs, int64_t currentBucketNum, int64_t startTimeNs,
                     int64_t bucketSizeNs, bool conditionSliced, bool fullLink,
                     const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
@@ -73,7 +81,6 @@ public:
           mNested(nesting),
           mCurrentBucketStartTimeNs(currentBucketStartNs),
           mDuration(0),
-          mDurationFullBucket(0),
           mCurrentBucketNum(currentBucketNum),
           mStartTimeNs(startTimeNs),
           mConditionSliced(conditionSliced),
@@ -82,14 +89,17 @@ public:
 
     virtual ~DurationTracker(){};
 
-    virtual void noteStart(const HashableDimensionKey& key, bool condition,
-                           const int64_t eventTime, const ConditionKey& conditionKey) = 0;
+    virtual void noteStart(const HashableDimensionKey& key, bool condition, const int64_t eventTime,
+                           const ConditionKey& conditionKey) = 0;
     virtual void noteStop(const HashableDimensionKey& key, const int64_t eventTime,
                           const bool stopAll) = 0;
     virtual void noteStopAll(const int64_t eventTime) = 0;
 
     virtual void onSlicedConditionMayChange(bool overallCondition, const int64_t timestamp) = 0;
     virtual void onConditionChanged(bool condition, const int64_t timestamp) = 0;
+
+    virtual void onStateChanged(const int64_t timestamp, const int32_t atomId,
+                                const FieldValue& newState) = 0;
 
     // Flush stale buckets if needed, and return true if the tracker has no on-going duration
     // events, so that the owner can safely remove the tracker.
@@ -109,9 +119,12 @@ public:
     // Dump internal states for debugging
     virtual void dumpStates(FILE* out, bool verbose) const = 0;
 
-    void setEventKey(const MetricDimensionKey& eventKey) {
-         mEventKey = eventKey;
-    }
+    virtual int64_t getCurrentStateKeyDuration() const = 0;
+
+    virtual int64_t getCurrentStateKeyFullBucketDuration() const = 0;
+
+    // Replace old value with new value for the given state atom.
+    virtual void updateCurrentStateKey(const int32_t atomId, const FieldValue& newState) = 0;
 
 protected:
     int64_t getCurrentBucketEndTimeNs() const {
@@ -140,10 +153,11 @@ protected:
         }
     }
 
-    void addPastBucketToAnomalyTrackers(const int64_t& bucketValue, const int64_t& bucketNum) {
+    void addPastBucketToAnomalyTrackers(const MetricDimensionKey eventKey,
+                                        const int64_t& bucketValue, const int64_t& bucketNum) {
         for (auto& anomalyTracker : mAnomalyTrackers) {
             if (anomalyTracker != nullptr) {
-                anomalyTracker->addPastBucket(mEventKey, bucketValue, bucketNum);
+                anomalyTracker->addPastBucket(eventKey, bucketValue, bucketNum);
             }
         }
     }
@@ -162,6 +176,10 @@ protected:
     // start time of the metric.
     int64_t getCurrentBucketEndTimeNs() {
         return mStartTimeNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
+    }
+
+    void setEventKey(const MetricDimensionKey& eventKey) {
+        mEventKey = eventKey;
     }
 
     // A reference to the DurationMetricProducer's config key.
@@ -183,7 +201,8 @@ protected:
 
     int64_t mDuration;  // current recorded duration result (for partial bucket)
 
-    int64_t mDurationFullBucket;  // Sum of past partial buckets in current full bucket.
+    // Recorded duration results for each state key in the current partial bucket.
+    std::unordered_map<HashableDimensionKey, DurationValues> mStateKeyDurationMap;
 
     int64_t mCurrentBucketNum;
 

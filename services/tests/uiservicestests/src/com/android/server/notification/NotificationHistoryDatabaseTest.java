@@ -146,7 +146,29 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         assertThat(mDataBase.mHistoryFiles).containsExactlyElementsIn(expectedFiles);
 
         verify(mAlarmManager, times(6)).setExactAndAllowWhileIdle(anyInt(), anyLong(), any());
+    }
 
+    @Test
+    public void testPrune_badFileName() {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTimeInMillis(10);
+        int retainDays = 1;
+
+        List<AtomicFile> expectedFiles = new ArrayList<>();
+
+        // add 5 files with a creation date of "today", but the file names are bad
+        for (long i = cal.getTimeInMillis(); i >= 5; i--) {
+            File file = mock(File.class);
+            when(file.getName()).thenReturn(i + ".txt");
+            AtomicFile af = new AtomicFile(file);
+            mDataBase.mHistoryFiles.addLast(af);
+        }
+
+        // trim everything a day+ old
+        cal.add(Calendar.DATE, 1 * retainDays);
+        mDataBase.prune(retainDays, cal.getTimeInMillis());
+
+        assertThat(mDataBase.mHistoryFiles).containsExactlyElementsIn(expectedFiles);
     }
 
     @Test

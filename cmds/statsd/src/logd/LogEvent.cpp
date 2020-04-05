@@ -17,13 +17,13 @@
 #define DEBUG false  // STOPSHIP if true
 #include "logd/LogEvent.h"
 
+#include <android-base/stringprintf.h>
+#include <android/binder_ibinder.h>
+#include <private/android_filesystem_config.h>
+
 #include "annotations.h"
 #include "stats_log_util.h"
 #include "statslog_statsd.h"
-
-#include <android/binder_ibinder.h>
-#include <android-base/stringprintf.h>
-#include <private/android_filesystem_config.h>
 
 namespace android {
 namespace os {
@@ -76,77 +76,7 @@ LogEvent::LogEvent(const LogEvent& event) {
 }
 
 LogEvent::LogEvent(int32_t uid, int32_t pid)
-    : mLogdTimestampNs(time(nullptr)),
-      mLogUid(uid),
-      mLogPid(pid) {
-}
-
-LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = tagId;
-    mLogUid = 0;
-    mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
-    if (mContext) {
-        android_log_write_int64(mContext, elapsedTimestampNs);
-        android_log_write_int32(mContext, tagId);
-    }
-}
-
-LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   int32_t uid,
-                   const std::map<int32_t, int32_t>& int_map,
-                   const std::map<int32_t, int64_t>& long_map,
-                   const std::map<int32_t, std::string>& string_map,
-                   const std::map<int32_t, float>& float_map) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = util::KEY_VALUE_PAIRS_ATOM;
-    mLogUid = uid;
-
-    int pos[] = {1, 1, 1};
-
-    mValues.push_back(FieldValue(Field(mTagId, pos, 0 /* depth */), Value(uid)));
-    pos[0]++;
-    for (const auto&itr : int_map) {
-        pos[2] = 1;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
-        pos[2] = 2;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
-        mValues.back().mField.decorateLastPos(2);
-        pos[1]++;
-    }
-
-    for (const auto&itr : long_map) {
-        pos[2] = 1;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
-        pos[2] = 3;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
-        mValues.back().mField.decorateLastPos(2);
-        pos[1]++;
-    }
-
-    for (const auto&itr : string_map) {
-        pos[2] = 1;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
-        pos[2] = 4;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
-        mValues.back().mField.decorateLastPos(2);
-        pos[1]++;
-    }
-
-    for (const auto&itr : float_map) {
-        pos[2] = 1;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
-        pos[2] = 5;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
-        mValues.back().mField.decorateLastPos(2);
-        pos[1]++;
-    }
-    if (!mValues.empty()) {
-        mValues.back().mField.decorateLastPos(1);
-        mValues.at(mValues.size() - 2).mField.decorateLastPos(1);
-    }
+    : mLogdTimestampNs(time(nullptr)), mLogUid(uid), mLogPid(pid) {
 }
 
 LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requiresStaging,
@@ -184,171 +114,12 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value(trainInfo.status)));
 }
 
-LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {
-    mLogdTimestampNs = timestampNs;
-    mTagId = tagId;
-    mLogUid = uid;
-    mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
-    if (mContext) {
-        android_log_write_int64(mContext, timestampNs);
-        android_log_write_int32(mContext, tagId);
-    }
-}
-
 LogEvent::~LogEvent() {
     if (mContext) {
         // This is for the case when LogEvent is created using the test interface
         // but init() isn't called.
         android_log_destroy(&mContext);
     }
-}
-
-bool LogEvent::write(int32_t value) {
-    if (mContext) {
-        return android_log_write_int32(mContext, value) >= 0;
-    }
-    return false;
-}
-
-bool LogEvent::write(uint32_t value) {
-    if (mContext) {
-        return android_log_write_int32(mContext, value) >= 0;
-    }
-    return false;
-}
-
-bool LogEvent::write(int64_t value) {
-    if (mContext) {
-        return android_log_write_int64(mContext, value) >= 0;
-    }
-    return false;
-}
-
-bool LogEvent::write(uint64_t value) {
-    if (mContext) {
-        return android_log_write_int64(mContext, value) >= 0;
-    }
-    return false;
-}
-
-bool LogEvent::write(const string& value) {
-    if (mContext) {
-        return android_log_write_string8_len(mContext, value.c_str(), value.length()) >= 0;
-    }
-    return false;
-}
-
-bool LogEvent::write(float value) {
-    if (mContext) {
-        return android_log_write_float32(mContext, value) >= 0;
-    }
-    return false;
-}
-
-bool LogEvent::writeBytes(const string& value) {
-    /* if (mContext) {
-        return android_log_write_char_array(mContext, value.c_str(), value.length()) >= 0;
-    }*/
-    return false;
-}
-
-bool LogEvent::writeKeyValuePairs(int32_t uid,
-                                  const std::map<int32_t, int32_t>& int_map,
-                                  const std::map<int32_t, int64_t>& long_map,
-                                  const std::map<int32_t, std::string>& string_map,
-                                  const std::map<int32_t, float>& float_map) {
-    if (mContext) {
-         if (android_log_write_list_begin(mContext) < 0) {
-            return false;
-         }
-         write(uid);
-         for (const auto& itr : int_map) {
-             if (android_log_write_list_begin(mContext) < 0) {
-                return false;
-             }
-             write(itr.first);
-             write(itr.second);
-             if (android_log_write_list_end(mContext) < 0) {
-                return false;
-             }
-         }
-
-         for (const auto& itr : long_map) {
-             if (android_log_write_list_begin(mContext) < 0) {
-                return false;
-             }
-             write(itr.first);
-             write(itr.second);
-             if (android_log_write_list_end(mContext) < 0) {
-                return false;
-             }
-         }
-
-         for (const auto& itr : string_map) {
-             if (android_log_write_list_begin(mContext) < 0) {
-                return false;
-             }
-             write(itr.first);
-             write(itr.second.c_str());
-             if (android_log_write_list_end(mContext) < 0) {
-                return false;
-             }
-         }
-
-         for (const auto& itr : float_map) {
-             if (android_log_write_list_begin(mContext) < 0) {
-                return false;
-             }
-             write(itr.first);
-             write(itr.second);
-             if (android_log_write_list_end(mContext) < 0) {
-                return false;
-             }
-         }
-
-         if (android_log_write_list_end(mContext) < 0) {
-            return false;
-         }
-         return true;
-    }
-    return false;
-}
-
-bool LogEvent::write(const std::vector<AttributionNodeInternal>& nodes) {
-    if (mContext) {
-         if (android_log_write_list_begin(mContext) < 0) {
-            return false;
-         }
-         for (size_t i = 0; i < nodes.size(); ++i) {
-             if (!write(nodes[i])) {
-                return false;
-             }
-         }
-         if (android_log_write_list_end(mContext) < 0) {
-            return false;
-         }
-         return true;
-    }
-    return false;
-}
-
-bool LogEvent::write(const AttributionNodeInternal& node) {
-    if (mContext) {
-         if (android_log_write_list_begin(mContext) < 0) {
-            return false;
-         }
-         if (android_log_write_int32(mContext, node.uid()) < 0) {
-            return false;
-         }
-         if (android_log_write_string8(mContext, node.tag().c_str()) < 0) {
-            return false;
-         }
-         if (android_log_write_list_end(mContext) < 0) {
-            return false;
-         }
-         return true;
-    }
-    return false;
 }
 
 void LogEvent::parseInt32(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
@@ -420,7 +191,7 @@ void LogEvent::parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last, uint8
         uint8_t typeInfo = readNextValue<uint8_t>();
         switch (getTypeId(typeInfo)) {
             case INT32_TYPE:
-                pos[2] = 2; // pos[2] determined by index of type in KeyValuePair in atoms.proto
+                pos[2] = 2;  // pos[2] determined by index of type in KeyValuePair in atoms.proto
                 parseInt32(pos, /*depth=*/2, last, /*numAnnotations=*/0);
                 break;
             case INT64_TYPE:
@@ -488,33 +259,38 @@ void LogEvent::parseTruncateTimestampAnnotation(uint8_t annotationType) {
     mTruncateTimestamp = readNextValue<uint8_t>();
 }
 
-void LogEvent::parseStateOptionAnnotation(uint8_t annotationType, int firstUidInChainIndex) {
-    if (mValues.empty() || annotationType != INT32_TYPE) {
+void LogEvent::parsePrimaryFieldAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != BOOL_TYPE) {
         mValid = false;
         return;
     }
 
-    int32_t stateOption = readNextValue<int32_t>();
-    switch (stateOption) {
-        case STATE_OPTION_EXCLUSIVE_STATE:
-            mValues[mValues.size() - 1].mAnnotations.setExclusiveState(true);
-            break;
-        case STATE_OPTION_PRIMARY_FIELD:
-            mValues[mValues.size() - 1].mAnnotations.setPrimaryField(true);
-            break;
-        case STATE_OPTION_PRIMARY_FIELD_FIRST_UID:
-            if (firstUidInChainIndex == -1) {
-                mValid = false;
-            } else {
-                mValues[firstUidInChainIndex].mAnnotations.setPrimaryField(true);
-            }
-            break;
-        default:
-            mValid = false;
-    }
+    const bool primaryField = readNextValue<uint8_t>();
+    mValues[mValues.size() - 1].mAnnotations.setPrimaryField(primaryField);
 }
 
-void LogEvent::parseResetStateAnnotation(uint8_t annotationType) {
+void LogEvent::parsePrimaryFieldFirstUidAnnotation(uint8_t annotationType,
+                                                   int firstUidInChainIndex) {
+    if (mValues.empty() || annotationType != BOOL_TYPE || -1 == firstUidInChainIndex) {
+        mValid = false;
+        return;
+    }
+
+    const bool primaryField = readNextValue<uint8_t>();
+    mValues[firstUidInChainIndex].mAnnotations.setPrimaryField(primaryField);
+}
+
+void LogEvent::parseExclusiveStateAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    const bool exclusiveState = readNextValue<uint8_t>();
+    mValues[mValues.size() - 1].mAnnotations.setExclusiveState(exclusiveState);
+}
+
+void LogEvent::parseTriggerStateResetAnnotation(uint8_t annotationType) {
     if (mValues.empty() || annotationType != INT32_TYPE) {
         mValid = false;
         return;
@@ -548,11 +324,17 @@ void LogEvent::parseAnnotations(uint8_t numAnnotations, int firstUidInChainIndex
             case ANNOTATION_ID_TRUNCATE_TIMESTAMP:
                 parseTruncateTimestampAnnotation(annotationType);
                 break;
-            case ANNOTATION_ID_STATE_OPTION:
-                parseStateOptionAnnotation(annotationType, firstUidInChainIndex);
+            case ANNOTATION_ID_PRIMARY_FIELD:
+                parsePrimaryFieldAnnotation(annotationType);
                 break;
-            case ANNOTATION_ID_RESET_STATE:
-                parseResetStateAnnotation(annotationType);
+            case ANNOTATION_ID_PRIMARY_FIELD_FIRST_UID:
+                parsePrimaryFieldFirstUidAnnotation(annotationType, firstUidInChainIndex);
+                break;
+            case ANNOTATION_ID_EXCLUSIVE_STATE:
+                parseExclusiveStateAnnotation(annotationType);
+                break;
+            case ANNOTATION_ID_TRIGGER_STATE_RESET:
+                parseTriggerStateResetAnnotation(annotationType);
                 break;
             case ANNOTATION_ID_STATE_NESTED:
                 parseStateNestedAnnotation(annotationType);
@@ -589,8 +371,7 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
     if (getTypeId(typeInfo) != INT32_TYPE) mValid = false;
     mTagId = readNextValue<int32_t>();
     numElements--;
-    parseAnnotations(getNumAnnotations(typeInfo)); // atom-level annotations
-
+    parseAnnotations(getNumAnnotations(typeInfo));  // atom-level annotations
 
     for (pos[0] = 1; pos[0] <= numElements && mValid; pos[0]++) {
         last[0] = (pos[0] == numElements);
@@ -599,7 +380,7 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
         uint8_t typeId = getTypeId(typeInfo);
 
         // TODO(b/144373276): handle errors passed to the socket
-        switch(typeId) {
+        switch (typeId) {
             case BOOL_TYPE:
                 parseBool(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
@@ -636,11 +417,11 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
 }
 
 uint8_t LogEvent::getTypeId(uint8_t typeInfo) {
-    return typeInfo & 0x0F; // type id in lower 4 bytes
+    return typeInfo & 0x0F;  // type id in lower 4 bytes
 }
 
 uint8_t LogEvent::getNumAnnotations(uint8_t typeInfo) {
-    return (typeInfo >> 4) & 0x0F; // num annotations in upper 4 bytes
+    return (typeInfo >> 4) & 0x0F;  // num annotations in upper 4 bytes
 }
 
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {
@@ -751,17 +532,17 @@ float LogEvent::GetFloat(size_t key, status_t* err) const {
 std::vector<uint8_t> LogEvent::GetStorage(size_t key, status_t* err) const {
     int field = getSimpleField(key);
     for (const auto& value : mValues) {
-      if (value.mField.getField() == field) {
-        if (value.mValue.getType() == STORAGE) {
-          return value.mValue.storage_value;
-        } else {
-          *err = BAD_TYPE;
-          return vector<uint8_t>();
+        if (value.mField.getField() == field) {
+            if (value.mValue.getType() == STORAGE) {
+                return value.mValue.storage_value;
+            } else {
+                *err = BAD_TYPE;
+                return vector<uint8_t>();
+            }
         }
-      }
-      if ((size_t)value.mField.getPosAtDepth(0) > key) {
-        break;
-      }
+        if ((size_t)value.mField.getPosAtDepth(0) > key) {
+            break;
+        }
     }
 
     *err = BAD_INDEX;

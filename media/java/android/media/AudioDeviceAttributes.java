@@ -99,11 +99,11 @@ public final class AudioDeviceAttributes implements Parcelable {
         if (role != ROLE_OUTPUT && role != ROLE_INPUT) {
             throw new IllegalArgumentException("Invalid role " + role);
         }
-        if (role == ROLE_OUTPUT && !AudioDeviceInfo.isValidAudioDeviceTypeOut(type)) {
-            throw new IllegalArgumentException("Invalid output device type " + type);
+        if (role == ROLE_OUTPUT) {
+            AudioDeviceInfo.enforceValidAudioDeviceTypeOut(type);
         }
-        if (role == ROLE_INPUT && !AudioDeviceInfo.isValidAudioDeviceTypeIn(type)) {
-            throw new IllegalArgumentException("Invalid input device type " + type);
+        if (role == ROLE_INPUT) {
+            AudioDeviceInfo.enforceValidAudioDeviceTypeIn(type);
         }
 
         mRole = role;

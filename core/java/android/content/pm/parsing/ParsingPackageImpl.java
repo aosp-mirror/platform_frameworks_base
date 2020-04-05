@@ -322,7 +322,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private String className;
     private int compatibleWidthLimitDp;
     private int descriptionRes;
-    private boolean enabled;
+
+    // Usually there's code to set this to true during parsing, but it's possible to install an APK
+    // targeting <R that doesn't contain an <application> tag. That code would be skipped and never
+    // assign this, so initialize this to true for those cases.
+    private boolean enabled = true;
+
     private boolean crossProfile;
     private int fullBackupContent;
     private int iconRes;

@@ -93,7 +93,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
 
         // WHEN inflation flags are cleared and stage executed.
         final int flags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
-        params.freeContentViews(flags);
+        params.markContentViewsFreeable(flags);
         mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
 
         // THEN binder unbinds flags.

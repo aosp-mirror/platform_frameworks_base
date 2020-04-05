@@ -645,14 +645,60 @@ public class DeviceConfigTest {
 
         Properties modifiedProperties2 = new Properties.Builder(namespaceToBan2).setString(KEY,
                 VALUE)
+                .setString(KEY3, NULL_VALUE).setString(KEY4, VALUE2).build();
+        DeviceConfig.setProperties(modifiedProperties2);
+        modifiedProperties2 = DeviceConfig.getProperties(namespaceToBan2);
+        assertThat(modifiedProperties2.getKeyset()).containsExactly(KEY, KEY3, KEY4);
+        assertThat(modifiedProperties2.getString(KEY, DEFAULT_VALUE)).isEqualTo(VALUE);
+        assertThat(modifiedProperties2.getString(KEY4, DEFAULT_VALUE)).isEqualTo(VALUE2);
+        // Since value is null DEFAULT_VALUE should be returned
+        assertThat(modifiedProperties2.getString(KEY3, DEFAULT_VALUE)).isEqualTo(DEFAULT_VALUE);
+    }
+
+    @Test
+    public void allConfigsUnbannedIfAnyUnbannedConfigUpdated()
+            throws DeviceConfig.BadConfigException {
+        // Given namespaces will be permanently banned, thus they need to be different every time
+        final String namespaceToBan1 = NAMESPACE + System.currentTimeMillis();
+        final String namespaceToBan2 = NAMESPACE + System.currentTimeMillis() + 1;
+
+        // Set namespaces properties
+        Properties properties1 = new Properties.Builder(namespaceToBan1).setString(KEY, VALUE)
+                .setString(KEY4, NULL_VALUE).build();
+        DeviceConfig.setProperties(properties1);
+        Properties properties2 = new Properties.Builder(namespaceToBan2).setString(KEY2, VALUE2)
+                .setString(KEY4, NULL_VALUE).build();
+        DeviceConfig.setProperties(properties2);
+
+        // Ban namespace with related properties
+        DeviceConfig.resetToDefaults(Settings.RESET_MODE_PACKAGE_DEFAULTS, namespaceToBan1);
+        DeviceConfig.resetToDefaults(Settings.RESET_MODE_PACKAGE_DEFAULTS, namespaceToBan2);
+
+        // Verify given namespace properties are banned
+        assertThrows(DeviceConfig.BadConfigException.class,
+                () -> DeviceConfig.setProperties(properties1));
+        assertThrows(DeviceConfig.BadConfigException.class,
+                () -> DeviceConfig.setProperties(properties2));
+
+        // Modify properties and verify we can set them
+        Properties modifiedProperties1 = new Properties.Builder(namespaceToBan1).setString(KEY,
+                VALUE)
                 .setString(KEY4, NULL_VALUE).setString(KEY2, VALUE2).build();
         DeviceConfig.setProperties(modifiedProperties1);
-        modifiedProperties2 = DeviceConfig.getProperties(namespaceToBan1);
-        assertThat(modifiedProperties2.getKeyset()).containsExactly(KEY, KEY2, KEY4);
-        assertThat(modifiedProperties2.getString(KEY, DEFAULT_VALUE)).isEqualTo(VALUE);
-        assertThat(modifiedProperties2.getString(KEY2, DEFAULT_VALUE)).isEqualTo(VALUE2);
+        modifiedProperties1 = DeviceConfig.getProperties(namespaceToBan1);
+        assertThat(modifiedProperties1.getKeyset()).containsExactly(KEY, KEY2, KEY4);
+        assertThat(modifiedProperties1.getString(KEY, DEFAULT_VALUE)).isEqualTo(VALUE);
+        assertThat(modifiedProperties1.getString(KEY2, DEFAULT_VALUE)).isEqualTo(VALUE2);
         // Since value is null DEFAULT_VALUE should be returned
-        assertThat(modifiedProperties2.getString(KEY4, DEFAULT_VALUE)).isEqualTo(DEFAULT_VALUE);
+        assertThat(modifiedProperties1.getString(KEY4, DEFAULT_VALUE)).isEqualTo(DEFAULT_VALUE);
+
+        // verify that other banned namespaces are unbanned now.
+        DeviceConfig.setProperties(properties2);
+        Properties result = DeviceConfig.getProperties(namespaceToBan2);
+        assertThat(result.getKeyset()).containsExactly(KEY2, KEY4);
+        assertThat(result.getString(KEY2, DEFAULT_VALUE)).isEqualTo(VALUE2);
+        // Since value is null DEFAULT_VALUE should be returned
+        assertThat(result.getString(KEY4, DEFAULT_VALUE)).isEqualTo(DEFAULT_VALUE);
     }
 
     // TODO(mpape): resolve b/142727848 and re-enable listener tests

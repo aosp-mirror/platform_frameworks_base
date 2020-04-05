@@ -5,7 +5,7 @@
       "host": true
     },
     {
-      "name": "FrameworksResourceLoaderTests"
+      "name": "CtsResourcesLoaderTests"
     }
   ]
 }

@@ -1274,6 +1274,8 @@ public abstract class DocumentsProvider extends ContentProvider {
 
             out.putParcelable(DocumentsContract.EXTRA_RESULT, path);
         } else if (METHOD_GET_DOCUMENT_METADATA.equals(method)) {
+            enforceReadPermissionInner(documentUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
             return getDocumentMetadata(documentId);
         } else {
             throw new UnsupportedOperationException("Method not supported " + method);

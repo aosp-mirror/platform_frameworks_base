@@ -294,6 +294,11 @@ interface IAudioService {
 
     oneway void setRttEnabled(in boolean rttEnabled);
 
+    void setDeviceVolumeBehavior(in AudioDeviceAttributes device,
+             in int deviceVolumeBehavior, in String pkgName);
+
+    int getDeviceVolumeBehavior(in AudioDeviceAttributes device);
+
     // WARNING: read warning at top of file, new methods that need to be used by native
     // code via IAudioManager.h need to be added to the top section.
 }

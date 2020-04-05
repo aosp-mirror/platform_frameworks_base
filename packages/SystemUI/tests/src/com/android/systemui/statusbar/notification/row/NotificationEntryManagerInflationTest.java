@@ -131,6 +131,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
 
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
     @Mock private NotificationRowComponent.Builder mNotificationRowComponentBuilder;
+    @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
 
     private StatusBarNotification mSbn;
     private NotificationListenerService.RankingMap mRankingMap;
@@ -181,7 +182,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         NotifRemoteViewCache cache = new NotifRemoteViewCacheImpl(mEntryManager);
         NotifBindPipeline pipeline = new NotifBindPipeline(
                 mEntryManager,
-                mock(NotifBindPipelineLogger.class));
+                mock(NotifBindPipelineLogger.class),
+                TestableLooper.get(this).getLooper());
         mBgExecutor = new FakeExecutor(new FakeSystemClock());
         NotificationContentInflater binder = new NotificationContentInflater(
                 cache,
@@ -239,7 +241,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                                 mGutsManager,
                                 true,
                                 null,
-                                mFalsingManager
+                                mFalsingManager,
+                                mPeopleNotificationIdentifier
                         ));
 
         when(mNotificationRowComponentBuilder.activatableNotificationView(any()))

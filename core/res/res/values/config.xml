@@ -3346,6 +3346,10 @@
          This should only be set when the device has gestural navigation enabled by default. -->
     <bool name="config_showGesturalNavigationHints">false</bool>
 
+    <!-- Controls the free snap mode for the docked stack divider. In this mode, the divider can be
+         snapped to any position between the first target and the last target. -->
+    <bool name="config_dockedStackDividerFreeSnapMode">false</bool>
+
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
          These values are in DPs and will be converted to pixel sizes internally. -->
     <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">16x16</string>

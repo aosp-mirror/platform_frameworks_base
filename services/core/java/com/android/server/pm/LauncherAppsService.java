@@ -47,6 +47,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutQueryWrapper;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
 import android.content.pm.UserInfo;
@@ -698,13 +699,19 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public ParceledListSlice getShortcuts(String callingPackage, long changedSince,
-                String packageName, List shortcutIds, List<LocusId> locusIds,
-                ComponentName componentName, int flags, UserHandle targetUser) {
+        public ParceledListSlice getShortcuts(@NonNull final String callingPackage,
+                @NonNull final ShortcutQueryWrapper query, @NonNull final UserHandle targetUser) {
             ensureShortcutPermission(callingPackage);
             if (!canAccessProfile(targetUser.getIdentifier(), "Cannot get shortcuts")) {
                 return new ParceledListSlice<>(Collections.EMPTY_LIST);
             }
+
+            final long changedSince = query.getChangedSince();
+            final String packageName = query.getPackage();
+            final List<String> shortcutIds = query.getShortcutIds();
+            final List<LocusId> locusIds = query.getLocusIds();
+            final ComponentName componentName = query.getActivity();
+            final int flags = query.getQueryFlags();
             if (shortcutIds != null && packageName == null) {
                 throw new IllegalArgumentException(
                         "To query by shortcut ID, package name must also be set");
@@ -723,16 +730,17 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public void registerShortcutChangeCallback(String callingPackage, long changedSince,
-                String packageName, List shortcutIds, List<LocusId> locusIds,
-                ComponentName componentName, int flags, IShortcutChangeCallback callback) {
+        public void registerShortcutChangeCallback(@NonNull final String callingPackage,
+                @NonNull final ShortcutQueryWrapper query,
+                @NonNull final IShortcutChangeCallback callback) {
+
             ensureShortcutPermission(callingPackage);
 
-            if (shortcutIds != null && packageName == null) {
+            if (query.getShortcutIds() != null && query.getPackage() == null) {
                 throw new IllegalArgumentException(
                         "To query by shortcut ID, package name must also be set");
             }
-            if (locusIds != null && packageName == null) {
+            if (query.getLocusIds() != null && query.getPackage() == null) {
                 throw new IllegalArgumentException(
                         "To query by locus ID, package name must also be set");
             }
@@ -744,10 +752,7 @@ public class LauncherAppsService extends SystemService {
                 user = null;
             }
 
-            // TODO: When ShortcutQueryWrapper (ag/10323729) is available, pass that directly.
-            ShortcutChangeHandler.QueryInfo query = new ShortcutChangeHandler.QueryInfo(
-                    changedSince, packageName, shortcutIds, locusIds, componentName, flags, user);
-            mShortcutChangeHandler.addShortcutChangeCallback(callback, query);
+            mShortcutChangeHandler.addShortcutChangeCallback(callback, query, user);
         }
 
         @Override
@@ -1081,9 +1086,11 @@ public class LauncherAppsService extends SystemService {
                     new RemoteCallbackList<>();
 
             public synchronized void addShortcutChangeCallback(IShortcutChangeCallback callback,
-                    QueryInfo query) {
+                    ShortcutQueryWrapper query, UserHandle user) {
                 mCallbacks.unregister(callback);
-                mCallbacks.register(callback, query);
+                mCallbacks.register(callback, new QueryInfo(query.getChangedSince(),
+                        query.getPackage(), query.getShortcutIds(), query.getLocusIds(),
+                        query.getActivity(), query.getQueryFlags(), user));
             }
 
             public synchronized void removeShortcutChangeCallback(

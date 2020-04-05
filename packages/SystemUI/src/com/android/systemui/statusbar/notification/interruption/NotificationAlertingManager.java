@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.interruption;
 
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.app.Notification;
 import android.service.notification.StatusBarNotification;
@@ -95,16 +94,10 @@ public class NotificationAlertingManager {
         // TODO: Instead of this back and forth, we should listen to changes in heads up and
         // cancel on-going heads up view inflation using the bind pipeline.
         if (entry.getRow().getPrivateLayout().getHeadsUpChild() != null) {
-            // Possible for shouldHeadsUp to change between the inflation starting and ending.
-            // If it does and we no longer need to heads up, we should free the view.
-            if (mNotificationInterruptStateProvider.shouldHeadsUp(entry)) {
-                mHeadsUpManager.showNotification(entry);
-                if (!mStatusBarStateController.isDozing()) {
-                    // Mark as seen immediately
-                    setNotificationShown(entry.getSbn());
-                }
-            } else {
-                entry.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
+            mHeadsUpManager.showNotification(entry);
+            if (!mStatusBarStateController.isDozing()) {
+                // Mark as seen immediately
+                setNotificationShown(entry.getSbn());
             }
         }
     }

@@ -26,7 +26,6 @@
 #include "MetricProducer.h"
 #include "condition/CombinationConditionTracker.h"
 #include "condition/SimpleConditionTracker.h"
-#include "condition/StateConditionTracker.h"
 #include "external/StatsPullerManager.h"
 #include "matchers/CombinationLogMatchingTracker.h"
 #include "matchers/EventMatcherWizard.h"
@@ -283,49 +282,6 @@ bool initLogTrackers(const StatsdConfig& config, const UidMap& uidMap,
     return true;
 }
 
-/**
- * A StateConditionTracker is built from a SimplePredicate which has only "start", and no "stop"
- * or "stop_all". The start must be an atom matcher that matches a state atom. It must
- * have dimension, the dimension must be the state atom's primary fields plus exclusive state
- * field. For example, the StateConditionTracker is used in tracking UidProcessState and ScreenState.
- *
- */
-bool isStateConditionTracker(const SimplePredicate& simplePredicate, vector<Matcher>* primaryKeys) {
-    // 1. must not have "stop". must have "dimension"
-    if (!simplePredicate.has_stop() && simplePredicate.has_dimensions()) {
-        auto it = android::util::AtomsInfo::kStateAtomsFieldOptions.find(
-                simplePredicate.dimensions().field());
-        // 2. must be based on a state atom.
-        if (it != android::util::AtomsInfo::kStateAtomsFieldOptions.end()) {
-            // 3. dimension must be primary fields + state field IN ORDER
-            size_t expectedDimensionCount = it->second.primaryFields.size() + 1;
-            vector<Matcher> dimensions;
-            translateFieldMatcher(simplePredicate.dimensions(), &dimensions);
-            if (dimensions.size() != expectedDimensionCount) {
-                return false;
-            }
-            // 3.1 check the primary fields first.
-            size_t index = 0;
-            for (const auto& field : it->second.primaryFields) {
-                Matcher matcher = getSimpleMatcher(it->first, field);
-                if (!(matcher == dimensions[index])) {
-                    return false;
-                }
-                primaryKeys->push_back(matcher);
-                index++;
-            }
-            Matcher stateFieldMatcher =
-                    getSimpleMatcher(it->first, it->second.exclusiveField);
-            // 3.2 last dimension should be the exclusive field.
-            if (!(dimensions.back() == stateFieldMatcher)) {
-                return false;
-            }
-            return true;
-        }
-    }
-    return false;
-}  // namespace statsd
-
 bool initConditions(const ConfigKey& key, const StatsdConfig& config,
                     const unordered_map<int64_t, int>& logTrackerMap,
                     unordered_map<int64_t, int>& conditionTrackerMap,
@@ -341,16 +297,8 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
         int index = allConditionTrackers.size();
         switch (condition.contents_case()) {
             case Predicate::ContentsCase::kSimplePredicate: {
-                vector<Matcher> primaryKeys;
-                if (isStateConditionTracker(condition.simple_predicate(), &primaryKeys)) {
-                    allConditionTrackers.push_back(new StateConditionTracker(key, condition.id(), index,
-                                                                    condition.simple_predicate(),
-                                                                    logTrackerMap, primaryKeys));
-                } else {
-                    allConditionTrackers.push_back(new SimpleConditionTracker(
-                            key, condition.id(), index, condition.simple_predicate(),
-                            logTrackerMap));
-                }
+                allConditionTrackers.push_back(new SimpleConditionTracker(
+                        key, condition.id(), index, condition.simple_predicate(), logTrackerMap));
                 break;
             }
             case Predicate::ContentsCase::kCombination: {
@@ -564,6 +512,33 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        std::vector<int> slicedStateAtoms;
+        unordered_map<int, unordered_map<int, int64_t>> stateGroupMap;
+        if (metric.slice_by_state_size() > 0) {
+            if (metric.aggregation_type() == DurationMetric::MAX_SPARSE) {
+                ALOGE("DurationMetric with aggregation type MAX_SPARSE cannot be sliced by state");
+                return false;
+            }
+            if (!handleMetricWithStates(config, metric.slice_by_state(), stateAtomIdMap,
+                                        allStateGroupMaps, slicedStateAtoms, stateGroupMap)) {
+                return false;
+            }
+        } else {
+            if (metric.state_link_size() > 0) {
+                ALOGW("DurationMetric has a MetricStateLink but doesn't have a sliced state");
+                return false;
+            }
+        }
+
+        // Check that all metric state links are a subset of dimensions_in_what fields.
+        std::vector<Matcher> dimensionsInWhat;
+        translateFieldMatcher(metric.dimensions_in_what(), &dimensionsInWhat);
+        for (const auto& stateLink : metric.state_link()) {
+            if (!handleMetricWithStateLink(stateLink.fields_in_what(), dimensionsInWhat)) {
+                return false;
+            }
+        }
+
         unordered_map<int, shared_ptr<Activation>> eventActivationMap;
         unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
         bool success = handleMetricActivation(config, metric.id(), metricIndex,
@@ -575,7 +550,8 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
                 key, metric, conditionIndex, trackerIndices[0], trackerIndices[1],
                 trackerIndices[2], nesting, wizard, internalDimensions, timeBaseTimeNs,
-                currentTimeNs, eventActivationMap, eventDeactivationMap);
+                currentTimeNs, eventActivationMap, eventDeactivationMap, slicedStateAtoms,
+                stateGroupMap);
 
         allMetricProducers.push_back(durationMetric);
     }

@@ -42,13 +42,10 @@ public class WifiSignalController extends
 
     public WifiSignalController(Context context, boolean hasMobileDataFeature,
             CallbackHandler callbackHandler, NetworkControllerImpl networkController,
-            WifiManager wifiManager) {
+            WifiManager wifiManager, ConnectivityManager connectivityManager,
+            NetworkScoreManager networkScoreManager) {
         super("WifiSignalController", context, NetworkCapabilities.TRANSPORT_WIFI,
                 callbackHandler, networkController);
-        NetworkScoreManager networkScoreManager =
-                context.getSystemService(NetworkScoreManager.class);
-        ConnectivityManager connectivityManager =
-                context.getSystemService(ConnectivityManager.class);
         mWifiTracker = new WifiStatusTracker(mContext, wifiManager, networkScoreManager,
                 connectivityManager, this::handleStatusUpdated);
         mWifiTracker.setListening(true);

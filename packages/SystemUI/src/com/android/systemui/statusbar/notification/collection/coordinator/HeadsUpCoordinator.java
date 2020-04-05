@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
+import static com.android.systemui.statusbar.notification.interruption.NotificationAlertingManager.alertAgain;
 
 import android.annotation.Nullable;
 
@@ -28,6 +29,8 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpViewBinder;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -55,6 +58,8 @@ public class HeadsUpCoordinator implements Coordinator {
     private static final String TAG = "HeadsUpCoordinator";
 
     private final HeadsUpManager mHeadsUpManager;
+    private final HeadsUpViewBinder mHeadsUpViewBinder;
+    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final NotificationRemoteInputManager mRemoteInputManager;
 
     // tracks the current HeadUpNotification reported by HeadsUpManager
@@ -66,8 +71,12 @@ public class HeadsUpCoordinator implements Coordinator {
     @Inject
     public HeadsUpCoordinator(
             HeadsUpManager headsUpManager,
+            HeadsUpViewBinder headsUpViewBinder,
+            NotificationInterruptStateProvider notificationInterruptStateProvider,
             NotificationRemoteInputManager remoteInputManager) {
         mHeadsUpManager = headsUpManager;
+        mHeadsUpViewBinder = headsUpViewBinder;
+        mNotificationInterruptStateProvider = notificationInterruptStateProvider;
         mRemoteInputManager = remoteInputManager;
     }
 
@@ -84,7 +93,50 @@ public class HeadsUpCoordinator implements Coordinator {
         return mNotifSection;
     }
 
+    private void onHeadsUpViewBound(NotificationEntry entry) {
+        mHeadsUpManager.showNotification(entry);
+    }
+
     private final NotifCollectionListener mNotifCollectionListener = new NotifCollectionListener() {
+        /**
+         * Notification was just added and if it should heads up, bind the view and then show it.
+         */
+        @Override
+        public void onEntryAdded(NotificationEntry entry) {
+            if (mNotificationInterruptStateProvider.shouldHeadsUp(entry)) {
+                mHeadsUpViewBinder.bindHeadsUpView(
+                        entry,
+                        HeadsUpCoordinator.this::onHeadsUpViewBound);
+            }
+        }
+
+        /**
+         * Notification could've updated to be heads up or not heads up. Even if it did update to
+         * heads up, if the notification specified that it only wants to alert once, don't heads
+         * up again.
+         */
+        @Override
+        public void onEntryUpdated(NotificationEntry entry) {
+            boolean hunAgain = alertAgain(entry, entry.getSbn().getNotification());
+            // includes check for whether this notification should be filtered:
+            boolean shouldHeadsUp = mNotificationInterruptStateProvider.shouldHeadsUp(entry);
+            final boolean wasHeadsUp = mHeadsUpManager.isAlerting(entry.getKey());
+            if (wasHeadsUp) {
+                if (shouldHeadsUp) {
+                    mHeadsUpManager.updateNotification(entry.getKey(), hunAgain);
+                } else if (!mHeadsUpManager.isEntryAutoHeadsUpped(entry.getKey())) {
+                    // We don't want this to be interrupting anymore, let's remove it
+                    mHeadsUpManager.removeNotification(
+                            entry.getKey(), false /* removeImmediately */);
+                }
+            } else if (shouldHeadsUp && hunAgain) {
+                // This notification was updated to be heads up, show it!
+                mHeadsUpViewBinder.bindHeadsUpView(
+                        entry,
+                        HeadsUpCoordinator.this::onHeadsUpViewBound);
+            }
+        }
+
         /**
          * Stop alerting HUNs that are removed from the notification collection
          */
@@ -97,6 +149,11 @@ public class HeadsUpCoordinator implements Coordinator {
                                 && !FORCE_REMOTE_INPUT_HISTORY;
                 mHeadsUpManager.removeNotification(entry.getKey(), removeImmediatelyForRemoteInput);
             }
+        }
+
+        @Override
+        public void onEntryCleanUp(NotificationEntry entry) {
+            mHeadsUpViewBinder.abortBindCallback(entry);
         }
     };
 
@@ -152,6 +209,9 @@ public class HeadsUpCoordinator implements Coordinator {
                 mCurrentHun = newHUN;
                 mNotifPromoter.invalidateList();
                 mNotifSection.invalidateList();
+            }
+            if (!isHeadsUp) {
+                mHeadsUpViewBinder.unbindHeadsUpView(entry);
             }
         }
     };

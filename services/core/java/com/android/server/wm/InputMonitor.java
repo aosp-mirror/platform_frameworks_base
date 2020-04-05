@@ -112,8 +112,9 @@ final class InputMonitor {
         @Override
         public void dispose() {
             synchronized (mService.mGlobalLock) {
-                disposeChannelsLw();
+                disposeChannelsLw(mInputMonitor.mInputTransaction);
                 mInputEventReceiver.dispose();
+                mInputMonitor.updateInputWindowsLw(true /* force */);
             }
         }
     }
@@ -195,8 +196,7 @@ final class InputMonitor {
 
     private boolean disposeInputConsumer(InputConsumerImpl consumer) {
         if (consumer != null) {
-            consumer.disposeChannelsLw();
-            consumer.hide(mInputTransaction);
+            consumer.disposeChannelsLw(mInputTransaction);
             return true;
         }
         return false;

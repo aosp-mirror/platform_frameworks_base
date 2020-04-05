@@ -250,24 +250,34 @@ public class NotificationHistoryDatabase {
 
             for (int i = mHistoryFiles.size() - 1; i >= 0; i--) {
                 final AtomicFile currentOldestFile = mHistoryFiles.get(i);
-                final long creationTime = Long.parseLong(currentOldestFile.getBaseFile().getName());
-                if (DEBUG) {
-                    Slog.d(TAG, "File " + currentOldestFile.getBaseFile().getName()
-                            + " created on " + creationTime);
-                }
-                if (creationTime <= retentionBoundary.getTimeInMillis()) {
+                try {
+                    final long creationTime = Long.parseLong(
+                            currentOldestFile.getBaseFile().getName());
                     if (DEBUG) {
-                        Slog.d(TAG, "Removed " + currentOldestFile.getBaseFile().getName());
+                        Slog.d(TAG, "File " + currentOldestFile.getBaseFile().getName()
+                                + " created on " + creationTime);
                     }
-                    currentOldestFile.delete();
-                    // TODO: delete all relevant bitmaps, once they exist
-                    mHistoryFiles.removeLast();
-                } else {
-                    // all remaining files are newer than the cut off; schedule jobs to delete
-                    scheduleDeletion(currentOldestFile.getBaseFile(), creationTime, retentionDays);
+                    if (creationTime <= retentionBoundary.getTimeInMillis()) {
+                        deleteFile(currentOldestFile);
+                    } else {
+                        // all remaining files are newer than the cut off; schedule jobs to delete
+                        scheduleDeletion(
+                                currentOldestFile.getBaseFile(), creationTime, retentionDays);
+                    }
+                } catch (NumberFormatException e) {
+                    deleteFile(currentOldestFile);
                 }
             }
         }
+    }
+
+    private void deleteFile(AtomicFile file) {
+        if (DEBUG) {
+            Slog.d(TAG, "Removed " + file.getBaseFile().getName());
+        }
+        file.delete();
+        // TODO: delete all relevant bitmaps, once they exist
+        mHistoryFiles.removeLast();
     }
 
     private void scheduleDeletion(File file, long creationTime, int retentionDays) {

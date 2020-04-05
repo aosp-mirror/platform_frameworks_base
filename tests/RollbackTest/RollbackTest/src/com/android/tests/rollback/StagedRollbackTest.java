@@ -477,4 +477,12 @@ public class StagedRollbackTest {
         StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         assertThat(sm.isCheckpointSupported()).isTrue();
     }
+
+    @Test
+    public void hasMainlineModule() throws Exception {
+        String pkgName = getModuleMetadataPackageName();
+        boolean existed =  InstrumentationRegistry.getInstrumentation().getContext()
+                .getPackageManager().getModuleInfo(pkgName, 0) != null;
+        assertThat(existed).isTrue();
+    }
 }

@@ -189,7 +189,7 @@ public class SizeCompatTests extends ActivityTestsBase {
         final int originalDpi = mActivity.getConfiguration().densityDpi;
 
         // Move the non-resizable activity to the new display.
-        mStack.reparent(newDisplay.mDisplayContent, true /* onTop */);
+        mStack.reparent(newDisplay.getDefaultTaskDisplayArea(), true /* onTop */);
 
         assertEquals(originalBounds.width(), mActivity.getBounds().width());
         assertEquals(originalBounds.height(), mActivity.getBounds().height());
@@ -257,7 +257,7 @@ public class SizeCompatTests extends ActivityTestsBase {
                 .setCanRotate(false).setNotch(notchHeight).build();
 
         // Move the non-resizable activity to the new display.
-        mStack.reparent(newDisplay, true /* onTop */);
+        mStack.reparent(newDisplay.getDefaultTaskDisplayArea(), true /* onTop */);
         // The configuration bounds should keep the same.
         assertEquals(origWidth, configBounds.width());
         assertEquals(origHeight, configBounds.height());

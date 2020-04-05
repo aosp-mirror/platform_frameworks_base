@@ -299,7 +299,7 @@ public final class DataManagerTest {
                 .build();
         AppTargetEvent appTargetEvent =
                 new AppTargetEvent.Builder(appTarget, AppTargetEvent.ACTION_LAUNCH)
-                        .setLaunchLocation(ChooserActivity.LAUNCH_LOCATON_DIRECT_SHARE)
+                        .setLaunchLocation(ChooserActivity.LAUNCH_LOCATION_DIRECT_SHARE)
                         .build();
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SEND, "image/jpg");
         mDataManager.reportShareTargetEvent(appTargetEvent, intentFilter);
@@ -319,7 +319,7 @@ public final class DataManagerTest {
                 .build();
         AppTargetEvent appTargetEvent =
                 new AppTargetEvent.Builder(appTarget, AppTargetEvent.ACTION_LAUNCH)
-                        .setLaunchLocation(ChooserActivity.LAUNCH_LOCATON_DIRECT_SHARE)
+                        .setLaunchLocation(ChooserActivity.LAUNCH_LOCATION_DIRECT_SHARE)
                         .build();
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SEND, "image/jpg");
 
@@ -667,7 +667,7 @@ public final class DataManagerTest {
                 .build();
         AppTargetEvent appTargetEvent =
                 new AppTargetEvent.Builder(appTarget, AppTargetEvent.ACTION_LAUNCH)
-                        .setLaunchLocation(ChooserActivity.LAUNCH_LOCATON_DIRECT_SHARE)
+                        .setLaunchLocation(ChooserActivity.LAUNCH_LOCATION_DIRECT_SHARE)
                         .build();
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SEND, "image/jpg");
 

@@ -220,7 +220,7 @@ public class DataManager {
         String mimeType = intentFilter != null ? intentFilter.getDataType(0) : null;
         @Event.EventType int eventType = mimeTypeToShareEventType(mimeType);
         EventHistoryImpl eventHistory;
-        if (ChooserActivity.LAUNCH_LOCATON_DIRECT_SHARE.equals(event.getLaunchLocation())) {
+        if (ChooserActivity.LAUNCH_LOCATION_DIRECT_SHARE.equals(event.getLaunchLocation())) {
             // Direct share event
             if (appTarget.getShortcutInfo() == null) {
                 return;

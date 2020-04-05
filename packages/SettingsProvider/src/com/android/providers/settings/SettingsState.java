@@ -459,6 +459,16 @@ final class SettingsState {
     }
 
     @GuardedBy("mLock")
+    public void unbanAllConfigIfBannedConfigUpdatedLocked(String prefix) {
+        // If the prefix updated is a banned namespace, clear mNamespaceBannedHashes
+        // to unban all unbanned namespaces.
+        if (mNamespaceBannedHashes.get(prefix) != null) {
+            mNamespaceBannedHashes.clear();
+            scheduleWriteIfNeededLocked();
+        }
+    }
+
+    @GuardedBy("mLock")
     public void banConfigurationLocked(String prefix, Map<String, String> keyValues) {
         if (prefix == null || keyValues.isEmpty()) {
             return;

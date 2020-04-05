@@ -9119,6 +9119,31 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public @Nullable ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(
+            @NonNull UserHandle userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
+        synchronized (getLockObject()) {
+            final String supervisor = mContext.getResources().getString(
+                    com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
+            if (supervisor == null) {
+                return null;
+            }
+            final ComponentName supervisorComponent = ComponentName.unflattenFromString(supervisor);
+            final ComponentName doComponent = mOwners.getDeviceOwnerComponent();
+            final ComponentName poComponent =
+                    mOwners.getProfileOwnerComponent(userHandle.getIdentifier());
+            if (supervisorComponent.equals(doComponent) || supervisorComponent.equals(
+                    poComponent)) {
+                return supervisorComponent;
+            } else {
+                return null;
+            }
+        }
+    }
+
+    @Override
     public String getProfileOwnerName(int userHandle) {
         if (!mHasFeature) {
             return null;
@@ -11487,6 +11512,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (isManagedProfile(userId)) {
             throw new SecurityException(
                     "User " + userId + " is not allowed to call setSecondaryLockscreenEnabled");
+        }
+        // Only the default supervision app can use this API.
+        final String supervisor = mContext.getResources().getString(
+                com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
+        if (supervisor == null) {
+            throw new SecurityException("Unable to set secondary lockscreen setting, no "
+                    + "default supervision component defined");
+        }
+        final ComponentName supervisorComponent = ComponentName.unflattenFromString(supervisor);
+        if (!who.equals(supervisorComponent)) {
+            throw new SecurityException(
+                    "Admin " + who + " is not the default supervision component");
         }
     }
 

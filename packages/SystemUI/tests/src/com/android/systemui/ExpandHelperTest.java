@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.annotation.UiThreadTest;
@@ -52,7 +53,11 @@ public class ExpandHelperTest extends SysuiTestCase {
         mDependency.injectMockDependency(NotificationMediaManager.class);
         allowTestableLooperAsMainThread();
         Context context = getContext();
-        mRow = new NotificationTestHelper(context, mDependency).createRow();
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        mRow = helper.createRow();
         mCallback = mock(ExpandHelper.Callback.class);
         mExpandHelper = new ExpandHelper(context, mCallback, 10, 100);
     }

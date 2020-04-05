@@ -28,6 +28,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.dagger.AppName;
 import com.android.systemui.statusbar.notification.row.dagger.DismissRunnable;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationKey;
@@ -68,6 +69,7 @@ public class ExpandableNotificationRowController {
     private Runnable mOnDismissRunnable;
     private final FalsingManager mFalsingManager;
     private final boolean mAllowLongPress;
+    private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
 
     @Inject
     public ExpandableNotificationRowController(ExpandableNotificationRow view,
@@ -83,7 +85,8 @@ public class ExpandableNotificationRowController {
             NotificationRowContentBinder.InflationCallback inflationCallback,
             NotificationGutsManager notificationGutsManager,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
-            @DismissRunnable Runnable onDismissRunnable, FalsingManager falsingManager) {
+            @DismissRunnable Runnable onDismissRunnable, FalsingManager falsingManager,
+            PeopleNotificationIdentifier peopleNotificationIdentifier) {
         mView = view;
         mActivatableNotificationViewController = activatableNotificationViewController;
         mMediaManager = mediaManager;
@@ -104,6 +107,7 @@ public class ExpandableNotificationRowController {
         mOnAppOpsClickListener = mNotificationGutsManager::openGuts;
         mAllowLongPress = allowLongPress;
         mFalsingManager = falsingManager;
+        mPeopleNotificationIdentifier = peopleNotificationIdentifier;
     }
 
     /**
@@ -123,7 +127,8 @@ public class ExpandableNotificationRowController {
                 mMediaManager,
                 mOnAppOpsClickListener,
                 mFalsingManager,
-                mStatusBarStateController
+                mStatusBarStateController,
+                mPeopleNotificationIdentifier
         );
         mView.setOnDismissRunnable(mOnDismissRunnable);
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);

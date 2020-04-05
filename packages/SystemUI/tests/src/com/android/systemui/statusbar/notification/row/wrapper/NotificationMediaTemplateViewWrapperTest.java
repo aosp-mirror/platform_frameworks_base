@@ -27,6 +27,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -97,7 +98,11 @@ public class NotificationMediaTemplateViewWrapperTest extends SysuiTestCase {
         mNotif = builder.build();
         assertTrue(mNotif.hasMediaSession());
 
-        mRow = new NotificationTestHelper(mContext, mDependency).createRow(mNotif);
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        mRow = helper.createRow(mNotif);
 
         RemoteViews views = new RemoteViews(mContext.getPackageName(),
                 com.android.internal.R.layout.notification_template_material_big_media);

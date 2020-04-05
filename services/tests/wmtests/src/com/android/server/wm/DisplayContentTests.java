@@ -281,7 +281,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc, activity.getDisplayContent());
 
         // Move stack to first display.
-        mDisplayContent.moveStackToDisplay(stack, true /* onTop */);
+        stack.reparent(mDisplayContent.getDefaultTaskDisplayArea(), true /* onTop */);
         assertEquals(mDisplayContent.getDisplayId(), stack.getDisplayContent().getDisplayId());
         assertEquals(mDisplayContent, stack.getDisplayContent());
         assertEquals(mDisplayContent, task.getDisplayContent());
@@ -753,7 +753,7 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(freeformStack).isVisible();
         freeformStack.getTopChild().setBounds(100, 100, 300, 400);
 
-        assertTrue(dc.isStackVisible(WINDOWING_MODE_FREEFORM));
+        assertTrue(dc.getDefaultTaskDisplayArea().isStackVisible(WINDOWING_MODE_FREEFORM));
 
         freeformStack.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         stack.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_PORTRAIT);
@@ -1039,6 +1039,13 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(config90.orientation, app.getConfiguration().orientation);
         assertEquals(config90.windowConfiguration.getBounds(), app.getBounds());
 
+        // Force the negative offset to verify it can be updated.
+        mWallpaperWindow.mWinAnimator.mXOffset = mWallpaperWindow.mWinAnimator.mYOffset = -1;
+        assertTrue(mDisplayContent.mWallpaperController.updateWallpaperOffset(mWallpaperWindow,
+                false /* sync */));
+        assertThat(mWallpaperWindow.mWinAnimator.mXOffset).isGreaterThan(-1);
+        assertThat(mWallpaperWindow.mWinAnimator.mYOffset).isGreaterThan(-1);
+
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
 
         // The animation in old rotation should be cancelled.
@@ -1089,8 +1096,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testGetOrCreateRootHomeTask_defaultDisplay() {
-        DisplayContent defaultDisplay = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
-        TaskDisplayArea defaultTaskDisplayArea = defaultDisplay.mTaskContainers;
+        TaskDisplayArea defaultTaskDisplayArea = mWm.mRoot.getDefaultTaskDisplayArea();
 
         // Remove the current home stack if it exists so a new one can be created below.
         ActivityStack homeTask = defaultTaskDisplayArea.getRootHomeTask();
@@ -1109,7 +1115,7 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(false).when(display).isUntrustedVirtualDisplay();
 
         // Remove the current home stack if it exists so a new one can be created below.
-        TaskDisplayArea taskDisplayArea = display.mTaskContainers;
+        TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
         ActivityStack homeTask = taskDisplayArea.getRootHomeTask();
         if (homeTask != null) {
             taskDisplayArea.removeChild(homeTask);
@@ -1122,7 +1128,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testGetOrCreateRootHomeTask_unsupportedSystemDecorations() {
         DisplayContent display = createNewDisplay();
-        TaskDisplayArea taskDisplayArea = display.mTaskContainers;
+        TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
         doReturn(false).when(display).supportsSystemDecorations();
 
         assertNull(taskDisplayArea.getRootHomeTask());
@@ -1132,7 +1138,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testGetOrCreateRootHomeTask_untrustedVirtualDisplay() {
         DisplayContent display = createNewDisplay();
-        TaskDisplayArea taskDisplayArea = display.mTaskContainers;
+        TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
         doReturn(true).when(display).isUntrustedVirtualDisplay();
 
         assertNull(taskDisplayArea.getRootHomeTask());

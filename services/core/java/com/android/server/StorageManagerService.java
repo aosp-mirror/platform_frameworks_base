@@ -234,6 +234,7 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String FUSE_ENABLED = "fuse_enabled";
     private static final boolean DEFAULT_FUSE_ENABLED = true;
 
+    @GuardedBy("mLock")
     private final Set<Integer> mFuseMountedUser = new ArraySet<>();
 
     public static class Lifecycle extends SystemService {
@@ -810,7 +811,7 @@ class StorageManagerService extends IStorageManager.Stub
                 }
                 case H_VOLUME_STATE_CHANGED: {
                     final SomeArgs args = (SomeArgs) msg.obj;
-                    onVolumeStateChangedInternal((VolumeInfo) args.arg1, (int) args.arg2,
+                    onVolumeStateChangedAsync((VolumeInfo) args.arg1, (int) args.arg2,
                             (int) args.arg3);
                 }
             }
@@ -1337,6 +1338,7 @@ class StorageManagerService extends IStorageManager.Stub
                     args.arg2 = oldState;
                     args.arg3 = newState;
                     mHandler.obtainMessage(H_VOLUME_STATE_CHANGED, args).sendToTarget();
+                    onVolumeStateChangedLocked(vol, oldState, newState);
                 }
             }
         }
@@ -1509,11 +1511,45 @@ class StorageManagerService extends IStorageManager.Stub
         return true;
     }
 
-    private void onVolumeStateChangedInternal(VolumeInfo vol, int oldState, int newState) {
-        synchronized (mLock) {
-            if (vol.type == VolumeInfo.TYPE_EMULATED && newState != VolumeInfo.STATE_MOUNTED) {
+
+    private void onVolumeStateChangedLocked(VolumeInfo vol, int oldState, int newState) {
+        if (vol.type == VolumeInfo.TYPE_EMULATED) {
+            if (newState != VolumeInfo.STATE_MOUNTED) {
                 mFuseMountedUser.remove(vol.getMountUserId());
+            } else {
+                final int userId = vol.getMountUserId();
+                mFuseMountedUser.add(userId);
+                // Async remount app storage so it won't block the main thread.
+                new Thread(() -> {
+                    Map<Integer, String> pidPkgMap = null;
+                    // getProcessesWithPendingBindMounts() could fail when a new app process is
+                    // starting and it's not planning to mount storage dirs in zygote, but it's
+                    // rare, so we retry 5 times and hope we can get the result successfully.
+                    for (int i = 0; i < 5; i++) {
+                        try {
+                            pidPkgMap = LocalServices.getService(ActivityManagerInternal.class)
+                                    .getProcessesWithPendingBindMounts(vol.getMountUserId());
+                            break;
+                        } catch (IllegalStateException e) {
+                            Slog.i(TAG, "Some processes are starting, retry");
+                            // Wait 100ms and retry so hope the pending process is started.
+                            SystemClock.sleep(100);
+                        }
+                    }
+                    if (pidPkgMap != null) {
+                        remountAppStorageDirs(pidPkgMap, userId);
+                    } else {
+                        Slog.wtf(TAG, "Not able to getStorageNotOptimizedProcesses() after"
+                                + " 5 retries");
+                    }
+                }).start();
             }
+        }
+    }
+
+
+    private void onVolumeStateChangedAsync(VolumeInfo vol, int oldState, int newState) {
+        synchronized (mLock) {
             // Remember that we saw this volume so we're ready to accept user
             // metadata, or so we can annoy them when a private volume is ejected
             if (!TextUtils.isEmpty(vol.fsUuid)) {
@@ -2161,35 +2197,6 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             });
             Slog.i(TAG, "Mounted volume " + vol);
-            if (vol.type == VolumeInfo.TYPE_EMULATED) {
-                final int userId = vol.getMountUserId();
-                mFuseMountedUser.add(userId);
-                // Async remount app storage so it won't block the main thread.
-                new Thread(() -> {
-                    Map<Integer, String> pidPkgMap = null;
-                    // getProcessesWithPendingBindMounts() could fail when a new app process is
-                    // starting and it's not planning to mount storage dirs in zygote, but it's
-                    // rare, so we retry 5 times and hope we can get the result successfully.
-                    for (int i = 0; i < 5; i++) {
-                        try {
-                            pidPkgMap = LocalServices.getService(ActivityManagerInternal.class)
-                                    .getProcessesWithPendingBindMounts(vol.getMountUserId());
-                            break;
-                        } catch (IllegalStateException e) {
-                            Slog.i(TAG, "Some processes are starting, retry");
-                            // Wait 100ms and retry so hope the pending process is started.
-                            SystemClock.sleep(100);
-                        }
-                    }
-                    if (pidPkgMap != null) {
-                        remountAppStorageDirs(pidPkgMap, userId);
-                    } else {
-                        Slog.wtf(TAG, "Not able to getStorageNotOptimizedProcesses() after"
-                                + " 5 retries");
-                    }
-
-                }).start();
-            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -4445,9 +4452,11 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public boolean prepareStorageDirs(int userId, Set<String> packageList,
                 String processName) {
-            if (!mFuseMountedUser.contains(userId)) {
-                Slog.w(TAG, "User " + userId + " is not unlocked yet so skip mounting obb");
-                return false;
+            synchronized (mLock) {
+                if (!mFuseMountedUser.contains(userId)) {
+                    Slog.w(TAG, "User " + userId + " is not unlocked yet so skip mounting obb");
+                    return false;
+                }
             }
             try {
                 final IVold vold = IVold.Stub.asInterface(

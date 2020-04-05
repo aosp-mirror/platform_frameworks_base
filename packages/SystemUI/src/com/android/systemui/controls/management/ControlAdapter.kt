@@ -151,10 +151,10 @@ private class ControlHolder(view: View, val favoriteCallback: ModelFavoriteChang
         subtitle.text = data.control.subtitle
         favorite.isChecked = data.favorite
         removed.text = if (data.removed) "Removed" else ""
-        favorite.setOnClickListener {
+        itemView.setOnClickListener {
+            favorite.isChecked = !favorite.isChecked
             favoriteCallback(data.control.controlId, favorite.isChecked)
         }
-        itemView.setOnClickListener { favorite.performClick() }
         applyRenderInfo(renderInfo)
     }
 

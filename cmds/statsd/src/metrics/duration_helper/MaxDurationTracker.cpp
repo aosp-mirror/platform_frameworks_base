@@ -26,15 +26,14 @@ namespace statsd {
 
 MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                                        const MetricDimensionKey& eventKey,
-                                       sp<ConditionWizard> wizard, int conditionIndex,
-                                       bool nesting,
+                                       sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                                        int64_t currentBucketStartNs, int64_t currentBucketNum,
                                        int64_t startTimeNs, int64_t bucketSizeNs,
                                        bool conditionSliced, bool fullLink,
                                        const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
-    : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting,
-                      currentBucketStartNs, currentBucketNum, startTimeNs, bucketSizeNs,
-                      conditionSliced, fullLink, anomalyTrackers) {
+    : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
+                      currentBucketNum, startTimeNs, bucketSizeNs, conditionSliced, fullLink,
+                      anomalyTrackers) {
 }
 
 bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
@@ -90,7 +89,6 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
             break;
     }
 }
-
 
 void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const int64_t eventTime,
                                   bool forceStop) {
@@ -240,6 +238,11 @@ void MaxDurationTracker::onSlicedConditionMayChange(bool overallCondition,
     }
 }
 
+void MaxDurationTracker::onStateChanged(const int64_t timestamp, const int32_t atomId,
+                                        const FieldValue& newState) {
+    ALOGE("MaxDurationTracker does not handle sliced state changes.");
+}
+
 void MaxDurationTracker::onConditionChanged(bool condition, const int64_t timestamp) {
     for (auto& pair : mInfos) {
         noteConditionChanged(pair.first, condition, timestamp);
@@ -307,6 +310,20 @@ int64_t MaxDurationTracker::predictAnomalyTimestampNs(const DurationAnomalyTrack
 void MaxDurationTracker::dumpStates(FILE* out, bool verbose) const {
     fprintf(out, "\t\t sub-durations %lu\n", (unsigned long)mInfos.size());
     fprintf(out, "\t\t current duration %lld\n", (long long)mDuration);
+}
+
+int64_t MaxDurationTracker::getCurrentStateKeyDuration() const {
+    ALOGE("MaxDurationTracker does not handle sliced state changes.");
+    return -1;
+}
+
+int64_t MaxDurationTracker::getCurrentStateKeyFullBucketDuration() const {
+    ALOGE("MaxDurationTracker does not handle sliced state changes.");
+    return -1;
+}
+
+void MaxDurationTracker::updateCurrentStateKey(const int32_t atomId, const FieldValue& newState) {
+    ALOGE("MaxDurationTracker does not handle sliced state changes.");
 }
 
 }  // namespace statsd

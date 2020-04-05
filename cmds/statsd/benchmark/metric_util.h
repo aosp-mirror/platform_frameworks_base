@@ -120,9 +120,6 @@ std::unique_ptr<LogEvent> CreateSyncEndEvent(uint64_t timestampNs,
                                              const vector<string>& attributionTags,
                                              const string& name);
 
-// Helper function to create an AttributionNodeInternal proto.
-AttributionNodeInternal CreateAttribution(const int& uid, const string& tag);
-
 // Create a statsd log event processor upon the start time in seconds, config and key.
 sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const StatsdConfig& config,
                                               const ConfigKey& key);

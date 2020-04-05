@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.net.RouteInfo.RTN_UNREACHABLE;
+
 import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
 import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
 import static com.android.testutils.ParcelUtilsKt.parcelingRoundTrip;
@@ -46,6 +48,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -445,14 +448,20 @@ public class LinkPropertiesTest {
         // Check comparisons work.
         LinkProperties lp2 = new LinkProperties(lp);
         assertAllRoutesHaveInterface("wlan0", lp2);
-        assertEquals(0, lp.compareAllRoutes(lp2).added.size());
-        assertEquals(0, lp.compareAllRoutes(lp2).removed.size());
+        // LinkProperties#compareAllRoutes exists both in R and before R, but the return type
+        // changed in R, so a test compiled with the R version of LinkProperties cannot run on Q.
+        if (isAtLeastR()) {
+            assertEquals(0, lp.compareAllRoutes(lp2).added.size());
+            assertEquals(0, lp.compareAllRoutes(lp2).removed.size());
+        }
 
         lp2.setInterfaceName("p2p0");
         assertAllRoutesHaveInterface("p2p0", lp2);
         assertAllRoutesNotHaveInterface("wlan0", lp2);
-        assertEquals(3, lp.compareAllRoutes(lp2).added.size());
-        assertEquals(3, lp.compareAllRoutes(lp2).removed.size());
+        if (isAtLeastR()) {
+            assertEquals(3, lp.compareAllRoutes(lp2).added.size());
+            assertEquals(3, lp.compareAllRoutes(lp2).removed.size());
+        }
 
         // Remove route with incorrect interface, no route removed.
         lp.removeRoute(new RouteInfo(prefix2, null, null));
@@ -946,7 +955,7 @@ public class LinkPropertiesTest {
 
     }
 
-    @Test
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
     public void testCompareResult() {
         // Either adding or removing items
         compareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(1),
@@ -1250,5 +1259,27 @@ public class LinkPropertiesTest {
         assertFalse(Ipv4.hasIpv6DnsServer());
         final LinkProperties Ipv6 = makeIpv6LinkProperties();
         assertTrue(Ipv6.hasIpv6DnsServer());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testHasIpv4UnreachableDefaultRoute() {
+        final LinkProperties lp = makeTestObject();
+        assertFalse(lp.hasIpv4UnreachableDefaultRoute());
+        assertFalse(lp.hasIpv6UnreachableDefaultRoute());
+
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), RTN_UNREACHABLE));
+        assertTrue(lp.hasIpv4UnreachableDefaultRoute());
+        assertFalse(lp.hasIpv6UnreachableDefaultRoute());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testHasIpv6UnreachableDefaultRoute() {
+        final LinkProperties lp = makeTestObject();
+        assertFalse(lp.hasIpv6UnreachableDefaultRoute());
+        assertFalse(lp.hasIpv4UnreachableDefaultRoute());
+
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE));
+        assertTrue(lp.hasIpv6UnreachableDefaultRoute());
+        assertFalse(lp.hasIpv4UnreachableDefaultRoute());
     }
 }
