@@ -1119,8 +1119,8 @@ class ActivityStack extends Task {
 
     @Override
     public boolean isAttached() {
-        final DisplayContent display = getDisplay();
-        return display != null && !display.isRemoved();
+        final TaskDisplayArea taskDisplayArea = getDisplayArea();
+        return taskDisplayArea != null && !taskDisplayArea.isRemoved();
     }
 
     // TODO: Should each user have there own stacks?
