@@ -780,8 +780,8 @@
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Aurrekoa"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Atzeratu"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"Aurreratu"</string>
-    <string name="keyboard_key_page_up" msgid="173914303254199845">"Orria gora"</string>
-    <string name="keyboard_key_page_down" msgid="9035902490071829731">"Orria behera"</string>
+    <string name="keyboard_key_page_up" msgid="173914303254199845">"Orrian gora"</string>
+    <string name="keyboard_key_page_down" msgid="9035902490071829731">"Orrian behera"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Ezabatu"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Hasiera"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Amaitu"</string>

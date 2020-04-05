@@ -168,7 +168,7 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Hubo demasiados intentos incorrectos. Se borrarán los datos del dispositivo."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Hubo demasiados intentos incorrectos. Se borrará este usuario."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Hubo demasiados intentos incorrectos. Se borrarán este perfil de trabajo y sus datos."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Ignorar"</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Descartar"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas digitales"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícono de huella digital"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Autenticando tu rostro…"</string>
@@ -508,7 +508,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Administrar"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historial"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notificaciones silenciosas"</string>
-    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Notificaciones que alertan"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Notificaciones de alerta"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversaciones"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas las notificaciones silenciosas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificaciones pausadas por el modo \"No interrumpir\""</string>
@@ -708,12 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Te ayuda a concentrarte sin sonar ni vibrar."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Capta tu atención con sonido o vibración."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Retiene tu atención con un acceso directo flotante a este contenido."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Aparece como una burbuja en la parte superior de la sección de conversación."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Aparece como una burbuja en la parte superior de la sección de la conversación."</string>
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Todas las conversaciones de <xliff:g id="APP_NAME_0">%1$s</xliff:g> se muestran como burbujas de forma predeterminada. Administra esta opción en <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hay burbujas recientes"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Las burbujas recientes y las descartadas aparecerán aquí"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Las burbujas recientes y las que se descartaron aparecerán aquí"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"No se pueden modificar estas notificaciones."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"No se puede configurar aquí este grupo de notificaciones"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notificación almacenada en proxy"</string>
@@ -993,9 +993,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Ubicar abajo a la izquierda"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Ubicar abajo a la derecha"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ignorar"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"No colocar la conversación en burbuja"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chat mediante burbujas"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Las conversaciones nuevas aparecen como íconos flotantes o burbujas. Pulsa para abrir la burbuja. Arrástrala para moverla."</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"No mostrar la conversación en burbujas"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chat con burbujas"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Las conversaciones nuevas aparecen como elementos flotantes o burbujas. Presiona para abrir la burbuja. Arrástrala para moverla."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controla las burbujas en todo momento"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Presiona Administrar para desactivar las burbujas de esta app"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Entendido"</string>
@@ -1033,10 +1033,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Desliza el dedo para ver más elementos"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendaciones"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Cerrar esta sesión multimedia"</string>
-    <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, verifica la app"</string>
-    <string name="controls_error_failed" msgid="960228639198558525">"Se produjo un error, vuelve a intentarlo."</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo. Verifica la app"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"Error. Vuelve a intentarlo."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En curso"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantén pulsado el botón de encendido para ver los nuevos controles"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantén presionado el botón de encendido para ver los nuevos controles"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Agregar controles"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editar controles"</string>
 </resources>

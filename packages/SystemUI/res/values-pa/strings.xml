@@ -155,26 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ਗਲਤ ਪਾਸਵਰਡ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"ਬਹੁਤ ਸਾਰੀਆਂ ਗ਼ਲਤ ਕੋਸ਼ਿਸ਼ਾਂ।\n<xliff:g id="NUMBER">%d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ। <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> ਵਿੱਚੋਂ <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> ਕੋਸ਼ਿਸ਼।"</string>
-    <!-- no translation found for biometric_dialog_last_attempt_before_wipe_dialog_title (2874250099278693477) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_device (6562299244825817598) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_device (9151756675698215723) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_device (2363778585575998317) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_user (8400180746043407270) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_user (4159878829962411168) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_user (4695682515465063885) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_profile (6045224069529284686) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_profile (545567685899091757) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_profile (8538032972389729253) -->
-    <skip />
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"ਤੁਹਾਡਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"ਜੇ ਤੁਸੀਂ ਅਗਲੀ ਕੋਸ਼ਿਸ਼ ਵਿੱਚ ਕੋਈ ਗਲਤ ਪੈਟਰਨ ਦਾਖਲ ਕਰਦੇ ਹੋ, ਤਾਂ ਇਸ ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"ਜੇ ਤੁਸੀਂ ਅਗਲੀ ਕੋਸ਼ਿਸ਼ ਵਿੱਚ ਕੋਈ ਗਲਤ ਪਿੰਨ ਦਾਖਲ ਕਰਦੇ ਹੋ, ਤਾਂ ਇਸ ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"ਜੇ ਤੁਸੀਂ ਅਗਲੀ ਕੋਸ਼ਿਸ਼ ਵਿੱਚ ਕੋਈ ਗਲਤ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰਦੇ ਹੋ, ਤਾਂ ਇਸ ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"ਜੇ ਤੁਸੀਂ ਅਗਲੀ ਕੋਸ਼ਿਸ਼ ਵਿੱਚ ਕੋਈ ਗਲਤ ਪੈਟਰਨ ਦਾਖਲ ਕਰਦੇ ਹੋ, ਤਾਂ ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"ਜੇ ਤੁਸੀਂ ਅਗਲੀ ਕੋਸ਼ਿਸ਼ ਵਿੱਚ ਕੋਈ ਗਲਤ ਪਿੰਨ ਦਾਖਲ ਕਰਦੇ ਹੋ, ਤਾਂ ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"ਜੇ ਤੁਸੀਂ ਅਗਲੀ ਕੋਸ਼ਿਸ਼ ਵਿੱਚ ਕੋਈ ਗਲਤ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰਦੇ ਹੋ, ਤਾਂ ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"ਜੇ ਤੁਸੀਂ ਅਗਲੀ ਕੋਸ਼ਿਸ਼ ਵਿੱਚ ਕੋਈ ਗਲਤ ਪੈਟਰਨ ਦਾਖਲ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡਾ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਇਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"ਜੇ ਤੁਸੀਂ ਅਗਲੀ ਕੋਸ਼ਿਸ਼ ਵਿੱਚ ਕੋਈ ਗਲਤ ਪਿੰਨ ਦਾਖਲ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡਾ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਇਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"ਜੇ ਤੁਸੀਂ ਅਗਲੀ ਕੋਸ਼ਿਸ਼ ਵਿੱਚ ਕੋਈ ਗਲਤ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡਾ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਇਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸ ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਹ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਇਸਦਾ ਡਾਟਾ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।"</string>
@@ -719,7 +709,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ਧੁਨੀ ਅਤੇ ਥਰਥਰਾਹਟ ਨਾਲ ਤੁਹਾਡਾ ਧਿਆਨ ਖਿੱਚਦੀ ਹੈ।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ਇਸ ਸਮੱਗਰੀ ਦੇ ਅਸਥਿਰ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਆਪਣਾ ਧਿਆਨ ਕੇਂਦਰਿਤ ਰੱਖੋ।"</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਦੇ ਉੱਪਰ ਅਤੇ ਬੁਲਬੁਲਿਆਂ ਦੇ ਤੌਰ \'ਤੇ ਦਿਖਾਉਂਦਾ ਹੈ।"</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ਵੱਲੋਂ ਸਾਰੀਆਂ ਗੱਲਾਂਬਾਤਾਂ \'ਤੇ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ \'ਤੇ ਬੁਲਬੁਲੇ ਲਾਏ ਗਏ ਹਨ। <xliff:g id="APP_NAME_1">%2$s</xliff:g> ਵਿੱਚ ਪ੍ਰਬੰਧਨ ਕਰੋ।"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ਵੱਲੋਂ ਸਾਰੀਆਂ ਗੱਲਾਂਬਾਤਾਂ \'ਤੇ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ \'ਤੇ ਬੁਲਬੁਲੇ ਲਾਏ ਜਾਂਦੇ ਹਨ। <xliff:g id="APP_NAME_1">%2$s</xliff:g> ਵਿੱਚ ਪ੍ਰਬੰਧਨ ਕਰੋ।"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ਕੋਈ ਹਾਲੀਆ ਬੁਲਬੁਲਾ ਨਹੀਂ"</string>
@@ -813,7 +803,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"ਸੰਗੀਤ"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"ਕੈਲੰਡਰ"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"ਵੌਲਿਊਮ ਕੰਟਰੋਲਾਂ ਨਾਲ  ਦਿਖਾਓ"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ਵੌਲਿਊਮ ਬਟਨ ਸ਼ਾਰਟਕੱਟ"</string>

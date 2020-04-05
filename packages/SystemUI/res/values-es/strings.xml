@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"La aplicación o tu organización no permiten realizar capturas de pantalla"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Cerrar captura de pantalla"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Abrir captura de pantalla"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Grabadora de pantalla"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Grabación de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación continua de una sesión de grabación de la pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"¿Empezar a grabar?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Mientras grabas, el sistema Android puede capturar información sensible que se muestre o se reproduzca en tu dispositivo, como contraseñas, datos de pago, fotos, mensajes y audios."</string>

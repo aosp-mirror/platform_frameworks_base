@@ -162,9 +162,9 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Agar grafik kalitni xato kiritsangiz, bu foydalanuvchi oʻchirib tashlanadi."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Agar PIN kodni xato kiritsangiz, bu foydalanuvchi oʻchirib tashlanadi."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Agar parolni xato kiritsangiz, bu foydalanuvchi oʻchirib tashlanadi."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Agar grafik kalitni xato kiritsangiz, ishchi profil va undagi maʼlumotlar oʻchirib tashlanadi."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Agar PIN kodni xato kiritsangiz, ishchi profil va undagi maʼlumotlar oʻchirib tashlanadi."</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Agar parolni xato kiritsangiz, ishchi profil va undagi maʼlumotlar oʻchirib tashlanadi."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Agar grafik kalitni xato kiritsangiz, ish profili va undagi maʼlumotlar oʻchirib tashlanadi."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Agar PIN kodni xato kiritsangiz, ish profili va undagi maʼlumotlar oʻchirib tashlanadi."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Agar parolni xato kiritsangiz, ish profili va undagi maʼlumotlar oʻchirib tashlanadi."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Juda koʻp marta muvaffaqiyatsiz urindingiz. Bu qurilmadagi maʼlumotlar oʻchirib tashlanadi."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Juda koʻp marta muvaffaqiyatsiz urindingiz. Bu foydalanuvchi oʻchirib tashlanadi."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Juda koʻp marta muvaffaqiyatsiz urindingiz. Bu ishchi profil va undagi maʼlumotlar oʻchirib tashlanadi."</string>

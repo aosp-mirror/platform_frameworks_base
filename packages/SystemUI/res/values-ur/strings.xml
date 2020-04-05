@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ایپ یا آپ کی تنظیم کی جانب سے اسکرین شاٹس لینے کی اجازت نہیں ہے"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"اسکرین شاٹ برخاست کریں"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"اسکرین شاٹ کھولیں"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"اسکرین ریکارڈر"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"سکرین ریکارڈر"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اسکرین ریکارڈ سیشن کیلئے جاری اطلاع"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ریکارڈنگ شروع کریں؟"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"‏ریکارڈ کرنے کے دوران، Android سسٹم آپ کی اسکرین پر نظر آنے والی یا آپ کے آلہ پر چلنے والی کسی بھی حساس معلومات کو کیپچر کر سکتا ہے۔ اس میں پاس ورڈز، ادائیگی کی معلومات، تصاویر، پیغامات اور آڈیو شامل ہیں۔"</string>
@@ -155,26 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"غلط پاس ورڈ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"کافی زیادہ غلط کوششیں کی گئیں۔\n <xliff:g id="NUMBER">%d</xliff:g> سیکنڈ بعد دوبارہ کوشش کریں۔"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"دوبارہ کوشش کریں۔ کوشش <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> از <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>۔"</string>
-    <!-- no translation found for biometric_dialog_last_attempt_before_wipe_dialog_title (2874250099278693477) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_device (6562299244825817598) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_device (9151756675698215723) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_device (2363778585575998317) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_user (8400180746043407270) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_user (4159878829962411168) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_user (4695682515465063885) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_profile (6045224069529284686) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_profile (545567685899091757) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_profile (8538032972389729253) -->
-    <skip />
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"آپ کا ڈیٹا حذف کر دیا جائے گا"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"اگر آپ نے اگلی کوشش میں غلط پیٹرن درج کیا تو اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"‏اگر آپ نے اگلی کوشش میں غلط PIN درج کیا تو اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"اگر آپ نے اگلی کوشش میں غلط پاس ورڈ درج کیا تو اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"اگر آپ نے اگلی کوشش میں غلط پیٹرن درج کیا تو اس صارف کو حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"‏اگر آپ نے اگلی کوشش میں غلط PIN درج کیا تو اس صارف کو حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"اگر آپ نے اگلی کوشش میں غلط پاس ورڈ درج کیا تو اس صارف کو حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"اگر آپ نے اگلی کوشش میں غلط پیٹرن درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"‏اگر آپ نے اگلی کوشش میں غلط PIN درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"اگر آپ نے اگلی کوشش میں غلط پاس ورڈ درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"بہت زیادہ غلط کوششیں۔ اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"بہت زیادہ غلط کوششیں۔ اس صارف کو حذف کر دیا جائے گا۔"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"بہت زیادہ غلط کوششیں۔ یہ دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
@@ -1005,7 +995,7 @@
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"برخاست کریں"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"بلبلہ گفتگو نہ کریں"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"بلبلے کے ذریعے چیٹ کریں"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"نئی گفتگو فلوٹنگ آئیکن یا بلبلے کے طور پر ظاہر ہو گی۔ بلبلہ کھولنے کے لیے تھپتھپائیں۔ اسے منتقل کرنے کے لیے گھسیٹیں۔"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"نئی گفتگوئیں فلوٹنگ آئیکن یا بلبلے کے طور پر ظاہر ہوں گی۔ بلبلہ کھولنے کے لیے تھپتھپائیں۔ اسے منتقل کرنے کے لیے گھسیٹیں۔"</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"کسی بھی وقت بلبلے کو کنٹرول کریں"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"اس ایپ سے بلبلوں کو آف کرنے کے لیے نظم کریں پر تھپتھپائیں"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"سمجھ آ گئی"</string>
@@ -1015,15 +1005,11 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"میگنیفیکیشن اوورلے ونڈو"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"میگنیفکیشن ونڈو"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"میگنیفکیشن ونڈو کنٹرولز"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="1686913115679255053">"فوری کنٹرولز"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"اپنے منسلک آلات کے لیے کنٹرولز شامل کریں"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"فوری کنٹرولز سیٹ اپ کریں"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"اپنے کنٹرول تک رسائی حاصل کرنے کے ليے پاور بٹن کو دبائیں رکھیں"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"کنٹرولز شامل کرنے کے لیے ایپ منتخب کریں"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> کنٹرولز شامل کر دیے گئے۔</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> کنٹرول شامل کر دیا گیا۔</item>

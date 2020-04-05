@@ -154,36 +154,21 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ଭୁଲ ପାଟର୍ନ"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ଭୁଲ ପାସ୍‌ୱାର୍ଡ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"ଅନେକ ଥର ଭୁଲ ଚେଷ୍ଟା। \n <xliff:g id="NUMBER">%d</xliff:g>ସେକେଣ୍ଡରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <!-- no translation found for biometric_dialog_credential_attempts_before_wipe (6751859711975516999) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_attempt_before_wipe_dialog_title (2874250099278693477) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_device (6562299244825817598) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_device (9151756675698215723) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_device (2363778585575998317) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_user (8400180746043407270) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_user (4159878829962411168) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_user (4695682515465063885) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_profile (6045224069529284686) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_profile (545567685899091757) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_profile (8538032972389729253) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_device (6585503524026243042) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_user (7015008539146949115) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_profile (5239378521440749682) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_now_wiping_dialog_dismiss (7189432882125106154) -->
-    <skip />
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ। <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>ଟିରୁ <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>ଟି ପ୍ରଚେଷ୍ଟା।"</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"ଆପଣଙ୍କ ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାଟର୍ନ ପ୍ରବେଶ କଲେ, ଏହି ଡିଭାଇସର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ PIN ଲେଖିଲେ, ଏହି ଡିଭାଇସର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାସୱାର୍ଡ ଲେଖିଲେ, ଏହି ଡିଭାଇସର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାଟର୍ନ ପ୍ରବେଶ କଲେ, ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ PIN ଲେଖିଲେ, ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାସୱାର୍ଡ ଲେଖିଲେ, ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାଟର୍ନ ପ୍ରବେଶ କଲେ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଏବଂ ଏହାର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ PIN ଲେଖିଲେ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଏବଂ ଏହାର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାସୱାର୍ଡ ଲେଖିଲେ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଓ ଏହାର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ଡିଭାଇସର ଡାଟା ଡିଲିଟ୍ ହୋଇଯିବ।"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ଉପଯୋଗକର୍ତ୍ତା ଡିଲିଟ୍ ହୋଇଯିବ।"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଏବଂ ଏହାର ଡାଟା ଡିଲିଟ୍ ହୋଇଯିବ।"</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ଟିପଚିହ୍ନ ସେନସର୍‌କୁ ଛୁଅଁନ୍ତୁ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ଟିପଚିହ୍ନ ଆଇକନ୍"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"ଆପଣଙ୍କୁ ଚିହ୍ନଟ କରୁଛି…"</string>
@@ -723,17 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ବିନା ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍‌ରେ ଆପଣଙ୍କୁ ଫୋକସ୍ କରିବାରେ ସାହାଯ୍ୟ କରେ।"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ମାଧ୍ୟମରେ ଆପଣଙ୍କର ଧ୍ୟାନ ଆକର୍ଷିତ କରିଥାଏ।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ଏହି ବିଷୟବସ୍ତୁ ପାଇଁ ଏକ ଭାସମାନ ସର୍ଟକଟ୍ ସହ ଆପଣଙ୍କର ଧ୍ୟାନ ଦିଅନ୍ତୁ।"</string>
-    <!-- no translation found for notification_channel_summary_priority (7415770044553264622) -->
-    <skip />
-    <!-- no translation found for notification_conversation_channel_all_bubble (5389290797101635297) -->
-    <skip />
-    <!-- no translation found for notification_conversation_channel_settings (2409977688430606835) -->
-    <skip />
-    <!-- no translation found for notification_priority_title (2079708866333537093) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"ଏହା ବାର୍ତ୍ତାଳାପ ବିଭାଗର ଶୀର୍ଷରେ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ।"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g>ରୁ ସମସ୍ତ ବାର୍ତ୍ତାଳାପ ଡିଫଲ୍ଟ ରୂପେ ବବଲରେ ଦେଖାଯାଏ। <xliff:g id="APP_NAME_1">%2$s</xliff:g>ରେ ପରିଚାଳନା କରନ୍ତୁ।"</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ସେଟିଂସ୍"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ବର୍ତ୍ତମାନ କୌଣସି ବବଲ୍ ନାହିଁ"</string>
-    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
-    <skip />
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ବର୍ତ୍ତମାନର ଏବଂ ଖାରଜ କରାଯାଇଥିବା ବବଲଗୁଡ଼ିକ ଏଠାରେ ଦେଖାଯିବ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ଏଠାରେ ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଗ୍ରୁପ୍ କନଫ୍ୟୁଗର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ବିଜ୍ଞପ୍ତି ପ୍ରକ୍ସୀ ହୋଇଛି"</string>
@@ -1013,17 +993,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ତଳ ବାମକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ତଳ ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"ଖାରଜ କରନ୍ତୁ"</string>
-    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ବାର୍ତ୍ତାଳାପକୁ ବବଲ୍ କରନ୍ତୁ ନାହିଁ"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"ବବଲଗୁଡ଼ିକୁ ବ୍ୟବହାର କରି ଚାଟ୍ କରନ୍ତୁ"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"ନୂଆ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଫ୍ଲୋଟିଂ ଆଇକନ୍ କିମ୍ବା ବବଲ୍ ଭାବେ ଦେଖାଯିବ। ବବଲ୍ ଖୋଲିବାକୁ ଟାପ୍ କରନ୍ତୁ। ଏହାକୁ ମୁଭ୍ କରିବାକୁ ଟାଣନ୍ତୁ।"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ଯେ କୌଣସି ସମୟରେ ବବଲଗୁଡ଼ିକ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ଏହି ଆପର ବବଲଗୁଡ଼ିକ ବନ୍ଦ କରିବା ପାଇଁ \'ପରିଚାଳନା କରନ୍ତୁ\' ବଟନରେ ଟାପ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ବୁଝିଗଲି"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ ହୋଇଛି। ପରିବର୍ତ୍ତନ କରିବା ପାଇଁ, ସେଟିଂସ୍‌କୁ ଯାଆନ୍ତୁ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ କରିବା ପାଇଁ ସେଟିଂସ୍‍କୁ ଯାଆନ୍ତୁ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ଷ୍ଟାଣ୍ଡବାଏ"</string>
@@ -1031,8 +1006,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
     <string name="quick_controls_title" msgid="1686913115679255053">"ଦ୍ରୁତ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
-    <!-- no translation found for quick_controls_subtitle (1667408093326318053) -->
-    <skip />
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"ଆପଣଙ୍କ ସଂଯୁକ୍ତ ଥିବା ଡିଭାଇସଗୁଡ଼ିକ ପାଇଁ ନିୟନ୍ତ୍ରଣ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="quick_controls_setup_title" msgid="9079435969373471268">"ଦ୍ରୁତ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ଆପଣଙ୍କ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ କରିବାକୁ ପାୱାର ବଟନକୁ ଧରି ରଖନ୍ତୁ"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଯୋଗ କରିବାକୁ ଆପ୍ ବାଛନ୍ତୁ"</string>
@@ -1041,45 +1015,28 @@
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g>ଟି ନିୟନ୍ତ୍ରଣ ଯୋଗ କରାଯାଇଛି।</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
-    <!-- no translation found for controls_favorite_subtitle (6604402232298443956) -->
-    <skip />
-    <!-- no translation found for controls_favorite_rearrange (7364147066539766260) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ପାୱାର ମେନୁରୁ ଆକ୍ସେସ୍ କରିବାକୁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ବାଛନ୍ତୁ"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ଏକ ନିୟନ୍ତ୍ରଣକୁ ମୁଭ୍ କରିବାକୁ ଏହାକୁ ଧରି ଟାଣନ୍ତୁ"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ସବୁ ନିୟନ୍ତ୍ରଣର ତାଲିକା ଲୋଡ୍ କରିପାରିଲା ନାହିଁ।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ଅନ୍ୟ"</string>
-    <!-- no translation found for controls_dialog_title (3475025327938684220) -->
-    <skip />
+    <string name="controls_dialog_title" msgid="3475025327938684220">"ଦ୍ରୁତ ନିୟନ୍ତ୍ରଣରେ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"ପସନ୍ଦଗୁଡ଼ିକରେ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"ଏହି ନିୟନ୍ତ୍ରଣକୁ ଆପଣଙ୍କ ପସନ୍ଦଗୁଡ଼ିକରେ ଯୋଗ କରିବାକୁ <xliff:g id="APP">%s</xliff:g> ପ୍ରସ୍ତାବ ଦେଇଛି।"</string>
-    <!-- no translation found for controls_dialog_confirmation (586517302736263447) -->
-    <skip />
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଅପଡେଟ୍ କରାଯାଇଛି"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PINରେ ଅକ୍ଷର କିମ୍ୱା ସଙ୍କେତଗୁଡ଼ିକ ଥାଏ"</string>
-    <!-- no translation found for controls_pin_verify (3452778292918877662) -->
-    <skip />
-    <!-- no translation found for controls_pin_verifying (3755045989392131746) -->
-    <skip />
+    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ଯାଞ୍ଚ କରନ୍ତୁ"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"ଯାଞ୍ଚ କରାଯାଉଛି…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN ଲେଖନ୍ତୁ"</string>
-    <!-- no translation found for controls_pin_instructions_retry (1566667581012131046) -->
-    <skip />
-    <!-- no translation found for controls_confirmation_confirming (2596071302617310665) -->
-    <skip />
-    <!-- no translation found for controls_confirmation_message (7744104992609594859) -->
-    <skip />
-    <!-- no translation found for controls_structure_tooltip (4355922222944447867) -->
-    <skip />
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"ଅନ୍ୟ ଏକ PIN ଚେଷ୍ଟା କରି ଦେଖନ୍ତୁ"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"ସୁନିଶ୍ଚିତ କରାଯାଉଛି…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> ପାଇଁ ପରିବର୍ତ୍ତନ ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"ଅଧିକ ଦେଖିବାକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ସୁପାରିଶଗୁଡ଼ିକ ଲୋଡ୍ କରାଯାଉଛି"</string>
-    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
-    <skip />
-    <!-- no translation found for controls_error_timeout (794197289772728958) -->
-    <skip />
-    <!-- no translation found for controls_error_failed (960228639198558525) -->
-    <skip />
-    <!-- no translation found for controls_in_progress (4421080500238215939) -->
-    <skip />
-    <!-- no translation found for controls_added_tooltip (4842812921719153085) -->
-    <skip />
-    <!-- no translation found for controls_menu_add (4447246119229920050) -->
-    <skip />
-    <!-- no translation found for controls_menu_edit (890623986951347062) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="9023534788828414585">"ଏହି ମିଡିଆ ସେସନ୍ ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"ତ୍ରୁଟି ହୋଇଛି, ପୁଣି ଚେଷ୍ଟା କର"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"ପ୍ରଗତିରେ ଅଛି"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"ନୂଆ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଦେଖିବା ପାଇଁ ପାୱାର ବଟନକୁ ଧରି ରଖନ୍ତୁ"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ସମ୍ପାଦନ କରନ୍ତୁ"</string>
 </resources>

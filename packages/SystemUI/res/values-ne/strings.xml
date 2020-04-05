@@ -155,29 +155,19 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"पासवर्ड मिलेन"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"अत्यन्तै धेरै पटक गलत प्रयास गरिए। \n <xliff:g id="NUMBER">%d</xliff:g>सेकेन्ड पछि पुनः प्रयास गर्नुहोस्।"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"फेरि प्रयास गर्नुहोस्। <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> मध्ये <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> प्रयास।"</string>
-    <!-- no translation found for biometric_dialog_last_attempt_before_wipe_dialog_title (2874250099278693477) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_device (6562299244825817598) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_device (9151756675698215723) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_device (2363778585575998317) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_user (8400180746043407270) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_user (4159878829962411168) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_user (4695682515465063885) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_profile (6045224069529284686) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_profile (545567685899091757) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_profile (8538032972389729253) -->
-    <skip />
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"तपाईंको डेटा मेटाइने छ"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"तपाईंले अर्को पटक पनि गलत ढाँचा प्रविष्टि गर्नुभयो भने यो यन्त्रको डेटा मेटाइने छ।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"तपाईंले अर्को पटक पनि गलत PIN प्रविष्टि गर्नुभयो भने यो यन्त्रको डेटा मेटाइने छ।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"तपाईंले अर्को पटक पनि गलत पासवर्ड प्रविष्टि गर्नुभयो भने यो यन्त्रको डेटा मेटाइने छ।"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"तपाईंले अर्को पटक पनि गलत ढाँचा प्रविष्टि गर्नुभयो भने यी प्रयोगकर्तालाई मेटाइने छ।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"तपाईंले अर्को पटक पनि गलत PIN प्रविष्टि गर्नुभयो भने यी प्रयोगकर्तालाई मेटाइने छ।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"तपाईंले अर्को पटक पनि गलत पासवर्ड प्रविष्टि गर्नुभयो भने यी प्रयोगकर्तालाई मेटाइने छ।"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"तपाईंले अर्को पटक पनि गलत ढाँचा प्रविष्टि गर्नुभयो भने यो कार्य प्रोफाइल र त्यहाँको डेटा मेटाइने छ।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"तपाईंले अर्को पटक पनि गलत PIN प्रविष्टि गर्नुभयो भने तपाईंको कार्य प्रोफाइल र त्यहाँको डेटा मेटाइने छ।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"तपाईंले अर्को पटक पनि गलत पासवर्ड प्रविष्टि गर्नुभयो भने तपाईंको कार्य प्रोफाइल र त्यहाँको डेटा मेटाइने छ।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"अनलक गर्ने अत्याधिक गलत प्रयासहरू भए। यो यन्त्रको डेटा मेटाइने छ।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"अनलक गर्ने अत्याधिक गलत प्रयासहरू भए। यो प्रयोगकर्तालाई हटाइने छ।"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"अनलक गर्ने अत्यधिक गलत प्रयासहरू भए। यो कार्य प्रोफाइल र यसको डेटा मेटाइने छ।"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"अनलक गर्ने अत्यधिक गलत प्रयासहरू भए। यो कार्यलयको प्रोफाइल र यसको डेटा मेटाइने छ।"</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"हटाउनुहोस्"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फिंगरप्रिन्ट सेन्सरमा छुनुहोस्‌"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"फिंगरप्रिन्ट जनाउने आइकन"</string>
@@ -718,8 +708,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"तपाईंलाई आवाज वा कम्पनविना ध्यान केन्द्रित गर्न मद्दत गर्छ।"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ध्वनि वा कम्पनमार्फत तपाईंको ध्यान आकर्षित गर्छ।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ्लोटिङ सर्टकटमार्फत यो सामग्रीतर्फ तपाईंको ध्यान आकर्षित गर्दछ।"</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"वार्तालापको खण्डको सिरानमा बबलका रूपमा देखा पर्छ।"</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> मार्फत भएका सबै वार्तालापहरू पूर्वनिर्धारित रूपमा बबलमा देखिन्छन्। <xliff:g id="APP_NAME_1">%2$s</xliff:g> मा व्यवस्थापन गर्नुहोस्।"</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"वार्तालाप खण्डको सिरानमा बबलका रूपमा देखा पर्छ।"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> मार्फत भएका सबै वार्तालापहरू पूर्वनिर्धारित रूपमा बबलमा देखिन्छन्। <xliff:g id="APP_NAME_1">%2$s</xliff:g> मा गई व्यवस्थापन गर्नुहोस्।"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिङ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हालसालै खारेज गरिएको कुनै पनि बबल छैन"</string>
@@ -1015,22 +1005,18 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"म्याग्निफिकेसन ओभरले विन्डो"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"म्याग्निफिकेसन विन्डो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"म्याग्निफिकेसन विन्डोका नियन्त्रणहरू"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="1686913115679255053">"द्रुत नियन्त्रणहरू"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"आफ्ना जोडिएका यन्त्रहरूका लागि नियन्त्रण सुविधाहरू थप्नुहोस्"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="9079435969373471268">"द्रुत नियन्त्रणहरू सेटअप गर्नुहोस्"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"आफ्ना नियन्त्रणहरूमाथि पहुँच राख्न पावर बटन थिचिराख्नुहोस्"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"नियन्त्रणहरू थप्न अनुप्रयोग छनौट गर्नुहोस्"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> वटा नियन्त्र थपियो।</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> नियन्त्र थपियो</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"नियन्त्रणहरू"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पावर मेनुबाट प्रयोग गर्न मिल्ने नियन्त्रण सुविधाहरू छान्नुहोस्"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"कुनै नियन्त्रण सुविधा सार्न त्यसलाई थिचिराखेर ड्र्याग गर्नुहोस्"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पावर मेनुबाट प्रयोग गर्न चाहेका नियन्त्रण सुविधाहरू छान्नुहोस्"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"कुनै नियन्त्रण सुविधा सार्न त्यसलाई थिचेर ड्र्याग गर्नुहोस्"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सबै नियन्त्रणहरूको सूची लोड गर्न सकिएन।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
     <string name="controls_dialog_title" msgid="3475025327938684220">"द्रुत नियन्त्रणहरूमा थप्नुहोस्"</string>
@@ -1047,7 +1033,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"थप हेर्न स्वाइप गर्नुहोस्"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सिफारिसहरू लोड गर्दै"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"यो मिडिया सत्र बन्द गर्नुहोस्"</string>
-    <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, अनुप्रयोगको जाँच गर्नु…"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, अनुप्रयोग जाँच गर्नु…"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"त्रुटि भयो, फेरि प्रयास गर्नु…"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"कार्य हुँदै छ"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नयाँ नियन्त्रण सुविधाहरू हेर्न पावर बटन थिचिराख्नुहोस्"</string>
