@@ -156,15 +156,15 @@
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Слишком много неудачных попыток.\nПовторите через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Попробуйте ещё раз. Попытка <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> из <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Осталась одна попытка"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Если вы неправильно введете графический ключ, с устройства будут удалены все данные."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Если вы неправильно введете PIN-код, с устройства будут удалены все данные."</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Если вы неправильно введете пароль, с устройства будут удалены все данные."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Если вы неправильно введете графический ключ, этот пользователь будет удален."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Если вы неправильно введете PIN-код, этот пользователь будет удален."</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Если вы неправильно введете пароль, этот пользователь будет удален."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Если вы неправильно введете графический ключ, ваш рабочий профиль и его данные будут удалены."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Если вы неправильно введете PIN-код, ваш рабочий профиль и его данные будут удалены."</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Если вы неправильно введете пароль, ваш рабочий профиль и его данные будут удалены."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Если вы неправильно введете графический ключ ещё раз, с устройства будут удалены все данные."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Если вы неправильно введете PIN-код ещё раз, с устройства будут удалены все данные."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Если вы неправильно введете пароль ещё раз, с устройства будут удалены все данные."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Если вы неправильно введете графический ключ ещё раз, этот пользователь будет удален."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Если вы неправильно введете PIN-код ещё раз, этот пользователь будет удален."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Если вы неправильно введете пароль ещё раз, этот пользователь будет удален."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Если вы неправильно введете графический ключ ещё раз, ваш рабочий профиль и его данные будут удалены."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Если вы неправильно введете PIN-код ещё раз, ваш рабочий профиль и его данные будут удалены."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Если вы неправильно введете пароль ещё раз, ваш рабочий профиль и его данные будут удалены."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Слишком много неудачных попыток. С устройства будут удалены все данные."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Слишком много неудачных попыток. Этот пользователь будет удален."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Слишком много неудачных попыток. Этот рабочий профиль и его данные будут удалены."</string>
@@ -514,7 +514,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Настроить"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"История"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Беззвучные уведомления"</string>
-    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Уведомления со звуком или вибрацией"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Оповещения"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Чаты"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Отклонить все беззвучные уведомления"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"В режиме \"Не беспокоить\" уведомления заблокированы"</string>

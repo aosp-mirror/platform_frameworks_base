@@ -708,7 +708,7 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Favorisce la tua concentrazione grazie all\'assenza di suono o vibrazione."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Richiama la tua attenzione con suono o vibrazione."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantiene la tua attenzione con una scorciatoia mobile a questi contenuti."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Visualizzata nella parte superiore della sezione della conversazione e viene mostrata come bolla."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Appare in cima alla sezione delle conversazioni sotto forma di bolla."</string>
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Per impostazione predefinita, tutte le conversazioni di <xliff:g id="APP_NAME_0">%1$s</xliff:g> vengono mostrate come bolle. Gestisci in <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Impostazioni"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorità"</string>

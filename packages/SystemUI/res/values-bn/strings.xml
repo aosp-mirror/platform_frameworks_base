@@ -155,26 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ভুল পাসওয়ার্ড"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"অনেকবার ভুল চেষ্টা করা হয়েছে। \n<xliff:g id="NUMBER">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন।"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"আবার চেষ্টা করুন। <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> বারের মধ্যে <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> বার চেষ্টা করা হয়েছে।"</string>
-    <!-- no translation found for biometric_dialog_last_attempt_before_wipe_dialog_title (2874250099278693477) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_device (6562299244825817598) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_device (9151756675698215723) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_device (2363778585575998317) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_user (8400180746043407270) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_user (4159878829962411168) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_user (4695682515465063885) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_profile (6045224069529284686) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_profile (545567685899091757) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_profile (8538032972389729253) -->
-    <skip />
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"আপনার ডেটা মুছে দেওয়া হবে"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"আপনি পরের বারও ভুল প্যাটার্ন আঁকলে এই ডিভাইসের ডেটা মুছে দেওয়া হবে।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"আপনি পরের বারও ভুল পিন দিলে এই ডিভাইসের ডেটা মুছে দেওয়া হবে।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"আপনি পরের বারও ভুল পাসওয়ার্ড দিলে এই ডিভাইসের ডেটা মুছে দেওয়া হবে।"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"আপনি পরের বারও ভুল প্যাটার্ন আঁকলে আপনাকে ব্যবহারকারীর তালিকা থেকে মুছে দেওয়া হবে।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"আপনি পরের বারও ভুল পিন দিলে আপনাকে ব্যবহারকারীর তালিকা থেকে মুছে দেওয়া হবে।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"আপনি পরের বারও ভুল পাসওয়ার্ড দিলে আপনাকে ব্যবহারকারীর তালিকা থেকে মুছে দেওয়া হবে।"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"আপনি পরের বারও ভুল প্যাটার্ন দিলে আপনার অফিস প্রোফাইল এবং তার ডেটা মুছে দেওয়া হবে।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"আপনি পরের বারও ভুল পিন দিলে আপনার অফিস প্রোফাইল এবং তার ডেটা মুছে দেওয়া হবে।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"আপনি পরের বারও ভুল পাসওয়ার্ড দিলে আপনার অফিস প্রোফাইল এবং তার ডেটা মুছে দেওয়া হবে।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"বহুবার ভুল লেখা হয়েছে। এই ডিভাইসের ডেটা মুছে যাবে।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"বহুবার ভুল লেখা হয়েছে। এই ব্যবহারকারীর ডেটা মুছে যাবে।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"বহুবার ভুল লেখা হয়েছে। এই অফিসের প্রোফাইল ও সংশ্লিষ্ট ডেটা মুছে যাবে।"</string>
@@ -813,7 +803,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"সংগীত"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"ক্যালেন্ডার"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"ভলিউম নিয়ন্ত্রণ সহ দেখান"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"বিরক্ত করবে না"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ভলিউম বোতামের শর্টকাট"</string>

@@ -155,26 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ভুল পাছৱৰ্ড"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"বহুসংখ্যক ভুল প্ৰয়াস।\n<xliff:g id="NUMBER">%d</xliff:g>ছেকেণ্ডত পুনৰ চেষ্টা কৰক।"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"আকৌ চেষ্টা কৰক। <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> টাৰ প্ৰয়াসৰ ভিতৰত <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> টা প্ৰয়াস।"</string>
-    <!-- no translation found for biometric_dialog_last_attempt_before_wipe_dialog_title (2874250099278693477) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_device (6562299244825817598) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_device (9151756675698215723) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_device (2363778585575998317) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_user (8400180746043407270) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_user (4159878829962411168) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_user (4695682515465063885) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pattern_attempt_before_wipe_profile (6045224069529284686) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_pin_attempt_before_wipe_profile (545567685899091757) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_last_password_attempt_before_wipe_profile (8538032972389729253) -->
-    <skip />
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"আপোনাৰ ডেটা মচি পেলোৱা হ’ব"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল আৰ্হি দিলে, এই ডিভাইচটোৰ ডেটা মচি পেলোৱা হ’ব।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল পিন দিলে, এই ডিভাইচটোৰ ডেটা মচি পেলোৱা হ’ব।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল পাছৱৰ্ড দিলে, এই ডিভাইচটোৰ ডেটা মচি পেলোৱা হ’ব।"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল আৰ্হি দিলে, এই ব্যৱহাৰকাৰীক মচি পেলোৱা হ’ব।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল পিন দিলে, এই ব্যৱহাৰকাৰীক মচি পেলোৱা হ’ব।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল পাছৱৰ্ড দিলে, এই ব্যৱহাৰকাৰীক মচি পেলোৱা হ’ব।"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল আৰ্হি দিলে, আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইল আৰু ইয়াৰ ডেটা মচি পেলোৱা হ’ব।"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল পিন দিলে, আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইল আৰু ইয়াৰ ডেটা মচি পেলোৱা হ’ব।"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল পাছৱৰ্ড দিলে, আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইল আৰু ইয়াৰ ডেটা মচি পেলোৱা হ’ব।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"বহুসংখ্যক ভুল প্ৰয়াস। এই ডিভাইচটোৰ ডেটা মচা হ\'ব।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"বহুসংখ্যক ভুল প্ৰয়াস। এই ব্যৱহাৰকাৰীক মচা হ\'ব।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"বহুসংখ্যক ভুল প্ৰয়াস। এই কৰ্মস্থানৰ প্ৰ\'ফাইলটো আৰু তাৰ লগত জড়িত ডেটা মচা হ\'ব।"</string>
@@ -813,7 +803,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"এছএমএছ"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"সংগীত"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"কেলেণ্ডাৰ"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"ভলিউম নিয়ন্ত্ৰণৰ সৈতে দেখুৱাওক"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"অসুবিধা নিদিব"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ভলিউম বুটামসমূহৰ শ্বৰ্টকাট"</string>

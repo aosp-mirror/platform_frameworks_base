@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Cho phép"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Không cho phép chế độ gỡ lỗi qua USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi USB. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Cho phép gỡ lỗi không dây trên mạng này?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Cho phép gỡ lỗi qua Wi-Fi trên mạng này?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Tên mạng (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nĐịa chỉ Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Luôn cho phép trên mạng này"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Cho phép"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Không cho phép gỡ lỗi không dây"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi không dây. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Không cho phép gỡ lỗi qua Wi-Fi"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi qua Wi-Fi. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Đã tắt cổng USB"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Để bảo vệ thiết bị của bạn khỏi chất lỏng hay mảnh vỡ, cổng USB sẽ tắt và không phát hiện được bất kỳ phụ kiện nào.\n\nBạn sẽ nhận được thông báo khi có thể sử dụng lại cổng USB."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Đã bật cổng USB để phát hiện bộ sạc và phụ kiện"</string>
@@ -712,8 +712,8 @@
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Theo mặc định, tất cả các cuộc trò chuyện từ ứng dụng <xliff:g id="APP_NAME_0">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng. Quản lý trong phần <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cài đặt"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Không có bong bóng nào gần đây"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bong bóng đã đóng và bong bóng gần đây sẽ xuất hiện ở đây"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Không có bong bóng trò chuyện nào gần đây"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bong bóng trò chuyện đã đóng và bong bóng trò chuyện gần đây sẽ xuất hiện ở đây"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Không thể sửa đổi các thông báo này."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Không thể định cấu hình nhóm thông báo này tại đây"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Thông báo đã xử lý qua máy chủ proxy"</string>
@@ -741,7 +741,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"Bị tắt tiếng"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Thông báo"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Hiển thị bong bóng"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Xóa bong bóng"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Xóa bong bóng trò chuyện"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Thêm vào màn hình chính"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"điều khiển thông báo"</string>
@@ -983,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"Dịch vụ cho thiết bị"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Không có tiêu đề"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Nhấn để khởi động lại ứng dụng này và xem ở chế độ toàn màn hình."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Tùy chọn cài đặt cho bong bóng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Tùy chọn cài đặt cho bong bóng trò chuyện <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Quản lý"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> của <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> từ <xliff:g id="APP_NAME">%2$s</xliff:g> và <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> bong bóng khác"</string>
@@ -994,10 +994,10 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Chuyển tới dưới cùng bên phải"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Loại bỏ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Dừng trò chuyện bằng bong bóng"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Trò chuyện bằng bong bóng"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Các cuộc trò chuyện mới hiển thị dưới dạng biểu tượng nổi hoặc bong bóng. Nhấn để mở bong bóng. Kéo để di chuyển bong bóng."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Kiểm soát các tùy chọn cài đặt bong bóng bất cứ lúc nào"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Nhấn vào nút Quản lý để tắt bong bóng từ ứng dụng này"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Trò chuyện bằng bong bóng trò chuyện"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Các cuộc trò chuyện mới hiển thị dưới dạng biểu tượng nổi hoặc bong bóng trò chuyện. Nhấn để mở bong bóng trò chuyện. Kéo để di chuyển bong bóng trò chuyện."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Kiểm soát tùy chọn cài đặt bong bóng trò chuyện bất mọi lúc"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Nhấn vào nút Quản lý để tắt bong bóng trò chuyện từ ứng dụng này"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Đã cập nhật chế độ di chuyển trên hệ thống. Để thay đổi, hãy chuyển đến phần Cài đặt."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Chuyển đến phần Cài đặt để cập nhật chế độ di chuyển trên hệ thống"</string>

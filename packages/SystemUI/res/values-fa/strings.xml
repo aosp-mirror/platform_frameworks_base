@@ -708,12 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"به شما کمک می‌کند بدون صدا یا لرزش تمرکز کنید."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"با صدا یا لرزش توجه شما را جلب می‌کند."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"با میان‌بری شناور به این محتوا، توجه‌تان را جلب می‌کند."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"در بالای بخش مکالمه نمایش داده می‌شود و به‌صورت حباب نمایان می‌شود."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"در بالای بخش مکالمه نمایش داده می‌شود و به‌صورت ابزارک اعلان نمایان می‌شود."</string>
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"همه مکالمه‌های <xliff:g id="APP_NAME_0">%1$s</xliff:g>، به‌طور پیش‌فرض در حباب نمایش داده می‌شوند. در <xliff:g id="APP_NAME_1">%2$s</xliff:g> مدیریت کنید."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"تنظیمات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"اولویت"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"هیچ ابزارک اعلان جدیدی وجود ندارد"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"حباب‌های اخیر و حباب‌های ردشده اینجا ظاهر خواهند شد"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ابزارک اعلان اخیر و ابزارک اعلان ردشده اینجا ظاهر خواهند شد"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"این اعلان‌ها قابل اصلاح نیستند."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"نمی‌توانید این گروه اعلان‌ها را در اینجا پیکربندی کنید"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"اعلان‌های دارای پراکسی"</string>
@@ -994,10 +994,10 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"انتقال به پایین سمت چپ"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"رد کردن"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"مکالمه در حباب نشان داده نشود"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"گپ بااستفاده از حباب‌ها"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"مکالمه‌های جدید به‌صورت نمادهای شناور یا حباب نشان داده شوند. برای باز کردن حباب ضربه بزنید. برای جابه‌جایی، آن را بکشید."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"کنترل حباب‌ها در هرزمانی"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"برای خاموش کردن «حباب‌ها» از این برنامه، روی «مدیریت» ضربه بزنید"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"گپ بااستفاده از ابزارک اعلان"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"مکالمه‌های جدید به‌صورت نمادهای شناور یا ابزارک اعلان نشان داده شوند. برای باز کردن ابزارک اعلان ضربه بزنید. برای جابه‌جایی، آن را بکشید."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"کنترل ابزارک اعلان در هرزمانی"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"برای خاموش کردن «ابزارک اعلان» از این برنامه، روی «مدیریت» ضربه بزنید"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"متوجه‌ام"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"پیمایش سیستم به‌روزرسانی شد. برای انجام تغییرات به «تنظیمات» بروید."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"برای به‌روزرسانی پیمایش سیستم، به «تنظیمات» بروید"</string>

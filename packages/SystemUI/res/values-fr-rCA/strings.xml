@@ -847,7 +847,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Code de touche droit"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icône à gauche"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icône droite"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Maint. doigt sur écran, puis glissez-le pour ajouter tuiles"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Sélectionnez et faites glisser les tuiles pour les ajouter"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Maint. doigt sur l\'écran, puis glissez-le pour réorg. tuiles"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les tuiles ici pour les supprimer"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Vous avez besoin d\'au moins <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tuiles"</string>

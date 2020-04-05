@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Nie możesz wykonać zrzutu ekranu, bo nie zezwala na to aplikacja lub Twoja organizacja."</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zamknij zrzut ekranu"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Otwórz zrzut ekranu"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Rejestrator ekranu"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Nagrywanie ekranu"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Rozpocząć rejestrowanie?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Podczas nagrywania system Android może rejestrować wszelkie informacji poufne wyświetlane na ekranie lub odtwarzane na urządzeniu. Dotyczy to m.in. haseł, szczegółów płatności, zdjęć, wiadomości i odtwarzanych dźwięków."</string>
@@ -714,8 +714,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Pomaga Ci się skupić, nie sygnalizując niczego dźwiękiem ani wibracjami."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Przyciąga uwagę dźwiękiem lub wibracjami."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Przyciąga uwagę dzięki pływającym skrótom do treści."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Wyświetla się u góry sekcji wątków i ma postać dymku."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Wszystkie wątki z aplikacji <xliff:g id="APP_NAME_0">%1$s</xliff:g> są domyślnie wyświetlane jako dymki. Zarządzaj w aplikacji <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Wyświetla się u góry sekcji rozmów i ma postać dymku."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Wszystkie rozmowy z aplikacji <xliff:g id="APP_NAME_0">%1$s</xliff:g> są domyślnie wyświetlane jako dymki. Zarządzaj w aplikacji <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ustawienia"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytet"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Brak ostatnich dymków"</string>
@@ -741,7 +741,7 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Dostosuj"</string>
     <string name="notification_done" msgid="6215117625922713976">"Gotowe"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Cofnij"</string>
-    <string name="demote" msgid="6225813324237153980">"Nie oznaczaj tego powiadomienia jako wątku"</string>
+    <string name="demote" msgid="6225813324237153980">"Nie oznaczaj tego powiadomienia jako rozmowy"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"Ważne rozmowy"</string>
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Rozmowa nieoznaczona jako ważna"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"Wyciszone"</string>
@@ -1003,9 +1003,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Przenieś w lewy dolny róg"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Przenieś w prawy dolny róg"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Zamknij"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nie wyświetlaj wątków jako dymków."</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nie wyświetlaj rozmowy jako dymku"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Czatuj, korzystając z dymków"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nowe wątki będą wyświetlane jako pływające ikony lub dymki. Kliknij, by otworzyć dymek. Przeciągnij, by go przenieść."</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nowe rozmowy będą wyświetlane jako pływające ikony lub dymki. Kliknij, by otworzyć dymek. Przeciągnij, by go przenieść."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Zarządzaj dymkami w dowolnym momencie"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Kliknij Zarządzaj, aby wyłączyć dymki z tej aplikacji"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
