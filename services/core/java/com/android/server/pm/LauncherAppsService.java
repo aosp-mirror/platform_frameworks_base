@@ -746,9 +746,8 @@ public class LauncherAppsService extends SystemService {
             }
 
             UserHandle user = UserHandle.of(injectCallingUserId());
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                    == PackageManager.PERMISSION_GRANTED) {
+            if (injectHasInteractAcrossUsersFullPermission(injectBinderCallingPid(),
+                    injectBinderCallingUid())) {
                 user = null;
             }
 
@@ -1053,29 +1052,6 @@ public class LauncherAppsService extends SystemService {
         }
 
         public static class ShortcutChangeHandler implements LauncherApps.ShortcutChangeCallback {
-
-            static class QueryInfo {
-                final long mChangedSince;
-                final String mPackage;
-                final List<String> mShortcutIds;
-                final List<LocusId> mLocusIds;
-                final ComponentName mActivity;
-                final int mQueryFlags;
-                final UserHandle mCallbackUser;
-
-                QueryInfo(long changedSince, String packageName, List<String> shortcutIds,
-                        List<LocusId> locusIds, ComponentName activity, int flags,
-                        UserHandle callbackUser) {
-                    mChangedSince = changedSince;
-                    mPackage = packageName;
-                    mShortcutIds = shortcutIds;
-                    mLocusIds = locusIds;
-                    mActivity = activity;
-                    mQueryFlags = flags;
-                    mCallbackUser = callbackUser;
-                }
-            }
-
             private final UserManagerInternal mUserManagerInternal;
 
             ShortcutChangeHandler(UserManagerInternal userManager) {
@@ -1088,9 +1064,7 @@ public class LauncherAppsService extends SystemService {
             public synchronized void addShortcutChangeCallback(IShortcutChangeCallback callback,
                     ShortcutQueryWrapper query, UserHandle user) {
                 mCallbacks.unregister(callback);
-                mCallbacks.register(callback, new QueryInfo(query.getChangedSince(),
-                        query.getPackage(), query.getShortcutIds(), query.getLocusIds(),
-                        query.getActivity(), query.getQueryFlags(), user));
+                mCallbacks.register(callback, new Pair<>(query, user));
             }
 
             public synchronized void removeShortcutChangeCallback(
@@ -1116,16 +1090,19 @@ public class LauncherAppsService extends SystemService {
 
                 for (int i = 0; i < count; i++) {
                     final IShortcutChangeCallback callback = mCallbacks.getBroadcastItem(i);
-                    final QueryInfo query = (QueryInfo) mCallbacks.getBroadcastCookie(i);
+                    final Pair<ShortcutQueryWrapper, UserHandle> cookie =
+                            (Pair<ShortcutQueryWrapper, UserHandle>)
+                                    mCallbacks.getBroadcastCookie(i);
 
-                    if (query.mCallbackUser != null && !hasUserAccess(query.mCallbackUser, user)) {
+                    final UserHandle callbackUser = cookie.second;
+                    if (callbackUser != null && !hasUserAccess(callbackUser, user)) {
                         // Callback owner does not have access to the shortcuts' user.
                         continue;
                     }
 
                     // Filter the list by query, if any matches exists, send via callback.
-                    List<ShortcutInfo> matchedList =
-                            filterShortcutsByQuery(packageName, shortcuts, query);
+                    List<ShortcutInfo> matchedList = filterShortcutsByQuery(packageName, shortcuts,
+                            cookie.first, shortcutsRemoved);
                     if (!CollectionUtils.isEmpty(matchedList)) {
                         try {
                             if (shortcutsRemoved) {
@@ -1143,21 +1120,25 @@ public class LauncherAppsService extends SystemService {
             }
 
             public static List<ShortcutInfo> filterShortcutsByQuery(String packageName,
-                    List<ShortcutInfo> shortcuts, QueryInfo query) {
-                if (query.mPackage != null && query.mPackage != packageName) {
+                    List<ShortcutInfo> shortcuts, ShortcutQueryWrapper query,
+                    boolean shortcutsRemoved) {
+                final long changedSince = query.getChangedSince();
+                final String queryPackage = query.getPackage();
+                final List<String> shortcutIds = query.getShortcutIds();
+                final List<LocusId> locusIds = query.getLocusIds();
+                final ComponentName activity = query.getActivity();
+                final int flags = query.getQueryFlags();
+
+                if (queryPackage != null && !queryPackage.equals(packageName)) {
                     return null;
                 }
 
                 List<ShortcutInfo> matches = new ArrayList<>();
 
-                final boolean matchDynamic =
-                        (query.mQueryFlags & ShortcutQuery.FLAG_MATCH_DYNAMIC) != 0;
-                final boolean matchPinned =
-                        (query.mQueryFlags & ShortcutQuery.FLAG_MATCH_PINNED) != 0;
-                final boolean matchManifest =
-                        (query.mQueryFlags & ShortcutQuery.FLAG_MATCH_MANIFEST) != 0;
-                final boolean matchCached =
-                        (query.mQueryFlags & ShortcutQuery.FLAG_MATCH_CACHED) != 0;
+                final boolean matchDynamic = (flags & ShortcutQuery.FLAG_MATCH_DYNAMIC) != 0;
+                final boolean matchPinned = (flags & ShortcutQuery.FLAG_MATCH_PINNED) != 0;
+                final boolean matchManifest = (flags & ShortcutQuery.FLAG_MATCH_MANIFEST) != 0;
+                final boolean matchCached = (flags & ShortcutQuery.FLAG_MATCH_CACHED) != 0;
                 final int shortcutFlags = (matchDynamic ? ShortcutInfo.FLAG_DYNAMIC : 0)
                         | (matchPinned ? ShortcutInfo.FLAG_PINNED : 0)
                         | (matchManifest ? ShortcutInfo.FLAG_MANIFEST : 0)
@@ -1166,24 +1147,19 @@ public class LauncherAppsService extends SystemService {
                 for (int i = 0; i < shortcuts.size(); i++) {
                     final ShortcutInfo si = shortcuts.get(i);
 
-                    if (query.mActivity != null && !query.mActivity.equals(si.getActivity())) {
+                    if (activity != null && !activity.equals(si.getActivity())) {
                         continue;
                     }
-
-                    if (query.mChangedSince != 0
-                            && query.mChangedSince > si.getLastChangedTimestamp()) {
+                    if (changedSince != 0 && changedSince > si.getLastChangedTimestamp()) {
                         continue;
                     }
-
-                    if (query.mShortcutIds != null && !query.mShortcutIds.contains(si.getId())) {
+                    if (shortcutIds != null && !shortcutIds.contains(si.getId())) {
                         continue;
                     }
-
-                    if (query.mLocusIds != null && !query.mLocusIds.contains(si.getLocusId())) {
+                    if (locusIds != null && !locusIds.contains(si.getLocusId())) {
                         continue;
                     }
-
-                    if ((shortcutFlags & si.getFlags()) != 0) {
+                    if (shortcutsRemoved || (shortcutFlags & si.getFlags()) != 0) {
                         matches.add(si);
                     }
                 }

@@ -35,7 +35,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -513,10 +513,6 @@ class ShortcutRequestPinProcessor {
 
             launcher.addPinnedShortcut(appPackageName, appUserId, shortcutId,
                     /*forPinRequest=*/ true);
-            if (changedShortcuts == null) {
-                changedShortcuts = new ArrayList<>(1);
-            }
-            changedShortcuts.add(original);
 
             if (current == null) {
                 if (DEBUG) {
@@ -526,6 +522,8 @@ class ShortcutRequestPinProcessor {
             }
 
             ps.adjustRanks(); // Shouldn't be needed, but just in case.
+
+            changedShortcuts = Collections.singletonList(ps.findShortcutById(shortcutId));
         }
 
         mService.verifyStates();

@@ -507,7 +507,8 @@ public class LauncherApps {
         /**
          * Indicates that one or more shortcuts, that match the {@link ShortcutQuery} used to
          * register this callback, have been added or updated.
-         * @see LauncherApps#registerShortcutChangeCallback(ShortcutChangeCallback, ShortcutQuery)
+         * @see LauncherApps#registerShortcutChangeCallback(ShortcutChangeCallback, ShortcutQuery,
+         * Executor)
          *
          * <p>Only the applications that are allowed to access the shortcut information,
          * as defined in {@link #hasShortcutHostPermission()}, will receive it.
@@ -525,7 +526,8 @@ public class LauncherApps {
         /**
          * Indicates that one or more shortcuts, that match the {@link ShortcutQuery} used to
          * register this callback, have been removed.
-         * @see LauncherApps#registerShortcutChangeCallback(ShortcutChangeCallback, ShortcutQuery)
+         * @see LauncherApps#registerShortcutChangeCallback(ShortcutChangeCallback, ShortcutQuery,
+         * Executor)
          *
          * <p>Only the applications that are allowed to access the shortcut information,
          * as defined in {@link #hasShortcutHostPermission()}, will receive it.
