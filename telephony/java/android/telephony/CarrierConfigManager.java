@@ -1168,6 +1168,21 @@ public class CarrierConfigManager {
             "support_ims_conference_event_package_bool";
 
     /**
+     * Determines whether processing of conference event package data received on a device other
+     * than the conference host is supported.
+     * <p>
+     * When a device A merges calls B and C into a conference it is considered the conference host
+     * and B and C are considered the conference peers.
+     * <p>
+     * When {@code true}, the conference peer will display the conference state if it receives
+     * conference event package data from the network.  When {@code false}, the conference peer will
+     * ignore conference event package data received from the network.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL =
+            "support_ims_conference_event_package_on_peer_bool";
+
+    /**
      * Determines whether High Definition audio property is displayed in the dialer UI.
      * If {@code false}, remove the HD audio property from the connection so that HD audio related
      * UI is not displayed. If {@code true}, keep HD audio property as it is configured.
@@ -3734,6 +3749,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL, true);
+        sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL, false);
         sDefaults.putInt(KEY_IMS_CONFERENCE_SIZE_LIMIT_INT, 5);
