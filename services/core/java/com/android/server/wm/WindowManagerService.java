@@ -6049,10 +6049,20 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.print("  mHasPermanentDpad="); pw.println(mHasPermanentDpad);
         mRoot.dumpTopFocusedDisplayId(pw);
         mRoot.forAllDisplays(dc -> {
+            final int displayId = dc.getDisplayId();
             final WindowState inputMethodTarget = dc.mInputMethodTarget;
             if (inputMethodTarget != null) {
-                pw.print("  mInputMethodTarget in display# "); pw.print(dc.getDisplayId());
+                pw.print("  mInputMethodTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(inputMethodTarget);
+            }
+            if (mAccessibilityController != null) {
+                final Region magnificationRegion = new Region();
+                mAccessibilityController.getMagnificationRegionLocked(displayId,
+                        magnificationRegion);
+                pw.print("  mMagnificationRegion in display# ");
+                pw.print(displayId);
+                pw.print(' ');
+                pw.println(magnificationRegion);
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
