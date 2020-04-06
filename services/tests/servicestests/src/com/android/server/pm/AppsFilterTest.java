@@ -17,7 +17,9 @@
 package com.android.server.pm;
 
 
-import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,7 +50,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +59,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.security.cert.CertificateException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -650,32 +651,32 @@ public class AppsFilterTest {
         final int hasProviderAppId = Process.FIRST_APPLICATION_UID + 1;
         final int queriesProviderAppId = Process.FIRST_APPLICATION_UID + 2;
         PackageSetting system = simulateAddPackage(appsFilter, pkg("some.system.pkg"), systemAppId);
-        PackageSetting seesNothing = simulateAddPackage(appsFilter, pkg("some.system.pkg"),
+        PackageSetting seesNothing = simulateAddPackage(appsFilter, pkg("com.some.package"),
                 seesNothingAppId);
         PackageSetting hasProvider = simulateAddPackage(appsFilter,
-                pkgWithProvider("com.some.package", "com.some.authority"), hasProviderAppId);
+                pkgWithProvider("com.some.other.package", "com.some.authority"), hasProviderAppId);
         PackageSetting queriesProvider = simulateAddPackage(appsFilter,
-                pkgQueriesProvider("com.some.other.package", "com.some.authority"),
+                pkgQueriesProvider("com.yet.some.other.package", "com.some.authority"),
                 queriesProviderAppId);
 
         final int[] systemFilter =
                 appsFilter.getVisibilityWhitelist(system, new int[]{0}, mExisting).get(0);
-        assertThat(Arrays.asList(systemFilter), arrayContaining(systemAppId));
+        assertThat(toList(systemFilter), empty());
 
         final int[] seesNothingFilter =
                 appsFilter.getVisibilityWhitelist(seesNothing, new int[]{0}, mExisting).get(0);
-        assertThat(Arrays.asList(seesNothingFilter),
-                arrayContaining(systemAppId, seesNothingAppId));
+        assertThat(toList(seesNothingFilter),
+                contains(seesNothingAppId));
 
         final int[] hasProviderFilter =
                 appsFilter.getVisibilityWhitelist(hasProvider, new int[]{0}, mExisting).get(0);
-        assertThat(Arrays.asList(hasProviderFilter),
-                arrayContaining(systemAppId, hasProviderAppId, queriesProviderAppId));
+        assertThat(toList(hasProviderFilter),
+                contains(hasProviderAppId, queriesProviderAppId));
 
         int[] queriesProviderFilter =
                 appsFilter.getVisibilityWhitelist(queriesProvider, new int[]{0}, mExisting).get(0);
-        assertThat(Arrays.asList(queriesProviderFilter),
-                arrayContaining(systemAppId, queriesProviderAppId));
+        assertThat(toList(queriesProviderFilter),
+                contains(queriesProviderAppId));
 
         // provider read
         appsFilter.grantImplicitAccess(hasProviderAppId, queriesProviderAppId);
@@ -683,11 +684,16 @@ public class AppsFilterTest {
         // ensure implicit access is included in the filter
         queriesProviderFilter =
                 appsFilter.getVisibilityWhitelist(queriesProvider, new int[]{0}, mExisting).get(0);
-        assertThat(Arrays.asList(queriesProviderFilter),
-                arrayContaining(systemAppId, hasProviderAppId, queriesProviderAppId));
+        assertThat(toList(queriesProviderFilter),
+                contains(hasProviderAppId, queriesProviderAppId));
     }
 
-    private void assertThat(List<int[]> asList, Matcher<Integer[]> arrayContainingInAnyOrder) {
+    private List<Integer> toList(int[] array) {
+        ArrayList<Integer> ret = new ArrayList<>(array.length);
+        for (int i = 0; i < array.length; i++) {
+            ret.add(i, array[i]);
+        }
+        return ret;
     }
 
     private interface WithSettingBuilder {
