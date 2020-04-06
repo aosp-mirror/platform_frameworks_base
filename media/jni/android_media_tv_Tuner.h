@@ -70,7 +70,7 @@ struct LnbCallback : public ILnbCallback {
     LnbCallback(jweak tunerObj, LnbId id);
     virtual Return<void> onEvent(LnbEventType lnbEventType);
     virtual Return<void> onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
-    jweak mObject;
+    jweak mLnb;
     LnbId mId;
 };
 
@@ -199,6 +199,7 @@ private:
     static sp<ITuner> mTuner;
     hidl_vec<FrontendId> mFeIds;
     sp<IFrontend> mFe;
+    int mFeId;
     hidl_vec<LnbId> mLnbIds;
     sp<ILnb> mLnb;
     sp<IDemux> mDemux;

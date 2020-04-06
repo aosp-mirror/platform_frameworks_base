@@ -20,12 +20,12 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Tuner.Result;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * LNB (low-noise block downconverter) for satellite tuner.
@@ -145,7 +145,8 @@ public class Lnb implements AutoCloseable {
 
     int mId;
     LnbCallback mCallback;
-    Context mContext;
+    Executor mExecutor;
+
 
     private native int nativeSetVoltage(int voltage);
     private native int nativeSetTone(int tone);
@@ -159,10 +160,20 @@ public class Lnb implements AutoCloseable {
         mId = id;
     }
 
-    void setCallback(@Nullable LnbCallback callback) {
+    void setCallback(Executor executor, @Nullable LnbCallback callback) {
         mCallback = callback;
-        if (mCallback == null) {
-            return;
+        mExecutor = executor;
+    }
+
+    private void onEvent(int eventType) {
+        if (mExecutor != null && mCallback != null) {
+            mExecutor.execute(() -> mCallback.onEvent(eventType));
+        }
+    }
+
+    private void onDiseqcMessage(byte[] diseqcMessage) {
+        if (mExecutor != null && mCallback != null) {
+            mExecutor.execute(() -> mCallback.onDiseqcMessage(diseqcMessage));
         }
     }
 
@@ -218,6 +229,9 @@ public class Lnb implements AutoCloseable {
      * Releases the LNB instance.
      */
     public void close() {
-        nativeClose();
+        int res = nativeClose();
+        if (res != Tuner.RESULT_SUCCESS) {
+            TunerUtils.throwExceptionForResult(res, "Failed to close LNB");
+        }
     }
 }
