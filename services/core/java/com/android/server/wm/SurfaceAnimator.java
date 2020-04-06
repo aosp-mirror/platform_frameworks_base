@@ -202,6 +202,11 @@ class SurfaceAnimator {
         return mAnimation != null;
     }
 
+    @AnimationType
+    int getAnimationType() {
+        return mAnimationType;
+    }
+
     /**
      * @return The current animation spec if we are running an animation, or {@code null} otherwise.
      */
@@ -453,32 +458,38 @@ class SurfaceAnimator {
      * Animation for screen rotation.
      * @hide
      */
-    static final int ANIMATION_TYPE_SCREEN_ROTATION = 2;
+    static final int ANIMATION_TYPE_SCREEN_ROTATION = 1 << 1;
 
     /**
      * Animation for dimming.
      * @hide
      */
-    static final int ANIMATION_TYPE_DIMMER = 3;
+    static final int ANIMATION_TYPE_DIMMER = 1 << 2;
 
     /**
      * Animation for recent apps.
      * @hide
      */
-    static final int ANIMATION_TYPE_RECENTS = 4;
+    static final int ANIMATION_TYPE_RECENTS = 1 << 3;
 
     /**
      * Animation for a {@link WindowState} without animating the activity.
      * @hide
      */
-    static final int ANIMATION_TYPE_WINDOW_ANIMATION = 5;
+    static final int ANIMATION_TYPE_WINDOW_ANIMATION = 1 << 4;
 
     /**
      * Animation to control insets. This is actually not an animation, but is used to give the
      * client a leash over the system window causing insets.
      * @hide
      */
-    static final int ANIMATION_TYPE_INSETS_CONTROL = 6;
+    static final int ANIMATION_TYPE_INSETS_CONTROL = 1 << 5;
+
+    /**
+     * Bitmask to include all animation types. This is NOT an {@link AnimationType}
+     * @hide
+     */
+    static final int ANIMATION_TYPE_ALL = -1;
 
     /**
      * The type of the animation.
