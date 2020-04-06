@@ -1494,9 +1494,7 @@ public class DisplayPolicy {
         final int behavior = mLastBehavior;
         boolean navVisible = ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL
                 ? (sysui & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0
-                : mNavigationBar != null && mNavigationBar.getControllableInsetProvider() != null
-                        && mNavigationBar.getControllableInsetProvider().isClientVisible()
-                        && !mDisplayContent.getInsetsPolicy().isTransient(ITYPE_NAVIGATION_BAR);
+                : isNavigationBarRequestedVisible();
         boolean navTranslucent = (sysui
                 & (View.NAVIGATION_BAR_TRANSLUCENT | View.NAVIGATION_BAR_TRANSPARENT)) != 0;
         boolean immersive = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0
@@ -1531,6 +1529,14 @@ public class DisplayPolicy {
         mLastNavTranslucent = navTranslucent;
         mLastNavAllowedHidden = navAllowedHidden;
         mLastNotificationShadeForcesShowingNavigation = notificationShadeForcesShowingNavigation;
+    }
+
+    boolean isNavigationBarRequestedVisible() {
+        final InsetsSourceProvider provider =
+                mDisplayContent.getInsetsStateController().peekSourceProvider(ITYPE_NAVIGATION_BAR);
+        return provider == null
+                ? InsetsState.getDefaultVisibility(ITYPE_NAVIGATION_BAR)
+                : provider.isClientVisible();
     }
 
     void updateHideNavInputEventReceiver(boolean navVisible, boolean navAllowedHidden) {
