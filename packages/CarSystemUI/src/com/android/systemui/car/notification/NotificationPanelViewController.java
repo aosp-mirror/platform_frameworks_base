@@ -599,6 +599,11 @@ public class NotificationPanelViewController extends OverlayViewController {
         }
     }
 
+    /** Returns {@code true} if the notification panel is expanded. */
+    public boolean isPanelExpanded() {
+        return mPanelExpanded;
+    }
+
     /** Sets the unseen count listener. */
     public void setOnUnseenCountUpdateListener(OnUnseenCountUpdateListener listener) {
         mUnseenCountUpdateListener = listener;
