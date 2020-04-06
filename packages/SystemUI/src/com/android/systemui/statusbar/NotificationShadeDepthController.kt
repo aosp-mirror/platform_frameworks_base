@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.WallpaperManager
 import android.util.Log
+import android.util.MathUtils
 import android.view.Choreographer
 import android.view.View
 import androidx.annotation.VisibleForTesting
@@ -185,7 +186,10 @@ class NotificationShadeDepthController @Inject constructor(
     private fun updateShadeBlur() {
         var newBlur = 0
         if (statusBarStateController.state == StatusBarState.SHADE) {
-            newBlur = blurUtils.blurRadiusOfRatio(shadeExpansion)
+            val animatedBlur =
+                    Interpolators.SHADE_ANIMATION.getInterpolation(
+                            MathUtils.constrain(shadeExpansion / 0.15f, 0f, 1f))
+            newBlur = blurUtils.blurRadiusOfRatio(0.35f * animatedBlur + 0.65f * shadeExpansion)
         }
 
         shadeSpring.animateTo(newBlur)
