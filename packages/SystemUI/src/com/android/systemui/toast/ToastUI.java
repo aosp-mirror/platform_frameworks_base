@@ -24,10 +24,10 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.IAccessibilityManager;
 import android.widget.ToastPresenter;
 
 import com.android.internal.R;
@@ -48,9 +48,8 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "ToastUI";
 
     private final CommandQueue mCommandQueue;
-    private final WindowManager mWindowManager;
     private final INotificationManager mNotificationManager;
-    private final AccessibilityManager mAccessibilityManager;
+    private final IAccessibilityManager mAccessibilityManager;
     private final int mGravity;
     private final int mY;
     @Nullable private ToastPresenter mPresenter;
@@ -59,18 +58,17 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
     @Inject
     public ToastUI(Context context, CommandQueue commandQueue) {
         this(context, commandQueue,
-                (WindowManager) context.getSystemService(Context.WINDOW_SERVICE),
                 INotificationManager.Stub.asInterface(
                         ServiceManager.getService(Context.NOTIFICATION_SERVICE)),
-                AccessibilityManager.getInstance(context));
+                IAccessibilityManager.Stub.asInterface(
+                        ServiceManager.getService(Context.ACCESSIBILITY_SERVICE)));
     }
 
     @VisibleForTesting
-    ToastUI(Context context, CommandQueue commandQueue, WindowManager windowManager,
-            INotificationManager notificationManager, AccessibilityManager accessibilityManager) {
+    ToastUI(Context context, CommandQueue commandQueue, INotificationManager notificationManager,
+            @Nullable IAccessibilityManager accessibilityManager) {
         super(context);
         mCommandQueue = commandQueue;
-        mWindowManager = windowManager;
         mNotificationManager = notificationManager;
         mAccessibilityManager = accessibilityManager;
         Resources resources = mContext.getResources();
@@ -85,15 +83,16 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
 
     @Override
     @MainThread
-    public void showToast(String packageName, IBinder token, CharSequence text,
+    public void showToast(int uid, String packageName, IBinder token, CharSequence text,
             IBinder windowToken, int duration, @Nullable ITransientNotificationCallback callback) {
         if (mPresenter != null) {
             hideCurrentToast();
         }
-        View view = ToastPresenter.getTextToastView(mContext, text);
+        Context context = mContext.createContextAsUser(UserHandle.getUserHandleForUid(uid), 0);
+        View view = ToastPresenter.getTextToastView(context, text);
         mCallback = callback;
-        mPresenter = new ToastPresenter(mContext, mWindowManager, mAccessibilityManager,
-                mNotificationManager, packageName);
+        mPresenter = new ToastPresenter(context, mAccessibilityManager, mNotificationManager,
+                packageName);
         mPresenter.show(view, token, windowToken, duration, mGravity, 0, mY, 0, 0, mCallback);
     }
 
