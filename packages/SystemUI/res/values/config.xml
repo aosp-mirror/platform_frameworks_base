@@ -533,4 +533,12 @@
          This config value should contain the package name of that preferred application.
     -->
     <string translatable="false" name="config_controlsPreferredPackage"></string>
+
+    <!-- Max number of columns for quick controls area -->
+    <integer name="controls_max_columns">2</integer>
+    <!-- If the dp width of the available space is <= this value, potentially adjust the number
+         of columns-->
+    <integer name="controls_max_columns_adjust_below_width_dp">320</integer>
+    <!-- If the config font scale is >= this value, potentially adjust the number of columns-->
+    <item name="controls_max_columns_adjust_above_font_scale" translatable="false" format="float" type="dimen">1.25</item>
 </resources>
