@@ -221,7 +221,28 @@ public:
 };
 
 class MockAppOpsManager : public AppOpsManagerWrapper {
+public:
+    MOCK_CONST_METHOD3(checkPermission, binder::Status(const char*, const char*, const char*));
     MOCK_METHOD3(startWatchingMode, void(int32_t, const String16&, const sp<IAppOpsCallback>&));
+    MOCK_METHOD1(stopWatchingMode, void(const sp<IAppOpsCallback>&));
+
+    void checkPermissionSuccess() {
+        ON_CALL(*this, checkPermission(_, _, _)).WillByDefault(Return(android::incremental::Ok()));
+    }
+    void checkPermissionFails() {
+        ON_CALL(*this, checkPermission(_, _, _))
+                .WillByDefault(
+                        Return(android::incremental::Exception(binder::Status::EX_SECURITY, {})));
+    }
+    void initializeStartWatchingMode() {
+        ON_CALL(*this, startWatchingMode(_, _, _))
+                .WillByDefault(Invoke(this, &MockAppOpsManager::storeCallback));
+    }
+    void storeCallback(int32_t, const String16&, const sp<IAppOpsCallback>& cb) {
+        mStoredCallback = cb;
+    }
+
+    sp<IAppOpsCallback> mStoredCallback;
 };
 
 class MockServiceManager : public ServiceManagerWrapper {
@@ -418,15 +439,71 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccess) {
     mVold->setIncFsMountOptionsSuccess();
     mDataLoaderManager->initializeDataLoaderSuccess();
     mDataLoaderManager->getDataLoaderSuccess();
+    mAppOpsManager->checkPermissionSuccess();
     EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, _));
+    // We are calling setIncFsMountOptions(true).
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true)).Times(1);
+    // After setIncFsMountOptions succeeded expecting to start watching.
+    EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
+    // Not expecting callback removal.
+    EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
     ASSERT_GE(mIncrementalService->setStorageParams(storageId, true), 0);
+}
+
+TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndPermissionChanged) {
+    mVold->mountIncFsSuccess();
+    mIncFs->makeFileSuccess();
+    mVold->bindMountSuccess();
+    mVold->setIncFsMountOptionsSuccess();
+    mDataLoaderManager->initializeDataLoaderSuccess();
+    mDataLoaderManager->getDataLoaderSuccess();
+    mAppOpsManager->checkPermissionSuccess();
+    mAppOpsManager->initializeStartWatchingMode();
+    EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    // We are calling setIncFsMountOptions(true).
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true)).Times(1);
+    // setIncFsMountOptions(false) is called on the callback.
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false)).Times(1);
+    // After setIncFsMountOptions succeeded expecting to start watching.
+    EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
+    // After callback is called, disable read logs and remove callback.
+    EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(1);
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_GE(mIncrementalService->setStorageParams(storageId, true), 0);
+    ASSERT_NE(nullptr, mAppOpsManager->mStoredCallback.get());
+    mAppOpsManager->mStoredCallback->opChanged(0, {});
+}
+
+TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsCheckPermissionFails) {
+    mVold->mountIncFsSuccess();
+    mIncFs->makeFileSuccess();
+    mVold->bindMountSuccess();
+    mDataLoaderManager->initializeDataLoaderSuccess();
+    mDataLoaderManager->getDataLoaderSuccess();
+    mAppOpsManager->checkPermissionFails();
+    EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    // checkPermission fails, no calls to set opitions,  start or stop WatchingMode.
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true)).Times(0);
+    EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(0);
+    EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_LT(mIncrementalService->setStorageParams(storageId, true), 0);
 }
 
 TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsFails) {
@@ -436,9 +513,14 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsFails) {
     mVold->setIncFsMountOptionsFails();
     mDataLoaderManager->initializeDataLoaderSuccess();
     mDataLoaderManager->getDataLoaderSuccess();
+    mAppOpsManager->checkPermissionSuccess();
     EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, _));
+    // We are calling setIncFsMountOptions.
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true)).Times(1);
+    // setIncFsMountOptions fails, no calls to start or stop WatchingMode.
+    EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(0);
+    EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
