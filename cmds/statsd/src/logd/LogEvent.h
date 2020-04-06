@@ -218,9 +218,6 @@ private:
      * The below three variables are only valid during the execution of
      * parseBuffer. There are no guarantees about the state of these variables
      * before/after.
-     *
-     * TODO (b/150312423): These shouldn't be member variables. We should pass
-     * them around as parameters.
      */
     uint8_t* mBuf;
     uint32_t mRemainingLen; // number of valid bytes left in the buffer being parsed
