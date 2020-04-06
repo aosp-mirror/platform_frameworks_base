@@ -1241,7 +1241,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private void applySurfaceTransforms(SurfaceControl surface, SurfaceControl.Transaction t,
             Rect position, long frameNumber) {
         final ViewRootImpl viewRoot = getViewRootImpl();
-        if (frameNumber > 0 && viewRoot != null && !viewRoot.useBLAST()) {
+        if (frameNumber > 0 && viewRoot != null && !viewRoot.isDrawingToBLASTTransaction()) {
             t.deferTransactionUntil(surface, viewRoot.getRenderSurfaceControl(),
                     frameNumber);
         }
@@ -1258,7 +1258,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void setParentSpaceRectangle(Rect position, long frameNumber) {
         final ViewRootImpl viewRoot = getViewRootImpl();
-        final boolean useBLAST = viewRoot.useBLAST();
+        final boolean useBLAST = viewRoot.isDrawingToBLASTTransaction();
         final SurfaceControl.Transaction t = useBLAST ? viewRoot.getBLASTSyncTransaction() :
             mRtTransaction;
 
@@ -1319,7 +1319,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         @Override
         public void positionLost(long frameNumber) {
             final ViewRootImpl viewRoot = getViewRootImpl();
-            boolean useBLAST = viewRoot != null && viewRoot.useBLAST();
+            boolean useBLAST = viewRoot != null && viewRoot.isDrawingToBLASTTransaction();
             if (DEBUG) {
                 Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
                         System.identityHashCode(this), frameNumber));
