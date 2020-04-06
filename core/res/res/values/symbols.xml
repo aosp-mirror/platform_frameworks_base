@@ -1546,6 +1546,7 @@
   <java-symbol type="layout" name="select_dialog" />
   <java-symbol type="layout" name="simple_dropdown_hint" />
   <java-symbol type="layout" name="status_bar_latest_event_content" />
+  <java-symbol type="layout" name="system_user_home" />
   <java-symbol type="layout" name="text_edit_action_popup_text" />
   <java-symbol type="layout" name="text_drag_thumbnail" />
   <java-symbol type="layout" name="typing_filter" />
