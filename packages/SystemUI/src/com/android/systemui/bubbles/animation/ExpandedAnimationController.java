@@ -323,6 +323,9 @@ public class ExpandedAnimationController
 
     /** Plays a dismiss animation on the dragged out bubble. */
     public void dismissDraggedOutBubble(View bubble, Runnable after) {
+        if (bubble == null) {
+            return;
+        }
         animationForChild(bubble)
                 .withStiffness(SpringForce.STIFFNESS_HIGH)
                 .scaleX(1.1f)
