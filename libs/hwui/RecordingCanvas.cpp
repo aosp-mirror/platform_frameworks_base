@@ -132,9 +132,9 @@ struct SaveBehind final : Op {
 
 struct Concat44 final : Op {
     static const auto kType = Type::Concat44;
-    Concat44(const SkScalar m[16]) { memcpy(colMajor, m, sizeof(colMajor)); }
-    SkScalar colMajor[16];
-    void draw(SkCanvas* c, const SkMatrix&) const { c->concat44(colMajor); }
+    Concat44(const SkM44& m) : matrix(m) {}
+    SkM44 matrix;
+    void draw(SkCanvas* c, const SkMatrix&) const { c->concat(matrix); }
 };
 struct Concat final : Op {
     static const auto kType = Type::Concat;
@@ -573,8 +573,8 @@ void DisplayListData::saveBehind(const SkRect* subset) {
     this->push<SaveBehind>(0, subset);
 }
 
-void DisplayListData::concat44(const SkScalar colMajor[16]) {
-    this->push<Concat44>(0, colMajor);
+void DisplayListData::concat(const SkM44& m) {
+    this->push<Concat44>(0, m);
 }
 void DisplayListData::concat(const SkMatrix& matrix) {
     this->push<Concat>(0, matrix);
@@ -838,7 +838,7 @@ bool RecordingCanvas::onDoSaveBehind(const SkRect* subset) {
 }
 
 void RecordingCanvas::didConcat44(const SkScalar colMajor[16]) {
-    fDL->concat44(colMajor);
+    fDL->concat(SkM44::ColMajor(colMajor));
 }
 void RecordingCanvas::didConcat(const SkMatrix& matrix) {
     fDL->concat(matrix);
