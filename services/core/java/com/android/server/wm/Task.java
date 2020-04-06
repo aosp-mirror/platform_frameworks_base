@@ -4106,20 +4106,18 @@ class Task extends WindowContainer<WindowContainer> {
      * Any time any of these conditions are updated, the updating code should call
      * sendTaskAppeared.
      */
-    private boolean taskAppearedReady() {
+    boolean taskAppearedReady() {
         return mSurfaceControl != null && mTaskOrganizer != null && getHasBeenVisible();
     }
 
     private void sendTaskAppeared() {
-        if (taskAppearedReady() && !mTaskAppearedSent) {
-            mTaskAppearedSent = true;
+        if (mTaskOrganizer != null) {
             mAtmService.mTaskOrganizerController.onTaskAppeared(mTaskOrganizer, this);
         }
     }
 
     private void sendTaskVanished() {
-        if (mTaskOrganizer != null && mTaskAppearedSent) {
-            mTaskAppearedSent = false;
+        if (mTaskOrganizer != null) {
             mAtmService.mTaskOrganizerController.onTaskVanished(mTaskOrganizer, this);
         }
    }
