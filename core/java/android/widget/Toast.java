@@ -43,7 +43,7 @@ import android.os.ServiceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.IAccessibilityManager;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -610,10 +610,10 @@ public class Toast {
          */
         TN(Context context, String packageName, Binder token, List<Callback> callbacks,
                 @Nullable Looper looper) {
-            WindowManager windowManager = context.getSystemService(WindowManager.class);
-            AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(context);
-            mPresenter = new ToastPresenter(context, windowManager, accessibilityManager,
-                    getService(), packageName);
+            IAccessibilityManager accessibilityManager = IAccessibilityManager.Stub.asInterface(
+                    ServiceManager.getService(Context.ACCESSIBILITY_SERVICE));
+            mPresenter = new ToastPresenter(context, accessibilityManager, getService(),
+                    packageName);
             mParams = mPresenter.getLayoutParams();
             mPackageName = packageName;
             mToken = token;
