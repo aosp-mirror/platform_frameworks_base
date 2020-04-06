@@ -829,6 +829,9 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
+        if (mLnb != null) {
+            mLnb.setCallback(executor, cb);
+        }
         return mLnb;
     }
 
@@ -847,7 +850,11 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(name, "LNB name must not be null");
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
-        return nativeOpenLnbByName(name);
+        mLnb = nativeOpenLnbByName(name);
+        if (mLnb != null) {
+            mLnb.setCallback(executor, cb);
+        }
+        return mLnb;
     }
 
     private boolean requestLnb() {
@@ -870,12 +877,6 @@ public class Tuner implements AutoCloseable  {
     public TimeFilter openTimeFilter() {
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
         return nativeOpenTimeFilter();
-    }
-
-    private void onLnbEvent(int eventType) {
-        if (mHandler != null) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_ON_LNB_EVENT, eventType, 0));
-        }
     }
 
     /**
