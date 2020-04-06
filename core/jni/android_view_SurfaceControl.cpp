@@ -837,9 +837,16 @@ static jobject convertDeviceProductInfoToJavaObject(
     } else {
         LOG_FATAL("Unknown alternative for variant DeviceProductInfo::ManufactureOrModelDate");
     }
+    auto relativeAddress = env->NewIntArray(info->relativeAddress.size());
+    auto relativeAddressData = env->GetIntArrayElements(relativeAddress, nullptr);
+    for (int i = 0; i < info->relativeAddress.size(); i++) {
+        relativeAddressData[i] = info->relativeAddress[i];
+    }
+    env->ReleaseIntArrayElements(relativeAddress, relativeAddressData, 0);
 
     return env->NewObject(gDeviceProductInfoClassInfo.clazz, gDeviceProductInfoClassInfo.ctor, name,
-                          manufacturerPnpId, productId, modelYear, manufactureDate);
+                          manufacturerPnpId, productId, modelYear, manufactureDate,
+                          relativeAddress);
 }
 
 static jobject nativeGetDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj) {
@@ -1674,7 +1681,8 @@ int register_android_view_SurfaceControl(JNIEnv* env)
                              "Ljava/lang/String;"
                              "Ljava/lang/String;"
                              "Ljava/lang/Integer;"
-                             "Landroid/hardware/display/DeviceProductInfo$ManufactureDate;)V");
+                             "Landroid/hardware/display/DeviceProductInfo$ManufactureDate;"
+                             "[I)V");
 
     jclass deviceProductInfoManufactureDateClazz =
             FindClassOrDie(env, "android/hardware/display/DeviceProductInfo$ManufactureDate");
