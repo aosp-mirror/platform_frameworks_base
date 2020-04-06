@@ -114,6 +114,8 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         DEAD
     };
 
+    private Boolean mCaptureState;
+
     private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
     private final @NonNull Context mContext;
     private Map<Integer, Set<ModuleService>> mModules;
@@ -224,6 +226,11 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             mDelegate.setCaptureState(active);
         } catch (Exception e) {
             throw handleException(e);
+        } finally {
+            // It is safe to lock here - local operation.
+            synchronized (this) {
+                mCaptureState = active;
+            }
         }
     }
 
@@ -274,8 +281,11 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 "This implementation is not inteded to be used directly with Binder.");
     }
 
-    @Override public void dump(PrintWriter pw) {
+    @Override
+    public void dump(PrintWriter pw) {
         synchronized (this) {
+            pw.printf("Capture state is %s\n", mCaptureState == null ? "uninitialized"
+                    : (mCaptureState ? "active" : "inactive"));
             if (mModules != null) {
                 for (int handle : mModules.keySet()) {
                     pw.println("=========================================");
