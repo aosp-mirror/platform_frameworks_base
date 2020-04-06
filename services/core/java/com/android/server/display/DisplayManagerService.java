@@ -1362,7 +1362,8 @@ public final class DisplayManagerService extends SystemService {
         return null;
     }
 
-    private SurfaceControl.ScreenshotGraphicBuffer screenshotInternal(int displayId) {
+    private SurfaceControl.ScreenshotGraphicBuffer screenshotInternal(int displayId,
+            boolean captureSecureLayer) {
         synchronized (mSyncRoot) {
             final IBinder token = getDisplayToken(displayId);
             if (token == null) {
@@ -1374,9 +1375,15 @@ public final class DisplayManagerService extends SystemService {
             }
 
             final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
-            return SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(token, new Rect(),
-                    displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight(),
-                    false /* useIdentityTransform */, 0 /* rotation */);
+            if (captureSecureLayer) {
+                return SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(token, new Rect(),
+                        displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight(),
+                        false /* useIdentityTransform */, 0 /* rotation */);
+            } else {
+                return SurfaceControl.screenshotToBuffer(token, new Rect(),
+                        displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight(),
+                        false /* useIdentityTransform */, 0 /* rotation */);
+            }
         }
     }
 
@@ -2494,7 +2501,12 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public SurfaceControl.ScreenshotGraphicBuffer screenshot(int displayId) {
-            return screenshotInternal(displayId);
+            return screenshotInternal(displayId, true);
+        }
+
+        @Override
+        public SurfaceControl.ScreenshotGraphicBuffer screenshotWithoutSecureLayer(int displayId) {
+            return screenshotInternal(displayId, false);
         }
 
         @Override
