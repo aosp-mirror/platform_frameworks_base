@@ -3014,6 +3014,10 @@ public final class ViewRootImpl implements ViewParent,
         if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
             reportNextDraw();
         }
+        if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC) != 0) {
+            reportNextDraw();
+            setUseBLASTSyncTransaction();
+        }
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
 
@@ -3722,7 +3726,7 @@ public final class ViewRootImpl implements ViewParent,
             if (needFrameCompleteCallback) {
                 final Handler handler = mAttachInfo.mHandler;
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
-                        finishBLASTSync();
+                        finishBLASTSync(!reportNextDraw);
                         handler.postAtFrontOfQueue(() -> {
                             if (reportNextDraw) {
                                 // TODO: Use the frame number
@@ -3756,7 +3760,7 @@ public final class ViewRootImpl implements ViewParent,
             if (usingAsyncReport && !canUseAsync) {
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback(null);
                 usingAsyncReport = false;
-                finishBLASTSync();
+                finishBLASTSync(true /* apply */);
             }
         } finally {
             mIsDrawing = false;
@@ -9572,10 +9576,15 @@ public final class ViewRootImpl implements ViewParent,
         mNextDrawUseBLASTSyncTransaction = true;
     }
 
-    private void finishBLASTSync() {
+    private void finishBLASTSync(boolean apply) {
         if (mNextReportConsumeBLAST) {
             mNextReportConsumeBLAST = false;
-            mRtBLASTSyncTransaction.apply();
+
+            if (apply) {
+                mRtBLASTSyncTransaction.apply();
+            } else {
+                mSurfaceChangedTransaction.merge(mRtBLASTSyncTransaction);
+            }
         }
     }
 

@@ -2575,4 +2575,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         return willSync;
     }
+
+    boolean useBLASTSync() {
+        return mUsingBLASTSyncTransaction;
+    }
 }
