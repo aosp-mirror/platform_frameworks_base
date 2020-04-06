@@ -81,7 +81,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
         RUNNING,      // start() called, and the stacked iface is known to be up.
     }
 
-    private IpPrefix mNat64Prefix;
+    private IpPrefix mNat64PrefixFromDns;
     private String mBaseIface;
     private String mIface;
     private Inet6Address mIPv6Address;
@@ -100,7 +100,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
      * currently connected and where the NetworkAgent has not disabled 464xlat. It is the signal to
      * enable NAT64 prefix discovery.
      *
-     * @param network the NetworkAgentInfo corresponding to the network.
+     * @param nai the NetworkAgentInfo corresponding to the network.
      * @return true if the network requires clat, false otherwise.
      */
     @VisibleForTesting
@@ -180,7 +180,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
 
         String addrStr = null;
         try {
-            addrStr = mNetd.clatdStart(baseIface, mNat64Prefix.toString());
+            addrStr = mNetd.clatdStart(baseIface, getNat64Prefix().toString());
         } catch (RemoteException | ServiceSpecificException e) {
             Slog.e(TAG, "Error starting clatd on " + baseIface + ": " + e);
         }
@@ -318,8 +318,12 @@ public class Nat464Xlat extends BaseNetworkObserver {
         }
     }
 
-    public void setNat64Prefix(IpPrefix nat64Prefix) {
-        mNat64Prefix = nat64Prefix;
+    private IpPrefix getNat64Prefix() {
+        return mNat64PrefixFromDns;
+    }
+
+    public void setNat64PrefixFromDns(IpPrefix prefix) {
+        mNat64PrefixFromDns = prefix;
     }
 
     /**
@@ -328,7 +332,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
      * has no idea that 464xlat is running on top of it.
      */
     public void fixupLinkProperties(@NonNull LinkProperties oldLp, @NonNull LinkProperties lp) {
-        lp.setNat64Prefix(mNat64Prefix);
+        lp.setNat64Prefix(getNat64Prefix());
 
         if (!isRunning()) {
             return;
