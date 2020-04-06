@@ -1079,29 +1079,26 @@ jobject JTuner::getFrontendInfo(int id) {
             maxSymbolRate, acquireRange, exclusiveGroupId, statusCaps, jcaps);
 }
 
-jobject JTuner::getLnbIds() {
+jintArray JTuner::getLnbIds() {
     ALOGD("JTuner::getLnbIds()");
-    mTuner->getLnbIds([&](Result, const hidl_vec<FrontendId>& lnbIds) {
-        mLnbIds = lnbIds;
+    Result res;
+    hidl_vec<LnbId> lnbIds;
+    mTuner->getLnbIds([&](Result r, const hidl_vec<LnbId>& ids) {
+        lnbIds = ids;
+        res = r;
     });
-    if (mLnbIds.size() == 0) {
+    if (res != Result::SUCCESS || mLnbIds.size() == 0) {
         ALOGW("Lnb isn't available");
         return NULL;
     }
 
+    mLnbIds = lnbIds;
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass arrayListClazz = env->FindClass("java/util/ArrayList");
-    jmethodID arrayListAdd = env->GetMethodID(arrayListClazz, "add", "(Ljava/lang/Object;)Z");
-    jobject obj = env->NewObject(arrayListClazz, env->GetMethodID(arrayListClazz, "<init>", "()V"));
 
-    jclass integerClazz = env->FindClass("java/lang/Integer");
-    jmethodID intInit = env->GetMethodID(integerClazz, "<init>", "(I)V");
+    jintArray ids = env->NewIntArray(mLnbIds.size());
+    env->SetIntArrayRegion(ids, 0, mLnbIds.size(), reinterpret_cast<jint*>(&mLnbIds[0]));
 
-    for (int i=0; i < mLnbIds.size(); i++) {
-       jobject idObj = env->NewObject(integerClazz, intInit, mLnbIds[i]);
-       env->CallBooleanMethod(obj, arrayListAdd, idObj);
-    }
-    return obj;
+    return ids;
 }
 
 jobject JTuner::openLnbById(int id) {
@@ -2405,7 +2402,7 @@ static jobject android_media_tv_Tuner_get_frontend_info(JNIEnv *env, jobject thi
     return tuner->getFrontendInfo(id);
 }
 
-static jobject android_media_tv_Tuner_get_lnb_ids(JNIEnv *env, jobject thiz) {
+static jintArray android_media_tv_Tuner_get_lnb_ids(JNIEnv *env, jobject thiz) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->getLnbIds();
 }
@@ -3415,8 +3412,7 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_filter },
     { "nativeOpenTimeFilter", "()Landroid/media/tv/tuner/filter/TimeFilter;",
             (void *)android_media_tv_Tuner_open_time_filter },
-    { "nativeGetLnbIds", "()Ljava/util/List;",
-            (void *)android_media_tv_Tuner_get_lnb_ids },
+    { "nativeGetLnbIds", "()[I", (void *)android_media_tv_Tuner_get_lnb_ids },
     { "nativeOpenLnbByHandle", "(I)Landroid/media/tv/tuner/Lnb;",
             (void *)android_media_tv_Tuner_open_lnb_by_handle },
     { "nativeOpenLnbByName", "(Ljava/lang/String;)Landroid/media/tv/tuner/Lnb;",
