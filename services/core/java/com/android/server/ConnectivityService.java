@@ -3153,7 +3153,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        nai.clatd.setNat64Prefix(prefix);
+        nai.clatd.setNat64PrefixFromDns(prefix);
         handleUpdateLinkProperties(nai, new LinkProperties(nai.linkProperties));
     }
 
@@ -5865,9 +5865,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull LinkProperties oldLp) {
         int netId = networkAgent.network.netId;
 
-        // The NetworkAgentInfo does not know whether clatd is running on its network or not, or
-        // whether there is a NAT64 prefix. Before we do anything else, make sure its LinkProperties
-        // are accurate.
+        // The NetworkAgent does not know whether clatd is running on its network or not, or whether
+        // a NAT64 prefix was discovered by the DNS resolver. Before we do anything else, make sure
+        // the LinkProperties for the network are accurate.
         networkAgent.clatd.fixupLinkProperties(oldLp, newLp);
 
         updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities,
