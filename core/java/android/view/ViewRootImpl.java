@@ -9610,4 +9610,12 @@ public final class ViewRootImpl implements ViewParent,
     boolean useBLAST() {
         return mUseBLASTAdapter;
     }
+
+    /**
+     * Returns true if we are about to or currently processing a draw directed
+     * in to a BLAST transaction.
+     */
+    boolean isDrawingToBLASTTransaction() {
+        return mNextReportConsumeBLAST;
+    }
 }
