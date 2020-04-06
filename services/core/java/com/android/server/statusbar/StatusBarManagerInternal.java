@@ -131,7 +131,7 @@ public interface StatusBarManagerInternal {
      * @see com.android.internal.statusbar.IStatusBar#showToast(String, IBinder, CharSequence,
      * IBinder, int, ITransientNotificationCallback)
      */
-    void showToast(String packageName, IBinder token, CharSequence text,
+    void showToast(int uid, String packageName, IBinder token, CharSequence text,
             IBinder windowToken, int duration,
             @Nullable ITransientNotificationCallback textCallback);
 

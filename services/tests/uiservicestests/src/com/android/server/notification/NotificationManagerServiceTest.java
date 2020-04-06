@@ -4791,7 +4791,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // enqueue toast -> no toasts enqueued
         ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
                 "Text", 2000, 0, null);
-        verify(mStatusBar).showToast(any(), any(), any(), any(), anyInt(), any());
+        verify(mStatusBar).showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
     }
 
     @Test
