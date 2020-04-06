@@ -544,8 +544,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Podaci o profilu"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Prije nego vam se omogući kreiranje ograničenog profila, morate postaviti zaključavanje ekrana da biste zaštitili svoje aplikacije i lične podatke."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Postaviti zaključavanje"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Prelazak na korisnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Dodavanje gosta"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Uklanjanje gosta"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Prebaci na korisnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Dodaj gosta"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gost"</string>
 </resources>

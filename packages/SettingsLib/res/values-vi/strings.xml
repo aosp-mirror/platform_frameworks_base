@@ -206,11 +206,11 @@
     <string name="enable_adb" msgid="8072776357237289039">"Gỡ lỗi qua USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Bật chế độ gỡ lỗi khi kết nối USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Thu hồi ủy quyền gỡ lỗi USB"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Gỡ lỗi không dây"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Gỡ lỗi qua Wi-Fi"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Chế độ gỡ lỗi khi có kết nối Wi-Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Lỗi"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"Gỡ lỗi không dây"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Để xem và sử dụng các thiết bị có sẵn, hãy bật tính năng gỡ lỗi không dây"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Gỡ lỗi qua Wi-Fi"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Để xem và sử dụng các thiết bị có sẵn, hãy bật tính năng gỡ lỗi qua Wi-Fi"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Ghép nối thiết bị bằng mã QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Ghép nối các thiết bị mới bằng Trình quét mã QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Ghép nối thiết bị bằng mã ghép nối"</string>
@@ -300,8 +300,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Sử dụng tính năng tăng tốc phần cứng khi chia sẻ kết nối nếu có"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Cho phép gỡ lỗi qua USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Gỡ lỗi USB chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị của bạn mà không thông báo và đọc dữ liệu nhật ký."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Bật tính năng gỡ lỗi không dây?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Tính năng gỡ lỗi không dây chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị mà không thông báo và đọc dữ liệu nhật ký."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Bật tính năng gỡ lỗi qua Wi-Fi?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Tính năng gỡ lỗi qua Wi-Fi chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị mà không thông báo và đọc dữ liệu nhật ký."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Thu hồi quyền truy cập gỡ lỗi USB từ tất cả máy tính mà bạn đã ủy quyền trước đó?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Cho phép cài đặt phát triển?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Những cài đặt này chỉ dành cho mục đích phát triển. Chúng có thể làm cho thiết bị và ứng dụng trên thiết bị của bạn bị lỗi và hoạt động sai."</string>
@@ -543,12 +543,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Thông tin hồ sơ"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Trước khi bạn có thể tạo tiểu sử bị hạn chế, bạn sẽ cần thiết lập một màn hình khóa để bảo vệ các ứng dụng và dữ liệu cá nhân của bạn."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Thiết lập khóa"</string>
-    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (3482026122932643557) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
-    <skip />
-    <!-- no translation found for guest_nickname (6332276931583337261) -->
-    <skip />
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Chuyển sang <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Thêm khách"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Xóa phiên khách"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Khách"</string>
 </resources>

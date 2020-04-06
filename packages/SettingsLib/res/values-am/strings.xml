@@ -206,11 +206,11 @@
     <string name="enable_adb" msgid="8072776357237289039">"የUSB አራሚ"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB ሲያያዝ የአርም ሁኔታ"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"የዩ ኤስ ቢ ስህተት ማረም ፈቀዳዎችን ይሻሩ"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"ገመድ-አልባ ማረም"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"ገመድ-አልባ debugging"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi ሲገናኝ የማረም ሁነታ"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ስህተት"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"ገመድ-አልባ ማረም"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"የሚገኙ መሣሪያዎችን ለመመልከትና ለመጠቀም ገመድ-አልባ ማረምን ያብሩ"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"ገመድ-አልባ debugging"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"የሚገኙ መሣሪያዎችን ለመመልከትና ለመጠቀም ገመድ-አልባ debuggingን ያብሩ"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"የQR ኮድን በመጠቀም መሣሪያን ያጣምሩ"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"የQR ኮድ መቃኛን በመጠቀም አዲስ መሣሪያዎችን ያጣምሩ"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"የማጣመሪያ ኮድን በመጠቀም መሣሪያን ያጣምሩ"</string>
@@ -300,8 +300,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"የሃርድዌር ማቀላጠፊያን ማስተሳሰርን የሚገኝ ከሆነ ይጠቀሙ"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"የUSB ማረሚያ ይፈቀድ?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"የUSB አድስ ለግንባታ አላማ ብቻ የታሰበ ነው። ከኮምፒዩተርህ ወደ መሳሪያህ ውሂብ ለመገልበጥ፣ መሣሪያህ ላይ ያለ ማሳወቂያ መተግበሪያዎችን መጫን፣ እና ማስታወሻ ውሂብ ማንበብ ለመጠቀም ይቻላል።"</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"ገመድ-አልባ ማረም ይፈቀድ?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ገመድ-አልባ ማረም ለግንባታ አላማዎች ብቻ የታሰበ ነው። ውሂብን ከኮምፒዩተርዎ ወደ መሳሪያዎ ለመቅዳት፣ መሣሪያዎ ላይ ያለማሳወቂያ መተግበሪያዎችን ለመጫን እና የምዝግብ ማስታወሻ ውሂብን ለማንበብ ይጠቀሙበት።"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"ገመድ-አልባ debugging ይፈቀድ?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ገመድ-አልባ debugging ለግንባታ አላማዎች ብቻ የታሰበ ነው። ውሂብን ከኮምፒዩተርዎ ወደ መሳሪያዎ ለመቅዳት፣ መሣሪያዎ ላይ ያለማሳወቂያ መተግበሪያዎችን ለመጫን እና የምዝግብ ማስታወሻ ውሂብን ለማንበብ ይጠቀሙበት።"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"የዩ ኤስ ቢ ማረም መዳረሻ ከዚህ ቀደም ፍቃድ ከሰጧቸው ኮምፒውተሮች ላይ ይሻሩ?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"የግንባታ ቅንብሮችን ፍቀድ?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"እነዚህ ቅንብሮች  የታሰቡት ለግንባታ አጠቃቀም ብቻ ናቸው። መሳሪያህን እና በሱ ላይ ያሉትን መተግበሪያዎች እንዲበለሹ ወይም በትክክል እንዳይሰሩ ሊያደርጉ ይችላሉ።"</string>

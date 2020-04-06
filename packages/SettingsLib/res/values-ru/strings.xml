@@ -278,7 +278,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Отключено"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Автоматический режим"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Имя хоста поставщика персонального DNS-сервера"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Введите имя хоста поставщика услуг DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Введите имя хоста поставщика DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Ошибка подключения"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показывать параметры сертификации беспроводных мониторов"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Вести подробный журнал, показывать RSSI для каждого SSID при выборе сети"</string>
@@ -545,12 +545,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Информация о профиле"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Чтобы создать профиль с ограниченным доступом, необходимо предварительно настроить блокировку экрана для защиты приложений и личных данных"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Включить блокировку"</string>
-    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (3482026122932643557) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
-    <skip />
-    <!-- no translation found for guest_nickname (6332276931583337261) -->
-    <skip />
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Переключиться на этот аккаунт: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Добавить аккаунт гостя"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Удалить аккаунт гостя"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Гость"</string>
 </resources>

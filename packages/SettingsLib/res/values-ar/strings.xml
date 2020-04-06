@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏عنوان IP والمنفذ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"المسح الضوئي لرمز الاستجابة السريعة"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"‏إقران الجهاز من خلال شبكة Wi‑Fi عن طريق المسح الضوئي لرمز استجابة سريعة"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏يُرجى الاتصال بشبكة Wi-Fi."</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb، تصحيح الأخطاء، مطور برامج"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"اختصار تقرير الأخطاء"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"عرض زر في قائمة خيارات التشغيل لإعداد تقرير بالأخطاء"</string>
@@ -432,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"قد تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"قد تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g>."</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"حتى <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"قد ينفد شحن البطارية قبل <xliff:g id="TIME">%1$s</xliff:g>."</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"يتبقى أقل من <xliff:g id="THRESHOLD">%1$s</xliff:g>."</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"يتبقى أقل من <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"يتبقى أكثر من <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
@@ -515,32 +513,21 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"مكبر صوت الهاتف"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"حدثت مشكلة أثناء الاتصال. يُرجى إيقاف الجهاز ثم إعادة تشغيله."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"جهاز سماعي سلكي"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"المساعدة والتعليقات"</string>
+    <string name="storage_category" msgid="2287342585424631813">"مساحة التخزين"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"البيانات المشتركة"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"عرض البيانات المشتركة وتعديلها"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ما مِن بيانات مشتركة لهذا المستخدم."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"حدث خطأ أثناء جلب البيانات المشتركة. يُرجى إعادة المحاولة."</string>
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
+    <string name="blob_id_text" msgid="8680078988996308061">"معرّف البيانات المشتركة: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"تنتهي صلاحيتها في <xliff:g id="DATE">%s</xliff:g>."</string>
     <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"حدث خطأ أثناء حذف البيانات المشتركة."</string>
     <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"ما مِن عمليات تأجير مطلوبة لهذه المعلومات المشتركة. هل تريد حذفها؟"</string>
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"التطبيقات التي تشارك البيانات"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"لم يوفّر التطبيق وصفًا."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"تنتهي صلاحية العقد في <xliff:g id="DATE">%s</xliff:g>."</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"حذف البيانات المشتركة"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"هل فعلاً تريد حذف هذه البيانات المشتركة؟"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"المستخدمون لديهم تطبيقات ومحتوى خاص بهم"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"يمكنك تقييد الدخول إلى التطبيقات والمحتوى من حسابك"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"المستخدم"</string>
@@ -560,12 +547,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"معلومات الملف الشخصي"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"قبل أن تتمكن من إنشاء ملف شخصي مقيد، يلزمك إعداد تأمين للشاشة لحماية تطبيقاتك وبياناتك الشخصية."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"تعيين التأمين"</string>
-    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (3482026122932643557) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
-    <skip />
-    <!-- no translation found for guest_nickname (6332276931583337261) -->
-    <skip />
+    <string name="user_switch_to_user" msgid="6975428297154968543">"التبديل إلى <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"إضافة ضيف"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"إزالة جلسة الضيف"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"ضيف"</string>
 </resources>
