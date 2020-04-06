@@ -249,6 +249,7 @@
     <style name="TextAppearance.DeviceManagementDialog.Title" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
 
     <style name="TextAppearance.AuthCredential">
+        <item name="android:accessibilityLiveRegion">polite</item>
         <item name="android:gravity">center_horizontal</item>
         <item name="android:textAlignment">gravity</item>
         <item name="android:layout_gravity">top</item>
