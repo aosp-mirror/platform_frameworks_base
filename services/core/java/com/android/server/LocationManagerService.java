@@ -2598,8 +2598,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     @NonNull
     public List<LocationRequest> getTestProviderCurrentRequests(String provider) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_DEVICE_CONFIG, null);
-
         LocationProviderManager manager = getLocationProviderManager(provider);
         if (manager == null) {
             throw new IllegalArgumentException("provider doesn't exist: " + provider);
