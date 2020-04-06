@@ -137,6 +137,8 @@ public final class TunerUtils {
             msg = "";
         }
         switch (r) {
+            case Tuner.RESULT_SUCCESS:
+                return;
             case Tuner.RESULT_INVALID_ARGUMENT:
                 throw new IllegalArgumentException(msg);
             case Tuner.RESULT_INVALID_STATE:
