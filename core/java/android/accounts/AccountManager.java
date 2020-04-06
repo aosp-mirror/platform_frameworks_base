@@ -388,6 +388,16 @@ public class AccountManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+        @Override
+        protected boolean debugCompareQueryResults(Account[] l, Account[] r) {
+            if (l == r) {
+                return true;
+            } else if (l == null || r == null) {
+                return false;
+            } else {
+                return Arrays.equals(l, r);
+            }
+        }
     };
 
     /**
