@@ -390,7 +390,7 @@ public class TunerResourceManager {
      * <li>If no Lnb system can be granted, the API would return false.
      * <ul>
      *
-     * <p><strong>Note:</strong> {@link #setLnbInfos(int[])} must be called before this request.
+     * <p><strong>Note:</strong> {@link #setLnbInfoList(int[])} must be called before this request.
      *
      * @param request {@link TunerLnbRequest} information of the current request.
      * @param lnbId a one-element array to return the granted Lnb id.
@@ -479,7 +479,7 @@ public class TunerResourceManager {
      *
      * <p>Client must call this whenever it releases an Lnb.
      *
-     * <p><strong>Note:</strong> {@link #setLnbInfos(int[])} must be called before this release.
+     * <p><strong>Note:</strong> {@link #setLnbInfoList(int[])} must be called before this release.
      *
      * @param lnbId the id of the released Tuner Lnb.
      */
