@@ -4630,6 +4630,10 @@ public final class Settings {
                 pw.print(prefix); pw.print("  privateFlags="); printFlags(pw,
                         privateFlags, PRIVATE_FLAG_DUMP_SPEC); pw.println();
             }
+            if (pkg.hasPreserveLegacyExternalStorage()) {
+                pw.print(prefix); pw.print("  hasPreserveLegacyExternalStorage=true");
+                pw.println();
+            }
             pw.print(prefix); pw.print("  forceQueryable="); pw.print(ps.pkg.isForceQueryable());
             if (ps.forceQueryableOverride) {
                 pw.print(" (override=true)");
