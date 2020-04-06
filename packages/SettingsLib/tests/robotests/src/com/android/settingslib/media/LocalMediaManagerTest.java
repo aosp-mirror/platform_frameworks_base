@@ -218,6 +218,26 @@ public class LocalMediaManagerTest {
     }
 
     @Test
+    public void getMediaDeviceById_idIsNull_shouldReturnNull() {
+        final MediaDevice device1 = mock(MediaDevice.class);
+        final MediaDevice device2 = mock(MediaDevice.class);
+        mLocalMediaManager.mMediaDevices.add(device1);
+        mLocalMediaManager.mMediaDevices.add(device2);
+
+        when(device1.getId()).thenReturn(null);
+        when(device2.getId()).thenReturn(null);
+
+        MediaDevice device = mLocalMediaManager
+                .getMediaDeviceById(mLocalMediaManager.mMediaDevices, TEST_CURRENT_DEVICE_ID);
+
+        assertThat(device).isNull();
+
+        device = mLocalMediaManager.getMediaDeviceById(TEST_CURRENT_DEVICE_ID);
+
+        assertThat(device).isNull();
+    }
+
+    @Test
     public void onDeviceAdded_addDevice() {
         final MediaDevice device = mock(MediaDevice.class);
 
