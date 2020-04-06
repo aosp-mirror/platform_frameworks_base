@@ -16,10 +16,9 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.ViewGroupFadeHelper.reset;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,9 +27,13 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.media.KeyguardMediaController;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
@@ -64,6 +67,14 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     private NotificationStackScrollLayout mNotificationStackScrollLayout;
     @Mock
     private ZenModeController mZenModeController;
+    @Mock
+    private KeyguardMediaController mKeyguardMediaController;
+    @Mock
+    private SysuiStatusBarStateController mSysuiStatusBarStateController;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private SysuiColorExtractor mColorExtractor;
 
     NotificationStackScrollLayoutController mController;
 
@@ -79,7 +90,11 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mTunerService,
                 mDynamicPrivacyController,
                 mConfigurationController,
-                mZenModeController
+                mSysuiStatusBarStateController,
+                mKeyguardMediaController,
+                mKeyguardBypassController,
+                mZenModeController,
+                mColorExtractor
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);

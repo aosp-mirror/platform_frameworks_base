@@ -27,9 +27,14 @@ import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -42,6 +47,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -57,6 +63,8 @@ import java.util.function.BiConsumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import kotlin.Unit;
+
 /**
  * Controller for {@link NotificationStackScrollLayout}.
  */
@@ -70,9 +78,15 @@ public class NotificationStackScrollLayoutController {
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final ConfigurationController mConfigurationController;
     private final ZenModeController mZenModeController;
+    private final KeyguardMediaController mKeyguardMediaController;
+    private final SysuiStatusBarStateController mStatusBarStateController;
+    private final KeyguardBypassController mKeyguardBypassController;
+    private final SysuiColorExtractor mColorExtractor;
+
+    private NotificationStackScrollLayout mView;
+
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
-    private NotificationStackScrollLayout mView;
 
     @VisibleForTesting
     final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
@@ -80,11 +94,14 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onViewAttachedToWindow(View v) {
                     mConfigurationController.addCallback(mConfigurationListener);
+                    mStatusBarStateController.addCallback(
+                            mStateListener, SysuiStatusBarStateController.RANK_STACK_SCROLLER);
                 }
 
                 @Override
                 public void onViewDetachedFromWindow(View v) {
                     mConfigurationController.removeCallback(mConfigurationListener);
+                    mStatusBarStateController.removeCallback(mStateListener);
                 }
             };
 
@@ -124,6 +141,27 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
+    private final StatusBarStateController.StateListener mStateListener =
+            new StatusBarStateController.StateListener() {
+                @Override
+                public void onStatePreChange(int oldState, int newState) {
+                    if (oldState == StatusBarState.SHADE_LOCKED
+                            && newState == StatusBarState.KEYGUARD) {
+                        mView.requestAnimateEverything();
+                    }
+                }
+
+                @Override
+                public void onStateChanged(int newState) {
+                    mView.setStatusBarState(newState);
+                }
+
+                @Override
+                public void onStatePostChange() {
+                    mView.onStatePostChange();
+                }
+            };
+
     @Inject
     public NotificationStackScrollLayoutController(
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
@@ -133,7 +171,11 @@ public class NotificationStackScrollLayoutController {
             TunerService tunerService,
             DynamicPrivacyController dynamicPrivacyController,
             ConfigurationController configurationController,
-            ZenModeController zenModeController) {
+            SysuiStatusBarStateController statusBarStateController,
+            KeyguardMediaController keyguardMediaController,
+            KeyguardBypassController keyguardBypassController,
+            ZenModeController zenModeController,
+            SysuiColorExtractor colorExtractor) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -141,12 +183,17 @@ public class NotificationStackScrollLayoutController {
         mTunerService = tunerService;
         mDynamicPrivacyController = dynamicPrivacyController;
         mConfigurationController = configurationController;
+        mStatusBarStateController = statusBarStateController;
+        mKeyguardMediaController = keyguardMediaController;
+        mKeyguardBypassController = keyguardBypassController;
         mZenModeController = zenModeController;
+        mColorExtractor = colorExtractor;
     }
 
     public void attach(NotificationStackScrollLayout view) {
         mView = view;
         mView.setController(this);
+        mView.initView(mView.getContext(), mKeyguardBypassController::getBypassEnabled);
 
         if (mAllowLongPress) {
             mView.setLongPressListener(mNotificationGutsManager::openGuts);
@@ -168,6 +215,23 @@ public class NotificationStackScrollLayoutController {
                 },
                 Settings.Secure.NOTIFICATION_DISMISS_RTL,
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
+
+        mColorExtractor.addOnColorsChangedListener((colorExtractor, which) -> {
+            final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
+            mView.updateDecorViews(useDarkText);
+        });
+
+        mKeyguardMediaController.setVisibilityChangedListener(visible -> {
+            mView.setKeyguardMediaControllorVisible(visible);
+            if (visible) {
+                mView.generateAddAnimation(
+                        mKeyguardMediaController.getView(), false /*fromMoreCard */);
+            } else {
+                mView.generateRemoveAnimation(mKeyguardMediaController.getView());
+            }
+            mView.requestChildrenUpdate();
+            return Unit.INSTANCE;
+        });
 
         if (mView.isAttachedToWindow()) {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
@@ -650,7 +714,7 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public void notifyGroupChildAdded(ExpandableView row) {
-            mView.onViewAddedInternal(row);
+            mView.notifyGroupChildAdded(row);
         }
 
         @Override
