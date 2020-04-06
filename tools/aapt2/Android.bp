@@ -201,6 +201,9 @@ cc_binary_host {
     use_version_lib: true,
     static_libs: ["libaapt2"],
     defaults: ["aapt2_defaults"],
+    dist: {
+        targets: ["aapt2_artifacts"],
+    },
 }
 
 // ==========================================================
@@ -219,6 +222,6 @@ genrule {
         "cp $(in) $(genDir)/protos && " +
         "$(location :soong_zip) -o $(out) -C $(genDir)/protos -D $(genDir)/protos",
     dist: {
-        targets: ["sdk_repo"],
+        targets: ["sdk_repo", "aapt2_artifacts"],
     },
 }
