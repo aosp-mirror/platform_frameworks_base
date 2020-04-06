@@ -91,7 +91,6 @@ java_library_static {
     ],
 
     libs: [
-        "android_system_server_stubs_current",
         "services.net",
         "android.hardware.light-V2.0-java",
         "android.hardware.power-java",
@@ -101,6 +100,7 @@ java_library_static {
         "android.net.ipsec.ike.stubs.module_libs_api",
         "app-compat-annotations",
         "framework-tethering-stubs-module_libs_api",
+        "service-permission-stubs",
     ],
 
     required: [
