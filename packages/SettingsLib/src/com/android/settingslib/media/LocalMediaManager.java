@@ -220,7 +220,7 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public MediaDevice getMediaDeviceById(List<MediaDevice> devices, String id) {
         for (MediaDevice mediaDevice : devices) {
-            if (mediaDevice.getId().equals(id)) {
+            if (TextUtils.equals(mediaDevice.getId(), id)) {
                 return mediaDevice;
             }
         }
@@ -236,7 +236,7 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public MediaDevice getMediaDeviceById(String id) {
         for (MediaDevice mediaDevice : mMediaDevices) {
-            if (mediaDevice.getId().equals(id)) {
+            if (TextUtils.equals(mediaDevice.getId(), id)) {
                 return mediaDevice;
             }
         }
