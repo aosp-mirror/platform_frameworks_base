@@ -161,6 +161,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The display blanker.
     private final DisplayBlanker mBlanker;
 
+    // The display device.
+    private final DisplayDevice mDisplayDevice;
+
     // Tracker for brightness changes.
     private final BrightnessTracker mBrightnessTracker;
 
@@ -348,11 +351,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @Nullable
     private BrightnessConfiguration mBrightnessConfiguration;
 
-    // The last brightness that was set by the user and not temporary. Set to -1 when a brightness
-    // has yet to be recorded.
+    // The last brightness that was set by the user and not temporary. Set to
+    // PowerManager.BRIGHTNESS_INVALID_FLOAT when a brightness has yet to be recorded.
     private float mLastUserSetScreenBrightness;
 
-    // The screen brightenss setting has changed but not taken effect yet. If this is different
+    // The screen brightness setting has changed but not taken effect yet. If this is different
     // from the current screen brightness setting then this is coming from something other than us
     // and should be considered a user interaction.
     private float mPendingScreenBrightnessSetting;
@@ -377,8 +380,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private float mPendingAutoBrightnessAdjustment;
 
     // The temporary auto brightness adjustment. Typically set when a user is interacting with the
-    // adjustment slider but hasn't settled on a choice yet. Set to Float.NaN when there's no
-    // temporary adjustment set.
+    // adjustment slider but hasn't settled on a choice yet. Set to
+    // PowerManager.BRIGHTNESS_INVALID_FLOAT when there's no temporary adjustment set.
     private float mTemporaryAutoBrightnessAdjustment;
 
     // Animators.
@@ -386,27 +389,29 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private ObjectAnimator mColorFadeOffAnimator;
     private RampAnimator<DisplayPowerState> mScreenBrightnessRampAnimator;
 
-    private BrightnessSynchronizer mBrightnessSynchronizer;
 
     /**
      * Creates the display power controller.
      */
     public DisplayPowerController(Context context,
             DisplayPowerCallbacks callbacks, Handler handler,
-            SensorManager sensorManager, DisplayBlanker blanker) {
+            SensorManager sensorManager, DisplayBlanker blanker, DisplayDevice displayDevice) {
         mHandler = new DisplayControllerHandler(handler.getLooper());
         mBrightnessTracker = new BrightnessTracker(context, null);
         mSettingsObserver = new SettingsObserver(mHandler);
         mCallbacks = callbacks;
-        mBrightnessSynchronizer = new BrightnessSynchronizer(context);
         mBatteryStats = BatteryStatsService.getService();
         mSensorManager = sensorManager;
         mWindowManagerPolicy = LocalServices.getService(WindowManagerPolicy.class);
         mBlanker = blanker;
         mContext = context;
+        mDisplayDevice = displayDevice;
 
         PowerManager pm =  context.getSystemService(PowerManager.class);
+        DisplayDeviceConfig displayDeviceConfig = mDisplayDevice.getDisplayDeviceConfig();
+
         final Resources resources = context.getResources();
+
         final float screenBrightnessSettingMinimumFloat = clampAbsoluteBrightness(
                 pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM));
 
@@ -498,7 +503,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
                         initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
                         autoBrightnessResetAmbientLuxAfterWarmUp, ambientBrightnessThresholds,
-                        screenBrightnessThresholds, context);
+                        screenBrightnessThresholds, context, displayDeviceConfig);
             } else {
                 mUseSoftwareAutoBrightnessConfig = false;
             }
