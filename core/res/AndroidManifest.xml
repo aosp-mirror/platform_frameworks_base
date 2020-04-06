@@ -5454,6 +5454,13 @@
             </intent-filter>
         </service>
 
+        <provider
+            android:name="com.android.server.textclassifier.IconsContentProvider"
+            android:authorities="com.android.textclassifier.icons"
+            android:enabled="true"
+            android:exported="true">
+        </provider>
+
     </application>
 
 </manifest>
