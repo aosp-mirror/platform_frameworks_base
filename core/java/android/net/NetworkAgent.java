@@ -624,7 +624,9 @@ public abstract class NetworkAgent {
             throw new UnsupportedOperationException(
                     "Legacy agents can't call markConnected.");
         }
-        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
+        // |reason| cannot be used by the non-legacy agents
+        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null /* reason */,
+                mNetworkInfo.getExtraInfo());
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
     }
 
@@ -638,7 +640,9 @@ public abstract class NetworkAgent {
         if (mIsLegacy) {
             throw new UnsupportedOperationException("Legacy agents can't call unregister.");
         }
-        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
+        // When unregistering an agent nobody should use the extrainfo (or reason) any more.
+        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null /* reason */,
+                null /* extraInfo */);
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
     }
 
