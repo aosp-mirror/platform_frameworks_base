@@ -18,6 +18,7 @@ package com.android.server.autofill;
 
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
+import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
@@ -581,7 +582,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + ", flags=" + flags + ")");
             }
             mForAugmentedAutofillOnly = true;
-            triggerAugmentedAutofillLocked();
+            triggerAugmentedAutofillLocked(flags);
             return;
         }
         viewState.setState(newState);
@@ -780,7 +781,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         id, mCompatMode);
             }
             // Although "standard" autofill is disabled, it might still trigger augmented autofill
-            if (triggerAugmentedAutofillLocked() != null) {
+            if (triggerAugmentedAutofillLocked(requestFlags) != null) {
                 mForAugmentedAutofillOnly = true;
                 if (sDebug) {
                     Slog.d(TAG, "Service disabled autofill for " + mComponentName
@@ -2424,7 +2425,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sDebug) Slog.d(TAG, "updateLocked(" + id + "): augmented-autofillable");
 
                     // ...then trigger the augmented autofill UI
-                    triggerAugmentedAutofillLocked();
+                    triggerAugmentedAutofillLocked(flags);
                     return;
                 }
 
@@ -2688,8 +2689,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // The default autofill service cannot fullfill the request, let's check if the augmented
         // autofill service can.
-        mAugmentedAutofillDestroyer = triggerAugmentedAutofillLocked();
-        if (mAugmentedAutofillDestroyer == null) {
+        mAugmentedAutofillDestroyer = triggerAugmentedAutofillLocked(flags);
+        if (mAugmentedAutofillDestroyer == null && ((flags & FLAG_PASSWORD_INPUT_TYPE) == 0)) {
             if (sVerbose) {
                 Slog.v(TAG, "canceling session " + id + " when service returned null and it cannot "
                         + "be augmented. AutofillableIds: " + autofillableIds);
@@ -2699,8 +2700,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             removeSelf();
         } else {
             if (sVerbose) {
-                Slog.v(TAG, "keeping session " + id + " when service returned null but "
-                        + "it can be augmented. AutofillableIds: " + autofillableIds);
+                if ((flags & FLAG_PASSWORD_INPUT_TYPE) != 0) {
+                    Slog.v(TAG, "keeping session " + id + " when service returned null and "
+                            + "augmented service is disabled for password fields. "
+                            + "AutofillableIds: " + autofillableIds);
+                } else {
+                    Slog.v(TAG, "keeping session " + id + " when service returned null but "
+                            + "it can be augmented. AutofillableIds: " + autofillableIds);
+                }
             }
             mAugmentedAutofillableIds = autofillableIds;
             try {
@@ -2719,7 +2726,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // TODO(b/123099468): might need to call it in other places, like when the service returns a
     // non-null response but without datasets (for example, just SaveInfo)
     @GuardedBy("mLock")
-    private Runnable triggerAugmentedAutofillLocked() {
+    private Runnable triggerAugmentedAutofillLocked(int flags) {
+        // (TODO: b/141703197) Fix later by passing info to service.
+        if ((flags & FLAG_PASSWORD_INPUT_TYPE) != 0) {
+            return null;
+        }
+
         // Check if Smart Suggestions is supported...
         final @SmartSuggestionMode int supportedModes = mService
                 .getSupportedSmartSuggestionModesLocked();

@@ -127,6 +127,11 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         updateSamplingListener();
     }
 
+    void stopAndDestroy() {
+        stop();
+        mSamplingListener.destroy();
+    }
+
     @Override
     public void onViewAttachedToWindow(View view) {
         updateSamplingListener();
@@ -134,9 +139,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
 
     @Override
     public void onViewDetachedFromWindow(View view) {
-        // isAttachedToWindow is only changed after this call to the listeners, so let's post it
-        // instead
-        postUpdateSamplingListener();
+        stopAndDestroy();
     }
 
     @Override

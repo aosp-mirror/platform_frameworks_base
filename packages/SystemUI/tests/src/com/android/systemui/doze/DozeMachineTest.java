@@ -46,6 +46,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
@@ -76,8 +77,8 @@ public class DozeMachineTest extends SysuiTestCase {
         mConfigMock = mock(AmbientDisplayConfiguration.class);
         mPartMock = mock(DozeMachine.Part.class);
 
-        mMachine = new DozeMachine(mServiceFake, mConfigMock, mWakeLockFake, mWakefulnessLifecycle);
-
+        mMachine = new DozeMachine(mServiceFake, mConfigMock, mWakeLockFake,
+                mWakefulnessLifecycle, mock(BatteryController.class));
         mMachine.setParts(new DozeMachine.Part[]{mPartMock});
     }
 

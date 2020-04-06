@@ -343,6 +343,10 @@
     <protected-broadcast android:name="com.android.server.am.DELETE_DUMPHEAP" />
     <protected-broadcast android:name="com.android.server.net.action.SNOOZE_WARNING" />
     <protected-broadcast android:name="com.android.server.net.action.SNOOZE_RAPID" />
+    <protected-broadcast android:name="com.android.server.wifi.ACTION_SHOW_SET_RANDOMIZATION_DETAILS" />
+    <protected-broadcast android:name="com.android.server.wifi.action.NetworkSuggestion.USER_ALLOWED_APP" />
+    <protected-broadcast android:name="com.android.server.wifi.action.NetworkSuggestion.USER_DISALLOWED_APP" />
+    <protected-broadcast android:name="com.android.server.wifi.action.NetworkSuggestion.USER_DISMISSED" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.USER_DISMISSED_NOTIFICATION" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.CONNECT_TO_NETWORK" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.PICK_WIFI_NETWORK" />

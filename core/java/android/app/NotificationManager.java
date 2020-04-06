@@ -1657,7 +1657,7 @@ public class NotificationManager {
         @Override
         public int hashCode() {
             return Objects.hash(priorityCategories, priorityCallSenders, priorityMessageSenders,
-                    suppressedVisualEffects);
+                    suppressedVisualEffects, state);
         }
 
         @Override
@@ -1669,9 +1669,9 @@ public class NotificationManager {
                     && other.priorityCallSenders == priorityCallSenders
                     && other.priorityMessageSenders == priorityMessageSenders
                     && suppressedVisualEffectsEqual(suppressedVisualEffects,
-                    other.suppressedVisualEffects);
+                    other.suppressedVisualEffects)
+                    && other.state == this.state;
         }
-
 
         private boolean suppressedVisualEffectsEqual(int suppressedEffects,
                 int otherSuppressedVisualEffects) {

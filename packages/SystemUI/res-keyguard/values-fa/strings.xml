@@ -20,138 +20,138 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="3171996292755059205">"Keyguard"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"کد پین را وارد کنید"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"‏PUK سیم‌کارت و کد پین جدید را تایپ کنید"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"‏کد PUK سیم‌کارت"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"کد پین سیم جدید"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"برای تایپ گذرواژه لمس کنید"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"برای بازکردن قفل، گذرواژه را وارد کنید"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"برای بازکردن قفل، پین را تایپ کنید"</string>
-    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"پین را وارد کنید"</string>
-    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"الگویتان را وارد کنید"</string>
-    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"گذرواژه‌تان را وارد کنید"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"کد پین اشتباه است."</string>
-    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"کارت نامعتبر"</string>
-    <string name="keyguard_charged" msgid="3316115607283493413">"شارژ کامل است"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ بی‌سیم"</string>
-    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ شدن"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ سریع"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آهسته‌آهسته شارژ می‌شود"</string>
-    <string name="keyguard_low_battery" msgid="9218432555787624490">"شارژر را وصل کنید."</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"برای باز کردن قفل روی «منو» فشار دهید."</string>
-    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"شبکه قفل شد"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"سیم‌کارت موجود نیست"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"سیم‌کارت درون رایانهٔ لوحی نیست."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"سیم‌کارت درون تلفن نیست."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"سیم‌کارت را وارد کنید."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"سیم‌کارت موجود نیست یا قابل خواندن نیست. یک سیم‌کارت وارد کنید."</string>
-    <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"سیم‌کارت غیرقابل استفاده است."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"‏سیم‌کارت شما به‌طور دائم غیرفعال شده است. \nبرای داشتن سیم‌کارت دیگر با ارائه‎دهنده سرویس بی‎سیم خود تماس بگیرید."</string>
-    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"سیم‌کارت قفل شد."</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"‏سیم‌کارت با PUK قفل شده است."</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"درحال باز کردن قفل سیم‌کارت..."</string>
-    <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"قسمت پین"</string>
-    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"گذرواژه دستگاه"</string>
-    <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"قسمت پین سیم‌کارت"</string>
-    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"‏قسمت PUK سیم‌کارت"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"زنگ بعدی برای <xliff:g id="ALARM">%1$s</xliff:g> تنظیم شد"</string>
-    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"حذف"</string>
-    <string name="disable_carrier_button_text" msgid="6914341927421916114">"‏غیرفعال کردن eSIM"</string>
-    <string name="error_disable_esim_title" msgid="4852978431156228006">"سیم‌کارت داخلی غیرفعال نشد"</string>
-    <string name="error_disable_esim_msg" msgid="676694908770135639">"به دلیل بروز خطا، سیم‌کارت داخلی غیرفعال نشد."</string>
-    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"الگو را فراموش کرده‌اید"</string>
-    <string name="kg_wrong_pattern" msgid="2873443744087746812">"الگو اشتباه است"</string>
-    <string name="kg_wrong_password" msgid="8060364776224836597">"گذرواژه اشتباه است"</string>
-    <string name="kg_wrong_pin" msgid="4785660766909463466">"پین اشتباه"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+    <string name="app_name" msgid="514691256816366517">"Keyguard"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="8582296866585566671">"کد پین را وارد کنید"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"‏PUK سیم‌کارت و کد پین جدید را تایپ کنید"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"‏کد PUK سیم‌کارت"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"کد پین سیم جدید"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"برای تایپ گذرواژه لمس کنید"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"برای بازکردن قفل، گذرواژه را وارد کنید"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"برای بازکردن قفل، پین را تایپ کنید"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"پین را وارد کنید"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"الگویتان را وارد کنید"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"گذرواژه‌تان را وارد کنید"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"کد پین اشتباه است."</string>
+    <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"کارت نامعتبر"</string>
+    <string name="keyguard_charged" msgid="6572033099675649299">"شارژ کامل است"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ بی‌سیم"</string>
+    <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ شدن"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ سریع"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آهسته‌آهسته شارژ می‌شود"</string>
+    <string name="keyguard_low_battery" msgid="1868012396800230904">"شارژر را وصل کنید."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"برای باز کردن قفل روی «منو» فشار دهید."</string>
+    <string name="keyguard_network_locked_message" msgid="407096292844868608">"شبکه قفل شد"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"سیم‌کارت موجود نیست"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"سیم‌کارت درون رایانهٔ لوحی نیست."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"سیم‌کارت درون تلفن نیست."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"سیم‌کارت را وارد کنید."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"سیم‌کارت موجود نیست یا قابل خواندن نیست. یک سیم‌کارت وارد کنید."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"سیم‌کارت غیرقابل استفاده است."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"‏سیم‌کارت شما به‌طور دائم غیرفعال شده است. \nبرای داشتن سیم‌کارت دیگر با ارائه‎دهنده سرویس بی‎سیم خود تماس بگیرید."</string>
+    <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"سیم‌کارت قفل شد."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"‏سیم‌کارت با PUK قفل شده است."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"درحال باز کردن قفل سیم‌کارت..."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"قسمت پین"</string>
+    <string name="keyguard_accessibility_password" msgid="3524161948484801450">"گذرواژه دستگاه"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"قسمت پین سیم‌کارت"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"‏قسمت PUK سیم‌کارت"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="4492876946798984630">"زنگ بعدی برای <xliff:g id="ALARM">%1$s</xliff:g> تنظیم شد"</string>
+    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"حذف"</string>
+    <string name="disable_carrier_button_text" msgid="7153361131709275746">"‏غیرفعال کردن eSIM"</string>
+    <string name="error_disable_esim_title" msgid="3802652622784813119">"سیم‌کارت داخلی غیرفعال نشد"</string>
+    <string name="error_disable_esim_msg" msgid="2441188596467999327">"به دلیل بروز خطا، سیم‌کارت داخلی غیرفعال نشد."</string>
+    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"الگو را فراموش کرده‌اید"</string>
+    <string name="kg_wrong_pattern" msgid="5907301342430102842">"الگو اشتباه است"</string>
+    <string name="kg_wrong_password" msgid="4143127991071670512">"گذرواژه اشتباه است"</string>
+    <string name="kg_wrong_pin" msgid="4160978845968732624">"پین اشتباه"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
       <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> ثانیه دیگر دوباره امتحان کنید.</item>
       <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> ثانیه دیگر دوباره امتحان کنید.</item>
     </plurals>
-    <string name="kg_pattern_instructions" msgid="5547646893001491340">"الگوی خود را رسم کنید"</string>
-    <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"پین سیم‌کارت را وارد کنید."</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"پین سیم‌کارت «<xliff:g id="CARRIER">%1$s</xliff:g>» را وارد کنید."</string>
-    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g>برای استفاده از دستگاه بدون سرویس همراه، سیم‌کارت داخلی را غیرفعال کنید."</string>
-    <string name="kg_pin_instructions" msgid="4069609316644030034">"کد پین را وارد کنید"</string>
-    <string name="kg_password_instructions" msgid="136952397352976538">"گذرواژه را وارد کنید"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"اکنون سیم‌کارت غیرفعال است. کد پین را برای ادامه وارد کنید. برای جزئیات با شرکت مخابراتی خود تماس بگیرید."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"‏اکنون سیم‌کارت «<xliff:g id="CARRIER">%1$s</xliff:g>» غیرفعال شده است. برای ادامه دادن، کد PUK را وارد کنید. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"کد پین دلخواه را وارد کنید"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"تأیید کد پین دلخواه"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"درحال باز کردن قفل سیم‌کارت..."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"یک پین ۴ تا ۸ رقمی را تایپ کنید."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"کد پین باید ۸ عدد یا بیشتر باشد."</string>
-    <string name="kg_invalid_puk" msgid="5399287873762592502">"کد پین صحیح را دوباره وارد کنید. تلاش‌های مکرر به‌طور دائم سیم‌کارت را غیرفعال خواهد کرد."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"کدهای پین منطبق نیستند"</string>
-    <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"پین خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"گذرواژه خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"الگوی باز کردن قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیدید. \n\nلطفاً پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، این رایانه لوحی بازنشانی می‌شود که با آن همه داده‌هایش حذف می‌شود."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، تلفن بازنشانی می‌شود که با آن همه داده‌هایش حذف می‌شود."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. این رایانه لوحی بازنشانی می‌شود که با آن همه داده‌هایش حذف می‌شود."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. این تلفن بازنشانی می‌شود که با آن همه داده‌هایش حذف می‌شود."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، این کاربر پاک می‌شود که با آن همه داده‌های کاربر حذف می‌شود."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، این کاربر پاک می‌شود که با آن همه داده‌های کاربر حذف می‌شود."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. این کاربر پام می‌شود که با آن همه داده‌های کاربر حذف می‌شود."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. این کاربر پاک می‌شود که با آن همه داده‌های کاربر حذف می‌شود."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، نمایه کاری پاک می‌شود که با آن همه داده‌های نمایه حذف می‌شود."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، نمایه کاری پاک می‌شود که با آن همه داده‌های نمایه حذف می‌شود."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. نمایه کاری پاک می‌شود که با آن همه داده‌های نمایه حذف می‌شود."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. نمایه کاری پاک می‌شود که با آن همه داده‌های نمایه حذف می‌شود."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"‏شما الگوی باز کردن قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"‏شما الگوی باز کردن قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"کد پین سیم‌کارت اشتباه است، اکنون برای باز کردن قفل دستگاهتان باید با شرکت مخابراتی تماس بگیرید."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+    <string name="kg_pattern_instructions" msgid="5376036737065051736">"الگوی خود را رسم کنید"</string>
+    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"پین سیم‌کارت را وارد کنید."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"پین سیم‌کارت «<xliff:g id="CARRIER">%1$s</xliff:g>» را وارد کنید."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g>برای استفاده از دستگاه بدون سرویس همراه، سیم‌کارت داخلی را غیرفعال کنید."</string>
+    <string name="kg_pin_instructions" msgid="822353548385014361">"کد پین را وارد کنید"</string>
+    <string name="kg_password_instructions" msgid="324455062831719903">"گذرواژه را وارد کنید"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"اکنون سیم‌کارت غیرفعال است. کد پین را برای ادامه وارد کنید. برای جزئیات با شرکت مخابراتی خود تماس بگیرید."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"‏اکنون سیم‌کارت «<xliff:g id="CARRIER">%1$s</xliff:g>» غیرفعال شده است. برای ادامه دادن، کد PUK را وارد کنید. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"کد پین دلخواه را وارد کنید"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"تأیید کد پین دلخواه"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"درحال باز کردن قفل سیم‌کارت..."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"یک پین ۴ تا ۸ رقمی را تایپ کنید."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"کد پین باید ۸ عدد یا بیشتر باشد."</string>
+    <string name="kg_invalid_puk" msgid="1774337070084931186">"کد پین صحیح را دوباره وارد کنید. تلاش‌های مکرر به‌طور دائم سیم‌کارت را غیرفعال خواهد کرد."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"کدهای پین منطبق نیستند"</string>
+    <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"پین خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"گذرواژه خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"الگوی باز کردن قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیدید. \n\nلطفاً پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، این رایانه لوحی بازنشانی می‌شود که با آن همه داده‌هایش حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، تلفن بازنشانی می‌شود که با آن همه داده‌هایش حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. این رایانه لوحی بازنشانی می‌شود که با آن همه داده‌هایش حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. این تلفن بازنشانی می‌شود که با آن همه داده‌هایش حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، این کاربر پاک می‌شود که با آن همه داده‌های کاربر حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، این کاربر پاک می‌شود که با آن همه داده‌های کاربر حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. این کاربر پام می‌شود که با آن همه داده‌های کاربر حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. این کاربر پاک می‌شود که با آن همه داده‌های کاربر حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، نمایه کاری پاک می‌شود که با آن همه داده‌های نمایه حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، نمایه کاری پاک می‌شود که با آن همه داده‌های نمایه حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. نمایه کاری پاک می‌شود که با آن همه داده‌های نمایه حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. نمایه کاری پاک می‌شود که با آن همه داده‌های نمایه حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"‏شما الگوی باز کردن قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"‏شما الگوی باز کردن قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"کد پین سیم‌کارت اشتباه است، اکنون برای باز کردن قفل دستگاهتان باید با شرکت مخابراتی تماس بگیرید."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">کد پین سیم‌کارت اشتباه است، <xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید.</item>
       <item quantity="other">کد پین سیم‌کارت اشتباه است، <xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید.</item>
     </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"سیم‌کارت غیرقابل استفاده است. با شرکت مخابراتی‌تان تماس بگیرید."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"سیم‌کارت غیرقابل استفاده است. با شرکت مخابراتی‌تان تماس بگیرید."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
       <item quantity="one">‏کد PUK سیم‌کارت اشتباه است، <xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید و پس از آن سیم‌کارت برای همیشه غیرقابل استفاده می‌شود.</item>
       <item quantity="other">‏کد PUK سیم‌کارت اشتباه است، <xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید و پس از آن سیم‌کارت برای همیشه غیرقابل استفاده می‌شود.</item>
     </plurals>
-    <string name="kg_password_pin_failed" msgid="8769990811451236223">"عملیات پین سیم‌کارت ناموفق بود!"</string>
-    <string name="kg_password_puk_failed" msgid="1331621440873439974">"‏عملیات PUK سیم‌کارت ناموفق بود!"</string>
-    <string name="kg_pin_accepted" msgid="7637293533973802143">"کد پذیرفته شد!"</string>
-    <string name="keyguard_carrier_default" msgid="4274828292998453695">"سرویسی وجود ندارد."</string>
-    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"تغییر روش ورودی"</string>
-    <string name="airplane_mode" msgid="3807209033737676010">"حالت هواپیما"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"بعد از بازنشانی دستگاه باید الگو وارد شود"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"بعد از بازنشانی دستگاه باید پین وارد شود"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"بعد از بازنشانی دستگاه باید گذرواژه وارد شود"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"برای ایمنی بیشتر باید الگو وارد شود"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"برای ایمنی بیشتر باید پین وارد شود"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"برای ایمنی بیشتر باید گذرواژه وارد شود"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"بعد از تغییر نمایه‌ها باید الگو وارد شود"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"بعد از تغییر نمایه‌ها باید پین وارد شود"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"بعد از تغییر نمایه‌ها باید گذرواژه وارد شود"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"دستگاه توسط سرپرست سیستم قفل شده است"</string>
-    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"دستگاه به‌صورت دستی قفل شده است"</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+    <string name="kg_password_pin_failed" msgid="5136259126330604009">"عملیات پین سیم‌کارت ناموفق بود!"</string>
+    <string name="kg_password_puk_failed" msgid="6778867411556937118">"‏عملیات PUK سیم‌کارت ناموفق بود!"</string>
+    <string name="kg_pin_accepted" msgid="1625501841604389716">"کد پذیرفته شد!"</string>
+    <string name="keyguard_carrier_default" msgid="6359808469637388586">"سرویسی وجود ندارد."</string>
+    <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"تغییر روش ورودی"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"حالت هواپیما"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"بعد از بازنشانی دستگاه باید الگو وارد شود"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"بعد از بازنشانی دستگاه باید پین وارد شود"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"بعد از بازنشانی دستگاه باید گذرواژه وارد شود"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"برای ایمنی بیشتر باید الگو وارد شود"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"برای ایمنی بیشتر باید پین وارد شود"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"برای ایمنی بیشتر باید گذرواژه وارد شود"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"بعد از تغییر نمایه‌ها باید الگو وارد شود"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="6490434826361055400">"بعد از تغییر نمایه‌ها باید پین وارد شود"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1680374696393804441">"بعد از تغییر نمایه‌ها باید گذرواژه وارد شود"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"دستگاه توسط سرپرست سیستم قفل شده است"</string>
+    <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"دستگاه به‌صورت دستی قفل شده است"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="1337428979661197957">
       <item quantity="one">قفل دستگاه <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. الگو را تأیید کنید.</item>
       <item quantity="other">قفل دستگاه <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. الگو را تأیید کنید.</item>
     </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="6444519502336330270">
       <item quantity="one">قفل دستگاه <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. پین را تأیید کنید.</item>
       <item quantity="other">قفل دستگاه <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. پین را تأیید کنید.</item>
     </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5343961527665116914">
       <item quantity="one">قفل دستگاه <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. گذرواژه را تأیید کنید.</item>
       <item quantity="other">قفل دستگاه <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. گذرواژه را تأیید کنید.</item>
     </plurals>
-    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"شناسایی نشد"</string>
-    <string name="kg_face_not_recognized" msgid="6382535088345875294">"شناسایی نشد"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"شناسایی نشد"</string>
+    <string name="kg_face_not_recognized" msgid="7903950626744419160">"شناسایی نشد"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">پین سیم‌کارت را وارد کنید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش دیگری باقی مانده است.</item>
       <item quantity="other">پین سیم‌کارت را وارد کنید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش دیگری باقی مانده است.</item>
     </plurals>
-    <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
       <item quantity="one">‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن کد PUK را وارد کنید. <xliff:g id="_NUMBER_1">%d</xliff:g> تلاش دیگر باقی مانده است و پس از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید.</item>
       <item quantity="other">‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن کد PUK را وارد کنید. <xliff:g id="_NUMBER_1">%d</xliff:g> تلاش دیگر باقی مانده است و پس از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"پیش‌فرض"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"حباب"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"آنالوگ"</string>
+    <string name="clock_title_default" msgid="6342735240617459864">"پیش‌فرض"</string>
+    <string name="clock_title_bubble" msgid="2204559396790593213">"حباب"</string>
+    <string name="clock_title_analog" msgid="8409262532900918273">"آنالوگ"</string>
 </resources>

@@ -19,25 +19,25 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_desc_recent_apps" msgid="2427210347871321373">"అవలోకనం."</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="2355882496933479534">"<xliff:g id="APP">%s</xliff:g>ని తీసివేయండి."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="4816790842084268400">"<xliff:g id="APP">%s</xliff:g> తీసివేయబడింది."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="5693205751863608046">"అన్ని ఇటీవలి యాప్‌లు తీసివేయబడ్డాయి."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="3406797323476801016">"<xliff:g id="APP">%s</xliff:g> యాప్ సమాచారాన్ని తెరుస్తుంది."</string>
-    <string name="accessibility_recents_item_launched" msgid="4519918148638221791">"<xliff:g id="APP">%s</xliff:g>ని ప్రారంభిస్తోంది."</string>
-    <string name="recents_empty_message" msgid="7967713254531861311">"ఇటీవలి అంశాలు ఏవీ లేవు"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="1850214584987361375">"మీరు అన్నింటినీ తీసివేసారు"</string>
-    <string name="recents_app_info_button_label" msgid="8732926607391786762">"యాప్ సమాచారం"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6087750201863853365">"స్క్రీన్‌కు పిన్ చేయడం"</string>
-    <string name="recents_search_bar_label" msgid="638132045925945941">"వెతుకు"</string>
-    <string name="recents_launch_error_message" msgid="9107963563503438012">"<xliff:g id="APP">%s</xliff:g>ని ప్రారంభించడం సాధ్యపడలేదు."</string>
-    <string name="recents_launch_disabled_message" msgid="826461671965217243">"<xliff:g id="APP">%s</xliff:g> సురక్షిత-మోడ్‌లో నిలిపివేయబడింది."</string>
-    <string name="recents_stack_action_button_label" msgid="1974273390109881497">"అన్నీ తీసివేయి"</string>
-    <string name="recents_drag_hint_message" msgid="610417221848280136">"విభజన స్క్రీన్‌ను ఉపయోగించడానికి ఇక్కడ లాగండి"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="488987777874979435">"అడ్డంగా విభజించు"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="2498375296906391117">"నిలువుగా విభజించు"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="7368405969130304811">"అనుకూలంగా విభజించు"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="8773505308411722524">"స్క్రీన్‌ని ఎగువకు విభజించు"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="722594718192007972">"స్క్రీన్‌ని ఎడమ వైపుకి విభజించు"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="2479764030969301514">"స్క్రీన్‌ని కుడి వైపుకి విభజించు"</string>
+    <string name="accessibility_desc_recent_apps" msgid="7556662260274154402">"అవలోకనం."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="1987979391731836442">"<xliff:g id="APP">%s</xliff:g>ని తీసివేయండి."</string>
+    <string name="accessibility_recents_item_dismissed" msgid="99149432850273747">"<xliff:g id="APP">%s</xliff:g> తీసివేయబడింది."</string>
+    <string name="accessibility_recents_all_items_dismissed" msgid="2584965907377043255">"అన్ని ఇటీవలి యాప్‌లు తీసివేయబడ్డాయి."</string>
+    <string name="accessibility_recents_item_open_app_info" msgid="5843409407745673280">"<xliff:g id="APP">%s</xliff:g> యాప్ సమాచారాన్ని తెరుస్తుంది."</string>
+    <string name="accessibility_recents_item_launched" msgid="2439069760172103351">"<xliff:g id="APP">%s</xliff:g>ని ప్రారంభిస్తోంది."</string>
+    <string name="recents_empty_message" msgid="4718114148356836203">"ఇటీవలి అంశాలు ఏవీ లేవు"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2873215505812268822">"మీరు అన్నింటినీ తీసివేసారు"</string>
+    <string name="recents_app_info_button_label" msgid="5371319329151716224">"యాప్ సమాచారం"</string>
+    <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"స్క్రీన్‌కు పిన్ చేయడం"</string>
+    <string name="recents_search_bar_label" msgid="1910412649656301014">"వెతుకు"</string>
+    <string name="recents_launch_error_message" msgid="8622817255751191462">"<xliff:g id="APP">%s</xliff:g>ని ప్రారంభించడం సాధ్యపడలేదు."</string>
+    <string name="recents_launch_disabled_message" msgid="1055364973720665718">"<xliff:g id="APP">%s</xliff:g> సురక్షిత-మోడ్‌లో నిలిపివేయబడింది."</string>
+    <string name="recents_stack_action_button_label" msgid="7396636872618564201">"అన్నీ తీసివేయి"</string>
+    <string name="recents_drag_hint_message" msgid="3309424039418402577">"విభజన స్క్రీన్‌ను ఉపయోగించడానికి ఇక్కడ లాగండి"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="3361339364058788960">"అడ్డంగా విభజించు"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="5525527159623478768">"నిలువుగా విభజించు"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="8749946272357062148">"అనుకూలంగా విభజించు"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="4034331660613790457">"స్క్రీన్‌ని ఎగువకు విభజించు"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="6523694635909067802">"స్క్రీన్‌ని ఎడమ వైపుకి విభజించు"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="559141375304415400">"స్క్రీన్‌ని కుడి వైపుకి విభజించు"</string>
 </resources>

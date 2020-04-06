@@ -7,3 +7,8 @@ filegroup {
     name: "IDropBoxManagerService.aidl",
     srcs: ["com/android/internal/os/IDropBoxManagerService.aidl"],
 }
+
+filegroup {
+    name: "ICarStatsService.aidl",
+    srcs: ["com/android/internal/car/ICarStatsService.aidl"],
+}

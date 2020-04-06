@@ -20,138 +20,138 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="3171996292755059205">"키가드"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"PIN 코드 입력"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"SIM PUK 및 새 PIN 코드 입력"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"SIM PUK 코드"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"새 SIM PIN 코드"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"터치하여 비밀번호 입력"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"잠금 해제하려면 비밀번호 입력"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"잠금 해제하려면 PIN 입력"</string>
-    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"PIN을 입력해 주세요."</string>
-    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"패턴 입력"</string>
-    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"비밀번호 입력"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"잘못된 PIN 코드입니다."</string>
-    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"유효하지 않은 카드"</string>
-    <string name="keyguard_charged" msgid="3316115607283493413">"충전 완료"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 무선 충전 중"</string>
-    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 충전 중"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 고속 충전 중"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 저속 충전 중"</string>
-    <string name="keyguard_low_battery" msgid="9218432555787624490">"충전기를 연결하세요."</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"잠금 해제하려면 메뉴를 누르세요."</string>
-    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"네트워크 잠김"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"SIM 카드 없음"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"태블릿에 SIM 카드가 없습니다."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"휴대전화에 SIM 카드가 없습니다."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"SIM 카드를 삽입하세요."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"SIM 카드가 없거나 읽을 수 없는 상태입니다. SIM 카드를 삽입하세요."</string>
-    <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"사용할 수 없는 SIM 카드입니다."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"SIM 카드가 영구적으로 사용 중지되었습니다.\n무선 서비스 제공업체에 문의하여 다른 SIM 카드를 받으시기 바랍니다."</string>
-    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM 카드가 잠겨 있습니다."</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM 카드가 PUK로 잠겨 있습니다."</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM 카드 잠금 해제 중..."</string>
-    <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN 영역"</string>
-    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"기기 비밀번호"</string>
-    <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM PIN 영역"</string>
-    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK 영역"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"<xliff:g id="ALARM">%1$s</xliff:g>에 다음 알람이 설정됨"</string>
-    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"삭제"</string>
-    <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIM 사용 중지"</string>
-    <string name="error_disable_esim_title" msgid="4852978431156228006">"eSIM을 사용 중지할 수 없음"</string>
-    <string name="error_disable_esim_msg" msgid="676694908770135639">"오류로 인해 eSIM을 사용 중지할 수 없습니다."</string>
-    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter 키"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"패턴을 잊음"</string>
-    <string name="kg_wrong_pattern" msgid="2873443744087746812">"잘못된 패턴"</string>
-    <string name="kg_wrong_password" msgid="8060364776224836597">"잘못된 비밀번호"</string>
-    <string name="kg_wrong_pin" msgid="4785660766909463466">"잘못된 PIN"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+    <string name="app_name" msgid="514691256816366517">"키가드"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="8582296866585566671">"PIN 코드 입력"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"SIM PUK 및 새 PIN 코드 입력"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"SIM PUK 코드"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"새 SIM PIN 코드"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"터치하여 비밀번호 입력"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"잠금 해제하려면 비밀번호 입력"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"잠금 해제하려면 PIN 입력"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"PIN을 입력해 주세요."</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"패턴 입력"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"비밀번호 입력"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"잘못된 PIN 코드입니다."</string>
+    <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"유효하지 않은 카드"</string>
+    <string name="keyguard_charged" msgid="6572033099675649299">"충전 완료"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 무선 충전 중"</string>
+    <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 충전 중"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 고속 충전 중"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 저속 충전 중"</string>
+    <string name="keyguard_low_battery" msgid="1868012396800230904">"충전기를 연결하세요."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"잠금 해제하려면 메뉴를 누르세요."</string>
+    <string name="keyguard_network_locked_message" msgid="407096292844868608">"네트워크 잠김"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM 카드 없음"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"태블릿에 SIM 카드가 없습니다."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"휴대전화에 SIM 카드가 없습니다."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"SIM 카드를 삽입하세요."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"SIM 카드가 없거나 읽을 수 없는 상태입니다. SIM 카드를 삽입하세요."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"사용할 수 없는 SIM 카드입니다."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"SIM 카드가 영구적으로 사용 중지되었습니다.\n무선 서비스 제공업체에 문의하여 다른 SIM 카드를 받으시기 바랍니다."</string>
+    <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"SIM 카드가 잠겨 있습니다."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"SIM 카드가 PUK로 잠겨 있습니다."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"SIM 카드 잠금 해제 중..."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"PIN 영역"</string>
+    <string name="keyguard_accessibility_password" msgid="3524161948484801450">"기기 비밀번호"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"SIM PIN 영역"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"SIM PUK 영역"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="4492876946798984630">"<xliff:g id="ALARM">%1$s</xliff:g>에 다음 알람이 설정됨"</string>
+    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"삭제"</string>
+    <string name="disable_carrier_button_text" msgid="7153361131709275746">"eSIM 사용 중지"</string>
+    <string name="error_disable_esim_title" msgid="3802652622784813119">"eSIM을 사용 중지할 수 없음"</string>
+    <string name="error_disable_esim_msg" msgid="2441188596467999327">"오류로 인해 eSIM을 사용 중지할 수 없습니다."</string>
+    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter 키"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"패턴을 잊음"</string>
+    <string name="kg_wrong_pattern" msgid="5907301342430102842">"잘못된 패턴"</string>
+    <string name="kg_wrong_password" msgid="4143127991071670512">"잘못된 비밀번호"</string>
+    <string name="kg_wrong_pin" msgid="4160978845968732624">"잘못된 PIN"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
       <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g>초 후에 다시 시도하세요.</item>
       <item quantity="one">1초 후에 다시 시도하세요.</item>
     </plurals>
-    <string name="kg_pattern_instructions" msgid="5547646893001491340">"패턴 그리기"</string>
-    <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"SIM PIN을 입력하세요."</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\'<xliff:g id="CARRIER">%1$s</xliff:g>\'의 SIM PIN을 입력하세요."</string>
-    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> 모바일 서비스 없이 기기를 사용하려면 eSIM을 사용 중지하세요."</string>
-    <string name="kg_pin_instructions" msgid="4069609316644030034">"PIN 입력"</string>
-    <string name="kg_password_instructions" msgid="136952397352976538">"비밀번호 입력"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM이 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. 자세한 내용은 이동통신사에 문의하시기 바랍니다."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"SIM \'<xliff:g id="CARRIER">%1$s</xliff:g>\'이(가) 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. 자세한 내용은 이동통신사에 문의하시기 바랍니다."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"원하는 PIN 코드 입력"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"원하는 PIN 코드 확인"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM 카드 잠금 해제 중..."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"4~8자리 숫자로 된 PIN을 입력하세요."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK 코드는 8자리 이상의 숫자여야 합니다."</string>
-    <string name="kg_invalid_puk" msgid="5399287873762592502">"올바른 PUK 코드를 다시 입력하세요. 입력을 반복해서 시도하면 SIM이 영구적으로 사용 중지됩니다."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"PIN 코드가 일치하지 않음"</string>
-    <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"패턴 그리기를 너무 많이 시도함"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"PIN을 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"비밀번호를 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 그렸습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 태블릿이 재설정되며 모든 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 휴대전화가 재설정되며 모든 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"태블릿 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 태블릿이 재설정되며 모든 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 휴대전화가 재설정되며 모든 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이 사용자와 모든 사용자 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이 사용자와 모든 사용자 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"태블릿 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 이 사용자와 모든 사용자 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 이 사용자와 모든 사용자 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 직장 프로필과 모든 프로필 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 직장 프로필과 모든 프로필 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"태블릿 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 직장 프로필과 모든 프로필 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 직장 프로필과 모든 프로필 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금 해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금 해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"잘못된 SIM PIN코드입니다. 이동통신사에 문의하여 기기를 잠금 해제해야 합니다."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+    <string name="kg_pattern_instructions" msgid="5376036737065051736">"패턴 그리기"</string>
+    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM PIN을 입력하세요."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\'<xliff:g id="CARRIER">%1$s</xliff:g>\'의 SIM PIN을 입력하세요."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> 모바일 서비스 없이 기기를 사용하려면 eSIM을 사용 중지하세요."</string>
+    <string name="kg_pin_instructions" msgid="822353548385014361">"PIN 입력"</string>
+    <string name="kg_password_instructions" msgid="324455062831719903">"비밀번호 입력"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM이 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. 자세한 내용은 이동통신사에 문의하시기 바랍니다."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM \'<xliff:g id="CARRIER">%1$s</xliff:g>\'이(가) 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. 자세한 내용은 이동통신사에 문의하시기 바랍니다."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"원하는 PIN 코드 입력"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"원하는 PIN 코드 확인"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"SIM 카드 잠금 해제 중..."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4~8자리 숫자로 된 PIN을 입력하세요."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK 코드는 8자리 이상의 숫자여야 합니다."</string>
+    <string name="kg_invalid_puk" msgid="1774337070084931186">"올바른 PUK 코드를 다시 입력하세요. 입력을 반복해서 시도하면 SIM이 영구적으로 사용 중지됩니다."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"PIN 코드가 일치하지 않음"</string>
+    <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"패턴 그리기를 너무 많이 시도함"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"PIN을 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"비밀번호를 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 그렸습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 태블릿이 재설정되며 모든 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 휴대전화가 재설정되며 모든 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"태블릿 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 태블릿이 재설정되며 모든 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 휴대전화가 재설정되며 모든 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이 사용자와 모든 사용자 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이 사용자와 모든 사용자 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"태블릿 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 이 사용자와 모든 사용자 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 이 사용자와 모든 사용자 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 직장 프로필과 모든 프로필 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 직장 프로필과 모든 프로필 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"태블릿 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 직장 프로필과 모든 프로필 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 직장 프로필과 모든 프로필 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금 해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금 해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"잘못된 SIM PIN코드입니다. 이동통신사에 문의하여 기기를 잠금 해제해야 합니다."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">잘못된 SIM PIN 코드입니다. 입력을 <xliff:g id="NUMBER_1">%d</xliff:g>번 더 시도할 수 있습니다.</item>
       <item quantity="one">잘못된 SIM PIN 코드입니다. 입력에 <xliff:g id="NUMBER_0">%d</xliff:g>번 더 실패할 경우 이동통신사에 문의하여 기기를 잠금 해제해야 합니다.</item>
     </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM을 사용할 수 없습니다. 이동통신사에 문의하세요."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM을 사용할 수 없습니다. 이동통신사에 문의하세요."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
       <item quantity="other">잘못된 SIM PUK 코드입니다. 입력에 <xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패할 경우 SIM이 영구적으로 사용 중지됩니다.</item>
       <item quantity="one">잘못된 SIM PUK 코드입니다. 입력에 <xliff:g id="NUMBER_0">%d</xliff:g>번 더 실패할 경우 SIM이 영구적으로 사용 중지됩니다.</item>
     </plurals>
-    <string name="kg_password_pin_failed" msgid="8769990811451236223">"SIM PIN 작업이 실패했습니다."</string>
-    <string name="kg_password_puk_failed" msgid="1331621440873439974">"SIM PUK 작업이 실패했습니다."</string>
-    <string name="kg_pin_accepted" msgid="7637293533973802143">"올바른 코드입니다."</string>
-    <string name="keyguard_carrier_default" msgid="4274828292998453695">"서비스 불가"</string>
-    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"입력 방법 전환"</string>
-    <string name="airplane_mode" msgid="3807209033737676010">"비행기 모드"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"기기가 다시 시작되면 패턴이 필요합니다."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"기기가 다시 시작되면 PIN이 필요합니다."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"기기가 다시 시작되면 비밀번호가 필요합니다."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"보안 강화를 위해 패턴이 필요합니다."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"보안 강화를 위해 PIN이 필요합니다."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"보안 강화를 위해 비밀번호가 필요합니다."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"프로필을 전환하려면 패턴이 필요합니다."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"프로필을 전환하려면 PIN이 필요합니다."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"프로필을 전환하려면 비밀번호가 필요합니다."</string>
-    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"관리자가 기기를 잠갔습니다."</string>
-    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"기기가 수동으로 잠금 설정되었습니다."</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+    <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM PIN 작업이 실패했습니다."</string>
+    <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUK 작업이 실패했습니다."</string>
+    <string name="kg_pin_accepted" msgid="1625501841604389716">"올바른 코드입니다."</string>
+    <string name="keyguard_carrier_default" msgid="6359808469637388586">"서비스 불가"</string>
+    <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"입력 방법 전환"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"비행기 모드"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"기기가 다시 시작되면 패턴이 필요합니다."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"기기가 다시 시작되면 PIN이 필요합니다."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"기기가 다시 시작되면 비밀번호가 필요합니다."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"보안 강화를 위해 패턴이 필요합니다."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"보안 강화를 위해 PIN이 필요합니다."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"보안 강화를 위해 비밀번호가 필요합니다."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"프로필을 전환하려면 패턴이 필요합니다."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="6490434826361055400">"프로필을 전환하려면 PIN이 필요합니다."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1680374696393804441">"프로필을 전환하려면 비밀번호가 필요합니다."</string>
+    <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"관리자가 기기를 잠갔습니다."</string>
+    <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"기기가 수동으로 잠금 설정되었습니다."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="1337428979661197957">
       <item quantity="other">기기가 <xliff:g id="NUMBER_1">%d</xliff:g>시간 동안 잠금 해제되지 않았습니다. 패턴을 입력하세요.</item>
       <item quantity="one">기기가 <xliff:g id="NUMBER_0">%d</xliff:g>시간 동안 잠금 해제되지 않았습니다. 패턴을 입력하세요.</item>
     </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="6444519502336330270">
       <item quantity="other">기기가 <xliff:g id="NUMBER_1">%d</xliff:g>시간 동안 잠금 해제되지 않았습니다. PIN을 입력하세요.</item>
       <item quantity="one">기기가 <xliff:g id="NUMBER_0">%d</xliff:g>시간 동안 잠금 해제되지 않았습니다. PIN을 입력하세요.</item>
     </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5343961527665116914">
       <item quantity="other">기기가 <xliff:g id="NUMBER_1">%d</xliff:g>시간 동안 잠금 해제되지 않았습니다. 비밀번호를 입력하세요.</item>
       <item quantity="one">기기가 <xliff:g id="NUMBER_0">%d</xliff:g>시간 동안 잠금 해제되지 않았습니다. 비밀번호를 입력하세요.</item>
     </plurals>
-    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"인식할 수 없음"</string>
-    <string name="kg_face_not_recognized" msgid="6382535088345875294">"인식할 수 없음"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"인식할 수 없음"</string>
+    <string name="kg_face_not_recognized" msgid="7903950626744419160">"인식할 수 없음"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM PIN을 입력하세요. 입력은 <xliff:g id="NUMBER_1">%d</xliff:g>번 더 시도할 수 있습니다.</item>
       <item quantity="one">SIM PIN을 입력하세요. 입력에 <xliff:g id="NUMBER_0">%d</xliff:g>번 더 실패하면 이동통신사에 문의하여 기기를 잠금 해제해야 합니다.</item>
     </plurals>
-    <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
       <item quantity="other">SIM이 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. <xliff:g id="_NUMBER_1">%d</xliff:g>번 더 실패하면 SIM을 완전히 사용할 수 없게 됩니다. 자세한 내용은 이동통신사에 문의하세요.</item>
       <item quantity="one">SIM이 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. <xliff:g id="_NUMBER_0">%d</xliff:g>번 더 실패하면 SIM을 완전히 사용할 수 없게 됩니다. 자세한 내용은 이동통신사에 문의하세요.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"기본"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"버블"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"아날로그"</string>
+    <string name="clock_title_default" msgid="6342735240617459864">"기본"</string>
+    <string name="clock_title_bubble" msgid="2204559396790593213">"버블"</string>
+    <string name="clock_title_analog" msgid="8409262532900918273">"아날로그"</string>
 </resources>

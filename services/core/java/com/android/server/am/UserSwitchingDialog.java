@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -45,6 +46,9 @@ class UserSwitchingDialog extends AlertDialog
 
     // Time to wait for the onWindowShown() callback before continuing the user switch
     private static final int WINDOW_SHOWN_TIMEOUT_MS = 3000;
+
+    // User switching doesn't happen that frequently, so it doesn't hurt to have it always on
+    protected static final boolean DEBUG = true;
 
     private final ActivityManagerService mService;
     private final int mUserId;
@@ -118,7 +122,7 @@ class UserSwitchingDialog extends AlertDialog
 
     @Override
     public void show() {
-        // Slog.v(TAG, "show called");
+        if (DEBUG) Slog.d(TAG, "show called");
         super.show();
         final View decorView = getWindow().getDecorView();
         if (decorView != null) {
@@ -132,13 +136,14 @@ class UserSwitchingDialog extends AlertDialog
 
     @Override
     public void onWindowShown() {
-        // Slog.v(TAG, "onWindowShown called");
+        if (DEBUG) Slog.d(TAG, "onWindowShown called");
         startUser();
     }
 
     void startUser() {
         synchronized (this) {
             if (!mStartedUser) {
+                Slog.i(TAG, "starting user " + mUserId);
                 mService.mUserController.startUserInForeground(mUserId);
                 dismiss();
                 mStartedUser = true;
@@ -147,6 +152,8 @@ class UserSwitchingDialog extends AlertDialog
                     decorView.getViewTreeObserver().removeOnWindowShownListener(this);
                 }
                 mHandler.removeMessages(MSG_START_USER);
+            } else {
+                Slog.i(TAG, "user " + mUserId + " already started");
             }
         }
     }
@@ -156,6 +163,8 @@ class UserSwitchingDialog extends AlertDialog
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_START_USER:
+                    Slog.w(TAG, "user switch window not shown in "
+                            + WINDOW_SHOWN_TIMEOUT_MS + " ms");
                     startUser();
                     break;
             }

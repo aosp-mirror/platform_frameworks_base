@@ -79,10 +79,13 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
         IWallpaperManager service = IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE));
-        try {
-            service.setLockWallpaperCallback(this);
-        } catch (RemoteException e) {
-            Log.e(TAG, "System dead?" + e);
+        if (service != null) {
+            // Service is disabled on some devices like Automotive
+            try {
+                service.setLockWallpaperCallback(this);
+            } catch (RemoteException e) {
+                Log.e(TAG, "System dead?" + e);
+            }
         }
     }
 
@@ -107,6 +110,11 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
     public LoaderResult loadBitmap(int currentUserId, UserHandle selectedUser) {
         // May be called on any thread - only use thread safe operations.
+
+        if (!mWallpaperManager.isWallpaperSupported()) {
+            // When wallpaper is not supported, show the system wallpaper
+            return LoaderResult.success(null);
+        }
 
         // Prefer the selected user (when specified) over the current user for the FLAG_SET_LOCK
         // wallpaper.

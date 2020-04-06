@@ -39,6 +39,7 @@ import android.net.ScoredNetwork;
 import android.net.WifiKey;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -1272,7 +1273,7 @@ public class AccessPointTest {
     @Test
     public void testGetKey_matchesKeysCorrectly() {
         AccessPoint ap = new AccessPoint(mContext, mScanResults);
-        assertThat(ap.getKey()).isEqualTo(AccessPoint.getKey(mScanResults.get(0)));
+        assertThat(ap.getKey()).isEqualTo(AccessPoint.getKey(mContext, mScanResults.get(0)));
 
         WifiConfiguration spyConfig = spy(new WifiConfiguration());
         when(spyConfig.isPasspoint()).thenReturn(true);
@@ -1291,6 +1292,44 @@ public class AccessPointTest {
         OsuProvider provider = createOsuProvider();
         AccessPoint osuAp = new AccessPoint(mContext, provider, mScanResults);
         assertThat(osuAp.getKey()).isEqualTo(AccessPoint.getKey(provider));
+    }
+
+    /**
+     * Test that getKey returns a key of SAE type for a PSK/SAE transition mode ScanResult.
+     */
+    @Test
+    public void testGetKey_supportSaeTransitionMode_shouldGetSaeKey() {
+        ScanResult scanResult = createScanResult(TEST_SSID, TEST_BSSID, DEFAULT_RSSI);
+        scanResult.capabilities =
+                "[WPA2-FT/PSK-CCMP][RSN-FT/PSK+PSK-SHA256+SAE+FT/SAE-CCMP][ESS][WPS]";
+        when(mMockWifiManager.isWpa3SaeSupported()).thenReturn(true);
+        when(mMockContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+        StringBuilder key = new StringBuilder();
+        key.append(AccessPoint.KEY_PREFIX_AP);
+        key.append(TEST_SSID);
+        key.append(',');
+        key.append(AccessPoint.SECURITY_SAE);
+
+        assertThat(AccessPoint.getKey(mMockContext, scanResult)).isEqualTo(key.toString());
+    }
+
+    /**
+     * Test that getKey returns a key of PSK type for a PSK/SAE transition mode ScanResult.
+     */
+    @Test
+    public void testGetKey_notSupportSaeTransitionMode_shouldGetPskKey() {
+        ScanResult scanResult = createScanResult(TEST_SSID, TEST_BSSID, DEFAULT_RSSI);
+        scanResult.capabilities =
+                "[WPA2-FT/PSK-CCMP][RSN-FT/PSK+PSK-SHA256+SAE+FT/SAE-CCMP][ESS][WPS]";
+        when(mMockWifiManager.isWpa3SaeSupported()).thenReturn(false);
+        when(mMockContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+        StringBuilder key = new StringBuilder();
+        key.append(AccessPoint.KEY_PREFIX_AP);
+        key.append(TEST_SSID);
+        key.append(',');
+        key.append(AccessPoint.SECURITY_PSK);
+
+        assertThat(AccessPoint.getKey(mMockContext, scanResult)).isEqualTo(key.toString());
     }
 
     /**
@@ -1521,5 +1560,114 @@ public class AccessPointTest {
         provisioningCallback.onProvisioningComplete();
 
         verify(mMockConnectListener).onFailure(anyInt());
+    }
+
+    /**
+     * Verifies that matches(AccessPoint other) matches a PSK/SAE transition mode AP to a PSK or a
+     * SAE AP.
+     */
+    @Test
+    public void testMatches1_transitionModeApMatchesNotTransitionModeAp_shouldMatchCorrectly() {
+        when(mMockContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+        when(mMockWifiManager.isWpa3SaeSupported()).thenReturn(true);
+        AccessPoint pskSaeTransitionModeAp = getPskSaeTransitionModeAp();
+
+        // Transition mode AP matches a SAE AP.
+        AccessPoint saeAccessPoint = new TestAccessPointBuilder(mContext)
+                .setSsid(AccessPoint.removeDoubleQuotes(TEST_SSID))
+                .setSecurity(AccessPoint.SECURITY_SAE)
+                .build();
+        assertThat(pskSaeTransitionModeAp.matches(saeAccessPoint)).isTrue();
+
+        // Transition mode AP matches a PSK AP.
+        AccessPoint pskAccessPoint = new TestAccessPointBuilder(mContext)
+                .setSsid(AccessPoint.removeDoubleQuotes(TEST_SSID))
+                .setSecurity(AccessPoint.SECURITY_PSK)
+                .build();
+
+        assertThat(pskSaeTransitionModeAp.matches(pskAccessPoint)).isTrue();
+
+        // Transition mode AP does not match a SAE AP if the device does not support SAE.
+        when(mMockWifiManager.isWpa3SaeSupported()).thenReturn(false);
+        pskSaeTransitionModeAp = getPskSaeTransitionModeAp();
+        saeAccessPoint = new TestAccessPointBuilder(mContext)
+            .setSsid(AccessPoint.removeDoubleQuotes(TEST_SSID))
+            .setSecurity(AccessPoint.SECURITY_SAE)
+            .build();
+
+        assertThat(pskSaeTransitionModeAp.matches(saeAccessPoint)).isFalse();
+    }
+
+    /**
+     * Verifies that matches(WifiConfiguration config) matches a PSK/SAE transition mode AP to a PSK
+     * or a SAE WifiConfiguration.
+     */
+    @Test
+    public void testMatches2_transitionModeApMatchesNotTransitionModeAp_shouldMatchCorrectly() {
+        when(mMockContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+        when(mMockWifiManager.isWpa3SaeSupported()).thenReturn(true);
+        AccessPoint pskSaeTransitionModeAp = getPskSaeTransitionModeAp();
+
+        // Transition mode AP matches a SAE WifiConfiguration.
+        WifiConfiguration saeConfig = new WifiConfiguration();
+        saeConfig.SSID = TEST_SSID;
+        saeConfig.allowedKeyManagement.set(KeyMgmt.SAE);
+
+        assertThat(pskSaeTransitionModeAp.matches(saeConfig)).isTrue();
+
+        // Transition mode AP matches a PSK WifiConfiguration.
+        WifiConfiguration pskConfig = new WifiConfiguration();
+        pskConfig.SSID = TEST_SSID;
+        pskConfig.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
+
+        assertThat(pskSaeTransitionModeAp.matches(pskConfig)).isTrue();
+
+        // Transition mode AP does not matches a SAE WifiConfiguration if the device does not
+        // support SAE.
+        when(mMockWifiManager.isWpa3SaeSupported()).thenReturn(false);
+        pskSaeTransitionModeAp = getPskSaeTransitionModeAp();
+
+        assertThat(pskSaeTransitionModeAp.matches(saeConfig)).isFalse();
+    }
+
+    /**
+     * Verifies that matches(ScanResult scanResult) matches a PSK/SAE transition mode AP to a PSK
+     * or a SAE ScanResult.
+     */
+    @Test
+    public void testMatches3_transitionModeApMatchesNotTransitionModeAp_shouldMatchCorrectly() {
+        when(mMockContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+        when(mMockWifiManager.isWpa3SaeSupported()).thenReturn(true);
+        AccessPoint pskSaeTransitionModeAp = getPskSaeTransitionModeAp();
+
+        // Transition mode AP matches a SAE ScanResult.
+        ScanResult saeScanResult = createScanResult(AccessPoint.removeDoubleQuotes(TEST_SSID),
+                TEST_BSSID, DEFAULT_RSSI);
+        saeScanResult.capabilities = "[SAE-CCMP][ESS][WPS]";
+
+        assertThat(pskSaeTransitionModeAp.matches(saeScanResult)).isTrue();
+
+        // Transition mode AP matches a PSK ScanResult.
+        ScanResult pskScanResult = createScanResult(AccessPoint.removeDoubleQuotes(TEST_SSID),
+                TEST_BSSID, DEFAULT_RSSI);
+        pskScanResult.capabilities = "[RSN-PSK-CCMP][ESS][WPS]";
+
+        assertThat(pskSaeTransitionModeAp.matches(pskScanResult)).isTrue();
+
+        // Transition mode AP does not matches a SAE ScanResult if the device does not support SAE.
+        when(mMockWifiManager.isWpa3SaeSupported()).thenReturn(false);
+        pskSaeTransitionModeAp = getPskSaeTransitionModeAp();
+
+        assertThat(pskSaeTransitionModeAp.matches(saeScanResult)).isFalse();
+    }
+
+    private AccessPoint getPskSaeTransitionModeAp() {
+        ScanResult scanResult = createScanResult(AccessPoint.removeDoubleQuotes(TEST_SSID),
+                TEST_BSSID, DEFAULT_RSSI);
+        scanResult.capabilities =
+                "[WPA2-FT/PSK-CCMP][RSN-FT/PSK+PSK-SHA256+SAE+FT/SAE-CCMP][ESS][WPS]";
+        return new TestAccessPointBuilder(mMockContext)
+                .setScanResults(new ArrayList<ScanResult>(Arrays.asList(scanResult)))
+                .build();
     }
 }

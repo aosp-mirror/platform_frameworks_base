@@ -264,3 +264,14 @@ message ZenPolicyProto {
     optional Sender priority_calls = 16;
     optional Sender priority_messages = 17;
 }
+
+// Next Tag: 2
+message PackageRemoteViewInfoProto {
+    optional string package_name = 1;
+    // add per-package additional info here (like channels)
+}
+
+// Next Tag: 2
+message NotificationRemoteViewsProto {
+    repeated PackageRemoteViewInfoProto package_remote_view_info = 1;
+}

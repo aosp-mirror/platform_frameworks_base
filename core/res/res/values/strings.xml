@@ -1035,47 +1035,26 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readContacts">read your contacts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts" product="tablet">Allows the app to read
-      data about your contacts stored on your tablet, including the frequency
-      with which you\'ve called, emailed, or communicated in other ways with
-      specific individuals. This permission allows apps to save your contact
-      data, and malicious apps may share contact data without your
-      knowledge.</string>
+    <string name="permdesc_readContacts" product="tablet">Allows the app to read data about your contacts stored on your tablet.
+      This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts" product="tv">Allows the app to read
-      data about your contacts stored on your TV, including the frequency
-      with which you\'ve called, emailed, or communicated in other ways with
-      specific individuals. This permission allows apps to save your contact
-      data, and malicious apps may share contact data without your
-      knowledge.</string>
+    <string name="permdesc_readContacts" product="tv">Allows the app to read data about your contacts stored on your TV.
+      This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts" product="default">Allows the app to
-      read data about your contacts stored on your phone, including the
-      frequency with which you\'ve called, emailed, or communicated in other ways
-      with specific individuals. This permission allows apps to save your
-      contact data, and malicious apps may share contact data without your
-      knowledge.</string>
+    <string name="permdesc_readContacts" product="default">Allows the app to read data about your contacts stored on your phone.
+      This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeContacts">modify your contacts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="tablet">Allows the app to
-      modify the data about your contacts stored on your tablet, including the
-      frequency with which you\'ve called, emailed, or communicated in other ways
-      with specific contacts. This permission allows apps to delete contact
-      data.</string>
+    <string name="permdesc_writeContacts" product="tablet">Allows the app to modify the data about your contacts stored on your tablet.
+      This permission allows apps to delete contact data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="tv">Allows the app to
-      modify the data about your contacts stored on your TV, including the
-      frequency with which you\'ve called, emailed, or communicated in other ways
-      with specific contacts. This permission allows apps to delete contact
-      data.</string>
+    <string name="permdesc_writeContacts" product="tv">Allows the app to modify the data about your contacts stored on your TV.
+      This permission allows apps to delete contact data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="default">Allows the app to
-    modify the data about your contacts stored on your phone, including the
-    frequency with which you\'ve called, emailed, or communicated in other ways
-    with specific contacts. This permission allows apps to delete contact
-    data.</string>
+    <string name="permdesc_writeContacts" product="default">Allows the app to modify the data about your contacts stored on your phone.
+      This permission allows apps to delete contact data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCallLog">read call log</string>
@@ -1137,6 +1116,8 @@
     <string name="permdesc_accessCoarseLocation" product="tablet">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your tablet for the app to be able to use them.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessCoarseLocation" product="tv">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your TV for the app to be able to use them.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessCoarseLocation" product="automotive">This app can get your approximate location only when it is in the foreground. These location services must be turned on and available on your car for the app to be able to use them.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessCoarseLocation" product="default">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when the app is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them.</string>
 
@@ -3361,6 +3342,26 @@
     <!-- If there is ever a ringtone set for some setting, but that ringtone can no longer be resolved, t his is shown instead.  For example, if the ringtone was on a SD card and it had been removed, this woudl be shown for ringtones on that SD card. -->
     <string name="ringtone_unknown">Unknown</string>
 
+    <!-- Start of string constants used to inform the user that the current network may be failing to connect due to not supporting randomized MAC-->
+    <!-- Notification title [CHAR_LIMIT=NONE]-->
+    <string name="wifi_cannot_connect_with_randomized_mac_title">Can\u2019t connect to <xliff:g id="ssid" example="SSID_1">%1$s</xliff:g></string>
+    <!-- Notification text [CHAR_LIMIT=NONE]-->
+    <string name="wifi_cannot_connect_with_randomized_mac_message">Tap to change privacy settings and retry</string>
+    <!-- Title of the dialog which pops up when the notification is tapped. [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_title">Change privacy setting?</string>
+    <!-- Dialog text [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_message"><xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> may want to connect using your device MAC address, a unique identifier. This may allow your device\u2019s location to be tracked by nearby devices.
+        \n\nIf you continue, <xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> will change your privacy setting and try to connect again.</string>
+    <!-- Text of the button that will disable MAC randomization for the network when tapped. [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text">Change setting</string>
+    <!-- Toast message which shows up after MAC randomization for the network is disabled. [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_success">Setting updated. Try connecting again.</string>
+    <!-- Toast message which shows up if the operation failed. [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_failure">Can\u2019t change privacy setting</string>
+    <!-- Toast message which shows up if the network no longer exists on the device. [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found">Network not found</string>
+    <!-- End of string constants used to inform the user that the current network may be failing to connect due to not supporting randomized MAC-->
+
     <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's title. -->
     <plurals name="wifi_available">
         <item quantity="one">Wi-Fi network available</item>
@@ -4839,10 +4840,10 @@
     <string name="confirm_battery_saver">OK</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, with a "learn more" link. -->
-    <string name="battery_saver_description_with_learn_more">Battery Saver turns off or restricts background activity, some visual effects \u0026 other high-power features to extend battery life. <annotation id="url">Learn More</annotation></string>
+    <string name="battery_saver_description_with_learn_more">To extend battery life, Battery Saver:\n&#183;Turns on Dark theme\n&#183;Turns off or restricts background activity, some visual effects, and other features like \u201cHey Google\u201d\n\n<annotation id="url">Learn more</annotation></string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, without a "learn more" link. -->
-    <string name="battery_saver_description">Battery Saver turns off or restricts background activity, some visual effects \u0026 other high-power features to extend battery life.</string>
+    <string name="battery_saver_description">To extend battery life, Battery Saver:\n&#183;Turns on Dark theme\n&#183;Turns off or restricts background activity, some visual effects, and other features like \u201cHey Google\u201d</string>
 
     <!-- [CHAR_LIMIT=NONE] Data saver: Feature description -->
     <string name="data_saver_description">To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them.</string>
@@ -5072,6 +5073,10 @@
     <string name="usb_mtp_launch_notification_description">Tap to view files</string>
 
     <!-- Resolver target actions strings -->
+    <!-- Pin this app to the top of the Sharesheet app list. [CHAR LIMIT=60]-->
+    <string name="pin_target">Pin</string>
+    <!-- Un-pin this app in the Sharesheet, so that it is sorted normally. [CHAR LIMIT=60]-->
+    <string name="unpin_target">Unpin</string>
     <!-- View application info for a target. -->
     <string name="app_info">App info</string>
 

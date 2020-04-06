@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.CHANGE_NETWORK_STATE;
+import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
+import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.net.ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN;
@@ -2333,9 +2336,17 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(trackDefaultCallback);
     }
 
+    private void grantUsingBackgroundNetworksPermissionForUid(final int uid) throws Exception {
+        final String testPackageName = mContext.getPackageName();
+        when(mPackageManager.getPackageInfo(eq(testPackageName), eq(GET_PERMISSIONS)))
+                .thenReturn(buildPackageInfo(true, uid));
+        mService.mPermissionMonitor.onPackageAdded(testPackageName, uid);
+    }
+
     @Test
-    public void testNetworkGoesIntoBackgroundAfterLinger() {
+    public void testNetworkGoesIntoBackgroundAfterLinger() throws Exception {
         setAlwaysOnNetworks(true);
+        grantUsingBackgroundNetworksPermissionForUid(Binder.getCallingUid());
         NetworkRequest request = new NetworkRequest.Builder()
                 .clearCapabilities()
                 .build();
@@ -3416,6 +3427,7 @@ public class ConnectivityServiceTest {
         // Create a background request. We can't do this ourselves because ConnectivityService
         // doesn't have an API for it. So just turn on mobile data always on.
         setAlwaysOnNetworks(true);
+        grantUsingBackgroundNetworksPermissionForUid(Binder.getCallingUid());
         final NetworkRequest request = new NetworkRequest.Builder().build();
         final NetworkRequest fgRequest = new NetworkRequest.Builder()
                 .addCapability(NET_CAPABILITY_FOREGROUND).build();
@@ -3582,6 +3594,7 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testMobileDataAlwaysOn() throws Exception {
+        grantUsingBackgroundNetworksPermissionForUid(Binder.getCallingUid());
         final TestNetworkCallback cellNetworkCallback = new TestNetworkCallback();
         final NetworkRequest cellRequest = new NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_CELLULAR).build();
@@ -6529,7 +6542,14 @@ public class ConnectivityServiceTest {
 
     private static PackageInfo buildPackageInfo(boolean hasSystemPermission, int uid) {
         final PackageInfo packageInfo = new PackageInfo();
-        packageInfo.requestedPermissions = new String[0];
+        if (hasSystemPermission) {
+            packageInfo.requestedPermissions = new String[] {
+                    CHANGE_NETWORK_STATE, CONNECTIVITY_USE_RESTRICTED_NETWORKS };
+            packageInfo.requestedPermissionsFlags = new int[] {
+                    REQUESTED_PERMISSION_GRANTED, REQUESTED_PERMISSION_GRANTED };
+        } else {
+            packageInfo.requestedPermissions = new String[0];
+        }
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.privateFlags = 0;
         packageInfo.applicationInfo.uid = UserHandle.getUid(UserHandle.USER_SYSTEM,

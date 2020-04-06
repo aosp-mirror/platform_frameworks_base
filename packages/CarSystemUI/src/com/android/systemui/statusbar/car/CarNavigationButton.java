@@ -90,17 +90,7 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
         try {
             if (mIntent != null) {
                 final Intent intent = Intent.parseUri(mIntent, Intent.URI_INTENT_SCHEME);
-                setOnClickListener(v -> {
-                    try {
-                        if (mBroadcastIntent) {
-                            mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
-                            return;
-                        }
-                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Failed to launch intent", e);
-                    }
-                });
+                setOnClickListener(getButtonClickListener(intent));
             }
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to attach intent", e);
@@ -109,19 +99,39 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
         try {
             if (mLongIntent != null) {
                 final Intent intent = Intent.parseUri(mLongIntent, Intent.URI_INTENT_SCHEME);
-                setOnLongClickListener(v -> {
-                    try {
-                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Failed to launch intent", e);
-                    }
-                    // consume event either way
-                    return true;
-                });
+                setOnLongClickListener(getButtonLongClickListener(intent));
             }
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to attach long press intent", e);
         }
+    }
+
+    /** Defines the behavior of a button click. */
+    protected OnClickListener getButtonClickListener(Intent toSend) {
+        return v -> {
+            try {
+                if (mBroadcastIntent) {
+                    mContext.sendBroadcastAsUser(toSend, UserHandle.CURRENT);
+                    return;
+                }
+                mContext.startActivityAsUser(toSend, UserHandle.CURRENT);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to launch intent", e);
+            }
+        };
+    }
+
+    /** Defines the behavior of a long click. */
+    protected OnLongClickListener getButtonLongClickListener(Intent toSend) {
+        return v -> {
+            try {
+                mContext.startActivityAsUser(toSend, UserHandle.CURRENT);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to launch intent", e);
+            }
+            // consume event either way
+            return true;
+        };
     }
 
     /**

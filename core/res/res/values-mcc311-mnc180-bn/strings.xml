@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="531930017979728896">"সিমের জন্য প্রস্তুত নয় MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="97745044956236881">"সিমের অনুমতি নেই MM#3"</string>
-    <string name="mmcc_illegal_me" msgid="5766888847785331904">"ফোন অনুমোদিত নয় MM#6"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="604133804161351810">"সিমের জন্য প্রস্তুত নয় MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="4073997279280371621">"সিমের অনুমতি নেই MM#3"</string>
+    <string name="mmcc_illegal_me" msgid="4936539345546223576">"ফোন অনুমোদিত নয় MM#6"</string>
 </resources>

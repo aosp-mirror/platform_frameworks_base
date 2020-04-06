@@ -395,7 +395,7 @@ public abstract class Image implements AutoCloseable {
          * <p>The row stride for this color plane, in bytes.</p>
          *
          * <p>This is the distance between the start of two consecutive rows of
-         * pixels in the image. Note that row stried is undefined for some formats
+         * pixels in the image. Note that row stride is undefined for some formats
          * such as
          * {@link android.graphics.ImageFormat#RAW_PRIVATE RAW_PRIVATE},
          * and calling getRowStride on images of these formats will
