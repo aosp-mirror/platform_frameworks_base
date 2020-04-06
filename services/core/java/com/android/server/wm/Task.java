@@ -2448,7 +2448,8 @@ class Task extends WindowContainer<WindowContainer> {
     Rect updateOverrideConfigurationFromLaunchBounds() {
         // If the task is controlled by another organized task, do not set override
         // configurations and let its parent (organized task) to control it;
-        final Rect bounds = isOrganized() && !isRootTask() ? null : getLaunchBounds();
+        final Task rootTask = getRootTask();
+        final Rect bounds = rootTask != this && rootTask.isOrganized() ? null : getLaunchBounds();
         setBounds(bounds);
         if (bounds != null && !bounds.isEmpty()) {
             // TODO: Review if we actually want to do this - we are setting the launch bounds
