@@ -42,7 +42,7 @@ import android.net.dhcp.DhcpLeaseParcelable;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.DhcpServingParamsParcelExt;
-import android.net.dhcp.IDhcpLeaseCallbacks;
+import android.net.dhcp.IDhcpEventCallbacks;
 import android.net.dhcp.IDhcpServer;
 import android.net.ip.IpNeighborMonitor.NeighborEvent;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
@@ -463,7 +463,7 @@ public class IpServer extends StateMachine {
         }
     }
 
-    private class DhcpLeaseCallback extends IDhcpLeaseCallbacks.Stub {
+    private class DhcpLeaseCallback extends IDhcpEventCallbacks.Stub {
         @Override
         public void onLeasesChanged(List<DhcpLeaseParcelable> leaseParcelables) {
             final ArrayList<TetheredClient> leases = new ArrayList<>();
@@ -494,6 +494,11 @@ public class IpServer extends StateMachine {
                 mDhcpLeases = leases;
                 mCallback.dhcpLeasesChanged();
             });
+        }
+
+        @Override
+        public void onNewPrefixRequest(IpPrefix currentPrefix) {
+            //TODO: add specific implementation.
         }
 
         @Override
