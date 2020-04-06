@@ -51,7 +51,6 @@ class ControlViewHolder(
 ) {
     val icon: ImageView = layout.requireViewById(R.id.icon)
     val status: TextView = layout.requireViewById(R.id.status)
-    val statusExtra: TextView = layout.requireViewById(R.id.status_extra)
     val title: TextView = layout.requireViewById(R.id.title)
     val subtitle: TextView = layout.requireViewById(R.id.subtitle)
     val context: Context = layout.getContext()
@@ -65,6 +64,8 @@ class ControlViewHolder(
         val ld = layout.getBackground() as LayerDrawable
         ld.mutate()
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer) as ClipDrawable
+        // needed for marquee to start
+        status.setSelected(true)
     }
 
     fun bindData(cws: ControlWithState) {
@@ -103,8 +104,7 @@ class ControlViewHolder(
 
         behavior?.bind(cws)
 
-        layout.setContentDescription(
-            "${title.text} ${subtitle.text} ${status.text} ${statusExtra.text}")
+        layout.setContentDescription("${title.text} ${subtitle.text} ${status.text}")
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
@@ -113,15 +113,12 @@ class ControlViewHolder(
 
     fun setTransientStatus(tempStatus: String) {
         val previousText = status.getText()
-        val previousTextExtra = statusExtra.getText()
 
         cancelUpdate = uiExecutor.executeDelayed({
                 status.setText(previousText)
-                statusExtra.setText(previousTextExtra)
             }, UPDATE_DELAY_IN_MILLIS)
 
         status.setText(tempStatus)
-        statusExtra.setText("")
     }
 
     fun action(action: ControlAction) {
@@ -154,7 +151,6 @@ class ControlViewHolder(
         }
 
         status.setTextColor(fg)
-        statusExtra.setTextColor(fg)
 
         icon.setImageDrawable(ri.icon)
 

@@ -47,9 +47,10 @@ class ToggleRangeBehavior : Behavior {
     lateinit var control: Control
     lateinit var cvh: ControlViewHolder
     lateinit var rangeTemplate: RangeTemplate
-    lateinit var statusExtra: TextView
     lateinit var status: TextView
     lateinit var context: Context
+    var currentStatusText: CharSequence = ""
+    var currentRangeValue: String = ""
 
     companion object {
         private const val DEFAULT_FORMAT = "%.1f"
@@ -83,8 +84,8 @@ class ToggleRangeBehavior : Behavior {
     override fun bind(cws: ControlWithState) {
         this.control = cws.control!!
 
-        statusExtra = cvh.statusExtra
-        status.setText(control.getStatusText())
+        currentStatusText = control.getStatusText()
+        status.setText(currentStatusText)
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
@@ -96,7 +97,7 @@ class ToggleRangeBehavior : Behavior {
         val checked = template.isChecked()
         val currentRatio = rangeTemplate.getCurrentValue() /
                 (rangeTemplate.getMaxValue() - rangeTemplate.getMinValue())
-        updateRange(currentRatio, checked)
+        updateRange(currentRatio, checked, /* isDragging */ false)
 
         cvh.applyRenderInfo(checked)
 
@@ -147,7 +148,7 @@ class ToggleRangeBehavior : Behavior {
                                 AccessibilityNodeInfo.ACTION_ARGUMENT_PROGRESS_VALUE)
                             val ratioDiff = (value - rangeTemplate.getCurrentValue()) /
                                 (rangeTemplate.getMaxValue() - rangeTemplate.getMinValue())
-                            updateRange(ratioDiff, template.isChecked())
+                            updateRange(ratioDiff, template.isChecked(), /* isDragging */ false)
                             endUpdateRange()
                             true
                         }
@@ -167,26 +168,27 @@ class ToggleRangeBehavior : Behavior {
     }
 
     fun beginUpdateRange() {
-        status.setVisibility(View.GONE)
-        statusExtra.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources()
+        status.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_expanded).toFloat())
     }
 
-    fun updateRange(ratioDiff: Float, checked: Boolean) {
+    fun updateRange(ratioDiff: Float, checked: Boolean, isDragging: Boolean) {
         val changeAmount = if (checked) (MAX_LEVEL * ratioDiff).toInt() else MIN_LEVEL
         val newLevel = Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, clipLayer.getLevel() + changeAmount))
         clipLayer.setLevel(newLevel)
 
         if (checked) {
             val newValue = levelToRangeValue(clipLayer.getLevel())
-            val formattedNewValue = format(rangeTemplate.getFormatString().toString(),
+            currentRangeValue = format(rangeTemplate.getFormatString().toString(),
                     DEFAULT_FORMAT, newValue)
-
-            statusExtra.setText(formattedNewValue)
-            statusExtra.setVisibility(View.VISIBLE)
+            val text = if (isDragging) {
+                currentRangeValue
+            } else {
+                "$currentStatusText $currentRangeValue"
+            }
+            status.setText(text)
         } else {
-            statusExtra.setText("")
-            statusExtra.setVisibility(View.GONE)
+            status.setText(currentStatusText)
         }
     }
 
@@ -210,9 +212,9 @@ class ToggleRangeBehavior : Behavior {
     }
 
     fun endUpdateRange() {
-        statusExtra.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources()
+        status.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_normal).toFloat())
-        status.setVisibility(View.VISIBLE)
+        status.setText("$currentStatusText $currentRangeValue")
         cvh.action(FloatAction(rangeTemplate.getTemplateId(),
             findNearestStep(levelToRangeValue(clipLayer.getLevel()))))
     }
@@ -260,7 +262,8 @@ class ToggleRangeBehavior : Behavior {
                 isDragging = true
             }
 
-            this@ToggleRangeBehavior.updateRange(-xDiff / v.getWidth(), true)
+            this@ToggleRangeBehavior.updateRange(-xDiff / v.getWidth(),
+                /* checked */ true, /* isDragging */ true)
             return true
         }
 
