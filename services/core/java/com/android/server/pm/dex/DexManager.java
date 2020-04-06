@@ -45,6 +45,7 @@ import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -102,19 +103,6 @@ public class DexManager {
     private static int DEX_SEARCH_FOUND_PRIMARY = 1;  // dex file is the primary/base apk
     private static int DEX_SEARCH_FOUND_SPLIT = 2;  // dex file is a split apk
     private static int DEX_SEARCH_FOUND_SECONDARY = 3;  // dex file is a secondary dex
-
-    /**
-     * We do not record packages that have no secondary dex files or that are not used by other
-     * apps. This is an optimization to reduce the amount of data that needs to be written to
-     * disk (apps will not usually be shared so this trims quite a bit the number we record).
-     *
-     * To make this behaviour transparent to the callers which need use information on packages,
-     * DexManager will return this DEFAULT instance from
-     * {@link DexManager#getPackageUseInfoOrDefault}. It has no data about secondary dex files and
-     * is marked as not being used by other apps. This reflects the intended behaviour when we don't
-     * find the package in the underlying data file.
-     */
-    private final static PackageUseInfo DEFAULT_USE_INFO = new PackageUseInfo();
 
     public DexManager(Context context, IPackageManager pms, PackageDexOptimizer pdo,
             Installer installer, Object installLock) {
@@ -194,6 +182,8 @@ public class DexManager {
                     // If the dex file is the primary apk (or a split) and not isUsedByOtherApps
                     // do not record it. This case does not bring any new usable information
                     // and can be safely skipped.
+                    // Note this is just an optimization that makes things easier to read in the
+                    // package-dex-use file since we don't need to pollute it with redundant info.
                     continue;
                 }
 
@@ -211,7 +201,7 @@ public class DexManager {
                     // async write to disk to make sure we don't loose the data in case of a reboot.
 
                     if (mPackageDexUsage.record(searchResult.mOwningPackageName,
-                            dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
+                            dexPath, loaderUserId, loaderIsa, primaryOrSplit,
                             loadingAppInfo.packageName, classLoaderContext)) {
                         mPackageDexUsage.maybeWriteAsync();
                     }
@@ -364,7 +354,9 @@ public class DexManager {
 
         try {
             mPackageDexUsage.read();
-            mPackageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
+            List<String> packagesToKeepDataAbout = new ArrayList<>();
+            mPackageDexUsage.syncData(
+                    packageToUsersMap, packageToCodePaths, packagesToKeepDataAbout);
         } catch (Exception e) {
             mPackageDexUsage.clear();
             Slog.w(TAG, "Exception while loading package dex usage. "
@@ -391,8 +383,17 @@ public class DexManager {
      * to access the package use.
      */
     public PackageUseInfo getPackageUseInfoOrDefault(String packageName) {
+        // We do not record packages that have no secondary dex files or that are not used by other
+        // apps. This is an optimization to reduce the amount of data that needs to be written to
+        // disk (apps will not usually be shared so this trims quite a bit the number we record).
+        //
+        // To make this behaviour transparent to the callers which need use information on packages,
+        // DexManager will return this DEFAULT instance from
+        // {@link DexManager#getPackageUseInfoOrDefault}. It has no data about secondary dex files
+        // and is marked as not being used by other apps. This reflects the intended behaviour when
+        // we don't find the package in the underlying data file.
         PackageUseInfo useInfo = mPackageDexUsage.getPackageUseInfo(packageName);
-        return useInfo == null ? DEFAULT_USE_INFO : useInfo;
+        return useInfo == null ? new PackageUseInfo(packageName) : useInfo;
     }
 
     /**
@@ -542,7 +543,7 @@ public class DexManager {
     // TODO(calin): questionable API in the presence of class loaders context. Needs amends as the
     // compilation happening here will use a pessimistic context.
     public RegisterDexModuleResult registerDexModule(ApplicationInfo info, String dexPath,
-            boolean isUsedByOtherApps, int userId) {
+            boolean isSharedModule, int userId) {
         // Find the owning package record.
         DexSearchResult searchResult = getDexPackage(info, dexPath, userId);
 
@@ -559,11 +560,14 @@ public class DexManager {
 
         // We found the package. Now record the usage for all declared ISAs.
         boolean update = false;
+        // If this is a shared module set the loading package to an arbitrary package name
+        // so that we can mark that module as usedByOthers.
+        String loadingPackage = isSharedModule ? ".shared.module" : searchResult.mOwningPackageName;
         for (String isa : getAppDexInstructionSets(info.primaryCpuAbi, info.secondaryCpuAbi)) {
             boolean newUpdate = mPackageDexUsage.record(searchResult.mOwningPackageName,
-                    dexPath, userId, isa, isUsedByOtherApps, /*primaryOrSplit*/ false,
+                    dexPath, userId, isa, /*primaryOrSplit*/ false,
                     searchResult.mOwningPackageName,
-                    PackageDexUsage.UNKNOWN_CLASS_LOADER_CONTEXT);
+                    PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT);
             update |= newUpdate;
         }
         if (update) {
