@@ -16,4 +16,4 @@
 
 package android.os;
 
-parcelable BatterySaverPolicyConfig;
+parcelable BatterySaverPolicyConfig cpp_header "android/BatterySaverPolicyConfig.h";
