@@ -3522,6 +3522,32 @@ package android.service.textclassifier {
 
 }
 
+package android.service.watchdog {
+
+  public abstract class ExplicitHealthCheckService extends android.app.Service {
+    ctor public ExplicitHealthCheckService();
+    method public final void notifyHealthCheckPassed(@NonNull String);
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onCancelHealthCheck(@NonNull String);
+    method @NonNull public abstract java.util.List<java.lang.String> onGetRequestedPackages();
+    method @NonNull public abstract java.util.List<android.service.watchdog.ExplicitHealthCheckService.PackageConfig> onGetSupportedPackages();
+    method public abstract void onRequestHealthCheck(@NonNull String);
+    method public void setCallback(@Nullable android.os.RemoteCallback);
+    field public static final String BIND_PERMISSION = "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
+    field public static final String SERVICE_INTERFACE = "android.service.watchdog.ExplicitHealthCheckService";
+  }
+
+  public static final class ExplicitHealthCheckService.PackageConfig implements android.os.Parcelable {
+    ctor public ExplicitHealthCheckService.PackageConfig(@NonNull String, long);
+    method public int describeContents();
+    method public long getHealthCheckTimeoutMillis();
+    method @NonNull public String getPackageName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.watchdog.ExplicitHealthCheckService.PackageConfig> CREATOR;
+  }
+
+}
+
 package android.telecom {
 
   public final class Call {
