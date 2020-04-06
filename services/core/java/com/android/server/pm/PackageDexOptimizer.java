@@ -401,7 +401,8 @@ public class PackageDexOptimizer {
             return DEX_OPT_FAILED;
         }
         String classLoaderContext = null;
-        if (dexUseInfo.isUnknownClassLoaderContext() || dexUseInfo.isVariableClassLoaderContext()) {
+        if (dexUseInfo.isUnsupportedClassLoaderContext()
+                || dexUseInfo.isVariableClassLoaderContext()) {
             // If we have an unknown (not yet set), or a variable class loader chain. Just extract
             // the dex file.
             compilerFilter = "extract";
