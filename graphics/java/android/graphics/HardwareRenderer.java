@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -142,6 +143,8 @@ public class HardwareRenderer {
      */
     private static final String CACHE_PATH_SHADERS = "com.android.opengl.shaders_cache";
     private static final String CACHE_PATH_SKIASHADERS = "com.android.skia.shaders_cache";
+
+    private static int sDensityDpi = 0;
 
     private final long mNativeProxy;
     /** @hide */
@@ -907,6 +910,19 @@ public class HardwareRenderer {
     }
 
     /**
+     * Sends device configuration changes to the render thread, for rendering profiling views.
+     *
+     * @hide
+     */
+    public static void sendDeviceConfigurationForDebugging(Configuration config) {
+        if (config.densityDpi != Configuration.DENSITY_DPI_UNDEFINED
+                && config.densityDpi != sDensityDpi) {
+            sDensityDpi = config.densityDpi;
+            nSetDisplayDensityDpi(config.densityDpi);
+        }
+    }
+
+    /**
      * If set extra graphics debugging abilities will be enabled such as dumping skp
      *
      * @hide
@@ -1189,4 +1205,6 @@ public class HardwareRenderer {
     private static native void nAllocateBuffers(long nativeProxy);
 
     private static native void nSetForceDark(long nativeProxy, boolean enabled);
+
+    private static native void nSetDisplayDensityDpi(int densityDpi);
 }

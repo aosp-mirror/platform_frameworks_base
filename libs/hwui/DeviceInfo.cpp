@@ -113,11 +113,12 @@ void DeviceInfo::updateDisplayInfo() {
 
     mWidth = ADisplayConfig_getWidth(mCurrentConfig);
     mHeight = ADisplayConfig_getHeight(mCurrentConfig);
-    mDensity = ADisplayConfig_getDensity(mCurrentConfig);
     mVsyncPeriod = static_cast<int64_t>(1000000000 / ADisplayConfig_getFps(mCurrentConfig));
     mCompositorOffset = ADisplayConfig_getCompositorOffsetNanos(mCurrentConfig);
     mAppOffset = ADisplayConfig_getAppVsyncOffsetNanos(mCurrentConfig);
 }
+
+std::atomic<float> DeviceInfo::sDensity = 2.0;
 
 } /* namespace uirenderer */
 } /* namespace android */

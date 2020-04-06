@@ -593,6 +593,13 @@ static void android_view_ThreadedRenderer_preload(JNIEnv*, jclass) {
     RenderProxy::preload();
 }
 
+// Plumbs the display density down to DeviceInfo.
+static void android_view_ThreadedRenderer_setDisplayDensityDpi(JNIEnv*, jclass, jint densityDpi) {
+    // Convert from dpi to density-independent pixels.
+    const float density = densityDpi / 160.0;
+    DeviceInfo::setDensity(density);
+}
+
 // ----------------------------------------------------------------------------
 // HardwareRendererObserver
 // ----------------------------------------------------------------------------
@@ -697,6 +704,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetContextPriority", "(I)V", (void*)android_view_ThreadedRenderer_setContextPriority },
     { "nAllocateBuffers", "(J)V", (void*)android_view_ThreadedRenderer_allocateBuffers },
     { "nSetForceDark", "(JZ)V", (void*)android_view_ThreadedRenderer_setForceDark },
+    { "nSetDisplayDensityDpi", "(I)V", (void*)android_view_ThreadedRenderer_setDisplayDensityDpi },
     { "preload", "()V", (void*)android_view_ThreadedRenderer_preload },
 };
 
