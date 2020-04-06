@@ -139,6 +139,10 @@ public class SubscriptionManager {
     public static final String CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY =
             "cache_key.telephony.get_default_data_sub_id";
 
+    /** @hide */
+    public static final String CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY =
+            "cache_key.telephony.get_active_data_sub_id";
+
     private static final int MAX_CACHE_SIZE = 4;
 
     private static PropertyInvalidatedCache<Void, Integer> sDefaultSubIdCache =
@@ -155,6 +159,14 @@ public class SubscriptionManager {
             @Override
             protected Integer recompute(Void query) {
                 return getDefaultDataSubscriptionIdInternal();
+            }};
+
+    private static PropertyInvalidatedCache<Void, Integer> sActiveDataSubIdCache =
+            new PropertyInvalidatedCache<Void, Integer>(
+                    MAX_CACHE_SIZE, CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY) {
+            @Override
+            protected Integer recompute(Void query) {
+                return getActiveDataSubscriptionIdInternal();
             }};
 
     /**
@@ -3289,6 +3301,10 @@ public class SubscriptionManager {
      * SubscriptionManager.INVALID_SUBSCRIPTION_ID if not.
      */
     public static int getActiveDataSubscriptionId() {
+        return sActiveDataSubIdCache.query(null);
+    }
+
+    private static int getActiveDataSubscriptionIdInternal() {
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
@@ -3324,6 +3340,11 @@ public class SubscriptionManager {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY);
     }
 
+    /** @hide */
+    public static void invalidateActiveDataSubIdCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY);
+    }
+
     /**
      * Allows a test process to disable client-side caching operations.
      *
@@ -3332,5 +3353,6 @@ public class SubscriptionManager {
     public static void disableCaching() {
         sDefaultSubIdCache.disableLocal();
         sDefaultDataSubIdCache.disableLocal();
+        sActiveDataSubIdCache.disableLocal();
     }
 }
