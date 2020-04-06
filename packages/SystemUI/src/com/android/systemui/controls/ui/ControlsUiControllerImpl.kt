@@ -43,6 +43,7 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Background
@@ -90,20 +91,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private lateinit var lastItems: List<SelectionItem>
     private var popup: ListPopupWindow? = null
     private var activeDialog: Dialog? = null
-    private val addControlsItem: SelectionItem
     private var hidden = true
-
-    init {
-        val addDrawable = context.getDrawable(R.drawable.ic_add).apply {
-            setTint(context.resources.getColor(R.color.control_secondary_text, null))
-        }
-        addControlsItem = SelectionItem(
-            context.resources.getString(R.string.controls_providers_title),
-            "",
-            addDrawable,
-            EMPTY_COMPONENT
-        )
-    }
 
     override val available: Boolean
         get() = controlsController.get().available
@@ -182,7 +170,7 @@ class ControlsUiControllerImpl @Inject constructor (
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
 
         val viewGroup = parent.requireViewById(R.id.controls_no_favorites_group) as ViewGroup
-        viewGroup.setOnClickListener(launchSelectorActivityListener(context))
+        viewGroup.setOnClickListener { v: View -> startProviderSelectorActivity(v.context) }
 
         val subtitle = parent.requireViewById<TextView>(R.id.controls_subtitle)
         subtitle.setText(context.resources.getString(R.string.quick_controls_subtitle))
@@ -196,16 +184,28 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    private fun launchSelectorActivityListener(context: Context): (View) -> Unit {
-        return { _ ->
-            val closeDialog = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-            context.sendBroadcast(closeDialog)
-
-            val i = Intent()
-            i.setComponent(ComponentName(context, ControlsProviderSelectorActivity::class.java))
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(i)
+    private fun startFavoritingActivity(context: Context, si: StructureInfo) {
+        val i = Intent(context, ControlsFavoritingActivity::class.java).apply {
+            putExtra(ControlsFavoritingActivity.EXTRA_APP,
+                controlsListingController.get().getAppLabel(si.componentName))
+            putExtra(ControlsFavoritingActivity.EXTRA_STRUCTURE, si.structure)
+            putExtra(Intent.EXTRA_COMPONENT_NAME, si.componentName)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
+        startActivity(context, i)
+    }
+
+    private fun startProviderSelectorActivity(context: Context) {
+        val i = Intent(context, ControlsProviderSelectorActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        startActivity(context, i)
+    }
+
+    private fun startActivity(context: Context, intent: Intent) {
+        val closeDialog = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        context.sendBroadcast(closeDialog)
+        context.startActivity(intent)
     }
 
     private fun showControlsView(items: List<SelectionItem>) {
@@ -246,7 +246,7 @@ class ControlsUiControllerImpl @Inject constructor (
                         ) {
                             when (pos) {
                                 // 0: Add Control
-                                0 -> launchSelectorActivityListener(view.context)(parent)
+                                0 -> startFavoritingActivity(view.context, selectedStructure)
                                 else -> Log.w(ControlsUiController.TAG,
                                     "Unsupported index ($pos) on 'more' menu selection")
                             }
