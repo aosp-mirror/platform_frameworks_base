@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.ActivityView;
 import android.app.IActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -36,9 +35,8 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.RemoteException;
+import android.hardware.display.VirtualDisplay;
 import android.os.UserHandle;
-import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -254,6 +252,10 @@ public abstract class TaskEmbedder {
 
     public int getDisplayId() {
         return INVALID_DISPLAY;
+    }
+
+    public VirtualDisplay getVirtualDisplay() {
+        return null;
     }
 
     /**
