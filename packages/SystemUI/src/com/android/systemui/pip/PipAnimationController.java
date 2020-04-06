@@ -319,7 +319,6 @@ public class PipAnimationController {
                     getSurfaceTransactionHelper()
                             .crop(tx, leash, getDestinationBounds())
                             .round(tx, leash, shouldApplyCornerRadius());
-                    tx.show(leash);
                     tx.apply();
                 }
             };
@@ -360,7 +359,6 @@ public class PipAnimationController {
                     getSurfaceTransactionHelper()
                             .alpha(tx, leash, 1f)
                             .round(tx, leash, shouldApplyCornerRadius());
-                    tx.show(leash);
                     tx.apply();
                 }
 
