@@ -254,9 +254,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
             mTaskToken = taskInfo.token;
             mTaskLeash = mTaskToken.getLeash();
             mTransaction.reparent(mTaskLeash, mSurfaceControl)
-                    .show(mTaskLeash)
-                    .show(mSurfaceControl)
-                    .apply();
+                    .show(mSurfaceControl).apply();
             if (mPendingNotifyBoundsChanged) {
                 // TODO: Either defer show or hide and synchronize show with the resize
                 notifyBoundsChanged();

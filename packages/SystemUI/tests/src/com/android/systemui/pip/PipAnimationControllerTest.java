@@ -51,6 +51,7 @@ public class PipAnimationControllerTest extends SysuiTestCase {
 
     private PipAnimationController mPipAnimationController;
 
+    @Mock
     private SurfaceControl mLeash;
 
     @Mock
@@ -60,10 +61,6 @@ public class PipAnimationControllerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         mPipAnimationController = new PipAnimationController(
                 mContext, new PipSurfaceTransactionHelper(mContext));
-        mLeash = new SurfaceControl.Builder()
-                .setContainerLayer()
-                .setName("FakeLeash")
-                .build();
         MockitoAnnotations.initMocks(this);
     }
 
