@@ -2674,4 +2674,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R QPR
     SETTINGS_ONE_HANDED = 1841;
+
+    // OPEN: Settings > Battery > Advanced battery option
+    // CATEGORY: SETTINGS
+    // OS: R
+    FUELGAUGE_ADVANCED_BATTERY_OPTION = 1842;
 }
