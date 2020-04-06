@@ -114,17 +114,18 @@ cc_defaults {
     static_libs: [
         "libbase",
         "libcutils",
+        "libgtest_prod",
         "libprotoutil",
         "libstatsmetadata",
         "libstatslog_statsd",
         "libsysutils",
         "libutils",
+        "statsd-aidl-ndk_platform",
     ],
     shared_libs: [
         "libbinder_ndk",
         "libincident",
         "liblog",
-        "statsd-aidl-ndk_platform",
     ],
 }
 
@@ -269,10 +270,11 @@ cc_binary {
 
     proto: {
         type: "lite",
+        static: true,
     },
+    stl: "libc++_static",
 
     shared_libs: [
-        "libgtest_prod",
         "libstatssocket",
     ],
 
