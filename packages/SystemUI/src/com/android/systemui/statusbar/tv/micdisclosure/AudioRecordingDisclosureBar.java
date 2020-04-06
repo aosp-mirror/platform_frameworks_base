@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.tv;
+package com.android.systemui.statusbar.tv.micdisclosure;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -25,7 +25,6 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.annotation.IntDef;
 import android.annotation.UiThread;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -40,6 +39,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.tv.TvStatusBar;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -54,9 +54,10 @@ import java.util.Set;
  *
  * @see TvStatusBar
  */
-class AudioRecordingDisclosureBar {
-    private static final String TAG = "AudioRecordingDisclosureBar";
-    private static final boolean DEBUG = false;
+public class AudioRecordingDisclosureBar implements
+        AudioActivityObserver.OnAudioActivityStateChangeListener {
+    private static final String TAG = "AudioRecordingDisclosure";
+    static final boolean DEBUG = false;
 
     // This title is used to test the microphone disclosure indicator in
     // CtsSystemUiHostTestCases:TvMicrophoneCaptureIndicatorTest
@@ -98,10 +99,12 @@ class AudioRecordingDisclosureBar {
     private TextView mTextView;
 
     @State private int mState = STATE_NOT_SHOWN;
+
     /**
-     * Set of the applications that currently are conducting audio recording.
+     * Array of the observers that monitor different aspects of the system, such as AppOps and
+     * microphone foreground services
      */
-    private final Set<String> mActiveAudioRecordingPackages = new ArraySet<>();
+    private final AudioActivityObserver[] mAudioActivityObservers;
     /**
      * Set of applications that we've notified the user about since the indicator came up. Meaning
      * that if an application is in this list then at some point since the indicator came up, it
@@ -119,29 +122,52 @@ class AudioRecordingDisclosureBar {
      * one of the two aforementioned states.
      */
     private final Queue<String> mPendingNotificationPackages = new LinkedList<>();
+    /**
+     * Set of applications for which we make an exception and do not show the indicator. This gets
+     * populated once - in {@link #AudioRecordingDisclosureBar(Context)}.
+     */
+    private final Set<String> mExemptPackages;
 
-    AudioRecordingDisclosureBar(Context context) {
+    public AudioRecordingDisclosureBar(Context context) {
         mContext = context;
-    }
 
-    void start() {
-        // Register AppOpsManager callback
-        final AppOpsManager appOpsManager = (AppOpsManager) mContext.getSystemService(
-                Context.APP_OPS_SERVICE);
-        appOpsManager.startWatchingActive(
-                new String[]{AppOpsManager.OPSTR_RECORD_AUDIO},
-                mContext.getMainExecutor(),
-                new OnActiveRecordingListener());
+        mExemptPackages = new ArraySet<>(
+                Arrays.asList(mContext.getResources().getStringArray(
+                        R.array.audio_recording_disclosure_exempt_apps)));
+
+        mAudioActivityObservers = new AudioActivityObserver[]{
+                new RecordAudioAppOpObserver(mContext, this),
+                new MicrophoneForegroundServicesObserver(mContext, this),
+        };
     }
 
     @UiThread
-    private void onStartedRecording(String packageName) {
-        if (!mActiveAudioRecordingPackages.add(packageName)) {
-            // This app is already known to perform recording
+    @Override
+    public void onAudioActivityStateChange(boolean active, String packageName) {
+        if (DEBUG) {
+            Log.d(TAG,
+                    "onAudioActivityStateChange, packageName=" + packageName + ", active="
+                            + active);
+        }
+
+        if (mExemptPackages.contains(packageName)) {
+            if (DEBUG) Log.d(TAG, "   - exempt package: ignoring");
             return;
         }
+
+        if (active) {
+            showIndicatorForPackageIfNeeded(packageName);
+        } else {
+            hideIndicatorIfNeeded();
+        }
+    }
+
+    @UiThread
+    private void showIndicatorForPackageIfNeeded(String packageName) {
+        if (DEBUG) Log.d(TAG, "showIndicatorForPackageIfNeeded, packageName=" + packageName);
         if (!mSessionNotifiedPackages.add(packageName)) {
             // We've already notified user about this app, no need to do it again.
+            if (DEBUG) Log.d(TAG, "   - already notified");
             return;
         }
 
@@ -167,23 +193,33 @@ class AudioRecordingDisclosureBar {
     }
 
     @UiThread
-    private void onDoneRecording(String packageName) {
-        if (!mActiveAudioRecordingPackages.remove(packageName)) {
-            // Was not marked as an active recorder, do nothing
-            return;
+    private void hideIndicatorIfNeeded() {
+        if (DEBUG) Log.d(TAG, "hideIndicatorIfNeeded");
+        // If not MINIMIZED, will check whether the indicator should be hidden when the indicator
+        // comes to the STATE_MINIMIZED eventually.
+        if (mState != STATE_MINIMIZED) return;
+
+        // If is in the STATE_MINIMIZED, but there are other active recorders - simply ignore.
+        for (int index = mAudioActivityObservers.length - 1; index >= 0; index--) {
+            for (String activePackage : mAudioActivityObservers[index].getActivePackages()) {
+                if (mExemptPackages.contains(activePackage)) continue;
+                if (DEBUG) Log.d(TAG, "   - there are still ongoing activities");
+                return;
+            }
         }
 
-        // If not MINIMIZED, will check whether the indicator should be hidden when the indicator
-        // comes to the STATE_MINIMIZED eventually. If is in the STATE_MINIMIZED, but there are
-        // other active recorders - simply ignore.
-        if (mState == STATE_MINIMIZED && mActiveAudioRecordingPackages.isEmpty()) {
-            mSessionNotifiedPackages.clear();
-            hide();
-        }
+        // Clear the state and hide the indicator.
+        mSessionNotifiedPackages.clear();
+        hide();
     }
 
     @UiThread
     private void show(String packageName) {
+        final String label = getApplicationLabel(packageName);
+        if (DEBUG) {
+            Log.d(TAG, "Showing indicator for " + packageName + " (" + label + ")...");
+        }
+
         // Inflate the indicator view
         mIndicatorView = LayoutInflater.from(mContext).inflate(
                 R.layout.tv_audio_recording_indicator,
@@ -196,7 +232,6 @@ class AudioRecordingDisclosureBar {
         mBgRight = mIndicatorView.findViewById(R.id.bg_right);
 
         // Set up the notification text
-        final String label = getApplicationLabel(packageName);
         mTextView.setText(mContext.getString(R.string.app_accessed_mic, label));
 
         // Initially change the visibility to INVISIBLE, wait until and receives the size and
@@ -260,6 +295,9 @@ class AudioRecordingDisclosureBar {
     @UiThread
     private void expand(String packageName) {
         final String label = getApplicationLabel(packageName);
+        if (DEBUG) {
+            Log.d(TAG, "Expanding for " + packageName + " (" + label + ")...");
+        }
         mTextView.setText(mContext.getString(R.string.app_accessed_mic, label));
 
         final AnimatorSet set = new AnimatorSet();
@@ -283,6 +321,7 @@ class AudioRecordingDisclosureBar {
 
     @UiThread
     private void minimize() {
+        if (DEBUG) Log.d(TAG, "Minimizing...");
         final int targetOffset = mTextsContainers.getWidth();
         final AnimatorSet set = new AnimatorSet();
         set.playTogether(
@@ -305,6 +344,7 @@ class AudioRecordingDisclosureBar {
 
     @UiThread
     private void hide() {
+        if (DEBUG) Log.d(TAG, "Hiding...");
         final int targetOffset =
                 mIndicatorView.getWidth() - (int) mIconTextsContainer.getTranslationX();
         final AnimatorSet set = new AnimatorSet();
@@ -326,6 +366,7 @@ class AudioRecordingDisclosureBar {
 
     @UiThread
     private void onExpanded() {
+        if (DEBUG) Log.d(TAG, "Expanded");
         mState = STATE_SHOWN;
 
         mIndicatorView.postDelayed(this::minimize, MAXIMIZED_DURATION);
@@ -333,20 +374,21 @@ class AudioRecordingDisclosureBar {
 
     @UiThread
     private void onMinimized() {
+        if (DEBUG) Log.d(TAG, "Minimized");
         mState = STATE_MINIMIZED;
 
         if (!mPendingNotificationPackages.isEmpty()) {
             // There is a new application that started recording, tell the user about it.
             expand(mPendingNotificationPackages.poll());
-        } else if (mActiveAudioRecordingPackages.isEmpty()) {
-            // Nobody is recording anymore, clear state and remove the indicator.
-            mSessionNotifiedPackages.clear();
-            hide();
+        } else {
+            hideIndicatorIfNeeded();
         }
     }
 
     @UiThread
     private void onHidden() {
+        if (DEBUG) Log.d(TAG, "Hidden");
+
         final WindowManager windowManager = (WindowManager) mContext.getSystemService(
                 Context.WINDOW_SERVICE);
         windowManager.removeView(mIndicatorView);
@@ -391,36 +433,5 @@ class AudioRecordingDisclosureBar {
             return packageName;
         }
         return pm.getApplicationLabel(appInfo).toString();
-    }
-
-    private class OnActiveRecordingListener implements AppOpsManager.OnOpActiveChangedListener {
-        private final Set<String> mExemptApps;
-
-        private OnActiveRecordingListener() {
-            mExemptApps = new ArraySet<>(Arrays.asList(mContext.getResources().getStringArray(
-                    R.array.audio_recording_disclosure_exempt_apps)));
-        }
-
-        @Override
-        public void onOpActiveChanged(String op, int uid, String packageName, boolean active) {
-            if (DEBUG) {
-                Log.d(TAG,
-                        "OP_RECORD_AUDIO active change, active=" + active + ", app="
-                                + packageName);
-            }
-
-            if (mExemptApps.contains(packageName)) {
-                if (DEBUG) {
-                    Log.d(TAG, "\t- exempt app");
-                }
-                return;
-            }
-
-            if (active) {
-                onStartedRecording(packageName);
-            } else {
-                onDoneRecording(packageName);
-            }
-        }
     }
 }
