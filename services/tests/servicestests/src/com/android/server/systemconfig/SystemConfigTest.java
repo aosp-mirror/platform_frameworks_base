@@ -16,6 +16,8 @@
 
 package com.android.server.systemconfig;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 
 import android.platform.test.annotations.Presubmit;
@@ -164,7 +166,7 @@ public class SystemConfigTest {
 
         mSysConfig.readPermissions(folder, /* No permission needed anyway */ 0);
 
-        final ArrayMap<String, Boolean>  packageOneExpected = new ArrayMap<>();
+        final ArrayMap<String, Boolean> packageOneExpected = new ArrayMap<>();
         packageOneExpected.put("com.android.package1.Full", true);
         packageOneExpected.put("com.android.package1.Relative", false);
 
@@ -181,7 +183,47 @@ public class SystemConfigTest {
     }
 
     /**
+     * Tests that readPermissions works correctly with {@link SystemConfig#ALLOW_APP_CONFIGS}
+     * permission flag for the tag: whitelisted-staged-installer.
+     */
+    @Test
+    public void readPermissions_allowAppConfigs_parsesStagedInstallerWhitelist()
+            throws IOException {
+        final String contents =
+                "<config>\n"
+                + "    <whitelisted-staged-installer package=\"com.android.package1\" />\n"
+                + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "staged-installer-whitelist.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getWhitelistedStagedInstallers())
+                .containsExactly("com.android.package1");
+    }
+
+    /**
+     * Tests that readPermissions works correctly without {@link SystemConfig#ALLOW_APP_CONFIGS}
+     * permission flag for the tag: whitelisted-staged-installer.
+     */
+    @Test
+    public void readPermissions_notAllowAppConfigs_wontParseStagedInstallerWhitelist()
+            throws IOException {
+        final String contents =
+                "<config>\n"
+                + "    <whitelisted-staged-installer package=\"com.android.package1\" />\n"
+                + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "staged-installer-whitelist.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* Grant all but ALLOW_APP_CONFIGS flag */ ~0x08);
+
+        assertThat(mSysConfig.getWhitelistedStagedInstallers()).isEmpty();
+    }
+
+    /**
      * Creates folderName/fileName in the mTemporaryFolder and fills it with the contents.
+     *
      * @param folderName subdirectory of mTemporaryFolder to put the file, creating if needed
      * @return the folder
      */
@@ -194,7 +236,8 @@ public class SystemConfigTest {
 
     /**
      * Creates folderName/fileName in the mTemporaryFolder and fills it with the contents.
-     * @param folder pre-existing subdirectory of mTemporaryFolder to put the file
+     *
+     * @param folder   pre-existing subdirectory of mTemporaryFolder to put the file
      * @param fileName name of the file (e.g. filename.xml) to create
      * @param contents contents to write to the file
      * @return the folder containing the newly created file (not the file itself!)

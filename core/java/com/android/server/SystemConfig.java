@@ -229,6 +229,7 @@ public class SystemConfig {
     private ArrayMap<String, Set<String>> mPackageToUserTypeBlacklist = new ArrayMap<>();
 
     private final ArraySet<String> mRollbackWhitelistedPackages = new ArraySet<>();
+    private final ArraySet<String> mWhitelistedStagedInstallers = new ArraySet<>();
 
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
@@ -392,6 +393,10 @@ public class SystemConfig {
 
     public Set<String> getRollbackWhitelistedPackages() {
         return mRollbackWhitelistedPackages;
+    }
+
+    public Set<String> getWhitelistedStagedInstallers() {
+        return mWhitelistedStagedInstallers;
     }
 
     public ArraySet<String> getAppDataIsolationWhitelistedApps() {
@@ -1134,6 +1139,20 @@ public class SystemConfig {
                                     + " at " + parser.getPositionDescription());
                         } else {
                             mRollbackWhitelistedPackages.add(pkgname);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "whitelisted-staged-installer": {
+                        if (allowAppConfigs) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            } else {
+                                mWhitelistedStagedInstallers.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
