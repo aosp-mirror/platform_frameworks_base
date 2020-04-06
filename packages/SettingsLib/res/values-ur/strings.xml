@@ -300,8 +300,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"اگر دستیاب ہو تو ٹیدرنگ ہارڈویئر سرعت کاری کا استعمال کریں"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"‏USB ڈیبگ کرنے کی اجازت دیں؟"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"‏USB ڈیبگ کرنا صرف ڈیولپمنٹ کے مقاصد کیلئے ہے۔ اپنے کمپیوٹر اور اپنے آلہ کے درمیان ڈیٹا کاپی کرنے کیلئے اسے استعمال کریں، بغیر اطلاع کے اپنے آلہ پر ایپس انسٹال کریں اور لاگ ڈیٹا پڑھیں۔"</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"وائرلیس ڈیبگ کرنے کی اجازت دیں؟"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"وائرلیس ڈیبگ کرنا صرف ڈیولپمنٹ کے مقاصد کے لیے ہے۔ اپنے کمپیوٹر اور اپنے آلہ کے درمیان ڈیٹا کاپی کرنے کے لیے اسے استعمال کریں، بغیر اطلاع کے اپنے آلہ پر ایپس انسٹال کریں اور لاگ ڈیٹا پڑھیں۔"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"وائرلیس ڈیبگنگ کی اجازت دیں؟"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"وائرلیس ڈیبگنگ صرف ڈیولپمنٹ کے مقاصد کے لیے ہے۔ اپنے کمپیوٹر اور اپنے آلہ کے درمیان ڈیٹا کاپی کرنے کے لیے اسے استعمال کریں، بغیر اطلاع کے اپنے آلہ پر ایپس انسٹال کریں اور لاگ ڈیٹا پڑھیں۔"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"‏اپنے ذریعہ پہلے سے اجازت یافتہ سبھی کمپیوٹرز سے USB ڈیبگ کرنے کی رسائی کو کالعدم کریں؟"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"ڈویلپمنٹ ترتیبات کی اجازت دیں؟"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"یہ ترتیبات صرف ڈویلپمنٹ استعمال کے ارادے سے ہیں۔ ان سے آپ کا آلہ اور اس پر موجود ایپلیکیشنز بریک ہو سکتی یا غلط برتاؤ کر سکتی ہیں۔"</string>
@@ -543,12 +543,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"پروفائل کی معلومات"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ایک محدود پروفائل بنانے سے پہلے، آپ کو اپنی ایپس اور ذاتی ڈیٹا کو محفوظ کرنے کیلئے ایک اسکرین لاک سیٹ اپ کرنا ہوگا۔"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"لاک سیٹ کریں"</string>
-    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (3482026122932643557) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
-    <skip />
-    <!-- no translation found for guest_nickname (6332276931583337261) -->
-    <skip />
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> پر سوئچ کریں"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"مہمان کو شامل کریں"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"مہمان کو ہٹائیں"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"مہمان"</string>
 </resources>

@@ -431,7 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"ब्याट्री लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> सम्म"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ब्याट्री <xliff:g id="TIME">%1$s</xliff:g> बजेभित्र सकिन सक्छ"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ब्याट्री <xliff:g id="TIME">%1$s</xliff:g> बजेसम्ममा सकिन सक्छ"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी छ"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -513,16 +513,12 @@
     <string name="storage_category" msgid="2287342585424631813">"भण्डारण"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"साझा डेटा"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"साझा डेटा हेर्नुहोस् र परिमार्जन गर्नुहोस्"</string>
-    <!-- no translation found for shared_data_no_blobs_text (3108114670341737434) -->
-    <skip />
-    <!-- no translation found for shared_data_query_failure_text (3489828881998773687) -->
-    <skip />
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"यो प्रयोगकर्तासँग कुनै पनि डेटा सेयर गरिएको छैन।"</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"सेयर गरिएको डेटा प्राप्त गर्ने क्रममा कुनै त्रुटि भयो। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="blob_id_text" msgid="8680078988996308061">"साझा डेटाको ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"<xliff:g id="DATE">%s</xliff:g> मा म्याद सकिन्छ"</string>
-    <!-- no translation found for shared_data_delete_failure_text (3842701391009628947) -->
-    <skip />
-    <!-- no translation found for shared_data_no_accessors_dialog_text (8903738462570715315) -->
-    <skip />
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"सेयर गरिएको डेटा मेट्ने क्रममा त्रुटि भयो।"</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"सेयर गरिएको यो डेटाका लागि कुनै ठेक्का पट्टा लिएको छैन। तपाईं यसलाई मेट्न चाहनुहुन्छ?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"साझा डेटा प्रयोग गर्ने अनुप्रयोगहरू"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"यो अनुप्रयोगले कुनै विवरण प्रदान गरेको छैन।"</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"लिजको म्याद <xliff:g id="DATE">%s</xliff:g> मा सकिन्छ"</string>
@@ -547,12 +543,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफाइल जानकारी"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"निषेधयुक्त प्रोफाइल बनाउनु अघि तपाईँको अनुप्रयोग र व्यक्तिगत डेटा सुरक्षा गर्नाका लागि तपाईँले स्क्रिन लक सेटअप गर्नु पर्दछ ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"लक सेट गर्नुहोस्"</string>
-    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (3482026122932643557) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
-    <skip />
-    <!-- no translation found for guest_nickname (6332276931583337261) -->
-    <skip />
+    <string name="user_switch_to_user" msgid="6975428297154968543">"प्रयोगकर्ता बदलेर <xliff:g id="USER_NAME">%s</xliff:g> पार्नुहोस्"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि थप्नुहोस्"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथि हटाउनुहोस्"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"अतिथि"</string>
 </resources>
