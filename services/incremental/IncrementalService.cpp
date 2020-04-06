@@ -17,7 +17,6 @@
 #define LOG_TAG "IncrementalService"
 
 #include "IncrementalService.h"
-#include "IncrementalServiceValidation.h"
 
 #include <android-base/file.h>
 #include <android-base/logging.h>
@@ -582,25 +581,29 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
         return -EINVAL;
     }
 
-    ifs->dataLoaderFilesystemParams.readLogsEnabled = enableReadLogs;
     if (enableReadLogs) {
-        // We never unregister the callbacks, but given a restricted number of data loaders and even fewer asking for read log access, should be ok.
-        registerAppOpsCallback(ifs->dataLoaderParams.packageName);
-    }
-
-    return applyStorageParams(*ifs);
-}
-
-int IncrementalService::applyStorageParams(IncFsMount& ifs) {
-    const bool enableReadLogs = ifs.dataLoaderFilesystemParams.readLogsEnabled;
-    if (enableReadLogs) {
-        if (auto status = CheckPermissionForDataDelivery(kDataUsageStats, kOpUsage);
+        if (auto status =
+                    mAppOpsManager->checkPermission(kDataUsageStats, kOpUsage,
+                                                    ifs->dataLoaderParams.packageName.c_str());
             !status.isOk()) {
-            LOG(ERROR) << "CheckPermissionForDataDelivery failed: " << status.toString8();
+            LOG(ERROR) << "checkPermission failed: " << status.toString8();
             return fromBinderStatus(status);
         }
     }
 
+    if (auto status = applyStorageParams(*ifs, enableReadLogs); !status.isOk()) {
+        LOG(ERROR) << "applyStorageParams failed: " << status.toString8();
+        return fromBinderStatus(status);
+    }
+
+    if (enableReadLogs) {
+        registerAppOpsCallback(ifs->dataLoaderParams.packageName);
+    }
+
+    return 0;
+}
+
+binder::Status IncrementalService::applyStorageParams(IncFsMount& ifs, bool enableReadLogs) {
     using unique_fd = ::android::base::unique_fd;
     ::android::os::incremental::IncrementalFileSystemControlParcel control;
     control.cmd.reset(unique_fd(dup(ifs.control.cmd())));
@@ -611,13 +614,7 @@ int IncrementalService::applyStorageParams(IncFsMount& ifs) {
     }
 
     std::lock_guard l(mMountOperationLock);
-    const auto status = mVold->setIncFsMountOptions(control, enableReadLogs);
-    if (!status.isOk()) {
-        LOG(ERROR) << "Calling Vold::setIncFsMountOptions() failed: " << status.toString8();
-        return fromBinderStatus(status);
-    }
-
-    return 0;
+    return mVold->setIncFsMountOptions(control, enableReadLogs);
 }
 
 void IncrementalService::deleteStorage(StorageId storageId) {
@@ -1280,39 +1277,54 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
 }
 
 void IncrementalService::registerAppOpsCallback(const std::string& packageName) {
-    if (packageName.empty()) {
+    sp<IAppOpsCallback> listener;
+    {
+        std::unique_lock lock{mCallbacksLock};
+        auto& cb = mCallbackRegistered[packageName];
+        if (cb) {
+            return;
+        }
+        cb = new AppOpsListener(*this, packageName);
+        listener = cb;
+    }
+
+    mAppOpsManager->startWatchingMode(AppOpsManager::OP_GET_USAGE_STATS, String16(packageName.c_str()), listener);
+}
+
+bool IncrementalService::unregisterAppOpsCallback(const std::string& packageName) {
+    sp<IAppOpsCallback> listener;
+    {
+        std::unique_lock lock{mCallbacksLock};
+        auto found = mCallbackRegistered.find(packageName);
+        if (found == mCallbackRegistered.end()) {
+            return false;
+        }
+        listener = found->second;
+        mCallbackRegistered.erase(found);
+    }
+
+    mAppOpsManager->stopWatchingMode(listener);
+    return true;
+}
+
+void IncrementalService::onAppOpChanged(const std::string& packageName) {
+    if (!unregisterAppOpsCallback(packageName)) {
         return;
     }
 
-    {
-        std::unique_lock lock{mCallbacksLock};
-        if (!mCallbackRegistered.insert(packageName).second) {
-            return;
-        }
-    }
-
-    /* TODO(b/152633648): restore callback after it's not crashing Binder anymore.
-    sp<AppOpsListener> listener = new AppOpsListener(*this, packageName);
-    mAppOpsManager->startWatchingMode(AppOpsManager::OP_GET_USAGE_STATS, String16(packageName.c_str()), listener);
-    */
-}
-
-void IncrementalService::onAppOppChanged(const std::string& packageName) {
     std::vector<IfsMountPtr> affected;
     {
         std::lock_guard l(mLock);
         affected.reserve(mMounts.size());
         for (auto&& [id, ifs] : mMounts) {
-            if (ifs->dataLoaderFilesystemParams.readLogsEnabled && ifs->dataLoaderParams.packageName == packageName) {
+            if (ifs->mountId == id && ifs->dataLoaderParams.packageName == packageName) {
                 affected.push_back(ifs);
             }
         }
     }
-    /* TODO(b/152633648): restore callback after it's not crashing Kernel anymore.
     for (auto&& ifs : affected) {
-        applyStorageParams(*ifs);
+        applyStorageParams(*ifs, false);
     }
-    */
 }
 
 binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChanged(MountId mountId,
@@ -1378,8 +1390,8 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
     return binder::Status::ok();
 }
 
-void IncrementalService::AppOpsListener::opChanged(int32_t op, const String16&) {
-    incrementalService.onAppOppChanged(packageName);
+void IncrementalService::AppOpsListener::opChanged(int32_t, const String16&) {
+    incrementalService.onAppOpChanged(packageName);
 }
 
 } // namespace android::incremental

@@ -40,7 +40,6 @@
 #include "ServiceWrappers.h"
 #include "android/content/pm/BnDataLoaderStatusListener.h"
 #include "incfs.h"
-#include "dataloader_ndk.h"
 #include "path.h"
 
 using namespace android::os::incremental;
@@ -182,7 +181,6 @@ private:
         StorageMap storages;
         BindMap bindPoints;
         DataLoaderParamsParcel dataLoaderParams;
-        DataLoaderFilesystemParams dataLoaderFilesystemParams;
         std::atomic<int> nextStorageDirNo{0};
         std::atomic<int> dataLoaderStatus = -1;
         bool dataLoaderStartRequested = false;
@@ -193,9 +191,7 @@ private:
               : root(std::move(root)),
                 control(std::move(control)),
                 mountId(mountId),
-                incrementalService(incrementalService) {
-            dataLoaderFilesystemParams.readLogsEnabled = false;
-        }
+                incrementalService(incrementalService) {}
         IncFsMount(IncFsMount&&) = delete;
         IncFsMount& operator=(IncFsMount&&) = delete;
         ~IncFsMount();
@@ -234,10 +230,11 @@ private:
     std::string normalizePathToStorage(const IfsMountPtr incfs, StorageId storage,
                                        std::string_view path);
 
-    int applyStorageParams(IncFsMount& ifs);
+    binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
 
     void registerAppOpsCallback(const std::string& packageName);
-    void onAppOppChanged(const std::string& packageName);
+    bool unregisterAppOpsCallback(const std::string& packageName);
+    void onAppOpChanged(const std::string& packageName);
 
     // Member variables
     std::unique_ptr<VoldServiceWrapper> const mVold;
@@ -252,7 +249,7 @@ private:
     BindPathMap mBindsByPath;
 
     std::mutex mCallbacksLock;
-    std::set<std::string> mCallbackRegistered;
+    std::map<std::string, sp<AppOpsListener>> mCallbackRegistered;
 
     std::atomic_bool mSystemReady = false;
     StorageId mNextId = 0;
