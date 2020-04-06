@@ -94,6 +94,7 @@ import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -136,12 +137,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private KeyguardBypassController mKeyguardBypassController;
-    @Mock private KeyguardMediaController mKeyguardMediaController;
-    @Mock private ZenModeController mZenModeController;
     @Mock private NotificationSectionsManager mNotificationSectionsManager;
     @Mock private NotificationSection mNotificationSection;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private FeatureFlags mFeatureFlags;
+    @Mock private KeyguardMediaController mKeyguardMediaController;
+    @Mock private SysuiStatusBarStateController mStatusBarStateController;
     private UserChangedListener mUserChangedListener;
     private NotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
@@ -211,17 +212,18 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // which refer to members of NotificationStackScrollLayout. The spy
         // holds a copy of the CUT's instances of these KeyguardBypassController, so they still
         // refer to the CUT's member variables, not the spy's member variables.
-        mStackScrollerInternal = new NotificationStackScrollLayout(getContext(), null,
+        mStackScrollerInternal = new NotificationStackScrollLayout(
+                getContext(),
+                null,
                 mNotificationRoundnessManager,
                 mock(DynamicPrivacyController.class),
-                mock(SysuiStatusBarStateController.class),
+                mStatusBarStateController,
                 mHeadsUpManager,
                 mKeyguardBypassController,
                 mKeyguardMediaController,
                 new FalsingManagerFake(),
                 mLockscreenUserManager,
                 mock(NotificationGutsManager.class),
-                mZenModeController,
                 mNotificationSectionsManager,
                 mock(ForegroundServiceSectionController.class),
                 mock(ForegroundServiceDismissalFeatureController.class),
@@ -269,9 +271,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     public void updateEmptyView_dndSuppressing() {
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
 
-        mStackScroller.updateEmptyShadeView(true);
+        mStackScroller.updateEmptyShadeView(true, true);
 
         verify(mEmptyShadeView).setText(R.string.dnd_suppressing_shade_text);
     }
@@ -280,9 +281,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void updateEmptyView_dndNotSuppressing() {
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
 
-        mStackScroller.updateEmptyShadeView(true);
+        mStackScroller.updateEmptyShadeView(true, false);
 
         verify(mEmptyShadeView).setText(R.string.empty_shade_text);
     }
@@ -291,12 +291,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void updateEmptyView_noNotificationsToDndSuppressing() {
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
-        mStackScroller.updateEmptyShadeView(true);
+        mStackScroller.updateEmptyShadeView(true, false);
         verify(mEmptyShadeView).setText(R.string.empty_shade_text);
 
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
-        mStackScroller.updateEmptyShadeView(true);
+        mStackScroller.updateEmptyShadeView(true, true);
         verify(mEmptyShadeView).setText(R.string.dnd_suppressing_shade_text);
     }
 

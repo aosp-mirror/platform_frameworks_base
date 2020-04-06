@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.statusbar.notification.ViewGroupFadeHelper.reset;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -26,11 +28,11 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
@@ -55,13 +57,13 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock
     private TunerService mTunerService;
     @Mock
-    private AmbientState mAmbientState;
-    @Mock
     private DynamicPrivacyController mDynamicPrivacyController;
     @Mock
     private ConfigurationController mConfigurationController;
     @Mock
     private NotificationStackScrollLayout mNotificationStackScrollLayout;
+    @Mock
+    private ZenModeController mZenModeController;
 
     NotificationStackScrollLayoutController mController;
 
@@ -76,7 +78,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mNotificationRoundnessManager,
                 mTunerService,
                 mDynamicPrivacyController,
-                mConfigurationController
+                mConfigurationController,
+                mZenModeController
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
@@ -111,5 +114,37 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         mController.attach(mNotificationStackScrollLayout);
         mController.mConfigurationListener.onDensityOrFontScaleChanged();
         verify(mNotificationStackScrollLayout).reinflateViews();
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_notificationsVisible() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
+        mController.attach(mNotificationStackScrollLayout);
+
+        mController.updateEmptyShadeView(true /* visible */);
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                true /* visible */,
+                true /* notifVisibleInShade */);
+        reset(mNotificationStackScrollLayout);
+        mController.updateEmptyShadeView(false /* visible */);
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                false /* visible */,
+                true /* notifVisibleInShade */);
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_notificationsHidden() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
+        mController.attach(mNotificationStackScrollLayout);
+
+        mController.updateEmptyShadeView(true /* visible */);
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                true /* visible */,
+                false /* notifVisibleInShade */);
+        reset(mNotificationStackScrollLayout);
+        mController.updateEmptyShadeView(false /* visible */);
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                false /* visible */,
+                false /* notifVisibleInShade */);
     }
 }
