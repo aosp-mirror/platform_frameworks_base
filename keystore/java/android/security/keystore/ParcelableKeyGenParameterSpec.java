@@ -16,8 +16,8 @@
 
 package android.security.keystore;
 
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.math.BigInteger;
 import java.security.spec.AlgorithmParameterSpec;
@@ -99,6 +99,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         out.writeInt(mSpec.getUserAuthenticationValidityDurationSeconds());
         out.writeBoolean(mSpec.isUserPresenceRequired());
         out.writeByteArray(mSpec.getAttestationChallenge());
+        out.writeBoolean(mSpec.isDevicePropertiesAttestationIncluded());
         out.writeBoolean(mSpec.isUniqueIdIncluded());
         out.writeBoolean(mSpec.isUserAuthenticationValidWhileOnBody());
         out.writeBoolean(mSpec.isInvalidatedByBiometricEnrollment());
@@ -154,6 +155,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         final int userAuthenticationValidityDurationSeconds = in.readInt();
         final boolean userPresenceRequired = in.readBoolean();
         final byte[] attestationChallenge = in.createByteArray();
+        final boolean devicePropertiesAttestationIncluded = in.readBoolean();
         final boolean uniqueIdIncluded = in.readBoolean();
         final boolean userAuthenticationValidWhileOnBody = in.readBoolean();
         final boolean invalidatedByBiometricEnrollment = in.readBoolean();
@@ -185,6 +187,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
                 userAuthenticationValidityDurationSeconds,
                 userPresenceRequired,
                 attestationChallenge,
+                devicePropertiesAttestationIncluded,
                 uniqueIdIncluded,
                 userAuthenticationValidWhileOnBody,
                 invalidatedByBiometricEnrollment,
