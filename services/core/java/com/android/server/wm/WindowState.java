@@ -3439,13 +3439,23 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         getMergedConfiguration(mLastReportedConfiguration);
         mLastConfigReportedToClient = true;
 
+        final boolean reportOrientation = mReportOrientationChanged;
+        // Always reset these states first, so if {@link IWindow#resized} fails, this
+        // window won't be added to {@link WindowManagerService#mResizingWindows} and set
+        // {@link #mOrientationChanging} to true again by {@link #updateResizingWindowIfNeeded}
+        // that may cause WINDOW_FREEZE_TIMEOUT because resizing the client keeps failing.
+        mReportOrientationChanged = false;
+        mDragResizingChangeReported = true;
+        mWinAnimator.mSurfaceResized = false;
+        mWindowFrames.resetInsetsChanged();
+
         final Rect frame = mWindowFrames.mCompatFrame;
         final Rect contentInsets = mWindowFrames.mLastContentInsets;
         final Rect visibleInsets = mWindowFrames.mLastVisibleInsets;
         final Rect stableInsets = mWindowFrames.mLastStableInsets;
         final MergedConfiguration mergedConfiguration = mLastReportedConfiguration;
         final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING;
-        final boolean forceRelayout = mReportOrientationChanged || isDragResizeChanged();
+        final boolean forceRelayout = reportOrientation || isDragResizeChanged();
         final int displayId = getDisplayId();
         final DisplayCutout displayCutout = getWmDisplayCutout().getDisplayCutout();
 
@@ -3454,25 +3464,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     mergedConfiguration, getBackdropFrame(frame), forceRelayout,
                     getDisplayContent().getDisplayPolicy().areSystemBarsForcedShownLw(this),
                     displayId, new DisplayCutout.ParcelableWrapper(displayCutout));
-            mDragResizingChangeReported = true;
 
             if (mWmService.mAccessibilityController != null) {
                 mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(displayId);
             }
             updateLocationInParentDisplayIfNeeded();
-
-            mWindowFrames.resetInsetsChanged();
-            mWinAnimator.mSurfaceResized = false;
-            mReportOrientationChanged = false;
         } catch (RemoteException e) {
+            // Cancel orientation change of this window to avoid blocking unfreeze display.
             setOrientationChanging(false);
             mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                     - mWmService.mDisplayFreezeTime);
-            // We are assuming the hosting process is dead or in a zombie state.
-            Slog.w(TAG, "Failed to report 'resized' to the client of " + this
-                    + ", removing this window.");
-            mWmService.mPendingRemove.add(this);
-            mWmService.mWindowPlacerLocked.requestTraversal();
+            Slog.w(TAG, "Failed to report 'resized' to " + this + " due to " + e);
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }

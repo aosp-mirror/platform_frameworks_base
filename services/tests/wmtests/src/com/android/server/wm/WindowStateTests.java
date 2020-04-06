@@ -40,12 +40,15 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doThrow;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -55,6 +58,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -65,6 +69,7 @@ import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.Size;
 import android.view.DisplayCutout;
@@ -565,6 +570,36 @@ public class WindowStateTests extends WindowTestsBase {
         // Keyguard host window should be always contained. The drawn app or app with starting
         // window are unnecessary to draw.
         assertEquals(Arrays.asList(keyguardHostWindow, startingWindow), outWaitingForDrawn);
+    }
+
+    @Test
+    public void testReportResizedWithRemoteException() {
+        final WindowState win = mChildAppWindowAbove;
+        makeWindowVisible(win, win.getParentWindow());
+        win.mLayoutSeq = win.getDisplayContent().mLayoutSeq;
+        win.updateResizingWindowIfNeeded();
+
+        assertThat(mWm.mResizingWindows).contains(win);
+        assertTrue(win.getOrientationChanging());
+
+        mWm.mResizingWindows.remove(win);
+        spyOn(win.mClient);
+        try {
+            doThrow(new RemoteException("test")).when(win.mClient).resized(any() /* frame */,
+                    any() /* contentInsets */, any() /* visibleInsets */, any() /* stableInsets */,
+                    anyBoolean() /* reportDraw */, any() /* mergedConfig */,
+                    any() /* backDropFrame */, anyBoolean() /* forceLayout */,
+                    anyBoolean() /* alwaysConsumeSystemBars */, anyInt() /* displayId */,
+                    any() /* displayCutout */);
+        } catch (RemoteException ignored) {
+        }
+        win.reportResized();
+        win.updateResizingWindowIfNeeded();
+
+        // Even "resized" throws remote exception, it is still considered as reported. So the window
+        // shouldn't be resized again (which may block unfreeze in real case).
+        assertThat(mWm.mResizingWindows).doesNotContain(win);
+        assertFalse(win.getOrientationChanging());
     }
 
     @Test
