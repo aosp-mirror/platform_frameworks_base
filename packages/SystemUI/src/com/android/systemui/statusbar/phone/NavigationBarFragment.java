@@ -26,6 +26,7 @@ import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_FORCE_OPAQUE;
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
@@ -56,6 +57,8 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
@@ -71,6 +74,7 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -104,6 +108,7 @@ import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
@@ -133,7 +138,7 @@ import dagger.Lazy;
  * on clicks and view states of the nav bar.
  */
 public class NavigationBarFragment extends LifecycleFragment implements Callbacks,
-        NavigationModeController.ModeChangedListener {
+        NavigationModeController.ModeChangedListener, DisplayManager.DisplayListener {
 
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
@@ -141,6 +146,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private static final String EXTRA_DISABLE2_STATE = "disabled2_state";
     private static final String EXTRA_APPEARANCE = "appearance";
     private static final String EXTRA_TRANSIENT_STATE = "transient_state";
+    private static final String FIXED_ROTATION_TRANSFORM_SETTING_NAME = "fixed_rotation_transform";
+
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
@@ -199,6 +206,23 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private boolean mIsOnDefaultDisplay;
     public boolean mHomeBlockedThisTouch;
 
+    /**
+     * When user is QuickSwitching between apps of different orientations, we'll draw a fake
+     * home handle on the orientation they originally touched down to start their swipe
+     * gesture to indicate to them that they can continue in that orientation without having to
+     * rotate the phone
+     * The secondary handle will show when we get
+     * {@link OverviewProxyListener#onQuickSwitchToNewTask(int)} callback with the
+     * original handle hidden and we'll flip the visibilities once the
+     * {@link #mTasksFrozenListener} fires
+     */
+    private NavigationHandle mOrientationHandle;
+    private WindowManager.LayoutParams mOrientationParams;
+    private boolean mFrozenTasks;
+    private int mStartingQuickSwitchRotation;
+    private int mCurrentRotation;
+    private boolean mFixedRotationEnabled;
+
     /** Only for default display */
     @Nullable
     private AssistHandleViewController mAssistHandlerViewController;
@@ -249,6 +273,12 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
 
         @Override
+        public void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {
+            mStartingQuickSwitchRotation = rotation;
+            orientSecondaryHomeHandle();
+        }
+
+        @Override
         public void startAssistant(Bundle bundle) {
             mAssistManager.startAssist(bundle);
         }
@@ -271,6 +301,22 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
     };
 
+    private TaskStackChangeListener mTasksFrozenListener = new TaskStackChangeListener() {
+        @Override
+        public void onRecentTaskListFrozenChanged(boolean frozen) {
+            mFrozenTasks = frozen;
+            orientSecondaryHomeHandle();
+        }
+    };
+
+    private NavigationBarTransitions.DarkIntensityListener mOrientationHandleIntensityListener =
+            new NavigationBarTransitions.DarkIntensityListener() {
+                @Override
+                public void onDarkIntensity(float darkIntensity) {
+                    mOrientationHandle.setDarkIntensity(darkIntensity);
+                }
+            };
+
     private final ContextButtonListener mRotationButtonListener = (button, visible) -> {
         if (visible) {
             // If the button will actually become visible and the navbar is about to hide,
@@ -291,6 +337,14 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 sendAssistantAvailability(available);
                 mAssistantAvailable = available;
             }
+        }
+    };
+
+    private final ContentObserver mFixedRotationObserver = new ContentObserver(
+            new Handler(Looper.getMainLooper())) {
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updatedFixedRotation();
         }
     };
 
@@ -351,6 +405,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 Settings.Secure.getUriFor(Settings.Secure.ASSISTANT),
                 false /* notifyForDescendants */, mAssistContentObserver, UserHandle.USER_ALL);
 
+        mContentResolver.registerContentObserver(
+                Settings.Global.getUriFor(FIXED_ROTATION_TRANSFORM_SETTING_NAME),
+                false /* notifyForDescendants */, mFixedRotationObserver, UserHandle.USER_ALL);
+
         if (savedInstanceState != null) {
             mDisabledFlags1 = savedInstanceState.getInt(EXTRA_DISABLE_STATE, 0);
             mDisabledFlags2 = savedInstanceState.getInt(EXTRA_DISABLE2_STATE, 0);
@@ -376,6 +434,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mNavigationModeController.removeListener(this);
         mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
+        mContentResolver.unregisterContentObserver(mFixedRotationObserver);
 
         DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
     }
@@ -406,6 +465,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
         mNavigationBarView.setNavigationIconHints(mNavigationIconHints);
         mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
+        updatedFixedRotation();
 
         prepareNavigationBarView();
         checkNavBarModes();
@@ -442,6 +502,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 new AssistHandleViewController(mHandler, mNavigationBarView);
             getBarTransitions().addDarkIntensityListener(mAssistHandlerViewController);
         }
+
+        initSecondaryHomeHandleForRotation();
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTasksFrozenListener);
     }
 
     @Override
@@ -458,6 +521,13 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
+        ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTasksFrozenListener);
+        if (mOrientationHandle != null) {
+            resetSecondaryHandle();
+            getContext().getSystemService(DisplayManager.class).unregisterDisplayListener(this);
+            getBarTransitions().removeDarkIntensityListener(mOrientationHandleIntensityListener);
+            mWindowManager.removeView(mOrientationHandle);
+        }
     }
 
     @Override
@@ -488,6 +558,88 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             refreshLayout(ld);
         }
         repositionNavigationBar();
+    }
+
+    private void initSecondaryHomeHandleForRotation() {
+        if (!canShowSecondaryHandle()) {
+            return;
+        }
+
+        getContext().getSystemService(DisplayManager.class)
+                .registerDisplayListener(this, new Handler(Looper.getMainLooper()));
+
+        mOrientationHandle = new VerticalNavigationHandle(getContext());
+
+        getBarTransitions().addDarkIntensityListener(mOrientationHandleIntensityListener);
+        mOrientationParams = new WindowManager.LayoutParams(0, 0,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                        | WindowManager.LayoutParams.FLAG_SLIPPERY,
+                PixelFormat.TRANSLUCENT);
+        mWindowManager.addView(mOrientationHandle, mOrientationParams);
+        mOrientationHandle.setVisibility(View.GONE);
+    }
+
+    private void orientSecondaryHomeHandle() {
+        if (!canShowSecondaryHandle()) {
+            return;
+        }
+
+        if (!mFrozenTasks) {
+            resetSecondaryHandle();
+        } else {
+            int deltaRotation = deltaRotation(mCurrentRotation, mStartingQuickSwitchRotation);
+            int height = 0;
+            int width = 0;
+            Rect dispSize = mWindowManager.getCurrentWindowMetrics().getBounds();
+            switch (deltaRotation) {
+                case Surface.ROTATION_90:
+                case Surface.ROTATION_270:
+                    height = dispSize.height();
+                    width = getResources()
+                            .getDimensionPixelSize(R.dimen.navigation_bar_height);
+                    break;
+                case Surface.ROTATION_180:
+                case Surface.ROTATION_0:
+                    // TODO(b/152683657): Need to determine best UX for this
+                    resetSecondaryHandle();
+                    return;
+            }
+
+            mOrientationParams.gravity =
+                    deltaRotation == Surface.ROTATION_90 ? Gravity.LEFT : Gravity.RIGHT;
+            mOrientationParams.height = height;
+            mOrientationParams.width = width;
+            mWindowManager.updateViewLayout(mOrientationHandle, mOrientationParams);
+            mNavigationBarView.setVisibility(View.GONE);
+            mOrientationHandle.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void resetSecondaryHandle() {
+        if (mOrientationHandle != null) {
+            // Case where nav mode is changed w/o ever invoking a quickstep
+            // mOrientedHandle is initialized lazily
+            mOrientationHandle.setVisibility(View.GONE);
+        }
+        mNavigationBarView.setVisibility(View.VISIBLE);
+    }
+
+    private int deltaRotation(int oldRotation, int newRotation) {
+        int delta = newRotation - oldRotation;
+        if (delta < 0) delta += 4;
+        return delta;
+    }
+
+    private void updatedFixedRotation() {
+        mFixedRotationEnabled = Settings.Global.getInt(getContext().getContentResolver(),
+                FIXED_ROTATION_TRANSFORM_SETTING_NAME, 0) != 0;
+        if (!canShowSecondaryHandle()) {
+            resetSecondaryHandle();
+        }
     }
 
     @Override
@@ -1112,6 +1264,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mNavBarMode = mode;
         updateScreenPinningGestures();
 
+        if (!canShowSecondaryHandle()) {
+            resetSecondaryHandle();
+        }
+
         // Workaround for b/132825155, for secondary users, we currently don't receive configuration
         // changes on overlay package change since SystemUI runs for the system user. In this case,
         // trigger a new configuration change to ensure that the nav bar is updated in the same way.
@@ -1155,6 +1311,34 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     private final AccessibilityServicesStateChangeListener mAccessibilityListener =
             this::updateAccessibilityServicesState;
+
+    @Override
+    public void onDisplayAdded(int displayId) {
+
+    }
+
+    @Override
+    public void onDisplayRemoved(int displayId) {
+
+    }
+
+    @Override
+    public void onDisplayChanged(int displayId) {
+        if (!canShowSecondaryHandle()) {
+            return;
+        }
+
+        int rotation = getContext().getResources().getConfiguration()
+                .windowConfiguration.getRotation();
+        if (rotation != mCurrentRotation) {
+            mCurrentRotation = rotation;
+            orientSecondaryHomeHandle();
+        }
+    }
+
+    private boolean canShowSecondaryHandle() {
+        return mFixedRotationEnabled && mNavBarMode == NAV_BAR_MODE_GESTURAL;
+    }
 
     private final Consumer<Integer> mRotationWatcher = rotation -> {
         if (mNavigationBarView != null
