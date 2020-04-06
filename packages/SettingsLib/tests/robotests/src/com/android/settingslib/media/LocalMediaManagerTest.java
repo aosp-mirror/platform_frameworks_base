@@ -484,6 +484,26 @@ public class LocalMediaManagerTest {
     }
 
     @Test
+    public void onDeviceAttributesChanged_failingTransferring_shouldResetState() {
+        final MediaDevice currentDevice = mock(MediaDevice.class);
+        final MediaDevice device = mock(BluetoothMediaDevice.class);
+        final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+        mLocalMediaManager.mMediaDevices.add(device);
+        mLocalMediaManager.mMediaDevices.add(currentDevice);
+        when(device.getId()).thenReturn(TEST_DEVICE_ID_1);
+        when(currentDevice.getId()).thenReturn(TEST_CURRENT_DEVICE_ID);
+        when(((BluetoothMediaDevice) device).getCachedDevice()).thenReturn(cachedDevice);
+        when(cachedDevice.isConnected()).thenReturn(false);
+        when(cachedDevice.isBusy()).thenReturn(false);
+
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.connectDevice(device);
+
+        mLocalMediaManager.mDeviceAttributeChangeCallback.onDeviceAttributesChanged();
+        verify(device).setState(LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
+    }
+
+    @Test
     public void onRequestFailed_checkDevicesState() {
         mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice1);
         mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice2);
