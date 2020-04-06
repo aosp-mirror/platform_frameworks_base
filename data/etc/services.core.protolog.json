@@ -25,6 +25,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "-2101985723": {
+      "message": "Failed looking up window session=%s callers=%s",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-2072089308": {
       "message": "Attempted to add window with token that is a sub-window: %s.  Aborting.",
       "level": "WARN",
@@ -653,12 +659,6 @@
       "message": "Relayout %s: oldVis=%d newVis=%d. %s",
       "level": "INFO",
       "group": "WM_DEBUG_SCREEN_ON",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-747671114": {
-      "message": "Failed looking up window callers=%s",
-      "level": "WARN",
-      "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-714291355": {
