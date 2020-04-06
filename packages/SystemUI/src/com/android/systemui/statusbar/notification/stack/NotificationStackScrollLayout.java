@@ -95,19 +95,15 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
-import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper.DragDownCallback;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -242,6 +238,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mBottomMargin;
     private int mBottomInset = 0;
     private float mQsExpansionFraction;
+    private int mCurrentUserId;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -341,12 +338,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return true;
         }
     };
-    private final UserChangedListener mLockscreenUserChangeListener = new UserChangedListener() {
-        @Override
-        public void onUserChanged(int userId) {
-            updateSensitiveness(false /* animated */);
-        }
-    };
+
     private StatusBar mStatusBar;
     private int[] mTempInt2 = new int[2];
     private boolean mGenerateChildOrderChangedEvent;
@@ -490,7 +482,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private ArrayList<BiConsumer<Float, Float>> mExpandedHeightListeners = new ArrayList<>();
     private int mHeadsUpInset;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
-    private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final Rect mTmpRect = new Rect();
     private final FeatureFlags mFeatureFlags;
     private final NotifPipeline mNotifPipeline;
@@ -579,7 +570,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             SysuiStatusBarStateController statusbarStateController,
             HeadsUpManagerPhone headsUpManager,
             FalsingManager falsingManager,
-            NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGutsManager notificationGutsManager,
             NotificationSectionsManager notificationSectionsManager,
             ForegroundServiceSectionController fgsSectionController,
@@ -595,7 +585,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         mRoundnessManager = notificationRoundnessManager;
 
-        mLockscreenUserManager = notificationLockscreenUserManager;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
         mHeadsUpManager.setAnimationStateHandler(this::setHeadsUpGoingAwayAnimationsAllowed);
@@ -626,7 +615,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 res.getBoolean(R.bool.config_drawNotificationBackground);
         mFadeNotificationsOnDismiss =
                 res.getBoolean(R.bool.config_fadeNotificationsOnDismiss);
-        mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
         setOutlineProvider(mOutlineProvider);
 
         // Blocking helper manager wants to know the expanded state, update as well.
@@ -4706,8 +4694,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private void updateSensitiveness(boolean animate) {
-        boolean hideSensitive = mLockscreenUserManager.isAnyProfilePublicMode();
+    void updateSensitiveness(boolean animate, boolean hideSensitive) {
         if (hideSensitive != mAmbientState.isHideSensitive()) {
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
@@ -5403,8 +5390,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setStatusBarState(statusBarState);
     }
 
-    void onStatePostChange() {
-
+    void onStatePostChange(boolean fromShadeLocked) {
         boolean onKeyguard = onKeyguard();
 
         mAmbientState.setActivatedChild(null);
@@ -5414,10 +5400,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mHeadsUpAppearanceController.onStateChanged();
         }
 
-        SysuiStatusBarStateController state = (SysuiStatusBarStateController)
-                Dependency.get(StatusBarStateController.class);
-        updateSensitiveness(state.goingToFullShade() /* animate */);
-        setDimmed(onKeyguard, state.fromShadeLocked() /* animate */);
+        setDimmed(onKeyguard, fromShadeLocked);
         setExpandingEnabled(!onKeyguard);
         ActivatableNotificationView activatedChild = getActivatedChild();
         setActivatedChild(null);
@@ -5823,6 +5806,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public NotificationStackScrollLayoutController getController() {
         return mController;
+    }
+
+    void setCurrentUserid(int userId) {
+        mCurrentUserId = userId;
     }
 
     /**
@@ -6473,7 +6460,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             @SelectedRows int selectedRows) {
         if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             if (selectedRows == ROWS_ALL) {
-                mNotifCollection.dismissAllNotifications(mLockscreenUserManager.getCurrentUserId());
+                mNotifCollection.dismissAllNotifications(mCurrentUserId);
             } else {
                 final List<Pair<NotificationEntry, DismissedByUserStats>>
                         entriesWithRowsDismissedFromShade = new ArrayList<>();
@@ -6502,7 +6489,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
             if (selectedRows == ROWS_ALL) {
                 try {
-                    mBarService.onClearAllNotifications(mLockscreenUserManager.getCurrentUserId());
+                    mBarService.onClearAllNotifications(mCurrentUserId);
                 } catch (Exception ex) {
                 }
             }

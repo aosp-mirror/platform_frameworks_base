@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -29,6 +30,9 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.media.KeyguardMediaController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -41,6 +45,7 @@ import com.android.systemui.tuner.TunerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -75,6 +80,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private SysuiColorExtractor mColorExtractor;
+    @Mock
+    private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
 
     NotificationStackScrollLayoutController mController;
 
@@ -94,8 +101,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mKeyguardMediaController,
                 mKeyguardBypassController,
                 mZenModeController,
-                mColorExtractor
-        );
+                mColorExtractor,
+                mNotificationLockscreenUserManager);
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
     }
@@ -161,5 +168,41 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 false /* visible */,
                 false /* notifVisibleInShade */);
+    }
+
+    @Test
+    public void testOnUserChange_verifySensitiveProfile() {
+        when(mNotificationLockscreenUserManager.isAnyProfilePublicMode()).thenReturn(true);
+
+        ArgumentCaptor<UserChangedListener> userChangedCaptor = ArgumentCaptor
+                .forClass(UserChangedListener.class);
+
+        mController.attach(mNotificationStackScrollLayout);
+        verify(mNotificationLockscreenUserManager)
+                .addUserChangedListener(userChangedCaptor.capture());
+        reset(mNotificationStackScrollLayout);
+
+        UserChangedListener changedListener = userChangedCaptor.getValue();
+        changedListener.onUserChanged(0);
+        verify(mNotificationStackScrollLayout).setCurrentUserid(0);
+        verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
+    }
+
+    @Test
+    public void testOnStatePostChange_verifyIfProfileIsPublic() {
+        when(mNotificationLockscreenUserManager.isAnyProfilePublicMode()).thenReturn(true);
+
+        ArgumentCaptor<StatusBarStateController.StateListener> stateListenerArgumentCaptor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+
+        mController.attach(mNotificationStackScrollLayout);
+        verify(mSysuiStatusBarStateController).addCallback(
+                stateListenerArgumentCaptor.capture(), anyInt());
+
+        StatusBarStateController.StateListener stateListener =
+                stateListenerArgumentCaptor.getValue();
+
+        stateListener.onStatePostChange();
+        verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
     }
 }

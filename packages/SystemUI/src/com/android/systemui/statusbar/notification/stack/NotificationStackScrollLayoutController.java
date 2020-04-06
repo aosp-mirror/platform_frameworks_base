@@ -31,6 +31,8 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -82,6 +84,7 @@ public class NotificationStackScrollLayoutController {
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final SysuiColorExtractor mColorExtractor;
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
 
     private NotificationStackScrollLayout mView;
 
@@ -158,9 +161,19 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onStatePostChange() {
-                    mView.onStatePostChange();
+                    mView.updateSensitiveness(mStatusBarStateController.goingToFullShade(),
+                            mLockscreenUserManager.isAnyProfilePublicMode());
+                    mView.onStatePostChange(mStatusBarStateController.fromShadeLocked());
                 }
             };
+
+    private final UserChangedListener mLockscreenUserChangeListener = new UserChangedListener() {
+        @Override
+        public void onUserChanged(int userId) {
+            mView.setCurrentUserid(userId);
+            mView.updateSensitiveness(false, mLockscreenUserManager.isAnyProfilePublicMode());
+        }
+    };
 
     @Inject
     public NotificationStackScrollLayoutController(
@@ -175,7 +188,8 @@ public class NotificationStackScrollLayoutController {
             KeyguardMediaController keyguardMediaController,
             KeyguardBypassController keyguardBypassController,
             ZenModeController zenModeController,
-            SysuiColorExtractor colorExtractor) {
+            SysuiColorExtractor colorExtractor,
+            NotificationLockscreenUserManager lockscreenUserManager) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -188,6 +202,7 @@ public class NotificationStackScrollLayoutController {
         mKeyguardBypassController = keyguardBypassController;
         mZenModeController = zenModeController;
         mColorExtractor = colorExtractor;
+        mLockscreenUserManager = lockscreenUserManager;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -201,6 +216,9 @@ public class NotificationStackScrollLayoutController {
 
         mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
+
+        mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
+        mView.setCurrentUserid(mLockscreenUserManager.getCurrentUserId());
 
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
