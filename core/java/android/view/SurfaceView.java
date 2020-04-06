@@ -1037,7 +1037,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             mTmpTransaction.setWindowCrop(mSurfaceControl, mSurfaceWidth,
                                     mSurfaceHeight);
                         }
-                    } else if ((layoutSizeChanged || positionChanged) &&
+                    } else if ((layoutSizeChanged || positionChanged || visibleChanged) &&
                             viewRoot.useBLAST()) {
                         viewRoot.setUseBLASTSyncTransaction();
                     }
