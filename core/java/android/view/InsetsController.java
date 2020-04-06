@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.toInternalType;
 import static android.view.InsetsState.toPublicType;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.ime;
@@ -471,7 +472,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (!localStateChanged && mLastDispachedState.equals(state)) {
             return false;
         }
-        mState.set(state);
+        updateState(state);
         mLastDispachedState.set(state, true /* copySources */);
         applyLocalVisibilityOverride();
         if (localStateChanged) {
@@ -480,11 +481,25 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (!mState.equals(mLastDispachedState, true /* excludingCaptionInsets */)) {
             sendStateToWindowManager();
         }
+        return true;
+    }
+
+    private void updateState(InsetsState newState) {
+        mState.setDisplayFrame(newState.getDisplayFrame());
+        for (int i = newState.getSourcesCount() - 1; i >= 0; i--) {
+            InsetsSource source = newState.sourceAt(i);
+            getSourceConsumer(source.getType()).updateSource(source);
+        }
+        for (int i = mState.getSourcesCount() - 1; i >= 0; i--) {
+            InsetsSource source = mState.sourceAt(i);
+            if (newState.peekSource(source.getType()) == null) {
+                mState.removeSource(source.getType());
+            }
+        }
         if (mCaptionInsetsHeight != 0) {
             mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(mFrame.left, mFrame.top,
                     mFrame.right, mFrame.top + mCaptionInsetsHeight));
         }
-        return true;
     }
 
     private boolean captionInsetsUnchanged() {
@@ -879,8 +894,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             control.cancel();
         }
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
-            if (mRunningAnimations.get(i).runner == control) {
+            RunningAnimation runningAnimation = mRunningAnimations.get(i);
+            if (runningAnimation.runner == control) {
                 mRunningAnimations.remove(i);
+                ArraySet<Integer> types = toInternalType(control.getTypes());
+                for (int j = types.size() - 1; j >= 0; j--) {
+                    if (getSourceConsumer(types.valueAt(j)).notifyAnimationFinished()) {
+                        mViewRoot.notifyInsetsChanged();
+                    }
+                }
                 break;
             }
         }
