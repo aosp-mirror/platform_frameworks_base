@@ -34,6 +34,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 /**
@@ -50,6 +51,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     private boolean mDismissing;
     protected boolean mResumed;
     private CountDownTimer mCountdownTimer = null;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -61,6 +63,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     public KeyguardAbsKeyInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
     }
 
     @Override
@@ -151,6 +154,8 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
             LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL);
             LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL_UNLOCKED);
         }
+
+        mKeyguardUpdateMonitor.setCredentialAttempted();
         mPendingLockCheck = LockPatternChecker.checkCredential(
                 mLockPatternUtils,
                 password,
