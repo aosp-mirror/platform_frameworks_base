@@ -27,7 +27,7 @@
     android:paddingRight="@dimen/global_actions_grid_item_side_margin"
     android:layout_marginRight="3dp"
     android:layout_marginLeft="3dp"
-    android:background="@drawable/rounded_bg_full">
+    android:background="@drawable/control_background">
     <LinearLayout
         android:layout_width="@dimen/global_actions_grid_item_width"
         android:layout_height="@dimen/global_actions_grid_item_height"
@@ -42,7 +42,7 @@
             android:layout_marginLeft="@dimen/global_actions_grid_item_icon_side_margin"
             android:layout_marginRight="@dimen/global_actions_grid_item_icon_side_margin"
             android:scaleType="centerInside"
-            android:tint="@color/global_actions_text" />
+            android:tint="@color/control_default_foreground" />
 
         <TextView
             android:id="@*android:id/message"
@@ -53,7 +53,7 @@
             android:singleLine="true"
             android:gravity="center"
             android:textSize="12dp"
-            android:textColor="@color/global_actions_text"
+            android:textColor="@color/control_default_foreground"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
@@ -62,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textColor="@color/global_actions_text"
+            android:textColor="@color/control_default_foreground"
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 </LinearLayout>
