@@ -22,6 +22,7 @@ import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 import static android.os.Build.VERSION_CODES.DONUT;
 import static android.os.Build.VERSION_CODES.O;
@@ -229,7 +230,8 @@ public class ParsingPackageUtils {
         final PackageParser.PackageLite lite = ApkLiteParseUtils.parseClusterPackageLite(packageDir,
                 0);
         if (mOnlyCoreApps && !lite.coreApp) {
-            return input.error("Not a coreApp: " + packageDir);
+            return input.error(INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED,
+                    "Not a coreApp: " + packageDir);
         }
 
         // Build the split dependency tree.
@@ -291,7 +293,8 @@ public class ParsingPackageUtils {
         final PackageParser.PackageLite lite = ApkLiteParseUtils.parseMonolithicPackageLite(apkFile,
                 flags);
         if (mOnlyCoreApps && !lite.coreApp) {
-            return input.error("Not a coreApp: " + apkFile);
+            return input.error(INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED,
+                    "Not a coreApp: " + apkFile);
         }
 
         final SplitAssetLoader assetLoader = new DefaultSplitAssetLoader(lite, flags);
