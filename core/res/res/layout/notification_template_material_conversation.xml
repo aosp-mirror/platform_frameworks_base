@@ -245,6 +245,7 @@
                     android:id="@+id/notification_messaging"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="@dimen/notification_text_size"
                     android:spacing="@dimen/notification_messaging_spacing"
                     android:clipToPadding="false"
                     android:clipChildren="false"
@@ -263,53 +264,65 @@
         <include layout="@layout/notification_material_action_list" />
     </com.android.internal.widget.RemeasuringLinearLayout>
 
-    <!--This is dynamically placed between here and at the end of the layout-->
-    <LinearLayout
+    <!--This is dynamically placed between here and at the end of the layout. It starts here since
+        only FrameLayout layout params have gravity-->
+    <FrameLayout
         android:id="@+id/expand_button_container"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/conversation_expand_button_size"
+        android:layout_height="match_parent"
         android:layout_gravity="end|top"
-        android:paddingStart="16dp"
-        android:orientation="horizontal"
-        android:paddingEnd="@dimen/notification_content_margin_end"
-        android:clipToPadding="false"
         android:clipChildren="false"
-        >
-        <!-- Images -->
-        <com.android.internal.widget.MessagingLinearLayout
-            android:id="@+id/conversation_image_message_container"
-            android:forceHasOverlappingRendering="false"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="11dp"
-            android:spacing="0dp"
-            android:layout_gravity="center"
+        android:clipToPadding="false">
+        <!--This layout makes sure that we can nicely center the expand content in the
+            collapsed layout while the parent makes sure that we're never laid out bigger
+            than the messaging content.-->
+        <LinearLayout
+            android:id="@+id/expand_button_inner_container"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/conversation_expand_button_size"
+            android:paddingStart="16dp"
+            android:orientation="horizontal"
+            android:layout_gravity="end|top"
+            android:paddingEnd="@dimen/notification_content_margin_end"
             android:clipToPadding="false"
             android:clipChildren="false"
-            />
-        <!-- Unread Count -->
-        <TextView
-            android:id="@+id/conversation_unread_count"
-            android:layout_width="33sp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="11dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:padding="2dp"
-            android:visibility="gone"
-            android:textAppearance="@style/TextAppearance.DeviceDefault.Notification"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:background="@drawable/conversation_unread_bg"
-        />
-        <com.android.internal.widget.NotificationExpandButton
-            android:id="@+id/expand_button"
-            android:layout_width="@dimen/notification_header_expand_icon_size"
-            android:layout_height="@dimen/notification_header_expand_icon_size"
-            android:layout_gravity="center"
-            android:drawable="@drawable/ic_expand_notification"
-            android:clickable="false"
-            android:importantForAccessibility="no"
-        />
-    </LinearLayout>
+            >
+            <!-- Images -->
+            <com.android.internal.widget.MessagingLinearLayout
+                android:id="@+id/conversation_image_message_container"
+                android:forceHasOverlappingRendering="false"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="11dp"
+                android:spacing="0dp"
+                android:layout_gravity="center"
+                android:clipToPadding="false"
+                android:clipChildren="false"
+                />
+            <!-- Unread Count -->
+            <TextView
+                android:id="@+id/conversation_unread_count"
+                android:layout_width="33sp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="11dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:padding="2dp"
+                android:visibility="gone"
+                android:textAppearance="@style/TextAppearance.DeviceDefault.Notification"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:background="@drawable/conversation_unread_bg"
+                />
+            <com.android.internal.widget.NotificationExpandButton
+                android:id="@+id/expand_button"
+                android:layout_width="@dimen/notification_header_expand_icon_size"
+                android:layout_height="@dimen/notification_header_expand_icon_size"
+                android:layout_gravity="center"
+                android:drawable="@drawable/ic_expand_notification"
+                android:clickable="false"
+                android:importantForAccessibility="no"
+                />
+        </LinearLayout>
+    </FrameLayout>
 </com.android.internal.widget.ConversationLayout>
