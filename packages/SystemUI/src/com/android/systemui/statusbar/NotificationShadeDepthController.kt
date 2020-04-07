@@ -74,6 +74,7 @@ class NotificationShadeDepthController @Inject constructor(
     var shadeSpring = DepthAnimation()
     @VisibleForTesting
     var globalActionsSpring = DepthAnimation()
+    var showingHomeControls: Boolean = false
 
     @VisibleForTesting
     var brightnessMirrorSpring = DepthAnimation()
@@ -133,7 +134,14 @@ class NotificationShadeDepthController @Inject constructor(
                 shadeRadius = 0f
             }
         }
-        val blur = max(shadeRadius.toInt(), globalActionsSpring.radius)
+
+        // Home controls have black background, this means that we should not have blur when they
+        // are fully visible, otherwise we'll enter Client Composition unnecessarily.
+        var globalActionsRadius = globalActionsSpring.radius
+        if (showingHomeControls) {
+            globalActionsRadius = 0
+        }
+        val blur = max(shadeRadius.toInt(), globalActionsRadius)
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur)
         try {
             wallpaperManager.setWallpaperZoomOut(root.windowToken,
