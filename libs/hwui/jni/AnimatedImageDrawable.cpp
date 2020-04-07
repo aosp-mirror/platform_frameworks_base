@@ -183,7 +183,7 @@ public:
     }
 
     ~InvokeListener() override {
-        auto* env = get_env_or_die(mJvm);
+        auto* env = requireEnv(mJvm);
         env->DeleteWeakGlobalRef(mWeakRef);
     }
 
