@@ -936,9 +936,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             }
         } else {
             addStack(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);
-            stack.setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
-                    false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
-                    true /* creating */);
+            stack.setWindowingMode(windowingMode, true /* creating */);
         }
         return stack;
     }
@@ -1148,7 +1146,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             for (int i = getStackCount() - 1; i >= 0; --i) {
                 final ActivityStack stack = getStackAt(i);
                 // Collect the root tasks that are currently being organized.
-                if (stack.isOrganized()) {
+                if (stack.mCreatedByOrganizer) {
                     for (int k = stack.getChildCount() - 1; k >= 0; --k) {
                         final ActivityStack childStack = (ActivityStack) stack.getChildAt(k);
                         if (childStack.getActivityType() == activityType) {

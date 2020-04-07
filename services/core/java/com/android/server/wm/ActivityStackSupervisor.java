@@ -80,8 +80,6 @@ import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.wm.Task.REPARENT_KEEP_STACK_AT_FRONT;
-import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
-import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -140,7 +138,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TransferPipe;
-import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -381,71 +378,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     private int mDeferResumeCount;
 
     private boolean mInitialized;
-
-    private final MoveTaskToFullscreenHelper mMoveTaskToFullscreenHelper =
-            new MoveTaskToFullscreenHelper();
-    private class MoveTaskToFullscreenHelper {
-        private TaskDisplayArea mToDisplayArea;
-        private boolean mOnTop;
-        private Task mTopTask;
-        private boolean mSchedulePictureInPictureModeChange;
-
-        void process(ActivityStack fromStack, TaskDisplayArea toDisplayArea, boolean onTop,
-                boolean schedulePictureInPictureModeChange) {
-            mSchedulePictureInPictureModeChange = schedulePictureInPictureModeChange;
-            mToDisplayArea = toDisplayArea;
-            mOnTop = onTop;
-            mTopTask = fromStack.getTopMostTask();
-
-            final PooledConsumer c = PooledLambda.obtainConsumer(
-                    MoveTaskToFullscreenHelper::processLeafTask, this, PooledLambda.__(Task.class));
-            fromStack.forAllLeafTasks(c, false /* traverseTopToBottom */);
-            c.recycle();
-            mToDisplayArea = null;
-            mTopTask = null;
-        }
-
-        private void processLeafTask(Task task) {
-            // This is a one level task that we don't need to create stack for reparenting to.
-            if (task.isRootTask() && DisplayContent.alwaysCreateStack(WINDOWING_MODE_FULLSCREEN,
-                    task.getActivityType())) {
-                final ActivityStack stack = (ActivityStack) task;
-                stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-                if (mToDisplayArea.getDisplayId() != stack.getDisplayId()) {
-                    stack.reparent(mToDisplayArea, mOnTop);
-                } else if (mOnTop) {
-                    mToDisplayArea.positionStackAtTop(stack, false /* includingParents */);
-                } else {
-                    mToDisplayArea.positionStackAtBottom(stack);
-                }
-                return;
-            }
-
-            final ActivityStack toStack = mToDisplayArea.getOrCreateStack(null, mTmpOptions, task,
-                    task.getActivityType(), mOnTop);
-            if (task == toStack) {
-                // The task was reused as the root task.
-                return;
-            }
-
-            if (mOnTop) {
-                final boolean isTopTask = task == mTopTask;
-                // Defer resume until all the tasks have been moved to the fullscreen stack
-                task.reparent(toStack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, isTopTask /*animate*/,
-                        DEFER_RESUME, mSchedulePictureInPictureModeChange,
-                        "moveTasksToFullscreenStack - onTop");
-                MetricsLoggerWrapper.logPictureInPictureFullScreen(mService.mContext,
-                        task.effectiveUid, task.realActivity.flattenToString());
-            } else {
-                // Position the tasks in the fullscreen stack in order at the bottom of the
-                // stack. Also defer resume until all the tasks have been moved to the
-                // fullscreen stack.
-                task.reparent(toStack, ON_TOP, REPARENT_LEAVE_STACK_IN_PLACE,
-                        !ANIMATE, DEFER_RESUME, mSchedulePictureInPictureModeChange,
-                        "moveTasksToFullscreenStack - NOT_onTop");
-            }
-        }
-    }
 
     /**
      * Description of a request to start a new activity, which has been held
@@ -1501,56 +1433,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mResizingTasksDuringAnimation.clear();
     }
 
-    /**
-     * TODO: This should just change the windowing mode and resize vs. actually moving task around.
-     * Can do that once we are no longer using static stack ids.
-     */
-    private void moveTasksToFullscreenStackInSurfaceTransaction(ActivityStack fromStack,
-            int toDisplayId, boolean onTop) {
-
-        mService.deferWindowLayout();
-        try {
-            final int windowingMode = fromStack.getWindowingMode();
-            final TaskDisplayArea toDisplayArea = mRootWindowContainer
-                    .getDisplayContent(toDisplayId).getDefaultTaskDisplayArea();
-
-            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                // We are moving all tasks from the docked stack to the fullscreen stack,
-                // which is dismissing the docked stack, so resize all other stacks to
-                // fullscreen here already so we don't end up with resize trashing.
-                for (int i = toDisplayArea.getStackCount() - 1; i >= 0; --i) {
-                    final ActivityStack otherStack = toDisplayArea.getStackAt(i);
-                    if (!otherStack.inSplitScreenSecondaryWindowingMode()) {
-                        continue;
-                    }
-                    otherStack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
-                }
-            }
-
-            // If we are moving from the pinned stack, then the animation takes care of updating
-            // the picture-in-picture mode.
-            final boolean schedulePictureInPictureModeChange =
-                    windowingMode == WINDOWING_MODE_PINNED;
-
-            if (fromStack.hasChild()) {
-                mTmpOptions.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN);
-                mMoveTaskToFullscreenHelper.process(
-                        fromStack, toDisplayArea, onTop, schedulePictureInPictureModeChange);
-            }
-
-            mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
-            mRootWindowContainer.resumeFocusedStacksTopActivities();
-        } finally {
-            mService.continueWindowLayout();
-        }
-    }
-
-    void moveTasksToFullscreenStackLocked(ActivityStack fromStack, boolean onTop) {
-        // TODO(b/153089193): Support moving within the same task display area
-        mWindowManager.inSurfaceTransaction(() ->
-                moveTasksToFullscreenStackInSurfaceTransaction(fromStack, DEFAULT_DISPLAY, onTop));
-    }
-
     void setSplitScreenResizing(boolean resizing) {
         if (resizing == mDockedStackResizing) {
             return;
@@ -1560,26 +1442,46 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mWindowManager.setDockedStackResizing(resizing);
     }
 
+    private void removePinnedStackInSurfaceTransaction(ActivityStack stack) {
+        /**
+         * Workaround: Force-stop all the activities in the pinned stack before we reparent them
+         * to the fullscreen stack.  This is to guarantee that when we are removing a stack,
+         * that the client receives onStop() before it is reparented.  We do this by detaching
+         * the stack from the display so that it will be considered invisible when
+         * ensureActivitiesVisible() is called, and all of its activities will be marked
+         * invisible as well and added to the stopping list.  After which we process the
+         * stopping list by handling the idle.
+         */
+        stack.cancelAnimation();
+        stack.setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, true /* set */);
+        stack.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+        stack.setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, false /* set */);
+        activityIdleInternal(null /* idleActivity */, false /* fromTimeout */,
+                true /* processPausingActivities */, null /* configuration */);
+
+        // Reparent all the tasks to the bottom of the display
+        final DisplayContent toDisplay =
+                mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY);
+
+        mService.deferWindowLayout();
+        try {
+            stack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+            if (toDisplay.getDisplayId() != stack.getDisplayId()) {
+                stack.reparent(toDisplay.getDefaultTaskDisplayArea(), false /* onTop */);
+            } else {
+                toDisplay.mTaskContainers.positionStackAtBottom(stack);
+            }
+
+            mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+            mRootWindowContainer.resumeFocusedStacksTopActivities();
+        } finally {
+            mService.continueWindowLayout();
+        }
+    }
+
     private void removeStackInSurfaceTransaction(ActivityStack stack) {
         if (stack.getWindowingMode() == WINDOWING_MODE_PINNED) {
-            /**
-             * Workaround: Force-stop all the activities in the pinned stack before we reparent them
-             * to the fullscreen stack.  This is to guarantee that when we are removing a stack,
-             * that the client receives onStop() before it is reparented.  We do this by detaching
-             * the stack from the display so that it will be considered invisible when
-             * ensureActivitiesVisible() is called, and all of its activities will be marked
-             * invisible as well and added to the stopping list.  After which we process the
-             * stopping list by handling the idle.
-             */
-            stack.cancelAnimation();
-            stack.setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, true /* set */);
-            stack.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
-            stack.setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, false /* set */);
-            activityIdleInternal(null /* idleActivity */, false /* fromTimeout */,
-                    true /* processPausingActivities */, null /* configuration */);
-
-            // Move all the tasks to the bottom of the fullscreen stack
-            moveTasksToFullscreenStackLocked(stack, !ON_TOP);
+            removePinnedStackInSurfaceTransaction(stack);
         } else {
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     ActivityStackSupervisor::processRemoveTask, this, PooledLambda.__(Task.class));
