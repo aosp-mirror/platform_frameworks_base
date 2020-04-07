@@ -152,7 +152,6 @@ void ShellSubscriber::startPull(int64_t myToken) {
                 mPullerMgr->Pull(pullInfo.mPullerMatcher.atom_id(), uids, &data);
                 VLOG("pulled %zu atoms with id %d", data.size(), pullInfo.mPullerMatcher.atom_id());
 
-                // TODO(b/150969574): Don't write to a pipe while holding a lock.
                 if (!writePulledAtomsLocked(data, pullInfo.mPullerMatcher)) {
                     mSubscriptionInfo->mClientAlive = false;
                     mSubscriptionShouldEnd.notify_one();
