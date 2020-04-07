@@ -223,6 +223,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private int mRingMode;
     private int mPhoneState;
     private boolean mKeyguardIsVisible;
+    private boolean mCredentialAttempted;
     private boolean mKeyguardGoingAway;
     private boolean mGoingToSleep;
     private boolean mBouncer;
@@ -498,11 +499,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
+     * Updates KeyguardUpdateMonitor's internal state to know if credential was attempted on
+     * bouncer. Note that this does not care if the credential was correct/incorrect. This is
+     * cleared when the user leaves the bouncer (unlocked, screen off, back to lockscreen, etc)
+     */
+    public void setCredentialAttempted() {
+        mCredentialAttempted = true;
+        updateBiometricListeningState();
+    }
+
+    /**
      * Updates KeyguardUpdateMonitor's internal state to know if keyguard is goingAway
      */
     public void setKeyguardGoingAway(boolean goingAway) {
         mKeyguardGoingAway = goingAway;
-        updateFingerprintListeningState();
+        updateBiometricListeningState();
     }
 
     /**
@@ -664,6 +675,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             updateFingerprintListeningState();
         } else {
             setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
+            mFingerprintCancelSignal = null;
+            mFaceCancelSignal = null;
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE) {
@@ -679,6 +692,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     getCurrentUser());
         }
 
+        if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
+                || msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
+            mFingerprintLockedOut = true;
+        }
+
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -688,6 +706,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private void handleFingerprintLockoutReset() {
+        mFingerprintLockedOut = false;
         updateFingerprintListeningState();
     }
 
@@ -1274,6 +1293,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private CancellationSignal mFaceCancelSignal;
     private FingerprintManager mFpm;
     private FaceManager mFaceManager;
+    private boolean mFingerprintLockedOut;
 
     /**
      * When we receive a
@@ -1820,13 +1840,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private boolean shouldListenForFingerprint() {
+        final boolean allowedOnBouncer =
+                !(mFingerprintLockedOut && mBouncer && mCredentialAttempted);
+
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen = (mKeyguardIsVisible || !mDeviceInteractive ||
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
-                && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser;
+                && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser
+                && allowedOnBouncer;
         return shouldListen;
     }
 
@@ -2372,6 +2396,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             // camera requests dismiss keyguard (tapping on photos for example). When these happen,
             // face auth should resume.
             mSecureCameraLaunched = false;
+        } else {
+            mCredentialAttempted = false;
         }
 
         for (int i = 0; i < mCallbacks.size(); i++) {
