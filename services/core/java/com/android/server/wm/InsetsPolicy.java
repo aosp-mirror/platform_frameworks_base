@@ -304,7 +304,10 @@ class InsetsPolicy {
         // We need to force system bars when the docked stack is visible, when the freeform stack
         // is visible but also when we are resizing for the transitions when docked stack
         // visibility changes.
-        return isDockedStackVisible || isFreeformStackVisible || isResizing;
+        return isDockedStackVisible
+                || isFreeformStackVisible
+                || isResizing
+                || mPolicy.getForceShowSystemBars();
     }
 
     @VisibleForTesting
