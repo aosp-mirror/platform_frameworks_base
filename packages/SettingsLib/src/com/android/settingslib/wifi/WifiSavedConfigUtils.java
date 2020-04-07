@@ -65,5 +65,17 @@ public class WifiSavedConfigUtils {
         }
         return savedConfigs;
     }
+
+    /**
+     * Returns the count of the saved configurations on the device, including both Wi-Fi networks
+     * and Passpoint profiles.
+     *
+     * @param context The application context
+     * @param wifiManager An instance of {@link WifiManager}
+     * @return count of saved Wi-Fi networks
+     */
+    public static int getAllConfigsCount(Context context, WifiManager wifiManager) {
+        return getAllConfigs(context, wifiManager).size();
+    }
 }
 
