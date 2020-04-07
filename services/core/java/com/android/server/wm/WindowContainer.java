@@ -2207,6 +2207,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
                                     boolean isVoiceInteraction) {
+        if (isOrganized()) {
+            // Defer to the task organizer to run animations
+            return null;
+        }
+
         final DisplayContent displayContent = getDisplayContent();
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final int width = displayInfo.appWidth;

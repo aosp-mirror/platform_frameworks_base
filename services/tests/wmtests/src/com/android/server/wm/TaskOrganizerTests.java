@@ -69,6 +69,8 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -115,6 +117,13 @@ public class TaskOrganizerTests extends WindowTestsBase {
 
     ActivityStack createStack() {
         return createTaskStackOnDisplay(mDisplayContent);
+    }
+
+    @Before
+    public void setUp() {
+        // We defer callbacks since we need to adjust task surface visibility, but for these tests,
+        // just run the callbacks synchronously
+        mWm.mAtmService.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer((r) -> r.run());
     }
 
     @Test
