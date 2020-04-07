@@ -513,10 +513,7 @@ public final class PowerManagerService extends SystemService
 
     // The screen brightness setting override from the window manager
     // to allow the current foreground activity to override the brightness.
-    // Use -1 to disable.
-    private int mScreenBrightnessOverrideFromWindowManager = -1;
-
-    private float mScreenBrightnessOverrideFromWindowManagerFloat =
+    private float mScreenBrightnessOverrideFromWindowManager =
             PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
     // The window manager has determined the user to be inactive via other means.
@@ -2846,7 +2843,7 @@ public final class PowerManagerService extends SystemService
                 screenBrightnessOverride = mScreenBrightnessSettingDefault;
             } else if (isValidBrightness(mScreenBrightnessOverrideFromWindowManager)) {
                 autoBrightness = false;
-                screenBrightnessOverride = mScreenBrightnessOverrideFromWindowManagerFloat;
+                screenBrightnessOverride = mScreenBrightnessOverrideFromWindowManager;
             } else {
                 autoBrightness = (mScreenBrightnessModeSetting ==
                         Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
@@ -2927,8 +2924,8 @@ public final class PowerManagerService extends SystemService
         return !mIsVrModeEnabled && mScreenBrightnessBoostInProgress;
     }
 
-    private static boolean isValidBrightness(int value) {
-        return value >= 0 && value <= 255;
+    private static boolean isValidBrightness(float value) {
+        return value >= PowerManager.BRIGHTNESS_MIN && value <= PowerManager.BRIGHTNESS_MAX;
     }
 
     @VisibleForTesting
@@ -3583,13 +3580,11 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    // TODO(brightnessfloat): change to float
-    private void setScreenBrightnessOverrideFromWindowManagerInternal(int brightness) {
+    private void setScreenBrightnessOverrideFromWindowManagerInternal(float brightness) {
         synchronized (mLock) {
-            if (mScreenBrightnessOverrideFromWindowManager != brightness) {
+            if (!BrightnessSynchronizer.floatEquals(mScreenBrightnessOverrideFromWindowManager,
+                    brightness)) {
                 mScreenBrightnessOverrideFromWindowManager = brightness;
-                mScreenBrightnessOverrideFromWindowManagerFloat =
-                        BrightnessSynchronizer.brightnessIntToFloat(mContext, brightness);
                 mDirty |= DIRTY_SETTINGS;
                 updatePowerStateLocked();
             }
@@ -3890,8 +3885,8 @@ public final class PowerManagerService extends SystemService
                     + isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked() + ")");
             pw.println("  mStayOnWhilePluggedInSetting=" + mStayOnWhilePluggedInSetting);
             pw.println("  mScreenBrightnessModeSetting=" + mScreenBrightnessModeSetting);
-            pw.println("  mScreenBrightnessOverrideFromWindowManagerFloat="
-                    + mScreenBrightnessOverrideFromWindowManagerFloat);
+            pw.println("  mScreenBrightnessOverrideFromWindowManager="
+                    + mScreenBrightnessOverrideFromWindowManager);
             pw.println("  mUserActivityTimeoutOverrideFromWindowManager="
                     + mUserActivityTimeoutOverrideFromWindowManager);
             pw.println("  mUserInactiveOverrideFromWindowManager="
@@ -4231,7 +4226,7 @@ public final class PowerManagerService extends SystemService
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto
                             .SCREEN_BRIGHTNESS_OVERRIDE_FROM_WINDOW_MANAGER,
-                    mScreenBrightnessOverrideFromWindowManagerFloat);
+                    mScreenBrightnessOverrideFromWindowManager);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto
                             .USER_ACTIVITY_TIMEOUT_OVERRIDE_FROM_WINDOW_MANAGER_MS,
@@ -5430,10 +5425,10 @@ public final class PowerManagerService extends SystemService
     @VisibleForTesting
     final class LocalService extends PowerManagerInternal {
         @Override
-        public void setScreenBrightnessOverrideFromWindowManager(int screenBrightness) {
-            if (screenBrightness < PowerManager.BRIGHTNESS_DEFAULT
-                    || screenBrightness > PowerManager.BRIGHTNESS_ON) {
-                screenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+        public void setScreenBrightnessOverrideFromWindowManager(float screenBrightness) {
+            if (screenBrightness < PowerManager.BRIGHTNESS_MIN
+                    || screenBrightness > PowerManager.BRIGHTNESS_MAX) {
+                screenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             }
             setScreenBrightnessOverrideFromWindowManagerInternal(screenBrightness);
         }
