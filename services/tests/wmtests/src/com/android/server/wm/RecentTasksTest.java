@@ -1124,8 +1124,6 @@ public class RecentTasksTest extends ActivityTestsBase {
             }
         });
         assertSecurityException(expectCallable,
-                () -> mService.moveTasksToFullscreenStack(INVALID_STACK_ID, true));
-        assertSecurityException(expectCallable,
                 () -> mService.startActivityFromRecents(0, new Bundle()));
         assertSecurityException(expectCallable, () -> mService.getTaskSnapshot(0, true));
         assertSecurityException(expectCallable, () -> mService.registerTaskStackListener(null));
