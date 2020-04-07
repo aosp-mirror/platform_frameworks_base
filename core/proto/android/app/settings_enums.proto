@@ -2669,4 +2669,9 @@ enum PageId {
     // Open: Settings > Sound > Do Not Disturb > Apps > <Choose App>
     // OS: R
     DND_APPS_BYPASSING = 1840;
+
+    // OPEN: Settings > Battery > Advanced battery option
+    // CATEGORY: SETTINGS
+    // OS: R
+    FUELGAUGE_ADVANCED_BATTERY_OPTION = 1842;
 }

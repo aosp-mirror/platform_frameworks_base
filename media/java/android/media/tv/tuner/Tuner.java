@@ -45,6 +45,7 @@ import android.media.tv.tuner.frontend.ScanCallback;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
+import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
@@ -256,6 +257,36 @@ public class Tuner implements AutoCloseable  {
         mTunerResourceManager.registerClientProfile(
                 profile, new HandlerExecutor(mHandler), mResourceListener, clientId);
         mClientId = clientId[0];
+
+        setFrontendInfoList();
+        setLnbIds();
+    }
+
+    private void setFrontendInfoList() {
+        List<Integer> ids = nativeGetFrontendIds();
+        if (ids == null) {
+            return;
+        }
+        TunerFrontendInfo[] infos = new TunerFrontendInfo[ids.size()];
+        for (int i = 0; i < ids.size(); i++) {
+            int id = ids.get(i);
+            FrontendInfo frontendInfo = nativeGetFrontendInfo(id);
+            if (frontendInfo == null) {
+                continue;
+            }
+            TunerFrontendInfo tunerFrontendInfo = new TunerFrontendInfo(
+                    id, frontendInfo.getType(), frontendInfo.getExclusiveGroupId());
+            infos[i] = tunerFrontendInfo;
+        }
+        mTunerResourceManager.setFrontendInfoList(infos);
+    }
+
+    private void setLnbIds() {
+        int[] ids = nativeGetLnbIds();
+        if (ids == null) {
+            return;
+        }
+        mTunerResourceManager.setLnbInfoList(ids);
     }
 
     /**
@@ -358,7 +389,7 @@ public class Tuner implements AutoCloseable  {
     private native Filter nativeOpenFilter(int type, int subType, long bufferSize);
     private native TimeFilter nativeOpenTimeFilter();
 
-    private native List<Integer> nativeGetLnbIds();
+    private native int[] nativeGetLnbIds();
     private native Lnb nativeOpenLnbByHandle(int handle);
     private native Lnb nativeOpenLnbByName(String name);
 
@@ -829,6 +860,9 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
+        if (mLnb != null) {
+            mLnb.setCallback(executor, cb);
+        }
         return mLnb;
     }
 
@@ -847,7 +881,11 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(name, "LNB name must not be null");
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
-        return nativeOpenLnbByName(name);
+        mLnb = nativeOpenLnbByName(name);
+        if (mLnb != null) {
+            mLnb.setCallback(executor, cb);
+        }
+        return mLnb;
     }
 
     private boolean requestLnb() {
@@ -870,12 +908,6 @@ public class Tuner implements AutoCloseable  {
     public TimeFilter openTimeFilter() {
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
         return nativeOpenTimeFilter();
-    }
-
-    private void onLnbEvent(int eventType) {
-        if (mHandler != null) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_ON_LNB_EVENT, eventType, 0));
-        }
     }
 
     /**

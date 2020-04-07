@@ -16,8 +16,18 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -27,6 +37,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.platform.test.annotations.Presubmit;
 
@@ -133,5 +146,49 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
         assertEquals("The testing DisplayContent should be moved to top with task",
                 mWm.mRoot.getChildCount() - 1, indexOfDisplayWithPinnedStack);
+    }
+
+    @Test
+    public void testReuseTaskAsStack() {
+        final Task candidateTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task newStack = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        doReturn(newStack).when(mDisplayContent.mTaskContainers).createStack(anyInt(),
+                anyInt(), anyBoolean(), any(), any(), anyBoolean());
+
+        final int type = ACTIVITY_TYPE_STANDARD;
+        assertGetOrCreateStack(WINDOWING_MODE_FULLSCREEN, type, candidateTask,
+                true /* reuseCandidate */);
+        assertGetOrCreateStack(WINDOWING_MODE_UNDEFINED, type, candidateTask,
+                true /* reuseCandidate */);
+        assertGetOrCreateStack(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, type, candidateTask,
+                true /* reuseCandidate */);
+        assertGetOrCreateStack(WINDOWING_MODE_FREEFORM, type, candidateTask,
+                true /* reuseCandidate */);
+        assertGetOrCreateStack(WINDOWING_MODE_MULTI_WINDOW, type, candidateTask,
+                true /* reuseCandidate */);
+        assertGetOrCreateStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, type, candidateTask,
+                false /* reuseCandidate */);
+        assertGetOrCreateStack(WINDOWING_MODE_PINNED, type, candidateTask,
+                false /* reuseCandidate */);
+
+        final int windowingMode = WINDOWING_MODE_FULLSCREEN;
+        assertGetOrCreateStack(windowingMode, ACTIVITY_TYPE_HOME, candidateTask,
+                false /* reuseCandidate */);
+        assertGetOrCreateStack(windowingMode, ACTIVITY_TYPE_RECENTS, candidateTask,
+                false /* reuseCandidate */);
+        assertGetOrCreateStack(windowingMode, ACTIVITY_TYPE_ASSISTANT, candidateTask,
+                false /* reuseCandidate */);
+        assertGetOrCreateStack(windowingMode, ACTIVITY_TYPE_DREAM, candidateTask,
+                false /* reuseCandidate */);
+    }
+
+    private void assertGetOrCreateStack(int windowingMode, int activityType, Task candidateTask,
+            boolean reuseCandidate) {
+        final TaskDisplayArea taskDisplayArea = (TaskDisplayArea) candidateTask.getParent();
+        final ActivityStack stack = taskDisplayArea.getOrCreateStack(windowingMode, activityType,
+                false /* onTop */, null /* intent */, candidateTask /* candidateTask */);
+        assertEquals(reuseCandidate, stack == candidateTask);
     }
 }

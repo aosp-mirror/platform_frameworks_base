@@ -35,10 +35,11 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
  * in a linear layout.
  */
 public class CarNavigationBarView extends LinearLayout {
+    private final boolean mConsumeTouchWhenPanelOpen;
+
     private View mNavButtons;
     private CarNavigationButton mNotificationsButton;
     private NotificationsShadeController mNotificationsShadeController;
-    private Context mContext;
     private View mLockScreenButtons;
     // used to wire in open/close gestures for notifications
     private OnTouchListener mStatusBarWindowTouchListener;
@@ -46,7 +47,8 @@ public class CarNavigationBarView extends LinearLayout {
 
     public CarNavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = context;
+        mConsumeTouchWhenPanelOpen = getResources().getBoolean(
+                R.bool.config_consumeNavigationBarTouchWhenNotificationPanelOpen);
     }
 
     @Override
@@ -77,9 +79,16 @@ public class CarNavigationBarView extends LinearLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (mStatusBarWindowTouchListener != null) {
+            boolean shouldConsumeEvent = mNotificationsShadeController == null ? false
+                    : mNotificationsShadeController.isNotificationPanelOpen();
+
             // Forward touch events to the status bar window so it can drag
             // windows if required (Notification shade)
             mStatusBarWindowTouchListener.onTouch(this, ev);
+
+            if (mConsumeTouchWhenPanelOpen && shouldConsumeEvent) {
+                return true;
+            }
         }
         return super.onInterceptTouchEvent(ev);
     }

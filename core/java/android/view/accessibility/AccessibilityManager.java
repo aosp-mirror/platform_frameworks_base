@@ -1275,7 +1275,14 @@ public final class AccessibilityManager {
 
     /**
      * Register the provided {@link RemoteAction} with the given actionId
-     *
+     * <p>
+     * To perform established system actions, an accessibility service uses the GLOBAL_ACTION
+     * constants in {@link android.accessibilityservice.AccessibilityService}. To provide a
+     * customized implementation for one of these actions, the id of the registered system action
+     * must match that of the corresponding GLOBAL_ACTION constant. For example, to register a
+     * Back action, {@code actionId} must be
+     * {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_BACK}
+     * </p>
      * @param action The remote action to be registered with the given actionId as system action.
      * @param actionId The id uniquely identify the system action.
      * @hide

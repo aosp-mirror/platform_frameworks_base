@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -37,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -131,12 +133,17 @@ public class FileIntegrityService extends SystemService {
         // duplicate the same loading logic here.
 
         // Load certificates trusted by the device manufacturer.
-        loadCertificatesFromDirectory("/product/etc/security/fsverity");
+        // NB: Directories need to be synced with system/security/fsverity_init/fsverity_init.cpp.
+        final String relativeDir = "etc/security/fsverity";
+        loadCertificatesFromDirectory(Environment.getRootDirectory().toPath()
+                .resolve(relativeDir));
+        loadCertificatesFromDirectory(Environment.getProductDirectory().toPath()
+                .resolve(relativeDir));
     }
 
-    private void loadCertificatesFromDirectory(String path) {
+    private void loadCertificatesFromDirectory(Path path) {
         try {
-            File[] files = new File(path).listFiles();
+            File[] files = path.toFile().listFiles();
             if (files == null) {
                 return;
             }

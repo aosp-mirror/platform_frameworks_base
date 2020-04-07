@@ -70,7 +70,7 @@ struct LnbCallback : public ILnbCallback {
     LnbCallback(jweak tunerObj, LnbId id);
     virtual Return<void> onEvent(LnbEventType lnbEventType);
     virtual Return<void> onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
-    jweak mObject;
+    jweak mLnb;
     LnbId mId;
 };
 
@@ -179,7 +179,7 @@ struct JTuner : public RefBase {
     int stopScan();
     int setLnb(int id);
     int setLna(bool enable);
-    jobject getLnbIds();
+    jintArray getLnbIds();
     jobject openLnbById(int id);
     jobject openLnbByName(jstring name);
     jobject openFilter(DemuxFilterType type, int bufferSize);
@@ -199,6 +199,7 @@ private:
     static sp<ITuner> mTuner;
     hidl_vec<FrontendId> mFeIds;
     sp<IFrontend> mFe;
+    int mFeId;
     hidl_vec<LnbId> mLnbIds;
     sp<ILnb> mLnb;
     sp<IDemux> mDemux;

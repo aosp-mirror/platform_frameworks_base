@@ -2448,7 +2448,8 @@ class Task extends WindowContainer<WindowContainer> {
     Rect updateOverrideConfigurationFromLaunchBounds() {
         // If the task is controlled by another organized task, do not set override
         // configurations and let its parent (organized task) to control it;
-        final Rect bounds = isOrganized() && !isRootTask() ? null : getLaunchBounds();
+        final Task rootTask = getRootTask();
+        final Rect bounds = rootTask != this && rootTask.isOrganized() ? null : getLaunchBounds();
         setBounds(bounds);
         if (bounds != null && !bounds.isEmpty()) {
             // TODO: Review if we actually want to do this - we are setting the launch bounds
@@ -4131,17 +4132,6 @@ class Task extends WindowContainer<WindowContainer> {
         // Let the old organizer know it has lost control.
         sendTaskVanished();
         mTaskOrganizer = organizer;
-
-        // If the task is not yet visible when it is added to the task organizer, then we should
-        // hide it to allow the task organizer to show it when it is properly reparented. We skip
-        // this for tasks created by the organizer because they can synchronously update the leash
-        // before new children are added to the task.
-        if (!mCreatedByOrganizer && organizer != null
-                && (!getHasBeenVisible() || !hasVisibleChildren())) {
-            getPendingTransaction().hide(getSurfaceControl());
-            commitPendingTransaction();
-        }
-
         sendTaskAppeared();
         onTaskOrganizerChanged();
         return true;

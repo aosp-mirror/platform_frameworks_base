@@ -625,7 +625,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             // mOrientedHandle is initialized lazily
             mOrientationHandle.setVisibility(View.GONE);
         }
-        mNavigationBarView.setVisibility(View.VISIBLE);
+        if (mNavigationBarView != null) {
+            mNavigationBarView.setVisibility(View.VISIBLE);
+        }
     }
 
     private int deltaRotation(int oldRotation, int newRotation) {
@@ -635,7 +637,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     private void updatedFixedRotation() {
-        mFixedRotationEnabled = Settings.Global.getInt(getContext().getContentResolver(),
+        mFixedRotationEnabled = Settings.Global.getInt(mContentResolver,
                 FIXED_ROTATION_TRANSFORM_SETTING_NAME, 0) != 0;
         if (!canShowSecondaryHandle()) {
             resetSecondaryHandle();
