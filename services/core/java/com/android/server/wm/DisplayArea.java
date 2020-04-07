@@ -253,6 +253,12 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
             super.prepareSurfaces();
             getBounds(mTmpDimBoundsRect);
 
+            // If SystemUI is dragging for recents, we want to reset the dim state so any dim layer
+            // on the display level fades out.
+            if (forAllTasks(task -> !task.canAffectSystemUiFlags())) {
+                mDimmer.resetDimStates();
+            }
+
             if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
                 scheduleAnimation();
             }
