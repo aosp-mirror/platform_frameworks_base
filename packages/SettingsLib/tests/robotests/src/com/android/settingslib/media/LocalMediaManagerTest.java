@@ -218,6 +218,26 @@ public class LocalMediaManagerTest {
     }
 
     @Test
+    public void getMediaDeviceById_idIsNull_shouldReturnNull() {
+        final MediaDevice device1 = mock(MediaDevice.class);
+        final MediaDevice device2 = mock(MediaDevice.class);
+        mLocalMediaManager.mMediaDevices.add(device1);
+        mLocalMediaManager.mMediaDevices.add(device2);
+
+        when(device1.getId()).thenReturn(null);
+        when(device2.getId()).thenReturn(null);
+
+        MediaDevice device = mLocalMediaManager
+                .getMediaDeviceById(mLocalMediaManager.mMediaDevices, TEST_CURRENT_DEVICE_ID);
+
+        assertThat(device).isNull();
+
+        device = mLocalMediaManager.getMediaDeviceById(TEST_CURRENT_DEVICE_ID);
+
+        assertThat(device).isNull();
+    }
+
+    @Test
     public void onDeviceAdded_addDevice() {
         final MediaDevice device = mock(MediaDevice.class);
 
@@ -461,6 +481,26 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mMediaDeviceCallback.onDeviceAttributesChanged();
 
         verify(mCallback).onDeviceAttributesChanged();
+    }
+
+    @Test
+    public void onDeviceAttributesChanged_failingTransferring_shouldResetState() {
+        final MediaDevice currentDevice = mock(MediaDevice.class);
+        final MediaDevice device = mock(BluetoothMediaDevice.class);
+        final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+        mLocalMediaManager.mMediaDevices.add(device);
+        mLocalMediaManager.mMediaDevices.add(currentDevice);
+        when(device.getId()).thenReturn(TEST_DEVICE_ID_1);
+        when(currentDevice.getId()).thenReturn(TEST_CURRENT_DEVICE_ID);
+        when(((BluetoothMediaDevice) device).getCachedDevice()).thenReturn(cachedDevice);
+        when(cachedDevice.isConnected()).thenReturn(false);
+        when(cachedDevice.isBusy()).thenReturn(false);
+
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.connectDevice(device);
+
+        mLocalMediaManager.mDeviceAttributeChangeCallback.onDeviceAttributesChanged();
+        verify(device).setState(LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
     }
 
     @Test

@@ -39,7 +39,7 @@ import java.util.Set;
  *
  * <p>Example implementation:<br>
  * <pre class="prettyprint">
- *   public class MyRichContentReceiver extends RichContentReceiver&lt;TextView&gt; {
+ *   public class MyRichContentReceiver implements RichContentReceiver&lt;TextView&gt; {
  *
  *       private static final Set&lt;String&gt; SUPPORTED_MIME_TYPES = Collections.unmodifiableSet(
  *           Set.of("text/*", "image/gif", "image/png", "image/jpg"));

@@ -28,6 +28,7 @@ import java.io.PrintWriter;
  * Represents a toast, a transient notification.
  */
 public abstract class ToastRecord {
+    public final int uid;
     public final int pid;
     public final String pkg;
     public final IBinder token;
@@ -36,11 +37,10 @@ public abstract class ToastRecord {
     protected final NotificationManagerService mNotificationManager;
     private int mDuration;
 
-    protected ToastRecord(
-            NotificationManagerService notificationManager,
-            int pid, String pkg, IBinder token, int duration,
-            Binder windowToken, int displayId) {
+    protected ToastRecord(NotificationManagerService notificationManager, int uid, int pid,
+            String pkg, IBinder token, int duration, Binder windowToken, int displayId) {
         this.mNotificationManager = notificationManager;
+        this.uid = uid;
         this.pid = pid;
         this.pkg = pkg;
         this.token = token;

@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.tv.micdisclosure.AudioRecordingDisclosureBar;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -66,7 +67,8 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
             // If the system process isn't there we're doomed anyway.
         }
 
-        new AudioRecordingDisclosureBar(mContext).start();
+        // Creating AudioRecordingDisclosureBar and just letting it run
+        new AudioRecordingDisclosureBar(mContext);
     }
 
     @Override

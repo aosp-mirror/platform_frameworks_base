@@ -478,6 +478,7 @@ filegroup {
         "core/java/android/os/IThermalEventListener.aidl",
         "core/java/android/os/IThermalStatusListener.aidl",
         "core/java/android/os/IThermalService.aidl",
+        "core/java/android/os/IPowerManager.aidl",
     ],
     path: "core/java",
 }

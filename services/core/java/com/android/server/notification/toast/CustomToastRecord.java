@@ -23,6 +23,7 @@ import android.app.ITransientNotification;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.notification.NotificationManagerService;
@@ -35,11 +36,10 @@ public class CustomToastRecord extends ToastRecord {
 
     public final ITransientNotification callback;
 
-    public CustomToastRecord(
-            NotificationManagerService notificationManager, int pid, String packageName,
-            IBinder token, ITransientNotification callback, int duration, Binder windowToken,
-            int displayId) {
-        super(notificationManager, pid, packageName, token, duration, windowToken, displayId);
+    public CustomToastRecord(NotificationManagerService notificationManager, int uid, int pid,
+            String packageName, IBinder token, ITransientNotification callback, int duration,
+            Binder windowToken, int displayId) {
+        super(notificationManager, uid, pid, packageName, token, duration, windowToken, displayId);
         this.callback = checkNotNull(callback);
     }
 
@@ -74,8 +74,8 @@ public class CustomToastRecord extends ToastRecord {
     public String toString() {
         return "CustomToastRecord{"
                 + Integer.toHexString(System.identityHashCode(this))
+                + " " + pid + ":" +  pkg + "/" + UserHandle.formatUid(uid)
                 + " token=" + token
-                + " packageName=" + pkg
                 + " callback=" + callback
                 + " duration=" + getDuration()
                 + "}";

@@ -13586,7 +13586,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * the clipboard). See {@link #setRichContentReceiver} for more info.
      *
      * @return The callback that this view is using to handle insertion of content. Returns
-     * {@link #DEFAULT_RICH_CONTENT_RECEIVER} if not custom callback has been
+     * {@link #DEFAULT_RICH_CONTENT_RECEIVER} if no custom callback has been
      * {@link #setRichContentReceiver set}.
      */
     @NonNull

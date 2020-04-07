@@ -239,16 +239,18 @@ class UiAutomationManager {
             mMainHandler.post(() -> {
                 try {
                     final IAccessibilityServiceClient serviceInterface;
-                    final IBinder service;
                     synchronized (mLock) {
                         serviceInterface = mServiceInterface;
-                        mService = (serviceInterface == null) ? null : mServiceInterface.asBinder();
-                        service = mService;
+                        if (serviceInterface == null) {
+                            mService = null;
+                        } else {
+                            mService = mServiceInterface.asBinder();
+                            mService.linkToDeath(this, 0);
+                        }
                     }
                     // If the serviceInterface is null, the UiAutomation has been shut down on
                     // another thread.
                     if (serviceInterface != null) {
-                        service.linkToDeath(this, 0);
                         serviceInterface.init(this, mId,
                                 mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
                     }

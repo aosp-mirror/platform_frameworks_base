@@ -502,12 +502,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void showToast(String packageName, IBinder token, CharSequence text,
+        public void showToast(int uid, String packageName, IBinder token, CharSequence text,
                 IBinder windowToken, int duration,
                 @Nullable ITransientNotificationCallback callback) {
             if (mBar != null) {
                 try {
-                    mBar.showToast(packageName, token, text, windowToken, duration, callback);
+                    mBar.showToast(uid, packageName, token, text, windowToken, duration, callback);
                 } catch (RemoteException ex) { }
             }
         }
