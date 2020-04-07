@@ -192,7 +192,7 @@ public class AppOpsHelper {
                     callerIdentity.uid,
                     callerIdentity.packageName,
                     callerIdentity.attributionTag,
-                    null) == AppOpsManager.MODE_ALLOWED;
+                    callerIdentity.listenerId) == AppOpsManager.MODE_ALLOWED;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -211,7 +211,7 @@ public class AppOpsHelper {
                     callerIdentity.packageName,
                     false,
                     callerIdentity.attributionTag,
-                    null) == AppOpsManager.MODE_ALLOWED;
+                    callerIdentity.listenerId) == AppOpsManager.MODE_ALLOWED;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -246,7 +246,7 @@ public class AppOpsHelper {
                     callerIdentity.uid,
                     callerIdentity.packageName,
                     callerIdentity.attributionTag,
-                    null) == AppOpsManager.MODE_ALLOWED;
+                    callerIdentity.listenerId) == AppOpsManager.MODE_ALLOWED;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
