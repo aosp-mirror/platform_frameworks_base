@@ -604,7 +604,7 @@
     <!-- [CHAR LIMIT=NONE] Adb Wireless QR code pairing scanner title -->
     <string name="adb_wireless_qrcode_pairing_title">Scan QR code</string>
     <!-- [CHAR LIMIT=NONE] Adb Wireless QR code pairing description -->
-    <string name="adb_wireless_qrcode_pairing_description">Pair device over Wi\u2011Fi by scanning a QR Code</string>
+    <string name="adb_wireless_qrcode_pairing_description">Pair device over Wi\u2011Fi by scanning a QR code</string>
     <!-- [CHAR LIMIT=NONE] Toast message when trying to enable Wi-Fi debugging and no Wi-Fi network connected -->
     <string name="adb_wireless_no_network_msg">Please connect to a Wi\u2011Fi network</string>
     <!--Adb wireless search Keywords [CHAR LIMIT=NONE]-->
