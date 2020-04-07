@@ -17572,11 +17572,13 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (needToVerify) {
+                final boolean needsVerification = needsNetworkVerificationLPr(packageName);
                 final int verificationId = mIntentFilterVerificationToken++;
                 for (ParsedActivity a : activities) {
                     for (ParsedIntentInfo filter : a.getIntents()) {
-                        if (filter.handlesWebUris(true)
-                                && needsNetworkVerificationLPr(a.getPackageName())) {
+                        // Run verification against hosts mentioned in any web-nav intent filter,
+                        // even if the filter matches non-web schemes as well
+                        if (needsVerification && filter.handlesWebUris(false)) {
                             if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
                                     "Verification needed for IntentFilter:" + filter.toString());
                             mIntentFilterVerifier.addOneIntentFilterVerification(
