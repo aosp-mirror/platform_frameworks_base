@@ -33,6 +33,7 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MacAddress;
 import android.net.RouteInfo;
+import android.net.TetherOffloadRuleParcel;
 import android.net.TetheredClient;
 import android.net.TetheringManager;
 import android.net.TetheringRequestParcel;
@@ -278,6 +279,19 @@ public class IpServer extends StateMachine {
         public Ipv6ForwardingRule onNewUpstream(int newUpstreamIfindex) {
             return new Ipv6ForwardingRule(newUpstreamIfindex, downstreamIfindex, address, srcMac,
                     dstMac);
+        }
+
+        // Don't manipulate TetherOffloadRuleParcel directly because implementing onNewUpstream()
+        // would be error-prone due to generated stable AIDL classes not having a copy constructor.
+        public TetherOffloadRuleParcel toTetherOffloadRuleParcel() {
+            final TetherOffloadRuleParcel parcel = new TetherOffloadRuleParcel();
+            parcel.inputInterfaceIndex = upstreamIfindex;
+            parcel.outputInterfaceIndex = downstreamIfindex;
+            parcel.destination = address.getAddress();
+            parcel.prefixLength = 128;
+            parcel.srcL2Address = srcMac.toByteArray();
+            parcel.dstL2Address = dstMac.toByteArray();
+            return parcel;
         }
     }
     private final LinkedHashMap<Inet6Address, Ipv6ForwardingRule> mIpv6ForwardingRules =
@@ -815,9 +829,7 @@ public class IpServer extends StateMachine {
 
     private void addIpv6ForwardingRule(Ipv6ForwardingRule rule) {
         try {
-            mNetd.tetherRuleAddDownstreamIpv6(mInterfaceParams.index, rule.upstreamIfindex,
-                    rule.address.getAddress(),  mInterfaceParams.macAddr.toByteArray(),
-                    rule.dstMac.toByteArray());
+            mNetd.tetherOffloadRuleAdd(rule.toTetherOffloadRuleParcel());
             mIpv6ForwardingRules.put(rule.address, rule);
         } catch (RemoteException | ServiceSpecificException e) {
             mLog.e("Could not add IPv6 downstream rule: ", e);
@@ -826,7 +838,7 @@ public class IpServer extends StateMachine {
 
     private void removeIpv6ForwardingRule(Ipv6ForwardingRule rule, boolean removeFromMap) {
         try {
-            mNetd.tetherRuleRemoveDownstreamIpv6(rule.upstreamIfindex, rule.address.getAddress());
+            mNetd.tetherOffloadRuleRemove(rule.toTetherOffloadRuleParcel());
             if (removeFromMap) {
                 mIpv6ForwardingRules.remove(rule.address);
             }
