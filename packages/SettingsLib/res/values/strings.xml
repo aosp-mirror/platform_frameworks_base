@@ -928,11 +928,15 @@
     <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=100] -->
     <string name="show_all_anrs_summary">Display App Not Responding dialog for background apps</string>
 
-    <!-- UI debug setting: show all ANRs? [CHAR LIMIT=25] -->
+    <!-- UI debug setting: show missing channel toasts? [CHAR LIMIT=25] -->
     <string name="show_notification_channel_warnings">Show notification channel warnings</string>
-    <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=50] -->
+    <!-- UI debug setting: show missing channel toasts summary [CHAR LIMIT=50] -->
     <string name="show_notification_channel_warnings_summary">Displays on-screen warning when an app posts a notification without a valid channel</string>
 
+    <!-- UI debug setting: enforce shortcut requirements for conversation space [CHAR LIMIT=25] -->
+    <string name="enforce_shortcuts_for_conversations">Enforce shortcuts for conversation notifications</string>
+    <!-- UI debug setting: enforce shortcut requirements for conversation space summary [CHAR LIMIT=50] -->
+    <string name="enforce_shortcuts_for_conversations_summary">Require notifications to be backed by a long-lived sharing shortcut in order to appear in the conversation section</string>
 
     <!-- UI debug setting: force allow apps on external storage [CHAR LIMIT=50] -->
     <string name="force_allow_on_external">Force allow apps on external</string>
