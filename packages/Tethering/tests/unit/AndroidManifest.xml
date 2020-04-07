@@ -20,7 +20,16 @@
 
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
+        <service
+            android:name="com.android.server.connectivity.tethering.MockTetheringService"
+            android:permission="android.permission.TETHER_PRIVILEGED"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.server.connectivity.tethering.TetheringService"/>
+            </intent-filter>
+        </service>
     </application>
+
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.android.networkstack.tethering.tests.unit"
         android:label="Tethering service tests">
