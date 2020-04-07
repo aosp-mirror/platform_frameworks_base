@@ -418,7 +418,7 @@ message Atom {
         AppStandbyBucketChanged app_standby_bucket_changed = 258 [(module) = "framework"];
         SharesheetStarted sharesheet_started = 259 [(module) = "framework"];
         RankingSelected ranking_selected = 260 [(module) = "framework"];
-        TvSettingsUIInteracted tvsettings_ui_interacted = 261;
+        TvSettingsUIInteracted tvsettings_ui_interacted = 261 [(module) = "tv_settings"];
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
