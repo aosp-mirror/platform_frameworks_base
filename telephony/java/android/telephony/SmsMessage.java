@@ -493,7 +493,10 @@ public class SmsMessage {
         String newMsgBody = null;
         Resources r = Resources.getSystem();
         if (r.getBoolean(com.android.internal.R.bool.config_sms_force_7bit_encoding)) {
-            newMsgBody = Sms7BitEncodingTranslator.translate(text, isCdma);
+            // 7-bit ASCII table based translation is required only for CDMA single-part SMS since
+            // ENCODING_7BIT_ASCII is used for CDMA single-part SMS and ENCODING_GSM_7BIT_ALPHABET
+            // is used for CDMA multi-part SMS.
+            newMsgBody = Sms7BitEncodingTranslator.translate(text, isCdma && ted.msgCount == 1);
         }
         if (TextUtils.isEmpty(newMsgBody)) {
             newMsgBody = text;
