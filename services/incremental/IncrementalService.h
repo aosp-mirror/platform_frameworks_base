@@ -158,6 +158,8 @@ public:
     };
 
 private:
+    static const bool sEnablePerfLogging;
+
     struct IncFsMount {
         struct Bind {
             StorageId storage;
@@ -231,8 +233,10 @@ private:
     void deleteStorage(IncFsMount& ifs);
     void deleteStorageLocked(IncFsMount& ifs, std::unique_lock<std::mutex>&& ifsLock);
     MountMap::iterator getStorageSlotLocked();
-    std::string normalizePathToStorage(const IfsMountPtr incfs, StorageId storage,
+    std::string normalizePathToStorage(const IfsMountPtr& incfs, StorageId storage,
                                        std::string_view path);
+    std::string normalizePathToStorageLocked(IncFsMount::StorageMap::iterator storageIt,
+                                             std::string_view path);
 
     int applyStorageParams(IncFsMount& ifs);
 
