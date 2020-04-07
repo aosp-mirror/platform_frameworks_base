@@ -85,6 +85,9 @@ public class DexManagerTests {
     private TestData mBarUser0UnsupportedClassLoader;
     private TestData mBarUser0DelegateLastClassLoader;
 
+    private TestData mSystemServerJar;
+    private TestData mSystemServerJarInvalid;
+
     private int mUser0;
     private int mUser1;
 
@@ -107,6 +110,9 @@ public class DexManagerTests {
                 UNSUPPORTED_CLASS_LOADER_NAME);
         mBarUser0DelegateLastClassLoader = new TestData(bar, isa, mUser0,
                 DELEGATE_LAST_CLASS_LOADER_NAME);
+
+        mSystemServerJar = new TestData("android", isa, mUser0, PATH_CLASS_LOADER_NAME);
+        mSystemServerJarInvalid = new TestData("android", isa, mUser0, PATH_CLASS_LOADER_NAME);
 
         mDexManager = new DexManager(/*Context*/ null, mPM, /*PackageDexOptimizer*/ null,
                 mInstaller, mInstallLock);
@@ -585,6 +591,25 @@ public class DexManagerTests {
                 expectedContexts);
 
         assertHasDclInfo(mFooUser0, mFooUser0, fooSecondaries);
+    }
+
+
+    @Test
+    public void testNotifySystemServerUse() {
+        List<String> dexFiles = new ArrayList<String>();
+        dexFiles.add("/system/framework/foo");
+        notifyDexLoad(mSystemServerJar, dexFiles, mUser0);
+        PackageUseInfo pui = getPackageUseInfo(mSystemServerJar);
+        assertIsUsedByOtherApps(mSystemServerJar, pui, false);
+    }
+
+    @Test
+    public void testNotifySystemServerInvalidUse() {
+        List<String> dexFiles = new ArrayList<String>();
+        dexFiles.add("/data/foo");
+        notifyDexLoad(mSystemServerJarInvalid, dexFiles, mUser0);
+        assertNoUseInfo(mSystemServerJarInvalid);
+        assertNoDclInfo(mSystemServerJarInvalid);
     }
 
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
