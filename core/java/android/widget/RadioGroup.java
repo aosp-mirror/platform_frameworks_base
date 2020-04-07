@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -484,21 +485,21 @@ public class RadioGroup extends LinearLayout {
         super.onInitializeAccessibilityNodeInfo(info);
         if (this.getOrientation() == HORIZONTAL) {
             info.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain(1,
-                    getVisibleChildCount(), false,
+                    getVisibleChildWithTextCount(), false,
                     AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE));
         } else {
             info.setCollectionInfo(
-                    AccessibilityNodeInfo.CollectionInfo.obtain(getVisibleChildCount(),
+                    AccessibilityNodeInfo.CollectionInfo.obtain(getVisibleChildWithTextCount(),
                     1, false,
                     AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE));
         }
     }
 
-    private int getVisibleChildCount() {
+    private int getVisibleChildWithTextCount() {
         int count = 0;
         for (int i = 0; i < getChildCount(); i++) {
             if (this.getChildAt(i) instanceof RadioButton) {
-                if (((RadioButton) this.getChildAt(i)).getVisibility() == VISIBLE) {
+                if (isVisibleWithText((RadioButton) this.getChildAt(i))) {
                     count++;
                 }
             }
@@ -513,15 +514,19 @@ public class RadioGroup extends LinearLayout {
         int index = 0;
         for (int i = 0; i < getChildCount(); i++) {
             if (this.getChildAt(i) instanceof RadioButton) {
-                RadioButton radioButton = (RadioButton) this.getChildAt(i);
-                if (radioButton == child) {
+                RadioButton button = (RadioButton) this.getChildAt(i);
+                if (button == child) {
                     return index;
                 }
-                if (radioButton.getVisibility() == VISIBLE) {
+                if (isVisibleWithText(button)) {
                     index++;
                 }
             }
         }
         return -1;
+    }
+
+    private boolean isVisibleWithText(RadioButton button) {
+        return button.getVisibility() == VISIBLE && !TextUtils.isEmpty(button.getText());
     }
 }
