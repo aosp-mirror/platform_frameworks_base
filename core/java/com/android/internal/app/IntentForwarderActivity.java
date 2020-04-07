@@ -108,20 +108,16 @@ public class IntentForwarderActivity extends Activity  {
             finish();
             return;
         }
+        if (Intent.ACTION_CHOOSER.equals(intentReceived.getAction())) {
+            launchChooserActivityWithCorrectTab(intentReceived, className);
+            return;
+        }
 
         final int callingUserId = getUserId();
         final Intent newIntent = canForward(intentReceived, getUserId(), targetUserId,
                 mInjector.getIPackageManager(), getContentResolver());
         if (newIntent != null) {
-            if (Intent.ACTION_CHOOSER.equals(newIntent.getAction())) {
-                Intent innerIntent = newIntent.getParcelableExtra(Intent.EXTRA_INTENT);
-                // At this point, innerIntent is not null. Otherwise, canForward would have returned
-                // false.
-                innerIntent.prepareToLeaveUser(callingUserId);
-                innerIntent.fixUris(callingUserId);
-            } else {
-                newIntent.prepareToLeaveUser(callingUserId);
-            }
+            newIntent.prepareToLeaveUser(callingUserId);
 
             final ResolveInfo ri = mInjector.resolveActivityAsUser(newIntent, MATCH_DEFAULT_ONLY,
                     targetUserId);
@@ -151,6 +147,33 @@ public class IntentForwarderActivity extends Activity  {
                     + callingUserId + " to user " + targetUserId);
         }
         finish();
+    }
+
+    private void launchChooserActivityWithCorrectTab(Intent intentReceived, String className) {
+        // When showing the sharesheet, instead of forwarding to the other profile,
+        // we launch the sharesheet in the current user and select the other tab.
+        // This fixes b/152866292 where the user can not go back to the original profile
+        // when cross-profile intents are disabled.
+        int selectedProfile = findSelectedProfile(className);
+        sanitizeIntent(intentReceived);
+        intentReceived.putExtra(ChooserActivity.EXTRA_SELECTED_PROFILE, selectedProfile);
+        Intent innerIntent = intentReceived.getParcelableExtra(Intent.EXTRA_INTENT);
+        if (innerIntent == null) {
+            Slog.wtf(TAG, "Cannot start a chooser intent with no extra " + Intent.EXTRA_INTENT);
+            return;
+        }
+        sanitizeIntent(innerIntent);
+        startActivity(intentReceived);
+        finish();
+    }
+
+    private int findSelectedProfile(String className) {
+        if (className.equals(FORWARD_INTENT_TO_PARENT)) {
+            return ChooserActivity.PROFILE_PERSONAL;
+        } else if (className.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
+            return ChooserActivity.PROFILE_WORK;
+        }
+        return -1;
     }
 
     private boolean shouldShowDisclosure(@Nullable ResolveInfo ri, Intent intent) {
