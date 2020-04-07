@@ -272,13 +272,18 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     }
                     mAnimation.cancel();
                 }
-                mAnimationDirection = show ? DIRECTION_SHOW : DIRECTION_HIDE;
                 final float defaultY = mImeSourceControl.getSurfacePosition().y;
                 final float x = mImeSourceControl.getSurfacePosition().x;
                 final float hiddenY = defaultY + imeSource.getFrame().height();
                 final float shownY = defaultY;
                 final float startY = show ? hiddenY : shownY;
                 final float endY = show ? shownY : hiddenY;
+                if (mAnimationDirection == DIRECTION_NONE && mImeShowing && show) {
+                    // IME is already showing, so set seek to end
+                    seekValue = shownY;
+                    seek = true;
+                }
+                mAnimationDirection = show ? DIRECTION_SHOW : DIRECTION_HIDE;
                 mImeShowing = show;
                 mAnimation = ValueAnimator.ofFloat(startY, endY);
                 mAnimation.setDuration(
