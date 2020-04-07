@@ -566,7 +566,7 @@
     <!-- [CHAR LIMIT=50] Title for adb wireless pair by QR code preference -->
     <string name="adb_pair_method_qrcode_title">Pair device with QR code</string>
     <!-- [CHAR LIMIT=NONE] Summary for adb wireless pair by QR code preference -->
-    <string name="adb_pair_method_qrcode_summary">Pair new devices using QR code Scanner</string>
+    <string name="adb_pair_method_qrcode_summary">Pair new devices using QR code scanner</string>
     <!-- [CHAR LIMIT=50] Title for adb wireless pair by pairing code preference -->
     <string name="adb_pair_method_code_title">Pair device with pairing code</string>
     <!-- [CHAR LIMIT=NONE] Summary for adb wireless pair by pairing code preference -->
