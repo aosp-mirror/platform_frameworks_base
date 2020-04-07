@@ -35,11 +35,11 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
@@ -68,8 +68,10 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.rollback.WatchdogRollbackLogger;
 
 import java.io.File;
@@ -80,6 +82,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * This class handles staged install sessions, i.e. install sessions that require packages to
@@ -94,6 +97,7 @@ public class StagingManager {
     private final PowerManager mPowerManager;
     private final Context mContext;
     private final PreRebootVerificationHandler mPreRebootVerificationHandler;
+    private final Supplier<PackageParser2> mPackageParserSupplier;
 
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
@@ -105,9 +109,11 @@ public class StagingManager {
     private final List<String> mFailedPackageNames = new ArrayList<>();
     private String mNativeFailureReason;
 
-    StagingManager(PackageInstallerService pi, Context context) {
+    StagingManager(PackageInstallerService pi, Context context,
+            Supplier<PackageParser2> packageParserSupplier) {
         mPi = pi;
         mContext = context;
+        mPackageParserSupplier = packageParserSupplier;
 
         mApexManager = ApexManager.getInstance();
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -223,17 +229,21 @@ public class StagingManager {
         final List<String> apexPackageNames = new ArrayList<>();
         for (ApexInfo apexInfo : apexInfoList.apexInfos) {
             final PackageInfo packageInfo;
-            int flags = PackageManager.GET_META_DATA;
-            PackageParser.Package pkg;
-            try {
+            final int flags = PackageManager.GET_META_DATA;
+            try (PackageParser2 packageParser = mPackageParserSupplier.get()) {
                 File apexFile = new File(apexInfo.modulePath);
-                PackageParser pp = new PackageParser();
-                pkg = pp.parsePackage(apexFile, flags, false);
+                final ParsedPackage parsedPackage = packageParser.parsePackage(
+                        apexFile, flags, false);
+                packageInfo = PackageInfoWithoutStateUtils.generate(parsedPackage, apexInfo, flags);
+                if (packageInfo == null) {
+                    throw new PackageManagerException(
+                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                            "Unable to generate package info: " + apexInfo.modulePath);
+                }
             } catch (PackageParserException e) {
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                         "Failed to parse APEX package " + apexInfo.modulePath, e);
             }
-            packageInfo = PackageParser.generatePackageInfo(pkg, apexInfo, flags);
             final PackageInfo activePackage = mApexManager.getPackageInfo(packageInfo.packageName,
                     ApexManager.MATCH_ACTIVE_PACKAGE);
             if (activePackage == null) {
