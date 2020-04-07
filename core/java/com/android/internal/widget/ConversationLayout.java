@@ -386,14 +386,17 @@ public class ConversationLayout extends FrameLayout
 
     /** @hide */
     public void setUnreadCount(int unreadCount) {
-        mUnreadBadge.setVisibility(mIsCollapsed && unreadCount > 1 ? VISIBLE : GONE);
-        CharSequence text = unreadCount >= 100
-                ? getResources().getString(R.string.unread_convo_overflow, 99)
-                : String.format(Locale.getDefault(), "%d", unreadCount);
-        mUnreadBadge.setText(text);
-        mUnreadBadge.setBackgroundTintList(ColorStateList.valueOf(mLayoutColor));
-        boolean needDarkText = ColorUtils.calculateLuminance(mLayoutColor) > 0.5f;
-        mUnreadBadge.setTextColor(needDarkText ? Color.BLACK : Color.WHITE);
+        boolean visible = mIsCollapsed && unreadCount > 1;
+        mUnreadBadge.setVisibility(visible ? VISIBLE : GONE);
+        if (visible) {
+            CharSequence text = unreadCount >= 100
+                    ? getResources().getString(R.string.unread_convo_overflow, 99)
+                    : String.format(Locale.getDefault(), "%d", unreadCount);
+            mUnreadBadge.setText(text);
+            mUnreadBadge.setBackgroundTintList(ColorStateList.valueOf(mLayoutColor));
+            boolean needDarkText = ColorUtils.calculateLuminance(mLayoutColor) > 0.5f;
+            mUnreadBadge.setTextColor(needDarkText ? Color.BLACK : Color.WHITE);
+        }
     }
 
     private void addRemoteInputHistoryToMessages(
