@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.controller
 
+import android.service.controls.Control
 import android.service.controls.DeviceTypes
 
 /**
@@ -39,6 +40,14 @@ data class ControlInfo(
 
     companion object {
         private const val SEPARATOR = ":"
+        fun fromControl(control: Control): ControlInfo {
+            return ControlInfo(
+                    control.controlId,
+                    control.title,
+                    control.subtitle,
+                    control.deviceType
+            )
+        }
     }
 
     /**
@@ -48,14 +57,5 @@ data class ControlInfo(
      */
     override fun toString(): String {
         return "$SEPARATOR$controlId$SEPARATOR$controlTitle$SEPARATOR$deviceType"
-    }
-
-    class Builder {
-        lateinit var controlId: String
-        lateinit var controlTitle: CharSequence
-        lateinit var controlSubtitle: CharSequence
-        var deviceType: Int = DeviceTypes.TYPE_UNKNOWN
-
-        fun build() = ControlInfo(controlId, controlTitle, controlSubtitle, deviceType)
     }
 }

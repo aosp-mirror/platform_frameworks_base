@@ -679,6 +679,15 @@
                   android:visibleToInstantApps="true">
         </activity>
 
+        <activity android:name=".controls.management.ControlsEditingActivity"
+                  android:theme="@style/Theme.ControlsManagement"
+                  android:excludeFromRecents="true"
+                  android:showForAllUsers="true"
+                  android:finishOnTaskLaunch="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
         <activity android:name=".controls.management.ControlsFavoritingActivity"
                   android:theme="@style/Theme.ControlsManagement"
                   android:excludeFromRecents="true"

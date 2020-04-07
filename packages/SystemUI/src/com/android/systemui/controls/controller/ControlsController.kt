@@ -148,6 +148,18 @@ interface ControlsController : UserAwareController {
     fun getFavoritesForComponent(componentName: ComponentName): List<StructureInfo>
 
     /**
+     * Get all the favorites for a given structure.
+     *
+     * @param componentName the name of the service that provides the [Control]
+     * @param structureName the name of the structure
+     * @return a list of the current favorites in that structure
+     */
+    fun getFavoritesForStructure(
+        componentName: ComponentName,
+        structureName: CharSequence
+    ): List<ControlInfo>
+
+    /**
      * Adds a single favorite to a given component and structure
      * @param componentName the name of the service that provides the [Control]
      * @param structureName the name of the structure that holds the [Control]
