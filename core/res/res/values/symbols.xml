@@ -1303,7 +1303,7 @@
   <java-symbol type="array" name="preloaded_color_state_lists" />
   <java-symbol type="array" name="preloaded_drawables" />
   <java-symbol type="array" name="preloaded_freeform_multi_window_drawables" />
-  <java-symbol type="array" name="simColors" />
+  <java-symbol type="array" name="sim_colors" />
   <java-symbol type="array" name="special_locale_codes" />
   <java-symbol type="array" name="special_locale_names" />
   <java-symbol type="array" name="supported_locales" />

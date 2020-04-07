@@ -85,10 +85,23 @@ static jint convertAudioProductStrategiesFromNative(
     jStrategyId = static_cast<jint>(strategy.getId());
 
     // Audio Attributes Group array
-    std::map<int, std::vector<AudioAttributes> > groups;
+    int attrGroupIndex = 0;
+    std::map<int /**attributesGroupIndex*/, std::vector<AudioAttributes> > groups;
     for (const auto &attr : strategy.getAudioAttributes()) {
-        int attrGroupId = attr.getGroupId();
-        groups[attrGroupId].push_back(attr);
+        int groupId = attr.getGroupId();
+        int streamType = attr.getStreamType();
+        const auto &iter = std::find_if(begin(groups), end(groups),
+                                        [groupId, streamType](const auto &iter) {
+            const auto &frontAttr = iter.second.front();
+            return frontAttr.getGroupId() == groupId && frontAttr.getStreamType() == streamType;
+        });
+        // Same Volume Group Id and same stream type
+        if (iter != end(groups)) {
+             groups[iter->first].push_back(attr);
+        } else {
+            // Add a new Group of AudioAttributes for this product strategy
+            groups[attrGroupIndex++].push_back(attr);
+        }
     }
     numAttributesGroups = groups.size();
 
@@ -97,7 +110,7 @@ static jint convertAudioProductStrategiesFromNative(
     for (const auto &iter : groups) {
         std::vector<AudioAttributes> audioAttributesGroups = iter.second;
         jint numAttributes = audioAttributesGroups.size();
-        jint jGroupId = iter.first;
+        jint jGroupId = audioAttributesGroups.front().getGroupId();
         jint jLegacyStreamType = audioAttributesGroups.front().getStreamType();
 
         jStatus = JNIAudioAttributeHelper::getJavaArray(env, &jAudioAttributes, numAttributes);

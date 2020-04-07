@@ -17,6 +17,8 @@
 package android.net;
 
 import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
+import static android.net.NetworkCapabilities.MAX_TRANSPORT;
+import static android.net.NetworkCapabilities.MIN_TRANSPORT;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_EIMS;
@@ -32,10 +34,12 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVIT
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
 import static android.net.NetworkCapabilities.RESTRICTED_CAPABILITIES;
+import static android.net.NetworkCapabilities.SIGNAL_STRENGTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
 import static android.net.NetworkCapabilities.UNRESTRICTED_CAPABILITIES;
 
 import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
@@ -45,18 +49,28 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.net.wifi.aware.DiscoverySession;
+import android.net.wifi.aware.PeerHandle;
+import android.net.wifi.aware.WifiAwareNetworkSpecifier;
 import android.os.Build;
+import android.os.Process;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 
 import androidx.core.os.BuildCompat;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
+
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -66,6 +80,12 @@ import java.util.Set;
 public class NetworkCapabilitiesTest {
     private static final String TEST_SSID = "TEST_SSID";
     private static final String DIFFERENT_TEST_SSID = "DIFFERENT_TEST_SSID";
+
+    @Rule
+    public DevSdkIgnoreRule mDevSdkIgnoreRule = new DevSdkIgnoreRule();
+
+    private DiscoverySession mDiscoverySession = Mockito.mock(DiscoverySession.class);
+    private PeerHandle mPeerHandle = Mockito.mock(PeerHandle.class);
 
     private boolean isAtLeastR() {
         // BuildCompat.isAtLeastR() is used to check the Android version before releasing Android R.
@@ -441,7 +461,7 @@ public class NetworkCapabilitiesTest {
         return range;
     }
 
-    @Test
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
     public void testSetAdministratorUids() {
         NetworkCapabilities nc =
                 new NetworkCapabilities().setAdministratorUids(new int[] {2, 1, 3});
@@ -449,7 +469,7 @@ public class NetworkCapabilitiesTest {
         assertArrayEquals(new int[] {1, 2, 3}, nc.getAdministratorUids());
     }
 
-    @Test
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
     public void testSetAdministratorUidsWithDuplicates() {
         try {
             new NetworkCapabilities().setAdministratorUids(new int[] {1, 1});
@@ -510,6 +530,12 @@ public class NetworkCapabilitiesTest {
         assertFalse(nc2.appliesToUid(12));
         assertTrue(nc1.appliesToUid(22));
         assertTrue(nc2.appliesToUid(22));
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testCombineCapabilities_AdministratorUids() {
+        final NetworkCapabilities nc1 = new NetworkCapabilities();
+        final NetworkCapabilities nc2 = new NetworkCapabilities();
 
         final int[] adminUids = {3, 6, 12};
         nc1.setAdministratorUids(adminUids);
@@ -518,7 +544,7 @@ public class NetworkCapabilitiesTest {
         assertArrayEquals(nc2.getAdministratorUids(), adminUids);
 
         final int[] adminUidsOtherOrder = {3, 12, 6};
-        nc1.setAdministratorUids(adminUids);
+        nc1.setAdministratorUids(adminUidsOtherOrder);
         assertTrue(nc2.equalsAdministratorUids(nc1));
 
         final int[] adminUids2 = {11, 1, 12, 3, 6};
@@ -671,5 +697,233 @@ public class NetworkCapabilitiesTest {
         assertEquals(TRANSPORT_WIFI, transportTypes[1]);
         assertEquals(TRANSPORT_VPN, transportTypes[2]);
         assertEquals(TRANSPORT_TEST, transportTypes[3]);
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testTelephonyNetworkSpecifier() {
+        final TelephonyNetworkSpecifier specifier = new TelephonyNetworkSpecifier(1);
+        final NetworkCapabilities nc1 = new NetworkCapabilities.Builder()
+                .addTransportType(TRANSPORT_WIFI)
+                .setNetworkSpecifier(specifier)
+                .build();
+        assertEquals(specifier, nc1.getNetworkSpecifier());
+        try {
+            final NetworkCapabilities nc2 = new NetworkCapabilities.Builder()
+                    .setNetworkSpecifier(specifier)
+                    .build();
+            fail("Must have a single transport type. Without transport type or multiple transport"
+                    + " types is invalid.");
+        } catch (IllegalStateException expected) { }
+    }
+
+    @Test
+    public void testWifiAwareNetworkSpecifier() {
+        final NetworkCapabilities nc = new NetworkCapabilities()
+                .addTransportType(TRANSPORT_WIFI_AWARE);
+        // If NetworkSpecifier is not set, the default value is null.
+        assertNull(nc.getNetworkSpecifier());
+        final WifiAwareNetworkSpecifier specifier = new WifiAwareNetworkSpecifier.Builder(
+                mDiscoverySession, mPeerHandle).build();
+        nc.setNetworkSpecifier(specifier);
+        assertEquals(specifier, nc.getNetworkSpecifier());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testAdministratorUidsAndOwnerUid() {
+        // Test default owner uid.
+        // If the owner uid is not set, the default value should be Process.INVALID_UID.
+        final NetworkCapabilities nc1 = new NetworkCapabilities.Builder().build();
+        assertEquals(Process.INVALID_UID, nc1.getOwnerUid());
+        // Test setAdministratorUids and getAdministratorUids.
+        final int[] administratorUids = {1001, 10001};
+        final NetworkCapabilities nc2 = new NetworkCapabilities.Builder()
+                .setAdministratorUids(administratorUids)
+                .build();
+        assertTrue(Arrays.equals(administratorUids, nc2.getAdministratorUids()));
+        // Test setOwnerUid and getOwnerUid.
+        // The owner UID must be included in administrator UIDs, or throw IllegalStateException.
+        try {
+            final NetworkCapabilities nc3 = new NetworkCapabilities.Builder()
+                    .setOwnerUid(1001)
+                    .build();
+            fail("The owner UID must be included in administrator UIDs.");
+        } catch (IllegalStateException expected) { }
+        final NetworkCapabilities nc4 = new NetworkCapabilities.Builder()
+                .setAdministratorUids(administratorUids)
+                .setOwnerUid(1001)
+                .build();
+        assertEquals(1001, nc4.getOwnerUid());
+        try {
+            final NetworkCapabilities nc5 = new NetworkCapabilities.Builder()
+                    .setAdministratorUids(null)
+                    .build();
+            fail("Should not set null into setAdministratorUids");
+        } catch (NullPointerException expected) { }
+    }
+
+    @Test
+    public void testLinkBandwidthKbps() {
+        final NetworkCapabilities nc = new NetworkCapabilities();
+        // The default value of LinkDown/UpstreamBandwidthKbps should be LINK_BANDWIDTH_UNSPECIFIED.
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, nc.getLinkDownstreamBandwidthKbps());
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, nc.getLinkUpstreamBandwidthKbps());
+        nc.setLinkDownstreamBandwidthKbps(512);
+        nc.setLinkUpstreamBandwidthKbps(128);
+        assertEquals(512, nc.getLinkDownstreamBandwidthKbps());
+        assertNotEquals(128, nc.getLinkDownstreamBandwidthKbps());
+        assertEquals(128, nc.getLinkUpstreamBandwidthKbps());
+        assertNotEquals(512, nc.getLinkUpstreamBandwidthKbps());
+    }
+
+    @Test
+    public void testSignalStrength() {
+        final NetworkCapabilities nc = new NetworkCapabilities();
+        // The default value of signal strength should be SIGNAL_STRENGTH_UNSPECIFIED.
+        assertEquals(SIGNAL_STRENGTH_UNSPECIFIED, nc.getSignalStrength());
+        nc.setSignalStrength(-80);
+        assertEquals(-80, nc.getSignalStrength());
+        assertNotEquals(-50, nc.getSignalStrength());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testDeduceRestrictedCapability() {
+        final NetworkCapabilities nc = new NetworkCapabilities();
+        // Default capabilities don't have restricted capability.
+        assertFalse(nc.deduceRestrictedCapability());
+        // If there is a force restricted capability, then the network capabilities is restricted.
+        nc.addCapability(NET_CAPABILITY_OEM_PAID);
+        nc.addCapability(NET_CAPABILITY_INTERNET);
+        assertTrue(nc.deduceRestrictedCapability());
+        // Except for the force restricted capability, if there is any unrestricted capability in
+        // capabilities, then the network capabilities is not restricted.
+        nc.removeCapability(NET_CAPABILITY_OEM_PAID);
+        nc.addCapability(NET_CAPABILITY_CBS);
+        assertFalse(nc.deduceRestrictedCapability());
+        // Except for the force restricted capability, the network capabilities will only be treated
+        // as restricted when there is no any unrestricted capability.
+        nc.removeCapability(NET_CAPABILITY_INTERNET);
+        assertTrue(nc.deduceRestrictedCapability());
+    }
+
+    private void assertNoTransport(NetworkCapabilities nc) {
+        for (int i = MIN_TRANSPORT; i <= MAX_TRANSPORT; i++) {
+            assertFalse(nc.hasTransport(i));
+        }
+    }
+
+    // Checks that all transport types from MIN_TRANSPORT to maxTransportType are set and all
+    // transport types from maxTransportType + 1 to MAX_TRANSPORT are not set when positiveSequence
+    // is true. If positiveSequence is false, then the check sequence is opposite.
+    private void checkCurrentTransportTypes(NetworkCapabilities nc, int maxTransportType,
+            boolean positiveSequence) {
+        for (int i = MIN_TRANSPORT; i <= maxTransportType; i++) {
+            if (positiveSequence) {
+                assertTrue(nc.hasTransport(i));
+            } else {
+                assertFalse(nc.hasTransport(i));
+            }
+        }
+        for (int i = MAX_TRANSPORT; i > maxTransportType; i--) {
+            if (positiveSequence) {
+                assertFalse(nc.hasTransport(i));
+            } else {
+                assertTrue(nc.hasTransport(i));
+            }
+        }
+    }
+
+    @Test
+    public void testMultipleTransportTypes() {
+        final NetworkCapabilities nc = new NetworkCapabilities();
+        assertNoTransport(nc);
+        // Test adding multiple transport types.
+        for (int i = MIN_TRANSPORT; i <= MAX_TRANSPORT; i++) {
+            nc.addTransportType(i);
+            checkCurrentTransportTypes(nc, i, true /* positiveSequence */);
+        }
+        // Test removing multiple transport types.
+        for (int i = MIN_TRANSPORT; i <= MAX_TRANSPORT; i++) {
+            nc.removeTransportType(i);
+            checkCurrentTransportTypes(nc, i, false /* positiveSequence */);
+        }
+        assertNoTransport(nc);
+        nc.addTransportType(TRANSPORT_WIFI);
+        assertTrue(nc.hasTransport(TRANSPORT_WIFI));
+        assertFalse(nc.hasTransport(TRANSPORT_VPN));
+        nc.addTransportType(TRANSPORT_VPN);
+        assertTrue(nc.hasTransport(TRANSPORT_WIFI));
+        assertTrue(nc.hasTransport(TRANSPORT_VPN));
+        nc.removeTransportType(TRANSPORT_WIFI);
+        assertFalse(nc.hasTransport(TRANSPORT_WIFI));
+        assertTrue(nc.hasTransport(TRANSPORT_VPN));
+        nc.removeTransportType(TRANSPORT_VPN);
+        assertFalse(nc.hasTransport(TRANSPORT_WIFI));
+        assertFalse(nc.hasTransport(TRANSPORT_VPN));
+        assertNoTransport(nc);
+    }
+
+    @Test
+    public void testAddAndRemoveTransportType() {
+        final NetworkCapabilities nc = new NetworkCapabilities();
+        try {
+            nc.addTransportType(-1);
+            fail("Should not set invalid transport type into addTransportType");
+        } catch (IllegalArgumentException expected) { }
+        try {
+            nc.removeTransportType(-1);
+            fail("Should not set invalid transport type into removeTransportType");
+        } catch (IllegalArgumentException e) { }
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testBuilder() {
+        final int ownerUid = 1001;
+        final int signalStrength = -80;
+        final int requestUid = 10100;
+        final int[] administratorUids = {ownerUid, 10001};
+        final TelephonyNetworkSpecifier specifier = new TelephonyNetworkSpecifier(1);
+        final String ssid = "TEST_SSID";
+        final String packageName = "com.google.test.networkcapabilities";
+        final NetworkCapabilities nc = new NetworkCapabilities.Builder()
+                .addTransportType(TRANSPORT_WIFI)
+                .addTransportType(TRANSPORT_CELLULAR)
+                .removeTransportType(TRANSPORT_CELLULAR)
+                .addCapability(NET_CAPABILITY_EIMS)
+                .addCapability(NET_CAPABILITY_CBS)
+                .removeCapability(NET_CAPABILITY_CBS)
+                .setAdministratorUids(administratorUids)
+                .setOwnerUid(ownerUid)
+                .setLinkDownstreamBandwidthKbps(512)
+                .setLinkUpstreamBandwidthKbps(128)
+                .setNetworkSpecifier(specifier)
+                .setTransportInfo(null)
+                .setSignalStrength(signalStrength)
+                .setSsid(ssid)
+                .setRequestorUid(requestUid)
+                .setRequestorPackageName(packageName)
+                .build();
+        assertEquals(1, nc.getTransportTypes().length);
+        assertEquals(TRANSPORT_WIFI, nc.getTransportTypes()[0]);
+        assertTrue(nc.hasCapability(NET_CAPABILITY_EIMS));
+        assertFalse(nc.hasCapability(NET_CAPABILITY_CBS));
+        assertTrue(Arrays.equals(administratorUids, nc.getAdministratorUids()));
+        assertEquals(ownerUid, nc.getOwnerUid());
+        assertEquals(512, nc.getLinkDownstreamBandwidthKbps());
+        assertNotEquals(128, nc.getLinkDownstreamBandwidthKbps());
+        assertEquals(128, nc.getLinkUpstreamBandwidthKbps());
+        assertNotEquals(512, nc.getLinkUpstreamBandwidthKbps());
+        assertEquals(specifier, nc.getNetworkSpecifier());
+        assertNull(nc.getTransportInfo());
+        assertEquals(signalStrength, nc.getSignalStrength());
+        assertNotEquals(-50, nc.getSignalStrength());
+        assertEquals(ssid, nc.getSsid());
+        assertEquals(requestUid, nc.getRequestorUid());
+        assertEquals(packageName, nc.getRequestorPackageName());
+        // Cannot assign null into NetworkCapabilities.Builder
+        try {
+            final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder(null);
+            fail("Should not set null into NetworkCapabilities.Builder");
+        } catch (NullPointerException expected) { }
+        assertEquals(nc, new NetworkCapabilities.Builder(nc).build());
     }
 }

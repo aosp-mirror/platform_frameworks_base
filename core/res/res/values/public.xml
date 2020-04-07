@@ -3021,10 +3021,6 @@
     <public-group type="color" first-id="0x0106001d">
     </public-group>
 
-    <public-group type="array" first-id="0x01070006">
-      <!-- @hide @SystemApi -->
-      <public name="simColors" />
-    </public-group>
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
 

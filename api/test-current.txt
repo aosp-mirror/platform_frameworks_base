@@ -1200,6 +1200,13 @@ package android.media {
     ctor public AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, String);
   }
 
+  public class AudioSystem {
+    method public static float getMasterBalance();
+    method public static final int getNumStreamTypes();
+    method public static int setMasterBalance(float);
+    field public static final int STREAM_DEFAULT = -1; // 0xffffffff
+  }
+
   public static final class AudioTrack.MetricsConstants {
     field public static final String ATTRIBUTES = "android.media.audiotrack.attributes";
     field public static final String CHANNEL_MASK = "android.media.audiotrack.channelMask";
@@ -3510,10 +3517,6 @@ package android.telephony.ims {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsExternalCallState> CREATOR;
   }
 
-  public class ImsManager {
-    field public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION = "com.android.internal.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
-  }
-
   public class ImsMmTelManager implements android.telephony.ims.RegistrationManager {
     method @Deprecated @NonNull @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(int);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public void getFeatureState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>) throws android.telephony.ims.ImsException;
@@ -3775,138 +3778,18 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningStringValue(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setRcsProvisioningStatusForCapability(int, boolean);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public void unregisterProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.Callback);
-    field public static final int KEY_1X_EPDG_TIMER_SEC = 64; // 0x40
-    field public static final int KEY_1X_THRESHOLD = 59; // 0x3b
-    field public static final int KEY_AMR_BANDWIDTH_EFFICIENT_PAYLOAD_TYPE = 50; // 0x32
-    field public static final int KEY_AMR_CODEC_MODE_SET_VALUES = 0; // 0x0
-    field public static final int KEY_AMR_DEFAULT_ENCODING_MODE = 53; // 0x35
-    field public static final int KEY_AMR_OCTET_ALIGNED_PAYLOAD_TYPE = 49; // 0x31
-    field public static final int KEY_AMR_WB_BANDWIDTH_EFFICIENT_PAYLOAD_TYPE = 48; // 0x30
-    field public static final int KEY_AMR_WB_CODEC_MODE_SET_VALUES = 1; // 0x1
-    field public static final int KEY_AMR_WB_OCTET_ALIGNED_PAYLOAD_TYPE = 47; // 0x2f
-    field public static final int KEY_DTMF_NB_PAYLOAD_TYPE = 52; // 0x34
-    field public static final int KEY_DTMF_WB_PAYLOAD_TYPE = 51; // 0x33
-    field public static final int KEY_EAB_PROVISIONING_STATUS = 25; // 0x19
-    field public static final int KEY_ENABLE_SILENT_REDIAL = 6; // 0x6
-    field public static final int KEY_LOCAL_BREAKOUT_PCSCF_ADDRESS = 31; // 0x1f
-    field public static final int KEY_LTE_EPDG_TIMER_SEC = 62; // 0x3e
-    field public static final int KEY_LTE_THRESHOLD_1 = 56; // 0x38
-    field public static final int KEY_LTE_THRESHOLD_2 = 57; // 0x39
-    field public static final int KEY_LTE_THRESHOLD_3 = 58; // 0x3a
-    field public static final int KEY_MINIMUM_SIP_SESSION_EXPIRATION_TIMER_SEC = 3; // 0x3
-    field public static final int KEY_MOBILE_DATA_ENABLED = 29; // 0x1d
-    field public static final int KEY_MULTIENDPOINT_ENABLED = 65; // 0x41
-    field public static final int KEY_RCS_AVAILABILITY_CACHE_EXPIRATION_SEC = 19; // 0x13
-    field public static final int KEY_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC = 18; // 0x12
-    field public static final int KEY_RCS_CAPABILITIES_POLL_INTERVAL_SEC = 20; // 0x14
-    field public static final int KEY_RCS_CAPABILITY_DISCOVERY_ENABLED = 17; // 0x11
-    field public static final int KEY_RCS_CAPABILITY_POLL_LIST_SUB_EXP_SEC = 23; // 0x17
-    field public static final int KEY_RCS_MAX_NUM_ENTRIES_IN_RCL = 22; // 0x16
-    field public static final int KEY_RCS_PUBLISH_OFFLINE_AVAILABILITY_TIMER_SEC = 16; // 0x10
-    field public static final int KEY_RCS_PUBLISH_SOURCE_THROTTLE_MS = 21; // 0x15
-    field public static final int KEY_RCS_PUBLISH_TIMER_SEC = 15; // 0xf
-    field public static final int KEY_REGISTRATION_DOMAIN_NAME = 12; // 0xc
-    field public static final int KEY_REGISTRATION_RETRY_BASE_TIME_SEC = 33; // 0x21
-    field public static final int KEY_REGISTRATION_RETRY_MAX_TIME_SEC = 34; // 0x22
-    field public static final int KEY_RTP_SPEECH_END_PORT = 36; // 0x24
-    field public static final int KEY_RTP_SPEECH_START_PORT = 35; // 0x23
-    field public static final int KEY_RTT_ENABLED = 66; // 0x42
-    field public static final int KEY_SIP_ACK_RECEIPT_WAIT_TIME_MS = 43; // 0x2b
-    field public static final int KEY_SIP_ACK_RETRANSMIT_WAIT_TIME_MS = 44; // 0x2c
-    field public static final int KEY_SIP_INVITE_ACK_WAIT_TIME_MS = 38; // 0x26
-    field public static final int KEY_SIP_INVITE_CANCELLATION_TIMER_MS = 4; // 0x4
-    field public static final int KEY_SIP_INVITE_REQUEST_TRANSMIT_INTERVAL_MS = 37; // 0x25
-    field public static final int KEY_SIP_INVITE_RESPONSE_RETRANSMIT_INTERVAL_MS = 42; // 0x2a
-    field public static final int KEY_SIP_INVITE_RESPONSE_RETRANSMIT_WAIT_TIME_MS = 39; // 0x27
-    field public static final int KEY_SIP_KEEP_ALIVE_ENABLED = 32; // 0x20
-    field public static final int KEY_SIP_NON_INVITE_REQUEST_RETRANSMISSION_WAIT_TIME_MS = 45; // 0x2d
-    field public static final int KEY_SIP_NON_INVITE_REQUEST_RETRANSMIT_INTERVAL_MS = 40; // 0x28
-    field public static final int KEY_SIP_NON_INVITE_RESPONSE_RETRANSMISSION_WAIT_TIME_MS = 46; // 0x2e
-    field public static final int KEY_SIP_NON_INVITE_TRANSACTION_TIMEOUT_TIMER_MS = 41; // 0x29
-    field public static final int KEY_SIP_SESSION_TIMER_SEC = 2; // 0x2
-    field public static final int KEY_SMS_FORMAT = 13; // 0xd
-    field public static final int KEY_SMS_OVER_IP_ENABLED = 14; // 0xe
-    field public static final int KEY_SMS_PUBLIC_SERVICE_IDENTITY = 54; // 0x36
-    field public static final int KEY_T1_TIMER_VALUE_MS = 7; // 0x7
-    field public static final int KEY_T2_TIMER_VALUE_MS = 8; // 0x8
-    field public static final int KEY_TF_TIMER_VALUE_MS = 9; // 0x9
-    field public static final int KEY_TRANSITION_TO_LTE_DELAY_MS = 5; // 0x5
-    field public static final int KEY_USE_GZIP_FOR_LIST_SUBSCRIPTION = 24; // 0x18
-    field public static final int KEY_VIDEO_QUALITY = 55; // 0x37
-    field public static final int KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE = 28; // 0x1c
     field public static final int KEY_VOICE_OVER_WIFI_MODE_OVERRIDE = 27; // 0x1b
     field public static final int KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE = 26; // 0x1a
-    field public static final int KEY_VOLTE_PROVISIONING_STATUS = 10; // 0xa
-    field public static final int KEY_VOLTE_USER_OPT_IN_STATUS = 30; // 0x1e
-    field public static final int KEY_VT_PROVISIONING_STATUS = 11; // 0xb
-    field public static final int KEY_WIFI_EPDG_TIMER_SEC = 63; // 0x3f
-    field public static final int KEY_WIFI_THRESHOLD_A = 60; // 0x3c
-    field public static final int KEY_WIFI_THRESHOLD_B = 61; // 0x3d
-    field public static final int PROVISIONING_RESULT_UNKNOWN = -1; // 0xffffffff
     field public static final int PROVISIONING_VALUE_DISABLED = 0; // 0x0
     field public static final int PROVISIONING_VALUE_ENABLED = 1; // 0x1
-    field public static final int SMS_FORMAT_3GPP = 1; // 0x1
-    field public static final int SMS_FORMAT_3GPP2 = 0; // 0x0
     field public static final String STRING_QUERY_RESULT_ERROR_GENERIC = "STRING_QUERY_RESULT_ERROR_GENERIC";
     field public static final String STRING_QUERY_RESULT_ERROR_NOT_READY = "STRING_QUERY_RESULT_ERROR_NOT_READY";
-    field public static final int VIDEO_QUALITY_HIGH = 1; // 0x1
-    field public static final int VIDEO_QUALITY_LOW = 0; // 0x0
   }
 
   public static class ProvisioningManager.Callback {
     ctor public ProvisioningManager.Callback();
     method public void onProvisioningIntChanged(int, int);
     method public void onProvisioningStringChanged(int, @NonNull String);
-  }
-
-  public final class RcsContactUceCapability implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public java.util.List<java.lang.String> getCapableExtensionTags();
-    method @NonNull public android.net.Uri getContactUri();
-    method @Nullable public android.net.Uri getServiceUri(long);
-    method public boolean isCapable(long);
-    method public boolean isCapable(@NonNull String);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int CAPABILITY_CALL_COMPOSER = 4194304; // 0x400000
-    field public static final int CAPABILITY_CHAT_BOT = 67108864; // 0x4000000
-    field public static final int CAPABILITY_CHAT_BOT_ROLE = 134217728; // 0x8000000
-    field public static final int CAPABILITY_CHAT_SESSION = 2; // 0x2
-    field public static final int CAPABILITY_CHAT_SESSION_STORE_FORWARD = 4; // 0x4
-    field public static final int CAPABILITY_CHAT_STANDALONE = 1; // 0x1
-    field public static final int CAPABILITY_DISCOVERY_VIA_PRESENCE = 4096; // 0x1000
-    field public static final int CAPABILITY_FILE_TRANSFER = 8; // 0x8
-    field public static final int CAPABILITY_FILE_TRANSFER_HTTP = 64; // 0x40
-    field public static final int CAPABILITY_FILE_TRANSFER_SMS = 128; // 0x80
-    field public static final int CAPABILITY_FILE_TRANSFER_STORE_FORWARD = 32; // 0x20
-    field public static final int CAPABILITY_FILE_TRANSFER_THUMBNAIL = 16; // 0x10
-    field public static final int CAPABILITY_GEOLOCATION_PULL = 131072; // 0x20000
-    field public static final int CAPABILITY_GEOLOCATION_PULL_FILE_TRANSFER = 262144; // 0x40000
-    field public static final int CAPABILITY_GEOLOCATION_PUSH = 32768; // 0x8000
-    field public static final int CAPABILITY_GEOLOCATION_PUSH_SMS = 65536; // 0x10000
-    field public static final int CAPABILITY_IMAGE_SHARE = 256; // 0x100
-    field public static final int CAPABILITY_IP_VIDEO_CALL = 16384; // 0x4000
-    field public static final int CAPABILITY_IP_VOICE_CALL = 8192; // 0x2000
-    field public static final int CAPABILITY_MMTEL_CALL_COMPOSER = 1073741824; // 0x40000000
-    field public static final int CAPABILITY_PLUG_IN = 268435456; // 0x10000000
-    field public static final int CAPABILITY_POST_CALL = 8388608; // 0x800000
-    field public static final int CAPABILITY_RCS_VIDEO_CALL = 1048576; // 0x100000
-    field public static final int CAPABILITY_RCS_VIDEO_ONLY_CALL = 2097152; // 0x200000
-    field public static final int CAPABILITY_RCS_VOICE_CALL = 524288; // 0x80000
-    field public static final int CAPABILITY_SHARED_MAP = 16777216; // 0x1000000
-    field public static final int CAPABILITY_SHARED_SKETCH = 33554432; // 0x2000000
-    field public static final int CAPABILITY_SOCIAL_PRESENCE = 2048; // 0x800
-    field public static final int CAPABILITY_STANDALONE_CHAT_BOT = 536870912; // 0x20000000
-    field public static final int CAPABILITY_VIDEO_SHARE = 1024; // 0x400
-    field public static final int CAPABILITY_VIDEO_SHARE_DURING_CS_CALL = 512; // 0x200
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RcsContactUceCapability> CREATOR;
-  }
-
-  public static class RcsContactUceCapability.Builder {
-    ctor public RcsContactUceCapability.Builder(@NonNull android.net.Uri);
-    method @NonNull public android.telephony.ims.RcsContactUceCapability.Builder add(long, @NonNull android.net.Uri);
-    method @NonNull public android.telephony.ims.RcsContactUceCapability.Builder add(long);
-    method @NonNull public android.telephony.ims.RcsContactUceCapability.Builder add(@NonNull String);
-    method @NonNull public android.telephony.ims.RcsContactUceCapability build();
   }
 
   public class RcsUceAdapter {
