@@ -48,6 +48,6 @@ cc_test {
     },
 
     auto_gen_config: false,
-    test_suites: ["general-tests", "pts", "vts-core"],
+    test_suites: ["general-tests", "pts", "vts"],
     gtest: false,
 }
