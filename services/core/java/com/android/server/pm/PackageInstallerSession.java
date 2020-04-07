@@ -1830,7 +1830,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throws PackageManagerException {
         final List<File> addedFiles = getAddedApksLocked();
         if (addedFiles.isEmpty()) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    String.format("Session: %d. No packages staged in %s", sessionId,
+                          stageDir.getAbsolutePath()));
         }
 
         if (ArrayUtils.size(addedFiles) > 1) {
@@ -1921,7 +1923,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         final List<File> addedFiles = getAddedApksLocked();
         if (addedFiles.isEmpty() && removeSplitList.size() == 0) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    String.format("Session: %d. No packages staged in %s", sessionId,
+                          stageDir.getAbsolutePath()));
         }
 
         // Verify that all staged packages are internally consistent
