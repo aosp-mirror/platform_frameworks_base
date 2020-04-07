@@ -227,6 +227,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputWindowHandle;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
@@ -1356,7 +1357,7 @@ public class WindowManagerService extends IWindowManager.Stub
             LayoutParams attrs, int viewVisibility, int displayId, Rect outFrame,
             Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
-            InsetsState outInsetsState) {
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
@@ -1643,8 +1644,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     outStableInsets, outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
-            outInsetsState.set(win.getInsetsState(),
-                    win.mClient instanceof IWindow.Stub /* copySource */);
+            outInsetsState.set(win.getInsetsState(), win.isClientLocal());
 
             if (mInTouchMode) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
@@ -1677,6 +1677,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         false /*updateInputWindows*/);
             }
             displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
+
+            getInsetsSourceControls(win, outActiveControls);
 
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "addWindow: New client %s"
                     + ": window=%s Callers=%s", client.asBinder(), win, Debug.getCallers(5));
@@ -2080,7 +2082,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Rect outVisibleInsets, Rect outStableInsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper outCutout, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            Point outSurfaceSize, SurfaceControl outBLASTSurfaceControl) {
+            InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
+            SurfaceControl outBLASTSurfaceControl) {
         int result = 0;
         boolean configChanged;
         final int pid = Binder.getCallingPid();
@@ -2375,8 +2378,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     outStableInsets);
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
-            outInsetsState.set(win.getInsetsState(),
-                    win.mClient instanceof IWindow.Stub /* copySource */);
+            outInsetsState.set(win.getInsetsState(), win.isClientLocal());
+            getInsetsSourceControls(win, outActiveControls);
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
                         + ", requestedWidth=" + requestedWidth
@@ -2411,6 +2414,21 @@ public class WindowManagerService extends IWindowManager.Stub
 
         Binder.restoreCallingIdentity(origId);
         return result;
+    }
+
+    private void getInsetsSourceControls(WindowState win, InsetsSourceControl[] outControls) {
+        if (outControls != null) {
+            final InsetsSourceControl[] controls =
+                    win.getDisplayContent().getInsetsStateController().getControlsForDispatch(win);
+            Arrays.fill(outControls, null);
+            if (controls != null) {
+                final int length = Math.min(controls.length, outControls.length);
+                for (int i = 0; i < length; i++) {
+                    outControls[i] = win.isClientLocal()
+                            ? new InsetsSourceControl(controls[i]) : controls[i];
+                }
+            }
+        }
     }
 
     private boolean tryStartExitingAnimation(WindowState win, WindowStateAnimator winAnimator,
