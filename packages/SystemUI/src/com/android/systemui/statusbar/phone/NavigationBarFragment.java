@@ -625,7 +625,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             // mOrientedHandle is initialized lazily
             mOrientationHandle.setVisibility(View.GONE);
         }
-        mNavigationBarView.setVisibility(View.VISIBLE);
+        if (mNavigationBarView != null) {
+            mNavigationBarView.setVisibility(View.VISIBLE);
+        }
     }
 
     private int deltaRotation(int oldRotation, int newRotation) {
