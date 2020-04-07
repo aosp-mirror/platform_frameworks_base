@@ -165,6 +165,11 @@ public:
     virtual Status sendAppBreadcrumbAtom(int32_t label, int32_t state) override;
 
     /**
+     * Binder call to notify statsd that all pullers from boot have been registered.
+     */
+    virtual Status allPullersFromBootRegistered();
+
+    /**
      * Binder call to register a callback function for a pulled atom.
      */
     virtual Status registerPullAtomCallback(

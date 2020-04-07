@@ -1215,6 +1215,14 @@ Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
     return Status::ok();
 }
 
+Status StatsService::allPullersFromBootRegistered() {
+    ENFORCE_UID(AID_SYSTEM);
+
+    VLOG("StatsService::allPullersFromBootRegistered was called");
+
+    return Status::ok();
+}
+
 Status StatsService::registerPullAtomCallback(int32_t uid, int32_t atomTag, int64_t coolDownMillis,
                                               int64_t timeoutMillis,
                                               const std::vector<int32_t>& additiveFields,
