@@ -489,6 +489,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mAdapter = new MyAdapter();
 
+        mDepthController.setShowingHomeControls(shouldShowControls());
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, getWalletPanelViewController(),
                 mDepthController, mSysuiColorExtractor, mStatusBarService,
                 mNotificationShadeWindowController,
@@ -1780,8 +1781,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
             if (mBackgroundDrawable == null) {
                 mBackgroundDrawable = new ScrimDrawable();
-                mScrimAlpha = mBlurUtils.supportsBlursOnWindows()
-                        ? ScrimController.BLUR_SCRIM_ALPHA : ScrimController.BUSY_SCRIM_ALPHA;
+                if (mControlsUiController != null) {
+                    mScrimAlpha = 1.0f;
+                } else {
+                    mScrimAlpha = mBlurUtils.supportsBlursOnWindows()
+                            ? ScrimController.BLUR_SCRIM_ALPHA : ScrimController.BUSY_SCRIM_ALPHA;
+                }
             }
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
         }
@@ -1841,8 +1846,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (!(mBackgroundDrawable instanceof ScrimDrawable)) {
                 return;
             }
-            ((ScrimDrawable) mBackgroundDrawable).setColor(colors.supportsDarkText() ? Color.WHITE
-                    : Color.BLACK, animate);
+            boolean hasControls = mControlsUiController != null;
+            ((ScrimDrawable) mBackgroundDrawable).setColor(
+                    !hasControls && colors.supportsDarkText() ? Color.WHITE : Color.BLACK, animate);
             View decorView = getWindow().getDecorView();
             if (colors.supportsDarkText()) {
                 decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR |
