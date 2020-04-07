@@ -70,6 +70,7 @@ import android.testing.TestableLooper;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
 import com.android.systemui.SysuiTestCase;
@@ -87,6 +88,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,16 +136,17 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
+    private TelephonyManager mTelephonyManager;
+    @Mock
     private RingerModeTracker mRingerModeTracker;
     @Mock
     private LiveData<Integer> mRingerModeLiveData;
-    @Mock
-    private TelephonyManager mTelephonyManager;
     // Direct executor
     private Executor mBackgroundExecutor = Runnable::run;
     private TestableLooper mTestableLooper;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private TestableContext mSpiedContext;
+    private MockitoSession mMockitoSession;
 
     @Before
     public void setup() {
@@ -165,6 +168,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker
                 .isUnlockingWithBiometricAllowed(anyBoolean() /* isStrongBiometric */))
                 .thenReturn(true);
+
+        when(mTelephonyManager.getServiceStateForSubscriber(anyInt()))
+                .thenReturn(new ServiceState());
         mSpiedContext.addMockSystemService(TrustManager.class, mTrustManager);
         mSpiedContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
         mSpiedContext.addMockSystemService(BiometricManager.class, mBiometricManager);
@@ -176,6 +182,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
 
+        mMockitoSession = ExtendedMockito.mockitoSession()
+                .spyStatic(SubscriptionManager.class).startMocking();
+        ExtendedMockito.doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
+                .when(SubscriptionManager::getDefaultSubscriptionId);
+
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mSpiedContext);
@@ -183,6 +194,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
+        mMockitoSession.finishMocking();
         mKeyguardUpdateMonitor.destroy();
     }
 

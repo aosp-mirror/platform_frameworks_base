@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
+import android.os.Handler;
 import android.os.Looper;
 import android.telephony.CellSignalStrength;
 import android.telephony.ServiceState;
@@ -46,6 +47,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @SmallTest
@@ -65,6 +67,28 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, -1, 0);
+    }
+
+    @Test
+    public void testServiceStateInitialState() throws Exception {
+        // Verify that NetworkControllerImpl pulls the service state from Telephony upon
+        // initialization rather than relying on the sticky behavior of ACTION_SERVICE_STATE
+
+        when(mServiceState.isEmergencyOnly()).thenReturn(true);
+        when(mMockTm.getServiceState()).thenReturn(mServiceState);
+        when(mMockSm.getCompleteActiveSubscriptionInfoList()).thenReturn(Collections.emptyList());
+
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
+                mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mCallbackHandler,
+                mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
+                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd);
+        mNetworkController.registerListeners();
+
+        // Wait for the main looper to execute the previous command
+        Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+        waitForIdleSync(mainThreadHandler);
+
+        verifyEmergencyOnly(true);
     }
 
     @Test
