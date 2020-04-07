@@ -141,7 +141,9 @@ import com.android.networkstack.tethering.R;
 import com.android.testutils.MiscAssertsKt;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -438,6 +440,18 @@ public class TetheringTest {
 
     private static UpstreamNetworkState buildMobile464xlatUpstreamState() {
         return buildMobileUpstreamState(false, true, true);
+    }
+
+    // See FakeSettingsProvider#clearSettingsProvider() that this needs to be called before and
+    // after use.
+    @BeforeClass
+    public static void setupOnce() {
+        FakeSettingsProvider.clearSettingsProvider();
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        FakeSettingsProvider.clearSettingsProvider();
     }
 
     @Before
