@@ -399,7 +399,9 @@ public abstract class ApexManager {
         @VisibleForTesting
         protected IApexService waitForApexService() {
             try {
-                return IApexService.Stub.asInterface(Binder.waitForService("apexservice"));
+                // Since apexd is a trusted platform component, synchronized calls are allowable
+                return IApexService.Stub.asInterface(
+                        Binder.allowBlocking(Binder.waitForService("apexservice")));
             } catch (RemoteException e) {
                 throw new IllegalStateException("Required service apexservice not available");
             }
