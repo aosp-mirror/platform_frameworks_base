@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.net.RouteInfo.RTN_UNREACHABLE;
+
 import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
 import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
 import static com.android.testutils.ParcelUtilsKt.parcelingRoundTrip;
@@ -46,6 +48,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1256,5 +1259,27 @@ public class LinkPropertiesTest {
         assertFalse(Ipv4.hasIpv6DnsServer());
         final LinkProperties Ipv6 = makeIpv6LinkProperties();
         assertTrue(Ipv6.hasIpv6DnsServer());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testHasIpv4UnreachableDefaultRoute() {
+        final LinkProperties lp = makeTestObject();
+        assertFalse(lp.hasIpv4UnreachableDefaultRoute());
+        assertFalse(lp.hasIpv6UnreachableDefaultRoute());
+
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), RTN_UNREACHABLE));
+        assertTrue(lp.hasIpv4UnreachableDefaultRoute());
+        assertFalse(lp.hasIpv6UnreachableDefaultRoute());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testHasIpv6UnreachableDefaultRoute() {
+        final LinkProperties lp = makeTestObject();
+        assertFalse(lp.hasIpv6UnreachableDefaultRoute());
+        assertFalse(lp.hasIpv4UnreachableDefaultRoute());
+
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE));
+        assertTrue(lp.hasIpv6UnreachableDefaultRoute());
+        assertFalse(lp.hasIpv4UnreachableDefaultRoute());
     }
 }

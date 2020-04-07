@@ -474,7 +474,7 @@ public class NetworkRequest implements Parcelable {
      * @param nc Capabilities that should satisfy this NetworkRequest. null capabilities do not
      *           satisfy any request.
      */
-    public boolean satisfiedBy(@Nullable NetworkCapabilities nc) {
+    public boolean canBeSatisfiedBy(@Nullable NetworkCapabilities nc) {
         return networkCapabilities.satisfiedByNetworkCapabilities(nc);
     }
 

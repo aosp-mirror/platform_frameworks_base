@@ -181,7 +181,7 @@ public class Nat464XlatTest {
         Nat464Xlat nat = makeNat464Xlat();
         ArgumentCaptor<LinkProperties> c = ArgumentCaptor.forClass(LinkProperties.class);
 
-        nat.setNat64Prefix(new IpPrefix(NAT64_PREFIX));
+        nat.setNat64PrefixFromDns(new IpPrefix(NAT64_PREFIX));
 
         // Start clat.
         nat.start();
@@ -222,7 +222,7 @@ public class Nat464XlatTest {
         ArgumentCaptor<LinkProperties> c = ArgumentCaptor.forClass(LinkProperties.class);
         InOrder inOrder = inOrder(mNetd, mConnectivity);
 
-        nat.setNat64Prefix(new IpPrefix(NAT64_PREFIX));
+        nat.setNat64PrefixFromDns(new IpPrefix(NAT64_PREFIX));
 
         nat.start();
 
@@ -309,7 +309,7 @@ public class Nat464XlatTest {
         Nat464Xlat nat = makeNat464Xlat();
         ArgumentCaptor<LinkProperties> c = ArgumentCaptor.forClass(LinkProperties.class);
 
-        nat.setNat64Prefix(new IpPrefix(NAT64_PREFIX));
+        nat.setNat64PrefixFromDns(new IpPrefix(NAT64_PREFIX));
 
         nat.start();
 
@@ -348,7 +348,7 @@ public class Nat464XlatTest {
     public void testStopBeforeClatdStarts() throws Exception {
         Nat464Xlat nat = makeNat464Xlat();
 
-        nat.setNat64Prefix(new IpPrefix(NAT64_PREFIX));
+        nat.setNat64PrefixFromDns(new IpPrefix(NAT64_PREFIX));
 
         nat.start();
 
@@ -380,7 +380,7 @@ public class Nat464XlatTest {
     public void testStopAndClatdNeverStarts() throws Exception {
         Nat464Xlat nat = makeNat464Xlat();
 
-        nat.setNat64Prefix(new IpPrefix(NAT64_PREFIX));
+        nat.setNat64PrefixFromDns(new IpPrefix(NAT64_PREFIX));
 
         nat.start();
 

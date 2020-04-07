@@ -1074,6 +1074,21 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Returns true if this link has an IPv4 unreachable default route.
+     *
+     * @return {@code true} if there is an IPv4 unreachable default route, {@code false} otherwise.
+     * @hide
+     */
+    public boolean hasIpv4UnreachableDefaultRoute() {
+        for (RouteInfo r : mRoutes) {
+            if (r.isIPv4UnreachableDefault()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * For backward compatibility.
      * This was annotated with @UnsupportedAppUsage in P, so we can't remove the method completely
      * just yet.
@@ -1095,6 +1110,21 @@ public final class LinkProperties implements Parcelable {
     public boolean hasIpv4DefaultRoute() {
         for (RouteInfo r : mRoutes) {
             if (r.isIPv4Default()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this link has an IPv6 unreachable default route.
+     *
+     * @return {@code true} if there is an IPv6 unreachable default route, {@code false} otherwise.
+     * @hide
+     */
+    public boolean hasIpv6UnreachableDefaultRoute() {
+        for (RouteInfo r : mRoutes) {
+            if (r.isIPv6UnreachableDefault()) {
                 return true;
             }
         }

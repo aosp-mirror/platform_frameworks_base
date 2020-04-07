@@ -115,7 +115,8 @@ public abstract class SocketKeepalive implements AutoCloseable {
             SUCCESS,
             ERROR_INVALID_LENGTH,
             ERROR_UNSUPPORTED,
-            ERROR_INSUFFICIENT_RESOURCES
+            ERROR_INSUFFICIENT_RESOURCES,
+            ERROR_HARDWARE_UNSUPPORTED
     })
     public @interface KeepaliveEvent {}
 

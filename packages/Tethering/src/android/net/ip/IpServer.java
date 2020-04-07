@@ -34,6 +34,7 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MacAddress;
 import android.net.RouteInfo;
+import android.net.TetherOffloadRuleParcel;
 import android.net.TetheredClient;
 import android.net.TetheringManager;
 import android.net.TetheringRequestParcel;
@@ -41,7 +42,7 @@ import android.net.dhcp.DhcpLeaseParcelable;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.DhcpServingParamsParcelExt;
-import android.net.dhcp.IDhcpLeaseCallbacks;
+import android.net.dhcp.IDhcpEventCallbacks;
 import android.net.dhcp.IDhcpServer;
 import android.net.ip.IpNeighborMonitor.NeighborEvent;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
@@ -280,6 +281,19 @@ public class IpServer extends StateMachine {
             return new Ipv6ForwardingRule(newUpstreamIfindex, downstreamIfindex, address, srcMac,
                     dstMac);
         }
+
+        // Don't manipulate TetherOffloadRuleParcel directly because implementing onNewUpstream()
+        // would be error-prone due to generated stable AIDL classes not having a copy constructor.
+        public TetherOffloadRuleParcel toTetherOffloadRuleParcel() {
+            final TetherOffloadRuleParcel parcel = new TetherOffloadRuleParcel();
+            parcel.inputInterfaceIndex = upstreamIfindex;
+            parcel.outputInterfaceIndex = downstreamIfindex;
+            parcel.destination = address.getAddress();
+            parcel.prefixLength = 128;
+            parcel.srcL2Address = srcMac.toByteArray();
+            parcel.dstL2Address = dstMac.toByteArray();
+            return parcel;
+        }
     }
     private final LinkedHashMap<Inet6Address, Ipv6ForwardingRule> mIpv6ForwardingRules =
             new LinkedHashMap<>();
@@ -449,7 +463,7 @@ public class IpServer extends StateMachine {
         }
     }
 
-    private class DhcpLeaseCallback extends IDhcpLeaseCallbacks.Stub {
+    private class DhcpLeaseCallback extends IDhcpEventCallbacks.Stub {
         @Override
         public void onLeasesChanged(List<DhcpLeaseParcelable> leaseParcelables) {
             final ArrayList<TetheredClient> leases = new ArrayList<>();
@@ -480,6 +494,11 @@ public class IpServer extends StateMachine {
                 mDhcpLeases = leases;
                 mCallback.dhcpLeasesChanged();
             });
+        }
+
+        @Override
+        public void onNewPrefixRequest(IpPrefix currentPrefix) {
+            //TODO: add specific implementation.
         }
 
         @Override
@@ -824,9 +843,7 @@ public class IpServer extends StateMachine {
 
     private void addIpv6ForwardingRule(Ipv6ForwardingRule rule) {
         try {
-            mNetd.tetherRuleAddDownstreamIpv6(mInterfaceParams.index, rule.upstreamIfindex,
-                    rule.address.getAddress(),  mInterfaceParams.macAddr.toByteArray(),
-                    rule.dstMac.toByteArray());
+            mNetd.tetherOffloadRuleAdd(rule.toTetherOffloadRuleParcel());
             mIpv6ForwardingRules.put(rule.address, rule);
         } catch (RemoteException | ServiceSpecificException e) {
             mLog.e("Could not add IPv6 downstream rule: ", e);
@@ -835,7 +852,7 @@ public class IpServer extends StateMachine {
 
     private void removeIpv6ForwardingRule(Ipv6ForwardingRule rule, boolean removeFromMap) {
         try {
-            mNetd.tetherRuleRemoveDownstreamIpv6(rule.upstreamIfindex, rule.address.getAddress());
+            mNetd.tetherOffloadRuleRemove(rule.toTetherOffloadRuleParcel());
             if (removeFromMap) {
                 mIpv6ForwardingRules.remove(rule.address);
             }

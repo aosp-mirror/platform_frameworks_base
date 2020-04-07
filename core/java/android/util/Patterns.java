@@ -301,7 +301,7 @@ public class Patterns {
     private static final String DOMAIN_NAME_STR = "(" + HOST_NAME + "|" + IP_ADDRESS_STRING + ")";
     public static final Pattern DOMAIN_NAME = Pattern.compile(DOMAIN_NAME_STR);
 
-    private static final String PROTOCOL = "(?i:http|https|rtsp)://";
+    private static final String PROTOCOL = "(?i:http|https|rtsp|ftp)://";
 
     /* A word boundary or end of input.  This is to stop foo.sure from matching as foo.su */
     private static final String WORD_BOUNDARY = "(?:\\b|$|^)";
