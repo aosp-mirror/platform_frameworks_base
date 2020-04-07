@@ -13,7 +13,7 @@ java_library_static {
     ],
     static_libs: [
         "dnsresolver_aidl_interface-V2-java",
-        "netd_aidl_interface-unstable-java",
+        "netd_aidl_interface-V3-java",
         "netlink-client",
         "networkstack-client",
         "net-utils-services-common",
@@ -44,7 +44,7 @@ java_library {
     ],
     static_libs: [
         "dnsresolver_aidl_interface-V2-java",
-        "netd_aidl_interface-unstable-java",
+        "netd_aidl_interface-V3-java",
         "netlink-client",
         "networkstack-client",
         "net-utils-services-common",
