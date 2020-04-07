@@ -163,10 +163,9 @@ jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat forma
 
 void ABitmap_notifyPixelsChanged(ABitmap* bitmapHandle) {
     Bitmap* bitmap = TypeCast::toBitmap(bitmapHandle);
-    if (bitmap->isImmutable()) {
-        ALOGE("Attempting to modify an immutable Bitmap!");
+    if (!bitmap->isImmutable()) {
+        bitmap->notifyPixelsChanged();
     }
-    return bitmap->notifyPixelsChanged();
 }
 
 namespace {
