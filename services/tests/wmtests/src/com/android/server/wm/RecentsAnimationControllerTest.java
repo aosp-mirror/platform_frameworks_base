@@ -23,7 +23,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -318,7 +317,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Assume activity transition should animate when no
         // IRecentsAnimationController#setDeferCancelUntilNextTransition called.
         assertFalse(mController.shouldDeferCancelWithScreenshot());
-        assertTrue(activity.shouldAnimate(TRANSIT_ACTIVITY_CLOSE));
+        assertTrue(activity.shouldAnimate());
     }
 
     @Test
