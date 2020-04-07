@@ -103,12 +103,20 @@ class ConversationNotificationManager @Inject constructor(
             override fun onEntryInflated(entry: NotificationEntry) {
                 if (!entry.ranking.isConversation) return
                 fun updateCount(isExpanded: Boolean) {
-                    if (isExpanded && !notifPanelCollapsed) {
+                    if (isExpanded && (!notifPanelCollapsed || entry.isPinnedAndExpanded())) {
                         resetCount(entry.key)
                         entry.row?.let(::resetBadgeUi)
                     }
                 }
-                entry.row?.setOnExpansionChangedListener(::updateCount)
+                entry.row?.setOnExpansionChangedListener { isExpanded ->
+                    if (entry.row?.isShown == true && isExpanded) {
+                        entry.row.performOnIntrinsicHeightReached {
+                            updateCount(isExpanded)
+                        }
+                    } else {
+                        updateCount(isExpanded)
+                    }
+                }
                 updateCount(entry.row?.isExpanded == true)
             }
 
@@ -169,7 +177,8 @@ class ConversationNotificationManager @Inject constructor(
 
     private fun resetBadgeUi(row: ExpandableNotificationRow): Unit =
             (row.layouts?.asSequence() ?: emptySequence())
-                    .mapNotNull { layout -> layout.contractedChild as? ConversationLayout }
+                    .flatMap { layout -> layout.allViews.asSequence()}
+                    .mapNotNull { view -> view as? ConversationLayout }
                     .forEach { convoLayout -> convoLayout.setUnreadCount(0) }
 
     private data class ConversationState(val unreadCount: Int, val notification: Notification)
