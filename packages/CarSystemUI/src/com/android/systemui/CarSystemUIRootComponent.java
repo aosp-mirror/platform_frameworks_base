@@ -40,6 +40,6 @@ import dagger.Component;
                 CarSystemUIModule.class,
                 CarSystemUIBinder.class
         })
-interface CarSystemUIRootComponent extends SystemUIRootComponent {
+public interface CarSystemUIRootComponent extends SystemUIRootComponent {
 
 }
