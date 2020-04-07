@@ -185,6 +185,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * gap is drawn between them). In this case we don't want to round their corners.
      */
     private static final int DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX = 1;
+    private OnMenuEventListener mMenuEventListener;
     private KeyguardBypassEnabledProvider mKeyguardBypassEnabledProvider;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final SysuiStatusBarStateController mStatusbarStateController;
@@ -316,7 +317,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * motion.
      */
     private int mMaxScrollAfterExpand;
-    private ExpandableNotificationRow.LongPressListener mLongPressListener;
     boolean mCheckForLeavebehind;
 
     /**
@@ -608,8 +608,27 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
         mExpandHelper.setScrollAdapter(mScrollAdapter);
+
+        // TODO: move swipe helper into controller.
+        // The anonymous proxy through to mMenuEventListener is temporary until more can be moved
+        // into the controller.
         mSwipeHelper = new NotificationSwipeHelper(SwipeHelper.X, mNotificationCallback,
-                getContext(), mMenuEventListener, mFalsingManager);
+                getContext(), new OnMenuEventListener() {
+            @Override
+            public void onMenuClicked(View row, int x, int y, MenuItem menu) {
+                mMenuEventListener.onMenuClicked(row, x, y, menu);
+            }
+
+            @Override
+            public void onMenuReset(View row) {
+                mMenuEventListener.onMenuReset(row);
+            }
+
+            @Override
+            public void onMenuShown(View row) {
+                mMenuEventListener.onMenuShown(row);
+            }
+        }, mFalsingManager);
         mStackScrollAlgorithm = createStackScrollAlgorithm(context);
         mShouldDrawNotificationBackground =
                 res.getBoolean(R.bool.config_drawNotificationBackground);
@@ -3753,11 +3772,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return y < getHeight() - getEmptyBottomMargin();
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void setLongPressListener(ExpandableNotificationRow.LongPressListener listener) {
-        mLongPressListener = listener;
-    }
-
     private float getTouchSlop(MotionEvent event) {
         // Adjust the touch slop if another gesture may be being performed.
         return event.getClassification() == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE
@@ -5812,6 +5826,27 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mCurrentUserId = userId;
     }
 
+    void onMenuShown(View row) {
+        mSwipeHelper.onMenuShown(row);
+    }
+
+    void onMenuReset(View row) {
+        View translatingParentView = mSwipeHelper.getTranslatingParentView();
+        if (translatingParentView != null && row == translatingParentView) {
+            mSwipeHelper.clearExposedMenuView();
+            mSwipeHelper.clearTranslatingParentView();
+            if (row instanceof ExpandableNotificationRow) {
+                mHeadsUpManager.setMenuShown(
+                        ((ExpandableNotificationRow) row).getEntry(), false);
+
+            }
+        }
+    }
+
+    void setMenuEventListener(OnMenuEventListener menuEventListener) {
+        mMenuEventListener = menuEventListener;
+    }
+
     /**
      * A listener that is notified when the empty space below the notifications is clicked on
      */
@@ -6167,69 +6202,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @VisibleForTesting
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    protected final OnMenuEventListener mMenuEventListener = new OnMenuEventListener() {
-        @Override
-        public void onMenuClicked(View view, int x, int y, MenuItem item) {
-            if (mLongPressListener == null) {
-                return;
-            }
-            if (view instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-                mMetricsLogger.write(row.getEntry().getSbn().getLogMaker()
-                        .setCategory(MetricsEvent.ACTION_TOUCH_GEAR)
-                        .setType(MetricsEvent.TYPE_ACTION)
-                        );
-            }
-            mLongPressListener.onLongPress(view, x, y, item);
-        }
 
-        @Override
-        public void onMenuReset(View row) {
-            View translatingParentView = mSwipeHelper.getTranslatingParentView();
-            if (translatingParentView != null && row == translatingParentView) {
-                mSwipeHelper.clearExposedMenuView();
-                mSwipeHelper.clearTranslatingParentView();
-                if (row instanceof ExpandableNotificationRow) {
-                    mHeadsUpManager.setMenuShown(
-                            ((ExpandableNotificationRow) row).getEntry(), false);
-
-                }
-            }
-        }
-
-        @Override
-        public void onMenuShown(View row) {
-            if (row instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow notificationRow = (ExpandableNotificationRow) row;
-                mMetricsLogger.write(notificationRow.getEntry().getSbn().getLogMaker()
-                        .setCategory(MetricsEvent.ACTION_REVEAL_GEAR)
-                        .setType(MetricsEvent.TYPE_ACTION));
-                mHeadsUpManager.setMenuShown(notificationRow.getEntry(), true);
-                mSwipeHelper.onMenuShown(row);
-                mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
-                        false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
-                        false /* resetMenu */);
-
-                // Check to see if we want to go directly to the notfication guts
-                NotificationMenuRowPlugin provider = notificationRow.getProvider();
-                if (provider.shouldShowGutsOnSnapOpen()) {
-                    MenuItem item = provider.menuItemToExposeOnSnap();
-                    if (item != null) {
-                        Point origin = provider.getRevealAnimationOrigin();
-                        mNotificationGutsManager.openGuts(row, origin.x, origin.y, item);
-                    } else  {
-                        Log.e(TAG, "Provider has shouldShowGutsOnSnapOpen, but provided no "
-                                + "menu item in menuItemtoExposeOnSnap. Skipping.");
-                    }
-
-                    // Close the menu row since we went directly to the guts
-                    resetExposedMenuView(false, true);
-                }
-            }
-        }
-    };
 
     @ShadeViewRefactor(RefactorComponent.INPUT)
     private final NotificationSwipeHelper.NotificationCallback mNotificationCallback =

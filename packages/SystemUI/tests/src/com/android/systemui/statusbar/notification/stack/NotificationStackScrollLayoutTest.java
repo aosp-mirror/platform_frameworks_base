@@ -24,9 +24,7 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
@@ -47,7 +45,6 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.ExpandHelper;
@@ -99,7 +96,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -449,61 +445,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         swipeActionHelper.setExposedMenuView(new View(mContext));
         mStackScroller.setHideAmount(0.1f, 0.1f);
         assertNull(swipeActionHelper.getExposedMenuView());
-    }
-
-    class LogMatcher implements ArgumentMatcher<LogMaker> {
-        private int mCategory, mType;
-
-        LogMatcher(int category, int type) {
-            mCategory = category;
-            mType = type;
-        }
-        public boolean matches(LogMaker l) {
-            return (l.getCategory() == mCategory)
-                    && (l.getType() == mType);
-        }
-
-        public String toString() {
-            return String.format("LogMaker(%d, %d)", mCategory, mType);
-        }
-    }
-
-    private LogMaker logMatcher(int category, int type) {
-        return argThat(new LogMatcher(category, type));
-    }
-
-    @Test
-    @UiThreadTest
-    public void testOnMenuClickedLogging() {
-        // Set up the object under test to have a valid mLongPressListener.  We're testing an
-        // anonymous-class member, mMenuEventListener, so we need to modify the state of the
-        // class itself, not the Mockito spy copied from it.  See notes in setup.
-        mStackScrollerInternal.setLongPressListener(
-                mock(ExpandableNotificationRow.LongPressListener.class));
-
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
-        when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
-                MetricsProto.MetricsEvent.VIEW_UNKNOWN));
-
-        mStackScroller.mMenuEventListener.onMenuClicked(row, 0, 0, mock(
-                NotificationMenuRowPlugin.MenuItem.class));
-        verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
-        verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_TOUCH_GEAR,
-                MetricsProto.MetricsEvent.TYPE_ACTION));
-    }
-
-    @Test
-    @UiThreadTest
-    public void testOnMenuShownLogging() { ;
-
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
-        when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
-                MetricsProto.MetricsEvent.VIEW_UNKNOWN));
-
-        mStackScroller.mMenuEventListener.onMenuShown(row);
-        verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
-        verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_REVEAL_GEAR,
-                MetricsProto.MetricsEvent.TYPE_ACTION));
     }
 
     @Test

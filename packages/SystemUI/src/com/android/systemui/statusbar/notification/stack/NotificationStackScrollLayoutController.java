@@ -18,8 +18,10 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +29,12 @@ import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.media.KeyguardMediaController;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -72,6 +78,8 @@ import kotlin.Unit;
  */
 @StatusBarComponent.StatusBarScope
 public class NotificationStackScrollLayoutController {
+    private static final String TAG = "StackScrollerController";
+
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
     private final HeadsUpManagerPhone mHeadsUpManager;
@@ -80,6 +88,7 @@ public class NotificationStackScrollLayoutController {
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final ConfigurationController mConfigurationController;
     private final ZenModeController mZenModeController;
+    private final MetricsLogger mMetricsLogger;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -175,6 +184,60 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
+    private final OnMenuEventListener mMenuEventListener = new OnMenuEventListener() {
+        @Override
+        public void onMenuClicked(
+                View view, int x, int y, NotificationMenuRowPlugin.MenuItem item) {
+            if (!mAllowLongPress) {
+                return;
+            }
+            if (view instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                mMetricsLogger.write(row.getEntry().getSbn().getLogMaker()
+                        .setCategory(MetricsEvent.ACTION_TOUCH_GEAR)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                );
+            }
+            mNotificationGutsManager.openGuts(view, x, y, item);
+        }
+
+        @Override
+        public void onMenuReset(View row) {
+            mView.onMenuReset(row);
+        }
+
+        @Override
+        public void onMenuShown(View row) {
+            if (row instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow notificationRow = (ExpandableNotificationRow) row;
+                mMetricsLogger.write(notificationRow.getEntry().getSbn().getLogMaker()
+                        .setCategory(MetricsEvent.ACTION_REVEAL_GEAR)
+                        .setType(MetricsEvent.TYPE_ACTION));
+                mHeadsUpManager.setMenuShown(notificationRow.getEntry(), true);
+                mView.onMenuShown(row);
+                mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
+                        false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
+                        false /* resetMenu */);
+
+                // Check to see if we want to go directly to the notification guts
+                NotificationMenuRowPlugin provider = notificationRow.getProvider();
+                if (provider.shouldShowGutsOnSnapOpen()) {
+                    NotificationMenuRowPlugin.MenuItem item = provider.menuItemToExposeOnSnap();
+                    if (item != null) {
+                        Point origin = provider.getRevealAnimationOrigin();
+                        mNotificationGutsManager.openGuts(row, origin.x, origin.y, item);
+                    } else  {
+                        Log.e(TAG, "Provider has shouldShowGutsOnSnapOpen, but provided no "
+                                + "menu item in menuItemtoExposeOnSnap. Skipping.");
+                    }
+
+                    // Close the menu row since we went directly to the guts
+                    mView.resetExposedMenuView(false, true);
+                }
+            }
+        }
+    };
+
     @Inject
     public NotificationStackScrollLayoutController(
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
@@ -189,7 +252,8 @@ public class NotificationStackScrollLayoutController {
             KeyguardBypassController keyguardBypassController,
             ZenModeController zenModeController,
             SysuiColorExtractor colorExtractor,
-            NotificationLockscreenUserManager lockscreenUserManager) {
+            NotificationLockscreenUserManager lockscreenUserManager,
+            MetricsLogger metricsLogger) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -203,6 +267,7 @@ public class NotificationStackScrollLayoutController {
         mZenModeController = zenModeController;
         mColorExtractor = colorExtractor;
         mLockscreenUserManager = lockscreenUserManager;
+        mMetricsLogger = metricsLogger;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -210,15 +275,13 @@ public class NotificationStackScrollLayoutController {
         mView.setController(this);
         mView.initView(mView.getContext(), mKeyguardBypassController::getBypassEnabled);
 
-        if (mAllowLongPress) {
-            mView.setLongPressListener(mNotificationGutsManager::openGuts);
-        }
-
         mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
         mView.setCurrentUserid(mLockscreenUserManager.getCurrentUserId());
+
+        mView.setMenuEventListener(mMenuEventListener);
 
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
