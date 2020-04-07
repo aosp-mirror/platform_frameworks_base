@@ -294,6 +294,12 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                         .getAllCrossProfilePackages().contains(packageName));
     }
 
+    private boolean isCrossProfilePackageWhitelistedByDefault(String packageName) {
+        return mInjector.withCleanCallingIdentity(() ->
+                mInjector.getDevicePolicyManagerInternal()
+                        .getDefaultCrossProfilePackages().contains(packageName));
+    }
+
     private List<UserHandle> getTargetUserProfilesUnchecked(
             String packageName, @UserIdInt int userId) {
         return mInjector.withCleanCallingIdentity(() -> {
@@ -528,6 +534,9 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
     @Override
     public boolean canConfigureInteractAcrossProfiles(String packageName) {
+        if (!canUserAttemptToConfigureInteractAcrossProfiles(packageName)) {
+            return false;
+        }
         if (!hasOtherProfileWithPackageInstalled(packageName, mInjector.getCallingUserId())) {
             return false;
         }
@@ -546,7 +555,35 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             return false;
         }
         return hasRequestedAppOpPermission(
-                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), packageName);
+                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), packageName)
+                && !isPlatformSignedAppWithNonUserConfigurablePermission(packageName, profileIds);
+    }
+
+    private boolean isPlatformSignedAppWithNonUserConfigurablePermission(
+            String packageName, int[] profileIds) {
+        return !isCrossProfilePackageWhitelistedByDefault(packageName)
+                && isPlatformSignedAppWithAutomaticProfilesPermission(packageName, profileIds);
+    }
+
+    /**
+     * Only platform-signed apps can be granted INTERACT_ACROSS_PROFILES automatically without user
+     * consent.
+     *
+     * Returns true if the app is automatically granted the permission in at least one profile.
+     */
+    private boolean isPlatformSignedAppWithAutomaticProfilesPermission(
+            String packageName, int[] profileIds) {
+        for (int userId : profileIds) {
+            final int uid = mInjector.getPackageManagerInternal().getPackageUidInternal(
+                    packageName, /* flags= */ 0, userId);
+            if (uid == -1) {
+                continue;
+            }
+            if (isPermissionGranted(Manifest.permission.INTERACT_ACROSS_PROFILES, uid)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasOtherProfileWithPackageInstalled(String packageName, @UserIdInt int userId) {
