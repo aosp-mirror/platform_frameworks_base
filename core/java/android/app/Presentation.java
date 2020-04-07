@@ -19,6 +19,7 @@ package android.app;
 import static android.content.Context.DISPLAY_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -191,12 +192,16 @@ public class Presentation extends Dialog {
         mDisplay = display;
         mDisplayManager = (DisplayManager)getContext().getSystemService(DISPLAY_SERVICE);
 
+        final int windowType =
+                (display.getFlags() & Display.FLAG_PRIVATE) != 0 ? TYPE_PRIVATE_PRESENTATION
+                        : TYPE_PRESENTATION;
+
         final Window w = getWindow();
         final WindowManager.LayoutParams attr = w.getAttributes();
         attr.token = mToken;
         w.setAttributes(attr);
         w.setGravity(Gravity.FILL);
-        w.setType(TYPE_PRESENTATION);
+        w.setType(windowType);
         setCanceledOnTouchOutside(false);
     }
 
