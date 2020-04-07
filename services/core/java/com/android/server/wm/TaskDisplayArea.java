@@ -1612,6 +1612,11 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         }
     }
 
+    @Override
+    boolean canCreateRemoteAnimationTarget() {
+        return true;
+    }
+
     /**
      * Callback for when the order of the stacks in the display changes.
      */
