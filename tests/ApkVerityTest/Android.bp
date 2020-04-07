@@ -16,7 +16,7 @@ java_test_host {
     name: "ApkVerityTest",
     srcs: ["src/**/*.java"],
     libs: ["tradefed", "compatibility-tradefed", "compatibility-host-util"],
-    test_suites: ["general-tests", "vts-core"],
+    test_suites: ["general-tests", "vts"],
     target_required: [
         "block_device_writer_module",
     ],
