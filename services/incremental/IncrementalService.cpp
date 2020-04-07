@@ -1143,6 +1143,7 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
     fsControlParcel.incremental->pendingReads.reset(
             base::unique_fd(::dup(ifs.control.pendingReads())));
     fsControlParcel.incremental->log.reset(base::unique_fd(::dup(ifs.control.logs())));
+    fsControlParcel.service = new IncrementalServiceConnector(*this, ifs.mountId);
     sp<IncrementalDataLoaderListener> listener =
             new IncrementalDataLoaderListener(*this,
                                               externalListener ? *externalListener
@@ -1392,6 +1393,12 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
 
 void IncrementalService::AppOpsListener::opChanged(int32_t, const String16&) {
     incrementalService.onAppOpChanged(packageName);
+}
+
+binder::Status IncrementalService::IncrementalServiceConnector::setStorageParams(
+        bool enableReadLogs, int32_t* _aidl_return) {
+    *_aidl_return = incrementalService.setStorageParams(storage, enableReadLogs);
+    return binder::Status::ok();
 }
 
 } // namespace android::incremental
