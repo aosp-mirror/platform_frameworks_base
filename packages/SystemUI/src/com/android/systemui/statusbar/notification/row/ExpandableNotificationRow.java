@@ -284,6 +284,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 if (isPinned()) {
                     nowExpanded = !mExpandedWhenPinned;
                     mExpandedWhenPinned = nowExpanded;
+                    // Also notify any expansion changed listeners. This is necessary since the
+                    // expansion doesn't actually change (it's already system expanded) but it
+                    // changes visually
+                    if (mExpansionChangedListener != null) {
+                        mExpansionChangedListener.onExpansionChanged(nowExpanded);
+                    }
                 } else {
                     nowExpanded = !isExpanded();
                     setUserExpanded(nowExpanded);
@@ -326,6 +332,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationInlineImageResolver mImageResolver;
     private NotificationMediaManager mMediaManager;
     @Nullable private OnExpansionChangedListener mExpansionChangedListener;
+    @Nullable private Runnable mOnIntrinsicHeightReachedRunnable;
 
     private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
             new SystemNotificationAsyncTask();
@@ -356,6 +363,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public NotificationContentView[] getLayouts() {
         return Arrays.copyOf(mLayouts, mLayouts.length);
+    }
+
+    /**
+     * Is this entry pinned and was expanded while doing so
+     */
+    public boolean isPinnedAndExpanded() {
+        if (!isPinned()) {
+            return false;
+        }
+        return mExpandedWhenPinned;
     }
 
     @Override
@@ -2690,6 +2707,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mMenuRow != null && mMenuRow.getMenuView() != null) {
             mMenuRow.onParentHeightUpdate();
         }
+        handleIntrinsicHeightReached();
     }
 
     @Override
@@ -2905,6 +2923,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setOnExpansionChangedListener(@Nullable OnExpansionChangedListener listener) {
         mExpansionChangedListener = listener;
+    }
+
+    /**
+     * Perform an action when the notification height has reached its intrinsic height.
+     *
+     * @param runnable the runnable to run
+     */
+    public void performOnIntrinsicHeightReached(@Nullable Runnable runnable) {
+        mOnIntrinsicHeightReachedRunnable = runnable;
+        handleIntrinsicHeightReached();
+    }
+
+    private void handleIntrinsicHeightReached() {
+        if (mOnIntrinsicHeightReachedRunnable != null
+                && getActualHeight() == getIntrinsicHeight()) {
+            mOnIntrinsicHeightReachedRunnable.run();
+            mOnIntrinsicHeightReachedRunnable = null;
+        }
     }
 
     @Override
