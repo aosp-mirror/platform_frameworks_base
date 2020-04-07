@@ -73,7 +73,7 @@ struct Constants {
 };
 
 static const Constants& constants() {
-    static Constants c;
+    static constexpr Constants c;
     return c;
 }
 
@@ -158,6 +158,9 @@ std::string makeBindMdName() {
     return name;
 }
 } // namespace
+
+const bool IncrementalService::sEnablePerfLogging =
+        android::base::GetBoolProperty("incremental.perflogging", false);
 
 IncrementalService::IncFsMount::~IncFsMount() {
     incrementalService.mDataLoaderManager->destroyDataLoader(mountId);
@@ -719,7 +722,10 @@ int IncrementalService::bind(StorageId storage, std::string_view source, std::st
     if (storageInfo == ifs->storages.end()) {
         return -EINVAL;
     }
-    std::string normSource = normalizePathToStorage(ifs, storage, source);
+    std::string normSource = normalizePathToStorageLocked(storageInfo, source);
+    if (normSource.empty()) {
+        return -EINVAL;
+    }
     l.unlock();
     std::unique_lock l2(mLock, std::defer_lock);
     return addBindMount(*ifs, storage, storageInfo->second.name, std::move(normSource),
@@ -768,22 +774,28 @@ int IncrementalService::unbind(StorageId storage, std::string_view target) {
     return 0;
 }
 
-std::string IncrementalService::normalizePathToStorage(const IncrementalService::IfsMountPtr ifs,
+std::string IncrementalService::normalizePathToStorageLocked(
+        IncFsMount::StorageMap::iterator storageIt, std::string_view path) {
+    std::string normPath;
+    if (path::isAbsolute(path)) {
+        normPath = path::normalize(path);
+        if (!path::startsWith(normPath, storageIt->second.name)) {
+            return {};
+        }
+    } else {
+        normPath = path::normalize(path::join(storageIt->second.name, path));
+    }
+    return normPath;
+}
+
+std::string IncrementalService::normalizePathToStorage(const IncrementalService::IfsMountPtr& ifs,
                                                        StorageId storage, std::string_view path) {
+    std::unique_lock l(ifs->lock);
     const auto storageInfo = ifs->storages.find(storage);
     if (storageInfo == ifs->storages.end()) {
         return {};
     }
-    std::string normPath;
-    if (path::isAbsolute(path)) {
-        normPath = path::normalize(path);
-    } else {
-        normPath = path::normalize(path::join(storageInfo->second.name, path));
-    }
-    if (!path::startsWith(normPath, storageInfo->second.name)) {
-        return {};
-    }
-    return normPath;
+    return normalizePathToStorageLocked(storageInfo, path);
 }
 
 int IncrementalService::makeFile(StorageId storage, std::string_view path, int mode, FileId id,
@@ -791,17 +803,14 @@ int IncrementalService::makeFile(StorageId storage, std::string_view path, int m
     if (auto ifs = getIfs(storage)) {
         std::string normPath = normalizePathToStorage(ifs, storage, path);
         if (normPath.empty()) {
-            LOG(ERROR) << "Internal error: storageId " << storage << " failed to normalize: " << path;
+            LOG(ERROR) << "Internal error: storageId " << storage
+                       << " failed to normalize: " << path;
             return -EINVAL;
         }
         auto err = mIncFs->makeFile(ifs->control, normPath, mode, id, params);
         if (err) {
             LOG(ERROR) << "Internal error: storageId " << storage << " failed to makeFile: " << err;
             return err;
-        }
-        std::vector<uint8_t> metadataBytes;
-        if (params.metadata.data && params.metadata.size > 0) {
-            metadataBytes.assign(params.metadata.data, params.metadata.data + params.metadata.size);
         }
         return 0;
     }
@@ -842,8 +851,9 @@ int IncrementalService::makeDirs(StorageId storageId, std::string_view path, int
 
 int IncrementalService::link(StorageId sourceStorageId, std::string_view oldPath,
                              StorageId destStorageId, std::string_view newPath) {
-    if (auto ifsSrc = getIfs(sourceStorageId), ifsDest = getIfs(destStorageId);
-        ifsSrc && ifsSrc == ifsDest) {
+    auto ifsSrc = getIfs(sourceStorageId);
+    auto ifsDest = sourceStorageId == destStorageId ? ifsSrc : getIfs(destStorageId);
+    if (ifsSrc && ifsSrc == ifsDest) {
         std::string normOldPath = normalizePathToStorage(ifsSrc, sourceStorageId, oldPath);
         std::string normNewPath = normalizePathToStorage(ifsDest, destStorageId, newPath);
         if (normOldPath.empty() || normNewPath.empty()) {
@@ -1156,11 +1166,25 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
     return true;
 }
 
-// Extract lib filse from zip, create new files in incfs and write data to them
+template <class Duration>
+static long elapsedMcs(Duration start, Duration end) {
+    return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+}
+
+// Extract lib files from zip, create new files in incfs and write data to them
 bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
                                                  std::string_view libDirRelativePath,
                                                  std::string_view abi) {
+    namespace sc = std::chrono;
+    using Clock = sc::steady_clock;
+    auto start = Clock::now();
+
     const auto ifs = getIfs(storage);
+    if (!ifs) {
+        LOG(ERROR) << "Invalid storage " << storage;
+        return false;
+    }
+
     // First prepare target directories if they don't exist yet
     if (auto res = makeDirs(storage, libDirRelativePath, 0755)) {
         LOG(ERROR) << "Failed to prepare target lib directory " << libDirRelativePath
@@ -1168,112 +1192,145 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
         return false;
     }
 
-    std::unique_ptr<ZipFileRO> zipFile(ZipFileRO::open(apkFullPath.data()));
+    auto mkDirsTs = Clock::now();
+
+    std::unique_ptr<ZipFileRO> zipFile(ZipFileRO::open(path::c_str(apkFullPath)));
     if (!zipFile) {
         LOG(ERROR) << "Failed to open zip file at " << apkFullPath;
         return false;
     }
     void* cookie = nullptr;
     const auto libFilePrefix = path::join(constants().libDir, abi);
-    if (!zipFile.get()->startIteration(&cookie, libFilePrefix.c_str() /* prefix */,
-                                       constants().libSuffix.data() /* suffix */)) {
+    if (!zipFile->startIteration(&cookie, libFilePrefix.c_str() /* prefix */,
+                                 constants().libSuffix.data() /* suffix */)) {
         LOG(ERROR) << "Failed to start zip iteration for " << apkFullPath;
         return false;
     }
+    auto endIteration = [&zipFile](void* cookie) { zipFile->endIteration(cookie); };
+    auto iterationCleaner = std::unique_ptr<void, decltype(endIteration)>(cookie, endIteration);
+
+    auto openZipTs = Clock::now();
+
+    std::vector<IncFsDataBlock> instructions;
     ZipEntryRO entry = nullptr;
-    bool success = true;
-    while ((entry = zipFile.get()->nextEntry(cookie)) != nullptr) {
+    while ((entry = zipFile->nextEntry(cookie)) != nullptr) {
+        auto startFileTs = Clock::now();
+
         char fileName[PATH_MAX];
-        if (zipFile.get()->getEntryFileName(entry, fileName, sizeof(fileName))) {
+        if (zipFile->getEntryFileName(entry, fileName, sizeof(fileName))) {
             continue;
         }
         const auto libName = path::basename(fileName);
         const auto targetLibPath = path::join(libDirRelativePath, libName);
         const auto targetLibPathAbsolute = normalizePathToStorage(ifs, storage, targetLibPath);
         // If the extract file already exists, skip
-        struct stat st;
-        if (stat(targetLibPathAbsolute.c_str(), &st) == 0) {
-            LOG(INFO) << "Native lib file already exists: " << targetLibPath
-                      << "; skipping extraction";
+        if (access(targetLibPathAbsolute.c_str(), F_OK) == 0) {
+            if (sEnablePerfLogging) {
+                LOG(INFO) << "incfs: Native lib file already exists: " << targetLibPath
+                          << "; skipping extraction, spent "
+                          << elapsedMcs(startFileTs, Clock::now()) << "mcs";
+            }
             continue;
         }
 
-        uint32_t uncompressedLen;
-        if (!zipFile.get()->getEntryInfo(entry, nullptr, &uncompressedLen, nullptr, nullptr,
-                                         nullptr, nullptr)) {
+        uint32_t uncompressedLen, compressedLen;
+        if (!zipFile->getEntryInfo(entry, nullptr, &uncompressedLen, &compressedLen, nullptr,
+                                   nullptr, nullptr)) {
             LOG(ERROR) << "Failed to read native lib entry: " << fileName;
-            success = false;
-            break;
+            return false;
         }
 
         // Create new lib file without signature info
-        incfs::NewFileParams libFileParams{};
-        libFileParams.size = uncompressedLen;
-        libFileParams.signature = {};
-        // Metadata of the new lib file is its relative path
-        IncFsSpan libFileMetadata;
-        libFileMetadata.data = targetLibPath.c_str();
-        libFileMetadata.size = targetLibPath.size();
-        libFileParams.metadata = libFileMetadata;
+        incfs::NewFileParams libFileParams = {
+                .size = uncompressedLen,
+                .signature = {},
+                // Metadata of the new lib file is its relative path
+                .metadata = {targetLibPath.c_str(), (IncFsSize)targetLibPath.size()},
+        };
         incfs::FileId libFileId = idFromMetadata(targetLibPath);
-        if (auto res = makeFile(storage, targetLibPath, 0777, libFileId, libFileParams)) {
+        if (auto res = mIncFs->makeFile(ifs->control, targetLibPathAbsolute, 0777, libFileId,
+                                        libFileParams)) {
             LOG(ERROR) << "Failed to make file for: " << targetLibPath << " errno: " << res;
-            success = false;
             // If one lib file fails to be created, abort others as well
-            break;
+            return false;
         }
+
+        auto makeFileTs = Clock::now();
+
         // If it is a zero-byte file, skip data writing
         if (uncompressedLen == 0) {
+            if (sEnablePerfLogging) {
+                LOG(INFO) << "incfs: Extracted " << libName << "(" << compressedLen << " -> "
+                          << uncompressedLen << " bytes): " << elapsedMcs(startFileTs, makeFileTs)
+                          << "mcs, make: " << elapsedMcs(startFileTs, makeFileTs);
+            }
             continue;
         }
 
         // Write extracted data to new file
-        std::vector<uint8_t> libData(uncompressedLen);
-        if (!zipFile.get()->uncompressEntry(entry, &libData[0], uncompressedLen)) {
+        // NOTE: don't zero-initialize memory, it may take a while
+        auto libData = std::unique_ptr<uint8_t[]>(new uint8_t[uncompressedLen]);
+        if (!zipFile->uncompressEntry(entry, libData.get(), uncompressedLen)) {
             LOG(ERROR) << "Failed to extract native lib zip entry: " << fileName;
-            success = false;
-            break;
+            return false;
         }
+
+        auto extractFileTs = Clock::now();
+
         const auto writeFd = mIncFs->openForSpecialOps(ifs->control, libFileId);
         if (!writeFd.ok()) {
             LOG(ERROR) << "Failed to open write fd for: " << targetLibPath << " errno: " << writeFd;
-            success = false;
-            break;
+            return false;
         }
-        const int numBlocks = uncompressedLen / constants().blockSize + 1;
-        std::vector<IncFsDataBlock> instructions;
-        auto remainingData = std::span(libData);
-        for (int i = 0; i < numBlocks - 1; i++) {
+
+        auto openFileTs = Clock::now();
+
+        const int numBlocks = (uncompressedLen + constants().blockSize - 1) / constants().blockSize;
+        instructions.clear();
+        instructions.reserve(numBlocks);
+        auto remainingData = std::span(libData.get(), uncompressedLen);
+        for (int i = 0; i < numBlocks; i++) {
+            const auto blockSize = std::min<uint16_t>(constants().blockSize, remainingData.size());
             auto inst = IncFsDataBlock{
-                    .fileFd = writeFd,
+                    .fileFd = writeFd.get(),
                     .pageIndex = static_cast<IncFsBlockIndex>(i),
                     .compression = INCFS_COMPRESSION_KIND_NONE,
                     .kind = INCFS_BLOCK_KIND_DATA,
-                    .dataSize = static_cast<uint16_t>(constants().blockSize),
+                    .dataSize = blockSize,
                     .data = reinterpret_cast<const char*>(remainingData.data()),
             };
             instructions.push_back(inst);
-            remainingData = remainingData.subspan(constants().blockSize);
+            remainingData = remainingData.subspan(blockSize);
         }
-        // Last block
-        auto inst = IncFsDataBlock{
-                .fileFd = writeFd,
-                .pageIndex = static_cast<IncFsBlockIndex>(numBlocks - 1),
-                .compression = INCFS_COMPRESSION_KIND_NONE,
-                .kind = INCFS_BLOCK_KIND_DATA,
-                .dataSize = static_cast<uint16_t>(remainingData.size()),
-                .data = reinterpret_cast<const char*>(remainingData.data()),
-        };
-        instructions.push_back(inst);
+        auto prepareInstsTs = Clock::now();
+
         size_t res = mIncFs->writeBlocks(instructions);
         if (res != instructions.size()) {
             LOG(ERROR) << "Failed to write data into: " << targetLibPath;
-            success = false;
+            return false;
         }
-        instructions.clear();
+
+        if (sEnablePerfLogging) {
+            auto endFileTs = Clock::now();
+            LOG(INFO) << "incfs: Extracted " << libName << "(" << compressedLen << " -> "
+                      << uncompressedLen << " bytes): " << elapsedMcs(startFileTs, endFileTs)
+                      << "mcs, make: " << elapsedMcs(startFileTs, makeFileTs)
+                      << " extract: " << elapsedMcs(makeFileTs, extractFileTs)
+                      << " open: " << elapsedMcs(extractFileTs, openFileTs)
+                      << " prepare: " << elapsedMcs(openFileTs, prepareInstsTs)
+                      << " write:" << elapsedMcs(prepareInstsTs, endFileTs);
+        }
     }
-    zipFile.get()->endIteration(cookie);
-    return success;
+
+    if (sEnablePerfLogging) {
+        auto end = Clock::now();
+        LOG(INFO) << "incfs: configureNativeBinaries complete in " << elapsedMcs(start, end)
+                  << "mcs, make dirs: " << elapsedMcs(start, mkDirsTs)
+                  << " open zip: " << elapsedMcs(mkDirsTs, openZipTs)
+                  << " extract all: " << elapsedMcs(openZipTs, end);
+    }
+
+    return true;
 }
 
 void IncrementalService::registerAppOpsCallback(const std::string& packageName) {
