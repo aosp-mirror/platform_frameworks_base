@@ -29,11 +29,13 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
+#include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include <private/gui/ComposerService.h>
 #include <stdio.h>
 #include <system/graphics.h>
 #include <ui/ConfigStoreTypes.h>
@@ -622,6 +624,23 @@ static void nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong transactionObj, 
     // Transaction::setFrameRate() takes an ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_* value. The
     // values are identical though, so no need to convert anything.
     transaction->setFrameRate(ctrl, frameRate, static_cast<int8_t>(compatibility));
+}
+
+static jlong nativeAcquireFrameRateFlexibilityToken(JNIEnv* env, jclass clazz) {
+    sp<ISurfaceComposer> composer = ComposerService::getComposerService();
+    sp<IBinder> token;
+    status_t result = composer->acquireFrameRateFlexibilityToken(&token);
+    if (result < 0) {
+        ALOGE("Failed acquiring frame rate flexibility token: %s (%d)", strerror(-result), result);
+        return 0;
+    }
+    token->incStrong((void*)nativeAcquireFrameRateFlexibilityToken);
+    return reinterpret_cast<jlong>(token.get());
+}
+
+static void nativeReleaseFrameRateFlexibilityToken(JNIEnv* env, jclass clazz, jlong tokenLong) {
+    sp<IBinder> token(reinterpret_cast<IBinder*>(tokenLong));
+    token->decStrong((void*)nativeAcquireFrameRateFlexibilityToken);
 }
 
 static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
@@ -1474,6 +1493,10 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetShadowRadius },
     {"nativeSetFrameRate", "(JJFI)V",
             (void*)nativeSetFrameRate },
+    {"nativeAcquireFrameRateFlexibilityToken", "()J",
+            (void*)nativeAcquireFrameRateFlexibilityToken },
+    {"nativeReleaseFrameRateFlexibilityToken", "(J)V",
+            (void*)nativeReleaseFrameRateFlexibilityToken },
     {"nativeGetPhysicalDisplayIds", "()[J",
             (void*)nativeGetPhysicalDisplayIds },
     {"nativeGetPhysicalDisplayToken", "(J)Landroid/os/IBinder;",
