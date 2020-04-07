@@ -7158,7 +7158,8 @@ public class Notification implements Parcelable
             CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;
-            if (!TextUtils.isEmpty(conversationTitle) && !hasOnlyWhiteSpaceSenders()) {
+            if (mConversationType == CONVERSATION_TYPE_LEGACY
+                    && !TextUtils.isEmpty(conversationTitle) && !hasOnlyWhiteSpaceSenders()) {
                 return conversationTitle;
             }
             return null;
