@@ -254,8 +254,9 @@ public class StagingManager {
     private int retrieveRollbackIdForCommitSession(int sessionId) throws PackageManagerException {
         RollbackManager rm = mContext.getSystemService(RollbackManager.class);
 
-        List<RollbackInfo> rollbacks = rm.getRecentlyCommittedRollbacks();
-        for (RollbackInfo rollback : rollbacks) {
+        final List<RollbackInfo> rollbacks = rm.getRecentlyCommittedRollbacks();
+        for (int i = 0, size = rollbacks.size(); i < size; i++) {
+            final RollbackInfo rollback = rollbacks.get(i);
             if (rollback.getCommittedSessionId() == sessionId) {
                 return rollback.getRollbackId();
             }
@@ -388,7 +389,8 @@ public class StagingManager {
                     }
                 }
             }
-            for (PackageInstallerSession childSession : childrenSessions) {
+            for (int i = 0, size = childrenSessions.size(); i < size; i++) {
+                final PackageInstallerSession childSession = childrenSessions.get(i);
                 if (sessionContainsApex(childSession)) {
                     apexSessions.add(childSession);
                 }
@@ -402,15 +404,15 @@ public class StagingManager {
         IRollbackManager rm = IRollbackManager.Stub.asInterface(
                 ServiceManager.getService(Context.ROLLBACK_SERVICE));
 
-        for (PackageInstallerSession apexSession : apexSessions) {
-            String packageName = apexSession.getPackageName();
+        for (int i = 0, sessionsSize = apexSessions.size(); i < sessionsSize; i++) {
+            final String packageName = apexSessions.get(i).getPackageName();
             // Perform any snapshots or restores for the APEX itself
             snapshotAndRestoreApexUserData(packageName, allUsers, rm);
 
             // Process the apks inside the APEX
-            List<String> apksInApex = mApexManager.getApksInApex(packageName);
-            for (String apk: apksInApex) {
-                snapshotAndRestoreApkInApexUserData(apk, allUsers, rm);
+            final List<String> apksInApex = mApexManager.getApksInApex(packageName);
+            for (int j = 0, apksSize = apksInApex.size(); j < apksSize; j++) {
+                snapshotAndRestoreApkInApexUserData(apksInApex.get(j), allUsers, rm);
             }
         }
     }
@@ -637,7 +639,8 @@ public class StagingManager {
                     0 /* UserHandle.SYSTEM */);
             PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
             apkSession.open();
-            for (String apkFilePath : apkFilePaths) {
+            for (int i = 0, size = apkFilePaths.size(); i < size; i++) {
+                final String apkFilePath = apkFilePaths.get(i);
                 File apkFile = new File(apkFilePath);
                 ParcelFileDescriptor pfd = ParcelFileDescriptor.open(apkFile,
                         ParcelFileDescriptor.MODE_READ_ONLY);
@@ -705,9 +708,9 @@ public class StagingManager {
                         "Unable to prepare multi-package session for staged session");
             }
 
-            for (PackageInstallerSession sessionToClone : childSessions) {
-                PackageInstallerSession apkChildSession =
-                        createAndWriteApkSession(sessionToClone, preReboot);
+            for (int i = 0, size = childSessions.size(); i < size; i++) {
+                final PackageInstallerSession apkChildSession = createAndWriteApkSession(
+                        childSessions.get(i), preReboot);
                 try {
                     apkParentSession.addChildSessionId(apkChildSession.sessionId);
                 } catch (IllegalStateException e) {
@@ -1206,10 +1209,9 @@ public class StagingManager {
             // multi-package sessions, find all the child sessions that contain an APEX.
             if (hasApex) {
                 try {
-                    final List<PackageInfo> apexPackages =
-                            submitSessionToApexService(session);
-                    for (PackageInfo apexPackage : apexPackages) {
-                        validateApexSignature(apexPackage);
+                    final List<PackageInfo> apexPackages = submitSessionToApexService(session);
+                    for (int i = 0, size = apexPackages.size(); i < size; i++) {
+                        validateApexSignature(apexPackages.get(i));
                     }
                 } catch (PackageManagerException e) {
                     session.setStagedSessionFailed(e.error, e.getMessage());
