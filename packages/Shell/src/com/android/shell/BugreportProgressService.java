@@ -363,6 +363,7 @@ public class BugreportProgressService extends Service {
         public void onError(@BugreportErrorCode int errorCode) {
             synchronized (mLock) {
                 stopProgressLocked(mInfo.id);
+                mInfo.deleteEmptyFiles();
             }
             Log.e(TAG, "Bugreport API callback onError() errorCode = " + errorCode);
             return;
@@ -1977,6 +1978,22 @@ public class BugreportProgressService extends Service {
         private void deleteBugreportFile() {
             Log.i(TAG, "Deleting bugreport file " + bugreportFile);
             bugreportFile.delete();
+        }
+
+        /**
+         * Deletes empty files for a given bugreport.
+         */
+        private void deleteEmptyFiles() {
+            if (bugreportFile.length() == 0) {
+                Log.i(TAG, "Deleting empty bugreport file: " + bugreportFile);
+                bugreportFile.delete();
+            }
+            for (File file : screenshotFiles) {
+                if (file.length() == 0) {
+                    Log.i(TAG, "Deleting empty screenshot file: " + file);
+                    file.delete();
+                }
+            }
         }
 
         /**
