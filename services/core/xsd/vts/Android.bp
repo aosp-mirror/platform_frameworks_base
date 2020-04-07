@@ -36,7 +36,7 @@ cc_test {
     ],
     test_suites: [
         "general-tests",
-        "vts-core"
+        "vts"
     ],
     test_config: "vts_defaultPermissions_validate_test.xml",
 }
