@@ -199,6 +199,12 @@ public class CrossProfileAppsServiceImplRoboTest {
                 CROSS_PROFILE_APP_PACKAGE_NAME, PERSONAL_PROFILE_UID, PERSONAL_PROFILE_USER_ID);
         ShadowApplicationPackageManager.setPackageUidAsUser(
                 CROSS_PROFILE_APP_PACKAGE_NAME, WORK_PROFILE_UID, WORK_PROFILE_USER_ID);
+        when(mPackageManagerInternal.getPackageUidInternal(
+                CROSS_PROFILE_APP_PACKAGE_NAME, /* flags= */ 0, PERSONAL_PROFILE_USER_ID))
+                .thenReturn(PERSONAL_PROFILE_UID);
+        when(mPackageManagerInternal.getPackageUidInternal(
+                CROSS_PROFILE_APP_PACKAGE_NAME, /* flags= */ 0, WORK_PROFILE_USER_ID))
+                .thenReturn(WORK_PROFILE_UID);
     }
 
     @Before
@@ -456,6 +462,19 @@ public class CrossProfileAppsServiceImplRoboTest {
     }
 
     @Test
+    public void canUserAttemptToConfigureInteractAcrossProfiles_platformSignedAppWithAutomaticPermission_returnsFalse() {
+        mockCrossProfileAppNotWhitelistedByOem();
+        shadowOf(mContext).grantPermissions(
+                Process.myPid(),
+                PERSONAL_PROFILE_UID,
+                Manifest.permission.INTERACT_ACROSS_PROFILES);
+
+        assertThat(mCrossProfileAppsServiceImpl
+                .canUserAttemptToConfigureInteractAcrossProfiles(CROSS_PROFILE_APP_PACKAGE_NAME))
+                .isFalse();
+    }
+
+    @Test
     public void canUserAttemptToConfigureInteractAcrossProfiles_returnsTrue() {
         assertThat(mCrossProfileAppsServiceImpl
                 .canUserAttemptToConfigureInteractAcrossProfiles(CROSS_PROFILE_APP_PACKAGE_NAME))
@@ -525,6 +544,11 @@ public class CrossProfileAppsServiceImplRoboTest {
 
     private void mockCrossProfileAppNotWhitelisted() {
         when(mDevicePolicyManagerInternal.getAllCrossProfilePackages())
+                .thenReturn(new ArrayList<>());
+    }
+
+    private void mockCrossProfileAppNotWhitelistedByOem() {
+        when(mDevicePolicyManagerInternal.getDefaultCrossProfilePackages())
                 .thenReturn(new ArrayList<>());
     }
 
