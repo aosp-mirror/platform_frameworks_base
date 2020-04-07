@@ -12459,6 +12459,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return DevicePolicyManagerService.this.getAllCrossProfilePackages();
         }
 
+        @Override
+        public List<String> getDefaultCrossProfilePackages() {
+            return DevicePolicyManagerService.this.getDefaultCrossProfilePackages();
+        }
+
         /**
          * Sends the {@code intent} to the packages with cross profile capabilities.
          *
