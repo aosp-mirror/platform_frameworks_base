@@ -30,7 +30,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -41,7 +40,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import android.platform.test.annotations.Presubmit;
 import android.util.IntArray;
@@ -49,7 +47,6 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.test.InsetsModeSession;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.AfterClass;
@@ -165,6 +162,18 @@ public class InsetsPolicyTest extends WindowTestsBase {
         // The app controls the navigation bar.
         assertNotNull(controls);
         assertEquals(1, controls.length);
+    }
+
+    @Test
+    public void testControlsForDispatch_forceShowSystemBarsFromExternal_appHasNoControl() {
+        mDisplayContent.getDisplayPolicy().setForceShowSystemBars(true);
+        addWindow(TYPE_STATUS_BAR, "statusBar");
+        addWindow(TYPE_NAVIGATION_BAR, "navBar");
+
+        final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
+
+        // The focused app window cannot control system bars.
+        assertNull(controls);
     }
 
     @Test
