@@ -168,6 +168,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Obtained by ConnectivityService and merged into NetworkAgent-provided information.
     public CaptivePortalData captivePortalData;
 
+    // The UID of the remote entity that created this Network.
+    public final int creatorUid;
+
     // Networks are lingered when they become unneeded as a result of their NetworkRequests being
     // satisfied by a higher-scoring network. so as to allow communication to wrap up before the
     // network is taken down.  This usually only happens to the default network. Lingering ends with
@@ -268,7 +271,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context,
             Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
-            IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber) {
+            IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber,
+            int creatorUid) {
         this.messenger = messenger;
         asyncChannel = ac;
         network = net;
@@ -282,6 +286,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         mHandler = handler;
         networkAgentConfig = config;
         this.factorySerialNumber = factorySerialNumber;
+        this.creatorUid = creatorUid;
     }
 
     /**

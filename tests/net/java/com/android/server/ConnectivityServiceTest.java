@@ -75,6 +75,7 @@ import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
+import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
 
 import static com.android.server.ConnectivityServiceTestUtilsKt.transportToLegacyType;
@@ -6953,7 +6954,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0);
+                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
 
         mServiceContext.setPermission(
                 android.Manifest.permission.NETWORK_STACK, PERMISSION_GRANTED);
@@ -6969,7 +6970,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0);
+                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
 
         mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
 
@@ -6985,7 +6986,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0);
+                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
 
         mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
 
@@ -7002,7 +7003,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
                         null, null, network, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0);
+                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -7036,7 +7037,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, nc, 0, mServiceContext, null, null,
-                        mService, null, null, null, 0);
+                        mService, null, null, null, 0, INVALID_UID);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -7058,7 +7059,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, nc, 0, mServiceContext, null, null,
-                        mService, null, null, null, 0);
+                        mService, null, null, null, 0, INVALID_UID);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
