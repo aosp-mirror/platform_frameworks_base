@@ -40,7 +40,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -537,37 +536,26 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateImageMessages() {
-        boolean displayExternalImage = false;
-        ArraySet<View> newMessages = new ArraySet<>();
-        if (mIsCollapsed) {
+        View newMessage = null;
+        if (mIsCollapsed && mGroups.size() > 0) {
 
-            // When collapsed, we're displaying all image messages in a dedicated container
-            // on the right of the layout instead of inline. Let's add all isolated images there
-            int imageIndex = 0;
-            for (int i = 0; i < mGroups.size(); i++) {
-                MessagingGroup messagingGroup = mGroups.get(i);
-                MessagingImageMessage isolatedMessage = messagingGroup.getIsolatedMessage();
-                if (isolatedMessage != null) {
-                    newMessages.add(isolatedMessage.getView());
-                    displayExternalImage = true;
-                    if (imageIndex
-                            != mImageMessageContainer.indexOfChild(isolatedMessage.getView())) {
-                        mImageMessageContainer.removeView(isolatedMessage.getView());
-                        mImageMessageContainer.addView(isolatedMessage.getView(), imageIndex);
-                    }
-                    imageIndex++;
-                }
+            // When collapsed, we're displaying the image message in a dedicated container
+            // on the right of the layout instead of inline. Let's add the isolated image there
+            MessagingGroup messagingGroup = mGroups.get(mGroups.size() -1);
+            MessagingImageMessage isolatedMessage = messagingGroup.getIsolatedMessage();
+            if (isolatedMessage != null) {
+                newMessage = isolatedMessage.getView();
             }
         }
         // Remove all messages that don't belong into the image layout
-        for (int i = 0; i < mImageMessageContainer.getChildCount(); i++) {
-            View child = mImageMessageContainer.getChildAt(i);
-            if (!newMessages.contains(child)) {
-                mImageMessageContainer.removeView(child);
-                i--;
+        View previousMessage = mImageMessageContainer.getChildAt(0);
+        if (previousMessage != newMessage) {
+            mImageMessageContainer.removeView(previousMessage);
+            if (newMessage != null) {
+                mImageMessageContainer.addView(newMessage);
             }
         }
-        mImageMessageContainer.setVisibility(displayExternalImage ? VISIBLE : GONE);
+        mImageMessageContainer.setVisibility(newMessage != null ? VISIBLE : GONE);
     }
 
     private void bindFacePile() {
