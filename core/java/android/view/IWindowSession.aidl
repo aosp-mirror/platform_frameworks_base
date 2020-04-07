@@ -29,6 +29,7 @@ import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -46,7 +47,7 @@ interface IWindowSession {
             in int viewVisibility, in int layerStackId, out Rect outFrame,
             out Rect outContentInsets, out Rect outStableInsets,
             out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
-            out InsetsState insetsState);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls);
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outContentInsets,
             out Rect outStableInsets, out InsetsState insetsState);
@@ -106,8 +107,8 @@ interface IWindowSession {
             out Rect outBackdropFrame,
             out DisplayCutout.ParcelableWrapper displayCutout,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out Point outSurfaceSize,
-            out SurfaceControl outBlastSurfaceControl);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
+            out Point outSurfaceSize, out SurfaceControl outBlastSurfaceControl);
 
     /*
      * Notify the window manager that an application is relaunching and
