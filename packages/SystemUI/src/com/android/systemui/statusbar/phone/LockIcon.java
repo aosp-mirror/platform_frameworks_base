@@ -50,19 +50,22 @@ public class LockIcon extends KeyguardAffordanceView {
     static final int STATE_BIOMETRICS_ERROR = 3;
     private float mDozeAmount;
     private int mIconColor;
-    private StateProvider mStateProvider;
     private int mOldState;
+    private int mState;
     private boolean mPulsing;
     private boolean mDozing;
     private boolean mKeyguardJustShown;
+    private boolean mPredrawRegistered;
     private final SparseArray<Drawable> mDrawableCache = new SparseArray<>();
 
     private final OnPreDrawListener mOnPreDrawListener = new OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
             getViewTreeObserver().removeOnPreDrawListener(this);
+            mPredrawRegistered = false;
 
-            int newState = mStateProvider.getState();
+            int newState = mState;
+            mOldState = mState;
             Drawable icon = getIcon(newState);
             setImageDrawable(icon, false);
 
@@ -80,7 +83,7 @@ public class LockIcon extends KeyguardAffordanceView {
                             @Override
                             public void onAnimationEnd(Drawable drawable) {
                                 if (getDrawable() == animation
-                                        && newState == mStateProvider.getState()
+                                        && newState == mState
                                         && newState == STATE_SCANNING_FACE) {
                                     animation.start();
                                 } else {
@@ -98,10 +101,6 @@ public class LockIcon extends KeyguardAffordanceView {
 
     public LockIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    void setStateProvider(StateProvider stateProvider) {
-        mStateProvider = stateProvider;
     }
 
     @Override
@@ -135,13 +134,16 @@ public class LockIcon extends KeyguardAffordanceView {
         return false;
     }
 
-    void update(int oldState, boolean pulsing, boolean dozing, boolean keyguardJustShown) {
-        mOldState = oldState;
+    void update(int newState, boolean pulsing, boolean dozing, boolean keyguardJustShown) {
+        mState = newState;
         mPulsing = pulsing;
         mDozing = dozing;
         mKeyguardJustShown = keyguardJustShown;
 
-        getViewTreeObserver().addOnPreDrawListener(mOnPreDrawListener);
+        if (!mPredrawRegistered) {
+            mPredrawRegistered = true;
+            getViewTreeObserver().addOnPreDrawListener(mOnPreDrawListener);
+        }
     }
 
     void setDozeAmount(float dozeAmount) {
@@ -175,7 +177,7 @@ public class LockIcon extends KeyguardAffordanceView {
         return mDrawableCache.get(iconRes);
     }
 
-    static int getIconForState(int state) {
+    private static int getIconForState(int state) {
         int iconRes;
         switch (state) {
             case STATE_LOCKED:
@@ -196,7 +198,7 @@ public class LockIcon extends KeyguardAffordanceView {
         return iconRes;
     }
 
-    static int getAnimationIndexForTransition(int oldState, int newState, boolean pulsing,
+    private static int getAnimationIndexForTransition(int oldState, int newState, boolean pulsing,
             boolean dozing, boolean keyguardJustShown) {
 
         // Never animate when screen is off
@@ -260,9 +262,4 @@ public class LockIcon extends KeyguardAffordanceView {
         }
         return LOCK_ANIM_RES_IDS[0][lockAnimIndex];
     }
-
-    interface StateProvider {
-        int getState();
-    }
-
 }
