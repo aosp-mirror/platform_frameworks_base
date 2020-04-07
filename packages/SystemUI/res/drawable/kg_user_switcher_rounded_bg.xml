@@ -16,17 +16,17 @@
   -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
         android:color="?android:attr/colorControlHighlight">
-   <item>
-      <shape>
-         <solid android:color="@color/qs_user_detail_avatar_frame" />
+    <item>
+        <shape>
+            <solid android:color="@color/kg_user_switcher_rounded_background_color" />
 
-         <padding
-                 android:left="1dp"
-                 android:right="1dp"
-                 android:bottom="1dp"
-                 android:top="1dp" />
+            <padding
+                android:left="8dp"
+                android:right="8dp"
+                android:bottom="8dp"
+                android:top="8dp" />
 
-         <corners android:radius="48dp" />
-      </shape>
-   </item>
+            <corners android:radius="48dp" />
+        </shape>
+    </item>
 </ripple>

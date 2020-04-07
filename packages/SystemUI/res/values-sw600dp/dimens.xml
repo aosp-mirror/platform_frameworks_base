@@ -45,6 +45,11 @@
     <!-- Height of the status bar header bar when on Keyguard -->
     <dimen name="status_bar_header_height_keyguard">60dp</dimen>
 
+    <!-- Size of user icon + frame in the qs user picker (incl. frame) -->
+    <dimen name="qs_framed_avatar_size">60dp</dimen>
+    <!-- Size of user icon + frame in the keyguard user picker (incl. frame) -->
+    <dimen name="kg_framed_avatar_size">48dp</dimen>
+
     <!-- The width of user avatar when on Keyguard -->
     <dimen name="multi_user_switch_width_keyguard">48dp</dimen>
 
@@ -88,4 +93,7 @@
 
     <!-- Keyboard shortcuts helper -->
     <dimen name="ksh_layout_width">488dp</dimen>
+
+    <!-- Text size for user name in user switcher -->
+    <dimen name="kg_user_switcher_text_size">18sp</dimen>
 </resources>
