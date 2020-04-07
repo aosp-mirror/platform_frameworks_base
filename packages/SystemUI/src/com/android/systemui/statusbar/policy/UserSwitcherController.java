@@ -31,7 +31,6 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -52,7 +51,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.RestrictedLockUtilsInternal;
-import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.Prefs;
@@ -684,18 +682,17 @@ public class UserSwitcherController implements Dumpable {
             }
         }
 
-        public Drawable getDrawable(Context context, UserRecord item) {
+        protected static Drawable getIconDrawable(Context context, UserRecord item) {
+            int iconRes;
             if (item.isAddUser) {
-                return context.getDrawable(R.drawable.ic_add_circle_qs);
+                iconRes = R.drawable.ic_add_circle;
+            } else if (item.isGuest) {
+                iconRes = R.drawable.ic_avatar_guest_user;
+            } else {
+                iconRes = R.drawable.ic_avatar_user;
             }
-            Drawable icon = UserIcons.getDefaultUserIcon(
-                    context.getResources(), item.resolveId(), /* light= */ false);
-            if (item.isGuest) {
-                icon.setColorFilter(Utils.getColorAttrDefaultColor(context,
-                        android.R.attr.colorForeground),
-                        Mode.SRC_IN);
-            }
-            return icon;
+
+            return context.getDrawable(iconRes);
         }
 
         public void refresh() {
