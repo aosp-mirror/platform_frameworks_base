@@ -63,7 +63,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.StatusBarNotification;
-import android.util.FeatureFlagUtils;
 import android.widget.RemoteViews;
 
 import androidx.test.filters.SmallTest;
@@ -124,8 +123,8 @@ public class NotificationRecordTest extends UiServiceTestCase {
         when(mMockContext.getResources()).thenReturn(getContext().getResources());
         when(mMockContext.getPackageManager()).thenReturn(mPm);
         when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
-        Settings.Global.putString(mContentResolver,
-                FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
         ApplicationInfo appInfo = new ApplicationInfo();
         appInfo.targetSdkVersion = Build.VERSION_CODES.O;
         when(mMockContext.getApplicationInfo()).thenReturn(appInfo);
@@ -1138,8 +1137,8 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
     @Test
     public void testIsConversation_bypassShortcutFlagEnabled() {
-        Settings.Global.putString(mContentResolver,
-                FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0);
         StatusBarNotification sbn = getMessagingStyleNotification();
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         record.setShortcutInfo(null);
