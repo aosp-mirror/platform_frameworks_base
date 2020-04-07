@@ -159,3 +159,13 @@ JNIEnv* android::get_env_or_die(JavaVM* jvm) {
     }
     return env;
 }
+
+JNIEnv* android::requireEnv(JavaVM* jvm) {
+    JNIEnv* env;
+    if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        if (jvm->AttachCurrentThreadAsDaemon(&env, nullptr) != JNI_OK) {
+            LOG_ALWAYS_FATAL("Failed to AttachCurrentThread!");
+        }
+    }
+    return env;
+}

@@ -9,24 +9,6 @@ using namespace android;
 static jmethodID gByteBuffer_getMethodID;
 static jmethodID gByteBuffer_setPositionMethodID;
 
-/**
- * Helper method for accessing the JNI interface pointer.
- *
- * Image decoding (which this supports) is started on a thread that is already
- * attached to the Java VM. But an AnimatedImageDrawable continues decoding on
- * the AnimatedImageThread, which is not attached. This will attach if
- * necessary.
- */
-static JNIEnv* requireEnv(JavaVM* jvm) {
-    JNIEnv* env;
-    if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
-        if (jvm->AttachCurrentThreadAsDaemon(&env, nullptr) != JNI_OK) {
-            LOG_ALWAYS_FATAL("Failed to AttachCurrentThread!");
-        }
-    }
-    return env;
-}
-
 class ByteBufferStream : public SkStreamAsset {
 private:
     ByteBufferStream(JavaVM* jvm, jobject jbyteBuffer, size_t initialPosition, size_t length,
@@ -304,7 +286,7 @@ std::unique_ptr<SkStream> CreateByteBufferStreamAdaptor(JNIEnv* env, jobject jby
         auto* context = new release_proc_context{jvm, jbyteBuffer};
         auto releaseProc = [](const void*, void* context) {
             auto* c = reinterpret_cast<release_proc_context*>(context);
-            JNIEnv* env = get_env_or_die(c->jvm);
+            JNIEnv* env = requireEnv(c->jvm);
             env->DeleteGlobalRef(c->jbyteBuffer);
             delete c;
         };

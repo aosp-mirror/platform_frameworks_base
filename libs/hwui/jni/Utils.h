@@ -78,6 +78,16 @@ bool isSeekable(int descriptor);
 
 JNIEnv* get_env_or_die(JavaVM* jvm);
 
+/**
+ * Helper method for accessing the JNI interface pointer.
+ *
+ * Image decoding (which this supports) is started on a thread that is already
+ * attached to the Java VM. But an AnimatedImageDrawable continues decoding on
+ * the AnimatedImageThread, which is not attached. This will attach if
+ * necessary.
+ */
+JNIEnv* requireEnv(JavaVM* jvm);
+
 }; // namespace android
 
 #endif  // _ANDROID_GRAPHICS_UTILS_H_
