@@ -273,9 +273,6 @@ filegroup {
         // etc.
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
-
-        // telephony annotations
-        ":framework-telephony-annotations",
     ],
 }
 
@@ -1224,62 +1221,6 @@ build = [
     "ApiDocs.bp",
 ]
 
-// TODO(b/147699819): move to frameworks/base/telephony/ folder
-droidstubs {
-    name: "framework-telephony-stubs-srcs",
-    srcs: [
-        ":framework-telephony-sources",
-        ":framework_native_aidl",
-        ":framework-javastream-protos",
-    ],
-    aidl: {
-        local_include_dirs: [
-            "core/java",
-            "telecomm/java"
-        ],
-    },
-    libs: [
-        "framework-annotations-lib",
-        "android.hardware.radio-V1.5-java",
-    ],
-    check_api: {
-        current: {
-            // TODO(b/147699819): remove telephony prefix when moved
-            api_file: "telephony/api/system-current.txt",
-            removed_api_file: "telephony/api/system-removed.txt",
-        },
-    },
-    // TODO: make telephony inherit the shared stubs and remove this
-    args: "--show-annotation android.annotation.SystemApi\\(" +
-            "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
-        "\\) " +
-        "--error UnhiddenSystemApi " +
-        "--hide BroadcastBehavior " +
-        "--hide DeprecationMismatch " +
-        "--hide HiddenSuperclass " +
-        "--hide HiddenTypedefConstant " +
-        "--hide HiddenTypeParameter " +
-        "--hide MissingPermission " +
-        "--hide RequiresPermission " +
-        "--hide SdkConstant " +
-        "--hide Todo " +
-        "--hide Typo " +
-        "--hide UnavailableSymbol ",
-    filter_packages: ["android.telephony"],
-    sdk_version: "system_current",
-}
-
-java_library {
-    name: "framework-telephony-stubs",
-    srcs: [":framework-telephony-stubs-srcs"],
-    // TODO(b/147699819): move public aidls to a separate folder and potentially remove
-    // below aidl exports.
-    aidl: {
-        export_include_dirs: ["telephony/java"],
-    },
-    sdk_version: "module_current",
-}
-
 java_library {
     name: "framework-telephony",
     srcs: [
@@ -1313,12 +1254,6 @@ java_library {
         enabled: false,
     },
     installable: true,
-}
-
-filegroup {
-    // TODO (b/147690217): move to frameworks/base/telephony/common.
-    name: "framework-telephony-annotations",
-    srcs: ["telephony/java/android/telephony/Annotation.java"],
 }
 
 filegroup {
