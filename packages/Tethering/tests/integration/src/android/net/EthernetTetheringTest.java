@@ -63,6 +63,7 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -150,10 +151,7 @@ public class EthernetTetheringTest {
         Log.d(TAG, "Including test interfaces");
         mEm.setIncludeTestInterfaces(true);
 
-        Log.d(TAG, "Requesting tethered interface");
-        mTetheredInterfaceRequester.requestInterface();
-
-        final String iface = mTetheredInterfaceRequester.awaitRequestedInterface();
+        final String iface = mTetheredInterfaceRequester.getInterface();
         assertEquals("TetheredInterfaceCallback for unexpected interface",
                 mTestIface.getInterfaceName(), iface);
 
@@ -165,14 +163,13 @@ public class EthernetTetheringTest {
         // This test requires manipulating packets. Skip if there is a physical Ethernet connected.
         assumeFalse(mEm.isAvailable());
 
-        Log.d(TAG, "Requesting tethered interface");
-        mTetheredInterfaceRequester.requestInterface();
+        CompletableFuture<String> futureIface = mTetheredInterfaceRequester.requestInterface();
 
         mEm.setIncludeTestInterfaces(true);
 
         mTestIface = createTestInterface();
 
-        final String iface = mTetheredInterfaceRequester.awaitRequestedInterface();
+        final String iface = futureIface.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         assertEquals("TetheredInterfaceCallback for unexpected interface",
                 mTestIface.getInterfaceName(), iface);
 
@@ -184,8 +181,7 @@ public class EthernetTetheringTest {
         assumeTrue(mEm.isAvailable());
 
         // Get an interface to use.
-        mTetheredInterfaceRequester.requestInterface();
-        String iface = mTetheredInterfaceRequester.awaitRequestedInterface();
+        final String iface = mTetheredInterfaceRequester.getInterface();
 
         // Enable Ethernet tethering and check that it starts.
         mTetheringEventCallback = enableEthernetTethering(iface);
@@ -373,8 +369,8 @@ public class EthernetTetheringTest {
         private final Handler mHandler;
         private final EthernetManager mEm;
 
-        private volatile TetheredInterfaceRequest mRequest;
-        private volatile String mIface;
+        private TetheredInterfaceRequest mRequest;
+        private final CompletableFuture<String> mFuture = new CompletableFuture<>();
 
         TetheredInterfaceRequester(Handler handler, EthernetManager em) {
             mHandler = handler;
@@ -384,25 +380,28 @@ public class EthernetTetheringTest {
         @Override
         public void onAvailable(String iface) {
             Log.d(TAG, "Ethernet interface available: " + iface);
-            mIface = iface;
-            mInterfaceAvailableLatch.countDown();
+            mFuture.complete(iface);
         }
+
         @Override
-        public void onUnavailable() {}
-
-        public void requestInterface() {
-            assertNull("BUG: more than one tethered interface request", mRequest);
-            mRequest = mEm.requestTetheredInterface(mHandler::post, this);
+        public void onUnavailable() {
+            mFuture.completeExceptionally(new IllegalStateException("onUnavailable received"));
         }
 
-        public String awaitRequestedInterface() throws InterruptedException {
-            assertTrue("No tethered interface available after " + TIMEOUT_MS + "ms",
-                    mInterfaceAvailableLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-            return mIface;
+        public CompletableFuture<String> requestInterface() {
+            assertNull("BUG: more than one tethered interface request", mRequest);
+            Log.d(TAG, "Requesting tethered interface");
+            mRequest = mEm.requestTetheredInterface(mHandler::post, this);
+            return mFuture;
+        }
+
+        public String getInterface() throws Exception {
+            return requestInterface().get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         }
 
         public void release() {
             if (mRequest != null) {
+                mFuture.obtrudeException(new IllegalStateException("Request already released"));
                 mRequest.release();
                 mRequest = null;
             }
