@@ -1829,12 +1829,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void requestLocationUpdates(LocationRequest request, ILocationListener listener,
-            PendingIntent intent, String packageName, String attributionTag) {
+            PendingIntent intent, String packageName, String attributionTag, String listenerId) {
         if (request == null) {
             request = DEFAULT_LOCATION_REQUEST;
         }
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
+                listenerId);
         identity.enforceLocationPermission(PERMISSION_COARSE);
 
         WorkSource workSource = request.getWorkSource();
@@ -2022,7 +2023,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public boolean getCurrentLocation(LocationRequest locationRequest,
             ICancellationSignal remoteCancellationSignal, ILocationListener listener,
-            String packageName, String attributionTag) {
+            String packageName, String attributionTag, String listenerId) {
         // side effect of validating locationRequest and packageName
         Location lastLocation = getLastLocation(locationRequest, packageName, attributionTag);
         if (lastLocation != null) {
@@ -2047,7 +2048,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
 
-        requestLocationUpdates(locationRequest, listener, null, packageName, attributionTag);
+        requestLocationUpdates(locationRequest, listener, null, packageName, attributionTag,
+                listenerId);
         CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
                 remoteCancellationSignal);
         if (cancellationSignal != null) {

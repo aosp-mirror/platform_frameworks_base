@@ -48,10 +48,10 @@ interface ILocationManager
     Location getLastLocation(in LocationRequest request, String packageName, String attributionTag);
     boolean getCurrentLocation(in LocationRequest request,
             in ICancellationSignal cancellationSignal, in ILocationListener listener,
-            String packageName, String attributionTag);
+            String packageName, String attributionTag, String listenerId);
 
     void requestLocationUpdates(in LocationRequest request, in ILocationListener listener,
-            in PendingIntent intent, String packageName, String attributionTag);
+            in PendingIntent intent, String packageName, String attributionTag, String listenerId);
     void removeUpdates(in ILocationListener listener, in PendingIntent intent);
 
     void requestGeofence(in LocationRequest request, in Geofence geofence,
