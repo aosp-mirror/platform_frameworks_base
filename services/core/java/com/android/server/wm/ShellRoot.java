@@ -16,12 +16,20 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
+import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
+
 import android.annotation.NonNull;
+import android.graphics.Point;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.DisplayInfo;
 import android.view.IWindow;
 import android.view.SurfaceControl;
+import android.view.animation.Animation;
 
 /**
  * Represents a piece of the hierarchy under which a client Shell can manage sub-windows.
@@ -69,6 +77,30 @@ public class ShellRoot {
 
     IWindow getClient() {
         return mClient;
+    }
+
+    void startAnimation(Animation anim) {
+        // Only do this for the divider
+        if (mToken.windowType != TYPE_DOCK_DIVIDER) {
+            return;
+        }
+
+        DisplayInfo displayInfo = mToken.getFixedRotationTransformDisplayInfo();
+        if (displayInfo == null) {
+            displayInfo = mDisplayContent.getDisplayInfo();
+        }
+
+        // Mostly copied from WindowState to enable keyguard transition animation
+        anim.initialize(displayInfo.logicalWidth, displayInfo.logicalHeight,
+                displayInfo.appWidth, displayInfo.appHeight);
+        anim.restrictDuration(MAX_ANIMATION_DURATION);
+        anim.scaleCurrentDuration(mDisplayContent.mWmService.getWindowAnimationScaleLocked());
+        final AnimationAdapter adapter = new LocalAnimationAdapter(
+                new WindowAnimationSpec(anim, new Point(0, 0), false /* canSkipFirstFrame */,
+                        0 /* windowCornerRadius */),
+                mDisplayContent.mWmService.mSurfaceAnimationRunner);
+        mToken.startAnimation(mToken.getPendingTransaction(), adapter, false /* hidden */,
+                ANIMATION_TYPE_WINDOW_ANIMATION, null /* animationFinishedCallback */);
     }
 }
 
