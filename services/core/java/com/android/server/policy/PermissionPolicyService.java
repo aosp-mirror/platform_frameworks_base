@@ -30,6 +30,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -47,6 +48,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.permission.PermissionControllerManager;
+import android.provider.Settings;
 import android.provider.Telephony;
 import android.telecom.TelecomManager;
 import android.util.ArrayMap;
@@ -70,7 +72,9 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -180,8 +184,6 @@ public final class PermissionPolicyService extends SystemService {
         intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         intentFilter.addDataScheme("package");
 
-
-        /* TODO ntmyren: enable receiver when test flakes are fixed
         getContext().registerReceiverAsUser(new BroadcastReceiver() {
             final List<Integer> mUserSetupUids = new ArrayList<>(200);
             final Map<UserHandle, PermissionControllerManager> mPermControllerManagers =
@@ -232,7 +234,6 @@ public final class PermissionPolicyService extends SystemService {
                 manager.updateUserSensitiveForApp(uid);
             }
         }, UserHandle.ALL, intentFilter, null, null);
-         */
     }
 
     /**
