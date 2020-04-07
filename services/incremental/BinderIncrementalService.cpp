@@ -116,11 +116,14 @@ binder::Status BinderIncrementalService::openStorage(const std::string& path,
     return ok();
 }
 
-binder::Status BinderIncrementalService::createStorage(const std::string& path,
-                                                       const DataLoaderParamsParcel& params,
-                                                       const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& listener,
-                                                       int32_t createMode, int32_t* _aidl_return) {
-    *_aidl_return = mImpl.createStorage(path, const_cast<DataLoaderParamsParcel&&>(params), listener, android::incremental::IncrementalService::CreateOptions(createMode));
+binder::Status BinderIncrementalService::createStorage(
+        const std::string& path, const DataLoaderParamsParcel& params,
+        const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& listener,
+        int32_t createMode, int32_t* _aidl_return) {
+    *_aidl_return =
+            mImpl.createStorage(path, const_cast<DataLoaderParamsParcel&&>(params), listener,
+                                android::incremental::IncrementalService::CreateOptions(
+                                        createMode));
     return ok();
 }
 
@@ -181,7 +184,8 @@ static std::tuple<int, incfs::FileId, incfs::NewFileParams> toMakeFileParams(
     if (!params.signature) {
         nfp.signature = {};
     } else {
-        nfp.signature = {(const char*)params.signature->data(), (IncFsSize)params.signature->size()};
+        nfp.signature = {(const char*)params.signature->data(),
+                         (IncFsSize)params.signature->size()};
     }
     return {0, id, nfp};
 }
@@ -275,6 +279,12 @@ binder::Status BinderIncrementalService::configureNativeBinaries(
         int32_t storageId, const std::string& apkFullPath, const std::string& libDirRelativePath,
         const std::string& abi, bool* _aidl_return) {
     *_aidl_return = mImpl.configureNativeBinaries(storageId, apkFullPath, libDirRelativePath, abi);
+    return ok();
+}
+
+binder::Status BinderIncrementalService::waitForNativeBinariesExtraction(int storageId,
+                                                                         bool* _aidl_return) {
+    *_aidl_return = mImpl.waitForNativeBinariesExtraction(storageId);
     return ok();
 }
 
