@@ -30,8 +30,8 @@ import java.lang.annotation.Target;
  * <p>
  * This is a marker annotation and it has no specific attributes.
  *
- * @paramDoc This value must never be {@code null}.
- * @returnDoc This value will never be {@code null}.
+ * @paramDoc This value cannot be {@code null}.
+ * @returnDoc This value cannot be {@code null}.
  * @hide
  */
 @Retention(SOURCE)
