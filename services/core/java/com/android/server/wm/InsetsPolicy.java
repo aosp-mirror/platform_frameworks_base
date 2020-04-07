@@ -99,7 +99,7 @@ class InsetsPolicy {
     }
 
     private void updateHideNavInputEventReceiver() {
-        mPolicy.updateHideNavInputEventReceiver(!isHidden(ITYPE_NAVIGATION_BAR),
+        mPolicy.updateHideNavInputEventReceiver(mPolicy.isNavigationBarRequestedVisible(),
                 mFocusedWin != null
                         && mFocusedWin.mAttrs.insetsFlags.behavior != BEHAVIOR_SHOW_BARS_BY_TOUCH);
     }
