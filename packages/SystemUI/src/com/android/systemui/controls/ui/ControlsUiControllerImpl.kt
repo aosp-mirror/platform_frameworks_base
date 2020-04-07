@@ -21,10 +21,12 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
+import android.util.TypedValue
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -345,10 +347,12 @@ class ControlsUiControllerImpl @Inject constructor (
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_with_favorites, parent, true)
 
+        val maxColumns = findMaxColumns()
+
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
         selectedStructure.controls.forEach {
-            if (lastRow.getChildCount() == 2) {
+            if (lastRow.getChildCount() == maxColumns) {
                 lastRow = createRow(inflater, listView)
             }
             val baseLayout = inflater.inflate(
@@ -365,10 +369,38 @@ class ControlsUiControllerImpl @Inject constructor (
             controlViewsById.put(key, cvh)
         }
 
-        // add spacer if necessary to keep control size consistent
-        if ((selectedStructure.controls.size % 2) == 1) {
+        // add spacers if necessary to keep control size consistent
+        var spacersToAdd = selectedStructure.controls.size % maxColumns
+        while (spacersToAdd > 0) {
             lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
+            spacersToAdd--
         }
+    }
+
+    /**
+     * For low-dp width screens that also employ an increased font scale, adjust the
+     * number of columns. This helps prevent text truncation on these devices.
+     */
+    private fun findMaxColumns(): Int {
+        val res = context.resources
+        var maxColumns = res.getInteger(R.integer.controls_max_columns)
+        val maxColumnsAdjustWidth =
+            res.getInteger(R.integer.controls_max_columns_adjust_below_width_dp)
+
+        val outValue = TypedValue()
+        res.getValue(R.dimen.controls_max_columns_adjust_above_font_scale, outValue, true)
+        val maxColumnsAdjustFontScale = outValue.getFloat()
+
+        val config = res.configuration
+        val isPortrait = config.orientation == Configuration.ORIENTATION_PORTRAIT
+        if (isPortrait &&
+            config.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED &&
+            config.screenWidthDp <= maxColumnsAdjustWidth &&
+            config.fontScale >= maxColumnsAdjustFontScale) {
+            maxColumns--
+        }
+
+        return maxColumns
     }
 
     private fun loadPreference(structures: List<StructureInfo>): StructureInfo {

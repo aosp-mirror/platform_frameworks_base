@@ -635,7 +635,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     private void updatedFixedRotation() {
-        mFixedRotationEnabled = Settings.Global.getInt(getContext().getContentResolver(),
+        mFixedRotationEnabled = Settings.Global.getInt(mContentResolver,
                 FIXED_ROTATION_TRANSFORM_SETTING_NAME, 0) != 0;
         if (!canShowSecondaryHandle()) {
             resetSecondaryHandle();

@@ -314,6 +314,9 @@ public class CarNavigationBarController {
     public interface NotificationsShadeController {
         /** Toggles the visibility of the notifications shade. */
         void togglePanel();
+
+        /** Returns {@code true} if the panel is open. */
+        boolean isNotificationPanelOpen();
     }
 
     private void checkAllBars(boolean isSetUp) {

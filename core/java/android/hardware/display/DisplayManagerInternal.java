@@ -17,6 +17,7 @@
 package android.hardware.display;
 
 import android.annotation.Nullable;
+import android.graphics.Point;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -72,6 +73,15 @@ public abstract class DisplayManagerInternal {
     public abstract SurfaceControl.ScreenshotGraphicBuffer screenshot(int displayId);
 
     /**
+     * Take a screenshot without secure layer of the specified display and return a buffer.
+     *
+     * @param displayId The display id to take the screenshot of.
+     * @return The buffer or null if we have failed.
+     */
+    public abstract SurfaceControl.ScreenshotGraphicBuffer screenshotWithoutSecureLayer(
+            int displayId);
+
+    /**
      * Returns information about the specified logical display.
      *
      * @param displayId The logical display id.
@@ -79,6 +89,16 @@ public abstract class DisplayManagerInternal {
      * returned object must be treated as immutable.
      */
     public abstract DisplayInfo getDisplayInfo(int displayId);
+
+    /**
+     * Returns the position of the display's projection.
+     *
+     * @param displayId The logical display id.
+     * @return The x, y coordinates of the display, or null if the display does not exist. The
+     * return object must be treated as immutable.
+     */
+    @Nullable
+    public abstract Point getDisplayPosition(int displayId);
 
     /**
      * Registers a display transaction listener to provide the client a chance to

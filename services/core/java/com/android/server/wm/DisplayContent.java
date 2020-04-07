@@ -5433,6 +5433,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDisplayPolicy.getSystemUiContext();
     }
 
+    Point getDisplayPosition() {
+        return mWmService.mDisplayManagerInternal.getDisplayPosition(getDisplayId());
+    }
+
     class RemoteInsetsControlTarget implements InsetsControlTarget {
         private final IDisplayWindowInsetsController mRemoteInsetsController;
 

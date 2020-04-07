@@ -40,28 +40,19 @@
 
     <TextView
         android:id="@+id/status"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Control.Status"
         android:paddingTop="@dimen/control_padding_adjustment"
         android:paddingStart="@dimen/control_status_padding"
-        android:clickable="false"
+        android:clickable="true"
         android:focusable="false"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit = "marquee_forever"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@+id/icon"
         app:layout_constraintStart_toEndOf="@+id/icon" />
-
-
-    <TextView
-        android:id="@+id/status_extra"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Control.Status"
-        android:paddingTop="@dimen/control_padding_adjustment"
-        android:paddingStart="@dimen/control_status_padding"
-        android:clickable="false"
-        android:focusable="false"
-        app:layout_constraintBottom_toBottomOf="@+id/icon"
-        app:layout_constraintStart_toEndOf="@+id/status" />
 
     <TextView
         android:id="@+id/title"

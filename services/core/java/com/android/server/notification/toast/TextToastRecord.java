@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.notification.NotificationManagerService;
@@ -41,10 +42,10 @@ public class TextToastRecord extends ToastRecord {
     private final ITransientNotificationCallback mCallback;
 
     public TextToastRecord(NotificationManagerService notificationManager,
-            @Nullable StatusBarManagerInternal statusBarManager, int pid, String packageName,
-            IBinder token, CharSequence text, int duration, Binder windowToken, int displayId,
-            @Nullable ITransientNotificationCallback callback) {
-        super(notificationManager, pid, packageName, token, duration, windowToken, displayId);
+            @Nullable StatusBarManagerInternal statusBarManager, int uid, int pid,
+            String packageName, IBinder token, CharSequence text, int duration, Binder windowToken,
+            int displayId, @Nullable ITransientNotificationCallback callback) {
+        super(notificationManager, uid, pid, packageName, token, duration, windowToken, displayId);
         mStatusBar = statusBarManager;
         mCallback = callback;
         this.text = checkNotNull(text);
@@ -59,7 +60,7 @@ public class TextToastRecord extends ToastRecord {
             Slog.w(TAG, "StatusBar not available to show text toast for package " + pkg);
             return false;
         }
-        mStatusBar.showToast(pkg, token, text, windowToken, getDuration(), mCallback);
+        mStatusBar.showToast(uid, pkg, token, text, windowToken, getDuration(), mCallback);
         return true;
     }
 
@@ -75,8 +76,8 @@ public class TextToastRecord extends ToastRecord {
     public String toString() {
         return "TextToastRecord{"
                 + Integer.toHexString(System.identityHashCode(this))
+                + " " + pid + ":" +  pkg + "/" + UserHandle.formatUid(uid)
                 + " token=" + token
-                + " packageName=" + pkg
                 + " text=" + text
                 + " duration=" + getDuration()
                 + "}";
