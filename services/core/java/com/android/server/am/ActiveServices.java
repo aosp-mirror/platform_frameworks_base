@@ -1440,7 +1440,7 @@ public final class ActiveServices {
                                 active.mPackageName = r.packageName;
                                 active.mUid = r.appInfo.uid;
                                 active.mShownWhileScreenOn = mScreenOn;
-                                if (r.app != null) {
+                                if (r.app != null && r.app.uidRecord != null) {
                                     active.mAppOnTop = active.mShownWhileTop =
                                             r.app.uidRecord.getCurProcState()
                                                     <= ActivityManager.PROCESS_STATE_TOP;
