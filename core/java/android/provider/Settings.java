@@ -13757,6 +13757,16 @@ public final class Settings {
                 "show_notification_channel_warnings";
 
         /**
+         * When enabled, requires all notifications in the conversation section to be backed
+         * by a long-lived sharing shortcut
+         *
+         * The value 1 - require a shortcut, 0 - do not require a shortcut
+         * @hide
+         */
+        public static final String REQUIRE_SHORTCUTS_FOR_CONVERSATIONS =
+                "require_shortcuts_for_conversations";
+
+        /**
          * Whether cell is enabled/disabled
          * @hide
          */
