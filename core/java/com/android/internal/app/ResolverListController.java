@@ -121,20 +121,10 @@ public class ResolverListController {
             List<Intent> intents,
             UserHandle userHandle) {
         int baseFlags = PackageManager.MATCH_DEFAULT_ONLY
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                 | (shouldGetResolvedFilter ? PackageManager.GET_RESOLVED_FILTER : 0)
                 | (shouldGetActivityMetadata ? PackageManager.GET_META_DATA : 0);
-        return getResolversForIntentAsUserInternal(intents, userHandle, baseFlags);
-    }
-
-    /**
-     * Returns a list of resolved intents which is user state-independent. This means it will
-     * return the same results regardless of whether the {@code userHandle} user is disabled or not.
-     */
-    public List<ResolverActivity.ResolvedComponentInfo> getUserStateIndependentResolversAsUser(
-            List<Intent> intents,
-            UserHandle userHandle) {
-        int baseFlags = PackageManager.MATCH_DIRECT_BOOT_AWARE
-                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
         return getResolversForIntentAsUserInternal(intents, userHandle, baseFlags);
     }
 
