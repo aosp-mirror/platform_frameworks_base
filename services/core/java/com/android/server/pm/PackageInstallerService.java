@@ -82,6 +82,7 @@ import com.android.internal.util.ImageUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import libcore.io.IoUtils;
@@ -105,6 +106,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.IntPredicate;
+import java.util.function.Supplier;
 
 /** The service responsible for installing packages. */
 public class PackageInstallerService extends IPackageInstaller.Stub implements
@@ -194,7 +196,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     };
 
-    public PackageInstallerService(Context context, PackageManagerService pm) {
+    public PackageInstallerService(Context context, PackageManagerService pm,
+            Supplier<PackageParser2> apexParserSupplier) {
         mContext = context;
         mPm = pm;
         mPermissionManager = LocalServices.getService(PermissionManagerServiceInternal.class);
@@ -213,7 +216,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mSessionsDir.mkdirs();
 
         mApexManager = ApexManager.getInstance();
-        mStagingManager = new StagingManager(this, context);
+        mStagingManager = new StagingManager(this, context, apexParserSupplier);
     }
 
     boolean okToSendBroadcasts()  {
