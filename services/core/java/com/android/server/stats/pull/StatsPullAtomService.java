@@ -416,6 +416,8 @@ public class StatsPullAtomService extends SystemService {
                         return pullHealthHal(atomTag, data);
                     case FrameworkStatsLog.ATTRIBUTED_APP_OPS:
                         return pullAttributedAppOps(atomTag, data);
+                    case FrameworkStatsLog.SETTING_SNAPSHOT:
+                        return pullSettingsStats(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -580,6 +582,7 @@ public class StatsPullAtomService extends SystemService {
         registerFullBatteryCapacity();
         registerBatteryVoltage();
         registerBatteryCycleCount();
+        registerSettingsStats();
     }
 
     /**
@@ -3240,6 +3243,43 @@ public class StatsPullAtomService extends SystemService {
             });
         } catch (RemoteException | IllegalStateException e) {
             return StatsManager.PULL_SKIP;
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerSettingsStats() {
+        int tagId = FrameworkStatsLog.SETTING_SNAPSHOT;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullSettingsStats(int atomTag, List<StatsEvent> pulledData) {
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        if (userManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            for (UserInfo user : userManager.getUsers()) {
+                final int userId = user.getUserHandle().getIdentifier();
+
+                if (userId == UserHandle.USER_SYSTEM) {
+                    pulledData.addAll(SettingsStatsUtil.logGlobalSettings(mContext, atomTag,
+                            UserHandle.USER_SYSTEM));
+                }
+                pulledData.addAll(SettingsStatsUtil.logSystemSettings(mContext, atomTag, userId));
+                pulledData.addAll(SettingsStatsUtil.logSecureSettings(mContext, atomTag, userId));
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "failed to pullSettingsStats", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         return StatsManager.PULL_SUCCESS;
     }
