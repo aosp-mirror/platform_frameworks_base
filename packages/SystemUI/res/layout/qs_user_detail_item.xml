@@ -30,21 +30,20 @@
         android:clipToPadding="false"
         android:focusable="true"
         android:background="@drawable/ripple_drawable"
-        systemui:regularTextAppearance="@style/TextAppearance.QS.UserSwitcher"
-        systemui:activatedTextAppearance="@style/TextAppearance.QS.UserSwitcher.Activated">
+        systemui:regularTextAppearance="@style/TextAppearance.QS.UserSwitcher">
 
     <com.android.systemui.statusbar.phone.UserAvatarView
             android:id="@+id/user_picture"
-            android:layout_width="@dimen/framed_avatar_size"
-            android:layout_height="@dimen/framed_avatar_size"
+            android:layout_width="@dimen/qs_framed_avatar_size"
+            android:layout_height="@dimen/qs_framed_avatar_size"
             android:layout_marginBottom="7dp"
             android:backgroundTint="@color/qs_user_detail_avatar_tint"
             android:backgroundTintMode="src_atop"
-            systemui:frameWidth="2dp"
-            systemui:framePadding="2.5dp"
+            systemui:frameWidth="6dp"
             systemui:badgeDiameter="18dp"
             systemui:badgeMargin="1dp"
-            systemui:frameColor="@color/qs_user_detail_avatar_frame"/>
+            systemui:framePadding="-1dp"
+            systemui:frameColor="@color/qs_user_avatar_frame"/>
 
     <LinearLayout
             android:layout_width="wrap_content"
