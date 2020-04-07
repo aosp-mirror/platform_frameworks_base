@@ -47,7 +47,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
-import android.view.SurfaceControl;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -1820,6 +1819,13 @@ public abstract class AccessibilityService extends Service {
 
     /**
      * Returns a list of system actions available in the system right now.
+     * <p>
+     * System actions that correspond to the global action constants will have matching action IDs.
+     * For example, an with id {@link #GLOBAL_ACTION_BACK} will perform the back action.
+     * </p>
+     * <p>
+     * These actions should be called by {@link #performGlobalAction}.
+     * </p>
      *
      * @return A list of available system actions.
      */
@@ -1981,8 +1987,6 @@ public abstract class AccessibilityService extends Service {
      * to declare the capability to take screenshot by setting the
      * {@link android.R.styleable#AccessibilityService_canTakeScreenshot}
      * property in its meta-data. For details refer to {@link #SERVICE_META_DATA}.
-     * This API only will support {@link Display#DEFAULT_DISPLAY} until {@link SurfaceControl}
-     * supports non-default displays.
      * </p>
      *
      * @param displayId The logic display id, must be {@link Display#DEFAULT_DISPLAY} for
@@ -1990,18 +1994,11 @@ public abstract class AccessibilityService extends Service {
      * @param executor Executor on which to run the callback.
      * @param callback The callback invoked when taking screenshot has succeeded or failed.
      *                 See {@link TakeScreenshotCallback} for details.
-     *
-     * @throws IllegalArgumentException if displayId is not {@link Display#DEFAULT_DISPLAY}.
      */
     public void takeScreenshot(int displayId, @NonNull @CallbackExecutor Executor executor,
             @NonNull TakeScreenshotCallback callback) {
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkNotNull(callback, "callback cannot be null");
-
-        if (displayId != Display.DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("DisplayId isn't the default display");
-        }
-
         final IAccessibilityServiceConnection connection =
                 AccessibilityInteractionClient.getInstance().getConnection(
                         mConnectionId);

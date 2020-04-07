@@ -514,7 +514,7 @@
     <string name="shared_data_title" msgid="1017034836800864953">"शेयर किया गया डेटा"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"शेयर किए गए डेटा को देखें और उसमें बदलाव करें"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"इस उपयोगकर्ता के साथ किसी तरह का डेटा शेयर नहीं किया गया है."</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"शेयर किए गए इस डेटा को लाने में कोई गड़बड़ी हुई है. फिर से कोशिश करें."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"शेयर किए गए डेटा को लाने में कोई गड़बड़ी हुई है. फिर से कोशिश करें."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"शेयर किए गए डेटा का आईडी: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"डेटा का ऐक्सेस <xliff:g id="DATE">%s</xliff:g> को खत्म हो जाएगा"</string>
     <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"शेयर किए गए डेटा को मिटाने में कोई गड़बड़ी हुई."</string>
@@ -543,12 +543,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफ़ाइल की जानकारी"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"इससे पहले कि आप कोई प्रतिबंधित प्रोफ़ाइल बनाएं, आपको अपने ऐप्लिकेशन  और व्यक्तिगत डेटा की सुरक्षा करने के लिए एक स्क्रीन लॉक सेट करना होगा."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"लॉक सेट करें"</string>
-    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (3482026122932643557) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
-    <skip />
-    <!-- no translation found for guest_nickname (6332276931583337261) -->
-    <skip />
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> पर जाएं"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"मेहमान जोड़ें"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"मेहमान हटाएं"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"मेहमान"</string>
 </resources>

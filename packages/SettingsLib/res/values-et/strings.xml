@@ -543,12 +543,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profiili teave"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Enne piiratud profiili loomist peate seadistama lukustusekraani, et oma rakendusi ja isiklikke andmeid kaitsta."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Määra lukk"</string>
-    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (3482026122932643557) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
-    <skip />
-    <!-- no translation found for guest_nickname (6332276931583337261) -->
-    <skip />
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Lülita kasutajale <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Lisa külaline"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Eemalda külaline"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Külaline"</string>
 </resources>

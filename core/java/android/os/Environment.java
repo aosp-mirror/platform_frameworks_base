@@ -1268,6 +1268,7 @@ public class Environment {
     public static boolean isExternalStorageLegacy(@NonNull File path) {
         final Context context = AppGlobals.getInitialApplication();
         final int uid = context.getApplicationInfo().uid;
+        // Isolated processes and Instant apps are never allowed to be in scoped storage
         if (Process.isIsolated(uid)) {
             return false;
         }
@@ -1277,8 +1278,6 @@ public class Environment {
             return false;
         }
 
-        // TODO(b/150672994): Compat flags do not override instant app and isolated process's
-        //  behavior.
         boolean defaultScopedStorage = Compatibility.isChangeEnabled(DEFAULT_SCOPED_STORAGE);
         boolean forceEnableScopedStorage = Compatibility.isChangeEnabled(
                 FORCE_ENABLE_SCOPED_STORAGE);

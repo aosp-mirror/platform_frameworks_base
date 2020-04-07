@@ -5317,7 +5317,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalArgumentException(
                         "Requested window " + client + " does not exist");
             }
-            ProtoLog.w(WM_ERROR, "Failed looking up window callers=%s", Debug.getCallers(3));
+            ProtoLog.w(WM_ERROR, "Failed looking up window session=%s callers=%s", session,
+                    Debug.getCallers(3));
             return null;
         }
         if (session != null && win.mSession != session) {
@@ -5325,7 +5326,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalArgumentException("Requested window " + client + " is in session "
                         + win.mSession + ", not " + session);
             }
-            ProtoLog.w(WM_ERROR, "Failed looking up window callers=%s", Debug.getCallers(3));
+            ProtoLog.w(WM_ERROR, "Failed looking up window session=%s callers=%s", session,
+                    Debug.getCallers(3));
             return null;
         }
 
@@ -6049,10 +6051,20 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.print("  mHasPermanentDpad="); pw.println(mHasPermanentDpad);
         mRoot.dumpTopFocusedDisplayId(pw);
         mRoot.forAllDisplays(dc -> {
+            final int displayId = dc.getDisplayId();
             final WindowState inputMethodTarget = dc.mInputMethodTarget;
             if (inputMethodTarget != null) {
-                pw.print("  mInputMethodTarget in display# "); pw.print(dc.getDisplayId());
+                pw.print("  mInputMethodTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(inputMethodTarget);
+            }
+            if (mAccessibilityController != null) {
+                final Region magnificationRegion = new Region();
+                mAccessibilityController.getMagnificationRegionLocked(displayId,
+                        magnificationRegion);
+                pw.print("  mMagnificationRegion in display# ");
+                pw.print(displayId);
+                pw.print(' ');
+                pw.println(magnificationRegion);
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);

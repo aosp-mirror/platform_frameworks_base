@@ -32,6 +32,10 @@
     <!-- Disable normal notification rendering; we handle that ourselves -->
     <bool name="config_renderNotifications">false</bool>
 
+    <!-- Whether navigationBar touch events should be consumed before reaching the CarFacetButton \
+         when the notification panel is open. -->
+    <bool name="config_consumeNavigationBarTouchWhenNotificationPanelOpen">false</bool>
+
     <!-- Whether heads-up notifications should be shown when shade is open. -->
     <bool name="config_enableHeadsUpNotificationWhenNotificationShadeOpen">true</bool>
     <!-- Whether heads-up notifications should be shown on the bottom. If false, heads-up

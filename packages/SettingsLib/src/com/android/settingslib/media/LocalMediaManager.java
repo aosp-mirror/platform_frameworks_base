@@ -146,6 +146,7 @@ public class LocalMediaManager implements BluetoothCallback {
                     ((BluetoothMediaDevice) device).getCachedDevice();
             if (!cachedDevice.isConnected() && !cachedDevice.isBusy()) {
                 mOnTransferBluetoothDevice = connectDevice;
+                device.setState(MediaDeviceState.STATE_CONNECTING);
                 cachedDevice.connect();
                 return;
             }
@@ -220,7 +221,7 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public MediaDevice getMediaDeviceById(List<MediaDevice> devices, String id) {
         for (MediaDevice mediaDevice : devices) {
-            if (mediaDevice.getId().equals(id)) {
+            if (TextUtils.equals(mediaDevice.getId(), id)) {
                 return mediaDevice;
             }
         }
@@ -236,7 +237,7 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public MediaDevice getMediaDeviceById(String id) {
         for (MediaDevice mediaDevice : mMediaDevices) {
-            if (mediaDevice.getId().equals(id)) {
+            if (TextUtils.equals(mediaDevice.getId(), id)) {
                 return mediaDevice;
             }
         }
@@ -394,6 +395,7 @@ public class LocalMediaManager implements BluetoothCallback {
             dispatchDeviceListUpdate();
             if (mOnTransferBluetoothDevice != null && mOnTransferBluetoothDevice.isConnected()) {
                 connectDevice(mOnTransferBluetoothDevice);
+                mOnTransferBluetoothDevice.setState(MediaDeviceState.STATE_CONNECTED);
                 mOnTransferBluetoothDevice = null;
             }
         }
@@ -539,6 +541,14 @@ public class LocalMediaManager implements BluetoothCallback {
 
         @Override
         public void onDeviceAttributesChanged() {
+            if (mOnTransferBluetoothDevice != null
+                    && !((BluetoothMediaDevice) mOnTransferBluetoothDevice).getCachedDevice()
+                    .isBusy()
+                    && !mOnTransferBluetoothDevice.isConnected()) {
+                // Failed to connect
+                mOnTransferBluetoothDevice.setState(MediaDeviceState.STATE_DISCONNECTED);
+                mOnTransferBluetoothDevice = null;
+            }
             dispatchDeviceAttributesChanged();
         }
     }

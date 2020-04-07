@@ -191,6 +191,9 @@ public interface ChooserActivityLogger {
      * ChooserActivity.
      */
     default int typeFromIntentString(String intent) {
+        if (intent == null) {
+            return FrameworkStatsLog.SHARESHEET_STARTED__INTENT_TYPE__INTENT_DEFAULT;
+        }
         switch (intent) {
             case Intent.ACTION_VIEW:
                 return FrameworkStatsLog.SHARESHEET_STARTED__INTENT_TYPE__INTENT_ACTION_VIEW;

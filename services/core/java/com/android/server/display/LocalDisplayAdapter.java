@@ -203,6 +203,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private Spline mNitsToHalBrightness;
         private boolean mHalBrightnessSupport;
 
+        private DisplayDeviceConfig mDisplayDeviceConfig;
+
         LocalDisplayDevice(IBinder displayToken, long physicalDisplayId,
                 SurfaceControl.DisplayInfo info, SurfaceControl.DisplayConfig[] configs,
                 int activeConfigId, SurfaceControl.DesiredDisplayConfigSpecs configSpecs,
@@ -224,7 +226,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mAllmSupported = SurfaceControl.getAutoLowLatencyModeSupport(displayToken);
             mGameContentTypeSupported = SurfaceControl.getGameContentTypeSupport(displayToken);
             mHalBrightnessSupport = SurfaceControl.getDisplayBrightnessSupport(displayToken);
-
+            mDisplayDeviceConfig = null;
             // Defer configuration file loading
             BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                     LocalDisplayDevice::loadDisplayConfigurationBrightnessMapping, this));
@@ -373,17 +375,23 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return true;
         }
 
+        @Override
+        public DisplayDeviceConfig getDisplayDeviceConfig() {
+            return mDisplayDeviceConfig;
+        }
+
         private void loadDisplayConfigurationBrightnessMapping() {
             Spline nitsToHal = null;
             Spline sysToNits = null;
 
             // Load the mapping from nits to HAL brightness range (display-device-config.xml)
             DisplayDeviceConfig config = DisplayDeviceConfig.create(mPhysicalDisplayId);
+            mDisplayDeviceConfig = config;
             if (config == null) {
                 return;
             }
-            final float[] halNits = config.getNits();
-            final float[] halBrightness = config.getBrightness();
+            final float[] halNits = mDisplayDeviceConfig.getNits();
+            final float[] halBrightness = mDisplayDeviceConfig.getBrightness();
             if (halNits == null || halBrightness == null) {
                 return;
             }

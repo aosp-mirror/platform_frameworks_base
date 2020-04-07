@@ -545,12 +545,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Podatki za profil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Preden lahko ustvarite profil z omejitvami, morate nastaviti zaklepanje zaslona, da zaščitite aplikacije in osebne podatke."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Nastavi zaklepanje"</string>
-    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (3482026122932643557) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
-    <skip />
-    <!-- no translation found for guest_nickname (6332276931583337261) -->
-    <skip />
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Preklop na račun <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Dodajanje gosta"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Odstranitev gosta"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Gost"</string>
 </resources>

@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ଠିକଣା ଓ ପୋର୍ଟ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR କୋଡ୍ ସ୍କାନ୍ କରନ୍ତୁ"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"ଏକ QR କୋଡ୍ ସ୍କାନ୍ କରି ୱାଇ-ଫାଇରେ ଡିଭାଇସ୍ ପେୟାର୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ଦୟାକରି ଏକ ୱାଇ-ଫାଇ ନେଟୱାର୍କରେ ସଂଯୋଗ କରନ୍ତୁ"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ଡିବଗ୍, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ବଗ୍ ରିପୋର୍ଟ ସର୍ଟକଟ୍‌"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ବଗ୍ ରିପୋର୍ଟ ଦେବାପାଇଁ ପାୱାର୍‌ ମେନୁରେ ଏକ ବଟନ୍‌ ଦେଖନ୍ତୁ"</string>
@@ -432,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"ବ୍ୟାଟେରୀ ପାଖାପାଖି <xliff:g id="TIME">%1$s</xliff:g> ଚାଲିବ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"ବ୍ୟାଟେରୀ <xliff:g id="TIME">%1$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ ଚାଲିବ"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> ସୁଦ୍ଧା ବ୍ୟାଟେରୀର ଚାର୍ଜ ଶେଷ ହୋଇ ଯାଇପାରେ"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g>ରୁ କମ୍ ସମୟ ବଳକା ଅଛି"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ରୁ କମ୍ ସମୟ ବଳକା ଅଛି (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>ରୁ ଅଧିକ ସମୟ ବଳକା ଅଛି(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -511,32 +509,21 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ଫୋନ୍ ସ୍ପିକର୍"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ସଂଯୋଗ କରିବାରେ ସମସ୍ୟା ହେଉଛି। ଡିଭାଇସ୍ ବନ୍ଦ କରି ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ତାରଯୁକ୍ତ ଅଡିଓ ଡିଭାଇସ୍"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"ସାହାଯ୍ୟ ଓ ମତାମତ"</string>
+    <string name="storage_category" msgid="2287342585424631813">"ଷ୍ଟୋରେଜ୍"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"ସେୟାର୍ କରାଯାଇଥିବା ଡାଟା"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"ସେୟାର୍ କରାଯାଇଥିବା ଡାଟା ଦେଖନ୍ତୁ ଏବଂ ଏହାକୁ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ କୌଣସି ସେୟାର୍ କରାଯାଇଥିବା ଡାଟା ନାହିଁ।"</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"ସେୟାର୍ କରାଯାଇଥିବା ଡାଟା ଫେଚ୍ କରିବା ସମୟରେ ଏକ ତ୍ରୁଟି ହୋଇଥିଲା। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
+    <string name="blob_id_text" msgid="8680078988996308061">"ସେୟାର୍ କରାଯାଇଥିବା ଡାଟା ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"<xliff:g id="DATE">%s</xliff:g>ରେ ମିଆଦ ଶେଷ ହେଉଛି"</string>
     <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"ସେୟାର୍ କରାଯାଇଥିବା ଡାଟା ଡିଲିଟ୍ କରିବା ସମୟରେ ଏକ ତ୍ରୁଟି ହୋଇଥିଲା।"</string>
     <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"ସେୟାର୍ କରାଯାଇଥିବା ଏହି ଡାଟା ପାଇଁ କୌଣସି ଲିଜ୍ ପ୍ରାପ୍ତ ହୋଇନାହିଁ। ଆପଣ ଏହା ଡିଲିଟ୍ କରିବାକୁ ଚାହୁଁଛନ୍ତି କି?"</string>
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="accessor_info_title" msgid="8289823651512477787">"ଡାଟା ସେୟାର୍ କରୁଥିବା ଆପଗୁଡ଼ିକ"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"ଆପ୍ ଦ୍ୱାରା କୌଣସି ବର୍ଣ୍ଣନା ପ୍ରଦାନ କରାଯାଇନାହିଁ।"</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"<xliff:g id="DATE">%s</xliff:g>ରେ ଲିଜର ମିଆଦ ଶେଷ ହେଉଛି"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"ସେୟାର୍ କରାଯାଇଥିବା ଡାଟା ଡିଲିଟ୍ କରନ୍ତୁ"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"ଆପଣ ସେୟାର୍ କରାଯାଇଥିବା ଏହି ଡାଟା ଡିଲିଟ୍ କରିବାକୁ ଚାହୁଁଥିବା ନିଶ୍ଚିତ କି?"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"ଉପଯୋଗକର୍ତ୍ତାମାନଙ୍କ ପାଖରେ ନିଜର ଆପ୍‌ ଓ କଣ୍ଟେଣ୍ଟ ଅଛି"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"ନିଜ ଆକାଉଣ୍ଟରୁ ଆପ୍‌ ତଥା କଣ୍ଟେଣ୍ଟକୁ ଆପଣ ଆକ୍ସେସ୍ ରୋକିପାରିବେ"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ଉପଯୋଗକର୍ତ୍ତା"</string>
@@ -556,12 +543,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"ପ୍ରୋଫାଇଲ୍ ସୂଚନା"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ପ୍ରତିବନ୍ଧିତ ପ୍ରୋଫାଇଲ୍‌ ତିଆରି କରିବାବେଳେ, ନିଜ ଆପ୍‌ ଓ ବ୍ୟକ୍ତିଗତ ତଥ୍ୟର ସୁରକ୍ଷା ପାଇଁ ଏକ ସ୍କ୍ରୀନ୍‌ ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ"</string>
-    <!-- no translation found for user_switch_to_user (6975428297154968543) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (3482026122932643557) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest (5908239569510734136) -->
-    <skip />
-    <!-- no translation found for guest_nickname (6332276931583337261) -->
-    <skip />
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>କୁ ସ୍ୱିଚ୍ କରନ୍ତୁ"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"ଅତିଥି ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"ଅତିଥିଙ୍କୁ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"ଅତିଥି"</string>
 </resources>
