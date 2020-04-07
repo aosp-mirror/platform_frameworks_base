@@ -20,8 +20,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
@@ -56,6 +58,7 @@ public class DozeDockHandlerTest extends SysuiTestCase {
         mDockManagerFake = spy(new DockManagerFake());
         mDockHandler = new DozeDockHandler(mConfig, mMachine, mDockManagerFake);
 
+        when(mMachine.getState()).thenReturn(State.DOZE_AOD);
         doReturn(true).when(mConfig).alwaysOnEnabled(anyInt());
         mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
     }
@@ -100,5 +103,32 @@ public class DozeDockHandlerTest extends SysuiTestCase {
         mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED_HIDE);
 
         verify(mMachine).requestState(eq(State.DOZE));
+    }
+
+    @Test
+    public void onEvent_dockedWhilePulsing_wontRequestStateChange() {
+        when(mMachine.getState()).thenReturn(State.DOZE_PULSING);
+
+        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED);
+
+        verify(mMachine, never()).requestState(any(State.class));
+    }
+
+    @Test
+    public void onEvent_noneWhilePulsing_wontRequestStateChange() {
+        when(mMachine.getState()).thenReturn(State.DOZE_PULSING);
+
+        mDockManagerFake.setDockEvent(DockManager.STATE_NONE);
+
+        verify(mMachine, never()).requestState(any(State.class));
+    }
+
+    @Test
+    public void onEvent_hideWhilePulsing_wontRequestStateChange() {
+        when(mMachine.getState()).thenReturn(State.DOZE_PULSING);
+
+        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED_HIDE);
+
+        verify(mMachine, never()).requestState(any(State.class));
     }
 }
