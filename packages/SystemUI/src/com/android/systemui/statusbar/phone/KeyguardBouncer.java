@@ -203,7 +203,9 @@ public class KeyguardBouncer {
             Log.wtf(TAG, "onFullyShown when view was null");
         } else {
             mKeyguardView.onResume();
-            mRoot.announceForAccessibility(mKeyguardView.getAccessibilityTitleForCurrentMode());
+            if (mRoot != null) {
+                mRoot.announceForAccessibility(mKeyguardView.getAccessibilityTitleForCurrentMode());
+            }
         }
     }
 
