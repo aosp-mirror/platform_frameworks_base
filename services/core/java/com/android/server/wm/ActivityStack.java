@@ -20,7 +20,6 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
@@ -685,9 +684,7 @@ class ActivityStack extends Task {
             return;
         }
 
-        setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
-                false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
-                false /* creating */);
+        setWindowingMode(windowingMode, false /* creating */);
     }
 
     /**
@@ -709,23 +706,14 @@ class ActivityStack extends Task {
      * @param preferredWindowingMode the preferred windowing mode. This may not be honored depending
      *         on the state of things. For example, WINDOWING_MODE_UNDEFINED will resolve to the
      *         previous non-transient mode if this stack is currently in a transient mode.
-     * @param animate Can be used to prevent animation.
-     * @param showRecents Controls whether recents is shown on the other side of a split while
-     *         entering split mode.
-     * @param enteringSplitScreenMode {@code true} if entering split mode.
-     * @param deferEnsuringVisibility Whether visibility updates are deferred. This is set when
-     *         many operations (which can effect visibility) are being performed in bulk.
      * @param creating {@code true} if this is being run during ActivityStack construction.
      */
-    void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents,
-            boolean enteringSplitScreenMode, boolean deferEnsuringVisibility, boolean creating) {
+    void setWindowingMode(int preferredWindowingMode, boolean creating) {
         mWmService.inSurfaceTransaction(() -> setWindowingModeInSurfaceTransaction(
-                preferredWindowingMode, animate, showRecents, enteringSplitScreenMode,
-                deferEnsuringVisibility, creating));
+                preferredWindowingMode, creating));
     }
 
-    private void setWindowingModeInSurfaceTransaction(int preferredWindowingMode, boolean animate,
-            boolean showRecents, boolean enteringSplitScreenMode, boolean deferEnsuringVisibility,
+    private void setWindowingModeInSurfaceTransaction(int preferredWindowingMode,
             boolean creating) {
         final int currentMode = getWindowingMode();
         final int currentOverrideMode = getRequestedOverrideWindowingMode();
@@ -753,12 +741,9 @@ class ActivityStack extends Task {
 
         final boolean alreadyInSplitScreenMode = taskDisplayArea.isSplitScreenModeActivated();
 
-        // Don't send non-resizeable notifications if the windowing mode changed was a side effect
-        // of us entering split-screen mode.
-        final boolean sendNonResizeableNotification = !enteringSplitScreenMode;
         // Take any required action due to us not supporting the preferred windowing mode.
         if (alreadyInSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
-                && sendNonResizeableNotification && isActivityTypeStandardOrUndefined()) {
+                && isActivityTypeStandardOrUndefined()) {
             final boolean preferredSplitScreen =
                     preferredWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     || preferredWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -794,7 +779,7 @@ class ActivityStack extends Task {
         if (currentMode == WINDOWING_MODE_PINNED) {
             mAtmService.getTaskChangeNotificationController().notifyActivityUnpinned();
         }
-        if (sendNonResizeableNotification && likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
+        if (likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
                 && topActivity != null && !topActivity.noDisplay
                 && topActivity.isNonResizableOrForcedResizable(likelyResolvedMode)) {
             // Inform the user that they are starting an app that may not work correctly in
@@ -806,7 +791,7 @@ class ActivityStack extends Task {
 
         mAtmService.deferWindowLayout();
         try {
-            if (!animate && topActivity != null) {
+            if (topActivity != null) {
                 mStackSupervisor.mNoAnimActivities.add(topActivity);
             }
             super.setWindowingMode(windowingMode);
@@ -845,36 +830,11 @@ class ActivityStack extends Task {
                         false /*preserveWindows*/, true /*deferResume*/);
             }
         } finally {
-            if (showRecents && !alreadyInSplitScreenMode && isOnHomeDisplay()
-                    && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                // Make sure recents stack exist when creating a dock stack as it normally needs to
-                // be on the other side of the docked stack and we make visibility decisions based
-                // on that.
-                // TODO: This is only here to help out with the case where recents stack doesn't
-                // exist yet. For that case the initial size of the split-screen stack will be the
-                // the one where the home stack is visible since recents isn't visible yet, but the
-                // divider will be off. I think we should just make the initial bounds that of home
-                // so that the divider matches and remove this logic.
-                // TODO: This is currently only called when entering split-screen while in another
-                // task, and from the tests
-                // TODO (b/78247419): Fix the rotation animation from fullscreen to minimized mode
-                final boolean isRecentsComponentHome =
-                        mAtmService.getRecentTasks().isRecentsComponentHomeActivity(mCurrentUser);
-                final ActivityStack recentStack = taskDisplayArea.getOrCreateStack(
-                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
-                        isRecentsComponentHome ? ACTIVITY_TYPE_HOME : ACTIVITY_TYPE_RECENTS,
-                        true /* onTop */);
-                recentStack.moveToFront("setWindowingMode");
-                // If task moved to docked stack - show recents if needed.
-                mWmService.showRecentApps();
-            }
             mAtmService.continueWindowLayout();
         }
 
-        if (!deferEnsuringVisibility) {
-            mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
-            mRootWindowContainer.resumeFocusedStacksTopActivities();
-        }
+        mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+        mRootWindowContainer.resumeFocusedStacksTopActivities();
     }
 
     @Override
