@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -983,6 +984,14 @@ public class NotificationContentView extends FrameLayout {
             default:
                 return mContractedChild;
         }
+    }
+
+    public @NonNull View[] getAllViews() {
+        return new View[] {
+                mContractedChild,
+                mHeadsUpChild,
+                mExpandedChild,
+                mSingleLineView };
     }
 
     public NotificationViewWrapper getVisibleWrapper(int visibleType) {
