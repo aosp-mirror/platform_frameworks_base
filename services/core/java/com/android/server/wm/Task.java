@@ -4100,8 +4100,18 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void setHasBeenVisible(boolean hasBeenVisible) {
+        final boolean prevHasBeenVisible = mHasBeenVisible;
         mHasBeenVisible = hasBeenVisible;
         if (hasBeenVisible) {
+            // If the task is not yet visible when it is added to the task organizer, then we should
+            // hide it to allow the task organizer to show it when it is properly reparented. We
+            // skip this for tasks created by the organizer because they can synchronously update
+            // the leash before new children are added to the task.
+            if (!mCreatedByOrganizer && mTaskOrganizer != null && !prevHasBeenVisible) {
+                getPendingTransaction().hide(getSurfaceControl());
+                commitPendingTransaction();
+            }
+
             sendTaskAppeared();
             if (!isRootTask()) {
                 getRootTask().setHasBeenVisible(true);
@@ -4146,15 +4156,6 @@ class Task extends WindowContainer<WindowContainer> {
         sendTaskVanished();
         mTaskOrganizer = organizer;
 
-        // If the task is not yet visible when it is added to the task organizer, then we should
-        // hide it to allow the task organizer to show it when it is properly reparented. We skip
-        // this for tasks created by the organizer because they can synchronously update the leash
-        // before new children are added to the task.
-        if (!mCreatedByOrganizer && organizer != null
-                && (!getHasBeenVisible() || !hasVisibleChildren())) {
-            getPendingTransaction().hide(getSurfaceControl());
-            commitPendingTransaction();
-        }
 
         sendTaskAppeared();
         onTaskOrganizerChanged();

@@ -38,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -2118,16 +2119,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         try {
             final Task task = r.getTask();
-
             final ActivityStack pinnedStack = taskDisplayArea.getRootPinnedTask();
+
             // This will change the pinned stack's windowing mode to its original mode, ensuring
             // we only have one stack that is in pinned mode.
             if (pinnedStack != null) {
                 pinnedStack.dismissPip();
             }
 
-            final boolean singleActivity = task.getChildCount() == 1;
+            // Set a transition to ensure that we don't immediately try and update the visibility
+            // of the activity entering PIP
+            r.getDisplayContent().prepareAppTransition(TRANSIT_NONE, false);
 
+            final boolean singleActivity = task.getChildCount() == 1;
             final ActivityStack stack;
             if (singleActivity) {
                 stack = r.getRootTask();
@@ -2150,11 +2154,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mService.continueWindowLayout();
         }
 
-        // TODO: revisit the following statement after the animation is moved from WM to SysUI.
-        // Update the visibility of all activities after the they have been reparented to the new
-        // stack.  This MUST run after the animation above is scheduled to ensure that the windows
-        // drawn signal is scheduled after the bounds animation start call on the bounds animator
-        // thread.
         ensureActivitiesVisible(null, 0, false /* preserveWindows */);
         resumeFocusedStacksTopActivities();
 

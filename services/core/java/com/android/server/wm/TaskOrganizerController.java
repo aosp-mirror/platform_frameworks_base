@@ -131,6 +131,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void onTaskInfoChanged(Task task, ActivityManager.RunningTaskInfo taskInfo) {
+            if (!task.mCreatedByOrganizer && !task.mTaskAppearedSent) {
+                // Skip if the task has not yet received taskAppeared(), except for tasks created
+                // by the organizer that don't receive that signal
+                return;
+            }
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 if (!task.isOrganized()) {
                     // This is safe to ignore if the task is no longer organized
@@ -145,6 +150,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void onBackPressedOnTaskRoot(Task task) {
+            if (!task.mCreatedByOrganizer && !task.mTaskAppearedSent) {
+                // Skip if the task has not yet received taskAppeared(), except for tasks created
+                // by the organizer that don't receive that signal
+                return;
+            }
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 if (!task.isOrganized()) {
                     // This is safe to ignore if the task is no longer organized
@@ -193,23 +203,15 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 mOrganizedTasks.add(t);
             }
             if (t.taskAppearedReady()) {
-                try {
-                    t.mTaskAppearedSent = true;
-                    mOrganizer.onTaskAppeared(t);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Exception sending taskAppeared callback" + e);
-                }
+                t.mTaskAppearedSent = true;
+                mOrganizer.onTaskAppeared(t);
             }
         }
 
         void removeTask(Task t) {
             if (t.mTaskAppearedSent) {
-                try {
-                    t.mTaskAppearedSent = false;
-                    mOrganizer.onTaskVanished(t);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Exception sending taskVanished callback" + e);
-                }
+                t.mTaskAppearedSent = false;
+                mOrganizer.onTaskVanished(t);
             }
             mOrganizedTasks.remove(t);
         }
@@ -460,9 +462,15 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         mTmpTaskInfo = null;
 
         if (task.isOrganized()) {
+            // Because we defer sending taskAppeared() until the app has drawn, we may receive a
+            // configuration change before the state actually has the task registered. As such we
+            // should ignore these change events to the organizer until taskAppeared(). If the task
+            // was created by the organizer, then we always send the info change.
             final TaskOrganizerState state = mTaskOrganizerStates.get(
                     task.mTaskOrganizer.asBinder());
-            state.mOrganizer.onTaskInfoChanged(task, newInfo);
+            if (state != null) {
+                state.mOrganizer.onTaskInfoChanged(task, newInfo);
+            }
         }
     }
 
