@@ -82,7 +82,7 @@ private:
     void saveBehind(const SkRect*);
     void restore();
 
-    void concat44(const SkScalar colMajor[16]);
+    void concat(const SkM44&);
     void concat(const SkMatrix&);
     void setMatrix(const SkMatrix&);
     void scale(SkScalar, SkScalar);
