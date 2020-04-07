@@ -20,24 +20,24 @@
 <com.android.systemui.statusbar.policy.KeyguardUserDetailItemView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:sysui="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="32dp"
         android:gravity="end|center_vertical"
         android:clickable="true"
-        android:background="@drawable/rounded_user_switcher_bg"
-        sysui:regularTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher"
-        sysui:activatedTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher.Activated">
+        android:background="@drawable/kg_user_switcher_rounded_bg"
+        sysui:regularTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher">
     <TextView android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="13dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="12dp"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher"
             />
     <com.android.systemui.statusbar.phone.UserAvatarView android:id="@+id/user_picture"
-            android:layout_width="@dimen/framed_avatar_size"
-            android:layout_height="@dimen/framed_avatar_size"
+            android:layout_width="@dimen/kg_framed_avatar_size"
+            android:layout_height="@dimen/kg_framed_avatar_size"
             android:contentDescription="@null"
             sysui:badgeDiameter="18dp"
             sysui:badgeMargin="1dp" />
