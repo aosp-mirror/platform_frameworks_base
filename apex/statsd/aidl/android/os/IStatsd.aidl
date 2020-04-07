@@ -31,6 +31,11 @@ interface IStatsd {
     oneway void systemRunning();
 
     /**
+     * Tell the stats daemon that the android system has finished booting.
+     */
+    oneway void bootCompleted();
+
+    /**
      * Tell the stats daemon that the StatsCompanionService is up and running.
      * Two-way binder call so that caller knows message received.
      */

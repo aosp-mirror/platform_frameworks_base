@@ -1054,6 +1054,14 @@ Status StatsService::statsCompanionReady() {
     return Status::ok();
 }
 
+Status StatsService::bootCompleted() {
+    ENFORCE_UID(AID_SYSTEM);
+
+    VLOG("StatsService::bootCompleted was called");
+
+    return Status::ok();
+}
+
 void StatsService::Startup() {
     mConfigManager->Startup();
     mProcessor->LoadActiveConfigsFromDisk();
