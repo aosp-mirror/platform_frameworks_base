@@ -418,9 +418,9 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
                 auto data = picture->serialize();
                 savePictureAsync(data, mCapturedFile);
                 mCaptureSequence = 0;
+                mCaptureMode = CaptureMode::None;
             }
         }
-        mCaptureMode = CaptureMode::None;
         mRecorder.reset();
     }
 }
