@@ -601,6 +601,13 @@ public final class NotificationEntry extends ListEntry {
         return row != null && row.isPinned();
     }
 
+    /**
+     * Is this entry pinned and was expanded while doing so
+     */
+    public boolean isPinnedAndExpanded() {
+        return row != null && row.isPinnedAndExpanded();
+    }
+
     public void setRowPinned(boolean pinned) {
         if (row != null) row.setPinned(pinned);
     }
