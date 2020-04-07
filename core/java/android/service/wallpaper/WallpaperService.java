@@ -55,6 +55,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -190,6 +191,7 @@ public abstract class WallpaperService extends Service {
                 new DisplayCutout.ParcelableWrapper();
         DisplayCutout mDispatchedDisplayCutout = DisplayCutout.NO_CUTOUT;
         final InsetsState mInsetsState = new InsetsState();
+        final InsetsSourceControl[] mTempControls = new InsetsSourceControl[0];
         final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
         private final Point mSurfaceSize = new Point();
 
@@ -878,7 +880,7 @@ public abstract class WallpaperService extends Service {
                         if (mSession.addToDisplay(mWindow, mWindow.mSeq, mLayout, View.VISIBLE,
                                 mDisplay.getDisplayId(), mWinFrame, mContentInsets, mStableInsets,
                                 mDisplayCutout, inputChannel,
-                                mInsetsState) < 0) {
+                                mInsetsState, mTempControls) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
                         }
@@ -903,7 +905,7 @@ public abstract class WallpaperService extends Service {
                             View.VISIBLE, 0, -1, mWinFrame, mContentInsets,
                             mVisibleInsets, mStableInsets, mBackdropFrame,
                             mDisplayCutout, mMergedConfiguration, mSurfaceControl,
-                            mInsetsState, mSurfaceSize, mTmpSurfaceControl);
+                            mInsetsState, mTempControls, mSurfaceSize, mTmpSurfaceControl);
                     if (mSurfaceControl.isValid()) {
                         mSurfaceHolder.mSurface.copyFrom(mSurfaceControl);
                         mSurfaceControl.release();
