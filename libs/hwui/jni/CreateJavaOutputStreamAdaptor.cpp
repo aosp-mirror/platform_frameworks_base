@@ -49,13 +49,13 @@ public:
     }
 
     ~JavaInputStreamAdaptor() override {
-        auto* env = android::get_env_or_die(fJvm);
+        auto* env = android::requireEnv(fJvm);
         env->DeleteGlobalRef(fJavaInputStream);
         env->DeleteGlobalRef(fJavaByteArray);
     }
 
     size_t read(void* buffer, size_t size) override {
-        auto* env = android::get_env_or_die(fJvm);
+        auto* env = android::requireEnv(fJvm);
         if (!fSwallowExceptions && checkException(env)) {
             // Just in case the caller did not clear from a previous exception.
             return 0;
