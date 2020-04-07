@@ -178,7 +178,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     private Object mLastWindowFreezeSource = null;
     private Session mHoldScreen = null;
-    private float mScreenBrightness = -1;
+    private float mScreenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
     private long mUserActivityTimeout = -1;
     private boolean mUpdateRotation = false;
     // Following variables are for debugging screen wakelock only.
@@ -826,7 +826,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         mHoldScreen = null;
-        mScreenBrightness = -1;
+        mScreenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mUserActivityTimeout = -1;
         mObscureApplicationContentOnSecondaryDisplays = false;
         mSustainedPerformanceModeCurrent = false;
@@ -936,12 +936,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         mWmService.setHoldScreenLocked(mHoldScreen);
         if (!mWmService.mDisplayFrozen) {
-            final int brightness = mScreenBrightness < 0 || mScreenBrightness > 1.0f
-                    ? -1 : toBrightnessOverride(mScreenBrightness);
-
+            final float brightnessOverride = mScreenBrightnessOverride < PowerManager.BRIGHTNESS_MIN
+                    || mScreenBrightnessOverride > PowerManager.BRIGHTNESS_MAX
+                    ? PowerManager.BRIGHTNESS_INVALID_FLOAT : mScreenBrightnessOverride;
+            int brightnessFloatAsIntBits = Float.floatToIntBits(brightnessOverride);
             // Post these on a handler such that we don't call into power manager service while
             // holding the window manager lock to avoid lock contention with power manager lock.
-            mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, brightness, 0).sendToTarget();
+            mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, brightnessFloatAsIntBits,
+                    0).sendToTarget();
             mHandler.obtainMessage(SET_USER_ACTIVITY_TIMEOUT, mUserActivityTimeout).sendToTarget();
         }
 
@@ -1125,8 +1127,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                                 + "has FLAG_KEEP_SCREEN_ON!!! called by%s",
                         w, Debug.getCallers(10));
             }
-            if (!syswin && w.mAttrs.screenBrightness >= 0 && mScreenBrightness < 0) {
-                mScreenBrightness = w.mAttrs.screenBrightness;
+            if (!syswin && w.mAttrs.screenBrightness >= 0
+                    && Float.isNaN(mScreenBrightnessOverride)) {
+                mScreenBrightnessOverride = w.mAttrs.screenBrightness;
             }
 
             final int type = attrs.type;
@@ -1190,10 +1193,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return doRequest;
     }
 
-    private static int toBrightnessOverride(float value) {
-        return (int)(value * PowerManager.BRIGHTNESS_ON);
-    }
-
     private final class MyHandler extends Handler {
 
         public MyHandler(Looper looper) {
@@ -1205,7 +1204,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             switch (msg.what) {
                 case SET_SCREEN_BRIGHTNESS_OVERRIDE:
                     mWmService.mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(
-                            msg.arg1);
+                            Float.intBitsToFloat(msg.arg1));
                     break;
                 case SET_USER_ACTIVITY_TIMEOUT:
                     mWmService.mPowerManagerInternal.
