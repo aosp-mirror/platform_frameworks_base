@@ -22,7 +22,6 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-import static android.util.FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ;
 
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
 
@@ -2922,9 +2921,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testPlaceholderConversationId_flagOn() throws Exception {
-        Settings.Global.putString(
-                mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
+    public void testPlaceholderConversationId_shortcutNotRequired() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0);
+
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
 
         final String xml = "<ranking version=\"1\">\n"
@@ -2942,9 +2942,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testPlaceholderConversationId_flagOff() throws Exception {
-        Settings.Global.putString(
-                mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
+    public void testPlaceholderConversationId_shortcutRequired() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
 
         final String xml = "<ranking version=\"1\">\n"
@@ -2962,9 +2962,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testNormalConversationId_flagOff() throws Exception {
-        Settings.Global.putString(
-                mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
+    public void testNormalConversationId_shortcutRequired() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
 
         final String xml = "<ranking version=\"1\">\n"
@@ -2982,9 +2982,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testNoConversationId_flagOff() throws Exception {
-        Settings.Global.putString(
-                mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
+    public void testNoConversationId_shortcutRequired() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
 
         final String xml = "<ranking version=\"1\">\n"
