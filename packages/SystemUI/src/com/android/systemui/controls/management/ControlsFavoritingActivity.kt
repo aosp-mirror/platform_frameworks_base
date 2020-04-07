@@ -55,13 +55,19 @@ class ControlsFavoritingActivity @Inject constructor(
 
     companion object {
         private const val TAG = "ControlsFavoritingActivity"
+
+        // If provided and no structure is available, use as the title
         const val EXTRA_APP = "extra_app_label"
+
+        // If provided, show this structure page first
+        const val EXTRA_STRUCTURE = "extra_structure"
         private const val TOOLTIP_PREFS_KEY = Prefs.Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT
         private const val TOOLTIP_MAX_SHOWN = 2
     }
 
     private var component: ComponentName? = null
     private var appName: CharSequence? = null
+    private var structureExtra: CharSequence? = null
 
     private lateinit var structurePager: ViewPager2
     private lateinit var statusText: TextView
@@ -111,6 +117,7 @@ class ControlsFavoritingActivity @Inject constructor(
         val collator = Collator.getInstance(resources.configuration.locales[0])
         comparator = compareBy(collator) { it.structureName }
         appName = intent.getCharSequenceExtra(EXTRA_APP)
+        structureExtra = intent.getCharSequenceExtra(EXTRA_STRUCTURE) ?: ""
         component = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
 
         bindViews()
@@ -137,9 +144,15 @@ class ControlsFavoritingActivity @Inject constructor(
                 listOfStructures = controlsByStructure.map {
                     StructureContainer(it.key, AllModel(it.value, favoriteKeys, emptyZoneString))
                 }.sortedWith(comparator)
+
+                val structureIndex = listOfStructures.indexOfFirst {
+                    sc -> sc.structureName == structureExtra
+                }.let { if (it == -1) 0 else it }
+
                 executor.execute {
                     doneButton.isEnabled = true
                     structurePager.adapter = StructureAdapter(listOfStructures)
+                    structurePager.setCurrentItem(structureIndex)
                     if (error) {
                         statusText.text = resources.getText(R.string.controls_favorite_load_error)
                     } else {
@@ -247,7 +260,10 @@ class ControlsFavoritingActivity @Inject constructor(
         requireViewById<Button>(R.id.other_apps).apply {
             visibility = View.VISIBLE
             setOnClickListener {
-                this@ControlsFavoritingActivity.onBackPressed()
+                val i = Intent()
+                i.setComponent(
+                    ComponentName(context, ControlsProviderSelectorActivity::class.java))
+                context.startActivity(i)
             }
         }
 
