@@ -55,17 +55,15 @@ filegroup {
     name: "updatable-media-srcs",
     srcs: [
         ":mediaparser-srcs",
-        ":mediasession2-srcs",
+        ":mediasession2-java-srcs",
+        ":mediasession2-aidl-srcs",
     ],
 }
 
 filegroup {
-    name: "mediasession2-srcs",
+    name: "mediasession2-java-srcs",
     srcs: [
         "java/android/media/Controller2Link.java",
-        "java/android/media/IMediaController2.aidl",
-        "java/android/media/IMediaSession2.aidl",
-        "java/android/media/IMediaSession2Service.aidl",
         "java/android/media/MediaConstants.java",
         "java/android/media/MediaController2.java",
         "java/android/media/MediaSession2.java",
@@ -83,7 +81,7 @@ filegroup {
     srcs: [
         "java/android/media/MediaParser.java"
     ],
-    path: "java"
+    path: "java",
 }
 
 stubs_defaults {
