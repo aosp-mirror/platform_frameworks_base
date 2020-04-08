@@ -205,8 +205,14 @@ public final class Zygote {
     /** List of packages with the same uid, and its app data info: volume uuid and inode. */
     public static final String PKG_DATA_INFO_MAP = "--pkg-data-info-map";
 
+    /** List of whitelisted packages and its app data info: volume uuid and inode. */
+    public static final String WHITELISTED_DATA_INFO_MAP = "--whitelisted-data-info-map";
+
     /** Bind mount app storage dirs to lower fs not via fuse */
     public static final String BIND_MOUNT_APP_STORAGE_DIRS = "--bind-mount-storage-dirs";
+
+    /** Bind mount app storage dirs to lower fs not via fuse */
+    public static final String BIND_MOUNT_APP_DATA_DIRS = "--bind-mount-data-dirs";
 
     /**
      * An extraArg passed when a zygote process is forking a child-zygote, specifying a name
@@ -313,6 +319,8 @@ public final class Zygote {
      * @param isTopApp true if the process is for top (high priority) application.
      * @param pkgDataInfoList A list that stores related packages and its app data
      * info: volume uuid and inode.
+     * @param whitelistedDataInfoList Like pkgDataInfoList, but it's for whitelisted apps.
+     * @param bindMountAppDataDirs  True if the zygote needs to mount data dirs.
      * @param bindMountAppStorageDirs  True if the zygote needs to mount storage dirs.
      *
      * @return 0 if this is the child, pid of the child
@@ -321,13 +329,15 @@ public final class Zygote {
     static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
-            boolean isTopApp, String[] pkgDataInfoList, boolean bindMountAppStorageDirs) {
+            boolean isTopApp, String[] pkgDataInfoList, String[] whitelistedDataInfoList,
+            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs) {
         ZygoteHooks.preFork();
 
         int pid = nativeForkAndSpecialize(
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                 fdsToIgnore, startChildZygote, instructionSet, appDataDir, isTopApp,
-                pkgDataInfoList, bindMountAppStorageDirs);
+                pkgDataInfoList, whitelistedDataInfoList, bindMountAppDataDirs,
+                bindMountAppStorageDirs);
         if (pid == 0) {
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -344,6 +354,7 @@ public final class Zygote {
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             int[] fdsToClose, int[] fdsToIgnore, boolean startChildZygote, String instructionSet,
             String appDataDir, boolean isTopApp, String[] pkgDataInfoList,
+            String[] whitelistedDataInfoList, boolean bindMountAppDataDirs,
             boolean bindMountAppStorageDirs);
 
     /**
@@ -371,15 +382,19 @@ public final class Zygote {
      * volume uuid and CE dir inode. For example, pkgDataInfoList = [app_a_pkg_name,
      * app_a_data_volume_uuid, app_a_ce_inode, app_b_pkg_name, app_b_data_volume_uuid,
      * app_b_ce_inode, ...];
+     * @param whitelistedDataInfoList Like pkgDataInfoList, but it's for whitelisted apps.
+     * @param bindMountAppDataDirs  True if the zygote needs to mount data dirs.
      * @param bindMountAppStorageDirs  True if the zygote needs to mount storage dirs.
      */
     private static void specializeAppProcess(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName,
             boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp,
-            String[] pkgDataInfoList, boolean bindMountAppStorageDirs) {
+            String[] pkgDataInfoList, String[] whitelistedDataInfoList,
+            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs) {
         nativeSpecializeAppProcess(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
                 niceName, startChildZygote, instructionSet, appDataDir, isTopApp,
-                pkgDataInfoList, bindMountAppStorageDirs);
+                pkgDataInfoList, whitelistedDataInfoList,
+                bindMountAppDataDirs, bindMountAppStorageDirs);
 
         // Note that this event ends at the end of handleChildProc.
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -399,7 +414,8 @@ public final class Zygote {
     private static native void nativeSpecializeAppProcess(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp,
-            String[] pkgDataInfoList, boolean bindMountAppStorageDirs);
+            String[] pkgDataInfoList, String[] whitelistedDataInfoList,
+            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs);
 
     /**
      * Called to do any initialization before starting an application.
@@ -724,7 +740,8 @@ public final class Zygote {
                                  args.mRuntimeFlags, rlimits, args.mMountExternal,
                                  args.mSeInfo, args.mNiceName, args.mStartChildZygote,
                                  args.mInstructionSet, args.mAppDataDir, args.mIsTopApp,
-                                 args.mPkgDataInfoList, args.mBindMountAppStorageDirs);
+                                 args.mPkgDataInfoList, args.mWhitelistedDataInfoList,
+                                 args.mBindMountAppDataDirs, args.mBindMountAppStorageDirs);
 
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
