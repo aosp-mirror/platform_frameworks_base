@@ -59,6 +59,7 @@ import android.service.dreams.IDreamManager;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.view.IWindowManager;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
@@ -308,6 +309,12 @@ public class SystemServicesModule {
     @Nullable
     static Vibrator provideVibrator(Context context) {
         return context.getSystemService(Vibrator.class);
+    }
+
+    @Provides
+    @SysUISingleton
+    static ViewConfiguration provideViewConfiguration(Context context) {
+        return ViewConfiguration.get(context);
     }
 
     @Provides

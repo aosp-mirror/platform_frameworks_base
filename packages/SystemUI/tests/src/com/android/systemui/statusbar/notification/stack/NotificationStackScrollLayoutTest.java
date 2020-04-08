@@ -18,7 +18,6 @@ import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MOD
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,12 +33,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.metrics.LogMaker;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.View;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
@@ -52,6 +49,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -132,6 +130,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationSection mNotificationSection;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
+    @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
     private NotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
@@ -216,7 +215,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(NotifCollection.class),
                 mUiEventLoggerFake
         );
-        mStackScrollerInternal.initView(getContext(), mKeyguardBypassEnabledProvider);
+        mStackScrollerInternal.initView(getContext(), mKeyguardBypassEnabledProvider,
+                mNotificationSwipeHelper);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelfController(notificationShelfController);
         mStackScroller.setStatusBar(mBar);
@@ -420,31 +420,22 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     @UiThreadTest
     public void testSetIsBeingDraggedResetsExposedMenu() {
-        NotificationSwipeHelper swipeActionHelper =
-                (NotificationSwipeHelper) mStackScroller.getSwipeActionHelper();
-        swipeActionHelper.setExposedMenuView(new View(mContext));
         mStackScroller.setIsBeingDragged(true);
-        assertNull(swipeActionHelper.getExposedMenuView());
+        verify(mNotificationSwipeHelper).resetExposedMenuView(true, true);
     }
 
     @Test
     @UiThreadTest
     public void testPanelTrackingStartResetsExposedMenu() {
-        NotificationSwipeHelper swipeActionHelper =
-                (NotificationSwipeHelper) mStackScroller.getSwipeActionHelper();
-        swipeActionHelper.setExposedMenuView(new View(mContext));
         mStackScroller.onPanelTrackingStarted();
-        assertNull(swipeActionHelper.getExposedMenuView());
+        verify(mNotificationSwipeHelper).resetExposedMenuView(true, true);
     }
 
     @Test
     @UiThreadTest
     public void testDarkModeResetsExposedMenu() {
-        NotificationSwipeHelper swipeActionHelper =
-                (NotificationSwipeHelper) mStackScroller.getSwipeActionHelper();
-        swipeActionHelper.setExposedMenuView(new View(mContext));
         mStackScroller.setHideAmount(0.1f, 0.1f);
-        assertNull(swipeActionHelper.getExposedMenuView());
+        verify(mNotificationSwipeHelper).resetExposedMenuView(true, true);
     }
 
     @Test

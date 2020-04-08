@@ -26,6 +26,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Resources;
 import android.metrics.LogMaker;
 import android.testing.AndroidTestingRunner;
 
@@ -36,6 +37,7 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.media.KeyguardMediaController;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -47,6 +49,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
@@ -54,6 +57,7 @@ import com.android.systemui.tuner.TunerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
@@ -94,12 +98,26 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock
     private MetricsLogger mMetricsLogger;
+    @Mock
+    private FalsingManager mFalsingManager;
+    @Mock
+    private NotificationSectionsManager mNotificationSectionsManager;
+    @Mock
+    private Resources mResources;
+    @Mock(answer = Answers.RETURNS_SELF)
+    private NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
+    @Mock
+    private NotificationSwipeHelper mNotificationSwipeHelper;
+    @Mock
+    private StatusBar mStatusBar;
 
     private NotificationStackScrollLayoutController mController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
 
         mController = new NotificationStackScrollLayoutController(
                 true,
@@ -115,7 +133,12 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mZenModeController,
                 mColorExtractor,
                 mNotificationLockscreenUserManager,
-                mMetricsLogger
+                mMetricsLogger,
+                mFalsingManager,
+                mNotificationSectionsManager,
+                mResources,
+                mNotificationSwipeHelperBuilder,
+                mStatusBar
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
@@ -233,7 +256,7 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(OnMenuEventListener.class);
 
         mController.attach(mNotificationStackScrollLayout);
-        verify(mNotificationStackScrollLayout).setMenuEventListener(
+        verify(mNotificationSwipeHelperBuilder).setOnMenuEventListener(
                 onMenuEventListenerArgumentCaptor.capture());
 
         OnMenuEventListener onMenuEventListener = onMenuEventListenerArgumentCaptor.getValue();
@@ -255,7 +278,7 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(OnMenuEventListener.class);
 
         mController.attach(mNotificationStackScrollLayout);
-        verify(mNotificationStackScrollLayout).setMenuEventListener(
+        verify(mNotificationSwipeHelperBuilder).setOnMenuEventListener(
                 onMenuEventListenerArgumentCaptor.capture());
 
         OnMenuEventListener onMenuEventListener = onMenuEventListenerArgumentCaptor.getValue();
