@@ -1395,6 +1395,7 @@ public class AppOpsManager {
     public static final String OPSTR_QUERY_ALL_PACKAGES = "android:query_all_packages";
     /** @hide Access all external storage */
     @SystemApi
+    @TestApi
     public static final String OPSTR_MANAGE_EXTERNAL_STORAGE =
             "android:manage_external_storage";
 
