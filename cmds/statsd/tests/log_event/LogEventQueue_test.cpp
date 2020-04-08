@@ -21,6 +21,7 @@
 #include <thread>
 
 #include "stats_event.h"
+#include "tests/statsd_test_util.h"
 
 namespace android {
 namespace os {
@@ -37,14 +38,9 @@ std::unique_ptr<LogEvent> makeLogEvent(uint64_t timestampNs) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, 10);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
