@@ -26,6 +26,8 @@
 #include <sys/mman.h>
 #include <sys/wait.h>
 
+#include <android/bitmap.h>
+
 #include <binder/ProcessState.h>
 
 #include <gui/SurfaceComposerClient.h>
@@ -36,14 +38,6 @@
 #include <ui/PixelFormat.h>
 
 #include <system/graphics.h>
-
-// TODO: Fix Skia.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <SkImageEncoder.h>
-#include <SkData.h>
-#include <SkColorSpace.h>
-#pragma GCC diagnostic pop
 
 using namespace android;
 
@@ -65,25 +59,13 @@ static void usage(const char* pname, PhysicalDisplayId displayId)
             pname, displayId);
 }
 
-static SkColorType flinger2skia(PixelFormat f)
+static int32_t flinger2bitmapFormat(PixelFormat f)
 {
     switch (f) {
         case PIXEL_FORMAT_RGB_565:
-            return kRGB_565_SkColorType;
+            return ANDROID_BITMAP_FORMAT_RGB_565;
         default:
-            return kN32_SkColorType;
-    }
-}
-
-static sk_sp<SkColorSpace> dataSpaceToColorSpace(ui::Dataspace d)
-{
-    switch (d) {
-        case ui::Dataspace::V0_SRGB:
-            return SkColorSpace::MakeSRGB();
-        case ui::Dataspace::DISPLAY_P3:
-            return SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
-        default:
-            return nullptr;
+            return ANDROID_BITMAP_FORMAT_RGBA_8888;
     }
 }
 
@@ -192,8 +174,6 @@ int main(int argc, char** argv)
     ssize_t mapsize = -1;
 
     void* base = NULL;
-    uint32_t w, s, h, f;
-    size_t size = 0;
 
     // setThreadPoolMaxThreadCount(0) actually tells the kernel it's
     // not allowed to spawn any additional threads, but we still spawn
@@ -225,33 +205,36 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    w = outBuffer->getWidth();
-    h = outBuffer->getHeight();
-    s = outBuffer->getStride();
-    f = outBuffer->getPixelFormat();
-    size = s * h * bytesPerPixel(f);
-
     if (png) {
-        const SkImageInfo info =
-            SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType,
-                              dataSpaceToColorSpace(outDataspace));
-        SkPixmap pixmap(info, base, s * bytesPerPixel(f));
-        struct FDWStream final : public SkWStream {
-          size_t fBytesWritten = 0;
-          int fFd;
-          FDWStream(int f) : fFd(f) {}
-          size_t bytesWritten() const override { return fBytesWritten; }
-          bool write(const void* buffer, size_t size) override {
-            fBytesWritten += size;
-            return size == 0 || ::write(fFd, buffer, size) > 0;
-          }
-        } fdStream(fd);
-        (void)SkEncodeImage(&fdStream, pixmap, SkEncodedImageFormat::kPNG, 100);
+        AndroidBitmapInfo info;
+        info.format = flinger2bitmapFormat(outBuffer->getPixelFormat());
+        info.flags = ANDROID_BITMAP_FLAGS_ALPHA_PREMUL;
+        info.width = outBuffer->getWidth();
+        info.height = outBuffer->getHeight();
+        info.stride = outBuffer->getStride() * bytesPerPixel(outBuffer->getPixelFormat());
+
+        int result = AndroidBitmap_compress(&info, static_cast<int32_t>(outDataspace), base,
+                                            ANDROID_BITMAP_COMPRESS_FORMAT_PNG, 100, &fd,
+                                            [](void* fdPtr, const void* data, size_t size) -> bool {
+                                                int bytesWritten = write(*static_cast<int*>(fdPtr),
+                                                                         data, size);
+                                                return bytesWritten == size;
+                                            });
+
+        if (result != ANDROID_BITMAP_RESULT_SUCCESS) {
+            fprintf(stderr, "Failed to compress PNG (error code: %d)\n", result);
+        }
+
         if (fn != NULL) {
             notifyMediaScanner(fn);
         }
     } else {
+        uint32_t w = outBuffer->getWidth();
+        uint32_t h = outBuffer->getHeight();
+        uint32_t s = outBuffer->getStride();
+        uint32_t f = outBuffer->getPixelFormat();
         uint32_t c = dataSpaceToInt(outDataspace);
+
         write(fd, &w, 4);
         write(fd, &h, 4);
         write(fd, &f, 4);
