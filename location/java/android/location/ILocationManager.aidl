@@ -47,10 +47,10 @@ interface ILocationManager
     Location getLastLocation(in LocationRequest request, String packageName, String featureId);
     boolean getCurrentLocation(in LocationRequest request,
             in ICancellationSignal cancellationSignal, in ILocationListener listener,
-            String packageName, String featureId);
+            String packageName, String featureId, String listenerId);
 
     void requestLocationUpdates(in LocationRequest request, in ILocationListener listener,
-            in PendingIntent intent, String packageName, String featureId);
+            in PendingIntent intent, String packageName, String featureId, String listenerId);
     void removeUpdates(in ILocationListener listener, in PendingIntent intent);
 
     void requestGeofence(in LocationRequest request, in Geofence geofence,

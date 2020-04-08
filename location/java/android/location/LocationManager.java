@@ -718,7 +718,7 @@ public class LocationManager {
             currentLocationRequest.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
         }
 
-        GetCurrentLocationTransport listenerTransport = new GetCurrentLocationTransport(executor,
+        GetCurrentLocationTransport transport = new GetCurrentLocationTransport(executor,
                 consumer);
 
         if (cancellationSignal != null) {
@@ -729,14 +729,15 @@ public class LocationManager {
 
         try {
             if (mService.getCurrentLocation(currentLocationRequest, remoteCancellationSignal,
-                    listenerTransport, mContext.getPackageName(), mContext.getAttributionTag())) {
-                listenerTransport.register(mContext.getSystemService(AlarmManager.class),
+                    transport, mContext.getPackageName(), mContext.getAttributionTag(),
+                    transport.getListenerId())) {
+                transport.register(mContext.getSystemService(AlarmManager.class),
                         remoteCancellationSignal);
                 if (cancellationSignal != null) {
-                    cancellationSignal.setOnCancelListener(listenerTransport::cancel);
+                    cancellationSignal.setOnCancelListener(transport::cancel);
                 }
             } else {
-                listenerTransport.fail();
+                transport.fail();
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1175,7 +1176,8 @@ public class LocationManager {
             boolean registered = false;
             try {
                 mService.requestLocationUpdates(locationRequest, transport, null,
-                        mContext.getPackageName(), mContext.getAttributionTag());
+                        mContext.getPackageName(), mContext.getAttributionTag(),
+                        transport.getListenerId());
                 registered = true;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -1220,7 +1222,7 @@ public class LocationManager {
 
         try {
             mService.requestLocationUpdates(locationRequest, null, pendingIntent,
-                    mContext.getPackageName(), mContext.getAttributionTag());
+                    mContext.getPackageName(), mContext.getAttributionTag(), null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2558,6 +2560,10 @@ public class LocationManager {
             mRemoteCancellationSignal = null;
         }
 
+        public String getListenerId() {
+            return mConsumer.getClass().getName() + "@" + System.identityHashCode(mConsumer);
+        }
+
         public synchronized void register(AlarmManager alarmManager,
                 ICancellationSignal remoteCancellationSignal) {
             if (mConsumer == null) {
@@ -2681,6 +2687,10 @@ public class LocationManager {
 
         public LocationListener getKey() {
             return mListener;
+        }
+
+        public String getListenerId() {
+            return mListener.getClass().getName() + "@" + System.identityHashCode(mListener);
         }
 
         public void register(@NonNull Executor executor) {
