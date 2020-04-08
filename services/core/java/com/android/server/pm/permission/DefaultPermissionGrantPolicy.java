@@ -886,7 +886,7 @@ public final class DefaultPermissionGrantPolicy {
 
     public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to default browser for user:" + userId);
-        grantPermissionsToSystemPackage(packageName, userId, ALWAYS_LOCATION_PERMISSIONS);
+        grantPermissionsToSystemPackage(packageName, userId, FOREGROUND_LOCATION_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackage(String intentAction, int userId) {
