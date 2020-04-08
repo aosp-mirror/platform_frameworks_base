@@ -2702,10 +2702,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Slog.i(LOG_TAG, "Clearing the DO...");
         final ComponentName doAdminReceiver = doAdmin.info.getComponent();
         clearDeviceOwnerLocked(doAdmin, doUserId);
-        // TODO(b/143516163): If we have a power cut here, we might leave active admin. Consider if
-        // it is worth the complexity to make it more robust.
         Slog.i(LOG_TAG, "Removing admin artifacts...");
-        // TODO(b/143516163): Clean up application restrictions in UserManager.
+        // TODO(b/149075700): Clean up application restrictions in UserManager.
         removeAdminArtifacts(doAdminReceiver, doUserId);
         Slog.i(LOG_TAG, "Migration complete.");
 
@@ -2747,18 +2745,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // The following policies weren't available to PO, but will be available after migration.
         parentAdmin.disableCamera = doAdmin.disableCamera;
-
         parentAdmin.requireAutoTime = doAdmin.requireAutoTime;
-
-        // TODO(b/143516163): Uncomment once corresponding APIs are available via parent instance.
-        // parentAdmin.disableScreenCapture = doAdmin.disableScreenCapture;
-        // parentAdmin.accountTypesWithManagementDisabled.addAll(
-        //         doAdmin.accountTypesWithManagementDisabled);
+        parentAdmin.disableScreenCapture = doAdmin.disableScreenCapture;
+        parentAdmin.accountTypesWithManagementDisabled.addAll(
+                doAdmin.accountTypesWithManagementDisabled);
 
         moveDoUserRestrictionsToCopeParent(doAdmin, parentAdmin);
-
-        // TODO(b/143516163): migrate network and security logging state, currently they are
-        // turned off when DO is removed.
     }
 
     private void moveDoUserRestrictionsToCopeParent(ActiveAdmin doAdmin, ActiveAdmin parentAdmin) {
@@ -2778,7 +2770,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * a managed profile.
      */
     @GuardedBy("getLockObject()")
-    void applyManagedProfileRestrictionIfDeviceOwnerLocked() {
+    private void applyManagedProfileRestrictionIfDeviceOwnerLocked() {
         final int doUserId = mOwners.getDeviceOwnerUserId();
         if (doUserId == UserHandle.USER_NULL) {
             logIfVerbose("No DO found, skipping application of restriction.");
@@ -4002,11 +3994,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mOwners.systemReady();
                 break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
-                maybeStartSecurityLogMonitorOnActivityManagerReady();
                 synchronized (getLockObject()) {
                     migrateToProfileOnOrganizationOwnedDeviceIfCompLocked();
                     applyManagedProfileRestrictionIfDeviceOwnerLocked();
                 }
+                maybeStartSecurityLogMonitorOnActivityManagerReady();
                 final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
                 if (userId >= 0) {
                     updatePersonalAppSuspension(userId, false /* running */);
