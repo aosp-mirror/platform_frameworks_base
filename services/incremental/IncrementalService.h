@@ -160,12 +160,12 @@ public:
     class IncrementalServiceConnector : public BnIncrementalServiceConnector {
     public:
         IncrementalServiceConnector(IncrementalService& incrementalService, int32_t storage)
-              : incrementalService(incrementalService) {}
+              : incrementalService(incrementalService), storage(storage) {}
         binder::Status setStorageParams(bool enableReadLogs, int32_t* _aidl_return) final;
 
     private:
         IncrementalService& incrementalService;
-        int32_t storage;
+        int32_t const storage;
     };
 
 private:
