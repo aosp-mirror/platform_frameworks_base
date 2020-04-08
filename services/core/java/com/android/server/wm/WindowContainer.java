@@ -2295,6 +2295,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
         mLastLayer = -1;
         reassignLayer(t);
+
+        // Leash is now responsible for position, so set our position to 0.
+        t.setPosition(mSurfaceControl, 0, 0);
+        mLastSurfacePosition.set(0, 0);
     }
 
     @Override
@@ -2302,6 +2306,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mLastLayer = -1;
         mSurfaceFreezer.unfreeze(t);
         reassignLayer(t);
+        updateSurfacePosition(t);
     }
 
     /**
@@ -2365,11 +2370,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    void updateSurfacePosition() {
+    final void updateSurfacePosition() {
+        updateSurfacePosition(getPendingTransaction());
+    }
+
+    void updateSurfacePosition(Transaction t) {
         // Avoid fighting with the organizer over Surface position.
         if (isOrganized()) return;
 
-        if (mSurfaceControl == null) {
+        if (mSurfaceControl == null || mSurfaceAnimator.hasLeash()) {
             return;
         }
 
@@ -2378,7 +2387,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return;
         }
 
-        getPendingTransaction().setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
+        t.setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
         mLastSurfacePosition.set(mTmpPos.x, mTmpPos.y);
     }
 
