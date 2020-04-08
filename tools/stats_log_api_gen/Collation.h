@@ -160,7 +160,7 @@ struct AtomDecl {
     int exclusiveField = 0;
     int defaultState = INT_MAX;
     int triggerStateReset = INT_MAX;
-    bool nested;
+    bool nested = true;
 
     int uidField = 0;
 
