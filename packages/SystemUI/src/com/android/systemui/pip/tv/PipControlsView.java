@@ -30,6 +30,14 @@ import com.android.systemui.R;
  */
 public class PipControlsView extends LinearLayout {
 
+    public PipControlsView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public PipControlsView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
     public PipControlsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(
