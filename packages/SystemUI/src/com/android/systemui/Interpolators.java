@@ -49,6 +49,8 @@ public class Interpolators {
     public static final Interpolator CUSTOM_40_40 = new PathInterpolator(0.4f, 0f, 0.6f, 1f);
     public static final Interpolator HEADS_UP_APPEAR = new HeadsUpAppearInterpolator();
     public static final Interpolator ICON_OVERSHOT = new PathInterpolator(0.4f, 0f, 0.2f, 1.4f);
+    public static final Interpolator SHADE_ANIMATION =
+            new PathInterpolator(0.6f, 0.02f, 0.4f, 0.98f);
     public static final Interpolator ICON_OVERSHOT_LESS
             = new PathInterpolator(0.4f, 0f, 0.2f, 1.1f);
     public static final Interpolator PANEL_CLOSE_ACCELERATED
