@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wallpaperbackup.tests;
+package com.android.wallpaperbackup;
 
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
@@ -26,17 +26,22 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.WallpaperManager;
 import android.app.backup.FullBackupDataOutput;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.UserHandle;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.wallpaperbackup.WallpaperBackupAgent;
 import com.android.wallpaperbackup.utils.ContextWithServiceOverrides;
 
@@ -58,6 +63,7 @@ import java.util.List;
 public class WallpaperBackupAgentTest {
     private static final String SYSTEM_GENERATION = "system_gen";
     private static final String LOCK_GENERATION = "lock_gen";
+    private static final String TEST_WALLPAPER_PACKAGE = "wallpaper_package";
 
     private static final int TEST_SYSTEM_WALLPAPER_ID = 1;
     private static final int TEST_LOCK_WALLPAPER_ID = 2;
@@ -66,11 +72,13 @@ public class WallpaperBackupAgentTest {
     @Mock private WallpaperManager mWallpaperManager;
     @Mock private SharedPreferences mSharedPreferences;
     @Mock private SharedPreferences.Editor mSharedPreferenceEditor;
+    @Mock private Context mMockContext;
 
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
     private ContextWithServiceOverrides mContext;
     private IsolatedWallpaperBackupAgent mWallpaperBackupAgent;
+    private ComponentName mWallpaperComponent;
 
     @Before
     public void setUp() {
@@ -88,6 +96,8 @@ public class WallpaperBackupAgentTest {
         mWallpaperBackupAgent = new IsolatedWallpaperBackupAgent(mTemporaryFolder.getRoot());
         mWallpaperBackupAgent.attach(mContext);
         mWallpaperBackupAgent.onCreate();
+
+        mWallpaperComponent = new ComponentName(TEST_WALLPAPER_PACKAGE, "");
     }
 
     @Test
@@ -130,6 +140,69 @@ public class WallpaperBackupAgentTest {
         inOrder.verify(mSharedPreferenceEditor).apply();
     }
 
+    @Test
+    public void updateWallpaperComponent_doesApplyLater() throws IOException {
+        mWallpaperBackupAgent.mIsDeviceInRestore = true;
+
+        mWallpaperBackupAgent.updateWallpaperComponent(mWallpaperComponent,
+                /* applyToLock */ true);
+
+        // Imitate wallpaper component installation.
+        mWallpaperBackupAgent.mWallpaperPackageMonitor.onPackageAdded(TEST_WALLPAPER_PACKAGE,
+                /* uid */0);
+
+        verify(mWallpaperManager, times(1)).setWallpaperComponent(mWallpaperComponent);
+        verify(mWallpaperManager, times(1)).clear(eq(FLAG_LOCK));
+    }
+
+    @Test
+    public void updateWallpaperComponent_applyToLockFalse_doesApplyLaterOnlyToMainScreen()
+            throws IOException {
+        mWallpaperBackupAgent.mIsDeviceInRestore = true;
+
+        mWallpaperBackupAgent.updateWallpaperComponent(mWallpaperComponent,
+                /* applyToLock */ false);
+
+        // Imitate wallpaper component installation.
+        mWallpaperBackupAgent.mWallpaperPackageMonitor.onPackageAdded(TEST_WALLPAPER_PACKAGE,
+                /* uid */0);
+
+        verify(mWallpaperManager, times(1)).setWallpaperComponent(mWallpaperComponent);
+        verify(mWallpaperManager, never()).clear(eq(FLAG_LOCK));
+    }
+
+    @Test
+    public void updateWallpaperComponent_deviceNotInRestore_doesNotApply()
+            throws IOException {
+        mWallpaperBackupAgent.mIsDeviceInRestore = false;
+
+        mWallpaperBackupAgent.updateWallpaperComponent(mWallpaperComponent,
+                /* applyToLock */ true);
+
+        // Imitate wallpaper component installation.
+        mWallpaperBackupAgent.mWallpaperPackageMonitor.onPackageAdded(TEST_WALLPAPER_PACKAGE,
+                /* uid */0);
+
+        verify(mWallpaperManager, never()).setWallpaperComponent(mWallpaperComponent);
+        verify(mWallpaperManager, never()).clear(eq(FLAG_LOCK));
+    }
+
+    @Test
+    public void updateWallpaperComponent_differentPackageInstalled_doesNotApply()
+            throws IOException {
+        mWallpaperBackupAgent.mIsDeviceInRestore = false;
+
+        mWallpaperBackupAgent.updateWallpaperComponent(mWallpaperComponent,
+                /* applyToLock */ true);
+
+        // Imitate "wrong" wallpaper component installation.
+        mWallpaperBackupAgent.mWallpaperPackageMonitor.onPackageAdded(/* packageName */"",
+                /* uid */0);
+
+        verify(mWallpaperManager, never()).setWallpaperComponent(mWallpaperComponent);
+        verify(mWallpaperManager, never()).clear(eq(FLAG_LOCK));
+    }
+
     private void mockUnbackedUpState() {
         mockCurrentWallpapers(TEST_SYSTEM_WALLPAPER_ID, TEST_LOCK_WALLPAPER_ID);
         when(mSharedPreferences.getInt(eq(SYSTEM_GENERATION), eq(-1))).thenReturn(-1);
@@ -162,6 +235,8 @@ public class WallpaperBackupAgentTest {
     private class IsolatedWallpaperBackupAgent extends WallpaperBackupAgent {
         File mWallpaperBaseDirectory;
         List<File> mBackedUpFiles = new ArrayList<>();
+        PackageMonitor mWallpaperPackageMonitor;
+        boolean mIsDeviceInRestore = false;
 
         IsolatedWallpaperBackupAgent(File wallpaperBaseDirectory) {
             mWallpaperBaseDirectory = wallpaperBaseDirectory;
@@ -180,6 +255,28 @@ public class WallpaperBackupAgentTest {
         @Override
         public SharedPreferences getSharedPreferences(File file, int mode) {
             return mSharedPreferences;
+        }
+
+        @Override
+        boolean servicePackageExists(ComponentName comp) {
+            return false;
+        }
+
+        @Override
+        boolean isDeviceInRestore() {
+            return mIsDeviceInRestore;
+        }
+
+        @Override
+        PackageMonitor getWallpaperPackageMonitor(ComponentName componentName,
+                boolean applyToLock) {
+            mWallpaperPackageMonitor = super.getWallpaperPackageMonitor(componentName, applyToLock);
+            return mWallpaperPackageMonitor;
+        }
+
+        @Override
+        public Context getBaseContext() {
+            return mMockContext;
         }
     }
 }
