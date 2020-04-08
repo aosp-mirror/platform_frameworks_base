@@ -76,6 +76,7 @@ LIBANDROID {
     AInputEvent_getDeviceId;
     AInputEvent_getSource;
     AInputEvent_getType;
+    AInputEvent_release; # introduced=31
     AInputQueue_attachLooper;
     AInputQueue_detachLooper;
     AInputQueue_finishEvent;
@@ -90,6 +91,7 @@ LIBANDROID {
     AKeyEvent_getMetaState;
     AKeyEvent_getRepeatCount;
     AKeyEvent_getScanCode;
+    AKeyEvent_fromJava; # introduced=31
     ALooper_acquire;
     ALooper_addFd;
     ALooper_forThread;
@@ -139,6 +141,7 @@ LIBANDROID {
     AMotionEvent_getY;
     AMotionEvent_getYOffset;
     AMotionEvent_getYPrecision;
+    AMotionEvent_fromJava; # introduced=31
     ANativeActivity_finish;
     ANativeActivity_hideSoftInput;
     ANativeActivity_setWindowFlags;

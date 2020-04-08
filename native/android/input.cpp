@@ -26,6 +26,8 @@
 
 #include <android_runtime/android_app_NativeActivity.h>
 #include <android_runtime/android_view_InputQueue.h>
+#include <android_view_MotionEvent.h>
+#include <android_view_KeyEvent.h>
 
 #include <poll.h>
 #include <errno.h>
@@ -48,6 +50,10 @@ int32_t AInputEvent_getDeviceId(const AInputEvent* event) {
 
 int32_t AInputEvent_getSource(const AInputEvent* event) {
     return static_cast<const InputEvent*>(event)->getSource();
+}
+
+void AInputEvent_release(const AInputEvent* event) {
+    delete event;
 }
 
 int32_t AKeyEvent_getAction(const AInputEvent* key_event) {
@@ -77,6 +83,14 @@ int64_t AKeyEvent_getDownTime(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getDownTime();
 }
 
+const AInputEvent* AKeyEvent_fromJava(JNIEnv* env, jobject keyEvent) {
+    std::unique_ptr<KeyEvent> event = std::make_unique<KeyEvent>();
+    android::status_t ret = android::android_view_KeyEvent_toNative(env, keyEvent, event.get());
+    if (ret == android::OK) {
+        return event.release();
+    }
+    return nullptr;
+}
 
 int64_t AKeyEvent_getEventTime(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getEventTime();
@@ -269,6 +283,15 @@ float AMotionEvent_getHistoricalAxisValue(const AInputEvent* motion_event,
             axis, pointer_index, history_index);
 }
 
+const AInputEvent* AMotionEvent_fromJava(JNIEnv* env, jobject motionEvent) {
+    MotionEvent* eventSrc = android::android_view_MotionEvent_getNativePtr(env, motionEvent);
+    if (eventSrc == nullptr) {
+        return nullptr;
+    }
+    MotionEvent* event = new MotionEvent();
+    event->copyFrom(eventSrc, true);
+    return event;
+}
 
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
         int ident, ALooper_callbackFunc callback, void* data) {
