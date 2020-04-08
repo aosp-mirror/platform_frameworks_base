@@ -201,8 +201,8 @@ class DisplayAreaPolicyBuilder {
 
         Result(WindowManagerService wmService, DisplayContent content, DisplayArea.Root root,
                 DisplayArea<? extends WindowContainer> imeContainer,
-                DisplayArea<? extends ActivityStack> taskDisplayArea, ArrayList<Feature> features) {
-            super(wmService, content, root, imeContainer, taskDisplayArea);
+                List<TaskDisplayArea> taskDisplayAreas, ArrayList<Feature> features) {
+            super(wmService, content, root, imeContainer, taskDisplayAreas);
             mFeatures = features;
             mAreas = new HashMap<>(features.size());
             for (int i = 0; i < mFeatures.size(); i++) {
@@ -267,7 +267,7 @@ class DisplayAreaPolicyBuilder {
                     areaForLayer[layer].mChildren.add(leafArea);
                     leafType = type;
                     if (leafType == LEAF_TYPE_TASK_CONTAINERS) {
-                        leafArea.mExisting = mTaskContainers;
+                        addTaskDisplayAreasToLayer(areaForLayer[layer], layer);
                     } else if (leafType == LEAF_TYPE_IME_CONTAINERS) {
                         leafArea.mExisting = mImeContainer;
                     }
@@ -276,6 +276,17 @@ class DisplayAreaPolicyBuilder {
             }
             root.computeMaxLayer();
             root.instantiateChildren(mRoot, mAreaForLayer, 0, mAreas);
+        }
+
+        /** Adds all task display areas to the specified layer */
+        private void addTaskDisplayAreasToLayer(PendingArea parentPendingArea, int layer) {
+            final int count = mTaskDisplayAreas.size();
+            for (int i = 0; i < count; i++) {
+                PendingArea leafArea = new PendingArea(null, layer, parentPendingArea);
+                leafArea.mExisting = mTaskDisplayAreas.get(i);
+                leafArea.mMaxLayer = layer;
+                parentPendingArea.mChildren.add(leafArea);
+            }
         }
 
         @Override
@@ -317,12 +328,16 @@ class DisplayAreaPolicyBuilder {
         return this;
     }
 
+    protected List<Feature> getFeatures() {
+        return mFeatures;
+    }
+
     Result build(WindowManagerService wmService,
             DisplayContent content, DisplayArea.Root root,
             DisplayArea<? extends WindowContainer> imeContainer,
-            DisplayArea<? extends ActivityStack> taskDisplayArea) {
+            List<TaskDisplayArea> taskDisplayAreas) {
 
-        return new Result(wmService, content, root, imeContainer, taskDisplayArea, new ArrayList<>(
+        return new Result(wmService, content, root, imeContainer, taskDisplayAreas, new ArrayList<>(
                 mFeatures));
     }
 

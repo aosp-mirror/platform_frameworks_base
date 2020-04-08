@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
+import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.DisplayArea.Type.ANY;
@@ -72,7 +73,11 @@ public class DisplayAreaPolicyBuilderTest {
         WindowManagerService wms = mSystemServices.getWindowManagerService();
         DisplayArea.Root root = new SurfacelessDisplayAreaRoot(wms);
         DisplayArea<WindowContainer> ime = new DisplayArea<>(wms, ABOVE_TASKS, "Ime");
-        DisplayArea<ActivityStack> tasks = new DisplayArea<>(wms, ANY, "Tasks");
+        DisplayContent displayContent = mock(DisplayContent.class);
+        TaskDisplayArea taskDisplayArea = new TaskDisplayArea(displayContent, wms, "Tasks",
+                FEATURE_DEFAULT_TASK_CONTAINER);
+        List<TaskDisplayArea> taskDisplayAreaList = new ArrayList<>();
+        taskDisplayAreaList.add(taskDisplayArea);
 
         final Feature foo;
         final Feature bar;
@@ -86,7 +91,7 @@ public class DisplayAreaPolicyBuilderTest {
                         .all()
                         .except(TYPE_STATUS_BAR)
                         .build())
-                .build(wms, mock(DisplayContent.class), root, ime, tasks);
+                .build(wms, displayContent, root, ime, taskDisplayAreaList);
 
         policy.attachDisplayAreas();
 
@@ -98,9 +103,9 @@ public class DisplayAreaPolicyBuilderTest {
         assertThat(policy.findAreaForToken(tokenOfType(TYPE_STATUS_BAR)),
                 is(not(decendantOfOneOf(policy.getDisplayAreas(bar)))));
 
-        assertThat(tasks,
+        assertThat(taskDisplayArea,
                 is(decendantOfOneOf(policy.getDisplayAreas(foo))));
-        assertThat(tasks,
+        assertThat(taskDisplayArea,
                 is(decendantOfOneOf(policy.getDisplayAreas(bar))));
 
         assertThat(ime,
@@ -109,7 +114,8 @@ public class DisplayAreaPolicyBuilderTest {
                 is(decendantOfOneOf(policy.getDisplayAreas(bar))));
 
         List<DisplayArea<?>> actualOrder = collectLeafAreas(root);
-        Map<DisplayArea<?>, Set<Integer>> zSets = calculateZSets(policy, root, ime, tasks);
+        Map<DisplayArea<?>, Set<Integer>> zSets = calculateZSets(policy, root, ime,
+                taskDisplayArea);
         actualOrder = actualOrder.stream().filter(zSets::containsKey).collect(toList());
 
         Map<DisplayArea<?>, Integer> expectedByMinLayer = mapValues(zSets,
