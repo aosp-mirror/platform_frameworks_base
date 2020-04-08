@@ -16,8 +16,12 @@
 
 package com.android.keyguard
 
+import android.app.Notification
 import android.graphics.drawable.Icon
 import android.media.MediaMetadata
+import android.media.session.MediaController
+import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -28,7 +32,9 @@ import androidx.test.filters.SmallTest
 
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
+import com.android.systemui.media.MediaControllerFactory
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -38,6 +44,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.any
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -48,9 +55,12 @@ import org.mockito.Mockito.`when` as whenever
 public class KeyguardMediaPlayerTest : SysuiTestCase() {
 
     private lateinit var keyguardMediaPlayer: KeyguardMediaPlayer
+    @Mock private lateinit var mockMediaFactory: MediaControllerFactory
+    @Mock private lateinit var mockMediaController: MediaController
+    private lateinit var playbackState: PlaybackState
     private lateinit var fakeExecutor: FakeExecutor
     private lateinit var mediaMetadata: MediaMetadata.Builder
-    private lateinit var entry: NotificationEntryBuilder
+    private lateinit var entry: NotificationEntry
     @Mock private lateinit var mockView: View
     private lateinit var songView: TextView
     private lateinit var artistView: TextView
@@ -70,8 +80,16 @@ public class KeyguardMediaPlayerTest : SysuiTestCase() {
 
     @Before
     public fun setup() {
+        playbackState = PlaybackState.Builder().run {
+            build()
+        }
+        mockMediaController = mock(MediaController::class.java)
+        whenever(mockMediaController.getPlaybackState()).thenReturn(playbackState)
+        mockMediaFactory = mock(MediaControllerFactory::class.java)
+        whenever(mockMediaFactory.create(any())).thenReturn(mockMediaController)
+
         fakeExecutor = FakeExecutor(FakeSystemClock())
-        keyguardMediaPlayer = KeyguardMediaPlayer(context, fakeExecutor)
+        keyguardMediaPlayer = KeyguardMediaPlayer(context, mockMediaFactory, fakeExecutor)
         mockIcon = mock(Icon::class.java)
 
         mockView = mock(View::class.java)
@@ -81,7 +99,9 @@ public class KeyguardMediaPlayerTest : SysuiTestCase() {
         whenever<TextView>(mockView.findViewById(R.id.header_artist)).thenReturn(artistView)
 
         mediaMetadata = MediaMetadata.Builder()
-        entry = NotificationEntryBuilder()
+        entry = NotificationEntryBuilder().build()
+        entry.getSbn().getNotification().extras.putParcelable(Notification.EXTRA_MEDIA_SESSION,
+                MediaSession.Token(1, null))
 
         ArchTaskExecutor.getInstance().setDelegate(taskExecutor)
 
@@ -109,7 +129,7 @@ public class KeyguardMediaPlayerTest : SysuiTestCase() {
 
     @Test
     public fun testUpdateControls() {
-        keyguardMediaPlayer.updateControls(entry.build(), mockIcon, mediaMetadata.build())
+        keyguardMediaPlayer.updateControls(entry, mockIcon, mediaMetadata.build())
         FakeExecutor.exhaustExecutors(fakeExecutor)
         verify(mockView).setVisibility(View.VISIBLE)
     }
@@ -122,11 +142,22 @@ public class KeyguardMediaPlayerTest : SysuiTestCase() {
     }
 
     @Test
+    public fun testUpdateControlsNullPlaybackState() {
+        // GIVEN that the playback state is null (ie. the media session was destroyed)
+        whenever(mockMediaController.getPlaybackState()).thenReturn(null)
+        // WHEN updated
+        keyguardMediaPlayer.updateControls(entry, mockIcon, mediaMetadata.build())
+        FakeExecutor.exhaustExecutors(fakeExecutor)
+        // THEN the controls are cleared (ie. visibility is set to GONE)
+        verify(mockView).setVisibility(View.GONE)
+    }
+
+    @Test
     public fun testSongName() {
         val song: String = "Song"
         mediaMetadata.putText(MediaMetadata.METADATA_KEY_TITLE, song)
 
-        keyguardMediaPlayer.updateControls(entry.build(), mockIcon, mediaMetadata.build())
+        keyguardMediaPlayer.updateControls(entry, mockIcon, mediaMetadata.build())
 
         assertThat(fakeExecutor.runAllReady()).isEqualTo(1)
         assertThat(songView.getText()).isEqualTo(song)
@@ -137,7 +168,7 @@ public class KeyguardMediaPlayerTest : SysuiTestCase() {
         val artist: String = "Artist"
         mediaMetadata.putText(MediaMetadata.METADATA_KEY_ARTIST, artist)
 
-        keyguardMediaPlayer.updateControls(entry.build(), mockIcon, mediaMetadata.build())
+        keyguardMediaPlayer.updateControls(entry, mockIcon, mediaMetadata.build())
 
         assertThat(fakeExecutor.runAllReady()).isEqualTo(1)
         assertThat(artistView.getText()).isEqualTo(artist)
