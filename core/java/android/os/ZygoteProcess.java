@@ -333,6 +333,9 @@ public class ZygoteProcess {
      *                             started.
      * @param pkgDataInfoMap Map from related package names to private data directory
      *                       volume UUID and inode number.
+     * @param whitelistedDataInfoMap Map from whitelisted package names to private data directory
+     *                       volume UUID and inode number.
+     * @param bindMountAppsData whether zygote needs to mount CE and DE data.
      * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.
      *
      * @param zygoteArgs Additional arguments to supply to the Zygote process.
@@ -355,6 +358,9 @@ public class ZygoteProcess {
                                                   @Nullable long[] disabledCompatChanges,
                                                   @Nullable Map<String, Pair<String, Long>>
                                                           pkgDataInfoMap,
+                                                  @Nullable Map<String, Pair<String, Long>>
+                                                          whitelistedDataInfoMap,
+                                                  boolean bindMountAppsData,
                                                   boolean bindMountAppStorageDirs,
                                                   @Nullable String[] zygoteArgs) {
         // TODO (chriswailes): Is there a better place to check this value?
@@ -367,7 +373,8 @@ public class ZygoteProcess {
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
                     packageName, zygotePolicyFlags, isTopApp, disabledCompatChanges,
-                    pkgDataInfoMap, bindMountAppStorageDirs, zygoteArgs);
+                    pkgDataInfoMap, whitelistedDataInfoMap, bindMountAppsData,
+                    bindMountAppStorageDirs, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -608,6 +615,9 @@ public class ZygoteProcess {
      * @param disabledCompatChanges a list of disabled compat changes for the process being started.
      * @param pkgDataInfoMap Map from related package names to private data directory volume UUID
      *                       and inode number.
+     * @param whitelistedDataInfoMap Map from whitelisted package names to private data directory
+     *                       volume UUID and inode number.
+     * @param bindMountAppsData whether zygote needs to mount CE and DE data.
      * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
@@ -631,6 +641,9 @@ public class ZygoteProcess {
                                                       @Nullable long[] disabledCompatChanges,
                                                       @Nullable Map<String, Pair<String, Long>>
                                                               pkgDataInfoMap,
+                                                      @Nullable Map<String, Pair<String, Long>>
+                                                              whitelistedDataInfoMap,
+                                                      boolean bindMountAppsData,
                                                       boolean bindMountAppStorageDirs,
                                                       @Nullable String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
@@ -728,9 +741,31 @@ public class ZygoteProcess {
             }
             argsForZygote.add(sb.toString());
         }
+        if (whitelistedDataInfoMap != null && whitelistedDataInfoMap.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(Zygote.WHITELISTED_DATA_INFO_MAP);
+            sb.append("=");
+            boolean started = false;
+            for (Map.Entry<String, Pair<String, Long>> entry : whitelistedDataInfoMap.entrySet()) {
+                if (started) {
+                    sb.append(',');
+                }
+                started = true;
+                sb.append(entry.getKey());
+                sb.append(',');
+                sb.append(entry.getValue().first);
+                sb.append(',');
+                sb.append(entry.getValue().second);
+            }
+            argsForZygote.add(sb.toString());
+        }
 
         if (bindMountAppStorageDirs) {
             argsForZygote.add(Zygote.BIND_MOUNT_APP_STORAGE_DIRS);
+        }
+
+        if (bindMountAppsData) {
+            argsForZygote.add(Zygote.BIND_MOUNT_APP_DATA_DIRS);
         }
 
         if (disabledCompatChanges != null && disabledCompatChanges.length > 0) {
@@ -1291,6 +1326,7 @@ public class ZygoteProcess {
                     true /* startChildZygote */, null /* packageName */,
                     ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS /* zygotePolicyFlags */, false /* isTopApp */,
                     null /* disabledCompatChanges */, null /* pkgDataInfoMap */,
+                    null /* whitelistedDataInfoMap */, false /* bindMountAppsData*/,
                     /* bindMountAppStorageDirs */ false, extraArgs);
 
         } catch (ZygoteStartFailedEx ex) {
