@@ -129,6 +129,12 @@ public final class VibrationAttributes implements Parcelable {
      */
     public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 0x1;
 
+    /**
+     * All flags supported by vibrator service, update it when adding new flag.
+     * @hide
+     */
+    public static final int FLAG_ALL_SUPPORTED = FLAG_BYPASS_INTERRUPTION_POLICY;
+
     // If a vibration is playing for longer than 5s, it's probably not haptic feedback
     private static final long MAX_HAPTIC_FEEDBACK_DURATION = 5000;
 
@@ -139,7 +145,7 @@ public final class VibrationAttributes implements Parcelable {
 
     private VibrationAttributes(int usage, int flags, @NonNull AudioAttributes audio) {
         mUsage = usage;
-        mFlags = flags;
+        mFlags = flags & FLAG_ALL_SUPPORTED;
         mAudioAttributes = audio;
     }
 
@@ -388,23 +394,13 @@ public final class VibrationAttributes implements Parcelable {
         }
 
         /**
-         * Replaces flags
-         * @param flags any combination of flags.
-         * @return the same Builder instance.
-         * @hide
-         */
-        public @NonNull Builder replaceFlags(int flags) {
-            mFlags = flags;
-            return this;
-        }
-
-        /**
          * Set flags
          * @param flags combination of flags to be set.
          * @param mask Bit range that should be changed.
          * @return the same Builder instance.
          */
         public @NonNull Builder setFlags(int flags, int mask) {
+            mask &= FLAG_ALL_SUPPORTED;
             mFlags = (mFlags & ~mask) | (flags & mask);
             return this;
         }
