@@ -72,6 +72,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     // This should be the currently selected route.
     MediaRoute2Info mDefaultRoute;
     MediaRoute2Info mDeviceRoute;
+    RoutingSessionInfo mDefaultSessionInfo;
     final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
 
     final IAudioRoutesObserver.Stub mAudioRoutesObserver = new IAudioRoutesObserver.Stub() {
@@ -114,6 +115,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             }
         });
         updateSessionInfosIfNeeded();
+
         mContext.registerReceiver(new VolumeChangeReceiver(),
                 new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION));
 
@@ -156,6 +158,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     @Override
     public void transferToRoute(long requestId, String sessionId, String routeId) {
+        if (TextUtils.equals(routeId, DEFAULT_ROUTE_ID)) {
+            // The currently selected route is the default route.
+            return;
+        }
         if (mBtRouteProvider != null) {
             if (TextUtils.equals(routeId, mDeviceRoute.getId())) {
                 mBtRouteProvider.transferTo(null);
@@ -180,6 +186,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     public MediaRoute2Info getDefaultRoute() {
         return mDefaultRoute;
+    }
+
+    public RoutingSessionInfo getDefaultSessionInfo() {
+        return mDefaultSessionInfo;
     }
 
     private void updateDeviceRoute(AudioRoutesInfo newRoutes) {
@@ -229,8 +239,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
      */
     boolean updateSessionInfosIfNeeded() {
         synchronized (mLock) {
-            // Prevent to execute this method before mBtRouteProvider is created.
-            if (mBtRouteProvider == null) return false;
             RoutingSessionInfo oldSessionInfo = mSessionInfos.isEmpty() ? null : mSessionInfos.get(
                     0);
 
@@ -238,14 +246,19 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     SYSTEM_SESSION_ID, "" /* clientPackageName */)
                     .setSystemSession(true);
 
-            MediaRoute2Info selectedRoute = mBtRouteProvider.getSelectedRoute();
-            if (selectedRoute == null) {
-                selectedRoute = mDeviceRoute;
-            } else {
-                builder.addTransferableRoute(mDeviceRoute.getId());
+            MediaRoute2Info selectedRoute = mDeviceRoute;
+            if (mBtRouteProvider != null) {
+                MediaRoute2Info selectedBtRoute = mBtRouteProvider.getSelectedRoute();
+                if (selectedBtRoute != null) {
+                    selectedRoute = selectedBtRoute;
+                    builder.addTransferableRoute(mDeviceRoute.getId());
+                }
             }
             mSelectedRouteId = selectedRoute.getId();
-            mDefaultRoute = new MediaRoute2Info.Builder(DEFAULT_ROUTE_ID, selectedRoute).build();
+            mDefaultRoute = new MediaRoute2Info.Builder(DEFAULT_ROUTE_ID, selectedRoute)
+                    .setSystemRoute(true)
+                    .setProviderId(mUniqueId)
+                    .build();
             builder.addSelectedRoute(mSelectedRouteId);
 
             for (MediaRoute2Info route : mBtRouteProvider.getTransferableRoutes()) {
@@ -258,6 +271,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             } else {
                 mSessionInfos.clear();
                 mSessionInfos.add(newSessionInfo);
+                mDefaultSessionInfo = new RoutingSessionInfo.Builder(
+                        SYSTEM_SESSION_ID, "" /* clientPackageName */)
+                        .setProviderId(mUniqueId)
+                        .setSystemSession(true)
+                        .addSelectedRoute(DEFAULT_ROUTE_ID)
+                        .build();
                 return true;
             }
         }
@@ -302,6 +321,9 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 } else if (mBtRouteProvider != null) {
                     mBtRouteProvider.setSelectedRouteVolume(newVolume);
                 }
+                mDefaultRoute = new MediaRoute2Info.Builder(mDefaultRoute)
+                        .setVolume(newVolume)
+                        .build();
                 publishProviderState();
             }
         }
