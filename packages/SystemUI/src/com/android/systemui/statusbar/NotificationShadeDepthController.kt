@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController
 import com.android.systemui.statusbar.phone.PanelExpansionListener
+import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -107,6 +108,16 @@ class NotificationShadeDepthController @Inject constructor(
         }
 
     /**
+     * Force stop blur effect when necessary.
+     */
+    private var scrimsVisible: Boolean = false
+        set(value) {
+            if (field == value) return
+            field = value
+            scheduleUpdate()
+        }
+
+    /**
      * Blur radius of the wake-up animation on this frame.
      */
     private var wakeAndUnlockBlurRadius = 0
@@ -142,7 +153,13 @@ class NotificationShadeDepthController @Inject constructor(
         if (showingHomeControls) {
             globalActionsRadius = 0
         }
-        val blur = max(shadeRadius.toInt(), globalActionsRadius)
+        var blur = max(shadeRadius.toInt(), globalActionsRadius)
+
+        // Make blur be 0 if it is necessary to stop blur effect.
+        if (scrimsVisible) {
+            blur = 0
+        }
+
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur)
         try {
             wallpaperManager.setWallpaperZoomOut(root.windowToken,
@@ -202,6 +219,10 @@ class NotificationShadeDepthController @Inject constructor(
                 brightnessMirrorSpring.finishIfRunning()
             }
         }
+
+        override fun onDozeAmountChanged(linear: Float, eased: Float) {
+            wakeAndUnlockBlurRadius = blurUtils.blurRadiusOfRatio(eased)
+        }
     }
 
     init {
@@ -210,6 +231,10 @@ class NotificationShadeDepthController @Inject constructor(
             keyguardStateController.addCallback(keyguardStateCallback)
         }
         statusBarStateController.addCallback(statusBarStateCallback)
+        notificationShadeWindowController.setScrimsVisibilityListener {
+            // Stop blur effect when scrims is opaque to avoid unnecessary GPU composition.
+            visibility -> scrimsVisible = visibility == ScrimController.OPAQUE
+        }
     }
 
     /**
@@ -225,7 +250,8 @@ class NotificationShadeDepthController @Inject constructor(
 
     private fun updateShadeBlur() {
         var newBlur = 0
-        if (statusBarStateController.state == StatusBarState.SHADE) {
+        val state = statusBarStateController.state
+        if (state == StatusBarState.SHADE || state == StatusBarState.SHADE_LOCKED) {
             val animatedBlur =
                     Interpolators.SHADE_ANIMATION.getInterpolation(
                             MathUtils.constrain(shadeExpansion / 0.15f, 0f, 1f))
