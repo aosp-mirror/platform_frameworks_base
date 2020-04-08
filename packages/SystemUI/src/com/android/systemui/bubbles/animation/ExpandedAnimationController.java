@@ -252,8 +252,14 @@ public class ExpandedAnimationController
         mSpringToTouchOnNextMotionEvent = true;
     }
 
-    /** Prepares the given bubble to be dragged out. */
-    public void prepareForBubbleDrag(View bubble, MagnetizedObject.MagneticTarget target) {
+    /**
+     * Prepares the given bubble view to be dragged out, using the provided magnetic target and
+     * listener.
+     */
+    public void prepareForBubbleDrag(
+            View bubble,
+            MagnetizedObject.MagneticTarget target,
+            MagnetizedObject.MagnetListener listener) {
         mLayout.cancelAnimationsOnView(bubble);
 
         bubble.setTranslationZ(Short.MAX_VALUE);
@@ -277,6 +283,7 @@ public class ExpandedAnimationController
             }
         };
         mMagnetizedBubbleDraggingOut.addTarget(target);
+        mMagnetizedBubbleDraggingOut.setMagnetListener(listener);
         mMagnetizedBubbleDraggingOut.setHapticsEnabled(true);
         mMagnetizedBubbleDraggingOut.setFlingToTargetMinVelocity(FLING_TO_DISMISS_MIN_VELOCITY);
     }
