@@ -304,7 +304,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private boolean mForAugmentedAutofillOnly;
 
     @Nullable
-    private final InlineSuggestionSession mInlineSuggestionSession;
+    private final AutofillInlineSessionController mInlineSessionController;
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -720,8 +720,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestConsumer =
                     mAssistReceiver.newAutofillRequestLocked(/*isInlineRequest=*/ true);
             if (inlineSuggestionsRequestConsumer != null) {
-                mInlineSuggestionSession.onCreateInlineSuggestionsRequest(mCurrentViewId,
-                        inlineSuggestionsRequestConsumer);
+                // TODO(b/146454892): pipe the uiExtras from the ExtServices.
+                mInlineSessionController.onCreateInlineSuggestionsRequestLocked(mCurrentViewId,
+                        inlineSuggestionsRequestConsumer, Bundle.EMPTY);
             }
         } else {
             mAssistReceiver.newAutofillRequestLocked(/*isInlineRequest=*/ false);
@@ -777,8 +778,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mForAugmentedAutofillOnly = forAugmentedAutofillOnly;
         setClientLocked(client);
 
-        mInlineSuggestionSession = new InlineSuggestionSession(inputMethodManagerInternal, userId,
-                componentName, handler, mLock);
+        mInlineSessionController = new AutofillInlineSessionController(inputMethodManagerInternal,
+                userId, componentName, handler, mLock);
 
         mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FLAGS, flags));
@@ -2561,7 +2562,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sVerbose) Slog.v(TAG, "Exiting view " + id);
                     mUi.hideFillUi(this);
                     hideAugmentedAutofillLocked(viewState);
-                    mInlineSuggestionSession.hideInlineSuggestionsUi(mCurrentViewId);
+                    mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
                     mCurrentViewId = null;
                 }
                 break;
@@ -2779,7 +2780,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private boolean requestShowInlineSuggestionsLocked(@NonNull FillResponse response,
             @Nullable String filterText) {
         final Optional<InlineSuggestionsRequest> inlineSuggestionsRequest =
-                mInlineSuggestionSession.getInlineSuggestionsRequest();
+                mInlineSessionController.getInlineSuggestionsRequestLocked();
         if (!inlineSuggestionsRequest.isPresent()) {
             Log.w(TAG, "InlineSuggestionsRequest unavailable");
             return false;
@@ -2801,7 +2802,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         inlineSuggestionsRequest.get(), response, filterText, mCurrentViewId,
                         this, () -> {
                             synchronized (mLock) {
-                                mInlineSuggestionSession.hideInlineSuggestionsUi(mCurrentViewId);
+                                mInlineSessionController.hideInlineSuggestionsUiLocked(
+                                        mCurrentViewId);
                             }
                         }, remoteRenderService);
         if (inlineSuggestionsResponse == null) {
@@ -2809,7 +2811,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return false;
         }
 
-        return mInlineSuggestionSession.onInlineSuggestionsResponse(mCurrentViewId,
+        return mInlineSessionController.onInlineSuggestionsResponseLocked(mCurrentViewId,
                 inlineSuggestionsResponse);
     }
 
@@ -3106,8 +3108,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             focusedId,
                             currentValue, inlineSuggestionsRequest,
                             /*inlineSuggestionsCallback=*/
-                            response -> mInlineSuggestionSession.onInlineSuggestionsResponse(
-                                    mCurrentViewId, response),
+                            response -> {
+                                synchronized (mLock) {
+                                    return mInlineSessionController
+                                            .onInlineSuggestionsResponseLocked(
+                                            mCurrentViewId, response);
+                                }
+                            },
                             /*onErrorCallback=*/ () -> {
                                 synchronized (mLock) {
                                     cancelAugmentedAutofillLocked();
@@ -3125,11 +3132,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 && (mForAugmentedAutofillOnly
                 || !isInlineSuggestionsEnabledByAutofillProviderLocked())) {
             if (sDebug) Slog.d(TAG, "Create inline request for augmented autofill");
-            mInlineSuggestionSession.onCreateInlineSuggestionsRequest(mCurrentViewId,
-                    /*requestConsumer=*/ requestAugmentedAutofill);
+            // TODO(b/146454892): pipe the uiExtras from the ExtServices.
+            mInlineSessionController.onCreateInlineSuggestionsRequestLocked(mCurrentViewId,
+                    /*requestConsumer=*/ requestAugmentedAutofill, Bundle.EMPTY);
         } else {
             requestAugmentedAutofill.accept(
-                    mInlineSuggestionSession.getInlineSuggestionsRequest().orElse(null));
+                    mInlineSessionController.getInlineSuggestionsRequestLocked().orElse(null));
         }
         if (mAugmentedAutofillDestroyer == null) {
             mAugmentedAutofillDestroyer = () -> remoteService.onDestroyAutofillWindowsRequest();
