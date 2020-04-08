@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.pip.tv.dagger.TvPipComponent;
@@ -34,6 +35,7 @@ import javax.inject.Inject;
  * Activity to show the PIP menu to control PIP.
  */
 public class PipMenuActivity extends Activity implements PipManager.Listener {
+    private static final boolean DEBUG = false;
     private static final String TAG = "PipMenuActivity";
 
     static final String EXTRA_CUSTOM_ACTIONS = "custom_actions";
@@ -47,7 +49,6 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     private boolean mRestorePipSizeWhenClose;
     private PipControlsViewController mPipControlsViewController;
 
-
     @Inject
     public PipMenuActivity(TvPipComponent.Builder pipComponentBuilder, PipManager pipManager) {
         super();
@@ -57,6 +58,8 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     protected void onCreate(Bundle bundle) {
+        if (DEBUG) Log.d(TAG, "onCreate()");
+
         super.onCreate(bundle);
         if (!mPipManager.isPipShown()) {
             finish();
@@ -81,13 +84,18 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        if (DEBUG) Log.d(TAG, "onNewIntent(), intent=" + intent);
         super.onNewIntent(intent);
 
         onPipMenuActionsChanged(getIntent().getParcelableExtra(EXTRA_CUSTOM_ACTIONS));
     }
 
     private void restorePipAndFinish() {
+        if (DEBUG) Log.d(TAG, "restorePipAndFinish()");
+
         if (mRestorePipSizeWhenClose) {
+            if (DEBUG) Log.d(TAG, "   > restoring to the default position");
+
             // When PIP menu activity is closed, restore to the default position.
             mPipManager.resizePinnedStack(PipManager.STATE_PIP);
         }
@@ -96,12 +104,16 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     public void onResume() {
+        if (DEBUG) Log.d(TAG, "onResume()");
+
         super.onResume();
         mFadeInAnimation.start();
     }
 
     @Override
     public void onPause() {
+        if (DEBUG) Log.d(TAG, "onPause()");
+
         super.onPause();
         mFadeOutAnimation.start();
         restorePipAndFinish();
@@ -109,6 +121,8 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     protected void onDestroy() {
+        if (DEBUG) Log.d(TAG, "onDestroy()");
+
         super.onDestroy();
         mPipManager.removeListener(this);
         mPipManager.resumePipResizing(
@@ -117,29 +131,41 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     public void onBackPressed() {
+        if (DEBUG) Log.d(TAG, "onBackPressed()");
+
         restorePipAndFinish();
     }
 
     @Override
-    public void onPipEntered() { }
+    public void onPipEntered() {
+        if (DEBUG) Log.d(TAG, "onPipEntered()");
+    }
 
     @Override
     public void onPipActivityClosed() {
+        if (DEBUG) Log.d(TAG, "onPipActivityClosed()");
+
         finish();
     }
 
     @Override
     public void onPipMenuActionsChanged(ParceledListSlice actions) {
+        if (DEBUG) Log.d(TAG, "onPipMenuActionsChanged()");
+
         boolean hasCustomActions = actions != null && !actions.getList().isEmpty();
         mPipControlsViewController.setActions(
                 hasCustomActions ? actions.getList() : Collections.EMPTY_LIST);
     }
 
     @Override
-    public void onShowPipMenu() { }
+    public void onShowPipMenu() {
+        if (DEBUG) Log.d(TAG, "onShowPipMenu()");
+    }
 
     @Override
     public void onMoveToFullscreen() {
+        if (DEBUG) Log.d(TAG, "onMoveToFullscreen()");
+
         // Moving PIP to fullscreen is implemented by resizing PINNED_STACK with null bounds.
         // This conflicts with restoring PIP position, so disable it.
         mRestorePipSizeWhenClose = false;
@@ -148,8 +174,17 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     public void onPipResizeAboutToStart() {
+        if (DEBUG) Log.d(TAG, "onPipResizeAboutToStart()");
+
         finish();
         mPipManager.suspendPipResizing(
                 PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
+    }
+
+    @Override
+    public void finish() {
+        if (DEBUG) Log.d(TAG, "finish()", new RuntimeException());
+
+        super.finish();
     }
 }
