@@ -103,6 +103,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
         @Override
         public void onPipAnimationEnd(SurfaceControl.Transaction tx,
                 PipAnimationController.PipTransitionAnimator animator) {
+            finishResize(tx, animator.getDestinationBounds(), animator.getTransitionDirection());
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                     final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
@@ -110,7 +111,6 @@ public class PipTaskOrganizer extends TaskOrganizer {
                             animator.getTransitionDirection());
                 }
             });
-            finishResize(tx, animator.getDestinationBounds(), animator.getTransitionDirection());
         }
 
         @Override
