@@ -36,10 +36,12 @@ import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.content.PackageMonitor;
 
 import libcore.io.IoUtils;
 
@@ -261,22 +263,7 @@ public class WallpaperBackupAgent extends BackupAgent {
 
             // And reset to the wallpaper service we should be using
             ComponentName wpService = parseWallpaperComponent(infoStage, "wp");
-            if (servicePackageExists(wpService)) {
-                Slog.i(TAG, "Using wallpaper service " + wpService);
-                mWm.setWallpaperComponent(wpService, UserHandle.USER_SYSTEM);
-                if (!lockImageStage.exists()) {
-                    // We have a live wallpaper and no static lock image,
-                    // allow live wallpaper to show "through" on lock screen.
-                    mWm.clear(FLAG_LOCK);
-                }
-            } else {
-                // If we've restored a live wallpaper, but the component doesn't exist,
-                // we should log it as an error so we can easily identify the problem
-                // in reports from users
-                if (wpService != null) {
-                    Slog.e(TAG, "Wallpaper service " + wpService + " isn't available.");
-                }
-            }
+            updateWallpaperComponent(wpService, !lockImageStage.exists());
         } catch (Exception e) {
             Slog.e(TAG, "Unable to restore wallpaper: " + e.getMessage());
         } finally {
@@ -290,6 +277,28 @@ public class WallpaperBackupAgent extends BackupAgent {
                     .putInt(SYSTEM_GENERATION, -1)
                     .putInt(LOCK_GENERATION, -1)
                     .commit();
+        }
+    }
+
+    @VisibleForTesting
+    void updateWallpaperComponent(ComponentName wpService, boolean applyToLock) throws IOException {
+        if (servicePackageExists(wpService)) {
+            Slog.i(TAG, "Using wallpaper service " + wpService);
+            mWm.setWallpaperComponent(wpService, UserHandle.USER_SYSTEM);
+            if (applyToLock) {
+                // We have a live wallpaper and no static lock image,
+                // allow live wallpaper to show "through" on lock screen.
+                mWm.clear(FLAG_LOCK);
+            }
+        } else {
+            // If we've restored a live wallpaper, but the component doesn't exist,
+            // we should log it as an error so we can easily identify the problem
+            // in reports from users
+            if (wpService != null) {
+                applyComponentAtInstall(wpService, applyToLock);
+                Slog.w(TAG, "Wallpaper service " + wpService + " isn't available. "
+                        + " Will try to apply later");
+            }
         }
     }
 
@@ -372,7 +381,8 @@ public class WallpaperBackupAgent extends BackupAgent {
         return (value == null) ? defValue : Integer.parseInt(value);
     }
 
-    private boolean servicePackageExists(ComponentName comp) {
+    @VisibleForTesting
+    boolean servicePackageExists(ComponentName comp) {
         try {
             if (comp != null) {
                 final IPackageManager pm = AppGlobals.getPackageManager();
@@ -400,5 +410,54 @@ public class WallpaperBackupAgent extends BackupAgent {
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
         // Intentionally blank
+    }
+
+    private void applyComponentAtInstall(ComponentName componentName, boolean applyToLock) {
+        PackageMonitor packageMonitor = getWallpaperPackageMonitor(componentName, applyToLock);
+        packageMonitor.register(getBaseContext(), null, UserHandle.ALL, true);
+    }
+
+    @VisibleForTesting
+    PackageMonitor getWallpaperPackageMonitor(ComponentName componentName, boolean applyToLock) {
+        return new PackageMonitor() {
+            @Override
+            public void onPackageAdded(String packageName, int uid) {
+                if (!isDeviceInRestore()) {
+                    // We don't want to reapply the wallpaper outside a restore.
+                    unregister();
+                    return;
+                }
+
+                if (componentName.getPackageName().equals(packageName)) {
+                    Slog.d(TAG, "Applying component " + componentName);
+                    mWm.setWallpaperComponent(componentName);
+                    if (applyToLock) {
+                        try {
+                            mWm.clear(FLAG_LOCK);
+                        } catch (IOException e) {
+                            Slog.w(TAG, "Failed to apply live wallpaper to lock screen: " + e);
+                        }
+                    }
+                    // We're only expecting to restore the wallpaper component once.
+                    unregister();
+                }
+            }
+        };
+    }
+
+    @VisibleForTesting
+    boolean isDeviceInRestore() {
+        try {
+            boolean isInSetup = Settings.Secure.getInt(getBaseContext().getContentResolver(),
+                    Settings.Secure.USER_SETUP_COMPLETE) == 0;
+            boolean isInDeferredSetup = Settings.Secure.getInt(getBaseContext()
+                            .getContentResolver(),
+                    Settings.Secure.USER_SETUP_PERSONALIZATION_STATE) ==
+                    Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED;
+            return isInSetup || isInDeferredSetup;
+        } catch (Settings.SettingNotFoundException e) {
+            Slog.w(TAG, "Failed to check if the user is in restore: " + e);
+            return false;
+        }
     }
 }
