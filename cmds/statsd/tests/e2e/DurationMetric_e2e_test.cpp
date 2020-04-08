@@ -921,18 +921,18 @@ TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState) {
                bucket #1                      bucket #2
     |       1       2       3       4       5     6     7     8  (minutes)
     |---------------------------------------|------------------
-         ON                              OFF    ON             (BatterySaverMode)
+             ON                          OFF    ON             (BatterySaverMode)
                   T            F    T                          (DeviceUnpluggedPredicate)
-             |          |              |                       (ScreenIsOnEvent)
+         |              |              |                       (ScreenIsOnEvent)
                 |           |                       |          (ScreenIsOffEvent)
                                 |                              (ScreenDozeEvent)
     */
     // Initialize log events.
     std::vector<std::unique_ptr<LogEvent>> events;
-    events.push_back(CreateBatterySaverOnEvent(bucketStartTimeNs + 20 * NS_PER_SEC));  // 0:30
     events.push_back(CreateScreenStateChangedEvent(
-            bucketStartTimeNs + 60 * NS_PER_SEC,
-            android::view::DisplayStateEnum::DISPLAY_STATE_ON));  // 1:10
+            bucketStartTimeNs + 20 * NS_PER_SEC,
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON));                       // 0:30
+    events.push_back(CreateBatterySaverOnEvent(bucketStartTimeNs + 60 * NS_PER_SEC));  // 1:10
     events.push_back(CreateScreenStateChangedEvent(
             bucketStartTimeNs + 80 * NS_PER_SEC,
             android::view::DisplayStateEnum::DISPLAY_STATE_OFF));  // 1:30

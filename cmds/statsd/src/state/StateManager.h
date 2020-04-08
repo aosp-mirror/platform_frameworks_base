@@ -45,10 +45,11 @@ public:
     // Notifies the correct StateTracker of an event.
     void onLogEvent(const LogEvent& event);
 
-    // Returns true if atomId is being tracked and is associated with a state
-    // atom. StateManager notifies the correct StateTracker to register listener.
+    // Notifies the StateTracker for the given atomId to register listener.
     // If the correct StateTracker does not exist, a new StateTracker is created.
-    bool registerListener(const int32_t atomId, wp<StateListener> listener);
+    // Note: StateTrackers can be created for non-state atoms. They are essentially empty and
+    // do not perform any actions.
+    void registerListener(const int32_t atomId, wp<StateListener> listener);
 
     // Notifies the correct StateTracker to unregister a listener
     // and removes the tracker if it no longer has any listeners.

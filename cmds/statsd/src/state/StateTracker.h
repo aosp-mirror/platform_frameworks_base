@@ -15,7 +15,6 @@
  */
 #pragma once
 
-#include <atoms_info.h>
 #include <utils/RefBase.h>
 #include "HashableDimensionKey.h"
 #include "logd/LogEvent.h"
@@ -30,7 +29,7 @@ namespace statsd {
 
 class StateTracker : public virtual RefBase {
 public:
-    StateTracker(const int32_t atomId, const android::util::StateAtomFieldOptions& stateAtomInfo);
+    StateTracker(const int32_t atomId);
 
     virtual ~StateTracker(){};
 
@@ -60,21 +59,11 @@ public:
 
 private:
     struct StateValueInfo {
-        int32_t state;  // state value
-        int count;      // nested count (only used for binary states)
+        int32_t state = kStateUnknown;  // state value
+        int count = 0;                  // nested count (only used for binary states)
     };
 
-    const int32_t mAtomId;  // id of the state atom being tracked
-
-    Matcher mStateField;  // matches the atom's exclusive state field
-
-    std::vector<Matcher> mPrimaryFields;  // matches the atom's primary fields
-
-    int32_t mDefaultState = kStateUnknown;
-
-    int32_t mResetState = kStateUnknown;
-
-    const bool mNested;
+    Field mField;
 
     // Maps primary key to state value info
     std::unordered_map<HashableDimensionKey, StateValueInfo> mStateMap;
@@ -82,19 +71,23 @@ private:
     // Set of all StateListeners (objects listening for state changes)
     std::set<wp<StateListener>> mListeners;
 
-    // Reset all state values in map to default state.
-    void handleReset(const int64_t eventTimeNs);
+    // Reset all state values in map to the given state.
+    void handleReset(const int64_t eventTimeNs, const int32_t newState);
 
-    // Reset only the state value mapped to the given primary key to default state.
-    // Partial resets are used when we only need to update the state of one primary
-    // key instead of clearing/reseting every key in the map.
-    void handlePartialReset(const int64_t eventTimeNs, const HashableDimensionKey& primaryKey);
+    // Clears the state value mapped to the given primary key by setting it to kStateUnknown.
+    void clearStateForPrimaryKey(const int64_t eventTimeNs, const HashableDimensionKey& primaryKey);
 
     // Update the StateMap based on the received state value.
-    // Store the old and new states.
-    void updateState(const HashableDimensionKey& primaryKey, const int32_t eventState,
-                     int32_t* oldState, int32_t* newState);
+    void updateStateForPrimaryKey(const int64_t eventTimeNs, const HashableDimensionKey& primaryKey,
+                                  const int32_t newState, const bool nested,
+                                  StateValueInfo* stateValueInfo);
+
+    // Notify registered state listeners of state change.
+    void notifyListeners(const int64_t eventTimeNs, const HashableDimensionKey& primaryKey,
+                         const int32_t oldState, const int32_t newState);
 };
+
+bool getStateFieldValueFromLogEvent(const LogEvent& event, FieldValue* output);
 
 }  // namespace statsd
 }  // namespace os

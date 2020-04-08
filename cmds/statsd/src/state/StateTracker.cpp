@@ -25,81 +25,43 @@ namespace android {
 namespace os {
 namespace statsd {
 
-StateTracker::StateTracker(const int32_t atomId, const util::StateAtomFieldOptions& stateAtomInfo)
-    : mAtomId(atomId),
-      mStateField(getSimpleMatcher(atomId, stateAtomInfo.exclusiveField)),
-      mNested(stateAtomInfo.nested) {
-    // create matcher for each primary field
-    for (const auto& primaryField : stateAtomInfo.primaryFields) {
-        if (primaryField == util::FIRST_UID_IN_CHAIN) {
-            Matcher matcher = getFirstUidMatcher(atomId);
-            mPrimaryFields.push_back(matcher);
-        } else {
-            Matcher matcher = getSimpleMatcher(atomId, primaryField);
-            mPrimaryFields.push_back(matcher);
-        }
-    }
-
-    if (stateAtomInfo.defaultState != util::UNSET_VALUE) {
-        mDefaultState = stateAtomInfo.defaultState;
-    }
-
-    if (stateAtomInfo.resetState != util::UNSET_VALUE) {
-        mResetState = stateAtomInfo.resetState;
-    }
+StateTracker::StateTracker(const int32_t atomId) : mField(atomId, 0) {
 }
 
 void StateTracker::onLogEvent(const LogEvent& event) {
-    int64_t eventTimeNs = event.GetElapsedTimestampNs();
+    const int64_t eventTimeNs = event.GetElapsedTimestampNs();
 
     // Parse event for primary field values i.e. primary key.
     HashableDimensionKey primaryKey;
-    if (mPrimaryFields.size() > 0) {
-        if (!filterValues(mPrimaryFields, event.getValues(), &primaryKey) ||
-            primaryKey.getValues().size() != mPrimaryFields.size()) {
-            ALOGE("StateTracker error extracting primary key from log event.");
-            handleReset(eventTimeNs);
-            return;
-        }
-    } else {
-        // Use an empty HashableDimensionKey if atom has no primary fields.
-        primaryKey = DEFAULT_DIMENSION_KEY;
+    filterPrimaryKey(event.getValues(), &primaryKey);
+
+    FieldValue stateValue;
+    if (!getStateFieldValueFromLogEvent(event, &stateValue)) {
+        ALOGE("StateTracker error extracting state from log event. Missing exclusive state field.");
+        clearStateForPrimaryKey(eventTimeNs, primaryKey);
+        return;
     }
 
-    // Parse event for state value.
-    FieldValue stateValue;
-    if (!filterValues(mStateField, event.getValues(), &stateValue) ||
-        stateValue.mValue.getType() != INT) {
+    mField.setField(stateValue.mField.getField());
+
+    if (stateValue.mValue.getType() != INT) {
         ALOGE("StateTracker error extracting state from log event. Type: %d",
               stateValue.mValue.getType());
-        handlePartialReset(eventTimeNs, primaryKey);
+        clearStateForPrimaryKey(eventTimeNs, primaryKey);
         return;
     }
 
-    int32_t state = stateValue.mValue.int_value;
-    if (state == mResetState) {
-        VLOG("StateTracker Reset state: %s", stateValue.mValue.toString().c_str());
-        handleReset(eventTimeNs);
+    const int32_t resetState = stateValue.mAnnotations.getResetState();
+    if (resetState != -1) {
+        VLOG("StateTracker new reset state: %d", resetState);
+        handleReset(eventTimeNs, resetState);
         return;
     }
 
-    // Track and update state.
-    int32_t oldState = 0;
-    int32_t newState = 0;
-    updateState(primaryKey, state, &oldState, &newState);
-
-    // Notify all listeners if state has changed.
-    if (oldState != newState) {
-        VLOG("StateTracker updated state");
-        for (auto listener : mListeners) {
-            auto sListener = listener.promote();  // safe access to wp<>
-            if (sListener != nullptr) {
-                sListener->onStateChanged(eventTimeNs, mAtomId, primaryKey, oldState, newState);
-            }
-        }
-    } else {
-        VLOG("StateTracker NO updated state");
-    }
+    const int32_t newState = stateValue.mValue.int_value;
+    const bool nested = stateValue.mAnnotations.isNested();
+    StateValueInfo* stateValueInfo = &mStateMap[primaryKey];
+    updateStateForPrimaryKey(eventTimeNs, primaryKey, newState, nested, stateValueInfo);
 }
 
 void StateTracker::registerListener(wp<StateListener> listener) {
@@ -111,81 +73,62 @@ void StateTracker::unregisterListener(wp<StateListener> listener) {
 }
 
 bool StateTracker::getStateValue(const HashableDimensionKey& queryKey, FieldValue* output) const {
-    output->mField = mStateField.mMatcher;
+    output->mField = mField;
 
-    // Check that the query key has the correct number of primary fields.
-    if (queryKey.getValues().size() == mPrimaryFields.size()) {
-        auto it = mStateMap.find(queryKey);
-        if (it != mStateMap.end()) {
-            output->mValue = it->second.state;
-            return true;
-        }
-    } else if (queryKey.getValues().size() > mPrimaryFields.size()) {
-        ALOGE("StateTracker query key size %zu > primary key size %zu is illegal",
-              queryKey.getValues().size(), mPrimaryFields.size());
-    } else {
-        ALOGE("StateTracker query key size %zu < primary key size %zu is not supported",
-              queryKey.getValues().size(), mPrimaryFields.size());
+    if (const auto it = mStateMap.find(queryKey); it != mStateMap.end()) {
+        output->mValue = it->second.state;
+        return true;
     }
 
-    // Set the state value to default state if:
-    // - query key size is incorrect
-    // - query key is not found in state map
-    output->mValue = mDefaultState;
+    // Set the state value to kStateUnknown if query key is not found in state map.
+    output->mValue = kStateUnknown;
     return false;
 }
 
-void StateTracker::handleReset(const int64_t eventTimeNs) {
+void StateTracker::handleReset(const int64_t eventTimeNs, const int32_t newState) {
     VLOG("StateTracker handle reset");
-    for (const auto pair : mStateMap) {
-        for (auto l : mListeners) {
-            auto sl = l.promote();
-            if (sl != nullptr) {
-                sl->onStateChanged(eventTimeNs, mAtomId, pair.first, pair.second.state,
-                                   mDefaultState);
-            }
-        }
-    }
-    mStateMap.clear();
-}
-
-void StateTracker::handlePartialReset(const int64_t eventTimeNs,
-                                      const HashableDimensionKey& primaryKey) {
-    VLOG("StateTracker handle partial reset");
-    if (mStateMap.find(primaryKey) != mStateMap.end()) {
-        for (auto l : mListeners) {
-            auto sl = l.promote();
-            if (sl != nullptr) {
-                sl->onStateChanged(eventTimeNs, mAtomId, primaryKey,
-                                   mStateMap.find(primaryKey)->second.state, mDefaultState);
-            }
-        }
-        mStateMap.erase(primaryKey);
+    for (auto& [primaryKey, stateValueInfo] : mStateMap) {
+        updateStateForPrimaryKey(eventTimeNs, primaryKey, newState,
+                                 false /* nested; treat this state change as not nested */,
+                                 &stateValueInfo);
     }
 }
 
-void StateTracker::updateState(const HashableDimensionKey& primaryKey, const int32_t eventState,
-                               int32_t* oldState, int32_t* newState) {
-    // get old state (either current state in map or default state)
-    auto it = mStateMap.find(primaryKey);
+void StateTracker::clearStateForPrimaryKey(const int64_t eventTimeNs,
+                                           const HashableDimensionKey& primaryKey) {
+    VLOG("StateTracker clear state for primary key");
+    const std::unordered_map<HashableDimensionKey, StateValueInfo>::iterator it =
+            mStateMap.find(primaryKey);
+
+    // If there is no entry for the primaryKey in mStateMap, then the state is already
+    // kStateUnknown.
     if (it != mStateMap.end()) {
-        *oldState = it->second.state;
-    } else {
-        *oldState = mDefaultState;
+        updateStateForPrimaryKey(eventTimeNs, primaryKey, kStateUnknown,
+                                 false /* nested; treat this state change as not nested */,
+                                 &it->second);
+    }
+}
+
+void StateTracker::updateStateForPrimaryKey(const int64_t eventTimeNs,
+                                            const HashableDimensionKey& primaryKey,
+                                            const int32_t newState, const bool nested,
+                                            StateValueInfo* stateValueInfo) {
+    const int32_t oldState = stateValueInfo->state;
+
+    if (kStateUnknown == newState) {
+        mStateMap.erase(primaryKey);
     }
 
     // Update state map for non-nested counting case.
     // Every state event triggers a state overwrite.
-    if (!mNested) {
-        if (eventState == mDefaultState) {
-            // remove (key, state) pair if state returns to default state
-            VLOG("\t StateTracker changed to default state")
-            mStateMap.erase(primaryKey);
-        } else {
-            mStateMap[primaryKey].state = eventState;
-            mStateMap[primaryKey].count = 1;
+    if (!nested) {
+        stateValueInfo->state = newState;
+        stateValueInfo->count = 1;
+
+        // Notify listeners if state has changed.
+        if (oldState != newState) {
+            notifyListeners(eventTimeNs, primaryKey, oldState, newState);
         }
-        *newState = eventState;
         return;
     }
 
@@ -197,29 +140,45 @@ void StateTracker::updateState(const HashableDimensionKey& primaryKey, const int
     // number of OFF events as ON events.
     //
     // In atoms.proto, a state atom with nested counting enabled
-    // must only have 2 states and one of the states must be the default state.
-    it = mStateMap.find(primaryKey);
-    if (it != mStateMap.end()) {
-        *newState = it->second.state;
-        if (eventState == it->second.state) {
-            it->second.count++;
-        } else if (eventState == mDefaultState) {
-            if ((--it->second.count) == 0) {
-                mStateMap.erase(primaryKey);
-                *newState = mDefaultState;
-            }
-        } else {
-            ALOGE("StateTracker Nest counting state has a third state instead of the binary state "
-                  "limit.");
-            return;
+    // must only have 2 states. There is no enforcemnt here of this requirement.
+    // The atom must be logged correctly.
+    if (kStateUnknown == newState) {
+        if (kStateUnknown != oldState) {
+            notifyListeners(eventTimeNs, primaryKey, oldState, newState);
         }
-    } else {
-        if (eventState != mDefaultState) {
-            mStateMap[primaryKey].state = eventState;
-            mStateMap[primaryKey].count = 1;
-        }
-        *newState = eventState;
+    } else if (oldState == kStateUnknown) {
+        stateValueInfo->state = newState;
+        stateValueInfo->count = 1;
+        notifyListeners(eventTimeNs, primaryKey, oldState, newState);
+    } else if (oldState == newState) {
+        stateValueInfo->count++;
+    } else if (--stateValueInfo->count == 0) {
+        stateValueInfo->state = newState;
+        stateValueInfo->count = 1;
+        notifyListeners(eventTimeNs, primaryKey, oldState, newState);
     }
+}
+
+void StateTracker::notifyListeners(const int64_t eventTimeNs,
+                                   const HashableDimensionKey& primaryKey, const int32_t oldState,
+                                   const int32_t newState) {
+    for (auto l : mListeners) {
+        auto sl = l.promote();
+        if (sl != nullptr) {
+            sl->onStateChanged(eventTimeNs, mField.getTag(), primaryKey, oldState, newState);
+        }
+    }
+}
+
+bool getStateFieldValueFromLogEvent(const LogEvent& event, FieldValue* output) {
+    const int exclusiveStateFieldIndex = event.getExclusiveStateFieldIndex();
+    if (-1 == exclusiveStateFieldIndex) {
+        ALOGE("error extracting state from log event. Missing exclusive state field.");
+        return false;
+    }
+
+    *output = event.getValues()[exclusiveStateFieldIndex];
+    return true;
 }
 
 }  // namespace statsd

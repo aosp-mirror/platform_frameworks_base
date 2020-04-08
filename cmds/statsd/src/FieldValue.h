@@ -181,6 +181,7 @@ public:
 
         return false;
     }
+
     bool matches(const Matcher& that) const;
 };
 
@@ -360,7 +361,9 @@ struct Value {
 
 class Annotations {
 public:
-    Annotations() {}
+    Annotations() {
+        setNested(true);  // Nested = true by default
+    }
 
     // This enum stores where particular annotations can be found in the
     // bitmask. Note that these pos do not correspond to annotation ids.
@@ -379,7 +382,9 @@ public:
 
     inline void setUidField(bool isUid) { setBitmaskAtPos(UID_POS, isUid); }
 
-    inline void setResetState(int resetState) { mResetState = resetState; }
+    inline void setResetState(int32_t resetState) {
+        mResetState = resetState;
+    }
 
     // Default value = false
     inline bool isNested() const { return getValueFromBitmask(NESTED_POS); }
@@ -395,7 +400,9 @@ public:
 
     // If a reset state is not sent in the StatsEvent, returns -1. Note that a
     // reset satate is only sent if and only if a reset should be triggered.
-    inline int getResetState() const { return mResetState; }
+    inline int32_t getResetState() const {
+        return mResetState;
+    }
 
 private:
     inline void setBitmaskAtPos(int pos, bool value) {
@@ -411,7 +418,7 @@ private:
     // there are only 4 booleans, just one byte is required.
     uint8_t mBooleanBitmask = 0;
 
-    int mResetState = -1;
+    int32_t mResetState = -1;
 };
 
 /**

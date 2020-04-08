@@ -38,20 +38,12 @@ void StateManager::onLogEvent(const LogEvent& event) {
     }
 }
 
-bool StateManager::registerListener(const int32_t atomId, wp<StateListener> listener) {
+void StateManager::registerListener(const int32_t atomId, wp<StateListener> listener) {
     // Check if state tracker already exists.
     if (mStateTrackers.find(atomId) == mStateTrackers.end()) {
-        // Create a new state tracker iff atom is a state atom.
-        auto it = android::util::AtomsInfo::kStateAtomsFieldOptions.find(atomId);
-        if (it != android::util::AtomsInfo::kStateAtomsFieldOptions.end()) {
-            mStateTrackers[atomId] = new StateTracker(atomId, it->second);
-        } else {
-            ALOGE("StateManager cannot register listener, Atom %d is not a state atom", atomId);
-            return false;
-        }
+        mStateTrackers[atomId] = new StateTracker(atomId);
     }
     mStateTrackers[atomId]->registerListener(listener);
-    return true;
 }
 
 void StateManager::unregisterListener(const int32_t atomId, wp<StateListener> listener) {
