@@ -923,6 +923,7 @@ cc_library {
 filegroup {
     name: "incremental_aidl",
     srcs: [
+        "core/java/android/os/incremental/IIncrementalServiceConnector.aidl",
         "core/java/android/os/incremental/IncrementalFileSystemControlParcel.aidl",
     ],
     path: "core/java",
