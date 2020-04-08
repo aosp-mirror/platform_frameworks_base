@@ -54,17 +54,6 @@ public class DisplayAreaTest {
     }
 
     @Test
-    public void testDisplayArea_positionChanged_throwsIfIncompatibleSibling() {
-        WindowManagerService wms = mWmsRule.getWindowManagerService();
-        DisplayArea<WindowContainer> parent = new SurfacelessDisplayArea<>(wms, ANY, "Parent");
-        DisplayArea<WindowContainer> child1 = new DisplayArea<>(wms, ANY, "Child1");
-        DisplayArea<WindowContainer> child2 = new DisplayArea<>(wms, ANY, "Child2");
-
-        parent.addChild(child1, 0);
-        assertThrows(IllegalStateException.class, () -> parent.addChild(child2, 0));
-    }
-
-    @Test
     public void testType_typeOf() {
         WindowManagerService wms = mWmsRule.getWindowManagerService();
 
@@ -87,10 +76,10 @@ public class DisplayAreaTest {
         checkSiblings(BELOW_TASKS, ABOVE_TASKS);
         checkSiblings(ANY, ABOVE_TASKS);
         checkSiblings(ABOVE_TASKS, ABOVE_TASKS);
+        checkSiblings(ANY, ANY);
 
         assertThrows(IllegalStateException.class, () -> checkSiblings(ABOVE_TASKS, BELOW_TASKS));
         assertThrows(IllegalStateException.class, () -> checkSiblings(ABOVE_TASKS, ANY));
-        assertThrows(IllegalStateException.class, () -> checkSiblings(ANY, ANY));
         assertThrows(IllegalStateException.class, () -> checkSiblings(ANY, BELOW_TASKS));
     }
 
