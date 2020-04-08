@@ -62,7 +62,7 @@ int getStateInt(StateManager& mgr, int atomId, const HashableDimensionKey& query
 
 // START: build event functions.
 // Incorrect event - missing fields
-std::shared_ptr<LogEvent> buildIncorrectOverlayEvent(int uid, const std::string& packageName,
+std::unique_ptr<LogEvent> buildIncorrectOverlayEvent(int uid, const std::string& packageName,
                                                      int state) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, util::OVERLAY_STATE_CHANGED);
@@ -72,14 +72,9 @@ std::shared_ptr<LogEvent> buildIncorrectOverlayEvent(int uid, const std::string&
     AStatsEvent_writeString(statsEvent, packageName.c_str());
     // Missing field 3 - using_alert_window.
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -93,14 +88,9 @@ std::unique_ptr<LogEvent> buildOverlayEventBadStateType(int uid, const std::stri
     AStatsEvent_writeString(statsEvent, packageName.c_str());
     AStatsEvent_writeInt32(statsEvent, true);       // using_alert_window
     AStatsEvent_writeString(statsEvent, "string");  // exclusive state: string instead of int
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 // END: build event functions.
