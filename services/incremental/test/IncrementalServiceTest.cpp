@@ -137,6 +137,7 @@ public:
                                           bool* _aidl_return) {
         mId = mountId;
         mListener = listener;
+        mServiceConnector = control.service;
         *_aidl_return = true;
         return binder::Status::ok();
     }
@@ -166,9 +167,17 @@ public:
         mListener->onStatusChanged(mId, IDataLoaderStatusListener::DATA_LOADER_CREATED);
     }
 
+    int32_t setStorageParams(bool enableReadLogs) {
+        int32_t result = -1;
+        EXPECT_NE(mServiceConnector.get(), nullptr);
+        EXPECT_TRUE(mServiceConnector->setStorageParams(enableReadLogs, &result).isOk());
+        return result;
+    }
+
 private:
     int mId;
     sp<IDataLoaderStatusListener> mListener;
+    sp<IIncrementalServiceConnector> mServiceConnector;
     sp<IDataLoader> mDataLoader = sp<IDataLoader>(new FakeDataLoader());
 };
 
@@ -453,7 +462,7 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccess) {
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
-    ASSERT_GE(mIncrementalService->setStorageParams(storageId, true), 0);
+    ASSERT_GE(mDataLoaderManager->setStorageParams(true), 0);
 }
 
 TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndPermissionChanged) {
@@ -480,7 +489,7 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndPermissionChang
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
-    ASSERT_GE(mIncrementalService->setStorageParams(storageId, true), 0);
+    ASSERT_GE(mDataLoaderManager->setStorageParams(true), 0);
     ASSERT_NE(nullptr, mAppOpsManager->mStoredCallback.get());
     mAppOpsManager->mStoredCallback->opChanged(0, {});
 }
@@ -503,7 +512,7 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsCheckPermissionFails) {
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
-    ASSERT_LT(mIncrementalService->setStorageParams(storageId, true), 0);
+    ASSERT_LT(mDataLoaderManager->setStorageParams(true), 0);
 }
 
 TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsFails) {
@@ -526,7 +535,7 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsFails) {
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
-    ASSERT_LT(mIncrementalService->setStorageParams(storageId, true), 0);
+    ASSERT_LT(mDataLoaderManager->setStorageParams(true), 0);
 }
 
 TEST_F(IncrementalServiceTest, testMakeDirectory) {
