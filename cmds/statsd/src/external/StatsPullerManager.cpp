@@ -44,19 +44,23 @@ namespace statsd {
 // Stores the puller as a wp to avoid holding a reference in case it is unregistered and
 // pullAtomCallbackDied is never called.
 struct PullAtomCallbackDeathCookie {
-    PullAtomCallbackDeathCookie(sp<StatsPullerManager> pullerManager, const PullerKey& pullerKey,
-                                const wp<StatsPuller>& puller)
-        : mPullerManager(pullerManager), mPullerKey(pullerKey), mPuller(puller) {
+    PullAtomCallbackDeathCookie(const wp<StatsPullerManager>& pullerManager,
+                                const PullerKey& pullerKey, const wp<StatsPuller>& puller) :
+            mPullerManager(pullerManager), mPullerKey(pullerKey), mPuller(puller) {
     }
 
-    sp<StatsPullerManager> mPullerManager;
+    wp<StatsPullerManager> mPullerManager;
     PullerKey mPullerKey;
     wp<StatsPuller> mPuller;
 };
 
 void StatsPullerManager::pullAtomCallbackDied(void* cookie) {
     PullAtomCallbackDeathCookie* cookie_ = static_cast<PullAtomCallbackDeathCookie*>(cookie);
-    sp<StatsPullerManager>& thiz = cookie_->mPullerManager;
+    sp<StatsPullerManager> thiz = cookie_->mPullerManager.promote();
+    if (!thiz) {
+        return;
+    }
+
     const PullerKey& pullerKey = cookie_->mPullerKey;
     wp<StatsPuller> puller = cookie_->mPuller;
 
