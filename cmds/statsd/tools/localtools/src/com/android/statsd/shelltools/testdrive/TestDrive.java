@@ -68,6 +68,7 @@ public class TestDrive {
     };
     private static final String[] DEFAULT_PULL_SOURCES = {
             "AID_SYSTEM",
+            "AID_RADIO"
     };
     private static final Logger LOGGER = Logger.getLogger(TestDrive.class.getName());
 

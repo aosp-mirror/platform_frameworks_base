@@ -253,12 +253,14 @@ public final class Display {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static final int TYPE_UNKNOWN = 0;
 
     /**
      * Display type: Physical display connected through an internal port.
      * @hide
      */
+    @TestApi
     public static final int TYPE_INTERNAL = 1;
 
     /**
@@ -266,6 +268,7 @@ public final class Display {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static final int TYPE_EXTERNAL = 2;
 
     /**
@@ -273,12 +276,14 @@ public final class Display {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static final int TYPE_WIFI = 3;
 
     /**
      * Display type: Overlay display.
      * @hide
      */
+    @TestApi
     public static final int TYPE_OVERLAY = 4;
 
     /**
@@ -286,6 +291,7 @@ public final class Display {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static final int TYPE_VIRTUAL = 5;
 
     /**
@@ -569,6 +575,7 @@ public final class Display {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public int getType() {
         return mType;
     }

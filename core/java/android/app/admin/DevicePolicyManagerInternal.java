@@ -176,17 +176,29 @@ public abstract class DevicePolicyManagerInternal {
      * for cross-profile communication, via {@link
      * DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)}.</li>
      * <li>The default package names that are allowed to request user consent for cross-profile
-     * communication without being explicitly enabled by the admin , via {@link
-     * DevicePolicyManager#setDefaultCrossProfilePackages(ComponentName, UserHandle, Set)}.</li>
+     * communication without being explicitly enabled by the admin, via
+     * {@link com.android.internal.R.array#cross_profile_apps} and
+     * {@link com.android.internal.R.array#vendor_cross_profile_apps}.</li>
      * </ul>
      *
      * @return the combined set of whitelisted package names set via
      * {@link DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)} and
-     * {@link DevicePolicyManager#setDefaultCrossProfilePackages(ComponentName, UserHandle, Set)}
+     * {@link com.android.internal.R.array#cross_profile_apps} and
+     * {@link com.android.internal.R.array#vendor_cross_profile_apps}
      *
      * @hide
      */
     public abstract List<String> getAllCrossProfilePackages();
+
+    /**
+     * Returns the default package names set by the OEM that are allowed to request user consent for
+     * cross-profile communication without being explicitly enabled by the admin, via
+     * {@link com.android.internal.R.array#cross_profile_apps} and
+     * {@link com.android.internal.R.array#vendor_cross_profile_apps}.
+     *
+     * @hide
+     */
+    public abstract List<String> getDefaultCrossProfilePackages();
 
     /**
      * Sends the {@code intent} to the packages with cross profile capabilities.

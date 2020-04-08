@@ -20,6 +20,7 @@ import static android.net.TetheringConstants.EXTRA_ADD_TETHER_TYPE;
 import static android.net.TetheringConstants.EXTRA_PROVISION_CALLBACK;
 import static android.net.TetheringConstants.EXTRA_RUN_PROVISION;
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
+import static android.net.TetheringManager.TETHERING_ETHERNET;
 import static android.net.TetheringManager.TETHERING_INVALID;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
@@ -537,6 +538,7 @@ public class EntitlementManager {
     private static boolean isValidDownstreamType(int type) {
         switch (type) {
             case TETHERING_BLUETOOTH:
+            case TETHERING_ETHERNET:
             case TETHERING_USB:
             case TETHERING_WIFI:
                 return true;
@@ -650,6 +652,11 @@ public class EntitlementManager {
 
     private void handleRequestLatestTetheringEntitlementValue(int downstream,
             ResultReceiver receiver, boolean showEntitlementUi) {
+        if (!isValidDownstreamType(downstream)) {
+            receiver.send(TETHER_ERROR_ENTITLEMENT_UNKNOWN, null);
+            return;
+        }
+
         final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
         if (!isTetherProvisioningRequired(config)) {
             receiver.send(TETHER_ERROR_NO_ERROR, null);

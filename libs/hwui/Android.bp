@@ -171,7 +171,6 @@ cc_library_headers {
 
 cc_defaults {
     name: "android_graphics_apex",
-    host_supported: true,
     cflags: [
         "-Wno-unused-parameter",
         "-Wno-non-virtual-dtor",
@@ -231,7 +230,6 @@ cc_library_headers {
 
 cc_defaults {
     name: "android_graphics_jni",
-    host_supported: true,
     cflags: [
         "-Wno-unused-parameter",
         "-Wno-non-virtual-dtor",
@@ -537,7 +535,11 @@ cc_defaults {
 
 cc_test {
     name: "hwui_unit_tests",
-    defaults: ["hwui_test_defaults"],
+    defaults: [
+        "hwui_test_defaults",
+        "android_graphics_apex",
+        "android_graphics_jni",
+    ],
 
     static_libs: [
         "libgmock",
@@ -549,6 +551,7 @@ cc_test {
 
     srcs: [
         "tests/unit/main.cpp",
+        "tests/unit/ABitmapTests.cpp",
         "tests/unit/CacheManagerTests.cpp",
         "tests/unit/CanvasContextTests.cpp",
         "tests/unit/CommonPoolTests.cpp",

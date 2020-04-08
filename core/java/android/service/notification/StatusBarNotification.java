@@ -17,8 +17,6 @@
 package android.service.notification;
 
 import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
-import static android.util.FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ;
-import static android.util.FeatureFlagUtils.isEnabled;
 
 import android.annotation.NonNull;
 import android.app.Notification;
@@ -33,6 +31,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 
 import com.android.internal.logging.InstanceId;
@@ -477,9 +476,10 @@ public class StatusBarNotification implements Parcelable {
      */
     public String getShortcutId(Context context) {
         String conversationId = getNotification().getShortcutId();
-        if (isEnabled(context,  NOTIF_CONVO_BYPASS_SHORTCUT_REQ)
-                && getNotification().getNotificationStyle() == Notification.MessagingStyle.class
-                && TextUtils.isEmpty(conversationId)) {
+        if (TextUtils.isEmpty(conversationId)
+                && (Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0) == 0)
+                && getNotification().getNotificationStyle() == Notification.MessagingStyle.class) {
             conversationId = getId() + getTag() + PLACEHOLDER_CONVERSATION_ID;
         }
         return conversationId;
