@@ -558,8 +558,10 @@ public abstract class BiometricServiceBase extends SystemService
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                     statsModality(), BiometricsProtoEnums.ISSUE_CANCEL_TIMED_OUT);
 
+            ClientMonitor newClient = mPendingClient;
             mCurrentClient = null;
-            startClient(mPendingClient, false);
+            mPendingClient = null;
+            startClient(newClient, false);
         }
     }
 
