@@ -723,6 +723,25 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Uninstall the given package for the user for which this installer was created if the package
+     * will still exist for other users on the device.
+     *
+     * @param packageName The package to install.
+     * @param statusReceiver Where to deliver the result.
+     */
+    @RequiresPermission(Manifest.permission.DELETE_PACKAGES)
+    public void uninstallExistingPackage(@NonNull String packageName,
+            @Nullable IntentSender statusReceiver) {
+        Objects.requireNonNull(packageName, "packageName cannot be null");
+        try {
+            mInstaller.uninstallExistingPackage(
+                    new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                    mInstallerPackageName, statusReceiver, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /** {@hide} */
     @SystemApi
