@@ -106,7 +106,7 @@ static int getGamepadkeyCode(int32_t androidKeyCode) {
 static const GamepadAxis* getGamepadAxis(int32_t androidAxisCode) {
     std::unordered_map<int32_t, int>::iterator it =
             gamepadAndroidAxisToIndexMap.find(androidAxisCode);
-    if (it == gamepadAndroidToLinuxKeyMap.end()) {
+    if (it == gamepadAndroidAxisToIndexMap.end()) {
         return nullptr;
     }
     return &GAMEPAD_AXES[it->second];
