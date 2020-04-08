@@ -3106,10 +3106,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     MSG_SHOW_SOFT_INPUT, getImeShowFlags(), reason, mCurMethod, resultReceiver,
                     showInputToken));
             mInputShown = true;
+
             if (mHaveConnection && !mVisibleBound) {
                 bindCurrentInputMethodServiceLocked(
                         mCurIntent, mVisibleConnection, IME_VISIBLE_BIND_FLAGS);
                 mVisibleBound = true;
+            } else {
+                // Clear the show request after the input shown.
+                mShowRequested = false;
             }
             res = true;
         } else if (mHaveConnection && SystemClock.uptimeMillis()
