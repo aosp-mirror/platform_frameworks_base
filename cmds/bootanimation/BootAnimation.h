@@ -29,8 +29,6 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
-class SkBitmap;
-
 namespace android {
 
 class Surface;

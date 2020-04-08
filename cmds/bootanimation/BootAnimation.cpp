@@ -34,6 +34,7 @@
 #include <cutils/atomic.h>
 #include <cutils/properties.h>
 
+#include <android/imagedecoder.h>
 #include <androidfw/AssetManager.h>
 #include <binder/IPCThreadState.h>
 #include <utils/Errors.h>
@@ -50,14 +51,6 @@
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
-
-// TODO: Fix Skia.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <SkBitmap.h>
-#include <SkImage.h>
-#include <SkStream.h>
-#pragma GCC diagnostic pop
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -165,22 +158,51 @@ void BootAnimation::binderDied(const wp<IBinder>&)
     requestExit();
 }
 
+static void* decodeImage(const void* encodedData, size_t dataLength, AndroidBitmapInfo* outInfo) {
+    AImageDecoder* decoder = nullptr;
+    AImageDecoder_createFromBuffer(encodedData, dataLength, &decoder);
+    if (!decoder) {
+        return nullptr;
+    }
+
+    const AImageDecoderHeaderInfo* info = AImageDecoder_getHeaderInfo(decoder);
+    outInfo->width = AImageDecoderHeaderInfo_getWidth(info);
+    outInfo->height = AImageDecoderHeaderInfo_getHeight(info);
+    outInfo->format = AImageDecoderHeaderInfo_getAndroidBitmapFormat(info);
+    outInfo->stride = AImageDecoder_getMinimumStride(decoder);
+    outInfo->flags = 0;
+
+    const size_t size = outInfo->stride * outInfo->height;
+    void* pixels = malloc(size);
+    int result = AImageDecoder_decodeImage(decoder, pixels, outInfo->stride, size);
+    AImageDecoder_delete(decoder);
+
+    if (result != ANDROID_IMAGE_DECODER_SUCCESS) {
+        free(pixels);
+        return nullptr;
+    }
+    return pixels;
+}
+
 status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
         const char* name) {
     Asset* asset = assets.open(name, Asset::ACCESS_BUFFER);
     if (asset == nullptr)
         return NO_INIT;
-    SkBitmap bitmap;
-    sk_sp<SkData> data = SkData::MakeWithoutCopy(asset->getBuffer(false),
-            asset->getLength());
-    sk_sp<SkImage> image = SkImage::MakeFromEncoded(data);
-    image->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
+
+    AndroidBitmapInfo bitmapInfo;
+    void* pixels = decodeImage(asset->getBuffer(false), asset->getLength(), &bitmapInfo);
+    auto pixelDeleter = std::unique_ptr<void, decltype(free)*>{ pixels, free };
+
     asset->close();
     delete asset;
 
-    const int w = bitmap.width();
-    const int h = bitmap.height();
-    const void* p = bitmap.getPixels();
+    if (!pixels) {
+        return NO_INIT;
+    }
+
+    const int w = bitmapInfo.width;
+    const int h = bitmapInfo.height;
 
     GLint crop[4] = { 0, h, w, -h };
     texture->w = w;
@@ -189,22 +211,22 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
     glGenTextures(1, &texture->name);
     glBindTexture(GL_TEXTURE_2D, texture->name);
 
-    switch (bitmap.colorType()) {
-        case kAlpha_8_SkColorType:
+    switch (bitmapInfo.format) {
+        case ANDROID_BITMAP_FORMAT_A_8:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, w, h, 0, GL_ALPHA,
-                    GL_UNSIGNED_BYTE, p);
+                    GL_UNSIGNED_BYTE, pixels);
             break;
-        case kARGB_4444_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGBA_4444:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-                    GL_UNSIGNED_SHORT_4_4_4_4, p);
+                    GL_UNSIGNED_SHORT_4_4_4_4, pixels);
             break;
-        case kN32_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGBA_8888:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-                    GL_UNSIGNED_BYTE, p);
+                    GL_UNSIGNED_BYTE, pixels);
             break;
-        case kRGB_565_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGB_565:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-                    GL_UNSIGNED_SHORT_5_6_5, p);
+                    GL_UNSIGNED_SHORT_5_6_5, pixels);
             break;
         default:
             break;
@@ -221,20 +243,21 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
 
 status_t BootAnimation::initTexture(FileMap* map, int* width, int* height)
 {
-    SkBitmap bitmap;
-    sk_sp<SkData> data = SkData::MakeWithoutCopy(map->getDataPtr(),
-            map->getDataLength());
-    sk_sp<SkImage> image = SkImage::MakeFromEncoded(data);
-    image->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
+    AndroidBitmapInfo bitmapInfo;
+    void* pixels = decodeImage(map->getDataPtr(), map->getDataLength(), &bitmapInfo);
+    auto pixelDeleter = std::unique_ptr<void, decltype(free)*>{ pixels, free };
 
     // FileMap memory is never released until application exit.
     // Release it now as the texture is already loaded and the memory used for
     // the packed resource can be released.
     delete map;
 
-    const int w = bitmap.width();
-    const int h = bitmap.height();
-    const void* p = bitmap.getPixels();
+    if (!pixels) {
+        return NO_INIT;
+    }
+
+    const int w = bitmapInfo.width;
+    const int h = bitmapInfo.height;
 
     GLint crop[4] = { 0, h, w, -h };
     int tw = 1 << (31 - __builtin_clz(w));
@@ -242,28 +265,28 @@ status_t BootAnimation::initTexture(FileMap* map, int* width, int* height)
     if (tw < w) tw <<= 1;
     if (th < h) th <<= 1;
 
-    switch (bitmap.colorType()) {
-        case kN32_SkColorType:
+    switch (bitmapInfo.format) {
+        case ANDROID_BITMAP_FORMAT_RGBA_8888:
             if (!mUseNpotTextures && (tw != w || th != h)) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA,
                         GL_UNSIGNED_BYTE, nullptr);
                 glTexSubImage2D(GL_TEXTURE_2D, 0,
-                        0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, p);
+                        0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
             } else {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-                        GL_UNSIGNED_BYTE, p);
+                        GL_UNSIGNED_BYTE, pixels);
             }
             break;
 
-        case kRGB_565_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGB_565:
             if (!mUseNpotTextures && (tw != w || th != h)) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB,
                         GL_UNSIGNED_SHORT_5_6_5, nullptr);
                 glTexSubImage2D(GL_TEXTURE_2D, 0,
-                        0, 0, w, h, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, p);
+                        0, 0, w, h, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels);
             } else {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-                        GL_UNSIGNED_SHORT_5_6_5, p);
+                        GL_UNSIGNED_SHORT_5_6_5, pixels);
             }
             break;
         default:
