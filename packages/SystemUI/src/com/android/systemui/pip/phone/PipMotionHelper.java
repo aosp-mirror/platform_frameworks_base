@@ -24,8 +24,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityTaskManager;
 import android.content.Context;
-import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.RemoteException;
@@ -40,6 +38,7 @@ import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.animation.FloatProperties;
 import com.android.systemui.util.animation.PhysicsAnimator;
+import com.android.systemui.util.magnetictarget.MagnetizedObject;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -60,9 +59,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     /** Friction to use for PIP when it moves via physics fling animations. */
     private static final float DEFAULT_FRICTION = 2f;
-
-    // The fraction of the stack height that the user has to drag offscreen to dismiss the PiP
-    private static final float DISMISS_OFFSCREEN_FRACTION = 0.3f;
 
     private final Context mContext;
     private final IActivityTaskManager mActivityTaskManager;
@@ -103,7 +99,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /**
      * Update listener that resizes the PIP to {@link #mAnimatedBounds}.
      */
-    private final PhysicsAnimator.UpdateListener<Rect> mResizePipUpdateListener =
+    final PhysicsAnimator.UpdateListener<Rect> mResizePipUpdateListener =
             (target, values) -> resizePipUnchecked(mAnimatedBounds);
 
     /** FlingConfig instances provided to PhysicsAnimator for fling gestures. */
@@ -121,6 +117,13 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                         SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
     private final Consumer<Rect> mUpdateBoundsCallback = mBounds::set;
+
+    /**
+     * Whether we're springing to the touch event location (vs. moving it to that position
+     * instantly). We spring-to-touch after PIP is dragged out of the magnetic target, since it was
+     * 'stuck' in the target and needs to catch up to the touch location.
+     */
+    private boolean mSpringingToTouch = false;
 
     public PipMotionHelper(Context context, IActivityTaskManager activityTaskManager,
             PipTaskOrganizer pipTaskOrganizer, PipMenuActivityController menuController,
@@ -211,9 +214,35 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             mFloatingContentCoordinator.onContentMoved(this);
         }
 
-        cancelAnimations();
-        resizePipUnchecked(toBounds);
-        mBounds.set(toBounds);
+        if (!mSpringingToTouch) {
+            // If we are moving PIP directly to the touch event locations, cancel any animations and
+            // move PIP to the given bounds.
+            cancelAnimations();
+            resizePipUnchecked(toBounds);
+            mBounds.set(toBounds);
+        } else {
+            // If PIP is 'catching up' after being stuck in the dismiss target, update the animation
+            // to spring towards the new touch location.
+            mAnimatedBoundsPhysicsAnimator
+                    .spring(FloatProperties.RECT_X, toBounds.left, mSpringConfig)
+                    .spring(FloatProperties.RECT_Y, toBounds.top, mSpringConfig)
+                    .withEndActions(() -> mSpringingToTouch = false);
+
+            startBoundsAnimator(toBounds.left /* toX */, toBounds.top /* toY */);
+        }
+    }
+
+    /** Set whether we're springing-to-touch to catch up after being stuck in the dismiss target. */
+    void setSpringingToTouch(boolean springingToTouch) {
+        if (springingToTouch) {
+            mAnimatedBounds.set(mBounds);
+        }
+
+        mSpringingToTouch = springingToTouch;
+    }
+
+    void prepareForAnimation() {
+        mAnimatedBounds.set(mBounds);
     }
 
     /**
@@ -278,24 +307,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     }
 
     /**
-     * @return whether the PiP at the current bounds should be dismissed.
-     */
-    boolean shouldDismissPip() {
-        Point displaySize = new Point();
-        mContext.getDisplay().getRealSize(displaySize);
-        final int y = displaySize.y - mStableInsets.bottom;
-        if (mBounds.bottom > y) {
-            float offscreenFraction = (float) (mBounds.bottom - y) / mBounds.height();
-            return offscreenFraction >= DISMISS_OFFSCREEN_FRACTION;
-        }
-        return false;
-    }
-
-    /**
      * Flings the PiP to the closest snap target.
      */
     void flingToSnapTarget(
-            float velocityX, float velocityY, Runnable updateAction, @Nullable Runnable endAction) {
+            float velocityX, float velocityY,
+            @Nullable Runnable updateAction, @Nullable Runnable endAction) {
         mAnimatedBounds.set(mBounds);
         mAnimatedBoundsPhysicsAnimator
                 .flingThenSpring(
@@ -303,8 +319,12 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                         true /* flingMustReachMinOrMax */)
                 .flingThenSpring(
                         FloatProperties.RECT_Y, velocityY, mFlingConfigY, mSpringConfig)
-                .addUpdateListener((target, values) -> updateAction.run())
                 .withEndActions(endAction);
+
+        if (updateAction != null) {
+            mAnimatedBoundsPhysicsAnimator.addUpdateListener(
+                    (target, values) -> updateAction.run());
+        }
 
         final float xEndValue = velocityX < 0 ? mMovementBounds.left : mMovementBounds.right;
         final float estimatedFlingYEndValue =
@@ -338,16 +358,14 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * Animates the dismissal of the PiP off the edge of the screen.
      */
     void animateDismiss(float velocityX, float velocityY, @Nullable Runnable updateAction) {
-        final float velocity = PointF.length(velocityX, velocityY);
-        final boolean isFling = velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond();
-        final Point dismissEndPoint = getDismissEndPoint(mBounds, velocityX, velocityY, isFling);
-
         mAnimatedBounds.set(mBounds);
 
-        // Animate to the dismiss end point, and then dismiss PIP.
+        // Animate off the bottom of the screen, then dismiss PIP.
         mAnimatedBoundsPhysicsAnimator
-                .spring(FloatProperties.RECT_X, dismissEndPoint.x, velocityX, mSpringConfig)
-                .spring(FloatProperties.RECT_Y, dismissEndPoint.y, velocityY, mSpringConfig)
+                .spring(FloatProperties.RECT_Y,
+                        mBounds.bottom + mBounds.height(),
+                        velocityY,
+                        mSpringConfig)
                 .withEndActions(this::dismissPip);
 
         // If we were provided with an update action, run it whenever there's an update.
@@ -356,7 +374,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     (target, values) -> updateAction.run());
         }
 
-        startBoundsAnimator(dismissEndPoint.x /* toX */, dismissEndPoint.y /* toY */);
+        startBoundsAnimator(mBounds.left /* toX */, mBounds.bottom + mBounds.height() /* toY */);
     }
 
     /**
@@ -408,6 +426,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private void cancelAnimations() {
         mAnimatedBoundsPhysicsAnimator.cancel();
         mAnimatingToBounds.setEmpty();
+        mSpringingToTouch = false;
     }
 
     /** Set new fling configs whose min/max values respect the given movement bounds. */
@@ -426,7 +445,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * the 'real' bounds to equal the final animated bounds.
      */
     private void startBoundsAnimator(float toX, float toY) {
-        cancelAnimations();
+        if (!mSpringingToTouch) {
+            cancelAnimations();
+        }
 
         // Set animatingToBounds directly to avoid allocating a new Rect, but then call
         // setAnimatingToBounds to run the normal logic for changing animatingToBounds.
@@ -484,47 +505,29 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     }
 
     /**
-     * @return the coordinates the PIP should animate to based on the direction of velocity when
-     *         dismissing.
+     * Returns a MagnetizedObject wrapper for PIP's animated bounds. This is provided to the
+     * magnetic dismiss target so it can calculate PIP's size and position.
      */
-    private Point getDismissEndPoint(Rect pipBounds, float velX, float velY, boolean isFling) {
-        Point displaySize = new Point();
-        mContext.getDisplay().getRealSize(displaySize);
-        final float bottomBound = displaySize.y + pipBounds.height() * .1f;
-        if (isFling && velX != 0 && velY != 0) {
-            // Line is defined by: y = mx + b, m = slope, b = y-intercept
-            // Find the slope
-            final float slope = velY / velX;
-            // Sub in slope and PiP position to solve for y-intercept: b = y - mx
-            final float yIntercept = pipBounds.top - slope * pipBounds.left;
-            // Now find the point on this line when y = bottom bound: x = (y - b) / m
-            final float x = (bottomBound - yIntercept) / slope;
-            return new Point((int) x, (int) bottomBound);
-        } else {
-            // If it wasn't a fling the velocity on 'up' is not reliable for direction of movement,
-            // just animate downwards.
-            return new Point(pipBounds.left, (int) bottomBound);
-        }
-    }
+    MagnetizedObject<Rect> getMagnetizedPip() {
+        return new MagnetizedObject<Rect>(
+                mContext, mAnimatedBounds, FloatProperties.RECT_X, FloatProperties.RECT_Y) {
+            @Override
+            public float getWidth(@NonNull Rect animatedPipBounds) {
+                return animatedPipBounds.width();
+            }
 
-    /**
-     * @return whether the gesture it towards the dismiss area based on the velocity when
-     *         dismissing.
-     */
-    public boolean isGestureToDismissArea(Rect pipBounds, float velX, float velY,
-            boolean isFling) {
-        Point endpoint = getDismissEndPoint(pipBounds, velX, velY, isFling);
-        // Center the point
-        endpoint.x += pipBounds.width() / 2;
-        endpoint.y += pipBounds.height() / 2;
+            @Override
+            public float getHeight(@NonNull Rect animatedPipBounds) {
+                return animatedPipBounds.height();
+            }
 
-        // The dismiss area is the middle third of the screen, half the PIP's height from the bottom
-        Point size = new Point();
-        mContext.getDisplay().getRealSize(size);
-        final int left = size.x / 3;
-        Rect dismissArea = new Rect(left, size.y - (pipBounds.height() / 2), left * 2,
-                size.y + pipBounds.height());
-        return dismissArea.contains(endpoint.x, endpoint.y);
+            @Override
+            public void getLocationOnScreen(
+                    @NonNull Rect animatedPipBounds, @NonNull int[] loc) {
+                loc[0] = animatedPipBounds.left;
+                loc[1] = animatedPipBounds.top;
+            }
+        };
     }
 
     public void dump(PrintWriter pw, String prefix) {
