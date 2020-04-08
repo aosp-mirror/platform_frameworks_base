@@ -3242,6 +3242,18 @@
   <java-symbol type="id" name="accessibility_shortcut_target_switch_item" />
 
   <!-- Accessibility Button -->
+  <java-symbol type="layout" name="accessibility_button_chooser" />
+  <java-symbol type="layout" name="accessibility_button_chooser_item" />
+  <java-symbol type="id" name="accessibility_button_target_icon" />
+  <java-symbol type="id" name="accessibility_button_target_label" />
+  <java-symbol type="id" name="accessibility_button_chooser_grid" />
+  <java-symbol type="id" name="accessibility_button_prompt" />
+  <java-symbol type="id" name="accessibility_button_prompt_prologue" />
+  <java-symbol type="string" name="accessibility_gesture_prompt_text" />
+  <java-symbol type="string" name="accessibility_gesture_3finger_prompt_text" />
+  <java-symbol type="string" name="accessibility_gesture_instructional_text" />
+  <java-symbol type="string" name="accessibility_gesture_3finger_instructional_text" />
+
   <java-symbol type="string" name="accessibility_magnification_chooser_text" />
   <java-symbol type="string" name="edit_accessibility_shortcut_menu_button" />
   <java-symbol type="string" name="done_accessibility_shortcut_menu_button" />
