@@ -1554,6 +1554,14 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
+        public void onCallDirectionChanged(Conference c, int direction) {
+            String id = mIdByConference.get(c);
+            if (id != null) {
+                mAdapter.setCallDirection(id, direction);
+            }
+        }
+
+        @Override
         public void onAddressChanged(Conference c, Uri newAddress, int presentation) {
             String id = mIdByConference.get(c);
             if (id != null) {
