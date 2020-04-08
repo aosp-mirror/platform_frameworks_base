@@ -25,6 +25,7 @@
 #include "src/hash.h"
 #include "src/logd/LogEvent.h"
 #include "src/stats_log_util.h"
+#include "stats_event.h"
 #include "statslog_statsdtest.h"
 
 namespace android {
@@ -188,6 +189,12 @@ void getPartialWakelockKey(int uid, const std::string& tag, HashableDimensionKey
 
 void getPartialWakelockKey(int uid, HashableDimensionKey* key);
 // END: get primary key functions
+
+void writeAttribution(AStatsEvent* statsEvent, const vector<int>& attributionUids,
+                      const vector<string>& attributionTags);
+
+// Builds statsEvent to get buffer that is parsed into logEvent then releases statsEvent.
+void parseStatsEventToLogEvent(AStatsEvent* statsEvent, LogEvent* logEvent);
 
 shared_ptr<LogEvent> CreateTwoValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value1,
                                             int32_t value2);

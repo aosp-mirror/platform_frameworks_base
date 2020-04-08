@@ -64,16 +64,10 @@ std::unique_ptr<LogEvent> createSimpleEvent(int64_t eventTimeNs, int64_t value) 
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, pullTagId);
     AStatsEvent_overwriteTimestamp(statsEvent, eventTimeNs);
-
     AStatsEvent_writeInt64(statsEvent, value);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
