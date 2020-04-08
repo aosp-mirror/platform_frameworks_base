@@ -17,7 +17,7 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/pip_dismiss_gradient_height"
+    android:layout_height="@dimen/floating_dismiss_gradient_height"
     android:layout_gravity="bottom|center_horizontal">
 
     <FrameLayout

@@ -68,6 +68,7 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.DisplayCutout;
 import android.view.IWindowSession;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -164,6 +165,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final Rect tmpContentInsets = new Rect();
         final Rect tmpStableInsets = new Rect();
         final InsetsState mTmpInsetsState = new InsetsState();
+        final InsetsSourceControl[] mTempControls = new InsetsSourceControl[0];
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
         final TaskDescription taskDescription = new TaskDescription();
         taskDescription.setBackgroundColor(WHITE);
@@ -231,8 +233,8 @@ class TaskSnapshotSurface implements StartingSurface {
         }
         try {
             final int res = session.addToDisplay(window, window.mSeq, layoutParams,
-                    View.GONE, activity.getDisplayContent().getDisplayId(), tmpFrame, tmpRect, tmpRect,
-                    tmpCutout, null, mTmpInsetsState);
+                    View.GONE, activity.getDisplayContent().getDisplayId(), tmpFrame, tmpRect,
+                    tmpRect, tmpCutout, null, mTmpInsetsState, mTempControls);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                 return null;
@@ -249,7 +251,7 @@ class TaskSnapshotSurface implements StartingSurface {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
                     tmpFrame, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect,
                     tmpCutout, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
-                    sTmpSurfaceSize, sTmpSurfaceControl);
+                    mTempControls, sTmpSurfaceSize, sTmpSurfaceControl);
         } catch (RemoteException e) {
             // Local call.
         }
@@ -377,6 +379,7 @@ class TaskSnapshotSurface implements StartingSurface {
             frame = null;
             mTmpDstFrame.set(mFrame);
         }
+        mTmpDstFrame.offsetTo(0, 0);
 
         // Scale the mismatch dimensions to fill the task bounds
         mTmpSnapshotSize.set(0, 0, buffer.getWidth(), buffer.getHeight());

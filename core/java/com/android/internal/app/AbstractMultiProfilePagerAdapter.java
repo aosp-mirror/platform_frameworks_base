@@ -55,6 +55,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     private static final String TAG = "AbstractMultiProfilePagerAdapter";
     static final int PROFILE_PERSONAL = 0;
     static final int PROFILE_WORK = 1;
+
     @IntDef({PROFILE_PERSONAL, PROFILE_WORK})
     @interface Profile {}
 
@@ -365,7 +366,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         UserHandle listUserHandle = listAdapter.getUserHandle();
         if (!listUserHandle.equals(mWorkProfileUserHandle)
                 || !mInjector.isQuietModeEnabled(mWorkProfileUserHandle)
-                || !hasResolvedAppsInWorkProfile(listAdapter)) {
+                || listAdapter.getCount() == 0) {
             return false;
         }
         DevicePolicyEventLogger
@@ -380,20 +381,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
                     mInjector.requestQuietModeEnabled(false, mWorkProfileUserHandle);
                 });
         return true;
-    }
-
-    /**
-     * Returns {@code true} if there is at least one app resolved in the work profile,
-     * regardless of whether the work profile is enabled or not.
-     */
-    private boolean hasResolvedAppsInWorkProfile(ResolverListAdapter listAdapter) {
-        List<ResolverActivity.ResolvedComponentInfo> userStateIndependentWorkResolvers =
-                listAdapter.mResolverListController.getUserStateIndependentResolversAsUser(
-                        listAdapter.getIntents(), mWorkProfileUserHandle);
-        return userStateIndependentWorkResolvers.stream()
-                .anyMatch(resolvedComponentInfo ->
-                        resolvedComponentInfo.getResolveInfoAt(0).targetUserId
-                                == UserHandle.USER_CURRENT);
     }
 
     private void maybeShowNoAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
@@ -527,6 +514,13 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
             }
         }
         return false;
+    }
+
+    boolean shouldShowEmptyStateScreen(ResolverListAdapter listAdapter) {
+        int count = listAdapter.getUnfilteredCount();
+        return (count == 0 && listAdapter.getPlaceholderCount() == 0)
+                || (listAdapter.getUserHandle().equals(mWorkProfileUserHandle)
+                    && isQuietModeEnabled(mWorkProfileUserHandle));
     }
 
     protected class ProfileDescriptor {

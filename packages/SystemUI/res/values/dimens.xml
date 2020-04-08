@@ -752,8 +752,10 @@
          quick settings header -->
     <dimen name="max_avatar_size">48dp</dimen>
 
-    <!-- Size of user icon + frame in the qs/keyguard user picker (incl. frame) -->
-    <dimen name="framed_avatar_size">54dp</dimen>
+    <!-- Size of user icon + frame in the qs user picker (incl. frame) -->
+    <dimen name="qs_framed_avatar_size">54dp</dimen>
+    <!-- Size of user icon + frame in the keyguard user picker (incl. frame) -->
+    <dimen name="kg_framed_avatar_size">54dp</dimen>
 
     <!-- Margin on the left side of the carrier text on Keyguard -->
     <dimen name="keyguard_carrier_text_margin">16dp</dimen>
@@ -953,7 +955,7 @@
     <dimen name="recents_quick_scrub_onboarding_margin_start">8dp</dimen>
 
     <!-- The height of the gradient indicating the dismiss edge when moving a PIP. -->
-    <dimen name="pip_dismiss_gradient_height">176dp</dimen>
+    <dimen name="floating_dismiss_gradient_height">176dp</dimen>
 
     <!-- The bottom margin of the PIP drag to dismiss info text shown when moving a PIP. -->
     <dimen name="pip_dismiss_text_bottom_margin">24dp</dimen>

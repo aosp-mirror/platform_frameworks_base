@@ -136,6 +136,7 @@ import com.android.server.pm.OtaDexoptService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.dex.SystemServerDexLoadReporter;
 import com.android.server.policy.PermissionPolicyService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.policy.role.LegacyRoleResolutionPolicy;
@@ -519,10 +520,8 @@ public final class SystemServer {
             // Initialize native services.
             System.loadLibrary("android_servers");
 
-            // Debug builds - allow heap profiling.
-            if (Build.IS_DEBUGGABLE) {
-                initZygoteChildHeapProfiling();
-            }
+            // Allow heap / perf profiling.
+            initZygoteChildHeapProfiling();
 
             // Debug builds - spawn a thread to monitor for fd leaks.
             if (Build.IS_DEBUGGABLE) {
@@ -838,6 +837,11 @@ public final class SystemServer {
         } finally {
             Watchdog.getInstance().resumeWatchingCurrentThread("packagemanagermain");
         }
+
+        // Now that the package manager has started, register the dex load reporter to capture any
+        // dex files loaded by system server.
+        // These dex files will be optimized by the BackgroundDexOptService.
+        SystemServerDexLoadReporter.configureSystemServerDexReporter(mPackageManagerService);
 
         mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();

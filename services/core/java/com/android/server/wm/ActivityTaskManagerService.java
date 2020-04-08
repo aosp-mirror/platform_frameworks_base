@@ -3324,33 +3324,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
                     return;
                 }
-                // Place the task in the right stack if it isn't there already based on
-                // the requested bounds.
-                // The stack transition logic is:
-                // - a null bounds on a freeform task moves that task to fullscreen
-                // - a non-null bounds on a non-freeform (fullscreen OR docked) task moves
-                //   that task to freeform
-                // - otherwise the task is not moved
-                ActivityStack stack = task.getStack();
                 if (!task.getWindowConfiguration().canResizeTask()) {
                     throw new IllegalArgumentException("resizeTask not allowed on task=" + task);
-                }
-                if (bounds == null && stack.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
-                    stack = stack.getDisplayArea().getOrCreateStack(
-                            WINDOWING_MODE_FULLSCREEN, stack.getActivityType(), ON_TOP);
-                } else if (bounds != null && stack.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-                    stack = stack.getDisplayArea().getOrCreateStack(
-                            WINDOWING_MODE_FREEFORM, stack.getActivityType(), ON_TOP);
                 }
 
                 // Reparent the task to the right stack if necessary
                 boolean preserveWindow = (resizeMode & RESIZE_MODE_PRESERVE_WINDOW) != 0;
-                if (stack != task.getStack()) {
-                    // Defer resume until the task is resized below
-                    task.reparent(stack, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE,
-                            DEFER_RESUME, "resizeTask");
-                    preserveWindow = false;
-                }
 
                 // After reparenting (which only resizes the task to the stack bounds), resize the
                 // task to the actual bounds provided
@@ -4019,28 +3998,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "suppressResizeConfigChanges()");
         synchronized (mGlobalLock) {
             mSuppressResizeConfigChanges = suppress;
-        }
-    }
-
-    @Override
-    // TODO: API should just be about changing windowing modes...
-    public void moveTasksToFullscreenStack(int fromStackId, boolean onTop) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
-                "moveTasksToFullscreenStack()");
-        synchronized (mGlobalLock) {
-            final long origId = Binder.clearCallingIdentity();
-            try {
-                final ActivityStack stack = mRootWindowContainer.getStack(fromStackId);
-                if (stack != null){
-                    if (!stack.isActivityTypeStandardOrUndefined()) {
-                        throw new IllegalArgumentException(
-                                "You can't move tasks from non-standard stacks.");
-                    }
-                    mStackSupervisor.moveTasksToFullscreenStackLocked(stack, onTop);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(origId);
-            }
         }
     }
 

@@ -3479,6 +3479,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
+    boolean isClientLocal() {
+        return mClient instanceof IWindow.Stub;
+    }
+
     void updateLocationInParentDisplayIfNeeded() {
         final int embeddedDisplayContentsSize = mEmbeddedDisplayContents.size();
         // If there is any embedded display which is re-parented to this window, we need to
@@ -5233,23 +5237,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
         super.onAnimationLeashCreated(t, leash);
-
-        // Leash is now responsible for position, so set our position to 0.
-        t.setPosition(mSurfaceControl, 0, 0);
-        mLastSurfacePosition.set(0, 0);
     }
 
     @Override
     public void onAnimationLeashLost(Transaction t) {
         super.onAnimationLeashLost(t);
-        updateSurfacePosition(t);
     }
 
     @Override
-    void updateSurfacePosition() {
-        updateSurfacePosition(getPendingTransaction());
-    }
-
     @VisibleForTesting
     void updateSurfacePosition(Transaction t) {
         if (mSurfaceControl == null) {
