@@ -1117,9 +1117,4 @@ public class PhysicsAnimationLayout extends FrameLayout {
             mAssociatedController = controller;
         }
     }
-
-    @Override
-    protected boolean canReceivePointerEvents() {
-        return false;
-    }
 }
