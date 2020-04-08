@@ -514,7 +514,7 @@ public class BubbleStackView extends FrameLayout {
         mDismissTargetContainer = new FrameLayout(context);
         mDismissTargetContainer.setLayoutParams(new FrameLayout.LayoutParams(
                 MATCH_PARENT,
-                getResources().getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height),
+                getResources().getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height),
                 Gravity.BOTTOM));
         mDismissTargetContainer.setClipChildren(false);
         mDismissTargetContainer.addView(targetView);
@@ -523,7 +523,7 @@ public class BubbleStackView extends FrameLayout {
 
         // Start translated down so the target springs up.
         targetView.setTranslationY(
-                getResources().getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height));
+                getResources().getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height));
 
         // Save the MagneticTarget instance for the newly set up view - we'll add this to the
         // MagnetizedObjects.
