@@ -717,7 +717,8 @@ public class VibratorService extends IVibratorService.Stub
                     || hasPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING))) {
                 final int flags = attrs.getFlags()
                         & ~VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
-                attrs = new VibrationAttributes.Builder(attrs).replaceFlags(flags).build();
+                attrs = new VibrationAttributes.Builder(attrs)
+                                .setFlags(flags, attrs.getFlags()).build();
             }
         }
 
@@ -2047,7 +2048,7 @@ public class VibratorService extends IVibratorService.Stub
                     : 0;
             return new VibrationAttributes.Builder()
                     .setUsage(VibrationAttributes.USAGE_UNKNOWN)
-                    .replaceFlags(flags)
+                    .setFlags(flags, VibrationAttributes.FLAG_ALL_SUPPORTED)
                     .build();
         }
 
