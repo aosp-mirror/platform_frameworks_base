@@ -300,28 +300,24 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     }
 
     private boolean rebuildTab(ResolverListAdapter activeListAdapter, boolean doPostProcessing) {
-        UserHandle listUserHandle = activeListAdapter.getUserHandle();
-
-        if (UserHandle.myUserId() != listUserHandle.getIdentifier()) {
-            if (!mInjector.hasCrossProfileIntents(activeListAdapter.getIntents(),
-                    UserHandle.myUserId(), listUserHandle.getIdentifier())) {
-                if (listUserHandle.equals(mPersonalProfileUserHandle)) {
-                    DevicePolicyEventLogger.createEvent(
-                                DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL)
-                            .setStrings(getMetricsCategory())
-                            .write();
-                    showNoWorkToPersonalIntentsEmptyState(activeListAdapter);
-                } else {
-                    DevicePolicyEventLogger.createEvent(
-                            DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_WORK)
-                            .setStrings(getMetricsCategory())
-                            .write();
-                    showNoPersonalToWorkIntentsEmptyState(activeListAdapter);
-                }
-                return false;
-            }
+        if (shouldShowNoCrossProfileIntentsEmptyState(activeListAdapter)) {
+            activeListAdapter.postListReadyRunnable(doPostProcessing);
+            return false;
         }
         return activeListAdapter.rebuildList(doPostProcessing);
+    }
+
+    private boolean shouldShowNoCrossProfileIntentsEmptyState(
+            ResolverListAdapter activeListAdapter) {
+        UserHandle listUserHandle = activeListAdapter.getUserHandle();
+        return UserHandle.myUserId() != listUserHandle.getIdentifier()
+                && allowShowNoCrossProfileIntentsEmptyState()
+                && !mInjector.hasCrossProfileIntents(activeListAdapter.getIntents(),
+                        UserHandle.myUserId(), listUserHandle.getIdentifier());
+    }
+
+    boolean allowShowNoCrossProfileIntentsEmptyState() {
+        return true;
     }
 
     protected abstract void showWorkProfileOffEmptyState(
@@ -353,10 +349,33 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
      * anyway.
      */
     void showEmptyResolverListEmptyState(ResolverListAdapter listAdapter) {
+        if (maybeShowNoCrossProfileIntentsEmptyState(listAdapter)) {
+            return;
+        }
         if (maybeShowWorkProfileOffEmptyState(listAdapter)) {
             return;
         }
         maybeShowNoAppsAvailableEmptyState(listAdapter);
+    }
+
+    private boolean maybeShowNoCrossProfileIntentsEmptyState(ResolverListAdapter listAdapter) {
+        if (!shouldShowNoCrossProfileIntentsEmptyState(listAdapter)) {
+            return false;
+        }
+        if (listAdapter.getUserHandle().equals(mPersonalProfileUserHandle)) {
+            DevicePolicyEventLogger.createEvent(
+                    DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL)
+                    .setStrings(getMetricsCategory())
+                    .write();
+            showNoWorkToPersonalIntentsEmptyState(listAdapter);
+        } else {
+            DevicePolicyEventLogger.createEvent(
+                    DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_WORK)
+                    .setStrings(getMetricsCategory())
+                    .write();
+            showNoPersonalToWorkIntentsEmptyState(listAdapter);
+        }
+        return true;
     }
 
     /**

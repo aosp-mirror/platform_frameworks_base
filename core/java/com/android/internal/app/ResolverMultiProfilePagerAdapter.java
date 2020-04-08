@@ -35,6 +35,7 @@ import com.android.internal.widget.PagerAdapter;
 public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerAdapter {
 
     private final ResolverProfileDescriptor[] mItems;
+    private final boolean mShouldShowNoCrossProfileIntentsEmptyState;
 
     ResolverMultiProfilePagerAdapter(Context context,
             ResolverListAdapter adapter,
@@ -44,6 +45,7 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
         mItems = new ResolverProfileDescriptor[] {
                 createProfileDescriptor(adapter)
         };
+        mShouldShowNoCrossProfileIntentsEmptyState = true;
     }
 
     ResolverMultiProfilePagerAdapter(Context context,
@@ -51,13 +53,15 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
             ResolverListAdapter workAdapter,
             @Profile int defaultProfile,
             UserHandle personalProfileUserHandle,
-            UserHandle workProfileUserHandle) {
+            UserHandle workProfileUserHandle,
+            boolean shouldShowNoCrossProfileIntentsEmptyState) {
         super(context, /* currentPage */ defaultProfile, personalProfileUserHandle,
                 workProfileUserHandle);
         mItems = new ResolverProfileDescriptor[] {
                 createProfileDescriptor(personalAdapter),
                 createProfileDescriptor(workAdapter)
         };
+        mShouldShowNoCrossProfileIntentsEmptyState = shouldShowNoCrossProfileIntentsEmptyState;
     }
 
     private ResolverProfileDescriptor createProfileDescriptor(
@@ -160,6 +164,11 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     @Override
     String getMetricsCategory() {
         return ResolverActivity.METRICS_CATEGORY_RESOLVER;
+    }
+
+    @Override
+    boolean allowShowNoCrossProfileIntentsEmptyState() {
+        return mShouldShowNoCrossProfileIntentsEmptyState;
     }
 
     @Override

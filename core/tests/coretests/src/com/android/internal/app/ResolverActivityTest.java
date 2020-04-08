@@ -38,13 +38,16 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
 
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.espresso.Espresso;
@@ -543,6 +546,51 @@ public class ResolverActivityTest {
         assertThat(activity.getWorkListAdapter().getCount(), is(4));
     }
 
+    @Test
+    public void testWorkTab_headerIsVisibleInPersonalTab() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(1);
+        List<ResolvedComponentInfo> workResolvedComponentInfos = createResolvedComponentsForTest(4);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createOpenWebsiteIntent();
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        TextView headerText = activity.findViewById(R.id.title);
+        String initialText = headerText.getText().toString();
+        assertFalse(initialText.isEmpty(), "Header text is empty.");
+        assertThat(headerText.getVisibility(), is(View.VISIBLE));
+    }
+
+    @Test
+    public void testWorkTab_switchTabs_headerStaysSame() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(1);
+        List<ResolvedComponentInfo> workResolvedComponentInfos = createResolvedComponentsForTest(4);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createOpenWebsiteIntent();
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        TextView headerText = activity.findViewById(R.id.title);
+        String initialText = headerText.getText().toString();
+        onView(withText(R.string.resolver_work_tab))
+                .perform(click());
+
+        waitForIdle();
+        String currentText = headerText.getText().toString();
+        assertThat(headerText.getVisibility(), is(View.VISIBLE));
+        assertThat(String.format("Header text is not the same when switching tabs, personal profile"
+                        + " header was %s but work profile header is %s", initialText, currentText),
+                TextUtils.equals(initialText, currentText));
+    }
+
     @Ignore // b/148156663
     @Test
     public void testWorkTab_noPersonalApps_canStartWorkApps()
@@ -758,6 +806,13 @@ public class ResolverActivityTest {
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, "testing intent sending");
         sendIntent.setType("image/jpeg");
+        return sendIntent;
+    }
+
+    private Intent createOpenWebsiteIntent() {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_VIEW);
+        sendIntent.setData(Uri.parse("https://google.com"));
         return sendIntent;
     }
 
