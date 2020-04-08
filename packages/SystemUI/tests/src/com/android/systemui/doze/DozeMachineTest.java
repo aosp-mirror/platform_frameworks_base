@@ -254,6 +254,17 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPulseDone_whileDockedAoD_staysDockedAod() {
+        when(mDockManager.isDocked()).thenReturn(true);
+        mMachine.requestState(INITIALIZED);
+        mMachine.requestState(DOZE_AOD_DOCKED);
+
+        mMachine.requestState(DOZE_PULSE_DONE);
+
+        verify(mPartMock, never()).transitionTo(DOZE_AOD_DOCKED, DOZE_PULSE_DONE);
+    }
+
+    @Test
     public void testPulseDone_dozeSuppressed_afterDocked_goesToDoze() {
         when(mHost.isDozeSuppressed()).thenReturn(true);
         when(mDockManager.isDocked()).thenReturn(true);
