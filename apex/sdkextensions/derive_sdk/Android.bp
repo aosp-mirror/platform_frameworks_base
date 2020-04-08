@@ -20,13 +20,13 @@ cc_defaults {
     ],
     proto: {
         type: "lite",
+        static: true,
     },
     sdk_version: "current",
     stl: "c++_static",
     shared_libs: [ "liblog" ],
     static_libs: [
         "libbase_ndk",
-        "libprotobuf-cpp-lite-ndk",
     ],
 }
 
