@@ -1081,8 +1081,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return null;
         }
         mShellRoots.put(windowType, root);
-        SurfaceControl out = new SurfaceControl();
-        out.copyFrom(rootLeash);
+        SurfaceControl out = new SurfaceControl(rootLeash);
         return out;
     }
 

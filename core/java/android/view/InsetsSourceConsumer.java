@@ -91,6 +91,8 @@ public class InsetsSourceConsumer {
         if (mSourceControl == control) {
             return;
         }
+        SurfaceControl oldLeash = mSourceControl != null ? mSourceControl.getLeash() : null;
+
         final InsetsSourceControl lastControl = mSourceControl;
         mSourceControl = control;
 
@@ -116,6 +118,12 @@ public class InsetsSourceConsumer {
                 // However make sure that the leash visibility is still up to date.
                 if (applyLocalVisibilityOverride()) {
                     mController.notifyVisibilityChanged();
+                }
+
+                // If we have a new leash, make sure visibility is up-to-date, even though we
+                // didn't want to run an animation above.
+                SurfaceControl newLeash = mSourceControl.getLeash();
+                if (oldLeash == null || newLeash == null || !oldLeash.isSameSurface(newLeash)) {
                     applyHiddenToControl();
                 }
             }
