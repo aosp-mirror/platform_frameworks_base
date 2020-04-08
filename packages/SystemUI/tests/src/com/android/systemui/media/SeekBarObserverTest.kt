@@ -67,10 +67,11 @@ public class SeekBarObserverTest : SysuiTestCase() {
         val isEnabled = false
         val data = SeekBarViewModel.Progress(isEnabled, false, null, null, null)
         observer.onChanged(data)
-        // THEN seek bar visibility is set to GONE
-        assertThat(seekBarView.getVisibility()).isEqualTo(View.GONE)
-        assertThat(elapsedTimeView.getVisibility()).isEqualTo(View.GONE)
-        assertThat(totalTimeView.getVisibility()).isEqualTo(View.GONE)
+        // THEN seek bar shows just a line with no text
+        assertThat(seekBarView.isEnabled()).isFalse()
+        assertThat(seekBarView.getThumb().getAlpha()).isEqualTo(0)
+        assertThat(elapsedTimeView.getText()).isEqualTo("")
+        assertThat(totalTimeView.getText()).isEqualTo("")
     }
 
     @Test
