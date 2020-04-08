@@ -45,7 +45,8 @@ cc_binary {
     compile_multilib: "prefer32",
     stem: "derive_sdk",
     apex_available: [ "test_com.android.sdkext" ],
-    visibility: [ "//frameworks/base/apex/sdkextensions/testing" ]
+    visibility: [ "//frameworks/base/apex/sdkextensions/testing" ],
+    installable: false,
 }
 
 prebuilt_etc {
