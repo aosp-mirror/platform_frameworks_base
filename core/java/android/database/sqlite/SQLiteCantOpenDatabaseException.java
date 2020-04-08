@@ -22,4 +22,9 @@ public class SQLiteCantOpenDatabaseException extends SQLiteException {
     public SQLiteCantOpenDatabaseException(String error) {
         super(error);
     }
+
+    /** @hide */
+    public SQLiteCantOpenDatabaseException(String error, Throwable cause) {
+        super(error, cause);
+    }
 }
