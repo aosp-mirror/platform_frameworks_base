@@ -581,6 +581,7 @@ StorageId IncrementalService::findStorageId(std::string_view path) const {
 int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLogs) {
     const auto ifs = getIfs(storageId);
     if (!ifs) {
+        LOG(ERROR) << "setStorageParams failed, invalid storageId: " << storageId;
         return -EINVAL;
     }
 
