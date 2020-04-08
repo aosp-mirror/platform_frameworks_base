@@ -27,6 +27,11 @@ import java.lang.annotation.RetentionPolicy;
 public final class ShortcutConstants {
     private ShortcutConstants() {}
 
+    /**
+     * Package name of the accessibility chooser and used for {@link android.content.Intent}.
+     */
+    public static final String CHOOSER_PACKAGE_NAME = "android";
+
     public static final char SERVICES_SEPARATOR = ':';
 
     /**

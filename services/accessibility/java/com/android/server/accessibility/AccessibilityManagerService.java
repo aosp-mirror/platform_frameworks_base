@@ -21,6 +21,7 @@ import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHOR
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -99,6 +100,8 @@ import android.view.accessibility.IWindowMagnificationConnection;
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.internal.accessibility.AccessibilityShortcutController.ToggleableFrameworkFeatureInfo;
+import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
+import com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
@@ -1174,9 +1177,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private void showAccessibilityTargetsSelection(int displayId,
             @ShortcutType int shortcutType) {
-        Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
+        final Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
+        final String chooserClassName = (shortcutType == ACCESSIBILITY_SHORTCUT_KEY)
+                ? AccessibilityShortcutChooserActivity.class.getName()
+                : AccessibilityButtonChooserActivity.class.getName();
+        intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra(AccessibilityManager.EXTRA_SHORTCUT_TYPE, shortcutType);
         final Bundle bundle = ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle();
         mContext.startActivityAsUser(intent, bundle, UserHandle.of(mCurrentUserId));
     }
