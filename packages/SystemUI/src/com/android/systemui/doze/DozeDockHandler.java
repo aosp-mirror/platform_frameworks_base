@@ -40,7 +40,7 @@ public class DozeDockHandler implements DozeMachine.Part {
 
     private int mDockState = DockManager.STATE_NONE;
 
-    public DozeDockHandler(AmbientDisplayConfiguration config, DozeMachine machine,
+    DozeDockHandler(AmbientDisplayConfiguration config, DozeMachine machine,
             DockManager dockManager) {
         mMachine = machine;
         mConfig = config;
@@ -74,8 +74,13 @@ public class DozeDockHandler implements DozeMachine.Part {
         @Override
         public void onEvent(int dockState) {
             if (DEBUG) Log.d(TAG, "dock event = " + dockState);
-            final DozeMachine.State nextState;
+
             mDockState = dockState;
+            if (isPulsing()) {
+                return;
+            }
+
+            DozeMachine.State nextState;
             switch (mDockState) {
                 case DockManager.STATE_DOCKED:
                     nextState = State.DOZE_AOD_DOCKED;
@@ -90,8 +95,13 @@ public class DozeDockHandler implements DozeMachine.Part {
                 default:
                     return;
             }
-
             mMachine.requestState(nextState);
+        }
+
+        private boolean isPulsing() {
+            DozeMachine.State state = mMachine.getState();
+            return state == State.DOZE_REQUEST_PULSE || state == State.DOZE_PULSING
+                    || state == State.DOZE_PULSING_BRIGHT;
         }
 
         void register() {
