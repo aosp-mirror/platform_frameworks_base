@@ -61,6 +61,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -92,6 +93,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     private final State mCurrentState = new State();
     private OtherwisedCollapsedListener mListener;
     private ForcePluginOpenListener mForcePluginOpenListener;
+    private Consumer<Integer> mScrimsVisibilityListener;
     private final ArrayList<WeakReference<StatusBarWindowCallback>>
             mCallbacks = Lists.newArrayList();
 
@@ -148,6 +150,16 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
             }
         }
         mCallbacks.add(new WeakReference<StatusBarWindowCallback>(callback));
+    }
+
+    /**
+     * Register a listener to monitor scrims visibility
+     * @param listener A listener to monitor scrims visibility
+     */
+    public void setScrimsVisibilityListener(Consumer<Integer> listener) {
+        if (listener != null && mScrimsVisibilityListener != listener) {
+            mScrimsVisibilityListener = listener;
+        }
     }
 
     private boolean shouldEnableKeyguardScreenRotation() {
@@ -477,6 +489,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     public void setScrimsVisibility(int scrimsVisibility) {
         mCurrentState.mScrimsVisibility = scrimsVisibility;
         apply(mCurrentState);
+        mScrimsVisibilityListener.accept(scrimsVisibility);
     }
 
     /**
