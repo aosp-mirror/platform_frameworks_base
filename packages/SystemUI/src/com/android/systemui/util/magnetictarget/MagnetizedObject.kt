@@ -160,6 +160,18 @@ abstract class MagnetizedObject<T : Any>(
     lateinit var magnetListener: MagnetizedObject.MagnetListener
 
     /**
+     * Optional update listener to provide to the PhysicsAnimator that is used to spring the object
+     * into the target.
+     */
+    var physicsAnimatorUpdateListener: PhysicsAnimator.UpdateListener<T>? = null
+
+    /**
+     * Optional end listener to provide to the PhysicsAnimator that is used to spring the object
+     * into the target.
+     */
+    var physicsAnimatorEndListener: PhysicsAnimator.EndListener<T>? = null
+
+    /**
      * Sets whether forcefully flinging the object vertically towards a target causes it to be
      * attracted to the target and then released immediately, despite never being dragged within the
      * magnetic field.
@@ -479,6 +491,14 @@ abstract class MagnetizedObject<T : Any>(
                 .spring(yProperty, yProperty.getValue(underlyingObject) + yDiff, velY,
                         springConfig)
 
+        if (physicsAnimatorUpdateListener != null) {
+            animator.addUpdateListener(physicsAnimatorUpdateListener!!)
+        }
+
+        if (physicsAnimatorEndListener != null) {
+            animator.addEndListener(physicsAnimatorEndListener!!)
+        }
+
         if (after != null) {
             animator.withEndActions(after)
         }
@@ -560,13 +580,15 @@ abstract class MagnetizedObject<T : Any>(
         private val tempLoc = IntArray(2)
 
         fun updateLocationOnScreen() {
-            targetView.getLocationOnScreen(tempLoc)
+            targetView.post {
+                targetView.getLocationOnScreen(tempLoc)
 
-            // Add half of the target size to get the center, and subtract translation since the
-            // target could be animating in while we're doing this calculation.
-            centerOnScreen.set(
-                    tempLoc[0] + targetView.width / 2f - targetView.translationX,
-                    tempLoc[1] + targetView.height / 2f - targetView.translationY)
+                // Add half of the target size to get the center, and subtract translation since the
+                // target could be animating in while we're doing this calculation.
+                centerOnScreen.set(
+                        tempLoc[0] + targetView.width / 2f - targetView.translationX,
+                        tempLoc[1] + targetView.height / 2f - targetView.translationY)
+            }
         }
     }
 
