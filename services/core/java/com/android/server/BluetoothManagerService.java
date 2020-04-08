@@ -114,8 +114,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final int MESSAGE_DISABLE = 2;
     private static final int MESSAGE_HANDLE_ENABLE_DELAYED = 3;
     private static final int MESSAGE_HANDLE_DISABLE_DELAYED = 4;
-    private static final int MESSAGE_REGISTER_ADAPTER = 20;
-    private static final int MESSAGE_UNREGISTER_ADAPTER = 21;
     private static final int MESSAGE_REGISTER_STATE_CHANGE_CALLBACK = 30;
     private static final int MESSAGE_UNREGISTER_STATE_CHANGE_CALLBACK = 31;
     private static final int MESSAGE_BLUETOOTH_SERVICE_CONNECTED = 40;
@@ -631,10 +629,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Slog.w(TAG, "Callback is null in registerAdapter");
             return null;
         }
-        Message msg = mHandler.obtainMessage(MESSAGE_REGISTER_ADAPTER);
-        msg.obj = callback;
-        mHandler.sendMessage(msg);
-
+        synchronized (mCallbacks) {
+            mCallbacks.register(callback);
+        }
         return mBluetooth;
     }
 
@@ -644,9 +641,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             return;
         }
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        Message msg = mHandler.obtainMessage(MESSAGE_UNREGISTER_ADAPTER);
-        msg.obj = callback;
-        mHandler.sendMessage(msg);
+        synchronized (mCallbacks) {
+            mCallbacks.unregister(callback);
+        }
     }
 
     public void registerStateChangeCallback(IBluetoothStateChangeCallback callback) {
@@ -1519,18 +1516,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      * Inform BluetoothAdapter instances that Adapter service is up
      */
     private void sendBluetoothServiceUpCallback() {
-        try {
-            int n = mCallbacks.beginBroadcast();
-            Slog.d(TAG, "Broadcasting onBluetoothServiceUp() to " + n + " receivers.");
-            for (int i = 0; i < n; i++) {
-                try {
-                    mCallbacks.getBroadcastItem(i).onBluetoothServiceUp(mBluetooth);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to call onBluetoothServiceUp() on callback #" + i, e);
+        synchronized (mCallbacks) {
+            try {
+                int n = mCallbacks.beginBroadcast();
+                Slog.d(TAG, "Broadcasting onBluetoothServiceUp() to " + n + " receivers.");
+                for (int i = 0; i < n; i++) {
+                    try {
+                        mCallbacks.getBroadcastItem(i).onBluetoothServiceUp(mBluetooth);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to call onBluetoothServiceUp() on callback #" + i, e);
+                    }
                 }
+            } finally {
+                mCallbacks.finishBroadcast();
             }
-        } finally {
-            mCallbacks.finishBroadcast();
         }
     }
 
@@ -1538,18 +1537,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      * Inform BluetoothAdapter instances that Adapter service is down
      */
     private void sendBluetoothServiceDownCallback() {
-        try {
-            int n = mCallbacks.beginBroadcast();
-            Slog.d(TAG, "Broadcasting onBluetoothServiceDown() to " + n + " receivers.");
-            for (int i = 0; i < n; i++) {
-                try {
-                    mCallbacks.getBroadcastItem(i).onBluetoothServiceDown();
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to call onBluetoothServiceDown() on callback #" + i, e);
+        synchronized (mCallbacks) {
+            try {
+                int n = mCallbacks.beginBroadcast();
+                Slog.d(TAG, "Broadcasting onBluetoothServiceDown() to " + n + " receivers.");
+                for (int i = 0; i < n; i++) {
+                    try {
+                        mCallbacks.getBroadcastItem(i).onBluetoothServiceDown();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to call onBluetoothServiceDown() on callback #" + i, e);
+                    }
                 }
+            } finally {
+                mCallbacks.finishBroadcast();
             }
-        } finally {
-            mCallbacks.finishBroadcast();
         }
     }
 
@@ -1877,17 +1878,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                 mContext.getPackageName());
                     }
                     break;
-
-                case MESSAGE_REGISTER_ADAPTER: {
-                    IBluetoothManagerCallback callback = (IBluetoothManagerCallback) msg.obj;
-                    mCallbacks.register(callback);
-                    break;
-                }
-                case MESSAGE_UNREGISTER_ADAPTER: {
-                    IBluetoothManagerCallback callback = (IBluetoothManagerCallback) msg.obj;
-                    mCallbacks.unregister(callback);
-                    break;
-                }
                 case MESSAGE_REGISTER_STATE_CHANGE_CALLBACK: {
                     IBluetoothStateChangeCallback callback =
                             (IBluetoothStateChangeCallback) msg.obj;
