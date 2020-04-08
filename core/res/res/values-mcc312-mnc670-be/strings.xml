@@ -20,5 +20,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_illegal_me" msgid="3649306773478362802">"Тэлефон не дапускаецца MM#6"</string>
+    <string name="mmcc_illegal_me" msgid="8271599016773350087">"Тэлефон не дапускаецца MM#6"</string>
 </resources>

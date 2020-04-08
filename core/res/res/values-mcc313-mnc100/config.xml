@@ -42,4 +42,8 @@
         <item>"#8"</item>
         <item>"#9"</item>
     </string-array>
+
+    <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
+         check after reboot or airplane mode toggling -->
+    <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">true</bool>
 </resources>

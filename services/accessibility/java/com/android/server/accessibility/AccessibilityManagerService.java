@@ -217,6 +217,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final AppOpsManager mAppOpsManager;
 
+    private final ActivityTaskManagerInternal mActivityTaskManagerService;
+
     private final MainHandler mMainHandler;
 
     private final GlobalActionPerformer mGlobalActionPerformer;
@@ -308,6 +310,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mMainHandler = new MainHandler(mContext.getMainLooper());
         mGlobalActionPerformer = new GlobalActionPerformer(mContext, mWindowManagerService);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
+        mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
 
         registerBroadcastReceivers();
         new AccessibilityContentObserver(mMainHandler).register(
@@ -1635,7 +1638,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (service == null) {
                     service = new AccessibilityServiceConnection(userState, mContext, componentName,
                             installedService, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
-                            this, mWindowManagerService, mGlobalActionPerformer);
+                            this, mWindowManagerService, mGlobalActionPerformer,
+                            mActivityTaskManagerService);
                 } else if (userState.mBoundServices.contains(service)) {
                     continue;
                 }
@@ -3028,7 +3032,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     userState, mContext,
                     COMPONENT_NAME, info, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
                     AccessibilityManagerService.this, mWindowManagerService,
-                    mGlobalActionPerformer) {
+                    mGlobalActionPerformer, mActivityTaskManagerService) {
                 @Override
                 public boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
                     return true;

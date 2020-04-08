@@ -101,19 +101,6 @@ import java.util.concurrent.Executor;
  * <p>
  * The ApiDemos project contains examples of using this API:
  * <code>ApiDemos/src/com/example/android/apis/content/InstallApk*.java</code>.
- * <p>
- * On Android Q or above, an app installed notification will be posted
- * by system after a new app is installed.
- * To customize installer's notification icon, you should declare the following in the manifest
- * &lt;application> as follows: </p>
- * <pre>
- * &lt;meta-data android:name="com.android.packageinstaller.notification.smallIcon"
- * android:resource="@drawable/installer_notification_icon"/>
- * </pre>
- * <pre>
- * &lt;meta-data android:name="com.android.packageinstaller.notification.color"
- * android:resource="@color/installer_notification_color"/>
- * </pre>
  */
 public class PackageInstaller {
     private static final String TAG = "PackageInstaller";

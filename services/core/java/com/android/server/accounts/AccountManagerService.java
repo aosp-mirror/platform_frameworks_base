@@ -1289,6 +1289,33 @@ public class AccountManagerService
     }
 
     protected UserAccounts getUserAccounts(int userId) {
+        try {
+            return getUserAccountsNotChecked(userId);
+        } catch (RuntimeException e) {
+            if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+                // Let it go...
+                throw e;
+            }
+            // User accounts database is corrupted, we must wipe out the whole user, otherwise the
+            // system will crash indefinitely
+            Slog.wtf(TAG, "Removing user " + userId + " due to exception (" + e + ") reading its "
+                    + "account database");
+            if (userId == ActivityManager.getCurrentUser() && userId != UserHandle.USER_SYSTEM) {
+                Slog.i(TAG, "Switching to system user first");
+                try {
+                    ActivityManager.getService().switchUser(UserHandle.USER_SYSTEM);
+                } catch (RemoteException re) {
+                    Slog.e(TAG, "Could not switch to " + UserHandle.USER_SYSTEM + ": " + re);
+                }
+            }
+            if (!getUserManager().removeUserEvenWhenDisallowed(userId)) {
+                Slog.e(TAG, "could not remove user " + userId);
+            }
+            throw e;
+        }
+    }
+
+    private UserAccounts getUserAccountsNotChecked(int userId) {
         synchronized (mUsers) {
             UserAccounts accounts = mUsers.get(userId);
             boolean validateAccounts = false;

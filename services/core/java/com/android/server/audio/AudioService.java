@@ -2789,6 +2789,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     public void setMasterMute(boolean mute, int flags, String callingPackage, int userId) {
+        enforceModifyAudioRoutingPermission();
         setMasterMuteInternal(mute, flags, callingPackage, Binder.getCallingUid(),
                 userId);
     }
@@ -4015,8 +4016,7 @@ public class AudioService extends IAudioService.Stub
         final boolean muteSystem = (zenPolicy.priorityCategories
                 & NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM) == 0;
         final boolean muteNotificationAndRing = ZenModeConfig
-                .areAllPriorityOnlyNotificationZenSoundsMuted(
-                        mNm.getConsolidatedNotificationPolicy());
+                .areAllPriorityOnlyNotificationZenSoundsMuted(zenPolicy);
         return muteAlarms && isAlarm(streamType)
                 || muteMedia && isMedia(streamType)
                 || muteSystem && isSystem(streamType)
@@ -4028,11 +4028,13 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
-     * DND total silence: media and alarms streams are tied to the muted ringer
-     * {@link ZenModeHelper.RingerModeDelegate#getRingerModeAffectedStreams(int)}
-     * DND alarms only: notification, ringer + system muted (by default tied to muted ringer mode)
-     * DND priority only: alarms, media, system streams can be muted separate from ringer based on
-     * zenPolicy (this method determines which streams)
+     * Notifications, ringer and system sounds are controlled by the ringer:
+     * {@link ZenModeHelper.RingerModeDelegate#getRingerModeAffectedStreams(int)} but can
+     * also be muted by DND based on the DND mode:
+     * DND total silence: media and alarms streams can be muted by DND
+     * DND alarms only: no streams additionally controlled by DND
+     * DND priority only: alarms, media, system, ringer and notification streams can be muted by
+     * DND.  The current applied zenPolicy determines which streams will be muted by DND.
      * @return true if changed, else false
      */
     private boolean updateZenModeAffectedStreams() {
@@ -4052,6 +4054,11 @@ public class AudioService extends IAudioService.Stub
             if ((zenPolicy.priorityCategories
                     & NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM) == 0) {
                 zenModeAffectedStreams |= 1 << AudioManager.STREAM_SYSTEM;
+            }
+
+            if (ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(zenPolicy)) {
+                zenModeAffectedStreams |= 1 << AudioManager.STREAM_NOTIFICATION;
+                zenModeAffectedStreams |= 1 << AudioManager.STREAM_RING;
             }
         }
 

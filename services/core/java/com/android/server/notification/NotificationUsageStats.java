@@ -149,6 +149,7 @@ public class NotificationUsageStats {
             stats.numPostedByApp++;
             stats.updateInterarrivalEstimate(now);
             stats.countApiUse(notification);
+            stats.numUndecoratedRemoteViews += (notification.hasUndecoratedRemoteView() ? 1 : 0);
         }
         releaseAggregatedStatsLocked(aggregatedStatsArray);
         if (ENABLE_SQLITE_LOG) {
@@ -326,6 +327,15 @@ public class NotificationUsageStats {
         return dump;
     }
 
+    public PulledStats remoteViewStats(long startMs, boolean aggregate) {
+        if (ENABLE_SQLITE_LOG) {
+            if (aggregate) {
+                return mSQLiteLog.remoteViewAggStats(startMs);
+            }
+        }
+        return null;
+    }
+
     public synchronized void dump(PrintWriter pw, String indent, DumpFilter filter) {
         if (ENABLE_AGGREGATED_IN_MEMORY_STATS) {
             for (AggregatedStats as : mStats.values()) {
@@ -403,6 +413,7 @@ public class NotificationUsageStats {
         public int numRateViolations;
         public int numAlertViolations;
         public int numQuotaViolations;
+        public int numUndecoratedRemoteViews;
         public long mLastAccessTime;
 
         public AggregatedStats(Context context, String key) {
@@ -669,6 +680,8 @@ public class NotificationUsageStats {
             output.append(indentPlusTwo).append(noisyImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(quietImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(finalImportance.toString()).append("\n");
+            output.append(indentPlusTwo);
+            output.append("numUndecorateRVs=").append(numUndecoratedRemoteViews).append("\n");
             output.append(indent).append("}");
             return output.toString();
         }
@@ -1027,7 +1040,7 @@ public class NotificationUsageStats {
         private static final int MSG_DISMISS = 4;
 
         private static final String DB_NAME = "notification_log.db";
-        private static final int DB_VERSION = 5;
+        private static final int DB_VERSION = 7;
 
         /** Age in ms after which events are pruned from the DB. */
         private static final long HORIZON_MS = 7 * 24 * 60 * 60 * 1000L;  // 1 week
@@ -1060,6 +1073,7 @@ public class NotificationUsageStats {
         private static final String COL_FIRST_EXPANSIONTIME_MS = "first_expansion_time_ms";
         private static final String COL_AIRTIME_EXPANDED_MS = "expansion_airtime_ms";
         private static final String COL_EXPAND_COUNT = "expansion_count";
+        private static final String COL_UNDECORATED = "undecorated";
 
 
         private static final int EVENT_TYPE_POST = 1;
@@ -1085,12 +1099,20 @@ public class NotificationUsageStats {
                 "COUNT(*) AS cnt, " +
                 "SUM(" + COL_MUTED + ") as muted, " +
                 "SUM(" + COL_NOISY + ") as noisy, " +
-                "SUM(" + COL_DEMOTED + ") as demoted " +
+                "SUM(" + COL_DEMOTED + ") as demoted, " +
+                "SUM(" + COL_UNDECORATED + ") as undecorated " +
                 "FROM " + TAB_LOG + " " +
                 "WHERE " +
                 COL_EVENT_TYPE + "=" + EVENT_TYPE_POST +
                 " AND " + COL_EVENT_TIME + " > %d " +
                 " GROUP BY " + COL_EVENT_USER_ID + ", day, " + COL_PKG;
+        private static final String UNDECORATED_QUERY = "SELECT " +
+                COL_PKG + ", " +
+                "MAX(" + COL_EVENT_TIME + ") as max_time " +
+                "FROM " + TAB_LOG + " " +
+                "WHERE " + COL_UNDECORATED + "> 0 " +
+                " AND " + COL_EVENT_TIME + " > %d " +
+                "GROUP BY " + COL_PKG;
 
         public SQLiteLog(Context context) {
             HandlerThread backgroundThread = new HandlerThread("notification-sqlite-log",
@@ -1146,7 +1168,8 @@ public class NotificationUsageStats {
                             COL_AIRTIME_MS + " INT," +
                             COL_FIRST_EXPANSIONTIME_MS + " INT," +
                             COL_AIRTIME_EXPANDED_MS + " INT," +
-                            COL_EXPAND_COUNT + " INT" +
+                            COL_EXPAND_COUNT + " INT," +
+                            COL_UNDECORATED + " INT" +
                             ")");
                 }
 
@@ -1256,6 +1279,7 @@ public class NotificationUsageStats {
             } else {
                 putPosttimeVisibility(r, cv);
             }
+            cv.put(COL_UNDECORATED, (r.hasUndecoratedRemoteView() ? 1 : 0));
             SQLiteDatabase db = mHelper.getWritableDatabase();
             if (db.insert(TAB_LOG, null, cv) < 0) {
                 Log.wtf(TAG, "Error while trying to insert values: " + cv);
@@ -1331,6 +1355,23 @@ public class NotificationUsageStats {
                 // pass
             }
             return dump;
+        }
+
+        public PulledStats remoteViewAggStats(long startMs) {
+            PulledStats stats = new PulledStats(startMs);
+            SQLiteDatabase db = mHelper.getReadableDatabase();
+            String q = String.format(UNDECORATED_QUERY, startMs);
+            Cursor cursor = db.rawQuery(q, null);
+            try {
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                    String pkg = cursor.getString(0);
+                    long maxTimeMs = cursor.getLong(1);
+                    stats.addUndecoratedPackage(pkg, maxTimeMs);
+                }
+            } finally {
+                cursor.close();
+            }
+            return stats;
         }
     }
 }

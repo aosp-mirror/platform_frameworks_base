@@ -1252,6 +1252,7 @@ public final class Settings {
             return false;
         }
         ps.clearDomainVerificationStatusForUser(userId);
+        ps.setIntentFilterVerificationInfo(null);
         return true;
     }
 
@@ -3138,6 +3139,10 @@ public final class Settings {
         writeKernelMappingLPr();
 
         return true;
+    }
+
+    void readPermissionStateForUserSyncLPr(@UserIdInt int userId) {
+        mRuntimePermissionsPersistence.readStateForUserSyncLPr(userId);
     }
 
     void applyDefaultPreferredAppsLPw(int userId) {

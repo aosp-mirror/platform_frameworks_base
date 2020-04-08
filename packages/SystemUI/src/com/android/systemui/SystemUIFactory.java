@@ -42,6 +42,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
+import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -73,6 +74,7 @@ import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeDialogComponent;
 
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Named;
@@ -140,6 +142,17 @@ public class SystemUIFactory {
         return new StatusBarKeyguardViewManager(context, viewMediatorCallback, lockPatternUtils);
     }
 
+    /**
+     * Creates an instance of ScreenshotNotificationSmartActionsProvider.
+     * This method is overridden in vendor specific implementation of Sys UI.
+     */
+    public ScreenshotNotificationSmartActionsProvider
+            createScreenshotNotificationSmartActionsProvider(Context context,
+            Executor executor,
+            Handler uiHandler) {
+        return new ScreenshotNotificationSmartActionsProvider();
+    }
+
     public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry,
@@ -153,12 +166,11 @@ public class SystemUIFactory {
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
-            ScrimView scrimForBubble,
             LockscreenWallpaper lockscreenWallpaper,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
             AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
-        return new ScrimController(scrimBehind, scrimInFront, scrimForBubble, scrimStateListener,
+        return new ScrimController(scrimBehind, scrimInFront, scrimStateListener,
                 scrimVisibleListener, dozeParameters, alarmManager, keyguardMonitor);
     }
 

@@ -430,7 +430,8 @@ class AppErrors {
                 RescueParty.noteAppCrash(mContext, r.uid);
             }
 
-            mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode());
+            mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode(),
+                    PackageWatchdog.FAILURE_REASON_APP_CRASH);
         }
 
         final int relaunchReason = r != null
@@ -889,7 +890,8 @@ class AppErrors {
         }
         // Notify PackageWatchdog without the lock held
         if (packageList != null) {
-            mPackageWatchdog.onPackageFailure(packageList);
+            mPackageWatchdog.onPackageFailure(packageList,
+                    PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
         }
     }
 

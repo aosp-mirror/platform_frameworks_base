@@ -694,11 +694,22 @@ final class SystemServiceRegistry {
             @Override
             public WallpaperManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
-                final IBinder b;
-                if (ctx.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
-                    b = ServiceManager.getServiceOrThrow(Context.WALLPAPER_SERVICE);
-                } else {
-                    b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
+                final IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
+                if (b == null) {
+                    // There are 2 reason service can be null:
+                    // 1.Device doesn't support it - that's fine
+                    // 2.App is running on instant mode - should fail
+                    final boolean enabled = Resources.getSystem()
+                            .getBoolean(com.android.internal.R.bool.config_enableWallpaperService);
+                    if (!enabled) {
+                        // Life moves on...
+                        return DisabledWallpaperManager.getInstance();
+                    }
+                    if (ctx.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
+                        // Instant app
+                        throw new ServiceNotFoundException(Context.WALLPAPER_SERVICE);
+                    }
+                    // Bad state - WallpaperManager methods will throw exception
                 }
                 IWallpaperManager service = IWallpaperManager.Stub.asInterface(b);
                 return new WallpaperManager(service, ctx.getOuterContext(),

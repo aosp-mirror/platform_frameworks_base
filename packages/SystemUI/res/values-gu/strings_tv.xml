@@ -19,8 +19,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="notification_channel_tv_pip" msgid="134047986446577723">"ચિત્રમાં-ચિત્ર"</string>
-    <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(કોઈ ટાઇટલ પ્રોગ્રામ નથી)"</string>
-    <string name="pip_close" msgid="3480680679023423574">"PIP બંધ કરો"</string>
-    <string name="pip_fullscreen" msgid="8604643018538487816">"પૂર્ણ સ્ક્રીન"</string>
+    <string name="notification_channel_tv_pip" msgid="844249465483874817">"ચિત્રમાં-ચિત્ર"</string>
+    <string name="pip_notification_unknown_title" msgid="4413256731340767259">"(કોઈ ટાઇટલ પ્રોગ્રામ નથી)"</string>
+    <string name="pip_close" msgid="5775212044472849930">"PIP બંધ કરો"</string>
+    <string name="pip_fullscreen" msgid="3877997489869475181">"પૂર્ણ સ્ક્રીન"</string>
 </resources>

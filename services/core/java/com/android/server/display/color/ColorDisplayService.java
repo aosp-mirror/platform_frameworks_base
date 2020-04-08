@@ -589,16 +589,18 @@ public final class ColorDisplayService extends SystemService {
         if (immediate) {
             dtm.setColorMatrix(tintController.getLevel(), to);
         } else {
-            tintController.setAnimator(ValueAnimator.ofObject(COLOR_MATRIX_EVALUATOR,
-                    from == null ? MATRIX_IDENTITY : from, to));
-            tintController.getAnimator().setDuration(TRANSITION_DURATION);
-            tintController.getAnimator().setInterpolator(AnimationUtils.loadInterpolator(
+            TintValueAnimator valueAnimator = TintValueAnimator.ofMatrix(COLOR_MATRIX_EVALUATOR,
+                    from == null ? MATRIX_IDENTITY : from, to);
+            tintController.setAnimator(valueAnimator);
+            valueAnimator.setDuration(TRANSITION_DURATION);
+            valueAnimator.setInterpolator(AnimationUtils.loadInterpolator(
                     getContext(), android.R.interpolator.fast_out_slow_in));
-            tintController.getAnimator().addUpdateListener((ValueAnimator animator) -> {
+            valueAnimator.addUpdateListener((ValueAnimator animator) -> {
                 final float[] value = (float[]) animator.getAnimatedValue();
                 dtm.setColorMatrix(tintController.getLevel(), value);
+                ((TintValueAnimator) animator).updateMinMaxComponents();
             });
-            tintController.getAnimator().addListener(new AnimatorListenerAdapter() {
+            valueAnimator.addListener(new AnimatorListenerAdapter() {
 
                 private boolean mIsCancelled;
 
@@ -609,9 +611,14 @@ public final class ColorDisplayService extends SystemService {
 
                 @Override
                 public void onAnimationEnd(Animator animator) {
+                    TintValueAnimator t = (TintValueAnimator) animator;
                     Slog.d(TAG, tintController.getClass().getSimpleName()
                             + " Animation cancelled: " + mIsCancelled
-                            + " to matrix: " + TintController.matrixToString(to, 16));
+                            + " to matrix: " + TintController.matrixToString(to, 16)
+                            + " min matrix coefficients: "
+                            + TintController.matrixToString(t.getMin(), 16)
+                            + " max matrix coefficients: "
+                            + TintController.matrixToString(t.getMax(), 16));
                     if (!mIsCancelled) {
                         // Ensure final color matrix is set at the end of the animation. If the
                         // animation is cancelled then don't set the final color matrix so the new
@@ -621,7 +628,7 @@ public final class ColorDisplayService extends SystemService {
                     tintController.setAnimator(null);
                 }
             });
-            tintController.getAnimator().start();
+            valueAnimator.start();
         }
     }
 
@@ -1105,6 +1112,51 @@ public final class ColorDisplayService extends SystemService {
             Slog.d(TAG, "onTwilightStateChanged: isNight="
                     + (state == null ? null : state.isNight()));
             updateActivated(state);
+        }
+    }
+
+    /**
+     * Only animates matrices and saves min and max coefficients for logging.
+     */
+    static class TintValueAnimator extends ValueAnimator {
+        private float[] min;
+        private float[] max;
+
+        public static TintValueAnimator ofMatrix(ColorMatrixEvaluator evaluator,
+                Object... values) {
+            TintValueAnimator anim = new TintValueAnimator();
+            anim.setObjectValues(values);
+            anim.setEvaluator(evaluator);
+            if (values == null || values.length == 0) {
+                return null;
+            }
+            float[] m = (float[]) values[0];
+            anim.min = new float[m.length];
+            anim.max = new float[m.length];
+            for (int i = 0; i < m.length; ++i) {
+                anim.min[i] = Float.MAX_VALUE;
+                anim.max[i] = Float.MIN_VALUE;
+            }
+            return anim;
+        }
+
+        public void updateMinMaxComponents() {
+            float[] value = (float[]) getAnimatedValue();
+            if (value == null) {
+                return;
+            }
+            for (int i = 0; i < value.length; ++i) {
+                min[i] = Math.min(min[i], value[i]);
+                max[i] = Math.max(max[i], value[i]);
+            }
+        }
+
+        public float[] getMin() {
+            return min;
+        }
+
+        public float[] getMax() {
+            return max;
         }
     }
 

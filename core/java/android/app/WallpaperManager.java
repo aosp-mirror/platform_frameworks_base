@@ -510,7 +510,9 @@ public class WallpaperManager {
 
     /*package*/ WallpaperManager(IWallpaperManager service, Context context, Handler handler) {
         mContext = context;
-        initGlobals(service, context.getMainLooper());
+        if (service != null) {
+            initGlobals(service, context.getMainLooper());
+        }
     }
 
     /**

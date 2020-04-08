@@ -20,138 +20,138 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="3171996292755059205">"Keyguard"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"Πληκτρολογήστε τον κωδικό PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"Πληκτρολογήστε τον κωδικό PUK της κάρτας SIM και τον νέο κωδικό PIN"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"Κωδικός PUK κάρτας SIM"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"Νέος κωδικός PIN της κάρτας SIM"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Αγγίξτε για εισαγ. κωδ. πρόσβ."</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Πληκτρολογήστε τον κωδικό πρόσβασης για ξεκλείδωμα"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Πληκτρολογήστε τον αριθμό PIN για ξεκλείδωμα"</string>
-    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Εισαγάγετε τον αριθμό PIN σας"</string>
-    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Εισαγάγετε το μοτίβο σας"</string>
-    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Εισαγάγετε κωδικό πρόσβασης"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Λανθασμένος κωδικός PIN."</string>
-    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Μη έγκυρη κάρτα."</string>
-    <string name="keyguard_charged" msgid="3316115607283493413">"Πλήρως φορτισμένη"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ασύρματη φόρτιση"</string>
-    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Φόρτιση"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Γρήγορη φόρτιση"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Αργή φόρτιση"</string>
-    <string name="keyguard_low_battery" msgid="9218432555787624490">"Συνδέστε τον φορτιστή."</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Πατήστε \"Μενού\" για ξεκλείδωμα."</string>
-    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Κλειδωμένο δίκτυο"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Δεν υπάρχει κάρτα SIM"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"Δεν υπάρχει κάρτα SIM στο tablet."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"Δεν υπάρχει κάρτα SIM στο τηλέφωνο."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Τοποθετήστε μια κάρτα SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"Η κάρτα SIM δεν υπάρχει ή δεν είναι δυνατή η ανάγνωσή της. Τοποθετήστε μια κάρτα SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον πάροχο υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
-    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"Η κάρτα SIM είναι κλειδωμένη."</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"Η κάρτα SIM είναι κλειδωμένη με κωδικό PUK."</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Ξεκλείδωμα κάρτας SIM…"</string>
-    <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Περιοχή αριθμού PIN"</string>
-    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Κωδικός πρόσβασης συσκευής"</string>
-    <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Περιοχή αριθμού PIN κάρτας SIM"</string>
-    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Περιοχή κωδικού PUK κάρτας SIM"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Το επόμενο ξυπνητήρι ορίστηκε στις <xliff:g id="ALARM">%1$s</xliff:g>"</string>
-    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Διαγραφή"</string>
-    <string name="disable_carrier_button_text" msgid="6914341927421916114">"Απενεργοποίηση eSIM"</string>
-    <string name="error_disable_esim_title" msgid="4852978431156228006">"Αδυναμία απενεργοποίησης eSIM"</string>
-    <string name="error_disable_esim_msg" msgid="676694908770135639">"Δεν είναι δυνατή η απενεργοποίηση της eSIM, εξαιτίας κάποιου σφάλματος."</string>
-    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Ξεχάσατε το μοτίβο"</string>
-    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Λανθασμένο μοτίβο"</string>
-    <string name="kg_wrong_password" msgid="8060364776224836597">"Λανθασμένος κωδικός πρόσβασης"</string>
-    <string name="kg_wrong_pin" msgid="4785660766909463466">"Λανθασμένο PIN"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+    <string name="app_name" msgid="514691256816366517">"Keyguard"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="8582296866585566671">"Πληκτρολογήστε τον κωδικό PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"Πληκτρολογήστε τον κωδικό PUK της κάρτας SIM και τον νέο κωδικό PIN"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"Κωδικός PUK κάρτας SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"Νέος κωδικός PIN της κάρτας SIM"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"Αγγίξτε για εισαγ. κωδ. πρόσβ."</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"Πληκτρολογήστε τον κωδικό πρόσβασης για ξεκλείδωμα"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"Πληκτρολογήστε τον αριθμό PIN για ξεκλείδωμα"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Εισαγάγετε τον αριθμό PIN σας"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Εισαγάγετε το μοτίβο σας"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Εισαγάγετε κωδικό πρόσβασης"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Λανθασμένος κωδικός PIN."</string>
+    <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Μη έγκυρη κάρτα."</string>
+    <string name="keyguard_charged" msgid="6572033099675649299">"Πλήρως φορτισμένη"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ασύρματη φόρτιση"</string>
+    <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Φόρτιση"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Γρήγορη φόρτιση"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Αργή φόρτιση"</string>
+    <string name="keyguard_low_battery" msgid="1868012396800230904">"Συνδέστε τον φορτιστή."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Πατήστε \"Μενού\" για ξεκλείδωμα."</string>
+    <string name="keyguard_network_locked_message" msgid="407096292844868608">"Κλειδωμένο δίκτυο"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Δεν υπάρχει SIM"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"Δεν υπάρχει κάρτα SIM στο tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"Δεν υπάρχει κάρτα SIM στο τηλέφωνο."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Τοποθετήστε μια κάρτα SIM."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Η κάρτα SIM δεν υπάρχει ή δεν είναι δυνατή η ανάγνωσή της. Τοποθετήστε μια κάρτα SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον πάροχο υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
+    <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"Η κάρτα SIM είναι κλειδωμένη."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"Η κάρτα SIM είναι κλειδωμένη με κωδικό PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"Ξεκλείδωμα κάρτας SIM…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"Περιοχή αριθμού PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Κωδικός πρόσβασης συσκευής"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"Περιοχή αριθμού PIN κάρτας SIM"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"Περιοχή κωδικού PUK κάρτας SIM"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="4492876946798984630">"Το επόμενο ξυπνητήρι ορίστηκε στις <xliff:g id="ALARM">%1$s</xliff:g>"</string>
+    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Διαγραφή"</string>
+    <string name="disable_carrier_button_text" msgid="7153361131709275746">"Απενεργοποίηση eSIM"</string>
+    <string name="error_disable_esim_title" msgid="3802652622784813119">"Αδυναμία απενεργοποίησης eSIM"</string>
+    <string name="error_disable_esim_msg" msgid="2441188596467999327">"Δεν είναι δυνατή η απενεργοποίηση της eSIM, εξαιτίας κάποιου σφάλματος."</string>
+    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"Ξεχάσατε το μοτίβο"</string>
+    <string name="kg_wrong_pattern" msgid="5907301342430102842">"Λανθασμένο μοτίβο"</string>
+    <string name="kg_wrong_password" msgid="4143127991071670512">"Λανθασμένος κωδικός πρόσβασης"</string>
+    <string name="kg_wrong_pin" msgid="4160978845968732624">"Λανθασμένο PIN"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
       <item quantity="other">Δοκιμάστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα.</item>
       <item quantity="one">Δοκιμάστε ξανά σε 1 δευτερόλεπτο.</item>
     </plurals>
-    <string name="kg_pattern_instructions" msgid="5547646893001491340">"Σχεδιάστε το μοτίβο σας"</string>
-    <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Εισαγωγή αριθμού PIN κάρτας SIM"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Εισαγάγετε τον αριθμό PIN της κάρτας SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
-    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Απενεργοποιήστε την eSIM, για να χρησιμοποιήσετε τη συσκευή χωρίς υπηρεσία για κινητά."</string>
-    <string name="kg_pin_instructions" msgid="4069609316644030034">"Εισαγάγετε τον αριθμό PIN"</string>
-    <string name="kg_password_instructions" msgid="136952397352976538">"Εισαγάγετε κωδικό πρόσβασης"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"Η κάρτα SIM είναι απενεργοποιημένη αυτή τη στιγμή. Εισαγάγετε τον κωδικό PUK για να συνεχίσετε. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας σας για λεπτομέρειες."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"Η SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" έχει απενεργοποιηθεί. Εισάγετε τον κωδικό PUK για συνέχεια. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας για λεπτομέρειες."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"Εισαγάγετε τον απαιτούμενο κωδικό PIN"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"Επιβεβαιώστε τον απαιτούμενο κωδικό PIN"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"Ξεκλείδωμα κάρτας SIM…"</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"Πληκτρολογήστε έναν αριθμό PIN που να αποτελείται από 4 έως 8 αριθμούς."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"Ο κωδικός PUK θα πρέπει να περιέχει τουλάχιστον 8 αριθμούς."</string>
-    <string name="kg_invalid_puk" msgid="5399287873762592502">"Εισαγάγετε ξανά τον κωδικό PUK. Οι επαναλαμβανόμενες προσπάθειες θα απενεργοποιήσουν οριστικά την κάρτα SIM."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"Δεν υπάρχει αντιστοιχία μεταξύ των κωδικών PIN"</string>
-    <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"Πάρα πολλές προσπάθειες μοτίβου!"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"Έχετε πληκτρολογήσει τον αριθμό PIN εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"Έχετε πληκτρολογήσει τον κωδικό πρόσβασης εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος<xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"Δοκιμάσατε να ξεκλειδώσετε το tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, αυτό το tablet θα ρυθμιστεί εκ νέου και θα διαγραφούν όλα τα δεδομένα του."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, αυτό το τηλέφωνο θα ρυθμιστεί εκ νέου και θα διαγραφούν όλα τα δεδομένα του."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"Δοκιμάσατε να ξεκλειδώσετε αυτό το tablet <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Αυτό το tablet θα ρυθμιστεί εκ νέου και θα διαγραφούν όλα τα δεδομένα του."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Αυτό το τηλέφωνο θα ρυθμιστεί εκ νέου και θα διαγραφούν όλα τα δεδομένα του."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"Δοκιμάσατε να ξεκλειδώσετε το tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, αυτός ο χρήστης θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα χρήστη."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, αυτός ο χρήστης θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα χρήστη."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"Δοκιμάσατε να ξεκλειδώσετε το tablet <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Αυτός ο χρήστης θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα χρήστη."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Αυτός ο χρήστης θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα χρήστη."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"Δοκιμάσατε να ξεκλειδώσετε το tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, το προφίλ εργασίας θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα προφίλ."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, το προφίλ εργασίας θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα προφίλ."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"Δοκιμάσατε να ξεκλειδώσετε το tablet <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Το προφίλ εργασίας θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα προφίλ."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Το προφίλ εργασίας θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα προφίλ."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, θα σας ζητηθεί να ξεκλειδώσετε το tablet με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε να συνδεθείτε ξανά σε <xliff:g id="NUMBER_2">%3$d</xliff:g> δευτερόλεπτα."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%3$d</xliff:g> δευτερόλεπτα."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"Λανθασμένος κωδικός PIN κάρτας SIM. Θα πρέπει να επικοινωνήσετε με την εταιρεία κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+    <string name="kg_pattern_instructions" msgid="5376036737065051736">"Σχεδιάστε το μοτίβο σας"</string>
+    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Εισαγωγή αριθμού PIN κάρτας SIM"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Εισαγάγετε τον αριθμό PIN της κάρτας SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Απενεργοποιήστε την eSIM, για να χρησιμοποιήσετε τη συσκευή χωρίς υπηρεσία για κινητά."</string>
+    <string name="kg_pin_instructions" msgid="822353548385014361">"Εισαγάγετε τον αριθμό PIN"</string>
+    <string name="kg_password_instructions" msgid="324455062831719903">"Εισαγάγετε κωδικό πρόσβασης"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"Η κάρτα SIM είναι απενεργοποιημένη αυτή τη στιγμή. Εισαγάγετε τον κωδικό PUK για να συνεχίσετε. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας σας για λεπτομέρειες."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Η SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" έχει απενεργοποιηθεί. Εισάγετε τον κωδικό PUK για συνέχεια. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας για λεπτομέρειες."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Εισαγάγετε τον απαιτούμενο κωδικό PIN"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Επιβεβαιώστε τον απαιτούμενο κωδικό PIN"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"Ξεκλείδωμα κάρτας SIM…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Πληκτρολογήστε έναν αριθμό PIN που να αποτελείται από 4 έως 8 αριθμούς."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Ο κωδικός PUK θα πρέπει να περιέχει τουλάχιστον 8 αριθμούς."</string>
+    <string name="kg_invalid_puk" msgid="1774337070084931186">"Εισαγάγετε ξανά τον κωδικό PUK. Οι επαναλαμβανόμενες προσπάθειες θα απενεργοποιήσουν οριστικά την κάρτα SIM."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"Δεν υπάρχει αντιστοιχία μεταξύ των κωδικών PIN"</string>
+    <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Πάρα πολλές προσπάθειες μοτίβου!"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Έχετε πληκτρολογήσει τον αριθμό PIN εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Έχετε πληκτρολογήσει τον κωδικό πρόσβασης εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος<xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Δοκιμάσατε να ξεκλειδώσετε το tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, αυτό το tablet θα ρυθμιστεί εκ νέου και θα διαγραφούν όλα τα δεδομένα του."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, αυτό το τηλέφωνο θα ρυθμιστεί εκ νέου και θα διαγραφούν όλα τα δεδομένα του."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Δοκιμάσατε να ξεκλειδώσετε αυτό το tablet <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Αυτό το tablet θα ρυθμιστεί εκ νέου και θα διαγραφούν όλα τα δεδομένα του."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Αυτό το τηλέφωνο θα ρυθμιστεί εκ νέου και θα διαγραφούν όλα τα δεδομένα του."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Δοκιμάσατε να ξεκλειδώσετε το tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, αυτός ο χρήστης θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα χρήστη."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, αυτός ο χρήστης θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα χρήστη."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"Δοκιμάσατε να ξεκλειδώσετε το tablet <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Αυτός ο χρήστης θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα χρήστη."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Αυτός ο χρήστης θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα χρήστη."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"Δοκιμάσατε να ξεκλειδώσετε το tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, το προφίλ εργασίας θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα προφίλ."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, το προφίλ εργασίας θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα προφίλ."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Δοκιμάσατε να ξεκλειδώσετε το tablet <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Το προφίλ εργασίας θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα προφίλ."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Το προφίλ εργασίας θα καταργηθεί και θα διαγραφούν όλα τα δεδομένα προφίλ."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, θα σας ζητηθεί να ξεκλειδώσετε το tablet με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε να συνδεθείτε ξανά σε <xliff:g id="NUMBER_2">%3$d</xliff:g> δευτερόλεπτα."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ακόμα ανεπιτυχείς προσπάθειες, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%3$d</xliff:g> δευτερόλεπτα."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Λανθασμένος κωδικός PIN κάρτας SIM. Θα πρέπει να επικοινωνήσετε με την εταιρεία κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">Λανθασμένος κωδικός PIN κάρτας SIM. Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες.</item>
       <item quantity="one">Λανθασμένος κωδικός PIN κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με την εταιρεία κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας.</item>
     </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας σας."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας σας."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
       <item quantity="other">Λανθασμένος κωδικός PUK κάρτας SIM. Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM.</item>
       <item quantity="one">Λανθασμένος κωδικός PUK κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM.</item>
     </plurals>
-    <string name="kg_password_pin_failed" msgid="8769990811451236223">"Αποτυχία λειτουργίας κωδικού PIN κάρτας SIM!"</string>
-    <string name="kg_password_puk_failed" msgid="1331621440873439974">"Αποτυχία λειτουργίας κωδικού PUK κάρτας SIM!"</string>
-    <string name="kg_pin_accepted" msgid="7637293533973802143">"Αποδεκτός κωδικός!"</string>
-    <string name="keyguard_carrier_default" msgid="4274828292998453695">"Καμία υπηρεσία."</string>
-    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Εναλλαγή μεθόδου εισαγωγής"</string>
-    <string name="airplane_mode" msgid="3807209033737676010">"Λειτουργία πτήσης"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Απαιτείται μοτίβο μετά από την επανεκκίνηση της συσκευής"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Απαιτείται PIN μετά από την επανεκκίνηση της συσκευής"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"Απαιτείται κωδικός πρόσβασης μετά από την επανεκκίνηση της συσκευής"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"Απαιτείται μοτίβο για πρόσθετη ασφάλεια"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"Απαιτείται PIN για πρόσθετη ασφάλεια"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"Απαιτείται κωδικός πρόσβασης για πρόσθετη ασφάλεια"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Απαιτείται μοτίβο κατά την εναλλαγή προφίλ"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Απαιτείται PIN κατά την εναλλαγή προφίλ"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Απαιτείται κωδικός πρόσβασης κατά την εναλλαγή προφίλ"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"Η συσκευή κλειδώθηκε από τον διαχειριστή"</string>
-    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Η συσκευή κλειδώθηκε με μη αυτόματο τρόπο"</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+    <string name="kg_password_pin_failed" msgid="5136259126330604009">"Αποτυχία λειτουργίας κωδικού PIN κάρτας SIM!"</string>
+    <string name="kg_password_puk_failed" msgid="6778867411556937118">"Αποτυχία λειτουργίας κωδικού PUK κάρτας SIM!"</string>
+    <string name="kg_pin_accepted" msgid="1625501841604389716">"Αποδεκτός κωδικός!"</string>
+    <string name="keyguard_carrier_default" msgid="6359808469637388586">"Καμία υπηρεσία."</string>
+    <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Εναλλαγή μεθόδου εισαγωγής"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"Λειτουργία πτήσης"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Απαιτείται μοτίβο μετά από την επανεκκίνηση της συσκευής"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Απαιτείται PIN μετά από την επανεκκίνηση της συσκευής"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Απαιτείται κωδικός πρόσβασης μετά από την επανεκκίνηση της συσκευής"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Απαιτείται μοτίβο για πρόσθετη ασφάλεια"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Απαιτείται PIN για πρόσθετη ασφάλεια"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Απαιτείται κωδικός πρόσβασης για πρόσθετη ασφάλεια"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"Απαιτείται μοτίβο κατά την εναλλαγή προφίλ"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="6490434826361055400">"Απαιτείται PIN κατά την εναλλαγή προφίλ"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1680374696393804441">"Απαιτείται κωδικός πρόσβασης κατά την εναλλαγή προφίλ"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Η συσκευή κλειδώθηκε από τον διαχειριστή"</string>
+    <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Η συσκευή κλειδώθηκε με μη αυτόματο τρόπο"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="1337428979661197957">
       <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί εδώ και <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαιώστε το μοτίβο.</item>
       <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί εδώ και <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε το μοτίβο.</item>
     </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="6444519502336330270">
       <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί εδώ και <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαιώστε τον αριθμό PIN.</item>
       <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί εδώ και <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε τον αριθμό PIN.</item>
     </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5343961527665116914">
       <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί εδώ και <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαιώστε τον κωδικό πρόσβασης.</item>
       <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί εδώ και <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε τον κωδικό πρόσβασης.</item>
     </plurals>
-    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Δεν αναγνωρίστηκε"</string>
-    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Δεν αναγνωρίστηκε"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Δεν αναγνωρίστηκε"</string>
+    <string name="kg_face_not_recognized" msgid="7903950626744419160">"Δεν αναγνωρίστηκε"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Εισαγάγετε τον αριθμό PIN της κάρτας SIM. Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες.</item>
       <item quantity="one">Εισαγάγετε τον αριθμό PIN της κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας, για να ξεκλειδώσετε τη συσκευή.</item>
     </plurals>
-    <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
       <item quantity="other">Η κάρτα SIM απενεργοποιήθηκε. Καταχωρίστε τον κωδικό PUK, για να συνεχίσετε. Απομένουν <xliff:g id="_NUMBER_1">%d</xliff:g> ακόμη προσπάθειες προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας για λεπτομέρειες.</item>
       <item quantity="one">Η κάρτα SIM απενεργοποιήθηκε. Καταχωρίστε τον κωδικό PUK, για να συνεχίσετε. Απομένει <xliff:g id="_NUMBER_0">%d</xliff:g> ακόμη προσπάθεια προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας για λεπτομέρειες.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"Προεπιλογή"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"Συννεφάκι"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"Αναλογικό"</string>
+    <string name="clock_title_default" msgid="6342735240617459864">"Προεπιλογή"</string>
+    <string name="clock_title_bubble" msgid="2204559396790593213">"Συννεφάκι"</string>
+    <string name="clock_title_analog" msgid="8409262532900918273">"Αναλογικό"</string>
 </resources>

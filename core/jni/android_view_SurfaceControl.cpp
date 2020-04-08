@@ -463,15 +463,6 @@ static void nativeSetInputWindowInfo(JNIEnv* env, jclass clazz, jlong transactio
     transaction->setInputWindowInfo(ctrl, *handle->getInfo());
 }
 
-static void nativeTransferTouchFocus(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jobject fromTokenObj, jobject toTokenObj) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    sp<IBinder> fromToken(ibinderForJavaObject(env, fromTokenObj));
-    sp<IBinder> toToken(ibinderForJavaObject(env, toTokenObj));
-    transaction->transferTouchFocus(fromToken, toToken);
-}
-
 static void nativeSyncInputWindows(JNIEnv* env, jclass clazz, jlong transactionObj) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     transaction->syncInputWindows();
@@ -1381,8 +1372,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeCaptureLayers },
     {"nativeSetInputWindowInfo", "(JJLandroid/view/InputWindowHandle;)V",
             (void*)nativeSetInputWindowInfo },
-    {"nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)V",
-            (void*)nativeTransferTouchFocus },
     {"nativeSetMetadata", "(JJILandroid/os/Parcel;)V",
             (void*)nativeSetMetadata },
     {"nativeGetDisplayedContentSamplingAttributes",

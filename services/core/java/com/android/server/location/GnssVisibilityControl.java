@@ -637,7 +637,7 @@ class GnssVisibilityControl {
         return new Notification.Builder(context, SystemNotificationChannels.NETWORK_ALERTS)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_gps_on)
                 .setWhen(0)
-                .setOngoing(true)
+                .setOngoing(false)
                 .setAutoCancel(true)
                 .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color))

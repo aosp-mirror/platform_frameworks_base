@@ -229,22 +229,22 @@ public class PermissionMonitor {
     }
 
     @VisibleForTesting
-    boolean hasPermission(PackageInfo app, String permission) {
-        if (app.requestedPermissions != null) {
-            for (String p : app.requestedPermissions) {
-                if (permission.equals(p)) {
-                    return true;
-                }
-            }
+    boolean hasPermission(@NonNull final PackageInfo app, @NonNull final String permission) {
+        if (app.requestedPermissions == null || app.requestedPermissionsFlags == null) {
+            return false;
         }
-        return false;
+        final int index = ArrayUtils.indexOf(app.requestedPermissions, permission);
+        if (index < 0 || index >= app.requestedPermissionsFlags.length) return false;
+        return (app.requestedPermissionsFlags[index] & REQUESTED_PERMISSION_GRANTED) != 0;
     }
 
-    private boolean hasNetworkPermission(PackageInfo app) {
+    @VisibleForTesting
+    boolean hasNetworkPermission(@NonNull final PackageInfo app) {
         return hasPermission(app, CHANGE_NETWORK_STATE);
     }
 
-    private boolean hasRestrictedNetworkPermission(PackageInfo app) {
+    @VisibleForTesting
+    boolean hasRestrictedNetworkPermission(@NonNull final PackageInfo app) {
         // TODO : remove this check in the future(b/31479477). All apps should just
         // request the appropriate permission for their use case since android Q.
         if (app.applicationInfo != null) {
@@ -260,33 +260,18 @@ public class PermissionMonitor {
             }
         }
         return hasPermission(app, CONNECTIVITY_INTERNAL)
+                || hasPermission(app, NETWORK_STACK)
                 || hasPermission(app, CONNECTIVITY_USE_RESTRICTED_NETWORKS);
     }
 
-    private boolean hasUseBackgroundNetworksPermission(PackageInfo app) {
-        // This function defines what it means to hold the permission to use
-        // background networks.
-        return hasPermission(app, CHANGE_NETWORK_STATE)
-                || hasPermission(app, NETWORK_STACK)
-                || hasRestrictedNetworkPermission(app);
-    }
-
-    public boolean hasUseBackgroundNetworksPermission(int uid) {
-        final String[] names = mPackageManager.getPackagesForUid(uid);
-        if (null == names || names.length == 0) return false;
-        try {
-            // Only using the first package name. There may be multiple names if multiple
-            // apps share the same UID, but in that case they also share permissions so
-            // querying with any of the names will return the same results.
-            int userId = UserHandle.getUserId(uid);
-            final PackageInfo app = mPackageManager.getPackageInfoAsUser(
-                    names[0], GET_PERMISSIONS, userId);
-            return hasUseBackgroundNetworksPermission(app);
-        } catch (NameNotFoundException e) {
-            // App not found.
-            loge("NameNotFoundException " + names[0], e);
-            return false;
-        }
+    /** Returns whether the given uid has using background network permission. */
+    public synchronized boolean hasUseBackgroundNetworksPermission(final int uid) {
+        // Apps with any of the CHANGE_NETWORK_STATE, NETWORK_STACK, CONNECTIVITY_INTERNAL or
+        // CONNECTIVITY_USE_RESTRICTED_NETWORKS permission has the permission to use background
+        // networks. mApps contains the result of checks for both hasNetworkPermission and
+        // hasRestrictedNetworkPermission. If uid is in the mApps list that means uid has one of
+        // permissions at least.
+        return mApps.containsKey(uid);
     }
 
     private int[] toIntArray(Collection<Integer> list) {

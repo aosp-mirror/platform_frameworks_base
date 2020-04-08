@@ -34,6 +34,7 @@ import android.util.Slog;
 
 import com.android.server.accessibility.AccessibilityManagerService.SecurityPolicy;
 import com.android.server.accessibility.AccessibilityManagerService.UserState;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.lang.ref.WeakReference;
@@ -58,6 +59,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     */
     final WeakReference<UserState> mUserStateWeakReference;
     final Intent mIntent;
+    final ActivityTaskManagerInternal mActivityTaskManagerService;
 
     private final Handler mMainHandler;
 
@@ -69,7 +71,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
             Object lock, SecurityPolicy securityPolicy, SystemSupport systemSupport,
             WindowManagerInternal windowManagerInternal,
-            GlobalActionPerformer globalActionPerfomer) {
+            GlobalActionPerformer globalActionPerfomer,
+            ActivityTaskManagerInternal activityTaskManagerService) {
         super(context, componentName, accessibilityServiceInfo, id, mainHandler, lock,
                 securityPolicy, systemSupport, windowManagerInternal, globalActionPerfomer);
         mUserStateWeakReference = new WeakReference<UserState>(userState);
@@ -77,6 +80,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         mMainHandler = mainHandler;
         mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                 com.android.internal.R.string.accessibility_binding_label);
+        mActivityTaskManagerService = activityTaskManagerService;
         final long identity = Binder.clearCallingIdentity();
         try {
             mIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, mSystemSupport.getPendingIntentActivity(
@@ -103,6 +107,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+        mActivityTaskManagerService.setAllowAppSwitches(mComponentName.flattenToString(),
+                mAccessibilityServiceInfo.getResolveInfo().serviceInfo.applicationInfo.uid,
+                userState.mUserId);
     }
 
     public void unbindLocked() {
@@ -111,6 +118,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         if (userState == null) return;
         userState.removeServiceLocked(this);
         mSystemSupport.getMagnificationController().resetAllIfNeeded(mId);
+        // Set uid to -1 to clear allowing app switches.
+        mActivityTaskManagerService.setAllowAppSwitches(mComponentName.flattenToString(),
+                /* uid= */ -1, userState.mUserId);
         resetLocked();
     }
 
@@ -208,6 +218,12 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
         binderDied();
+        UserState userState = mUserStateWeakReference.get();
+        if (userState != null) {
+            // Set uid to -1 to clear allowing app switches.
+            mActivityTaskManagerService.setAllowAppSwitches(mComponentName.flattenToString(),
+                    /* uid= */ -1, userState.mUserId);
+        }
     }
 
     @Override

@@ -641,6 +641,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
                 GlobalSettingsProto.Euicc.FACTORY_RESET_TIMEOUT_MILLIS);
+        dumpSetting(s, p,
+                Settings.Global.EUICC_UNSUPPORTED_COUNTRIES,
+                GlobalSettingsProto.Euicc.UNSUPPORTED_COUNTRIES);
         p.end(euiccToken);
 
         dumpSetting(s, p,
@@ -1969,6 +1972,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.SKIP_TOUCH_COUNT,
                 SecureSettingsProto.Gesture.SKIP_TOUCH_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.AWARE_TAP_PAUSE_GESTURE_COUNT,
+                SecureSettingsProto.Gesture.AWARE_TAP_PAUSE_GESTURE_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.AWARE_TAP_PAUSE_TOUCH_COUNT,
+                SecureSettingsProto.Gesture.AWARE_TAP_PAUSE_TOUCH_COUNT);
         p.end(gestureToken);
 
         dumpSetting(s, p,

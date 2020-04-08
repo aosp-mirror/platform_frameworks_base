@@ -234,7 +234,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         }
 
         final boolean scrimsOccludingWallpaper =
-                state.scrimsVisibility == ScrimController.OPAQUE;
+                state.scrimsVisibility == ScrimController.VISIBILITY_FULLY_OPAQUE;
         final boolean keyguardOrAod = state.keyguardShowing
                 || (state.dozing && mDozeParameters.getAlwaysOn());
         if (keyguardOrAod && !state.backdropShowing && !scrimsOccludingWallpaper) {
@@ -320,7 +320,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
                 || state.headsUpShowing || state.bubblesShowing
-                || state.scrimsVisibility != ScrimController.TRANSPARENT);
+                || state.scrimsVisibility != ScrimController.VISIBILITY_FULLY_TRANSPARENT);
     }
 
     private void applyFitsSystemWindows(State state) {

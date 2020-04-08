@@ -67,7 +67,7 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
     @Mock private ScreenDecorations mMockScreenDecorations;
     @Mock private AssistUtils mMockAssistUtils;
     @Mock private Handler mMockHandler;
-    @Mock private PhenotypeHelper mMockPhenotypeHelper;
+    @Mock private DeviceConfigHelper mMockDeviceConfigHelper;
     @Mock private AssistHandleOffBehavior mMockOffBehavior;
     @Mock private AssistHandleLikeHomeBehavior mMockLikeHomeBehavior;
     @Mock private AssistHandleReminderExpBehavior mMockReminderExpBehavior;
@@ -97,7 +97,7 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
                         mMockAssistUtils,
                         mMockHandler,
                         () -> mMockScreenDecorations,
-                        mMockPhenotypeHelper,
+                        mMockDeviceConfigHelper,
                         behaviorMap,
                         mMockNavigationModeController,
                         mMockDumpController);
@@ -216,7 +216,7 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
     public void showAndGo_doesNothingIfRecentlyHidden() {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
-        when(mMockPhenotypeHelper.getLong(
+        when(mMockDeviceConfigHelper.getLong(
                 eq(SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOWN_FREQUENCY_THRESHOLD_MS),
                 anyLong())).thenReturn(10000L);
         mAssistHandleBehaviorController.showAndGo();
@@ -297,7 +297,7 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
     public void showAndGoDelayed_doesNothingIfRecentlyHidden() {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
-        when(mMockPhenotypeHelper.getLong(
+        when(mMockDeviceConfigHelper.getLong(
                 eq(SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOWN_FREQUENCY_THRESHOLD_MS),
                 anyLong())).thenReturn(10000L);
         mAssistHandleBehaviorController.showAndGo();

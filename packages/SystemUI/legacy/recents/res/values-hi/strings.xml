@@ -19,25 +19,25 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_desc_recent_apps" msgid="2427210347871321373">"खास जानकारी."</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="2355882496933479534">"<xliff:g id="APP">%s</xliff:g> को खारिज करें."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="4816790842084268400">"<xliff:g id="APP">%s</xliff:g> खारिज किया गया."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="5693205751863608046">"हाल के सभी ऐप्लिकेशन खारिज कर दिए गए हैं."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="3406797323476801016">"<xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन की जानकारी खोलें."</string>
-    <string name="accessibility_recents_item_launched" msgid="4519918148638221791">"<xliff:g id="APP">%s</xliff:g> शुरू किया जा रहा है."</string>
-    <string name="recents_empty_message" msgid="7967713254531861311">"हाल का कोई आइटम नहीं है"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="1850214584987361375">"आपने सब कुछ हटा दिया है"</string>
-    <string name="recents_app_info_button_label" msgid="8732926607391786762">"ऐप्लिकेशन की जानकारी"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6087750201863853365">"स्क्रीन पिन करना"</string>
-    <string name="recents_search_bar_label" msgid="638132045925945941">"खोजें"</string>
-    <string name="recents_launch_error_message" msgid="9107963563503438012">"<xliff:g id="APP">%s</xliff:g> शुरू नहीं किया जा सका."</string>
-    <string name="recents_launch_disabled_message" msgid="826461671965217243">"<xliff:g id="APP">%s</xliff:g> को सुरक्षित-मोड में बंद किया गया."</string>
-    <string name="recents_stack_action_button_label" msgid="1974273390109881497">"सभी ऐप्लिकेशन बंद करें"</string>
-    <string name="recents_drag_hint_message" msgid="610417221848280136">"स्क्रीन को दो हिस्सों में बाँटने (स्प्लिट स्क्रीन) के लिए यहां से खींचें और छोड़ें"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="488987777874979435">"क्षैतिज रूप से दो हिस्सों में बाँटें (स्प्लिट करें)"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="2498375296906391117">"लम्बवत रूप से दो हिस्सों में बाँटें (स्प्लिट करें)"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="7368405969130304811">"अपने मुताबिक दो हिस्सों में बाँटें (स्प्लिट स्क्रीन करें)"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="8773505308411722524">"ऊपर की ओर दूसरी स्क्रीन बनाएं"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="722594718192007972">"बाईं ओर दूसरी स्क्रीन बनाएं"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="2479764030969301514">"दाईं ओर दूसरी स्क्रीन बनाएं"</string>
+    <string name="accessibility_desc_recent_apps" msgid="7556662260274154402">"खास जानकारी."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="1987979391731836442">"<xliff:g id="APP">%s</xliff:g> को खारिज करें."</string>
+    <string name="accessibility_recents_item_dismissed" msgid="99149432850273747">"<xliff:g id="APP">%s</xliff:g> खारिज किया गया."</string>
+    <string name="accessibility_recents_all_items_dismissed" msgid="2584965907377043255">"हाल के सभी ऐप्लिकेशन खारिज कर दिए गए हैं."</string>
+    <string name="accessibility_recents_item_open_app_info" msgid="5843409407745673280">"<xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन की जानकारी खोलें."</string>
+    <string name="accessibility_recents_item_launched" msgid="2439069760172103351">"<xliff:g id="APP">%s</xliff:g> शुरू किया जा रहा है."</string>
+    <string name="recents_empty_message" msgid="4718114148356836203">"हाल का कोई आइटम नहीं है"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2873215505812268822">"आपने सब कुछ हटा दिया है"</string>
+    <string name="recents_app_info_button_label" msgid="5371319329151716224">"ऐप्लिकेशन की जानकारी"</string>
+    <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"स्क्रीन पिन करना"</string>
+    <string name="recents_search_bar_label" msgid="1910412649656301014">"खोजें"</string>
+    <string name="recents_launch_error_message" msgid="8622817255751191462">"<xliff:g id="APP">%s</xliff:g> शुरू नहीं किया जा सका."</string>
+    <string name="recents_launch_disabled_message" msgid="1055364973720665718">"<xliff:g id="APP">%s</xliff:g> को सुरक्षित-मोड में बंद किया गया."</string>
+    <string name="recents_stack_action_button_label" msgid="7396636872618564201">"सभी ऐप्लिकेशन बंद करें"</string>
+    <string name="recents_drag_hint_message" msgid="3309424039418402577">"स्क्रीन को दो हिस्सों में बाँटने (स्प्लिट स्क्रीन) के लिए यहां से खींचें और छोड़ें"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="3361339364058788960">"क्षैतिज रूप से दो हिस्सों में बाँटें (स्प्लिट करें)"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="5525527159623478768">"लम्बवत रूप से दो हिस्सों में बाँटें (स्प्लिट करें)"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="8749946272357062148">"अपने मुताबिक दो हिस्सों में बाँटें (स्प्लिट स्क्रीन करें)"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="4034331660613790457">"ऊपर की ओर दूसरी स्क्रीन बनाएं"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="6523694635909067802">"बाईं ओर दूसरी स्क्रीन बनाएं"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="559141375304415400">"दाईं ओर दूसरी स्क्रीन बनाएं"</string>
 </resources>
