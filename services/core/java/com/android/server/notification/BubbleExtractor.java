@@ -16,6 +16,7 @@
 package com.android.server.notification;
 
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
@@ -89,9 +90,10 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             record.setAllowBubble(recordChannel.canBubble());
         }
 
-        final boolean fulfillsPolicy = record.isConversation()
+        final boolean fulfillsPolicy = record.canBubble()
+                && record.isConversation()
                 && !mActivityManager.isLowRamDevice()
-                && record.canBubble();
+                && (record.getNotification().flags & FLAG_FOREGROUND_SERVICE) == 0;
         final boolean applyFlag = fulfillsPolicy && canPresentAsBubble(record);
         if (applyFlag) {
             record.getNotification().flags |= FLAG_BUBBLE;
