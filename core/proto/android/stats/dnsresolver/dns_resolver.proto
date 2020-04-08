@@ -184,6 +184,8 @@ enum NetworkType {
     NT_BLUETOOTH_VPN = 10;
     // Indicates this network uses an Ethernet+VPN transport.
     NT_ETHERNET_VPN = 11;
+    // Indicates this network uses a Wi-Fi+Cellular+VPN transport.
+    NT_WIFI_CELLULAR_VPN = 12;
 }
 
 enum CacheStatus{
