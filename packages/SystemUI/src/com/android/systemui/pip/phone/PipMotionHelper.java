@@ -16,12 +16,10 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager.StackInfo;
 import android.app.IActivityTaskManager;
 import android.content.Context;
 import android.graphics.Rect;
@@ -169,15 +167,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     void synchronizePinnedStackBounds() {
         cancelAnimations();
-        try {
-            StackInfo stackInfo = mActivityTaskManager.getStackInfo(
-                    WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
-            if (stackInfo != null) {
-                mBounds.set(stackInfo.bounds);
-            }
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to get pinned stack bounds");
-        }
+        mBounds.set(mPipTaskOrganizer.getLastReportedBounds());
     }
 
     /**
