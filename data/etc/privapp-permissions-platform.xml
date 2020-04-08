@@ -137,6 +137,7 @@ applications that come with the platform
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
+        <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
