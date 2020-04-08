@@ -43,6 +43,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
@@ -71,6 +72,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
@@ -1905,6 +1907,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                 mGlobalActionsLayout);
                     })
                     .start();
+            ViewGroup root = (ViewGroup) mGlobalActionsLayout.getRootView();
+            root.setOnApplyWindowInsetsListener((v, windowInsets) -> {
+                if (mControlsUiController != null) {
+                    Insets insets = windowInsets.getInsets(WindowInsets.Type.all());
+                    root.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                }
+                return WindowInsets.CONSUMED;
+            });
             if (mControlsUiController != null) {
                 mControlsUiController.show(mControlsView);
             }
