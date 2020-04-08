@@ -36,6 +36,8 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -177,17 +179,8 @@ public final class UiccAccessRule implements Parcelable {
      *     {@link TelephonyManager#CARRIER_PRIVILEGE_STATUS_NO_ACCESS}.
      */
     public int getCarrierPrivilegeStatus(PackageInfo packageInfo) {
-        Signature[] signatures = packageInfo.signatures;
-        SigningInfo sInfo = packageInfo.signingInfo;
-
-        if (sInfo != null) {
-            signatures = sInfo.getSigningCertificateHistory();
-            if (sInfo.hasMultipleSigners()) {
-                signatures = sInfo.getApkContentsSigners();
-            }
-        }
-
-        if (signatures == null || signatures.length == 0) {
+        List<Signature> signatures = getSignatures(packageInfo);
+        if (signatures.isEmpty()) {
             throw new IllegalArgumentException(
                     "Must use GET_SIGNING_CERTIFICATES when looking up package info");
         }
@@ -263,9 +256,29 @@ public final class UiccAccessRule implements Parcelable {
     }
 
     /**
-     * Converts a Signature into a Certificate hash usable for comparison.
+     * Gets all of the Signatures from the given PackageInfo.
+     * @hide
      */
-    private static byte[] getCertHash(Signature signature, String algo) {
+    @NonNull
+    public static List<Signature> getSignatures(PackageInfo packageInfo) {
+        Signature[] signatures = packageInfo.signatures;
+        SigningInfo signingInfo = packageInfo.signingInfo;
+
+        if (signingInfo != null) {
+            signatures = signingInfo.getSigningCertificateHistory();
+            if (signingInfo.hasMultipleSigners()) {
+                signatures = signingInfo.getApkContentsSigners();
+            }
+        }
+
+        return (signatures == null) ? Collections.EMPTY_LIST : Arrays.asList(signatures);
+    }
+
+    /**
+     * Converts a Signature into a Certificate hash usable for comparison.
+     * @hide
+     */
+    public static byte[] getCertHash(Signature signature, String algo) {
         try {
             MessageDigest md = MessageDigest.getInstance(algo);
             return md.digest(signature.toByteArray());
