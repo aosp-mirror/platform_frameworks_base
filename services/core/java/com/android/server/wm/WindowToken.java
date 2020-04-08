@@ -535,8 +535,8 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     @Override
-    void updateSurfacePosition() {
-        super.updateSurfacePosition();
+    void updateSurfacePosition(SurfaceControl.Transaction t) {
+        super.updateSurfacePosition(t);
         if (isFixedRotationTransforming()) {
             // The window is layouted in a simulated rotated display but the real display hasn't
             // rotated, so here transforms its surface to fit in the real display.
