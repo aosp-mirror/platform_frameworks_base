@@ -757,7 +757,11 @@ public class ZygoteInit {
             Zygote.applyDebuggerSystemProperty(parsedArgs);
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
-            if (Zygote.nativeSupportsTaggedPointers()) {
+            if (Zygote.nativeSupportsMemoryTagging()) {
+                /* The system server is more privileged than regular app processes, so it has async
+                 * tag checks enabled on hardware that supports memory tagging. */
+                parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_ASYNC;
+            } else if (Zygote.nativeSupportsTaggedPointers()) {
                 /* Enable pointer tagging in the system server. Hardware support for this is present
                  * in all ARMv8 CPUs. */
                 parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
