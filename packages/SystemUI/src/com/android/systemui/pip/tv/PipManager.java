@@ -334,6 +334,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
      * Shows the picture-in-picture menu if an activity is in picture-in-picture mode.
      */
     public void showPictureInPictureMenu() {
+        if (DEBUG) Log.d(TAG, "showPictureInPictureMenu(), current state=" + getStateDescription());
+
         if (getState() == STATE_PIP) {
             resizePinnedStack(STATE_PIP_MENU);
         }
@@ -343,10 +345,18 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
      * Closes PIP (PIPed activity and PIP system UI).
      */
     public void closePip() {
+        if (DEBUG) Log.d(TAG, "closePip(), current state=" + getStateDescription());
+
         closePipInternal(true);
     }
 
     private void closePipInternal(boolean removePipStack) {
+        if (DEBUG) {
+            Log.d(TAG,
+                    "closePipInternal() removePipStack=" + removePipStack + ", current state="
+                            + getStateDescription());
+        }
+
         mState = STATE_NO_PIP;
         mPipTaskId = TASK_ID_NO_PIP;
         mPipMediaController = null;
@@ -371,6 +381,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
      * Moves the PIPed activity to the fullscreen and closes PIP system UI.
      */
     void movePipToFullscreen() {
+        if (DEBUG) Log.d(TAG, "movePipToFullscreen(), current state=" + getStateDescription());
+
         mPipTaskId = TASK_ID_NO_PIP;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onMoveToFullscreen();
@@ -386,6 +398,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     public void suspendPipResizing(int reason) {
         if (DEBUG) Log.d(TAG,
                 "suspendPipResizing() reason=" + reason + " callers=" + Debug.getCallers(2));
+
         mSuspendPipResizingReason |= reason;
     }
 
@@ -408,7 +421,11 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
      * @param state In Pip state also used to determine the new size for the Pip.
      */
     void resizePinnedStack(int state) {
-        if (DEBUG) Log.d(TAG, "resizePinnedStack() state=" + state, new Exception());
+        if (DEBUG) {
+            Log.d(TAG, "resizePinnedStack() state=" + stateToName(state) + ", current state="
+                    + getStateDescription(), new Exception());
+        }
+
         boolean wasStateNoPip = (mState == STATE_NO_PIP);
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onPipResizeAboutToStart();
@@ -418,7 +435,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             if (DEBUG) Log.d(TAG, "resizePinnedStack() deferring"
                     + " mSuspendPipResizingReason=" + mSuspendPipResizingReason
                     + " mResumeResizePinnedStackRunnableState="
-                    + mResumeResizePinnedStackRunnableState);
+                    + stateToName(mResumeResizePinnedStackRunnableState));
             return;
         }
         mState = state;
@@ -458,7 +475,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
      * stack to the centered PIP bound {@link R.config_centeredPictureInPictureBounds}.
      */
     private void showPipMenu() {
-        if (DEBUG) Log.d(TAG, "showPipMenu()");
+        if (DEBUG) Log.d(TAG, "showPipMenu(), current state=" + getStateDescription());
+
         mState = STATE_PIP_MENU;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onShowPipMenu();
@@ -712,6 +730,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     private void onPipTransitionFinishedOrCanceled() {
         if (DEBUG) Log.d(TAG, "onPipTransitionFinishedOrCanceled()");
+
         if (getState() == STATE_PIP_MENU) {
             showPipMenu();
         }
@@ -752,5 +771,29 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         Dependency.get(UiOffloadThread.class).execute(() -> {
             WindowManagerWrapper.getInstance().setPipVisibility(visible);
         });
+    }
+
+    private String getStateDescription() {
+        if (mSuspendPipResizingReason == 0) {
+            return stateToName(mState);
+        }
+        return stateToName(mResumeResizePinnedStackRunnableState) + " (while " + stateToName(mState)
+                + " is suspended)";
+    }
+
+    private static String stateToName(int state) {
+        switch (state) {
+            case STATE_NO_PIP:
+                return "NO_PIP";
+
+            case STATE_PIP:
+                return "PIP";
+
+            case STATE_PIP_MENU:
+                return "PIP_MENU";
+
+            default:
+                return "UNKNOWN(" + state + ")";
+        }
     }
 }
