@@ -719,13 +719,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     /**
-     * Tell the stack of bubbles to expand.
-     */
-    public void expandStack() {
-        mBubbleData.setExpanded(true);
-    }
-
-    /**
      * Tell the stack of bubbles to collapse.
      */
     public void collapseStack() {
@@ -753,12 +746,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         return (isSummary && isSuppressedSummary) || isBubbleAndSuppressed;
     }
 
-    @VisibleForTesting
-    void selectBubble(String key) {
-        Bubble bubble = mBubbleData.getBubbleWithKey(key);
-        mBubbleData.setSelectedBubble(bubble);
-    }
-
     void promoteBubbleFromOverflow(Bubble bubble) {
         bubble.setInflateSynchronously(mInflateSynchronously);
         mBubbleData.promoteBubbleFromOverflow(bubble, mStackView, mBubbleIconFactory);
@@ -775,13 +762,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             mBubbleData.setSelectedBubble(bubble);
             mBubbleData.setExpanded(true);
         }
-    }
-
-    /**
-     * Tell the stack of bubbles to be dismissed, this will remove all of the bubbles in the stack.
-     */
-    void dismissStack(@DismissReason int reason) {
-        mBubbleData.dismissAll(reason);
     }
 
     /**
