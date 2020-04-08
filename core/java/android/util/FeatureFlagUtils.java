@@ -42,8 +42,6 @@ public class FeatureFlagUtils {
     public static final String DYNAMIC_SYSTEM = "settings_dynamic_system";
     public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
     public static final String SETTINGS_FUSE_FLAG = "settings_fuse";
-    public static final String NOTIF_CONVO_BYPASS_SHORTCUT_REQ =
-            "settings_notif_convo_bypass_shortcut_req";
     /** @hide */
     public static final String SETTINGS_DO_NOT_RESTORE_PRESERVED =
             "settings_do_not_restore_preserved";
@@ -66,7 +64,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_WIFITRACKER2, "true");
         DEFAULT_FLAGS.put("settings_controller_loading_enhancement", "false");
         DEFAULT_FLAGS.put("settings_conditionals", "false");
-        DEFAULT_FLAGS.put(NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
         // This flags guards a feature introduced in R and will be removed in the next release
         // (b/148367230).
         DEFAULT_FLAGS.put(SETTINGS_DO_NOT_RESTORE_PRESERVED, "true");

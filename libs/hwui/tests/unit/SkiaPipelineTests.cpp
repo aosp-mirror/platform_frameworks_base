@@ -403,3 +403,40 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
     renderThread.destroyRenderingContext();
     EXPECT_FALSE(pipeline->isSurfaceReady());
 }
+
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, pictureCallback) {
+    // create a pipeline and add a picture callback
+    auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
+    int callbackCount = 0;
+    pipeline->setPictureCapturedCallback(
+            [&callbackCount](sk_sp<SkPicture>&& picture) { callbackCount += 1; });
+
+    // create basic red frame and render it
+    auto redNode = TestUtils::createSkiaNode(
+            0, 0, 1, 1, [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
+                redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
+            });
+    LayerUpdateQueue layerUpdateQueue;
+    SkRect dirty = SkRectMakeLargest();
+    std::vector<sp<RenderNode>> renderNodes;
+    renderNodes.push_back(redNode);
+    bool opaque = true;
+    android::uirenderer::Rect contentDrawBounds(0, 0, 1, 1);
+    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+                          SkMatrix::I());
+
+    // verify the callback was called
+    EXPECT_EQ(1, callbackCount);
+
+    // render a second frame and check the callback count
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+                          SkMatrix::I());
+    EXPECT_EQ(2, callbackCount);
+
+    // unset the callback, render another frame, check callback was not invoked
+    pipeline->setPictureCapturedCallback(nullptr);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+                          SkMatrix::I());
+    EXPECT_EQ(2, callbackCount);
+}

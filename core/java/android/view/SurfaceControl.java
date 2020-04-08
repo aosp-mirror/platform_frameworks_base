@@ -32,6 +32,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
@@ -215,6 +216,9 @@ public final class SurfaceControl implements Parcelable {
 
     private static native void nativeSetFrameRate(
             long transactionObj, long nativeObject, float frameRate, int compatibility);
+
+    private static native long nativeAcquireFrameRateFlexibilityToken();
+    private static native void nativeReleaseFrameRateFlexibilityToken(long token);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -2867,5 +2871,25 @@ public final class SurfaceControl implements Parcelable {
                         "Unlocked access to synchronized SurfaceControl.Transaction");
             }
         }
+    }
+
+    /**
+     * Acquire a frame rate flexibility token, which allows surface flinger to freely switch display
+     * frame rates. This is used by CTS tests to put the device in a consistent state. See
+     * ISurfaceComposer::acquireFrameRateFlexibilityToken().
+     * @hide
+     */
+    @TestApi
+    public static long acquireFrameRateFlexibilityToken() {
+        return nativeAcquireFrameRateFlexibilityToken();
+    }
+
+    /**
+     * Release a frame rate flexibility token.
+     * @hide
+     */
+    @TestApi
+    public static void releaseFrameRateFlexibilityToken(long token) {
+        nativeReleaseFrameRateFlexibilityToken(token);
     }
 }

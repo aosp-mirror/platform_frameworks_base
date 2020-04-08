@@ -99,7 +99,7 @@ class InsetsPolicy {
     }
 
     private void updateHideNavInputEventReceiver() {
-        mPolicy.updateHideNavInputEventReceiver(!isHidden(ITYPE_NAVIGATION_BAR),
+        mPolicy.updateHideNavInputEventReceiver(mPolicy.isNavigationBarRequestedVisible(),
                 mFocusedWin != null
                         && mFocusedWin.mAttrs.insetsFlags.behavior != BEHAVIOR_SHOW_BARS_BY_TOUCH);
     }
@@ -304,7 +304,10 @@ class InsetsPolicy {
         // We need to force system bars when the docked stack is visible, when the freeform stack
         // is visible but also when we are resizing for the transitions when docked stack
         // visibility changes.
-        return isDockedStackVisible || isFreeformStackVisible || isResizing;
+        return isDockedStackVisible
+                || isFreeformStackVisible
+                || isResizing
+                || mPolicy.getForceShowSystemBars();
     }
 
     @VisibleForTesting

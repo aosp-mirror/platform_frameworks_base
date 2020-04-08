@@ -1504,6 +1504,13 @@ package android.media {
     ctor public AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, String);
   }
 
+  public class AudioSystem {
+    method public static float getMasterBalance();
+    method public static final int getNumStreamTypes();
+    method public static int setMasterBalance(float);
+    field public static final int STREAM_DEFAULT = -1; // 0xffffffff
+  }
+
   public static final class AudioTrack.MetricsConstants {
     field public static final String ATTRIBUTES = "android.media.audiotrack.attributes";
     field public static final String CHANNEL_MASK = "android.media.audiotrack.channelMask";
@@ -4707,7 +4714,6 @@ package android.util {
     field public static final String FFLAG_OVERRIDE_PREFIX = "sys.fflag.override.";
     field public static final String FFLAG_PREFIX = "sys.fflag.";
     field public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
-    field public static final String NOTIF_CONVO_BYPASS_SHORTCUT_REQ = "settings_notif_convo_bypass_shortcut_req";
     field public static final String PERSIST_PREFIX = "persist.sys.fflag.override.";
     field public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
     field public static final String SEAMLESS_TRANSFER = "settings_seamless_transfer";
@@ -4808,7 +4814,14 @@ package android.view {
 
   public final class Display {
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
+    method public int getType();
     method public boolean hasAccess(int);
+    field public static final int TYPE_EXTERNAL = 2; // 0x2
+    field public static final int TYPE_INTERNAL = 1; // 0x1
+    field public static final int TYPE_OVERLAY = 4; // 0x4
+    field public static final int TYPE_UNKNOWN = 0; // 0x0
+    field public static final int TYPE_VIRTUAL = 5; // 0x5
+    field public static final int TYPE_WIFI = 3; // 0x3
   }
 
   public class FocusFinder {
@@ -4844,6 +4857,11 @@ package android.view {
 
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD}) public @interface RemotableViewMethod {
     method public abstract String asyncImpl() default "";
+  }
+
+  public final class SurfaceControl implements android.os.Parcelable {
+    method public static long acquireFrameRateFlexibilityToken();
+    method public static void releaseFrameRateFlexibilityToken(long);
   }
 
   public class SurfaceControlViewHost {

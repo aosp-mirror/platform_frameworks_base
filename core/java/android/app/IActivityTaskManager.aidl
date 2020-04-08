@@ -299,7 +299,6 @@ interface IActivityTaskManager {
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
 
     void suppressResizeConfigChanges(boolean suppress);
-    void moveTasksToFullscreenStack(int fromStackId, boolean onTop);
     boolean moveTopActivityToPinnedStack(int stackId, in Rect bounds);
     boolean isInMultiWindowMode(in IBinder token);
     boolean isInPictureInPictureMode(in IBinder token);

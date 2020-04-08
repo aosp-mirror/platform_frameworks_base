@@ -21,6 +21,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.LAST_TYPE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -558,7 +559,8 @@ public final class ViewRootImpl implements ViewParent,
     final DisplayCutout.ParcelableWrapper mPendingDisplayCutout =
             new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
     boolean mPendingAlwaysConsumeSystemBars;
-    private InsetsState mTempInsets = new InsetsState();
+    private final InsetsState mTempInsets = new InsetsState();
+    private final InsetsSourceControl[] mTempControls = new InsetsSourceControl[LAST_TYPE + 1];
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -1003,7 +1005,7 @@ public final class ViewRootImpl implements ViewParent,
                             getHostVisibility(), mDisplay.getDisplayId(), mTmpFrame,
                             mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
                             mAttachInfo.mDisplayCutout, inputChannel,
-                            mTempInsets);
+                            mTempInsets, mTempControls);
                     setFrame(mTmpFrame);
                 } catch (RemoteException e) {
                     mAdded = false;
@@ -1028,6 +1030,7 @@ public final class ViewRootImpl implements ViewParent,
                         (res & WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS) != 0;
                 mPendingAlwaysConsumeSystemBars = mAttachInfo.mAlwaysConsumeSystemBars;
                 mInsetsController.onStateChanged(mTempInsets);
+                mInsetsController.onControlsChanged(mTempControls);
                 if (DEBUG_LAYOUT) Log.v(mTag, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
                     mAttachInfo.mRootView = null;
@@ -7356,7 +7359,7 @@ public final class ViewRootImpl implements ViewParent,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrame, mTmpRect, mTmpRect, mTmpRect, mPendingBackDropFrame,
                 mPendingDisplayCutout, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
-                mSurfaceSize, mBlastSurfaceControl);
+                mTempControls, mSurfaceSize, mBlastSurfaceControl);
         if (mSurfaceControl.isValid()) {
             if (!mUseBLASTAdapter) {
                 mSurface.copyFrom(mSurfaceControl);
@@ -7386,6 +7389,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         setFrame(mTmpFrame);
         mInsetsController.onStateChanged(mTempInsets);
+        mInsetsController.onControlsChanged(mTempControls);
         return relayoutResult;
     }
 
