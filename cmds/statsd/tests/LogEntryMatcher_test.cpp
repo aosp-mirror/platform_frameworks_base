@@ -48,15 +48,9 @@ void makeIntLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t tim
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
-
     AStatsEvent_writeInt32(statsEvent, value);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 void makeFloatLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
@@ -64,15 +58,9 @@ void makeFloatLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t t
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
-
     AStatsEvent_writeFloat(statsEvent, floatValue);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 void makeStringLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
@@ -80,15 +68,9 @@ void makeStringLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t 
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
-
     AStatsEvent_writeString(statsEvent, name.c_str());
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 void makeIntStringLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
@@ -99,13 +81,8 @@ void makeIntStringLogEvent(LogEvent* logEvent, const int32_t atomId, const int64
 
     AStatsEvent_writeInt32(statsEvent, value);
     AStatsEvent_writeString(statsEvent, name.c_str());
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 void makeAttributionLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
@@ -115,22 +92,10 @@ void makeAttributionLogEvent(LogEvent* logEvent, const int32_t atomId, const int
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
 
-    vector<const char*> cTags(attributionTags.size());
-    for (int i = 0; i < cTags.size(); i++) {
-        cTags[i] = attributionTags[i].c_str();
-    }
-
-    AStatsEvent_writeAttributionChain(statsEvent,
-                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
-                                      cTags.data(), attributionUids.size());
+    writeAttribution(statsEvent, attributionUids, attributionTags);
     AStatsEvent_writeString(statsEvent, name.c_str());
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 void makeBoolLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
@@ -141,13 +106,8 @@ void makeBoolLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t ti
 
     AStatsEvent_writeBool(statsEvent, bool1);
     AStatsEvent_writeBool(statsEvent, bool2);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 }  // anonymous namespace

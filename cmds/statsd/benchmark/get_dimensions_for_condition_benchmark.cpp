@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 #include <vector>
-#include "benchmark/benchmark.h"
+
 #include "FieldValue.h"
 #include "HashableDimensionKey.h"
+#include "benchmark/benchmark.h"
 #include "logd/LogEvent.h"
-#include "stats_log_util.h"
+#include "metric_util.h"
 #include "stats_event.h"
+#include "stats_log_util.h"
 
 namespace android {
 namespace os {
@@ -34,24 +36,13 @@ static void createLogEventAndLink(LogEvent* event, Metric2Condition *link) {
 
     std::vector<int> attributionUids = {100, 100};
     std::vector<string> attributionTags = {"LOCATION", "LOCATION"};
+    writeAttribution(statsEvent, attributionUids, attributionTags);
 
-    vector<const char*> cTags(attributionTags.size());
-    for (int i = 0; i < cTags.size(); i++) {
-        cTags[i] = attributionTags[i].c_str();
-    }
-
-    AStatsEvent_writeAttributionChain(statsEvent,
-                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
-                                      cTags.data(), attributionUids.size());
     AStatsEvent_writeFloat(statsEvent, 3.2f);
     AStatsEvent_writeString(statsEvent, "LOCATION");
     AStatsEvent_writeInt64(statsEvent, 990);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    event->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, event);
 
     link->conditionId = 1;
 

@@ -507,23 +507,26 @@ void getPartialWakelockKey(int uid, HashableDimensionKey* key) {
 }
 // END: get primary key functions
 
-shared_ptr<LogEvent> CreateTwoValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value1,
-                                            int32_t value2) {
-    AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, atomId);
-    AStatsEvent_overwriteTimestamp(statsEvent, eventTimeNs);
+void writeAttribution(AStatsEvent* statsEvent, const vector<int>& attributionUids,
+                      const vector<string>& attributionTags) {
+    vector<const char*> cTags(attributionTags.size());
+    for (int i = 0; i < cTags.size(); i++) {
+        cTags[i] = attributionTags[i].c_str();
+    }
 
-    AStatsEvent_writeInt32(statsEvent, value1);
-    AStatsEvent_writeInt32(statsEvent, value2);
+    AStatsEvent_writeAttributionChain(statsEvent,
+                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
+                                      cTags.data(), attributionUids.size());
+}
+
+void parseStatsEventToLogEvent(AStatsEvent* statsEvent, LogEvent* logEvent) {
     AStatsEvent_build(statsEvent);
 
     size_t size;
     uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
     logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
 
-    return logEvent;
+    AStatsEvent_release(statsEvent);
 }
 
 void CreateTwoValueLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeNs, int32_t value1,
@@ -534,31 +537,14 @@ void CreateTwoValueLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeNs,
 
     AStatsEvent_writeInt32(statsEvent, value1);
     AStatsEvent_writeInt32(statsEvent, value2);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
-shared_ptr<LogEvent> CreateThreeValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value1,
-                                              int32_t value2, int32_t value3) {
-    AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, atomId);
-    AStatsEvent_overwriteTimestamp(statsEvent, eventTimeNs);
-
-    AStatsEvent_writeInt32(statsEvent, value1);
-    AStatsEvent_writeInt32(statsEvent, value2);
-    AStatsEvent_writeInt32(statsEvent, value3);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+shared_ptr<LogEvent> CreateTwoValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value1,
+                                            int32_t value2) {
     shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
-
+    CreateTwoValueLogEvent(logEvent.get(), atomId, eventTimeNs, value1, value2);
     return logEvent;
 }
 
@@ -571,29 +557,14 @@ void CreateThreeValueLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeN
     AStatsEvent_writeInt32(statsEvent, value1);
     AStatsEvent_writeInt32(statsEvent, value2);
     AStatsEvent_writeInt32(statsEvent, value3);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
-shared_ptr<LogEvent> CreateRepeatedValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value) {
-    AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, atomId);
-    AStatsEvent_overwriteTimestamp(statsEvent, eventTimeNs);
-
-    AStatsEvent_writeInt32(statsEvent, value);
-    AStatsEvent_writeInt32(statsEvent, value);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+shared_ptr<LogEvent> CreateThreeValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value1,
+                                              int32_t value2, int32_t value3) {
     shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
-
+    CreateThreeValueLogEvent(logEvent.get(), atomId, eventTimeNs, value1, value2, value3);
     return logEvent;
 }
 
@@ -605,26 +576,13 @@ void CreateRepeatedValueLogEvent(LogEvent* logEvent, int atomId, int64_t eventTi
 
     AStatsEvent_writeInt32(statsEvent, value);
     AStatsEvent_writeInt32(statsEvent, value);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
-shared_ptr<LogEvent> CreateNoValuesLogEvent(int atomId, int64_t eventTimeNs) {
-    AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, atomId);
-    AStatsEvent_overwriteTimestamp(statsEvent, eventTimeNs);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+shared_ptr<LogEvent> CreateRepeatedValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value) {
     shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
-
+    CreateRepeatedValueLogEvent(logEvent.get(), atomId, eventTimeNs, value);
     return logEvent;
 }
 
@@ -632,12 +590,14 @@ void CreateNoValuesLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeNs)
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, eventTimeNs);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
+}
+
+shared_ptr<LogEvent> CreateNoValuesLogEvent(int atomId, int64_t eventTimeNs) {
+    shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
+    CreateNoValuesLogEvent(logEvent.get(), atomId, eventTimeNs);
+    return logEvent;
 }
 
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
@@ -645,16 +605,10 @@ std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, util::SCREEN_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -662,16 +616,10 @@ std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, util::BATTERY_SAVER_MODE_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-
     AStatsEvent_writeInt32(statsEvent, BatterySaverModeStateChanged::ON);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -679,16 +627,10 @@ std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, util::BATTERY_SAVER_MODE_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-
     AStatsEvent_writeInt32(statsEvent, BatterySaverModeStateChanged::OFF);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -696,16 +638,10 @@ std::unique_ptr<LogEvent> CreateBatteryStateChangedEvent(const uint64_t timestam
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, util::PLUGGED_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -713,16 +649,10 @@ std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(uint64_t timestampN
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, util::SCREEN_BRIGHTNESS_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-
     AStatsEvent_writeInt32(statsEvent, level);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -733,24 +663,12 @@ std::unique_ptr<LogEvent> CreateScheduledJobStateChangedEvent(
     AStatsEvent_setAtomId(statsEvent, util::SCHEDULED_JOB_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
-    vector<const char*> cTags(attributionTags.size());
-    for (int i = 0; i < cTags.size(); i++) {
-        cTags[i] = attributionTags[i].c_str();
-    }
-
-    AStatsEvent_writeAttributionChain(statsEvent,
-                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
-                                      cTags.data(), attributionUids.size());
+    writeAttribution(statsEvent, attributionUids, attributionTags);
     AStatsEvent_writeString(statsEvent, jobName.c_str());
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -780,25 +698,13 @@ std::unique_ptr<LogEvent> CreateWakelockStateChangedEvent(uint64_t timestampNs,
     AStatsEvent_setAtomId(statsEvent, util::WAKELOCK_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
-    vector<const char*> cTags(attributionTags.size());
-    for (int i = 0; i < cTags.size(); i++) {
-        cTags[i] = attributionTags[i].c_str();
-    }
-
-    AStatsEvent_writeAttributionChain(statsEvent,
-                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
-                                      cTags.data(), attributionUids.size());
+    writeAttribution(statsEvent, attributionUids, attributionTags);
     AStatsEvent_writeInt32(statsEvent, android::os::WakeLockLevelEnum::PARTIAL_WAKE_LOCK);
     AStatsEvent_writeString(statsEvent, wakelockName.c_str());
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -828,14 +734,9 @@ std::unique_ptr<LogEvent> CreateActivityForegroundStateChangedEvent(
     AStatsEvent_writeString(statsEvent, "pkg_name");
     AStatsEvent_writeString(statsEvent, "class_name");
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -858,24 +759,12 @@ std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(uint64_t timestampNs,
     AStatsEvent_setAtomId(statsEvent, util::SYNC_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
-    vector<const char*> cTags(attributionTags.size());
-    for (int i = 0; i < cTags.size(); i++) {
-        cTags[i] = attributionTags[i].c_str();
-    }
-
-    AStatsEvent_writeAttributionChain(statsEvent,
-                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
-                                      cTags.data(), attributionUids.size());
+    writeAttribution(statsEvent, attributionUids, attributionTags);
     AStatsEvent_writeString(statsEvent, name.c_str());
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -904,14 +793,9 @@ std::unique_ptr<LogEvent> CreateProcessLifeCycleStateChangedEvent(
     AStatsEvent_writeInt32(statsEvent, uid);
     AStatsEvent_writeString(statsEvent, "");
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -928,14 +812,9 @@ std::unique_ptr<LogEvent> CreateAppCrashOccurredEvent(uint64_t timestampNs, cons
     AStatsEvent_writeInt32(statsEvent, uid);
     AStatsEvent_writeString(statsEvent, "eventType");
     AStatsEvent_writeString(statsEvent, "processName");
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -948,14 +827,9 @@ std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(uint64_t timestampNs, in
     AStatsEvent_writeInt32(statsEvent, hostUid);
     AStatsEvent_writeInt32(statsEvent, isolatedUid);
     AStatsEvent_writeInt32(statsEvent, is_create);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -967,14 +841,9 @@ std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
 
     AStatsEvent_writeInt32(statsEvent, uid);
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -988,26 +857,14 @@ std::unique_ptr<LogEvent> CreateBleScanStateChangedEvent(uint64_t timestampNs,
     AStatsEvent_setAtomId(statsEvent, util::BLE_SCAN_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
-    vector<const char*> cTags(attributionTags.size());
-    for (int i = 0; i < cTags.size(); i++) {
-        cTags[i] = attributionTags[i].c_str();
-    }
-
-    AStatsEvent_writeAttributionChain(statsEvent,
-                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
-                                      cTags.data(), attributionUids.size());
+    writeAttribution(statsEvent, attributionUids, attributionTags);
     AStatsEvent_writeInt32(statsEvent, state);
     AStatsEvent_writeInt32(statsEvent, filtered);       // filtered
     AStatsEvent_writeInt32(statsEvent, firstMatch);     // first match
     AStatsEvent_writeInt32(statsEvent, opportunistic);  // opportunistic
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -1023,14 +880,9 @@ std::unique_ptr<LogEvent> CreateOverlayStateChangedEvent(int64_t timestampNs, co
     AStatsEvent_writeString(statsEvent, packageName.c_str());
     AStatsEvent_writeInt32(statsEvent, usingAlertWindow);
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
