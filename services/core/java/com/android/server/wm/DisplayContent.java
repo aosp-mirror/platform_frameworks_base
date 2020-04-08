@@ -3421,7 +3421,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim) {
         // Always update control target. This is needed to handle rotation.
-        updateImeControlTarget(target);
+        // We cannot set target as the control target, because mInputMethodTarget can only help
+        // decide the z-order of IME, but cannot control IME. Only the IME target reported from
+        // updateInputMethodTargetWindow can control IME.
+        updateImeControlTarget(mInputMethodControlTarget);
         if (target == mInputMethodTarget && mInputMethodTargetWaitingAnim == targetWaitingAnim) {
             return;
         }
