@@ -31,9 +31,16 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
+import android.text.BidiFormatter;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.ShortcutType;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
@@ -41,6 +48,7 @@ import com.android.internal.accessibility.common.ShortcutConstants.Accessibility
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Collection of utilities for accessibility target.
@@ -197,5 +205,57 @@ final class AccessibilityTargetHelper {
             default:
                 throw new IllegalStateException("Unexpected fragment type");
         }
+    }
+
+    static View createEnableDialogContentView(Context context,
+            AccessibilityServiceTarget target, View.OnClickListener allowListener,
+            View.OnClickListener denyListener) {
+        final LayoutInflater inflater = (LayoutInflater) context.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+
+        final View content = inflater.inflate(
+                R.layout.accessibility_enable_service_encryption_warning, /* root= */ null);
+
+        final TextView encryptionWarningView = (TextView) content.findViewById(
+                R.id.accessibility_encryption_warning);
+        if (StorageManager.isNonDefaultBlockEncrypted()) {
+            final String text = context.getString(
+                    R.string.accessibility_enable_service_encryption_warning,
+                    getServiceName(context, target.getLabel()));
+            encryptionWarningView.setText(text);
+            encryptionWarningView.setVisibility(View.VISIBLE);
+        } else {
+            encryptionWarningView.setVisibility(View.GONE);
+        }
+
+        final ImageView dialogIcon = content.findViewById(
+                R.id.accessibility_permissionDialog_icon);
+        dialogIcon.setImageDrawable(target.getIcon());
+
+        final TextView dialogTitle = content.findViewById(
+                R.id.accessibility_permissionDialog_title);
+        dialogTitle.setText(context.getString(R.string.accessibility_enable_service_title,
+                getServiceName(context, target.getLabel())));
+
+        final Button allowButton = content.findViewById(
+                R.id.accessibility_permission_enable_allow_button);
+        final Button denyButton = content.findViewById(
+                R.id.accessibility_permission_enable_deny_button);
+        allowButton.setOnClickListener((view) -> {
+            target.onCheckedChanged(/* isChecked= */ true);
+            allowListener.onClick(view);
+        });
+        denyButton.setOnClickListener((view) -> {
+            target.onCheckedChanged(/* isChecked= */ false);
+            denyListener.onClick(view);
+        });
+
+        return content;
+    }
+
+    // Gets the service name and bidi wrap it to protect from bidi side effects.
+    private static CharSequence getServiceName(Context context, CharSequence label) {
+        final Locale locale = context.getResources().getConfiguration().getLocales().get(0);
+        return BidiFormatter.getInstance(locale).unicodeWrap(label);
     }
 }

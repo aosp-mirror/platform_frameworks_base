@@ -99,29 +99,6 @@ public final class ShortcutUtils {
     }
 
     /**
-     * Returns if component id existed in one of {@link UserShortcutType} string from Settings.
-     *
-     * @param context The current context.
-     * @param shortcutTypes A combination of {@link UserShortcutType}.
-     * @param componentId The component id that need to be checked existed in Settings.
-     * @return {@code true} if component id existed in Settings.
-     */
-    public static boolean hasValuesInSettings(Context context, @UserShortcutType int shortcutTypes,
-            @NonNull String componentId) {
-        boolean exist = false;
-        if ((shortcutTypes & UserShortcutType.SOFTWARE) == UserShortcutType.SOFTWARE) {
-            exist = isComponentIdExistingInSettings(context, UserShortcutType.SOFTWARE,
-                    componentId);
-        }
-        if (((shortcutTypes & UserShortcutType.HARDWARE) == UserShortcutType.HARDWARE)) {
-            exist |= isComponentIdExistingInSettings(context, UserShortcutType.HARDWARE,
-                    componentId);
-        }
-        return exist;
-    }
-
-
-    /**
      * Returns if component id existed in Settings.
      *
      * @param context The current context.
