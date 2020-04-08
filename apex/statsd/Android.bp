@@ -67,7 +67,6 @@ cc_library_shared {
         "liblog",  // Has a stable abi - should not be copied into apex.
         "libstatssocket",
     ],
-    //TODO: is libc++_static correct?
     stl: "libc++_static",
     cflags: [
         "-Wall",
