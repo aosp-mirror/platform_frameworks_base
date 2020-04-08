@@ -611,7 +611,7 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
-    allData.push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 1, 1, 110));
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1, 110));
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs - 8});
 
@@ -656,7 +656,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
     valueProducer.prepareFirstBucket();
 
     LogEvent event1(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 1, 10);
+    CreateRepeatedValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 10);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
 
@@ -665,14 +665,14 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
     EXPECT_EQ(bucketStartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
 
     LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event2, tagId, bucketStartTimeNs + 59 * NS_PER_SEC, 1, 10);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 59 * NS_PER_SEC, 10);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     EXPECT_EQ(bucketStartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
 
     // Next value should create a new bucket.
     LogEvent event3(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event3, tagId, bucketStartTimeNs + 65 * NS_PER_SEC, 1, 10);
+    CreateRepeatedValueLogEvent(&event3, tagId, bucketStartTimeNs + 65 * NS_PER_SEC, 10);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
     EXPECT_EQ(2UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, valueProducer.mCurrentBucketStartTimeNs);
@@ -812,10 +812,10 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     valueProducer.prepareFirstBucket();
 
     LogEvent event1(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 1, 10);
+    CreateRepeatedValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 10);
 
     LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 1, 20);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 20);
 
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     // has one slice
@@ -856,7 +856,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
     valueProducer.mCondition = ConditionState::kFalse;
 
     LogEvent event1(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 1, 10);
+    CreateRepeatedValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 10);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     // has 1 slice
     EXPECT_EQ(0UL, valueProducer.mCurrentSlicedBucket.size());
@@ -864,7 +864,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
     valueProducer.onConditionChangedLocked(true, bucketStartTimeNs + 15);
 
     LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 1, 20);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 20);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
 
     // has one slice
@@ -875,7 +875,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
     EXPECT_EQ(20, curInterval.value.long_value);
 
     LogEvent event3(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event3, tagId, bucketStartTimeNs + 30, 1, 30);
+    CreateRepeatedValueLogEvent(&event3, tagId, bucketStartTimeNs + 30, 30);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
 
     // has one slice
@@ -886,7 +886,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
     valueProducer.onConditionChangedLocked(false, bucketStartTimeNs + 35);
 
     LogEvent event4(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event4, tagId, bucketStartTimeNs + 40, 1, 40);
+    CreateRepeatedValueLogEvent(&event4, tagId, bucketStartTimeNs + 40, 40);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event4);
 
     // has one slice
@@ -1195,10 +1195,10 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMin) {
     valueProducer.prepareFirstBucket();
 
     LogEvent event1(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 1, 10);
+    CreateRepeatedValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 10);
 
     LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 1, 20);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 20);
 
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     // has one slice
@@ -1238,10 +1238,10 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
     valueProducer.prepareFirstBucket();
 
     LogEvent event1(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 1, 10);
+    CreateRepeatedValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 10);
 
     LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 1, 20);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 20);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
 
     // has one slice
@@ -1283,10 +1283,10 @@ TEST(ValueMetricProducerTest, TestPushedAggregateAvg) {
     valueProducer.prepareFirstBucket();
 
     LogEvent event1(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 1, 10);
+    CreateRepeatedValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 10);
 
     LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 1, 15);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 15);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
@@ -1331,10 +1331,10 @@ TEST(ValueMetricProducerTest, TestPushedAggregateSum) {
     valueProducer.prepareFirstBucket();
 
     LogEvent event1(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 1, 10);
+    CreateRepeatedValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 10);
 
     LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 1, 15);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 15);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
@@ -1374,10 +1374,10 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     valueProducer.prepareFirstBucket();
 
     LogEvent event1(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 1, 10);
+    CreateRepeatedValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 10);
 
     LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event2, tagId, bucketStartTimeNs + 15, 1, 15);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 15, 15);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
@@ -1398,7 +1398,7 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
 
     // no change in data.
     LogEvent event3(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event3, tagId, bucket2StartTimeNs + 10, 1, 15);
+    CreateRepeatedValueLogEvent(&event3, tagId, bucket2StartTimeNs + 10, 15);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
     curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
@@ -1408,7 +1408,7 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     EXPECT_EQ(true, curInterval.hasValue);
 
     LogEvent event4(/*uid=*/0, /*pid=*/0);
-    CreateTwoValueLogEvent(&event4, tagId, bucket2StartTimeNs + 15, 1, 15);
+    CreateRepeatedValueLogEvent(&event4, tagId, bucket2StartTimeNs + 15, 15);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event4);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
     curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
@@ -2166,7 +2166,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenInitialPullFailed)
     // Bucket start.
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
-    allData.push_back(CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 1, 1, 110));
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 1, 110));
     valueProducer->onDataPulled(allData, /** succeed */ false, bucketStartTimeNs);
 
     valueProducer->onConditionChanged(false, bucketStartTimeNs + 2);
@@ -2174,7 +2174,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenInitialPullFailed)
 
     // Bucket end.
     allData.clear();
-    allData.push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 1, 1, 140));
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1, 140));
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
 
     valueProducer->flushIfNeededLocked(bucket2StartTimeNs + 1);

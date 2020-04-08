@@ -67,22 +67,12 @@ void makeWakeLockEvent(LogEvent* logEvent, uint32_t atomId, uint64_t timestamp,
     AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
 
     vector<std::string> tags(uids.size()); // vector of empty strings
-    vector<const char*> cTags(uids.size());
-    for (int i = 0; i < cTags.size(); i++) {
-        cTags[i] = tags[i].c_str();
-    }
-    AStatsEvent_writeAttributionChain(statsEvent, reinterpret_cast<const uint32_t*>(uids.data()),
-                                      cTags.data(), uids.size());
+    writeAttribution(statsEvent, uids, tags);
 
     AStatsEvent_writeString(statsEvent, wl.c_str());
     AStatsEvent_writeInt32(statsEvent, acquire);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 } // anonymous namespace
