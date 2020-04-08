@@ -191,10 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"நிர்வாகியால் தனிப்பட்ட உபயோகத்திற்காக ஒதுக்கப்பட்ட சாதனம்"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"சாதனம் நிர்வகிக்கப்படுகிறது"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"உங்கள் நிறுவனம் இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம். விவரங்களுக்கு, தட்டவும்."</string>
-    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
-    <skip />
-    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
-    <skip />
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"ஆப்ஸ் உங்கள் இருப்பிடத்தை அணுக முடியும்"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"உங்கள் IT நிர்வாகியைத் தொடர்புகொண்டு மேலும் அறியலாம்"</string>
     <string name="country_detector" msgid="7023275114706088854">"நாட்டைக் கண்டறியும் அம்சம்"</string>
     <string name="location_service" msgid="2439187616018455546">"இருப்பிடச் சேவை"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS சேவை"</string>
@@ -203,14 +201,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"நிர்வாகி ஆப்ஸை உபயோகிக்க முடியாது. இப்போது, உங்கள் சாதனம் ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்.\n\nஏதேனும் கேள்விகள் இருப்பின், உங்கள் நிறுவனத்தின் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"பிரிண்ட் செய்வதை <xliff:g id="OWNER_APP">%s</xliff:g> தடுத்துள்ளது."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"தனிப்பட்ட ஆப்ஸை அனுமதியுங்கள்"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"ஆப்ஸ் நாளை தடை செய்யப்படும்"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"பணிக் கணக்கு <xliff:g id="DAYS">%1$d</xliff:g> நாட்களுக்கு மேல் இடைநிறுத்தப்படுவதை உங்கள் IT நிர்வாகி அனுமதிக்கவில்லை"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"பணிக் கணக்கை ஆன் செய்"</string>
     <string name="me" msgid="6207584824693813140">"நான்"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"டேப்லெட் விருப்பங்கள்"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV விருப்பத்தேர்வுகள்"</string>
@@ -306,7 +300,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"தொடர்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"இருப்பிடம்"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ள"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"கேலெண்டர்"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"கேலெண்டரை அணுகலாம்"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
@@ -450,8 +444,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"கேமரா சாதனங்கள் திறக்கப்படும்போதோ மூடப்படும்போதோ அது குறித்த கால்பேக்குகளைப் பெற ஒரு ஆப்ஸையோ சேவையையோ அனுமதிக்கவும்."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"எந்தக் கேமரா சாதனமும் (எந்த ஆப்ஸாலும்) திறக்கப்படும்போதோ மூடப்படும்போதோ இந்த ஆப்ஸால் கால்பேக்குகளைப் பெற முடியும்."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"அதிர்வைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"அதிர்வைக் கட்டுப்படுத்தப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"அதிர்வு நிலையை அணுக ஆப்ஸை அனுமதிக்கும்."</string>
@@ -773,7 +766,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"பணியிட மொபைல்"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"பணியிட பேஜர்"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"உதவியாளர்"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"பிரத்தியேகம்"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"பிறந்தநாள்"</string>
@@ -1320,9 +1313,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB பிழைதிருத்தத்தை ஆஃப் செய்ய தட்டவும்"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB பிழைதிருத்தத்தை முடக்க, தேர்ந்தெடுக்கவும்."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"வயர்லெஸ் பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"வயர்லெஸ் பிழைதிருத்தத்தை ஆஃப் செய்ய தட்டவும்"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"வயர்லெஸ் பிழைதிருத்தத்தை முடக்க தேர்ந்தெடுக்கவும்."</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"வைஃபை பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"வைஃபை பிழைதிருத்தத்தை ஆஃப் செய்ய தட்டவும்"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"வைஃபை பிழைதிருத்தத்தை முடக்க தேர்ந்தெடுக்கவும்."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"\'தன்னியக்க சோதனைப்\' பயன்முறை இயக்கப்பட்டது"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"’தன்னியக்க சோதனைப்\' பயன்முறையை முடக்க ஆரம்பநிலைக்கு மீட்டமைக்கவும்."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"சீரியல் கன்சோல் இயக்கப்பட்டது"</string>
@@ -1353,13 +1346,17 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"தற்போதைய உள்ளடக்கத்தை மதிப்பாய்வு செய்கிறது"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"புதிய <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"அமைக்க, தட்டவும்"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"படங்களையும் மீடியாவையும் மாற்றலாம்"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> இல் சிக்கல்"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"சரிசெய்ய, தட்டவும்"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது. சரிசெய்ய, தேர்ந்தெடுக்கவும்."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"ஆதரிக்கப்படாத <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"சாதனம் இந்த <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைப்பில் அமைக்க, தட்டவும்."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"சாதனம் இந்த <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைப்பில் அமைக்க, தேர்ந்தெடுக்கவும்."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (7657357085538772913) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"உள்ளடக்கத்தை இழக்காமலிருக்க, அகற்றும் முன்பாக மீடியாவை வெளியேற்றவும்"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
@@ -2069,11 +2066,10 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"அணுகல்தன்மை மெனு"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸின் தலைப்புப் பட்டி."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> என்பதை வரம்பிடப்பட்ட பக்கெட்திற்குள் சேர்க்கப்பட்டது"</string>
-    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
-    <skip />
-    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
-    <skip />
-    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"உரையாடல்"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"குழு உரையாடல்"</string>
+    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
     <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"தனிப்பட்ட சுயவிவரம்"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"பணிச் சுயவிவரம்"</string>
@@ -2093,8 +2089,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"இந்த உள்ளடக்கத்தை எந்தவொரு பணி ஆப்ஸாலும் திறக்க முடியாது"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"இந்த உள்ளடக்கத்தை எந்தவொரு தனிப்பட்ட ஆப்ஸும் ஆதரிக்காது"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"இந்த உள்ளடக்கத்தை எந்தவொரு தனிப்பட்ட ஆப்ஸாலும் திறக்க முடியாது"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"அழைப்புகளின்போது ரெக்கார்டு செய்தல் அல்லது ஆடியோவைப் பிளே செய்தல்"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"இயல்பான டயலர் ஆப்ஸாக இதை அமைக்கும்போது, அழைப்புகளை ரெக்கார்டு செய்ய அல்லது ஆடியோவைப் பிளே செய்ய இதை அனுமதிக்கும்."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
     <skip />
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
