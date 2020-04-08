@@ -212,7 +212,8 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuración de erros sen fíos"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e usar os dispositivos dispoñibles, activa a depuración de erros sen fíos"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Vincular o dispositivo cun código QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Vincula dispositivos novos mediante un escáner de códigos QR"</string>
+    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
+    <skip />
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincular o dispositivo co código de sincronización"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Vincula dispositivos novos mediante un código de seis díxitos"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositivos vinculados"</string>
@@ -231,7 +232,8 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Produciuse un erro ao sincronizar o dispositivo. O código QR era incorrecto ou o dispositivo non está conectado á mesma rede."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Enderezo IP e porto"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escanear o código QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Vincula o dispositivo a través da wifi escaneando un código QR"</string>
+    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
+    <skip />
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Conéctate a unha rede wifi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depuración, programador"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Atallo do informe de erros"</string>
@@ -371,6 +373,10 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Indica que unha aplicación en segundo plano non responde"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostrar avisos de notificacións"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostra avisos cando unha aplicación publica notificacións sen unha canle válida"</string>
+    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
+    <skip />
+    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
+    <skip />
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forzar permiso de aplicacións de forma externa"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permite que calquera aplicación compatible se poida escribir nun almacenamento externo, independentemente dos valores do manifesto"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forzar o axuste do tamaño das actividades"</string>
@@ -513,8 +519,12 @@
     <string name="storage_category" msgid="2287342585424631813">"Almacenamento"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Datos compartidos"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Consulta e modifica os datos compartidos"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Non hai datos compartidos para este usuario."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Produciuse un erro ao obter os datos compartidos. Téntao de novo."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Código de identificación dos datos compartidos: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Caduca o <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Produciuse un erro ao eliminar os datos compartidos."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Non se adquiriu ningunha concesión para estes datos compartidos. Queres eliminalos?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Aplicacións que comparten datos"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"A aplicación non forneceu ningunha descrición."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"O alugueiro caduca o <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -539,4 +549,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Información do perfil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restrinxido, precisarás configurar un bloqueo da pantalla para protexer as túas aplicacións e datos persoais."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Establecer bloqueo"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Cambiar a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Engadir convidado"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Quitar convidado"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Convidado"</string>
 </resources>

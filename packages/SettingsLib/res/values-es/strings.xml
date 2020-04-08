@@ -212,7 +212,8 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuración inalámbrica"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver y utilizar los dispositivos disponibles, activa la depuración inalámbrica"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Vincular dispositivo con código QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Vincula nuevos dispositivos con el escáner de códigos QR"</string>
+    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
+    <skip />
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincular dispositivo con código de sincronización"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Vincula nuevos dispositivos con un código de seis dígitos"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositivos vinculados"</string>
@@ -231,7 +232,8 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"No se ha podido vincular el dispositivo. El código QR no era correcto o el dispositivo no estaba conectado a la misma red."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Dirección IP y puerto"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escanear código QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Vincula un dispositivo a través de Wi‑Fi con un código QR"</string>
+    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
+    <skip />
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Conéctate a una red Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depuración, desarrollo"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Atajo a informe de errores"</string>
@@ -371,6 +373,10 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostrar el diálogo de que la aplicación no responde para aplicaciones en segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Ver advertencias del canal de notificaciones"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostrar una advertencia en pantalla cuando una aplicación publica una notificación sin un canal válido"</string>
+    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
+    <skip />
+    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
+    <skip />
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forzar permitir aplicaciones de forma externa"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Hacer que cualquier aplicación se pueda escribir en un dispositivo de almacenamiento externo independientemente de los valores definidos"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forzar el ajuste de tamaño de las actividades"</string>
@@ -431,7 +437,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Duración aproximada hasta: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hasta: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Es probable que te quedes sin batería sobre las <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Es probable que te quedes sin batería sobre esta hora: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Queda menos del <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Queda más del <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -510,11 +516,15 @@
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"No se ha podido conectar; reinicia el dispositivo"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de audio con cable"</string>
     <string name="help_label" msgid="3528360748637781274">"Ayuda y sugerencias"</string>
-    <string name="storage_category" msgid="2287342585424631813">"Memoria"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Almacenamiento"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Datos compartidos"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Ver y modificar los datos compartidos"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"No hay datos compartidos de este usuario."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"No se han podido generar datos compartidos. Inténtalo de nuevo."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID de datos compartidos: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Caduca el <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"No se han podido eliminar los datos compartidos."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"No hay ninguna concesión sobre estos datos compartidos. ¿Quieres eliminarlos?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Aplicaciones que comparten datos"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"La aplicación no ofrece ninguna descripción."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"La concesión caduca el <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -539,4 +549,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Información del perfil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restringido, debes configurar una pantalla de bloqueo que proteja tus aplicaciones y datos personales."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Establecer bloqueo"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Cambiar a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Añadir invitado"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Quitar invitado"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Invitado"</string>
 </resources>
