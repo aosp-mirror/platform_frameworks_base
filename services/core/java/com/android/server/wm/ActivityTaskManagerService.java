@@ -4095,11 +4095,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         r.setPictureInPictureParams(params);
                         final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                         final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                        // Adjust the source bounds by the insets for the transition down
-                        final Rect sourceBounds = new Rect(
-                                r.pictureInPictureArgs.getSourceRectHint());
                         mRootWindowContainer.moveActivityToPinnedStack(
-                                r, sourceBounds, aspectRatio, "enterPictureInPictureMode");
+                                r, "enterPictureInPictureMode");
                         final ActivityStack stack = r.getRootTask();
                         stack.setPictureInPictureAspectRatio(aspectRatio);
                         stack.setPictureInPictureActions(actions);

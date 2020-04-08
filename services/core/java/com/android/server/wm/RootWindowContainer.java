@@ -2147,13 +2147,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return false;
         }
 
-        moveActivityToPinnedStack(r, null /* sourceBounds */, 0f /* aspectRatio */,
-                "moveTopActivityToPinnedStack");
+        moveActivityToPinnedStack(r, "moveTopActivityToPinnedStack");
         return true;
     }
 
-    void moveActivityToPinnedStack(ActivityRecord r, Rect sourceHintBounds, float aspectRatio,
-            String reason) {
+    void moveActivityToPinnedStack(ActivityRecord r, String reason) {
         mService.deferWindowLayout();
 
         final TaskDisplayArea taskDisplayArea = r.getDisplayArea();
@@ -2176,17 +2174,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final ActivityStack stack;
             if (singleActivity) {
                 stack = r.getRootTask();
-                stack.setWindowingMode(WINDOWING_MODE_PINNED);
             } else {
                 // In the case of multiple activities, we will create a new task for it and then
                 // move the PIP activity into the task.
-                stack = taskDisplayArea.createStack(WINDOWING_MODE_PINNED, r.getActivityType(),
+                stack = taskDisplayArea.createStack(WINDOWING_MODE_UNDEFINED, r.getActivityType(),
                         ON_TOP, r.info, r.intent, false /* createdByOrganizer */);
 
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
-                r.reparent(stack, MAX_VALUE, "moveActivityToStack");
+                // On the other hand, ActivityRecord#onParentChanged takes care of setting the
+                // up-to-dated pinned stack information on this newly created stack.
+                r.reparent(stack, MAX_VALUE, reason);
             }
+            stack.setWindowingMode(WINDOWING_MODE_PINNED);
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the pinned stack
