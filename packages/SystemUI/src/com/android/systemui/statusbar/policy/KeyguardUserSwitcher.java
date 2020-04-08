@@ -21,6 +21,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -292,6 +294,21 @@ public class KeyguardUserSwitcher {
             }
             convertView.setTag(item);
             return convertView;
+        }
+
+        private static Drawable getDrawable(Context context,
+                UserSwitcherController.UserRecord item) {
+            Drawable drawable = getIconDrawable(context, item);
+            int iconColorRes = item.isCurrent ? R.color.kg_user_switcher_selected_avatar_icon_color
+                    : R.color.kg_user_switcher_avatar_icon_color;
+            drawable.setTint(context.getResources().getColor(iconColorRes, context.getTheme()));
+
+            if (item.isCurrent) {
+                Drawable bg = context.getDrawable(R.drawable.bg_avatar_selected);
+                drawable = new LayerDrawable(new Drawable[]{bg, drawable});
+            }
+
+            return drawable;
         }
 
         @Override

@@ -319,23 +319,29 @@ public class PipTaskOrganizer extends TaskOrganizer {
      * TODO(b/152809058): consolidate the display info handling logic in SysUI
      */
     @SuppressWarnings("unchecked")
-    public void mayUpdateCurrentAnimationOnRotationChange() {
+    public void onMovementBoundsChanged(boolean fromImeAdjustment, boolean fromShelfAdjustment) {
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getCurrentAnimator();
-        if (animator != null && animator.isRunning()
-                && animator.getTransitionDirection() == TRANSITION_DIRECTION_TO_PIP) {
-            final Rect currentDestinationBounds = animator.getDestinationBounds();
-            if (mPipBoundsHandler.getDisplayBounds().contains(currentDestinationBounds)) {
-                return;
-            }
-            final Rect newDestinationBounds = mPipBoundsHandler.getDestinationBounds(
-                    getAspectRatioOrDefault(mTaskInfo.pictureInPictureParams),
-                    null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
-            if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
-                animator.updateEndValue(newDestinationBounds);
-            }
-            animator.setDestinationBounds(newDestinationBounds);
+        if (animator == null || !animator.isRunning()
+                || animator.getTransitionDirection() != TRANSITION_DIRECTION_TO_PIP) {
+            return;
         }
+
+        final Rect currentDestinationBounds = animator.getDestinationBounds();
+        if (!fromImeAdjustment && !fromShelfAdjustment
+                && mPipBoundsHandler.getDisplayBounds().contains(currentDestinationBounds)) {
+            // no need to update the destination bounds, bail early
+            return;
+        }
+
+        final Rect newDestinationBounds = mPipBoundsHandler.getDestinationBounds(
+                getAspectRatioOrDefault(mTaskInfo.pictureInPictureParams),
+                null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
+        if (newDestinationBounds.equals(currentDestinationBounds)) return;
+        if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
+            animator.updateEndValue(newDestinationBounds);
+        }
+        animator.setDestinationBounds(newDestinationBounds);
     }
 
     /**

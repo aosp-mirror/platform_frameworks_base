@@ -151,9 +151,12 @@ public final class NotifBindPipeline {
      * the real work once rather than repeatedly start and cancel it.
      */
     private void requestPipelineRun(NotificationEntry entry) {
-        mLogger.logRequestPipelineRun(entry.getKey());
-
         final BindEntry bindEntry = getBindEntry(entry);
+        if (bindEntry.row == null) {
+            // Row is not managed yet but may be soon. Stop for now.
+            return;
+        }
+        mLogger.logRequestPipelineRun(entry.getKey());
 
         // Abort any existing pipeline run
         mStage.abortStage(entry, bindEntry.row);
@@ -177,10 +180,6 @@ public final class NotifBindPipeline {
 
         final BindEntry bindEntry = mBindEntries.get(entry);
         final ExpandableNotificationRow row = bindEntry.row;
-        if (row == null) {
-            // Row is not managed yet but may be soon. Stop for now.
-            return;
-        }
 
         mStage.executeStage(entry, row, (en) -> onPipelineComplete(en));
     }

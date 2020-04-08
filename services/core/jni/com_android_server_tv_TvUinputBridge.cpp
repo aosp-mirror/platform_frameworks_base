@@ -31,26 +31,37 @@
 #include <utils/String8.h>
 
 #include <ctype.h>
-#include <linux/input.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <time.h>
-#include <stdint.h>
-#include <map>
 #include <fcntl.h>
+#include <linux/input.h>
 #include <linux/uinput.h>
 #include <signal.h>
+#include <stdint.h>
 #include <sys/inotify.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+#include <unordered_map>
 
 #define SLOT_UNKNOWN -1
 
 namespace android {
 
-static std::map<int32_t,int> keysMap;
-static std::map<int32_t,int32_t> slotsMap;
+#define GOOGLE_VENDOR_ID 0x18d1
+
+#define GOOGLE_VIRTUAL_REMOTE_PRODUCT_ID 0x0100
+#define GOOGLE_VIRTUAL_GAMEPAD_PROUCT_ID 0x0200
+
+static std::unordered_map<int32_t, int> keysMap;
+static std::unordered_map<int32_t, int32_t> slotsMap;
 static BitSet32 mtSlots;
+
+// Maps android key code to linux key code.
+static std::unordered_map<int32_t, int> gamepadAndroidToLinuxKeyMap;
+
+// Maps an android gamepad axis to the index within the GAMEPAD_AXES array.
+static std::unordered_map<int32_t, int> gamepadAndroidAxisToIndexMap;
 
 static void initKeysMap() {
     if (keysMap.empty()) {
@@ -60,16 +71,49 @@ static void initKeysMap() {
     }
 }
 
+static void initGamepadKeyMap() {
+    if (gamepadAndroidToLinuxKeyMap.empty()) {
+        for (size_t i = 0; i < NELEM(GAMEPAD_KEYS); i++) {
+            gamepadAndroidToLinuxKeyMap[GAMEPAD_KEYS[i].androidKeyCode] =
+                    GAMEPAD_KEYS[i].linuxUinputKeyCode;
+        }
+    }
+
+    if (gamepadAndroidAxisToIndexMap.empty()) {
+        for (size_t i = 0; i < NELEM(GAMEPAD_AXES); i++) {
+            gamepadAndroidAxisToIndexMap[GAMEPAD_AXES[i].androidAxis] = i;
+        }
+    }
+}
+
 static int32_t getLinuxKeyCode(int32_t androidKeyCode) {
-    std::map<int,int>::iterator it = keysMap.find(androidKeyCode);
+    std::unordered_map<int, int>::iterator it = keysMap.find(androidKeyCode);
     if (it != keysMap.end()) {
         return it->second;
     }
     return KEY_UNKNOWN;
 }
 
+static int getGamepadkeyCode(int32_t androidKeyCode) {
+    std::unordered_map<int32_t, int>::iterator it =
+            gamepadAndroidToLinuxKeyMap.find(androidKeyCode);
+    if (it != gamepadAndroidToLinuxKeyMap.end()) {
+        return it->second;
+    }
+    return KEY_UNKNOWN;
+}
+
+static const GamepadAxis* getGamepadAxis(int32_t androidAxisCode) {
+    std::unordered_map<int32_t, int>::iterator it =
+            gamepadAndroidAxisToIndexMap.find(androidAxisCode);
+    if (it == gamepadAndroidToLinuxKeyMap.end()) {
+        return nullptr;
+    }
+    return &GAMEPAD_AXES[it->second];
+}
+
 static int findSlot(int32_t pointerId) {
-    std::map<int,int>::iterator it = slotsMap.find(pointerId);
+    std::unordered_map<int, int>::iterator it = slotsMap.find(pointerId);
     if (it != slotsMap.end()) {
         return it->second;
     }
@@ -107,7 +151,7 @@ public:
 
     // Open /dev/uinput and prepare to register
     // the device with the given name and unique Id
-    bool Open(const char* name, const char* uniqueId);
+    bool Open(const char* name, const char* uniqueId, uint16_t product);
 
     // Checks if the current file descriptor is valid
     bool IsValid() const { return mFd != kInvalidFileDescriptor; }
@@ -141,7 +185,7 @@ int UInputDescriptor::Detach() {
     return fd;
 }
 
-bool UInputDescriptor::Open(const char* name, const char* uniqueId) {
+bool UInputDescriptor::Open(const char* name, const char* uniqueId, uint16_t product) {
     if (IsValid()) {
         ALOGE("UInput device already open");
         return false;
@@ -161,6 +205,8 @@ bool UInputDescriptor::Open(const char* name, const char* uniqueId) {
     strlcpy(mUinputDescriptor.name, name, UINPUT_MAX_NAME_SIZE);
     mUinputDescriptor.id.version = 1;
     mUinputDescriptor.id.bustype = BUS_VIRTUAL;
+    mUinputDescriptor.id.vendor = GOOGLE_VENDOR_ID;
+    mUinputDescriptor.id.product = product;
 
     // All UInput devices we use process keys
     ioctl(mFd, UI_SET_EVBIT, EV_KEY);
@@ -258,7 +304,7 @@ NativeConnection* NativeConnection::open(const char* name, const char* uniqueId,
     initKeysMap();
 
     UInputDescriptor descriptor;
-    if (!descriptor.Open(name, uniqueId)) {
+    if (!descriptor.Open(name, uniqueId, GOOGLE_VIRTUAL_REMOTE_PRODUCT_ID)) {
         return nullptr;
     }
 
@@ -277,21 +323,24 @@ NativeConnection* NativeConnection::open(const char* name, const char* uniqueId,
 NativeConnection* NativeConnection::openGamepad(const char* name, const char* uniqueId) {
     ALOGI("Registering uinput device %s: gamepad", name);
 
+    initGamepadKeyMap();
+
     UInputDescriptor descriptor;
-    if (!descriptor.Open(name, uniqueId)) {
+    if (!descriptor.Open(name, uniqueId, GOOGLE_VIRTUAL_GAMEPAD_PROUCT_ID)) {
         return nullptr;
     }
 
     // set the keys mapped for gamepads
-    for (size_t i = 0; i < NELEM(GAMEPAD_KEY_CODES); i++) {
-        descriptor.EnableKey(GAMEPAD_KEY_CODES[i]);
+    for (size_t i = 0; i < NELEM(GAMEPAD_KEYS); i++) {
+        descriptor.EnableKey(GAMEPAD_KEYS[i].linuxUinputKeyCode);
     }
 
     // define the axes that are required
     descriptor.EnableAxesEvents();
     for (size_t i = 0; i < NELEM(GAMEPAD_AXES); i++) {
-        const Axis& axis = GAMEPAD_AXES[i];
-        descriptor.EnableAxis(axis.number, axis.rangeMin, axis.rangeMax);
+        const GamepadAxis& axis = GAMEPAD_AXES[i];
+        descriptor.EnableAxis(axis.linuxUinputAxis, axis.linuxUinputRangeMin,
+                              axis.linuxUinputRangeMax);
     }
 
     if (!descriptor.Create()) {
@@ -350,7 +399,7 @@ static void nativeSendKey(JNIEnv* env, jclass clazz, jlong ptr, jint keyCode, jb
     }
 }
 
-static void nativeSendGamepadKey(JNIEnv* env, jclass clazz, jlong ptr, jint keyIndex,
+static void nativeSendGamepadKey(JNIEnv* env, jclass clazz, jlong ptr, jint keyCode,
                                  jboolean down) {
     NativeConnection* connection = reinterpret_cast<NativeConnection*>(ptr);
 
@@ -359,16 +408,16 @@ static void nativeSendGamepadKey(JNIEnv* env, jclass clazz, jlong ptr, jint keyI
         return;
     }
 
-    if ((keyIndex < 0) || (keyIndex >= NELEM(GAMEPAD_KEY_CODES))) {
-        ALOGE("Invalid gamepad key index: %d", keyIndex);
+    int linuxKeyCode = getGamepadkeyCode(keyCode);
+    if (linuxKeyCode == KEY_UNKNOWN) {
+        ALOGE("Gamepad: received an unknown keycode of %d.", keyCode);
         return;
     }
-
-    connection->sendEvent(EV_KEY, GAMEPAD_KEY_CODES[keyIndex], down ? 1 : 0);
+    connection->sendEvent(EV_KEY, linuxKeyCode, down ? 1 : 0);
 }
 
 static void nativeSendGamepadAxisValue(JNIEnv* env, jclass clazz, jlong ptr, jint axis,
-                                       jint value) {
+                                       jfloat value) {
     NativeConnection* connection = reinterpret_cast<NativeConnection*>(ptr);
 
     if (!connection->IsGamepad()) {
@@ -376,7 +425,25 @@ static void nativeSendGamepadAxisValue(JNIEnv* env, jclass clazz, jlong ptr, jin
         return;
     }
 
-    connection->sendEvent(EV_ABS, axis, value);
+    const GamepadAxis* axisInfo = getGamepadAxis(axis);
+    if (axisInfo == nullptr) {
+        ALOGE("Invalid axis: %d", axis);
+        return;
+    }
+
+    if (value > axisInfo->androidRangeMax) {
+        value = axisInfo->androidRangeMax;
+    } else if (value < axisInfo->androidRangeMin) {
+        value = axisInfo->androidRangeMin;
+    }
+
+    // Converts the android range into the device range
+    float movementPercent = (value - axisInfo->androidRangeMin) /
+            (axisInfo->androidRangeMax - axisInfo->androidRangeMin);
+    int axisRawValue = axisInfo->linuxUinputRangeMin +
+            movementPercent * (axisInfo->linuxUinputRangeMax - axisInfo->linuxUinputRangeMin);
+
+    connection->sendEvent(EV_ABS, axisInfo->linuxUinputAxis, axisRawValue);
 }
 
 static void nativeSendPointerDown(JNIEnv* env, jclass clazz, jlong ptr,
@@ -441,18 +508,20 @@ static void nativeClear(JNIEnv* env, jclass clazz, jlong ptr) {
             }
         }
     } else {
-        for (size_t i = 0; i < NELEM(GAMEPAD_KEY_CODES); i++) {
-            connection->sendEvent(EV_KEY, GAMEPAD_KEY_CODES[i], 0);
+        for (size_t i = 0; i < NELEM(GAMEPAD_KEYS); i++) {
+            connection->sendEvent(EV_KEY, GAMEPAD_KEYS[i].linuxUinputKeyCode, 0);
         }
 
         for (size_t i = 0; i < NELEM(GAMEPAD_AXES); i++) {
-            const Axis& axis = GAMEPAD_AXES[i];
-            if ((axis.number == ABS_Z) || (axis.number == ABS_RZ)) {
+            const GamepadAxis& axis = GAMEPAD_AXES[i];
+
+            if ((axis.linuxUinputAxis == ABS_Z) || (axis.linuxUinputAxis == ABS_RZ)) {
                 // Mark triggers unpressed
-                connection->sendEvent(EV_ABS, axis.number, 0);
+                connection->sendEvent(EV_ABS, axis.linuxUinputAxis, axis.linuxUinputRangeMin);
             } else {
                 // Joysticks and dpad rests on center
-                connection->sendEvent(EV_ABS, axis.number, (axis.rangeMin + axis.rangeMax) / 2);
+                connection->sendEvent(EV_ABS, axis.linuxUinputAxis,
+                                      (axis.linuxUinputRangeMin + axis.linuxUinputRangeMax) / 2);
             }
         }
     }
@@ -475,7 +544,7 @@ static JNINativeMethod gUinputBridgeMethods[] = {
         {"nativeClear", "(J)V", (void*)nativeClear},
         {"nativeSendPointerSync", "(J)V", (void*)nativeSendPointerSync},
         {"nativeSendGamepadKey", "(JIZ)V", (void*)nativeSendGamepadKey},
-        {"nativeSendGamepadAxisValue", "(JII)V", (void*)nativeSendGamepadAxisValue},
+        {"nativeSendGamepadAxisValue", "(JIF)V", (void*)nativeSendGamepadAxisValue},
 };
 
 int register_android_server_tv_TvUinputBridge(JNIEnv* env) {

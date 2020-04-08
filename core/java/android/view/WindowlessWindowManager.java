@@ -104,7 +104,7 @@ public class WindowlessWindowManager implements IWindowSession {
             int viewVisibility, int displayId, Rect outFrame, Rect outContentInsets,
             Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
-            InsetsState outInsetsState) {
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
                 .setParent(mRootSurface)
                 .setFormat(attrs.format)
@@ -179,7 +179,8 @@ public class WindowlessWindowManager implements IWindowSession {
             Rect outStableInsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            Point outSurfaceSize, SurfaceControl outBLASTSurfaceControl) {
+            InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
+            SurfaceControl outBLASTSurfaceControl) {
         final State state;
         synchronized (this) {
             state = mStateForWindow.get(window.asBinder());

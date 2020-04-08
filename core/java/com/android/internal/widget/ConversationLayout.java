@@ -40,7 +40,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -121,6 +120,7 @@ public class ConversationLayout extends FrameLayout
     private CachingIconView mConversationIconBadgeBg;
     private Icon mLargeIcon;
     private View mExpandButtonContainer;
+    private View mExpandButtonInnerContainer;
     private ViewGroup mExpandButtonAndContentContainer;
     private NotificationExpandButton mExpandButton;
     private MessagingLinearLayout mImageMessageContainer;
@@ -242,6 +242,7 @@ public class ConversationLayout extends FrameLayout
         mConversationHeader = findViewById(R.id.conversation_header);
         mContentContainer = findViewById(R.id.notification_action_list_margin_target);
         mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
+        mExpandButtonInnerContainer = findViewById(R.id.expand_button_inner_container);
         mExpandButton = findViewById(R.id.expand_button);
         mExpandButtonExpandedTopMargin = getResources().getDimensionPixelSize(
                 R.dimen.conversation_expand_button_top_margin_expanded);
@@ -385,14 +386,17 @@ public class ConversationLayout extends FrameLayout
 
     /** @hide */
     public void setUnreadCount(int unreadCount) {
-        mUnreadBadge.setVisibility(mIsCollapsed && unreadCount > 1 ? VISIBLE : GONE);
-        CharSequence text = unreadCount >= 100
-                ? getResources().getString(R.string.unread_convo_overflow, 99)
-                : String.format(Locale.getDefault(), "%d", unreadCount);
-        mUnreadBadge.setText(text);
-        mUnreadBadge.setBackgroundTintList(ColorStateList.valueOf(mLayoutColor));
-        boolean needDarkText = ColorUtils.calculateLuminance(mLayoutColor) > 0.5f;
-        mUnreadBadge.setTextColor(needDarkText ? Color.BLACK : Color.WHITE);
+        boolean visible = mIsCollapsed && unreadCount > 1;
+        mUnreadBadge.setVisibility(visible ? VISIBLE : GONE);
+        if (visible) {
+            CharSequence text = unreadCount >= 100
+                    ? getResources().getString(R.string.unread_convo_overflow, 99)
+                    : String.format(Locale.getDefault(), "%d", unreadCount);
+            mUnreadBadge.setText(text);
+            mUnreadBadge.setBackgroundTintList(ColorStateList.valueOf(mLayoutColor));
+            boolean needDarkText = ColorUtils.calculateLuminance(mLayoutColor) > 0.5f;
+            mUnreadBadge.setTextColor(needDarkText ? Color.BLACK : Color.WHITE);
+        }
     }
 
     private void addRemoteInputHistoryToMessages(
@@ -535,37 +539,26 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateImageMessages() {
-        boolean displayExternalImage = false;
-        ArraySet<View> newMessages = new ArraySet<>();
-        if (mIsCollapsed) {
+        View newMessage = null;
+        if (mIsCollapsed && mGroups.size() > 0) {
 
-            // When collapsed, we're displaying all image messages in a dedicated container
-            // on the right of the layout instead of inline. Let's add all isolated images there
-            int imageIndex = 0;
-            for (int i = 0; i < mGroups.size(); i++) {
-                MessagingGroup messagingGroup = mGroups.get(i);
-                MessagingImageMessage isolatedMessage = messagingGroup.getIsolatedMessage();
-                if (isolatedMessage != null) {
-                    newMessages.add(isolatedMessage.getView());
-                    displayExternalImage = true;
-                    if (imageIndex
-                            != mImageMessageContainer.indexOfChild(isolatedMessage.getView())) {
-                        mImageMessageContainer.removeView(isolatedMessage.getView());
-                        mImageMessageContainer.addView(isolatedMessage.getView(), imageIndex);
-                    }
-                    imageIndex++;
-                }
+            // When collapsed, we're displaying the image message in a dedicated container
+            // on the right of the layout instead of inline. Let's add the isolated image there
+            MessagingGroup messagingGroup = mGroups.get(mGroups.size() -1);
+            MessagingImageMessage isolatedMessage = messagingGroup.getIsolatedMessage();
+            if (isolatedMessage != null) {
+                newMessage = isolatedMessage.getView();
             }
         }
         // Remove all messages that don't belong into the image layout
-        for (int i = 0; i < mImageMessageContainer.getChildCount(); i++) {
-            View child = mImageMessageContainer.getChildAt(i);
-            if (!newMessages.contains(child)) {
-                mImageMessageContainer.removeView(child);
-                i--;
+        View previousMessage = mImageMessageContainer.getChildAt(0);
+        if (previousMessage != newMessage) {
+            mImageMessageContainer.removeView(previousMessage);
+            if (newMessage != null) {
+                mImageMessageContainer.addView(newMessage);
             }
         }
-        mImageMessageContainer.setVisibility(displayExternalImage ? VISIBLE : GONE);
+        mImageMessageContainer.setVisibility(newMessage != null ? VISIBLE : GONE);
     }
 
     private void bindFacePile() {
@@ -1169,7 +1162,7 @@ public class ConversationLayout extends FrameLayout
         layoutParams.topMargin = topMargin;
         mExpandButton.setLayoutParams(layoutParams);
 
-        mExpandButtonContainer.setContentDescription(mContext.getText(contentDescriptionId));
+        mExpandButtonInnerContainer.setContentDescription(mContext.getText(contentDescriptionId));
     }
 
     private void updateContentEndPaddings() {
@@ -1213,7 +1206,7 @@ public class ConversationLayout extends FrameLayout
         mExpandable = expandable;
         if (expandable) {
             mExpandButtonContainer.setVisibility(VISIBLE);
-            mExpandButtonContainer.setOnClickListener(onClickListener);
+            mExpandButtonInnerContainer.setOnClickListener(onClickListener);
         } else {
             // TODO: handle content paddings to end of layout
             mExpandButtonContainer.setVisibility(GONE);

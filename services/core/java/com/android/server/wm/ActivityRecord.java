@@ -42,7 +42,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_HOME;
@@ -109,7 +108,6 @@ import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_UNSET;
-import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -5812,18 +5810,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @VisibleForTesting
-    boolean shouldAnimate(int transit) {
-        if (task != null && !task.shouldAnimate()) {
-            return false;
-        }
-        final boolean isSplitScreenPrimary =
-                getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-        final boolean allowSplitScreenPrimaryAnimation = transit != TRANSIT_WALLPAPER_OPEN;
-
-        // We animate always if it's not split screen primary, and only some special cases in split
-        // screen primary because it causes issues with stack clipping when we run an un-minimize
-        // animation at the same time.
-        return !isSplitScreenPrimary || allowSplitScreenPrimaryAnimation;
+    boolean shouldAnimate() {
+        return task == null || task.shouldAnimate();
     }
 
     /**

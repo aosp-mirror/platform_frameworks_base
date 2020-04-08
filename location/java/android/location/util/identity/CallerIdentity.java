@@ -86,7 +86,7 @@ public final class CallerIdentity {
     public static CallerIdentity forTest(int uid, int pid, String packageName,
             @Nullable String attributionTag, @PermissionLevel int permissionLevel) {
 
-        return new CallerIdentity(uid, pid, packageName, attributionTag,
+        return new CallerIdentity(uid, pid, packageName, attributionTag, null,
                 permissionLevel);
     }
 
@@ -95,7 +95,7 @@ public final class CallerIdentity {
      */
     public static CallerIdentity fromContext(Context context) {
         return new CallerIdentity(Process.myUid(), Process.myPid(),
-                context.getPackageName(), context.getFeatureId(),
+                context.getPackageName(), context.getAttributionTag(), null,
                 getPermissionLevel(context, Binder.getCallingPid(), Binder.getCallingUid()));
     }
 
@@ -106,12 +106,22 @@ public final class CallerIdentity {
      */
     public static CallerIdentity fromBinder(Context context, String packageName,
             @Nullable String attributionTag) {
+        return fromBinder(context, packageName, attributionTag, null);
+    }
+
+    /**
+     * Creates a CallerIdentity from the current binder identity, using the given package, feature
+     * id, and listener id. The package will be checked to enforce it belongs to the calling uid,
+     * and a security exception will be thrown if it is invalid.
+     */
+    public static CallerIdentity fromBinder(Context context, String packageName,
+            @Nullable String attributionTag, @Nullable String listenerId) {
         int uid = Binder.getCallingUid();
         if (!ArrayUtils.contains(context.getPackageManager().getPackagesForUid(uid), packageName)) {
             throw new SecurityException("invalid package \"" + packageName + "\" for uid " + uid);
         }
 
-        return fromBinderUnsafe(context, packageName, attributionTag);
+        return fromBinderUnsafe(context, packageName, attributionTag, listenerId);
     }
 
     /**
@@ -122,8 +132,19 @@ public final class CallerIdentity {
      */
     public static CallerIdentity fromBinderUnsafe(Context context, String packageName,
             @Nullable String attributionTag) {
+        return fromBinderUnsafe(context, packageName, attributionTag, null);
+    }
+
+    /**
+     * Creates a CallerIdentity from the current binder identity, using the given package, feature
+     * id, and listener id. The package will not be checked to enforce that it belongs to the
+     * calling uid - this method should only be used if the package will be validated by some other
+     * means, such as an appops call.
+     */
+    public static CallerIdentity fromBinderUnsafe(Context context, String packageName,
+            @Nullable String attributionTag, @Nullable String listenerId) {
         return new CallerIdentity(Binder.getCallingUid(), Binder.getCallingPid(),
-                packageName, attributionTag,
+                packageName, attributionTag, listenerId,
                 getPermissionLevel(context, Binder.getCallingPid(), Binder.getCallingUid()));
     }
 
@@ -193,6 +214,9 @@ public final class CallerIdentity {
     /** The calling attribution tag. */
     public final @Nullable String attributionTag;
 
+    /** The calling listener id. */
+    public final @Nullable String listenerId;
+
     /**
      * The calling location permission level. This field should only be used for validating
      * permissions for API access. It should not be used for validating permissions for location
@@ -201,12 +225,14 @@ public final class CallerIdentity {
     public final @PermissionLevel int permissionLevel;
 
     private CallerIdentity(int uid, int pid, String packageName,
-            @Nullable String attributionTag, @PermissionLevel int permissionLevel) {
+            @Nullable String attributionTag, @Nullable String listenerId,
+            @PermissionLevel int permissionLevel) {
         this.uid = uid;
         this.pid = pid;
         this.userId = UserHandle.getUserId(uid);
         this.packageName = Objects.requireNonNull(packageName);
         this.attributionTag = attributionTag;
+        this.listenerId = listenerId;
         this.permissionLevel = Preconditions.checkArgumentInRange(permissionLevel, PERMISSION_NONE,
                 PERMISSION_FINE, "permissionLevel");
     }

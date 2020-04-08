@@ -435,6 +435,9 @@ public class CrossProfileApps {
      * <p>This differs from {@link #canConfigureInteractAcrossProfiles(String)} since it will
      * not return {@code false} if the app is not whitelisted or not installed in the other profile.
      *
+     * <p>Note that platform-signed apps that are automatically granted the permission and are not
+     * whitelisted by the OEM will not be included in this list.
+     *
      * @hide
      */
     public boolean canUserAttemptToConfigureInteractAcrossProfiles(String packageName) {

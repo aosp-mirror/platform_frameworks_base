@@ -28,7 +28,6 @@ import dagger.Module;
 @Module(includes = {
         DefaultActivityBinder.class,
         DefaultBroadcastReceiverBinder.class,
-        DefaultServiceBinder.class,
-        CarSystemUIBinder.class})
+        DefaultServiceBinder.class})
 public class CarComponentBinder {
 }

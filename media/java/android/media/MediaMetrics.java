@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Bundle;
 
@@ -24,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * MediaMetrics is the Java interface to the MediaMetrics service.
@@ -48,6 +50,77 @@ public class MediaMetrics {
 
     // The charset used for encoding Strings to bytes.
     private static final Charset MEDIAMETRICS_CHARSET = StandardCharsets.UTF_8;
+
+    /**
+     * Key interface.
+     *
+     * The presence of this {@code Key} interface on an object allows
+     * it to be used to set metrics.
+     *
+     * @param <T> type of value associated with {@code Key}.
+     */
+    public interface Key<T> {
+        /**
+         * Returns the internal name of the key.
+         */
+        @NonNull
+        String getName();
+
+        /**
+         * Returns the class type of the associated value.
+         */
+        @NonNull
+        Class<T> getValueClass();
+    }
+
+    /**
+     * Returns a Key object with the correct interface for MediaMetrics.
+     *
+     * @param name The name of the key.
+     * @param type The class type of the value represented by the key.
+     * @param <T> The type of value.
+     * @return a new key interface.
+     */
+    @NonNull
+    public static <T> Key<T> createKey(@NonNull String name, @NonNull Class<T> type) {
+        // Implementation specific.
+        return new Key<T>() {
+            private final String mName = name;
+            private final Class<T> mType = type;
+
+            @Override
+            @NonNull
+            public String getName() {
+                return mName;
+            }
+
+            @Override
+            @NonNull
+            public Class<T> getValueClass() {
+                return mType;
+            }
+
+            /**
+             * Return true if the name and the type of two objects are the same.
+             */
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) {
+                    return true;
+                }
+                if (!(obj instanceof Key)) {
+                    return false;
+                }
+                Key<?> other = (Key<?>) obj;
+                return mName.equals(other.getName()) && mType.equals(other.getValueClass());
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mName, mType);
+            }
+        };
+    }
 
     /**
      * Item records properties and delivers to the MediaMetrics service
@@ -199,6 +272,28 @@ public class MediaMetrics {
                 throw new IllegalStateException("Mismatched sizing");
             }
             mBuffer.putInt(0);     // number of properties (to be later filled in by record()).
+        }
+
+        /**
+         * Sets a metrics typed key
+         * @param key
+         * @param value
+         * @param <T>
+         * @return
+         */
+        @NonNull
+        public <T> Item set(@NonNull Key<T> key, @Nullable T value) {
+            if (value instanceof Integer) {
+                putInt(key.getName(), (int) value);
+            } else if (value instanceof Long) {
+                putLong(key.getName(), (long) value);
+            } else if (value instanceof Double) {
+                putDouble(key.getName(), (double) value);
+            } else if (value instanceof String) {
+                putString(key.getName(), (String) value);
+            }
+            // if value is null, etc. no error is raised.
+            return this;
         }
 
         /**

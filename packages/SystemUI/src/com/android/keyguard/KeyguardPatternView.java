@@ -282,6 +282,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         @Override
         public void onPatternDetected(final List<LockPatternView.Cell> pattern) {
+            mKeyguardUpdateMonitor.setCredentialAttempted();
             mLockPatternView.disableInput();
             if (mPendingLockCheck != null) {
                 mPendingLockCheck.cancel(false);

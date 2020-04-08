@@ -352,7 +352,6 @@ public class LockscreenLockIconController {
         mLockIcon.setOnClickListener(this::handleClick);
         mLockIcon.setOnLongClickListener(this::handleLongClick);
         mLockIcon.setAccessibilityDelegate(mAccessibilityDelegate);
-        mLockIcon.setStateProvider(this::getState);
 
         if (mLockIcon.isAttachedToWindow()) {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mLockIcon);
@@ -462,7 +461,7 @@ public class LockscreenLockIconController {
             shouldUpdate = false;
         }
         if (shouldUpdate && mLockIcon != null) {
-            mLockIcon.update(mLastState, mPulsing, mDozing, mKeyguardJustShown);
+            mLockIcon.update(state, mPulsing, mDozing, mKeyguardJustShown);
         }
         mLastState = state;
         mKeyguardJustShown = false;

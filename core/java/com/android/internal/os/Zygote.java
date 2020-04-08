@@ -1065,4 +1065,11 @@ public final class Zygote {
      * Returns whether the hardware supports memory tagging (ARM MTE).
      */
     public static native boolean nativeSupportsMemoryTagging();
+
+    /**
+     * Returns whether the kernel supports tagged pointers. Present in the
+     * Android Common Kernel from 4.14 and up. By default, you should prefer
+     * fully-feature Memory Tagging, rather than the static Tagged Pointers.
+     */
+    public static native boolean nativeSupportsTaggedPointers();
 }

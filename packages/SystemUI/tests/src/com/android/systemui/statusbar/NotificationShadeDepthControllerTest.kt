@@ -117,9 +117,24 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun updateGlobalDialogVisibility_appliesBlur() {
+    fun updateGlobalDialogVisibility_animatesBlur() {
         notificationShadeDepthController.updateGlobalDialogVisibility(0.5f, root)
         verify(globalActionsSpring).animateTo(eq(maxBlur / 2), safeEq(root))
+    }
+
+    @Test
+    fun updateGlobalDialogVisibility_appliesBlur_withoutHomeControls() {
+        `when`(globalActionsSpring.radius).thenReturn(maxBlur)
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(blurUtils).applyBlur(any(), eq(maxBlur))
+    }
+
+    @Test
+    fun updateGlobalDialogVisibility_appliesBlur_unlessHomeControls() {
+        notificationShadeDepthController.showingHomeControls = true
+        `when`(globalActionsSpring.radius).thenReturn(maxBlur)
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(blurUtils).applyBlur(any(), eq(0))
     }
 
     @Test

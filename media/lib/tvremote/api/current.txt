@@ -3,18 +3,22 @@ package com.android.media.tv.remoteprovider {
 
   public abstract class TvRemoteProvider {
     ctor public TvRemoteProvider(android.content.Context);
-    method public void clearInputBridge(android.os.IBinder) throws java.lang.RuntimeException;
-    method public void closeInputBridge(android.os.IBinder) throws java.lang.RuntimeException;
+    method public void clearInputBridge(@NonNull android.os.IBinder) throws java.lang.RuntimeException;
+    method public void closeInputBridge(@NonNull android.os.IBinder) throws java.lang.RuntimeException;
     method public android.os.IBinder getBinder();
     method public final android.content.Context getContext();
-    method public void onInputBridgeConnected(android.os.IBinder);
-    method public void openRemoteInputBridge(android.os.IBinder, String, int, int, int) throws java.lang.RuntimeException;
-    method public void sendKeyDown(android.os.IBinder, int) throws java.lang.RuntimeException;
-    method public void sendKeyUp(android.os.IBinder, int) throws java.lang.RuntimeException;
-    method public void sendPointerDown(android.os.IBinder, int, int, int) throws java.lang.RuntimeException;
-    method public void sendPointerSync(android.os.IBinder) throws java.lang.RuntimeException;
-    method public void sendPointerUp(android.os.IBinder, int) throws java.lang.RuntimeException;
-    method public void sendTimestamp(android.os.IBinder, long) throws java.lang.RuntimeException;
+    method public void onInputBridgeConnected(@NonNull android.os.IBinder);
+    method public void openGamepadBridge(@NonNull android.os.IBinder, @NonNull String) throws java.lang.RuntimeException;
+    method public void openRemoteInputBridge(@NonNull android.os.IBinder, @NonNull String, int, int, int) throws java.lang.RuntimeException;
+    method public void sendGamepadAxisValue(@NonNull android.os.IBinder, int, @FloatRange(from=-1.0F, to=1.0f) float) throws java.lang.RuntimeException;
+    method public void sendGamepadKeyDown(@NonNull android.os.IBinder, int) throws java.lang.RuntimeException;
+    method public void sendGamepadKeyUp(@NonNull android.os.IBinder, int) throws java.lang.RuntimeException;
+    method public void sendKeyDown(@NonNull android.os.IBinder, int) throws java.lang.RuntimeException;
+    method public void sendKeyUp(@NonNull android.os.IBinder, int) throws java.lang.RuntimeException;
+    method public void sendPointerDown(@NonNull android.os.IBinder, int, int, int) throws java.lang.RuntimeException;
+    method public void sendPointerSync(@NonNull android.os.IBinder) throws java.lang.RuntimeException;
+    method public void sendPointerUp(@NonNull android.os.IBinder, int) throws java.lang.RuntimeException;
+    method public void sendTimestamp(@NonNull android.os.IBinder, long) throws java.lang.RuntimeException;
     field public static final String SERVICE_INTERFACE = "com.android.media.tv.remoteprovider.TvRemoteProvider";
   }
 

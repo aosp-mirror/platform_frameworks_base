@@ -217,7 +217,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.FeatureFlagUtils;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
@@ -5620,18 +5619,16 @@ public class NotificationManagerService extends SystemService {
 
         mUsageStats.registerEnqueuedByApp(pkg);
 
+        final StatusBarNotification n = new StatusBarNotification(
+                pkg, opPkg, id, tag, notificationUid, callingPid, notification,
+                user, null, System.currentTimeMillis());
+
         // setup local book-keeping
         String channelId = notification.getChannelId();
         if (mIsTelevision && (new Notification.TvExtender(notification)).getChannelId() != null) {
             channelId = (new Notification.TvExtender(notification)).getChannelId();
         }
-        String shortcutId = notification.getShortcutId();
-        if (FeatureFlagUtils.isEnabled(getContext(),
-                FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ)
-            && shortcutId == null
-            && notification.getNotificationStyle() == Notification.MessagingStyle.class) {
-            shortcutId = id + tag + NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
-        }
+        String shortcutId = n.getShortcutId(getContext());
         final NotificationChannel channel = mPreferencesHelper.getConversationNotificationChannel(
                 pkg, notificationUid, channelId, shortcutId,
                 true /* parent ok */, false /* includeDeleted */);
@@ -5659,9 +5656,6 @@ public class NotificationManagerService extends SystemService {
             return;
         }
 
-        final StatusBarNotification n = new StatusBarNotification(
-                pkg, opPkg, id, tag, notificationUid, callingPid, notification,
-                user, null, System.currentTimeMillis());
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
         r.setIsAppImportanceLocked(mPreferencesHelper.getIsAppImportanceLocked(pkg, callingUid));
         r.setPostSilently(postSilently);

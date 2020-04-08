@@ -37,6 +37,7 @@ import static android.view.accessibility.AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
 import static com.android.server.accessibility.gestures.TouchState.ALL_POINTER_ID_BITS;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Region;
@@ -48,6 +49,7 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.BaseEventStreamTransformation;
 import com.android.server.accessibility.EventStreamTransformation;
@@ -162,6 +164,12 @@ public class TouchExplorer extends BaseEventStreamTransformation
      */
     public TouchExplorer(
             Context context, AccessibilityManagerService service, GestureManifold detector) {
+        this(context, service, detector, new Handler(context.getMainLooper()));
+    }
+
+    @VisibleForTesting
+    TouchExplorer(Context context, AccessibilityManagerService service, GestureManifold detector,
+            @NonNull Handler mainHandler) {
         mContext = context;
         mAms = service;
         mState = new TouchState();
@@ -169,7 +177,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
         mDispatcher = new EventDispatcher(context, mAms, super.getNext(), mState);
         mDetermineUserIntentTimeout = ViewConfiguration.getDoubleTapTimeout();
         mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
-        mHandler = new Handler(context.getMainLooper());
+        mHandler = mainHandler;
         mExitGestureDetectionModeDelayed = new ExitGestureDetectionModeDelayed();
         mSendHoverEnterAndMoveDelayed = new SendHoverEnterAndMoveDelayed();
         mSendHoverExitDelayed = new SendHoverExitDelayed();
@@ -290,20 +298,37 @@ public class TouchExplorer extends BaseEventStreamTransformation
     public void onAccessibilityEvent(AccessibilityEvent event) {
         final int eventType = event.getEventType();
 
+        if (eventType == TYPE_VIEW_HOVER_EXIT) {
+            sendsPendingA11yEventsIfNeeded();
+        }
+        super.onAccessibilityEvent(event);
+    }
+
+    /*
+     * Sends pending {@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END} or {@{@link
+     * AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END}} after receiving last hover exit
+     * event.
+     */
+    private void sendsPendingA11yEventsIfNeeded() {
+        // The last hover exit A11y event should be sent by view after receiving hover exit motion
+        // event. In some view hierarchy, the ViewGroup transforms hover move motion event to hover
+        // exit motion event and than dispatch to itself. It causes unexpected A11y exit events.
+        if (mSendHoverExitDelayed.isPending()) {
+            return;
+        }
         // The event for gesture end should be strictly after the
         // last hover exit event.
-        if (mSendTouchExplorationEndDelayed.isPending() && eventType == TYPE_VIEW_HOVER_EXIT) {
+        if (mSendTouchExplorationEndDelayed.isPending()) {
             mSendTouchExplorationEndDelayed.cancel();
             mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
         }
 
         // The event for touch interaction end should be strictly after the
         // last hover exit and the touch exploration gesture end events.
-        if (mSendTouchInteractionEndDelayed.isPending() && eventType == TYPE_VIEW_HOVER_EXIT) {
+        if (mSendTouchInteractionEndDelayed.isPending()) {
             mSendTouchInteractionEndDelayed.cancel();
             mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_INTERACTION_END);
         }
-        super.onAccessibilityEvent(event);
     }
 
     @Override
