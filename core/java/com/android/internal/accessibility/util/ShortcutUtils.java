@@ -25,8 +25,10 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.ShortcutType;
 
+import java.util.List;
 import java.util.StringJoiner;
 
 /**
@@ -146,6 +148,21 @@ public final class ShortcutUtils {
         }
 
         return false;
+    }
+
+    /**
+     * Returns if a {@code shortcutType} shortcut contains {@code componentId}.
+     *
+     * @param context The current context.
+     * @param shortcutType The preferred shortcut type user selected.
+     * @param componentId The component id that need to be checked.
+     * @return {@code true} if a component id is contained.
+     */
+    public static boolean isShortcutContained(Context context, @ShortcutType int shortcutType,
+            @NonNull String componentId) {
+        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+        final List<String> requiredTargets = am.getAccessibilityShortcutTargets(shortcutType);
+        return requiredTargets.contains(componentId);
     }
 
     /**
