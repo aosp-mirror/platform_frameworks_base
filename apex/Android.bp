@@ -136,7 +136,7 @@ stubs_defaults {
     name: "framework-module-stubs-defaults-publicapi",
     args: mainline_framework_stubs_args,
     installable: false,
-    sdk_version: "current",
+    sdk_version: "module_current",
     filter_packages: framework_packages_to_document,
     check_api: {
         current: {
@@ -151,7 +151,7 @@ stubs_defaults {
     args: mainline_framework_stubs_args + priv_apps,
     libs: ["framework-annotations-lib"],
     installable: false,
-    sdk_version: "system_current",
+    sdk_version: "module_current",
     filter_packages: framework_packages_to_document,
     check_api: {
         current: {
