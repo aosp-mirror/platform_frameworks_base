@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.content.pm.IPackageInstallerSessionFileSystemConnector;
+import android.os.incremental.IIncrementalServiceConnector;
 import android.os.incremental.IncrementalFileSystemControlParcel;
 
 /**
@@ -26,6 +27,8 @@ import android.os.incremental.IncrementalFileSystemControlParcel;
 parcelable FileSystemControlParcel {
     // Incremental FS control descriptors.
     @nullable IncrementalFileSystemControlParcel incremental;
+    // Incremental FS service.
+    @nullable IIncrementalServiceConnector service;
     // Callback-based installation connector.
     @nullable IPackageInstallerSessionFileSystemConnector callback;
 }
