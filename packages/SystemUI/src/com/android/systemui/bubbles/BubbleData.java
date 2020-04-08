@@ -28,6 +28,7 @@ import android.content.Context;
 import android.service.notification.NotificationListenerService;
 import android.util.Log;
 import android.util.Pair;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 
@@ -751,10 +752,22 @@ public class BubbleData {
     }
 
     @VisibleForTesting(visibility = PRIVATE)
+    @Nullable
     Bubble getBubbleWithKey(String key) {
         for (int i = 0; i < mBubbles.size(); i++) {
             Bubble bubble = mBubbles.get(i);
             if (bubble.getKey().equals(key)) {
+                return bubble;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    Bubble getBubbleWithView(View view) {
+        for (int i = 0; i < mBubbles.size(); i++) {
+            Bubble bubble = mBubbles.get(i);
+            if (bubble.getIconView() != null && bubble.getIconView().equals(view)) {
                 return bubble;
             }
         }
