@@ -1060,4 +1060,11 @@ public final class Zygote {
      */
     @FastNative
     public static native int nativeParseSigChld(byte[] in, int length, int[] out);
+
+    /**
+     * Returns whether the kernel supports tagged pointers. Present in the
+     * Android Common Kernel from 4.14 and up. By default, you should prefer
+     * fully-feature Memory Tagging, rather than the static Tagged Pointers.
+     */
+    public static native boolean nativeSupportsTaggedPointers();
 }
