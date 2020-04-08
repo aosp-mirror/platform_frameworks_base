@@ -49,9 +49,11 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
 
     private boolean mInitialized = false;
     private SectionHeaderView mGentleHeader;
+    private SectionHeaderView mAlertHeader;
     private boolean mGentleHeaderVisible = false;
+    private boolean mAlertHeaderVisible = false;
     @Nullable private ExpandableNotificationRow mFirstGentleNotif;
-    @Nullable private View.OnClickListener mOnClearGentleNotifsClickListener;
+    @Nullable private ExpandableNotificationRow mFirstAlertNotif;
 
     NotificationSectionsManager(
             NotificationStackScrollLayout parent,
@@ -76,43 +78,42 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
         mConfigurationController.addCallback(mConfigurationListener);
     }
 
+    void reinflateViews(LayoutInflater layoutInflater) {
+        mGentleHeader = reinflateView(layoutInflater, mGentleHeader,
+                R.string.notification_section_header_gentle);
+        mAlertHeader = reinflateView(layoutInflater, mAlertHeader,
+                R.string.notification_section_header_alerting);
+    }
+
     /**
      * Reinflates the entire notification header, including all decoration views.
      */
-    void reinflateViews(LayoutInflater layoutInflater) {
+    SectionHeaderView reinflateView(LayoutInflater layoutInflater,
+            SectionHeaderView sectionHeader, int labelId) {
         int oldPos = -1;
-        if (mGentleHeader != null) {
-            if (mGentleHeader.getTransientContainer() != null) {
-                mGentleHeader.getTransientContainer().removeView(mGentleHeader);
-            } else if (mGentleHeader.getParent() != null) {
-                oldPos = mParent.indexOfChild(mGentleHeader);
-                mParent.removeView(mGentleHeader);
+        if (sectionHeader != null) {
+            if (sectionHeader.getTransientContainer() != null) {
+                sectionHeader.getTransientContainer().removeView(sectionHeader);
+            } else if (sectionHeader.getParent() != null) {
+                oldPos = mParent.indexOfChild(sectionHeader);
+                mParent.removeView(sectionHeader);
             }
         }
 
-        mGentleHeader = (SectionHeaderView) layoutInflater.inflate(
+        sectionHeader = (SectionHeaderView) layoutInflater.inflate(
                 R.layout.status_bar_notification_section_header, mParent, false);
-        mGentleHeader.setOnHeaderClickListener(this::onGentleHeaderClick);
-        mGentleHeader.setOnClearAllClickListener(this::onClearGentleNotifsClick);
+        sectionHeader.setLabelText(mParent.getContext().getResources().getString(labelId));
 
         if (oldPos != -1) {
-            mParent.addView(mGentleHeader, oldPos);
+            mParent.addView(sectionHeader, oldPos);
         }
-    }
 
-    /** Listener for when the "clear all" buttton is clciked on the gentle notification header. */
-    void setOnClearGentleNotifsClickListener(View.OnClickListener listener) {
-        mOnClearGentleNotifsClickListener = listener;
-    }
-
-    /** Must be called whenever the UI mode changes (i.e. when we enter night mode). */
-    void onUiModeChanged() {
-        mGentleHeader.onUiModeChanged();
+        return sectionHeader;
     }
 
     @Override
     public boolean beginsSection(View view) {
-        return view == getFirstLowPriorityChild();
+        return view == getFirstLowPriorityChild() || view == getFirstHighPriorityChild();
     }
 
     /**
@@ -124,63 +125,70 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
             return;
         }
 
-        mFirstGentleNotif = null;
-        int firstGentleNotifIndex = -1;
+        mGentleHeaderVisible = adjustHeaderVisibilityAndPosition(
+                getFirstNotificationCategoryIndex(true), mGentleHeader, mGentleHeaderVisible);
+        mAlertHeaderVisible = adjustHeaderVisibilityAndPosition(
+                getFirstNotificationCategoryIndex(false), mAlertHeader, mAlertHeaderVisible);
+    }
 
+    private int getFirstNotificationCategoryIndex(boolean gentle) {
         final int n = mParent.getChildCount();
         for (int i = 0; i < n; i++) {
             View child = mParent.getChildAt(i);
             if (child instanceof ExpandableNotificationRow
                     && child.getVisibility() != View.GONE) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!row.getEntry().isTopBucket()) {
-                    firstGentleNotifIndex = i;
+                if (!gentle && row.getEntry().isTopBucket()) {
+                    mFirstAlertNotif = row;
+                    return i;
+                } else if (gentle && !row.getEntry().isTopBucket()) {
                     mFirstGentleNotif = row;
-                    break;
+                    return i;
                 }
             }
         }
 
-        adjustGentleHeaderVisibilityAndPosition(firstGentleNotifIndex);
-
-        mGentleHeader.setAreThereDismissableGentleNotifs(
-                mParent.hasActiveClearableNotifications(ROWS_GENTLE));
+        return -1;
     }
 
-    private void adjustGentleHeaderVisibilityAndPosition(int firstGentleNotifIndex) {
-        final boolean showGentleHeader =
-                firstGentleNotifIndex != -1
-                        && mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
-        final int currentHeaderIndex = mParent.indexOfChild(mGentleHeader);
+    private boolean adjustHeaderVisibilityAndPosition(int firstNotifIndex,
+            SectionHeaderView sectionHeader, boolean headerCurrentlyVisible) {
+        final boolean showHeader = firstNotifIndex != -1
+                && mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
+        final int currentHeaderIndex = mParent.indexOfChild(sectionHeader);
 
-        if (!showGentleHeader) {
-            if (mGentleHeaderVisible) {
-                mGentleHeaderVisible = false;
-                mParent.removeView(mGentleHeader);
+        if (!showHeader) {
+            if (headerCurrentlyVisible) {
+                headerCurrentlyVisible = false;
+                mParent.removeView(sectionHeader);
+                sectionHeader.setVisible(false, false);
             }
         } else {
-            if (!mGentleHeaderVisible) {
-                mGentleHeaderVisible = true;
+            if (!headerCurrentlyVisible) {
+                headerCurrentlyVisible = true;
                 // If the header is animating away, it will still have a parent, so detach it first
                 // TODO: We should really cancel the active animations here. This will happen
                 // automatically when the view's intro animation starts, but it's a fragile link.
-                if (mGentleHeader.getTransientContainer() != null) {
-                    mGentleHeader.getTransientContainer().removeTransientView(mGentleHeader);
-                    mGentleHeader.setTransientContainer(null);
+                if (sectionHeader.getTransientContainer() != null) {
+                    sectionHeader.getTransientContainer().removeTransientView(sectionHeader);
+                    sectionHeader.setTransientContainer(null);
                 }
-                mParent.addView(mGentleHeader, firstGentleNotifIndex);
-            } else if (currentHeaderIndex != firstGentleNotifIndex - 1) {
+                mParent.addView(sectionHeader, firstNotifIndex);
+                sectionHeader.setVisible(true, false);
+            } else if (currentHeaderIndex != firstNotifIndex - 1) {
                 // Relocate the header to be immediately before the first child in the section
-                int targetIndex = firstGentleNotifIndex;
-                if (currentHeaderIndex < firstGentleNotifIndex) {
+                int targetIndex = firstNotifIndex;
+                if (currentHeaderIndex < firstNotifIndex) {
                     // Adjust the target index to account for the header itself being temporarily
                     // removed during the position change.
                     targetIndex--;
                 }
 
-                mParent.changeViewPosition(mGentleHeader, targetIndex);
+                mParent.changeViewPosition(sectionHeader, targetIndex);
             }
         }
+
+        return headerCurrentlyVisible;
     }
 
     /**
@@ -233,11 +241,11 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
 
     @Nullable
     private ActivatableNotificationView getFirstLowPriorityChild() {
-        if (mGentleHeaderVisible) {
-            return mGentleHeader;
-        } else {
-            return mFirstGentleNotif;
-        }
+        return mFirstGentleNotif;
+    }
+
+    private ActivatableNotificationView getFirstHighPriorityChild() {
+        return mFirstAlertNotif;
     }
 
     @Nullable
@@ -262,21 +270,7 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
         @Override
         public void onLocaleListChanged() {
             mGentleHeader.reinflateContents();
+            mAlertHeader.reinflateContents();
         }
     };
-
-    private void onGentleHeaderClick(View v) {
-        Intent intent = new Intent(Settings.ACTION_NOTIFICATION_SETTINGS);
-        mActivityStarter.startActivity(
-                intent,
-                true,
-                true,
-                Intent.FLAG_ACTIVITY_SINGLE_TOP);
-    }
-
-    private void onClearGentleNotifsClick(View v) {
-        if (mOnClearGentleNotifsClickListener != null) {
-            mOnClearGentleNotifsClickListener.onClick(v);
-        }
-    }
 }

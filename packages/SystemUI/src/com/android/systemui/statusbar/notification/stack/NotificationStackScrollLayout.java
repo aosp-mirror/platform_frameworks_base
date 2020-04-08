@@ -547,11 +547,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         configurationController,
                         NotificationUtils.useNewInterruptionModel(context));
         mSectionsManager.initialize(LayoutInflater.from(context));
-        mSectionsManager.setOnClearGentleNotifsClickListener(v -> {
-            // Leave the shade open if there will be other notifs left over to clear
-            final boolean closeShade = !hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
-            clearNotifications(ROWS_GENTLE, closeShade);
-        });
 
         mAmbientState = new AmbientState(context, mSectionsManager, mHeadsUpManager);
         mBgColor = context.getColor(R.color.notification_shade_background_color);

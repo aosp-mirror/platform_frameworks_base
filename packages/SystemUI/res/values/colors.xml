@@ -104,7 +104,7 @@
     <color name="notification_guts_priority_button_bg_stroke_color">@color/GM2_grey_300</color>
     <color name="notification_guts_priority_button_bg_stroke_color_selected">@color/GM2_blue_600</color>
 
-    <color name="notification_section_header_label_color">@color/GM2_grey_900</color>
+    <color name="notification_section_header_label_color">#FFFFFFFF</color>
     <color name="notification_section_clear_all_btn_color">@color/GM2_grey_700</color>
     <!-- The divider view for the notification channel editor half-shelf -->
     <color name="notification_channel_dialog_separator">@color/GM2_grey_200</color>

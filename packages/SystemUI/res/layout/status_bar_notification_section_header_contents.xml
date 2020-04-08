@@ -24,18 +24,8 @@
         android:layout_marginStart="@dimen/notification_section_header_padding_left"
         android:gravity="start"
         android:textAlignment="gravity"
-        android:text="@string/notification_section_header_gentle"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:textColor="@color/notification_section_header_label_color"
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-    />
-    <ImageView
-        android:id="@+id/btn_clear_all"
-        android:layout_width="@dimen/notification_section_header_height"
-        android:layout_height="@dimen/notification_section_header_height"
-        android:layout_marginEnd="4dp"
-        android:src="@drawable/status_bar_notification_section_header_clear_btn"
-        android:contentDescription="@string/accessibility_notification_section_header_gentle_clear_all"
-        android:scaleType="center"
     />
 </merge>

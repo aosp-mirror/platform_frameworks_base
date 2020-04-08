@@ -19,32 +19,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/notification_section_header_height"
-    android:focusable="true"
-    android:clickable="true"
     >
-
-    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
-        android:id="@+id/backgroundNormal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
-        android:id="@+id/backgroundDimmed"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <LinearLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="4dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         >
         <include layout="@layout/status_bar_notification_section_header_contents"/>
     </LinearLayout>
-
-    <com.android.systemui.statusbar.notification.FakeShadowView
-        android:id="@+id/fake_shadow"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
 </com.android.systemui.statusbar.notification.stack.SectionHeaderView>
