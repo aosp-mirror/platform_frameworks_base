@@ -75,7 +75,7 @@ public class VpnManager {
     }
 
     /**
-     * Create an instance of the VpnManger with the given context.
+     * Create an instance of the VpnManager with the given context.
      *
      * <p>Internal only. Applications are expected to obtain an instance of the VpnManager via the
      * {@link Context.getSystemService()} method call.
