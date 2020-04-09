@@ -58,6 +58,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.server.autofill.ui.InlineSuggestionFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
@@ -263,6 +264,8 @@ final class RemoteAugmentedAutofillService
                                             && fieldIds.get(0).equals(focusedId);
                                     client.autofill(sessionId, fieldIds, dataset.getFieldValues(),
                                             hideHighlight);
+                                    inlineSuggestionsCallback.apply(new InlineSuggestionsResponse(
+                                            Collections.EMPTY_LIST));
                                 } catch (RemoteException e) {
                                     Slog.w(TAG, "Encounter exception autofilling the values");
                                 }
