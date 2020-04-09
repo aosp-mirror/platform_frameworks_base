@@ -115,6 +115,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
 
     @Test
     public void testShow_dismissedByCallback() throws Exception {
+        doAnswer(answerVoid(Runnable::run)).when(mHandler).post(any(Runnable.class));
         doAnswer(invocation -> {
             IKeyguardCallback callback = (IKeyguardCallback) invocation.getArguments()[1];
             callback.onDismiss();
@@ -184,7 +185,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
 
     private void verifyViewDismissed(SurfaceView v) throws Exception {
         verify(mParent).removeView(v);
-        verify(mKeyguardCallback).dismiss(true, TARGET_USER_ID);
+        verify(mKeyguardCallback).dismiss(true, TARGET_USER_ID, true);
         assertThat(mContext.isBound(mComponentName)).isFalse();
     }
 }
