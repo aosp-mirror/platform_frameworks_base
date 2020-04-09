@@ -2032,13 +2032,17 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(false));
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(UserManager.DISALLOW_CAMERA),
-                parentDpm.getUserRestrictions(admin1)
+                dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                        .getParentActiveAdmin()
+                        .getEffectiveRestrictions()
         );
 
         parentDpm.setCameraDisabled(admin1, false);
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(),
-                parentDpm.getUserRestrictions(admin1)
+                dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                        .getParentActiveAdmin()
+                        .getEffectiveRestrictions()
         );
         reset(getServices().userManagerInternal);
     }
@@ -2053,7 +2057,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         parentDpm.clearUserRestriction(admin1, restriction);
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(),
-                parentDpm.getUserRestrictions(admin1)
+                dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                        .getParentActiveAdmin()
+                        .getEffectiveRestrictions()
         );
     }
 
@@ -2088,11 +2094,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void assertNoDeviceOwnerRestrictions() {
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(),
-                getDeviceOwner().ensureUserRestrictions()
-        );
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(),
-                dpm.getUserRestrictions(admin1)
+                getDeviceOwner().getEffectiveRestrictions()
         );
     }
 
