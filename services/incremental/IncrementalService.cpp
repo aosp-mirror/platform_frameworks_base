@@ -51,7 +51,7 @@ using namespace android::content::pm;
 namespace fs = std::filesystem;
 
 constexpr const char* kDataUsageStats = "android.permission.LOADER_USAGE_STATS";
-constexpr const char* kOpUsage = "android:get_usage_stats";
+constexpr const char* kOpUsage = "android:loader_usage_stats";
 
 namespace android::incremental {
 
