@@ -139,6 +139,7 @@ class TestDisplayContent extends DisplayContent {
             spyOn(displayPolicy);
             if (mSystemDecorations) {
                 doReturn(true).when(newDisplay).supportsSystemDecorations();
+                doReturn(true).when(displayPolicy).hasNavigationBar();
             } else {
                 doReturn(false).when(displayPolicy).hasNavigationBar();
                 doReturn(false).when(displayPolicy).hasStatusBar();
