@@ -19,7 +19,7 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 LOCAL_PACKAGE_NAME := OverlayHostTests_UpdateOverlay
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := general-tests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_STATIC_JAVA_LIBRARIES := androidx.test.rules
 LOCAL_USE_AAPT2 := true
 LOCAL_AAPT_FLAGS := --no-resource-removal
@@ -31,7 +31,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_FrameworkOverlayV1
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := general-tests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v1
 LOCAL_AAPT_FLAGS += --version-code 1 --version-name v1
@@ -43,7 +43,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_FrameworkOverlayV2
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := general-tests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v2
 LOCAL_AAPT_FLAGS += --version-code 2 --version-name v2
@@ -57,7 +57,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_AppOverlayV1
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := general-tests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v1
 LOCAL_AAPT_FLAGS += --version-code 1 --version-name v1
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/app/v1/res
@@ -68,7 +68,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_AppOverlayV2
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := general-tests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v2
 LOCAL_AAPT_FLAGS += --version-code 2 --version-name v2
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/app/v2/res
