@@ -114,121 +114,6 @@ public class BiometricService extends SystemService {
     private static final int MSG_ON_DEVICE_CREDENTIAL_PRESSED = 12;
     private static final int MSG_ON_SYSTEM_EVENT = 13;
 
-    /**
-     * Authentication either just called and we have not transitioned to the CALLED state, or
-     * authentication terminated (success or error).
-     */
-    static final int STATE_AUTH_IDLE = 0;
-    /**
-     * Authentication was called and we are waiting for the <Biometric>Services to return their
-     * cookies before starting the hardware and showing the BiometricPrompt.
-     */
-    static final int STATE_AUTH_CALLED = 1;
-    /**
-     * Authentication started, BiometricPrompt is showing and the hardware is authenticating.
-     */
-    static final int STATE_AUTH_STARTED = 2;
-    /**
-     * Authentication is paused, waiting for the user to press "try again" button. Only
-     * passive modalities such as Face or Iris should have this state. Note that for passive
-     * modalities, the HAL enters the idle state after onAuthenticated(false) which differs from
-     * fingerprint.
-     */
-    static final int STATE_AUTH_PAUSED = 3;
-    /**
-     * Authentication is successful, but we're waiting for the user to press "confirm" button.
-     */
-    static final int STATE_AUTH_PENDING_CONFIRM = 5;
-    /**
-     * Biometric authenticated, waiting for SysUI to finish animation
-     */
-    static final int STATE_AUTHENTICATED_PENDING_SYSUI = 6;
-    /**
-     * Biometric error, waiting for SysUI to finish animation
-     */
-    static final int STATE_ERROR_PENDING_SYSUI = 7;
-    /**
-     * Device credential in AuthController is showing
-     */
-    static final int STATE_SHOWING_DEVICE_CREDENTIAL = 8;
-
-    final class AuthSession {
-        // Map of Authenticator/Cookie pairs. We expect to receive the cookies back from
-        // <Biometric>Services before we can start authenticating. Pairs that have been returned
-        // are moved to mModalitiesMatched.
-        final HashMap<Integer, Integer> mModalitiesWaiting;
-        // Pairs that have been matched.
-        final HashMap<Integer, Integer> mModalitiesMatched = new HashMap<>();
-
-        // The following variables are passed to authenticateInternal, which initiates the
-        // appropriate <Biometric>Services.
-        final IBinder mToken;
-        final long mSessionId;
-        final int mUserId;
-        // Original receiver from BiometricPrompt.
-        final IBiometricServiceReceiver mClientReceiver;
-        final String mOpPackageName;
-        // Info to be shown on BiometricDialog when all cookies are returned.
-        final Bundle mBundle;
-        final int mCallingUid;
-        final int mCallingPid;
-        final int mCallingUserId;
-        // Continue authentication with the same modality/modalities after "try again" is
-        // pressed
-        final int mModality;
-        final boolean mRequireConfirmation;
-
-        // The current state, which can be either idle, called, or started
-        int mState = STATE_AUTH_IDLE;
-        // For explicit confirmation, do not send to keystore until the user has confirmed
-        // the authentication.
-        byte[] mTokenEscrow;
-        // Waiting for SystemUI to complete animation
-        int mErrorEscrow;
-        int mVendorCodeEscrow;
-
-        // Timestamp when authentication started
-        private long mStartTimeMs;
-        // Timestamp when hardware authentication occurred
-        private long mAuthenticatedTimeMs;
-
-        AuthSession(HashMap<Integer, Integer> modalities, IBinder token, long sessionId,
-                int userId, IBiometricServiceReceiver receiver, String opPackageName,
-                Bundle bundle, int callingUid, int callingPid, int callingUserId,
-                int modality, boolean requireConfirmation) {
-            mModalitiesWaiting = modalities;
-            mToken = token;
-            mSessionId = sessionId;
-            mUserId = userId;
-            mClientReceiver = receiver;
-            mOpPackageName = opPackageName;
-            mBundle = bundle;
-            mCallingUid = callingUid;
-            mCallingPid = callingPid;
-            mCallingUserId = callingUserId;
-            mModality = modality;
-            mRequireConfirmation = requireConfirmation;
-        }
-
-        boolean isCrypto() {
-            return mSessionId != 0;
-        }
-
-        boolean containsCookie(int cookie) {
-            if (mModalitiesWaiting != null && mModalitiesWaiting.containsValue(cookie)) {
-                return true;
-            }
-            if (mModalitiesMatched != null && mModalitiesMatched.containsValue(cookie)) {
-                return true;
-            }
-            return false;
-        }
-
-        boolean isAllowDeviceCredential() {
-            return Utils.isCredentialRequested(mBundle);
-        }
-    }
-
     private final Injector mInjector;
     private final DevicePolicyManager mDevicePolicyManager;
     @VisibleForTesting
@@ -1328,10 +1213,10 @@ public class BiometricService extends SystemService {
             }
 
             if (!requireConfirmation) {
-                mCurrentAuthSession.mState = STATE_AUTHENTICATED_PENDING_SYSUI;
+                mCurrentAuthSession.mState = AuthSession.STATE_AUTHENTICATED_PENDING_SYSUI;
             } else {
                 mCurrentAuthSession.mAuthenticatedTimeMs = System.currentTimeMillis();
-                mCurrentAuthSession.mState = STATE_AUTH_PENDING_CONFIRM;
+                mCurrentAuthSession.mState = AuthSession.STATE_AUTH_PENDING_CONFIRM;
             }
 
             // Notify SysUI that the biometric has been authenticated. SysUI already knows
@@ -1359,7 +1244,7 @@ public class BiometricService extends SystemService {
             if ((mCurrentAuthSession.mModality & TYPE_FACE) != 0) {
                 // Pause authentication. onBiometricAuthenticated(false) causes the
                 // dialog to show a "try again" button for passive modalities.
-                mCurrentAuthSession.mState = STATE_AUTH_PAUSED;
+                mCurrentAuthSession.mState = AuthSession.STATE_AUTH_PAUSED;
             }
 
             mCurrentAuthSession.mClientReceiver.onAuthenticationFailed();
@@ -1380,7 +1265,7 @@ public class BiometricService extends SystemService {
             }
 
             mStatusBarService.onBiometricError(modality, error, vendorCode);
-            mCurrentAuthSession.mState = STATE_AUTH_PAUSED;
+            mCurrentAuthSession.mState = AuthSession.STATE_AUTH_PAUSED;
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
@@ -1399,12 +1284,12 @@ public class BiometricService extends SystemService {
                 mCurrentAuthSession.mErrorEscrow = error;
                 mCurrentAuthSession.mVendorCodeEscrow = vendorCode;
 
-                if (mCurrentAuthSession.mState == STATE_AUTH_STARTED) {
+                if (mCurrentAuthSession.mState == AuthSession.STATE_AUTH_STARTED) {
                     final boolean errorLockout = error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
                             || error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
                     if (mCurrentAuthSession.isAllowDeviceCredential() && errorLockout) {
                         // SystemUI handles transition from biometric to device credential.
-                        mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+                        mCurrentAuthSession.mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
                         mStatusBarService.onBiometricError(modality, error, vendorCode);
                     } else if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
                         mStatusBarService.hideAuthenticationDialog();
@@ -1414,17 +1299,17 @@ public class BiometricService extends SystemService {
                         mCurrentAuthSession.mClientReceiver.onError(modality, error, vendorCode);
                         mCurrentAuthSession = null;
                     } else {
-                        mCurrentAuthSession.mState = STATE_ERROR_PENDING_SYSUI;
+                        mCurrentAuthSession.mState = AuthSession.STATE_ERROR_PENDING_SYSUI;
                         mStatusBarService.onBiometricError(modality, error, vendorCode);
                     }
-                } else if (mCurrentAuthSession.mState == STATE_AUTH_PAUSED) {
+                } else if (mCurrentAuthSession.mState == AuthSession.STATE_AUTH_PAUSED) {
                     // In the "try again" state, we should forward canceled errors to
                     // the client and and clean up. The only error we should get here is
                     // ERROR_CANCELED due to another client kicking us out.
                     mCurrentAuthSession.mClientReceiver.onError(modality, error, vendorCode);
                     mStatusBarService.hideAuthenticationDialog();
                     mCurrentAuthSession = null;
-                } else if (mCurrentAuthSession.mState == STATE_SHOWING_DEVICE_CREDENTIAL) {
+                } else if (mCurrentAuthSession.mState == AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL) {
                     Slog.d(TAG, "Biometric canceled, ignoring from state: "
                             + mCurrentAuthSession.mState);
                 } else {
@@ -1433,7 +1318,7 @@ public class BiometricService extends SystemService {
                 }
             } else if (mPendingAuthSession != null
                     && mPendingAuthSession.containsCookie(cookie)) {
-                if (mPendingAuthSession.mState == STATE_AUTH_CALLED) {
+                if (mPendingAuthSession.mState == AuthSession.STATE_AUTH_CALLED) {
                     // If any error is received while preparing the auth session (lockout, etc),
                     // and if device credential is allowed, just show the credential UI.
                     if (mPendingAuthSession.isAllowDeviceCredential()) {
@@ -1447,7 +1332,7 @@ public class BiometricService extends SystemService {
                                 authenticators);
 
                         mCurrentAuthSession = mPendingAuthSession;
-                        mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+                        mCurrentAuthSession.mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
                         mPendingAuthSession = null;
 
                         mStatusBarService.showAuthenticationDialog(
@@ -1587,7 +1472,7 @@ public class BiometricService extends SystemService {
                 Binder.getCallingPid(), UserHandle.getCallingUserId(),
                 false /* fromClient */);
 
-        mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+        mCurrentAuthSession.mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
     }
 
     private void handleOnSystemEvent(int event) {
@@ -1639,7 +1524,7 @@ public class BiometricService extends SystemService {
 
         if (mPendingAuthSession.mModalitiesWaiting.isEmpty()) {
             final boolean continuing = mCurrentAuthSession != null
-                    && mCurrentAuthSession.mState == STATE_AUTH_PAUSED;
+                    && mCurrentAuthSession.mState == AuthSession.STATE_AUTH_PAUSED;
 
             mCurrentAuthSession = mPendingAuthSession;
 
@@ -1647,7 +1532,7 @@ public class BiometricService extends SystemService {
             mCurrentAuthSession.mStartTimeMs = System.currentTimeMillis();
             mPendingAuthSession = null;
 
-            mCurrentAuthSession.mState = STATE_AUTH_STARTED;
+            mCurrentAuthSession.mState = AuthSession.STATE_AUTH_STARTED;
             int modality = TYPE_NONE;
             it = mCurrentAuthSession.mModalitiesMatched.entrySet().iterator();
             while (it.hasNext()) {
@@ -1749,7 +1634,7 @@ public class BiometricService extends SystemService {
 
         try {
             if (authenticators == Authenticators.DEVICE_CREDENTIAL) {
-                mPendingAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+                mPendingAuthSession.mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
                 mCurrentAuthSession = mPendingAuthSession;
                 mPendingAuthSession = null;
 
@@ -1762,7 +1647,7 @@ public class BiometricService extends SystemService {
                         mCurrentAuthSession.mOpPackageName,
                         sessionId);
             } else {
-                mPendingAuthSession.mState = STATE_AUTH_CALLED;
+                mPendingAuthSession.mState = AuthSession.STATE_AUTH_CALLED;
                 for (AuthenticatorWrapper authenticator : mAuthenticators) {
                     // TODO(b/141025588): use ids instead of modalities to avoid ambiguity.
                     if (authenticator.modality == modality) {
@@ -1785,7 +1670,8 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        if (mCurrentAuthSession != null && mCurrentAuthSession.mState != STATE_AUTH_STARTED) {
+        if (mCurrentAuthSession != null
+                && mCurrentAuthSession.mState != AuthSession.STATE_AUTH_STARTED) {
             // We need to check the current authenticators state. If we're pending confirm
             // or idle, we need to dismiss the dialog and send an ERROR_CANCELED to the client,
             // since we won't be getting an onError from the driver.
@@ -1813,7 +1699,7 @@ public class BiometricService extends SystemService {
         if (mCurrentAuthSession == null) {
             Slog.w(TAG, "Skipping cancelInternal");
             return;
-        } else if (mCurrentAuthSession.mState != STATE_AUTH_STARTED) {
+        } else if (mCurrentAuthSession.mState != AuthSession.STATE_AUTH_STARTED) {
             Slog.w(TAG, "Skipping cancelInternal, state: " + mCurrentAuthSession.mState);
             return;
         }
