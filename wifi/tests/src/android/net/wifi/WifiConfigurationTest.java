@@ -16,9 +16,13 @@
 
 package android.net.wifi;
 
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B;
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OPEN;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OWE;
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_PSK;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_SAE;
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_WAPI_PSK;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -506,5 +510,31 @@ public class WifiConfigurationTest {
                 status2.getNetworkSelectionDisableReason());
         assertEquals(NetworkSelectionStatus.NETWORK_SELECTION_PERMANENTLY_DISABLED,
                 status2.getNetworkSelectionStatus());
+    }
+
+    @Test
+    public void testNeedsPreSharedKey() throws Exception {
+        WifiConfiguration configuration = new WifiConfiguration();
+
+        configuration.setSecurityParams(SECURITY_TYPE_PSK);
+        assertTrue(configuration.needsPreSharedKey());
+
+        configuration.setSecurityParams(SECURITY_TYPE_SAE);
+        assertTrue(configuration.needsPreSharedKey());
+
+        configuration.setSecurityParams(SECURITY_TYPE_WAPI_PSK);
+        assertTrue(configuration.needsPreSharedKey());
+
+        configuration.setSecurityParams(SECURITY_TYPE_OPEN);
+        assertFalse(configuration.needsPreSharedKey());
+
+        configuration.setSecurityParams(SECURITY_TYPE_OWE);
+        assertFalse(configuration.needsPreSharedKey());
+
+        configuration.setSecurityParams(SECURITY_TYPE_EAP);
+        assertFalse(configuration.needsPreSharedKey());
+
+        configuration.setSecurityParams(SECURITY_TYPE_EAP_SUITE_B);
+        assertFalse(configuration.needsPreSharedKey());
     }
 }
