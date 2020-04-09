@@ -6484,10 +6484,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect containingBounds = mTmpBounds;
         mCompatDisplayInsets.getContainerBounds(containingAppBounds, containingBounds, rotation,
                 orientation, orientationRequested, canChangeOrientation);
-        resolvedBounds.set(containingAppBounds);
+        resolvedBounds.set(containingBounds);
         // The size of floating task is fixed (only swap), so the aspect ratio is already correct.
         if (!mCompatDisplayInsets.mIsFloating) {
             applyAspectRatio(resolvedBounds, containingAppBounds, containingBounds);
+        }
+        // If the bounds are restricted by fixed aspect ratio, the resolved bounds should be put in
+        // the container app bounds. Otherwise the entire container bounds are available.
+        final boolean fillContainer = resolvedBounds.equals(containingBounds);
+        if (!fillContainer) {
+            // The horizontal position should not cover insets.
+            resolvedBounds.left = containingAppBounds.left;
         }
 
         // Use resolvedBounds to compute other override configurations such as appBounds. The bounds
@@ -6557,7 +6564,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int offsetX = getHorizontalCenterOffset(
                 (int) viewportW, (int) (contentW * mSizeCompatScale));
         // Above coordinates are in "@" space, now place "*" and "#" to screen space.
-        final int screenPosX = parentAppBounds.left + offsetX;
+        final int screenPosX = (fillContainer ? parentBounds.left : parentAppBounds.left) + offsetX;
         final int screenPosY = parentBounds.top;
         if (screenPosX != 0 || screenPosY != 0) {
             if (mSizeCompatBounds != null) {
@@ -7654,8 +7661,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Ensure the app bounds won't overlap with insets.
                 Task.intersectWithInsetsIfFits(outAppBounds, outBounds, mNonDecorInsets[rotation]);
             }
-            // The horizontal position is centered and it should not cover insets.
-            outBounds.left = outAppBounds.left;
         }
     }
 
