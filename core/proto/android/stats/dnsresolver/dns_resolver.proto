@@ -62,6 +62,13 @@ enum NsRcode {
     NS_R_NOTAUTH = 9;   // Not authoritative for zone
     NS_R_NOTZONE = 10;  // Zone of record different from zone section
     NS_R_MAX = 11;
+    // Define rcode=12~15(UNASSIGNED) in rcode enum type.
+    // Some DNS Servers might return undefined code to devices.
+    // Without the enum definition, that would be noise for our dashboard.
+    NS_R_UNASSIGNED12 = 12; // Unassigned
+    NS_R_UNASSIGNED13 = 13; // Unassigned
+    NS_R_UNASSIGNED14 = 14; // Unassigned
+    NS_R_UNASSIGNED15 = 15; // Unassigned
     // The following are EDNS extended rcodes
     NS_R_BADVERS = 16;
     // The following are TSIG errors
@@ -170,12 +177,22 @@ enum NetworkType {
     NT_BLUETOOTH = 3;
     // Indicates this network uses an Ethernet transport.
     NT_ETHERNET = 4;
-    // Indicates this network uses a VPN transport.
-    NT_VPN = 5;
+    // Indicates this network uses a VPN transport, now deprecated.
+    NT_VPN = 5 [deprecated=true];
     // Indicates this network uses a Wi-Fi Aware transport.
     NT_WIFI_AWARE = 6;
     // Indicates this network uses a LoWPAN transport.
     NT_LOWPAN = 7;
+    // Indicates this network uses a Cellular+VPN transport.
+    NT_CELLULAR_VPN = 8;
+    // Indicates this network uses a Wi-Fi+VPN transport.
+    NT_WIFI_VPN = 9;
+    // Indicates this network uses a Bluetooth+VPN transport.
+    NT_BLUETOOTH_VPN = 10;
+    // Indicates this network uses an Ethernet+VPN transport.
+    NT_ETHERNET_VPN = 11;
+    // Indicates this network uses a Wi-Fi+Cellular+VPN transport.
+    NT_WIFI_CELLULAR_VPN = 12;
 }
 
 enum CacheStatus{

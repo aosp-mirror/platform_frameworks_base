@@ -24,6 +24,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -40,6 +42,7 @@ import androidx.palette.graphics.Palette;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.media.MediaControllerFactory;
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView;
@@ -71,10 +74,11 @@ public class KeyguardMediaPlayer {
     private KeyguardMediaObserver mObserver;
 
     @Inject
-    public KeyguardMediaPlayer(Context context, @Background Executor backgroundExecutor) {
+    public KeyguardMediaPlayer(Context context, MediaControllerFactory factory,
+            @Background Executor backgroundExecutor) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
-        mViewModel = new KeyguardMediaViewModel(context);
+        mViewModel = new KeyguardMediaViewModel(context, factory);
     }
 
     /** Binds media controls to a view hierarchy. */
@@ -139,14 +143,16 @@ public class KeyguardMediaPlayer {
     private static final class KeyguardMediaViewModel {
 
         private final Context mContext;
+        private final MediaControllerFactory mMediaControllerFactory;
         private final MutableLiveData<KeyguardMedia> mMedia = new MutableLiveData<>();
         private final Object mActionsLock = new Object();
         private List<PendingIntent> mActions;
         private float mAlbumArtRadius;
         private int mAlbumArtSize;
 
-        KeyguardMediaViewModel(Context context) {
+        KeyguardMediaViewModel(Context context, MediaControllerFactory factory) {
             mContext = context;
+            mMediaControllerFactory = factory;
             loadDimens();
         }
 
@@ -161,6 +167,17 @@ public class KeyguardMediaPlayer {
         /** Update the media player with information about the active session. */
         public void updateControls(NotificationEntry entry, Icon appIcon,
                 MediaMetadata mediaMetadata) {
+
+            // Check the playback state of the media controller. If it is null, then the session was
+            // probably destroyed. Don't update in this case.
+            final MediaSession.Token token = entry.getSbn().getNotification().extras
+                    .getParcelable(Notification.EXTRA_MEDIA_SESSION);
+            final MediaController controller = token != null
+                    ? mMediaControllerFactory.create(token) : null;
+            if (controller != null && controller.getPlaybackState() == null) {
+                clearControls();
+                return;
+            }
 
             // Foreground and Background colors computed from album art
             Notification notif = entry.getSbn().getNotification();

@@ -83,12 +83,22 @@ public final class CallerIdentity {
      */
     public static CallerIdentity fromBinder(Context context, String packageName,
             @Nullable String featureId) {
+        return fromBinder(context, packageName, featureId, null);
+    }
+
+    /**
+     * Creates a CallerIdentity from the current binder identity, using the given package, feature
+     * id, and listener id. The package will be checked to enforce it belongs to the calling uid,
+     * and a security exception will be thrown if it is invalid.
+     */
+    public static CallerIdentity fromBinder(Context context, String packageName,
+            @Nullable String featureId, @Nullable String listenerId) {
         int uid = Binder.getCallingUid();
         if (!ArrayUtils.contains(context.getPackageManager().getPackagesForUid(uid), packageName)) {
             throw new SecurityException("invalid package \"" + packageName + "\" for uid " + uid);
         }
 
-        return fromBinderUnsafe(context, packageName, featureId);
+        return fromBinderUnsafe(context, packageName, featureId, listenerId);
     }
 
     /**
@@ -99,8 +109,19 @@ public final class CallerIdentity {
      */
     public static CallerIdentity fromBinderUnsafe(Context context, String packageName,
             @Nullable String featureId) {
+        return fromBinderUnsafe(context, packageName, featureId, null);
+    }
+
+    /**
+     * Creates a CallerIdentity from the current binder identity, using the given package, feature
+     * id, and listener id. The package will not be checked to enforce that it belongs to the
+     * calling uid - this method should only be used if the package will be validated by some other
+     * means, such as an appops call.
+     */
+    public static CallerIdentity fromBinderUnsafe(Context context, String packageName,
+            @Nullable String featureId, @Nullable String listenerId) {
         return new CallerIdentity(Binder.getCallingUid(), Binder.getCallingPid(),
-                UserHandle.getCallingUserId(), packageName, featureId,
+                UserHandle.getCallingUserId(), packageName, featureId, listenerId,
                 getBinderPermissionLevel(context));
     }
 
@@ -157,6 +178,9 @@ public final class CallerIdentity {
     /** The calling feature id. */
     public final @Nullable String featureId;
 
+    /** The calling listener id. */
+    public final @Nullable String listenerId;
+
     /**
      * The calling location permission level. This field should only be used for validating
      * permissions for API access. It should not be used for validating permissions for location
@@ -167,11 +191,18 @@ public final class CallerIdentity {
     @VisibleForTesting
     public CallerIdentity(int uid, int pid, int userId, String packageName,
             @Nullable String featureId, @PermissionLevel int permissionLevel) {
+        this(uid, pid, userId, packageName, featureId, null, permissionLevel);
+    }
+
+    private CallerIdentity(int uid, int pid, int userId, String packageName,
+            @Nullable String featureId, @Nullable String listenerId,
+            @PermissionLevel int permissionLevel) {
         this.uid = uid;
         this.pid = pid;
         this.userId = userId;
         this.packageName = Objects.requireNonNull(packageName);
         this.featureId = featureId;
+        this.listenerId = listenerId;
         this.permissionLevel = Preconditions.checkArgumentInRange(permissionLevel, PERMISSION_NONE,
                 PERMISSION_FINE, "permissionLevel");
     }
@@ -216,7 +247,8 @@ public final class CallerIdentity {
         return uid == that.uid
                 && pid == that.pid
                 && packageName.equals(that.packageName)
-                && Objects.equals(featureId, that.featureId);
+                && Objects.equals(featureId, that.featureId)
+                && Objects.equals(listenerId, that.listenerId);
     }
 
     @Override

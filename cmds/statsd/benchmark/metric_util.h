@@ -18,6 +18,7 @@
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "src/StatsLogProcessor.h"
 #include "src/logd/LogEvent.h"
+#include "stats_event.h"
 #include "statslog.h"
 
 namespace android {
@@ -91,6 +92,11 @@ FieldMatcher CreateAttributionUidAndTagDimensions(const int atomId,
 // Create dimensions by attribution uid only.
 FieldMatcher CreateAttributionUidDimensions(const int atomId,
                                             const std::vector<Position>& positions);
+
+void writeAttribution(AStatsEvent* statsEvent, const vector<int>& attributionUids,
+                      const vector<string>& attributionTags);
+
+void parseStatsEventToLogEvent(AStatsEvent* statsEvent, LogEvent* logEvent);
 
 // Create log event for screen state changed.
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(

@@ -17,6 +17,7 @@
 package com.android.server.accessibility;
 
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 
@@ -83,7 +84,7 @@ final class AccessibilityShellCommand extends ShellCommand {
                 return null;
             }
         }
-        return UserHandle.USER_SYSTEM;
+        return ActivityManager.getCurrentUser();
     }
 
     @Override

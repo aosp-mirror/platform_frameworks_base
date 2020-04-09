@@ -46,26 +46,17 @@ void makeLogEvent(LogEvent* logEvent, int64_t timestampNs, int atomId) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 void makeLogEvent(LogEvent* logEvent, int64_t timestampNs, int atomId, string uid) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-
     AStatsEvent_writeString(statsEvent, uid.c_str());
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 }  // namespace

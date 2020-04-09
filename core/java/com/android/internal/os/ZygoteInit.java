@@ -757,9 +757,11 @@ public class ZygoteInit {
             Zygote.applyDebuggerSystemProperty(parsedArgs);
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
-            /* Enable pointer tagging in the system server unconditionally. Hardware support for
-             * this is present in all ARMv8 CPUs; this flag has no effect on other platforms. */
-            parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
+            if (Zygote.nativeSupportsTaggedPointers()) {
+                /* Enable pointer tagging in the system server. Hardware support for this is present
+                 * in all ARMv8 CPUs. */
+                parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
+            }
 
             /* Enable gwp-asan on the system server with a small probability. This is the same
              * policy as applied to native processes and system apps. */

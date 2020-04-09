@@ -103,6 +103,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
         @Override
         public void onPipAnimationEnd(SurfaceControl.Transaction tx,
                 PipAnimationController.PipTransitionAnimator animator) {
+            finishResize(tx, animator.getDestinationBounds(), animator.getTransitionDirection());
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                     final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
@@ -110,7 +111,6 @@ public class PipTaskOrganizer extends TaskOrganizer {
                             animator.getTransitionDirection());
                 }
             });
-            finishResize(tx, animator.getDestinationBounds(), animator.getTransitionDirection());
         }
 
         @Override
@@ -247,7 +247,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
     public void onTaskAppeared(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(info, "Requires RunningTaskInfo");
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                getAspectRatioOrDefault(info.pictureInPictureParams),
+                info.topActivity, getAspectRatioOrDefault(info.pictureInPictureParams),
                 null /* bounds */, getMinimalSize(info.topActivityInfo));
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         mTaskInfo = info;
@@ -303,7 +303,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
             return;
         }
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                getAspectRatioOrDefault(newParams),
+                info.topActivity, getAspectRatioOrDefault(newParams),
                 null /* bounds */, getMinimalSize(info.topActivityInfo));
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration,
@@ -335,7 +335,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
         }
 
         final Rect newDestinationBounds = mPipBoundsHandler.getDestinationBounds(
-                getAspectRatioOrDefault(mTaskInfo.pictureInPictureParams),
+                mTaskInfo.topActivity, getAspectRatioOrDefault(mTaskInfo.pictureInPictureParams),
                 null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
         if (newDestinationBounds.equals(currentDestinationBounds)) return;
         if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
