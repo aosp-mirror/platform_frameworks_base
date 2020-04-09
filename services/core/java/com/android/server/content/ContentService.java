@@ -569,9 +569,10 @@ public final class ContentService extends IContentService.Stub {
                 // Immediately dispatch notifications to foreground apps that
                 // are important to the user; all other background observers are
                 // delayed to avoid stampeding
+                final boolean noDelay = (key.flags & ContentResolver.NOTIFY_NO_DELAY) != 0;
                 final int procState = LocalServices.getService(ActivityManagerInternal.class)
                         .getUidProcessState(key.uid);
-                if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND || noDelay) {
                     task.run();
                 } else {
                     BackgroundThread.getHandler().postDelayed(task, BACKGROUND_OBSERVER_DELAY);
