@@ -78,12 +78,10 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
-import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.KeyguardBypassEnabledProvider;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.leak.LeakDetector;
@@ -202,7 +200,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mNotificationRoundnessManager,
                 mock(DynamicPrivacyController.class),
                 mStatusBarStateController,
-                mock(NotificationGutsManager.class),
                 mNotificationSectionsManager,
                 mock(ForegroundServiceSectionController.class),
                 mock(ForegroundServiceDismissalFeatureController.class),
