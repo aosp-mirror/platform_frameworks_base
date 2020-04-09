@@ -2888,7 +2888,8 @@ public final class SurfaceControl implements Parcelable {
     /**
      * Acquire a frame rate flexibility token, which allows surface flinger to freely switch display
      * frame rates. This is used by CTS tests to put the device in a consistent state. See
-     * ISurfaceComposer::acquireFrameRateFlexibilityToken().
+     * ISurfaceComposer::acquireFrameRateFlexibilityToken(). The caller must have the
+     * ACCESS_SURFACE_FLINGER permission, or else the call will fail, returning 0.
      * @hide
      */
     @TestApi
