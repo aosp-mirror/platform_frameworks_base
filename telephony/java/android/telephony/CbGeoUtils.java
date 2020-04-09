@@ -128,6 +128,23 @@ public class CbGeoUtils {
         public String toString() {
             return "(" + lat + "," + lng + ")";
         }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+
+            if (!(o instanceof LatLng)) {
+                return false;
+            }
+
+            LatLng l = (LatLng) o;
+            return lat == l.lat && lng == l.lng;
+        }
     }
 
     /**
@@ -280,6 +297,32 @@ public class CbGeoUtils {
             }
             return str;
         }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+
+            if (!(o instanceof Polygon)) {
+                return false;
+            }
+
+            Polygon p = (Polygon) o;
+            if (mVertices.size() != p.mVertices.size()) {
+                return false;
+            }
+            for (int i = 0; i < mVertices.size(); i++) {
+                if (!mVertices.get(i).equals(p.mVertices.get(i))) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 
     /**
@@ -334,6 +377,24 @@ public class CbGeoUtils {
             }
 
             return str;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+
+            if (!(o instanceof Circle)) {
+                return false;
+            }
+
+            Circle c = (Circle) o;
+            return mCenter.equals(c.mCenter)
+                    && Double.compare(mRadiusMeter, c.mRadiusMeter) == 0;
         }
     }
 
