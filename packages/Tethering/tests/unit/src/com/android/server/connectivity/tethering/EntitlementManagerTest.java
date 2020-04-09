@@ -33,7 +33,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -72,8 +71,6 @@ import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -255,19 +252,16 @@ public final class EntitlementManagerTest {
 
     @Test
     public void testRequestLastEntitlementCacheValue() throws Exception {
-        final CountDownLatch mCallbacklatch = new CountDownLatch(1);
         // 1. Entitlement check is not required.
         mEnMgr.fakeEntitlementResult = TETHER_ERROR_NO_ERROR;
         ResultReceiver receiver = new ResultReceiver(null) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 assertEquals(TETHER_ERROR_NO_ERROR, resultCode);
-                mCallbacklatch.countDown();
             }
         };
         mEnMgr.requestLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, true);
         mLooper.dispatchAll();
-        callbackTimeoutHelper(mCallbacklatch);
         assertEquals(0, mEnMgr.uiProvisionCount);
         mEnMgr.reset();
 
@@ -277,12 +271,10 @@ public final class EntitlementManagerTest {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 assertEquals(TETHER_ERROR_ENTITLEMENT_UNKNOWN, resultCode);
-                mCallbacklatch.countDown();
             }
         };
         mEnMgr.requestLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, false);
         mLooper.dispatchAll();
-        callbackTimeoutHelper(mCallbacklatch);
         assertEquals(0, mEnMgr.uiProvisionCount);
         mEnMgr.reset();
         // 3. No cache value and ui entitlement check is needed.
@@ -291,12 +283,10 @@ public final class EntitlementManagerTest {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 assertEquals(TETHER_ERROR_PROVISIONING_FAILED, resultCode);
-                mCallbacklatch.countDown();
             }
         };
         mEnMgr.requestLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, true);
         mLooper.dispatchAll();
-        callbackTimeoutHelper(mCallbacklatch);
         assertEquals(1, mEnMgr.uiProvisionCount);
         mEnMgr.reset();
         // 4. Cache value is TETHER_ERROR_PROVISIONING_FAILED and don't need to run entitlement
@@ -306,12 +296,10 @@ public final class EntitlementManagerTest {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 assertEquals(TETHER_ERROR_PROVISIONING_FAILED, resultCode);
-                mCallbacklatch.countDown();
             }
         };
         mEnMgr.requestLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, false);
         mLooper.dispatchAll();
-        callbackTimeoutHelper(mCallbacklatch);
         assertEquals(0, mEnMgr.uiProvisionCount);
         mEnMgr.reset();
         // 5. Cache value is TETHER_ERROR_PROVISIONING_FAILED and ui entitlement check is needed.
@@ -320,12 +308,10 @@ public final class EntitlementManagerTest {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 assertEquals(TETHER_ERROR_NO_ERROR, resultCode);
-                mCallbacklatch.countDown();
             }
         };
         mEnMgr.requestLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, true);
         mLooper.dispatchAll();
-        callbackTimeoutHelper(mCallbacklatch);
         assertEquals(1, mEnMgr.uiProvisionCount);
         mEnMgr.reset();
         // 6. Cache value is TETHER_ERROR_NO_ERROR.
@@ -334,12 +320,10 @@ public final class EntitlementManagerTest {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 assertEquals(TETHER_ERROR_NO_ERROR, resultCode);
-                mCallbacklatch.countDown();
             }
         };
         mEnMgr.requestLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, true);
         mLooper.dispatchAll();
-        callbackTimeoutHelper(mCallbacklatch);
         assertEquals(0, mEnMgr.uiProvisionCount);
         mEnMgr.reset();
         // 7. Test get value for other downstream type.
@@ -347,12 +331,10 @@ public final class EntitlementManagerTest {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 assertEquals(TETHER_ERROR_ENTITLEMENT_UNKNOWN, resultCode);
-                mCallbacklatch.countDown();
             }
         };
         mEnMgr.requestLatestTetheringEntitlementResult(TETHERING_USB, receiver, false);
         mLooper.dispatchAll();
-        callbackTimeoutHelper(mCallbacklatch);
         assertEquals(0, mEnMgr.uiProvisionCount);
         mEnMgr.reset();
         // 8. Test get value for invalid downstream type.
@@ -361,20 +343,12 @@ public final class EntitlementManagerTest {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 assertEquals(TETHER_ERROR_ENTITLEMENT_UNKNOWN, resultCode);
-                mCallbacklatch.countDown();
             }
         };
         mEnMgr.requestLatestTetheringEntitlementResult(TETHERING_WIFI_P2P, receiver, true);
         mLooper.dispatchAll();
-        callbackTimeoutHelper(mCallbacklatch);
         assertEquals(0, mEnMgr.uiProvisionCount);
         mEnMgr.reset();
-    }
-
-    void callbackTimeoutHelper(final CountDownLatch latch) throws Exception {
-        if (!latch.await(1, TimeUnit.SECONDS)) {
-            fail("Timout, fail to receive callback");
-        }
     }
 
     @Test
