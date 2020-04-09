@@ -66,7 +66,7 @@ public class AudioDeviceBrokerTest {
         mContext = InstrumentationRegistry.getTargetContext();
 
         mMockAudioService = mock(AudioService.class);
-        mSpyAudioSystem = spy(AudioSystemAdapter.getAlwaysOkAdapter());
+        mSpyAudioSystem = spy(AudioSystemAdapter.getConfigurableAdapter());
         mSpyDevInventory = spy(new AudioDeviceInventory(mSpyAudioSystem));
         mAudioDeviceBroker = new AudioDeviceBroker(mContext, mMockAudioService, mSpyDevInventory);
         mSpyDevInventory.setDeviceBroker(mAudioDeviceBroker);
