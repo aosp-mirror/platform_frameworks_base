@@ -16,7 +16,6 @@
 
 package android.window;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
@@ -247,7 +246,6 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
     protected ActivityOptions prepareActivityOptions(ActivityOptions options) {
         options = super.prepareActivityOptions(options);
         options.setLaunchDisplayId(getDisplayId());
-        options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         return options;
     }
 
