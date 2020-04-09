@@ -36,6 +36,9 @@ import dalvik.system.CloseGuard;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -215,12 +218,31 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private void open() {
+        final String file = mConfiguration.path;
         final int cookie = mRecentOperations.beginOperation("open", null, null);
         try {
-            mConnectionPtr = nativeOpen(mConfiguration.path, mConfiguration.openFlags,
+            mConnectionPtr = nativeOpen(file, mConfiguration.openFlags,
                     mConfiguration.label,
                     NoPreloadHolder.DEBUG_SQL_STATEMENTS, NoPreloadHolder.DEBUG_SQL_TIME,
                     mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
+        } catch (SQLiteCantOpenDatabaseException e) {
+            String message = String.format("Cannot open database '%s'", file);
+
+            final Path path = FileSystems.getDefault().getPath(file);
+            final Path dir = path.getParent();
+
+            if (!Files.isDirectory(dir)) {
+                message += ": Directory " + dir + " doesn't exist";
+            } else if (!Files.exists(path)) {
+                message += ": File " + path + " doesn't exist";
+            } else if (!Files.isReadable(path)) {
+                message += ": File " + path + " is not readable";
+            } else if (Files.isDirectory(path)) {
+                message += ": Path " + path + " is a directory";
+            } else {
+                message += ": Unknown reason";
+            }
+            throw new SQLiteCantOpenDatabaseException(message, e);
         } finally {
             mRecentOperations.endOperation(cookie);
         }
