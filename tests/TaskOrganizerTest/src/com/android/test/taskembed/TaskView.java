@@ -80,8 +80,10 @@ class TaskView extends SurfaceView implements SurfaceHolder.Callback {
         } catch (Exception e) {
             // System server died.. oh well
         }
+
         t.reparent(leash, getSurfaceControl())
             .setPosition(leash, 0, 0)
+            .show(leash)
             .apply();
     }
 }
