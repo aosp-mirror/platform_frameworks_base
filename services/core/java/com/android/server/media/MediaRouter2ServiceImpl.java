@@ -98,18 +98,26 @@ class MediaRouter2ServiceImpl {
     public List<MediaRoute2Info> getSystemRoutes() {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+        final boolean hasModifyAudioRoutingPermission = mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+                == PackageManager.PERMISSION_GRANTED;
 
         final long token = Binder.clearCallingIdentity();
         try {
             Collection<MediaRoute2Info> systemRoutes;
             synchronized (mLock) {
                 UserRecord userRecord = getOrCreateUserRecordLocked(userId);
-                MediaRoute2ProviderInfo providerInfo =
-                        userRecord.mHandler.mSystemProvider.getProviderInfo();
-                if (providerInfo != null) {
-                    systemRoutes = providerInfo.getRoutes();
+                if (hasModifyAudioRoutingPermission) {
+                    MediaRoute2ProviderInfo providerInfo =
+                            userRecord.mHandler.mSystemProvider.getProviderInfo();
+                    if (providerInfo != null) {
+                        systemRoutes = providerInfo.getRoutes();
+                    } else {
+                        systemRoutes = Collections.emptyList();
+                    }
                 } else {
-                    systemRoutes = Collections.emptyList();
+                    systemRoutes = new ArrayList<>();
+                    systemRoutes.add(userRecord.mHandler.mSystemProvider.getDefaultRoute());
                 }
             }
             return new ArrayList<>(systemRoutes);
@@ -122,18 +130,25 @@ class MediaRouter2ServiceImpl {
     public RoutingSessionInfo getSystemSessionInfo() {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+        final boolean hasModifyAudioRoutingPermission = mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+                == PackageManager.PERMISSION_GRANTED;
 
         final long token = Binder.clearCallingIdentity();
         try {
             RoutingSessionInfo systemSessionInfo = null;
             synchronized (mLock) {
                 UserRecord userRecord = getOrCreateUserRecordLocked(userId);
-                List<RoutingSessionInfo> sessionInfos =
-                        userRecord.mHandler.mSystemProvider.getSessionInfos();
-                if (sessionInfos != null && !sessionInfos.isEmpty()) {
-                    systemSessionInfo = sessionInfos.get(0);
+                List<RoutingSessionInfo> sessionInfos;
+                if (hasModifyAudioRoutingPermission) {
+                    sessionInfos = userRecord.mHandler.mSystemProvider.getSessionInfos();
+                    if (sessionInfos != null && !sessionInfos.isEmpty()) {
+                        systemSessionInfo = sessionInfos.get(0);
+                    } else {
+                        Slog.w(TAG, "System provider does not have any session info.");
+                    }
                 } else {
-                    Slog.w(TAG, "System provider does not have any session info.");
+                    systemSessionInfo = userRecord.mHandler.mSystemProvider.getDefaultSessionInfo();
                 }
             }
             return systemSessionInfo;
@@ -654,10 +669,20 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        routerRecord.mUserRecord.mHandler.sendMessage(
-                obtainMessage(UserHandler::transferToRouteOnHandler,
-                        routerRecord.mUserRecord.mHandler,
-                        DUMMY_REQUEST_ID, routerRecord, uniqueSessionId, route));
+        String defaultRouteId =
+                routerRecord.mUserRecord.mHandler.mSystemProvider.getDefaultRoute().getId();
+        if (route.isSystemRoute() && !routerRecord.mHasModifyAudioRoutingPermission
+                && !TextUtils.equals(route.getId(), defaultRouteId)) {
+            routerRecord.mUserRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::notifySessionCreationFailedToRouter,
+                            routerRecord.mUserRecord.mHandler,
+                            routerRecord, toOriginalRequestId(DUMMY_REQUEST_ID)));
+        } else {
+            routerRecord.mUserRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::transferToRouteOnHandler,
+                            routerRecord.mUserRecord.mHandler,
+                            DUMMY_REQUEST_ID, routerRecord, uniqueSessionId, route));
+        }
     }
 
     private void setSessionVolumeWithRouter2Locked(@NonNull IMediaRouter2 router,
@@ -808,7 +833,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        // Can be null if the session is system's.
+        // Can be null if the session is system's or RCN.
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
 
@@ -829,7 +854,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        // Can be null if the session is system's.
+        // Can be null if the session is system's or RCN.
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
 
@@ -850,7 +875,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        // Can be null if the session is system's.
+        // Can be null if the session is system's or RCN.
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
 
@@ -1185,18 +1210,42 @@ class MediaRouter2ServiceImpl {
                 }
             }
 
-            List<IMediaRouter2> routers = getRouters();
+            List<IMediaRouter2> routersWithModifyAudioRoutingPermission = getRouters(true);
+            List<IMediaRouter2> routersWithoutModifyAudioRoutingPermission = getRouters(false);
             List<IMediaRouter2Manager> managers = getManagers();
+            List<MediaRoute2Info> defaultRoute = new ArrayList<>();
+            defaultRoute.add(mSystemProvider.getDefaultRoute());
+
             if (addedRoutes.size() > 0) {
-                notifyRoutesAddedToRouters(routers, addedRoutes);
+                notifyRoutesAddedToRouters(routersWithModifyAudioRoutingPermission, addedRoutes);
+                if (!provider.mIsSystemRouteProvider) {
+                    notifyRoutesAddedToRouters(routersWithoutModifyAudioRoutingPermission,
+                            addedRoutes);
+                } else if (prevInfo == null) {
+                    notifyRoutesAddedToRouters(routersWithoutModifyAudioRoutingPermission,
+                            defaultRoute);
+                } // 'else' is handled as changed routes
                 notifyRoutesAddedToManagers(managers, addedRoutes);
             }
             if (removedRoutes.size() > 0) {
-                notifyRoutesRemovedToRouters(routers, removedRoutes);
+                notifyRoutesRemovedToRouters(routersWithModifyAudioRoutingPermission,
+                        removedRoutes);
+                if (!provider.mIsSystemRouteProvider) {
+                    notifyRoutesRemovedToRouters(routersWithoutModifyAudioRoutingPermission,
+                            removedRoutes);
+                }
                 notifyRoutesRemovedToManagers(managers, removedRoutes);
             }
             if (changedRoutes.size() > 0) {
-                notifyRoutesChangedToRouters(routers, changedRoutes);
+                notifyRoutesChangedToRouters(routersWithModifyAudioRoutingPermission,
+                        changedRoutes);
+                if (!provider.mIsSystemRouteProvider) {
+                    notifyRoutesChangedToRouters(routersWithoutModifyAudioRoutingPermission,
+                            changedRoutes);
+                } else if (prevInfo != null) {
+                    notifyRoutesChangedToRouters(routersWithoutModifyAudioRoutingPermission,
+                            defaultRoute);
+                } // 'else' is handled as added routes
                 notifyRoutesChangedToManagers(managers, changedRoutes);
             }
         }
@@ -1223,6 +1272,15 @@ class MediaRouter2ServiceImpl {
                         toOriginalRequestId(uniqueRequestId));
                 return;
             }
+            if (route.isSystemRoute() && !routerRecord.mHasModifyAudioRoutingPermission
+                    && !TextUtils.equals(route.getId(),
+                            mSystemProvider.getDefaultRoute().getId())) {
+                Slog.w(TAG, "MODIFY_AUDIO_ROUTING permission is required to transfer to"
+                        + route);
+                notifySessionCreationFailedToRouter(routerRecord,
+                        toOriginalRequestId(uniqueRequestId));
+                return;
+            }
 
             SessionCreationRequest request =
                     new SessionCreationRequest(routerRecord, uniqueRequestId, route, managerRecord);
@@ -1232,7 +1290,7 @@ class MediaRouter2ServiceImpl {
                     route.getOriginalId(), sessionHints);
         }
 
-        // routerRecord can be null if the session is system's.
+        // routerRecord can be null if the session is system's or RCN.
         private void selectRouteOnHandler(long uniqueRequestId, @Nullable RouterRecord routerRecord,
                 @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
             if (!checkArgumentsForSessionControl(routerRecord, uniqueSessionId, route,
@@ -1250,7 +1308,7 @@ class MediaRouter2ServiceImpl {
                     route.getOriginalId());
         }
 
-        // routerRecord can be null if the session is system's.
+        // routerRecord can be null if the session is system's or RCN.
         private void deselectRouteOnHandler(long uniqueRequestId,
                 @Nullable RouterRecord routerRecord,
                 @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
@@ -1270,7 +1328,7 @@ class MediaRouter2ServiceImpl {
                     route.getOriginalId());
         }
 
-        // routerRecord can be null if the session is system's.
+        // routerRecord can be null if the session is system's or RCN.
         private void transferToRouteOnHandler(long uniqueRequestId,
                 @Nullable RouterRecord routerRecord,
                 @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
@@ -1289,6 +1347,8 @@ class MediaRouter2ServiceImpl {
                     route.getOriginalId());
         }
 
+        // routerRecord is null if and only if the session is created without the request, which
+        // includes the system's session and RCN cases.
         private boolean checkArgumentsForSessionControl(@Nullable RouterRecord routerRecord,
                 @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route,
                 @NonNull String description) {
@@ -1303,12 +1363,6 @@ class MediaRouter2ServiceImpl {
             // Bypass checking router if it's the system session (routerRecord should be null)
             if (TextUtils.equals(getProviderId(uniqueSessionId), mSystemProvider.getUniqueId())) {
                 return true;
-            }
-
-            //TODO(b/152950479): Handle RCN case.
-            if (routerRecord == null) {
-                Slog.w(TAG, "Ignoring " + description + " route from unknown router.");
-                return false;
             }
 
             RouterRecord matchingRecord = mSessionToRouterMap.get(uniqueSessionId);
@@ -1448,7 +1502,9 @@ class MediaRouter2ServiceImpl {
                 if (service == null) {
                     return;
                 }
-                notifySessionInfoChangedToRouters(getRouters(), sessionInfo);
+                notifySessionInfoChangedToRouters(getRouters(true), sessionInfo);
+                notifySessionInfoChangedToRouters(getRouters(false),
+                        mSystemProvider.getDefaultSessionInfo());
                 return;
             }
 
@@ -1569,7 +1625,7 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private List<IMediaRouter2> getRouters() {
+        private List<IMediaRouter2> getAllRouters() {
             final List<IMediaRouter2> routers = new ArrayList<>();
             MediaRouter2ServiceImpl service = mServiceRef.get();
             if (service == null) {
@@ -1578,6 +1634,23 @@ class MediaRouter2ServiceImpl {
             synchronized (service.mLock) {
                 for (RouterRecord routerRecord : mUserRecord.mRouterRecords) {
                     routers.add(routerRecord.mRouter);
+                }
+            }
+            return routers;
+        }
+
+        private List<IMediaRouter2> getRouters(boolean hasModifyAudioRoutingPermission) {
+            final List<IMediaRouter2> routers = new ArrayList<>();
+            MediaRouter2ServiceImpl service = mServiceRef.get();
+            if (service == null) {
+                return routers;
+            }
+            synchronized (service.mLock) {
+                for (RouterRecord routerRecord : mUserRecord.mRouterRecords) {
+                    if (hasModifyAudioRoutingPermission
+                            == routerRecord.mHasModifyAudioRoutingPermission) {
+                        routers.add(routerRecord.mRouter);
+                    }
                 }
             }
             return routers;

@@ -23,6 +23,7 @@
 #include "../metrics/metrics_test_helper.h"
 #include "stats_event.h"
 #include "statslog_statsdtest.h"
+#include "tests/statsd_test_util.h"
 
 #ifdef __ANDROID__
 
@@ -71,14 +72,9 @@ std::shared_ptr<LogEvent> makeUidLogEvent(uint64_t timestampNs, int uid, int dat
     AStatsEvent_writeInt32(statsEvent, uid);
     AStatsEvent_writeInt32(statsEvent, data1);
     AStatsEvent_writeInt32(statsEvent, data2);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::shared_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -86,16 +82,10 @@ std::shared_ptr<LogEvent> makeNonUidAtomLogEvent(uint64_t timestampNs, int data1
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, nonUidAtomTagId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-
     AStatsEvent_writeInt32(statsEvent, data1);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::shared_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 

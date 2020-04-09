@@ -84,14 +84,9 @@ std::unique_ptr<LogEvent> CreateAppStartOccurredEvent(
     AStatsEvent_writeString(statsEvent, calling_pkg_name.c_str());
     AStatsEvent_writeInt32(statsEvent, is_instant_app);
     AStatsEvent_writeInt32(statsEvent, activity_start_msec);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 

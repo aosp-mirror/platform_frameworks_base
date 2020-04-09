@@ -106,6 +106,10 @@ class MagnetizedObjectTest : SysuiTestCase() {
                 location[1] = targetCenterY - targetSize / 2 // y = 800
             }
         }.`when`(targetView).getLocationOnScreen(ArgumentMatchers.any())
+        doAnswer { invocation ->
+            (invocation.arguments[0] as Runnable).run()
+            true
+        }.`when`(targetView).post(ArgumentMatchers.any())
         `when`(targetView.context).thenReturn(context)
 
         magneticTarget = MagnetizedObject.MagneticTarget(targetView, magneticFieldRadius)
@@ -407,6 +411,10 @@ class MagnetizedObjectTest : SysuiTestCase() {
         `when`(secondTargetView.context).thenReturn(context)
         `when`(secondTargetView.width).thenReturn(targetSize)  // width = 200
         `when`(secondTargetView.height).thenReturn(targetSize) // height = 200
+        doAnswer { invocation ->
+            (invocation.arguments[0] as Runnable).run()
+            true
+        }.`when`(secondTargetView).post(ArgumentMatchers.any())
         doAnswer { invocation ->
             (invocation.arguments[0] as IntArray).also { location ->
                 // Return the top left of the target.

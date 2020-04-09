@@ -32,7 +32,7 @@ android_test {
         "protos/**/*.proto",
         ],
     test_suites: [
-        "general-tests",
+        "device-tests",
     ],
     platform_apis: true,
     privileged: true,

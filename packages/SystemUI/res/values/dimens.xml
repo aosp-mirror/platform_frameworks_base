@@ -955,7 +955,7 @@
     <dimen name="recents_quick_scrub_onboarding_margin_start">8dp</dimen>
 
     <!-- The height of the gradient indicating the dismiss edge when moving a PIP. -->
-    <dimen name="pip_dismiss_gradient_height">176dp</dimen>
+    <dimen name="floating_dismiss_gradient_height">176dp</dimen>
 
     <!-- The bottom margin of the PIP drag to dismiss info text shown when moving a PIP. -->
     <dimen name="pip_dismiss_text_bottom_margin">24dp</dimen>
@@ -1211,6 +1211,7 @@
     <!-- Size of media cards in the QSPanel carousel -->
     <dimen name="qs_media_width">350dp</dimen>
     <dimen name="qs_media_padding">8dp</dimen>
+    <dimen name="qs_media_panel_outer_padding">16dp</dimen>
     <dimen name="qs_media_corner_radius">10dp</dimen>
     <dimen name="qs_media_album_size">72dp</dimen>
     <dimen name="qs_seamless_icon_size">20dp</dimen>

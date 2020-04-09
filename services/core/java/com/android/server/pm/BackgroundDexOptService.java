@@ -46,6 +46,7 @@ import com.android.server.pm.dex.DexoptOptions;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -105,6 +106,8 @@ public class BackgroundDexOptService extends JobService {
     private final File mDataDir = Environment.getDataDirectory();
     private static final long mDowngradeUnusedAppsThresholdInMillis =
             getDowngradeUnusedAppsThresholdInMillis();
+
+    private static List<PackagesUpdatedListener> sPackagesUpdatedListeners = new ArrayList<>();
 
     public static void schedule(Context context) {
         if (isBackgroundDexoptDisabled()) {
@@ -244,6 +247,7 @@ public class BackgroundDexOptService extends JobService {
             }
         }
         notifyPinService(updatedPackages);
+        notifyPackagesUpdated(updatedPackages);
         // Ran to completion, so we abandon our timeslice and do not reschedule.
         jobFinished(jobParams, /* reschedule */ false);
     }
@@ -391,6 +395,7 @@ public class BackgroundDexOptService extends JobService {
         } finally {
             // Always let the pinner service know about changes.
             notifyPinService(updatedPackages);
+            notifyPackagesUpdated(updatedPackages);
         }
     }
 
@@ -639,6 +644,32 @@ public class BackgroundDexOptService extends JobService {
         if (pinnerService != null) {
             Log.i(TAG, "Pinning optimized code " + updatedPackages);
             pinnerService.update(updatedPackages, false /* force */);
+        }
+    }
+
+    public static interface PackagesUpdatedListener {
+        /** Callback when packages have been updated by the bg-dexopt service. */
+        public void onPackagesUpdated(ArraySet<String> updatedPackages);
+    }
+
+    public static void addPackagesUpdatedListener(PackagesUpdatedListener listener) {
+        synchronized (sPackagesUpdatedListeners) {
+            sPackagesUpdatedListeners.add(listener);
+        }
+    }
+
+    public static void removePackagesUpdatedListener(PackagesUpdatedListener listener) {
+        synchronized (sPackagesUpdatedListeners) {
+            sPackagesUpdatedListeners.remove(listener);
+        }
+    }
+
+    /** Notify all listeners (#addPackagesUpdatedListener) that packages have been updated. */
+    private void notifyPackagesUpdated(ArraySet<String> updatedPackages) {
+        synchronized (sPackagesUpdatedListeners) {
+            for (PackagesUpdatedListener listener : sPackagesUpdatedListeners) {
+                listener.onPackagesUpdated(updatedPackages);
+            }
         }
     }
 

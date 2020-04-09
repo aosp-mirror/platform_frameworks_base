@@ -247,21 +247,37 @@ FieldMatcher CreateDimensions(const int atomId, const std::vector<int>& fields) 
     return dimensions;
 }
 
+void writeAttribution(AStatsEvent* statsEvent, const vector<int>& attributionUids,
+                      const vector<string>& attributionTags) {
+    vector<const char*> cTags(attributionTags.size());
+    for (int i = 0; i < cTags.size(); i++) {
+        cTags[i] = attributionTags[i].c_str();
+    }
+
+    AStatsEvent_writeAttributionChain(statsEvent,
+                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
+                                      cTags.data(), attributionUids.size());
+}
+
+void parseStatsEventToLogEvent(AStatsEvent* statsEvent, LogEvent* logEvent) {
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+    logEvent->parseBuffer(buf, size);
+
+    AStatsEvent_release(statsEvent);
+}
+
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
         uint64_t timestampNs, const android::view::DisplayStateEnum state) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, util::SCREEN_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -272,24 +288,12 @@ std::unique_ptr<LogEvent> CreateScheduledJobStateChangedEvent(
     AStatsEvent_setAtomId(statsEvent, util::SCHEDULED_JOB_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
-    vector<const char*> cTags(attributionTags.size());
-    for (int i = 0; i < cTags.size(); i++) {
-        cTags[i] = attributionTags[i].c_str();
-    }
-
-    AStatsEvent_writeAttributionChain(statsEvent,
-                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
-                                      cTags.data(), attributionUids.size());
+    writeAttribution(statsEvent, attributionUids, attributionTags);
     AStatsEvent_writeString(statsEvent, jobName.c_str());
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 
@@ -319,24 +323,12 @@ std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(uint64_t timestampNs,
     AStatsEvent_setAtomId(statsEvent, util::SYNC_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
-    vector<const char*> cTags(attributionTags.size());
-    for (int i = 0; i < cTags.size(); i++) {
-        cTags[i] = attributionTags[i].c_str();
-    }
-
-    AStatsEvent_writeAttributionChain(statsEvent,
-                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
-                                      cTags.data(), attributionUids.size());
+    writeAttribution(statsEvent, attributionUids, attributionTags);
     AStatsEvent_writeString(statsEvent, name.c_str());
     AStatsEvent_writeInt32(statsEvent, state);
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
     std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 

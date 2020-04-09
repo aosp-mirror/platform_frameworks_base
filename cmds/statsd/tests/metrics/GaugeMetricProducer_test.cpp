@@ -64,14 +64,9 @@ shared_ptr<LogEvent> makeLogEvent(int32_t atomId, int64_t timestampNs, int32_t v
     AStatsEvent_writeInt32(statsEvent, value1);
     AStatsEvent_writeString(statsEvent, str1.c_str());
     AStatsEvent_writeInt32(statsEvent, value2);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
     shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buf, size);
-    AStatsEvent_release(statsEvent);
-
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
 }  // anonymous namespace

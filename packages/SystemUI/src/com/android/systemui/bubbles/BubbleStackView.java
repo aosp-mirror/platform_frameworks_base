@@ -30,6 +30,7 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -43,6 +44,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Region;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
@@ -83,6 +85,7 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.systemui.util.RelativeTouchListener;
 import com.android.systemui.util.animation.PhysicsAnimator;
 import com.android.systemui.util.magnetictarget.MagnetizedObject;
 
@@ -239,7 +242,6 @@ public class BubbleStackView extends FrameLayout {
         mExpandedAnimationController.dump(fd, pw, args);
     }
 
-    private BubbleTouchHandler mTouchHandler;
     private BubbleController.BubbleExpandListener mExpandListener;
     private SysUiState mSysUiState;
 
@@ -296,7 +298,7 @@ public class BubbleStackView extends FrameLayout {
 
                 @Override
                 public void setValue(Object o, float v) {
-                    onFlyoutDragged(v);
+                    setFlyoutStateForDragLength(v);
                 }
             };
 
@@ -337,13 +339,6 @@ public class BubbleStackView extends FrameLayout {
     private MagnetizedObject<?> mMagnetizedObject;
 
     /**
-     * The action to run when the magnetized object is released in the dismiss target.
-     *
-     * This will actually perform the dismissal of either the stack or an individual bubble.
-     */
-    private Runnable mReleasedInDismissTargetAction;
-
-    /**
      * The MagneticTarget instance for our circular dismiss view. This is added to the
      * MagnetizedObject instances for the stack and any dragged-out bubbles.
      */
@@ -377,7 +372,7 @@ public class BubbleStackView extends FrameLayout {
                 public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
                     mExpandedAnimationController.dismissDraggedOutBubble(
                             mExpandedAnimationController.getDraggedOutBubble(),
-                            mReleasedInDismissTargetAction);
+                            BubbleStackView.this::dismissMagnetizedObject);
                     hideDismissTarget();
                 }
             };
@@ -410,13 +405,204 @@ public class BubbleStackView extends FrameLayout {
                     mStackAnimationController.implodeStack(
                             () -> {
                                 resetDesaturationAndDarken();
-                                mReleasedInDismissTargetAction.run();
+                                dismissMagnetizedObject();
                             }
                     );
 
                     hideDismissTarget();
                 }
             };
+
+    /**
+     * Click listener set on each bubble view. When collapsed, clicking a bubble expands the stack.
+     * When expanded, clicking a bubble either expands that bubble, or collapses the stack.
+     */
+    private OnClickListener mBubbleClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            final Bubble clickedBubble = mBubbleData.getBubbleWithView(view);
+
+            // If the bubble has since left us, ignore the click.
+            if (clickedBubble == null) {
+                return;
+            }
+
+            final boolean clickedBubbleIsCurrentlyExpandedBubble =
+                    clickedBubble.getKey().equals(mExpandedBubble.getKey());
+
+            if (isExpanded() && !clickedBubbleIsCurrentlyExpandedBubble) {
+                if (clickedBubble != mBubbleData.getSelectedBubble()) {
+                    // Select the clicked bubble.
+                    mBubbleData.setSelectedBubble(clickedBubble);
+                } else {
+                    // If the clicked bubble is the selected bubble (but not the expanded bubble),
+                    // that means overflow was previously expanded. Set the selected bubble
+                    // internally without going through BubbleData (which would ignore it since it's
+                    // already selected).
+                    setSelectedBubble(clickedBubble);
+
+                }
+            } else {
+                // Otherwise, we either tapped the stack (which means we're collapsed
+                // and should expand) or the currently selected bubble (we're expanded
+                // and should collapse).
+                if (!maybeShowStackUserEducation()) {
+                    mBubbleData.setExpanded(!mBubbleData.isExpanded());
+                }
+            }
+        }
+    };
+
+    /**
+     * Touch listener set on each bubble view. This enables dragging and dismissing the stack (when
+     * collapsed), or individual bubbles (when expanded).
+     */
+    private RelativeTouchListener mBubbleTouchListener = new RelativeTouchListener() {
+
+        @Override
+        public boolean onDown(@NonNull View v, @NonNull MotionEvent ev) {
+            // If we're expanding or collapsing, consume but ignore all touch events.
+            if (mIsExpansionAnimating) {
+                return true;
+            }
+
+            if (mBubbleData.isExpanded()) {
+                maybeShowManageEducation(false /* show */);
+
+                // If we're expanded, tell the animation controller to prepare to drag this bubble,
+                // dispatching to the individual bubble magnet listener.
+                mExpandedAnimationController.prepareForBubbleDrag(
+                        v /* bubble */,
+                        mMagneticTarget,
+                        mIndividualBubbleMagnetListener);
+
+                // Save the magnetized individual bubble so we can dispatch touch events to it.
+                mMagnetizedObject = mExpandedAnimationController.getMagnetizedBubbleDraggingOut();
+            } else {
+                // If we're collapsed, prepare to drag the stack. Cancel active animations, set the
+                // animation controller, and hide the flyout.
+                mStackAnimationController.cancelStackPositionAnimations();
+                mBubbleContainer.setActiveController(mStackAnimationController);
+                hideFlyoutImmediate();
+
+                // Also, save the magnetized stack so we can dispatch touch events to it.
+                mMagnetizedObject = mStackAnimationController.getMagnetizedStack(mMagneticTarget);
+                mMagnetizedObject.setMagnetListener(mStackMagnetListener);
+            }
+
+            passEventToMagnetizedObject(ev);
+
+            // Bubbles are always interested in all touch events!
+            return true;
+        }
+
+        @Override
+        public void onMove(@NonNull View v, @NonNull MotionEvent ev, float viewInitialX,
+                float viewInitialY, float dx, float dy) {
+            // If we're expanding or collapsing, ignore all touch events.
+            if (mIsExpansionAnimating) {
+                return;
+            }
+
+            // Show the dismiss target, if we haven't already.
+            springInDismissTargetMaybe();
+
+            // First, see if the magnetized object consumes the event - if so, we shouldn't move the
+            // bubble since it's stuck to the target.
+            if (!passEventToMagnetizedObject(ev)) {
+                if (mBubbleData.isExpanded()) {
+                    mExpandedAnimationController.dragBubbleOut(
+                            v, viewInitialX + dx, viewInitialY + dy);
+                } else {
+                    hideStackUserEducation(false /* fromExpansion */);
+                    mStackAnimationController.moveStackFromTouch(
+                            viewInitialX + dx, viewInitialY + dy);
+                }
+            }
+        }
+
+        @Override
+        public void onUp(@NonNull View v, @NonNull MotionEvent ev, float viewInitialX,
+                float viewInitialY, float dx, float dy, float velX, float velY) {
+            // If we're expanding or collapsing, ignore all touch events.
+            if (mIsExpansionAnimating) {
+                return;
+            }
+
+            // First, see if the magnetized object consumes the event - if so, the bubble was
+            // released in the target or flung out of it, and we should ignore the event.
+            if (!passEventToMagnetizedObject(ev)) {
+                if (mBubbleData.isExpanded()) {
+                    mExpandedAnimationController.snapBubbleBack(v, velX, velY);
+                } else {
+                    // Fling the stack to the edge, and save whether or not it's going to end up on
+                    // the left side of the screen.
+                    mStackOnLeftOrWillBe =
+                            mStackAnimationController.flingStackThenSpringToEdge(
+                                    viewInitialX + dx, velX, velY) <= 0;
+
+                    updateBubbleZOrdersAndDotPosition(true /* animate */);
+
+                    logBubbleEvent(null /* no bubble associated with bubble stack move */,
+                            SysUiStatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
+                }
+
+                hideDismissTarget();
+            }
+        }
+    };
+
+    /** Click listener set on the flyout, which expands the stack when the flyout is tapped. */
+    private OnClickListener mFlyoutClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (maybeShowStackUserEducation()) {
+                // If we're showing user education, don't open the bubble show the education first
+                mBubbleToExpandAfterFlyoutCollapse = null;
+            } else {
+                mBubbleToExpandAfterFlyoutCollapse = mBubbleData.getSelectedBubble();
+            }
+
+            mFlyout.removeCallbacks(mHideFlyout);
+            mHideFlyout.run();
+        }
+    };
+
+    /** Touch listener for the flyout. This enables the drag-to-dismiss gesture on the flyout. */
+    private RelativeTouchListener mFlyoutTouchListener = new RelativeTouchListener() {
+
+        @Override
+        public boolean onDown(@NonNull View v, @NonNull MotionEvent ev) {
+            mFlyout.removeCallbacks(mHideFlyout);
+            return true;
+        }
+
+        @Override
+        public void onMove(@NonNull View v, @NonNull MotionEvent ev, float viewInitialX,
+                float viewInitialY, float dx, float dy) {
+            setFlyoutStateForDragLength(dx);
+        }
+
+        @Override
+        public void onUp(@NonNull View v, @NonNull MotionEvent ev, float viewInitialX,
+                float viewInitialY, float dx, float dy, float velX, float velY) {
+            final boolean onLeft = mStackAnimationController.isStackOnLeftSide();
+            final boolean metRequiredVelocity =
+                    onLeft ? velX < -FLYOUT_DISMISS_VELOCITY : velX > FLYOUT_DISMISS_VELOCITY;
+            final boolean metRequiredDeltaX =
+                    onLeft
+                            ? dx < -mFlyout.getWidth() * FLYOUT_DRAG_PERCENT_DISMISS
+                            : dx > mFlyout.getWidth() * FLYOUT_DRAG_PERCENT_DISMISS;
+            final boolean isCancelFling = onLeft ? velX > 0 : velX < 0;
+            final boolean shouldDismiss = metRequiredVelocity
+                    || (metRequiredDeltaX && !isCancelFling);
+
+            mFlyout.removeCallbacks(mHideFlyout);
+            animateFlyoutCollapsed(shouldDismiss, velX);
+
+            maybeShowStackUserEducation();
+        }
+    };
 
     private ViewGroup mDismissTargetContainer;
     private PhysicsAnimator<View> mDismissTargetAnimator;
@@ -436,6 +622,7 @@ public class BubbleStackView extends FrameLayout {
     private BubbleManageEducationView mManageEducationView;
     private boolean mAnimatingManageEducationAway;
 
+    @SuppressLint("ClickableViewAccessibility")
     public BubbleStackView(Context context, BubbleData data,
             @Nullable SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
@@ -444,8 +631,6 @@ public class BubbleStackView extends FrameLayout {
 
         mBubbleData = data;
         mInflater = LayoutInflater.from(context);
-        mTouchHandler = new BubbleTouchHandler(this, data, context);
-        setOnTouchListener(mTouchHandler);
 
         mSysUiState = sysUiState;
 
@@ -514,7 +699,7 @@ public class BubbleStackView extends FrameLayout {
         mDismissTargetContainer = new FrameLayout(context);
         mDismissTargetContainer.setLayoutParams(new FrameLayout.LayoutParams(
                 MATCH_PARENT,
-                getResources().getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height),
+                getResources().getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height),
                 Gravity.BOTTOM));
         mDismissTargetContainer.setClipChildren(false);
         mDismissTargetContainer.addView(targetView);
@@ -523,7 +708,7 @@ public class BubbleStackView extends FrameLayout {
 
         // Start translated down so the target springs up.
         targetView.setTranslationY(
-                getResources().getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height));
+                getResources().getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height));
 
         // Save the MagneticTarget instance for the newly set up view - we'll add this to the
         // MagnetizedObjects.
@@ -641,6 +826,18 @@ public class BubbleStackView extends FrameLayout {
             mDesaturateAndDarkenPaint.setColorFilter(new ColorMatrixColorFilter(animatedMatrix));
             mDesaturateAndDarkenTargetView.setLayerPaint(mDesaturateAndDarkenPaint);
         });
+
+        // If the stack itself is touched, it means none of its touchable views (bubbles, flyouts,
+        // ActivityViews, etc.) were touched. Collapse the stack if it's expanded.
+        setOnTouchListener((view, ev) -> {
+            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                if (mBubbleData.isExpanded()) {
+                    mBubbleData.setExpanded(false);
+                }
+            }
+
+            return false;
+        });
     }
 
     private void setUpUserEducation() {
@@ -690,6 +887,7 @@ public class BubbleStackView extends FrameLayout {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setUpFlyout() {
         if (mFlyout != null) {
             removeView(mFlyout);
@@ -699,6 +897,8 @@ public class BubbleStackView extends FrameLayout {
         mFlyout.animate()
                 .setDuration(FLYOUT_ALPHA_ANIMATION_DURATION)
                 .setInterpolator(new AccelerateDecelerateInterpolator());
+        mFlyout.setOnClickListener(mFlyoutClickListener);
+        mFlyout.setOnTouchListener(mFlyoutTouchListener);
         addView(mFlyout, new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
     }
 
@@ -718,6 +918,7 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.addView(mBubbleOverflow.getBtn(), overflowBtnIndex,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
 
+        mBubbleOverflow.getBtn().setOnClickListener(v -> setSelectedBubble(mBubbleOverflow));
     }
     /**
      * Handle theme changes.
@@ -920,6 +1121,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     // via BubbleData.Listener
+    @SuppressLint("ClickableViewAccessibility")
     void addBubble(Bubble bubble) {
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "addBubble: " + bubble);
@@ -943,6 +1145,9 @@ public class BubbleStackView extends FrameLayout {
         // resting slightly off-screen would result in the dot also being off-screen.
         bubble.getIconView().setDotPositionOnLeft(
                 !mStackOnLeftOrWillBe /* onLeft */, false /* animate */);
+
+        bubble.getIconView().setOnClickListener(mBubbleClickListener);
+        bubble.getIconView().setOnTouchListener(mBubbleTouchListener);
 
         mBubbleContainer.addView(bubble.getIconView(), 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
@@ -1007,10 +1212,6 @@ public class BubbleStackView extends FrameLayout {
         }
         updateBubbleZOrdersAndDotPosition(false /* animate */);
         updatePointerPosition();
-    }
-
-    void showOverflow() {
-        setSelectedBubble(mBubbleOverflow);
     }
 
     /**
@@ -1177,14 +1378,6 @@ public class BubbleStackView extends FrameLayout {
         }
     }
 
-    /*
-     * Sets the action to run to dismiss the currently dragging object (either the stack or an
-     * individual bubble).
-     */
-    public void setReleasedInDismissTargetAction(Runnable action) {
-        mReleasedInDismissTargetAction = action;
-    }
-
     /**
      * Dismiss the stack of bubbles.
      *
@@ -1198,54 +1391,6 @@ public class BubbleStackView extends FrameLayout {
         mBubbleData.dismissAll(reason);
         logBubbleEvent(null /* no bubble associated with bubble stack dismiss */,
                 SysUiStatsLog.BUBBLE_UICHANGED__ACTION__STACK_DISMISSED);
-    }
-
-    /**
-     * @return the view the touch event is on
-     */
-    @Nullable
-    public View getTargetView(MotionEvent event) {
-        float x = event.getRawX();
-        float y = event.getRawY();
-        if (mIsExpanded) {
-            if (isIntersecting(mBubbleContainer, x, y)) {
-                if (BubbleExperimentConfig.allowBubbleOverflow(mContext)
-                        && isIntersecting(mBubbleOverflow.getBtn(), x, y)) {
-                    return mBubbleOverflow.getBtn();
-                }
-                // Could be tapping or dragging a bubble while expanded
-                for (int i = 0; i < getBubbleCount(); i++) {
-                    BadgedImageView view = (BadgedImageView) mBubbleContainer.getChildAt(i);
-                    if (isIntersecting(view, x, y)) {
-                        return view;
-                    }
-                }
-            }
-            BubbleExpandedView bev = (BubbleExpandedView) mExpandedViewContainer.getChildAt(0);
-            if (bev.intersectingTouchableContent((int) x, (int) y)) {
-                return bev;
-            }
-            // Outside of the parts we care about.
-            return null;
-        } else if (mFlyout.getVisibility() == VISIBLE && isIntersecting(mFlyout, x, y)) {
-            return mFlyout;
-        } else if (mUserEducationView != null && mUserEducationView.getVisibility() == VISIBLE) {
-            View bubbleChild = mBubbleContainer.getChildAt(0);
-            if (isIntersecting(bubbleChild, x, y)) {
-                return this;
-            } else if (isIntersecting(mUserEducationView, x, y)) {
-                return mUserEducationView;
-            } else {
-                return null;
-            }
-        }
-
-        // If it wasn't an individual bubble in the expanded state, or the flyout, it's the stack.
-        return this;
-    }
-
-    View getFlyoutView() {
-        return mFlyout;
     }
 
     /**
@@ -1385,124 +1530,70 @@ public class BubbleStackView extends FrameLayout {
         }
     }
 
-    /** Called when the collapsed stack is tapped on. */
-    void onStackTapped() {
-        if (!maybeShowStackUserEducation()) {
-            mBubbleData.setExpanded(true);
-        }
+    /**
+     * This method is called by {@link android.app.ActivityView} because the BubbleStackView has a
+     * higher Z-index than the ActivityView (so that dragged-out bubbles are visible over the AV).
+     * ActivityView is asking BubbleStackView to subtract the stack's bounds from the provided
+     * touchable region, so that the ActivityView doesn't consume events meant for the stack. Due to
+     * the special nature of ActivityView, it does not respect the standard
+     * {@link #dispatchTouchEvent} and {@link #onInterceptTouchEvent} methods typically used for
+     * this purpose.
+     *
+     * BubbleStackView is MATCH_PARENT, so that bubbles can be positioned via their translation
+     * properties for performance reasons. This means that the default implementation of this method
+     * subtracts the entirety of the screen from the ActivityView's touchable region, resulting in
+     * it not receiving any touch events. This was previously addressed by returning false in the
+     * stack's {@link View#canReceivePointerEvents()} method, but this precluded the use of any
+     * touch handlers in the stack or its child views.
+     *
+     * To support touch handlers, we're overriding this method to leave the ActivityView's touchable
+     * region alone. The only touchable part of the stack that can ever overlap the AV is a
+     * dragged-out bubble that is animating back into the row of bubbles. It's not worth continually
+     * updating the touchable region to allow users to grab a bubble while it completes its ~50ms
+     * animation back to the bubble row.
+     *
+     * NOTE: Any future additions to the stack that obscure the ActivityView region will need their
+     * bounds subtracted here in order to receive touch events.
+     */
+    @Override
+    public void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
+
     }
 
-    /** Called when a drag operation on an individual bubble has started. */
-    public void onBubbleDragStart(View bubble) {
-        if (DEBUG_BUBBLE_STACK_VIEW) {
-            Log.d(TAG, "onBubbleDragStart: bubble=" + ((BadgedImageView) bubble).getKey());
-        }
-
-        if (mBubbleOverflow != null && bubble.equals(mBubbleOverflow.getIconView())) {
-            return;
-        }
-
-        mExpandedAnimationController.prepareForBubbleDrag(bubble, mMagneticTarget);
-
-        // We're dragging an individual bubble, so set the magnetized object to the magnetized
-        // bubble.
-        mMagnetizedObject = mExpandedAnimationController.getMagnetizedBubbleDraggingOut();
-        mMagnetizedObject.setMagnetListener(mIndividualBubbleMagnetListener);
-
-        maybeShowManageEducation(false);
+    /**
+     * If you're here because you're not receiving touch events on a view that is a descendant of
+     * BubbleStackView, and you think BSV is intercepting them - it's not! You need to subtract the
+     * bounds of the view in question in {@link #subtractObscuredTouchableRegion}. The ActivityView
+     * consumes all touch events within its bounds, even for views like the BubbleStackView that are
+     * above it. It ignores typical view touch handling methods like this one and
+     * dispatchTouchEvent.
+     */
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return super.onInterceptTouchEvent(ev);
     }
 
-    /** Called with the coordinates to which an individual bubble has been dragged. */
-    public void onBubbleDragged(View bubble, float x, float y) {
-        if (!mIsExpanded || mIsExpansionAnimating
-                || (mBubbleOverflow != null && bubble.equals(mBubbleOverflow.getIconView()))) {
-            return;
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        boolean dispatched = super.dispatchTouchEvent(ev);
+
+        // If a new bubble arrives while the collapsed stack is being dragged, it will be positioned
+        // at the front of the stack (under the touch position). Subsequent ACTION_MOVE events will
+        // then be passed to the new bubble, which will not consume them since it hasn't received an
+        // ACTION_DOWN yet. Work around this by passing MotionEvents directly to the touch handler
+        // until the current gesture ends with an ACTION_UP event.
+        if (!dispatched && !mIsExpanded && mIsGestureInProgress) {
+            dispatched = mBubbleTouchListener.onTouch(this /* view */, ev);
         }
 
-        mExpandedAnimationController.dragBubbleOut(bubble, x, y);
-        springInDismissTarget();
+        mIsGestureInProgress =
+                ev.getAction() != MotionEvent.ACTION_UP
+                        && ev.getAction() != MotionEvent.ACTION_CANCEL;
+
+        return dispatched;
     }
 
-    /** Called when a drag operation on an individual bubble has finished. */
-    public void onBubbleDragFinish(
-            View bubble, float x, float y, float velX, float velY) {
-        if (DEBUG_BUBBLE_STACK_VIEW) {
-            Log.d(TAG, "onBubbleDragFinish: bubble=" + bubble);
-        }
-
-        if (!mIsExpanded || mIsExpansionAnimating
-                || (mBubbleOverflow != null && bubble.equals(mBubbleOverflow.getIconView()))) {
-            return;
-        }
-
-        mExpandedAnimationController.snapBubbleBack(bubble, velX, velY);
-        hideDismissTarget();
-    }
-
-    /** Expands the clicked bubble. */
-    public void expandBubble(Bubble bubble) {
-        if (bubble != null && bubble.equals(mBubbleData.getSelectedBubble())) {
-            // If the bubble we're supposed to expand is the selected bubble, that means the
-            // overflow bubble is currently expanded. Don't tell BubbleData to set this bubble as
-            // selected, since it already is. Just call the stack's setSelectedBubble to expand it.
-            setSelectedBubble(bubble);
-        } else {
-            mBubbleData.setSelectedBubble(bubble);
-        }
-    }
-
-    void onDragStart() {
-        if (DEBUG_BUBBLE_STACK_VIEW) {
-            Log.d(TAG, "onDragStart()");
-        }
-        if (mIsExpanded || mIsExpansionAnimating) {
-            if (DEBUG_BUBBLE_STACK_VIEW) {
-                Log.d(TAG, "mIsExpanded or mIsExpansionAnimating");
-            }
-            return;
-        }
-        mStackAnimationController.cancelStackPositionAnimations();
-        mBubbleContainer.setActiveController(mStackAnimationController);
-        hideFlyoutImmediate();
-
-        // Since we're dragging the stack, set the magnetized object to the magnetized stack.
-        mMagnetizedObject = mStackAnimationController.getMagnetizedStack(mMagneticTarget);
-        mMagnetizedObject.setMagnetListener(mStackMagnetListener);
-    }
-
-    void onDragged(float x, float y) {
-        if (mIsExpanded || mIsExpansionAnimating) {
-            return;
-        }
-
-        hideStackUserEducation(false /* fromExpansion */);
-        springInDismissTarget();
-        mStackAnimationController.moveStackFromTouch(x, y);
-    }
-
-    void onDragFinish(float x, float y, float velX, float velY) {
-        if (DEBUG_BUBBLE_STACK_VIEW) {
-            Log.d(TAG, "onDragFinish");
-        }
-
-        if (mIsExpanded || mIsExpansionAnimating) {
-            return;
-        }
-
-        final float newStackX = mStackAnimationController.flingStackThenSpringToEdge(x, velX, velY);
-        logBubbleEvent(null /* no bubble associated with bubble stack move */,
-                SysUiStatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
-
-        mStackOnLeftOrWillBe = newStackX <= 0;
-        updateBubbleZOrdersAndDotPosition(true /* animate */);
-        hideDismissTarget();
-    }
-
-    void onFlyoutDragStart() {
-        mFlyout.removeCallbacks(mHideFlyout);
-    }
-
-    void onFlyoutDragged(float deltaX) {
+    void setFlyoutStateForDragLength(float deltaX) {
         // This shouldn't happen, but if it does, just wait until the flyout lays out. This method
         // is continually called.
         if (mFlyout.getWidth() <= 0) {
@@ -1538,59 +1629,27 @@ public class BubbleStackView extends FrameLayout {
         mFlyout.setTranslationX(mFlyout.getRestingTranslationX() + overscrollTranslation);
     }
 
-    void onFlyoutTapped() {
-        if (maybeShowStackUserEducation()) {
-            // If we're showing user education, don't open the bubble show the education first
-            mBubbleToExpandAfterFlyoutCollapse = null;
-        } else {
-            mBubbleToExpandAfterFlyoutCollapse = mBubbleData.getSelectedBubble();
-        }
-
-        mFlyout.removeCallbacks(mHideFlyout);
-        mHideFlyout.run();
-    }
-
-    /**
-     * Called when the flyout drag has finished, and returns true if the gesture successfully
-     * dismissed the flyout.
-     */
-    void onFlyoutDragFinished(float deltaX, float velX) {
-        final boolean onLeft = mStackAnimationController.isStackOnLeftSide();
-        final boolean metRequiredVelocity =
-                onLeft ? velX < -FLYOUT_DISMISS_VELOCITY : velX > FLYOUT_DISMISS_VELOCITY;
-        final boolean metRequiredDeltaX =
-                onLeft
-                        ? deltaX < -mFlyout.getWidth() * FLYOUT_DRAG_PERCENT_DISMISS
-                        : deltaX > mFlyout.getWidth() * FLYOUT_DRAG_PERCENT_DISMISS;
-        final boolean isCancelFling = onLeft ? velX > 0 : velX < 0;
-        final boolean shouldDismiss = metRequiredVelocity || (metRequiredDeltaX && !isCancelFling);
-
-        mFlyout.removeCallbacks(mHideFlyout);
-        animateFlyoutCollapsed(shouldDismiss, velX);
-
-        maybeShowStackUserEducation();
-    }
-
-    /**
-     * Called when the first touch event of a gesture (stack drag, bubble drag, flyout drag, etc.)
-     * is received.
-     */
-    void onGestureStart() {
-        mIsGestureInProgress = true;
-    }
-
-    /** Called when a gesture is completed or cancelled. */
-    void onGestureFinished() {
-        mIsGestureInProgress = false;
-
-        if (mIsExpanded) {
-            mExpandedAnimationController.onGestureFinished();
-        }
-    }
-
     /** Passes the MotionEvent to the magnetized object and returns true if it was consumed. */
-    boolean passEventToMagnetizedObject(MotionEvent event) {
+    private boolean passEventToMagnetizedObject(MotionEvent event) {
         return mMagnetizedObject != null && mMagnetizedObject.maybeConsumeMotionEvent(event);
+    }
+
+    /**
+     * Dismisses the magnetized object - either an individual bubble, if we're expanded, or the
+     * stack, if we're collapsed.
+     */
+    private void dismissMagnetizedObject() {
+        if (mIsExpanded) {
+            final View draggedOutBubbleView = (View) mMagnetizedObject.getUnderlyingObject();
+            final Bubble draggedOutBubble = mBubbleData.getBubbleWithView(draggedOutBubbleView);
+
+            if (mBubbleData.hasBubbleWithKey(draggedOutBubble.getKey())) {
+                mBubbleData.notificationEntryRemoved(
+                        draggedOutBubble.getEntry(), BubbleController.DISMISS_USER_GESTURE);
+            }
+        } else {
+            mBubbleData.dismissAll(BubbleController.DISMISS_USER_GESTURE);
+        }
     }
 
     /** Prepares and starts the desaturate/darken animation on the bubble stack. */
@@ -1624,7 +1683,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /** Animates in the dismiss target. */
-    private void springInDismissTarget() {
+    private void springInDismissTargetMaybe() {
         if (mShowingDismiss) {
             return;
         }
@@ -1825,13 +1884,6 @@ public class BubbleStackView extends FrameLayout {
         }
 
         return 0;
-    }
-
-    private boolean isIntersecting(View view, float x, float y) {
-        mTempLoc = view.getLocationOnScreen();
-        mTempRect.set(mTempLoc[0], mTempLoc[1], mTempLoc[0] + view.getWidth(),
-                mTempLoc[1] + view.getHeight());
-        return mTempRect.contains(x, y);
     }
 
     private void requestUpdate() {
