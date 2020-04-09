@@ -8606,7 +8606,7 @@ public class DevicePolicyManager {
      * <p>
      * This method may be called on the {@code DevicePolicyManager} instance returned from
      * {@link #getParentProfileInstance(ComponentName)}. Note that only a profile owner on
-     * an organization-deviced can affect account types on the parent profile instance.
+     * an organization-owned device can affect account types on the parent profile instance.
      *
      * @return a list of account types for which account management has been disabled.
      *
