@@ -20,6 +20,9 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.WindowManagerGlobal;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Client implementation of {@link IWindowToken}. It can receive configuration change callbacks from
@@ -31,9 +34,9 @@ import android.os.IBinder;
 public class WindowTokenClient extends IWindowToken.Stub {
     /**
      * Attached {@link Context} for this window token to update configuration and resources.
-     * Initialized by {@link #attachContext(Context)}.
+     * Initialized by {@link #attachContext(WindowContext)}.
      */
-    private Context mContext = null;
+    private WeakReference<WindowContext> mContextRef = null;
 
     private final ResourcesManager mResourcesManager = ResourcesManager.getInstance();
 
@@ -47,30 +50,46 @@ public class WindowTokenClient extends IWindowToken.Stub {
      * @param context context to be attached
      * @throws IllegalStateException if attached context has already existed.
      */
-    void attachContext(@NonNull Context context) {
-        if (mContext != null) {
+    void attachContext(@NonNull WindowContext context) {
+        if (mContextRef != null) {
             throw new IllegalStateException("Context is already attached.");
         }
-        mContext = context;
-        ContextImpl impl = ContextImpl.getImpl(mContext);
+        mContextRef = new WeakReference<>(context);
+        final ContextImpl impl = ContextImpl.getImpl(context);
         impl.setResources(impl.createWindowContextResources());
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
-        final int currentDisplayId = mContext.getDisplayId();
+        final Context context = mContextRef.get();
+        if (context == null) {
+            return;
+        }
+        final int currentDisplayId = context.getDisplayId();
         final boolean displayChanged = newDisplayId != currentDisplayId;
-        final Configuration config = new Configuration(mContext.getResources()
+        final Configuration config = new Configuration(context.getResources()
                 .getConfiguration());
         final boolean configChanged = config.isOtherSeqNewer(newConfig)
                 && config.updateFrom(newConfig) != 0;
         if (displayChanged || configChanged) {
             // TODO(ag/9789103): update resource manager logic to track non-activity tokens
-            mResourcesManager.updateResourcesForActivity(asBinder(), config, newDisplayId,
+            mResourcesManager.updateResourcesForActivity(this, config, newDisplayId,
                     displayChanged);
         }
         if (displayChanged) {
-            mContext.updateDisplay(newDisplayId);
+            context.updateDisplay(newDisplayId);
         }
+    }
+
+    @Override
+    public void onWindowTokenRemoved() {
+        final WindowContext context = mContextRef.get();
+        if (context != null) {
+            context.destroy();
+            mContextRef.clear();
+        }
+        // If a secondary display is detached, release all views attached to this token.
+        WindowManagerGlobal.getInstance().closeAll(this, mContextRef.getClass().getName(),
+                "WindowContext");
     }
 }
