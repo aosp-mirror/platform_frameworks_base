@@ -1959,7 +1959,8 @@ public class NotificationManagerService extends SystemService {
                 mPackageManagerClient,
                 mRankingHandler,
                 mZenModeHelper,
-                new NotificationChannelLoggerImpl());
+                new NotificationChannelLoggerImpl(),
+                mAppOps);
         mRankingHelper = new RankingHelper(getContext(),
                 mRankingHandler,
                 mPreferencesHelper,
