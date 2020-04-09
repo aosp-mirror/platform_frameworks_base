@@ -56,17 +56,17 @@ public class WindowMetricsTest {
 
     @Before
     public void setUp() {
-        final Context insetContext = InstrumentationRegistry.getInstrumentation()
+        final Context instContext = InstrumentationRegistry.getInstrumentation()
                 .getTargetContext();
-        final Display display = insetContext.getSystemService(DisplayManager.class)
+        final Display display = instContext.getSystemService(DisplayManager.class)
                 .getDisplay(DEFAULT_DISPLAY);
-        mWindowContext = insetContext.createDisplayContext(display)
+        mWindowContext = instContext.createDisplayContext(display)
                 .createWindowContext(TYPE_APPLICATION_OVERLAY, null /* options */);
         mWm = mWindowContext.getSystemService(WindowManager.class);
     }
 
     @Test
-    public void testAddViewANdRemoveView_GetMetrics_DoNotCrash() {
+    public void testAddViewAndRemoveView_GetMetrics_DoNotCrash() {
         final View view = new View(mWindowContext);
         final WindowManager.LayoutParams params =
                 new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
