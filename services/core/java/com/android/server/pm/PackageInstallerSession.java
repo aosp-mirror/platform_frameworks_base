@@ -128,6 +128,7 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
@@ -1801,6 +1802,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private void logDataLoaderInstallationSession(int returnCode, String extraMessage) {
+        final long currentTimestamp = System.currentTimeMillis();
+        FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLER_V2_REPORTED,
+                isIncrementalInstallation(),
+                mPackageName,
+                currentTimestamp - createdMillis,
+                returnCode);
+    }
+
     /**
      * Returns true if the session should attempt to inherit any existing native libraries already
      * extracted at the current install location. This is necessary to prevent double loading of
@@ -2789,6 +2799,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         mCallback.onSessionFinished(this, success);
+        if (isDataLoaderInstallation()) {
+            logDataLoaderInstallationSession(returnCode, msg);
+        }
     }
 
     /** {@hide} */
