@@ -42,7 +42,6 @@ static void write_atoms_info_header_body(FILE* out, const Atoms& atoms) {
     fprintf(out,
             "  const static std::set<int> "
             "kTruncatingTimestampAtomBlackList;\n");
-    fprintf(out, "  const static std::map<int, int> kAtomsWithUidField;\n");
     fprintf(out, "  const static std::set<int> kAtomsWithAttributionChain;\n");
     fprintf(out,
             "  const static std::map<int, StateAtomFieldOptions> "
@@ -100,28 +99,6 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
 
     fprintf(out, "};\n");
     fprintf(out, "\n");
-
-    fprintf(out, "static std::map<int, int> getAtomUidField() {\n");
-    fprintf(out, "    std::map<int, int> uidField;\n");
-    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
-         atomIt++) {
-        if ((*atomIt)->uidField == 0) {
-            continue;
-        }
-        fprintf(out,
-                "\n    // Adding uid field for atom "
-                "(%d)%s\n",
-                (*atomIt)->code, (*atomIt)->name.c_str());
-        fprintf(out, "    uidField[%d /* %s */] = %d;\n", (*atomIt)->code,
-                make_constant_name((*atomIt)->name).c_str(), (*atomIt)->uidField);
-    }
-
-    fprintf(out, "    return uidField;\n");
-    fprintf(out, "};\n");
-
-    fprintf(out,
-            "const std::map<int, int> AtomsInfo::kAtomsWithUidField = "
-            "getAtomUidField();\n");
 
     fprintf(out,
             "static std::map<int, StateAtomFieldOptions> "
