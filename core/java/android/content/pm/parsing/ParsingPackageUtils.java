@@ -21,7 +21,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 import static android.os.Build.VERSION_CODES.DONUT;
@@ -253,10 +252,8 @@ public class ParsingPackageUtils {
             final File baseApk = new File(lite.baseCodePath);
             ParseResult<ParsingPackage> result = parseBaseApk(input, baseApk,
                     lite.codePath, assets, flags);
-            // TODO(b/135203078): Pass original error up?
             if (result.isError()) {
-                return input.error(INSTALL_PARSE_FAILED_NOT_APK,
-                        "Failed to parse base APK: " + baseApk);
+                return input.error(result);
             }
 
             ParsingPackage pkg = result.getResult();
