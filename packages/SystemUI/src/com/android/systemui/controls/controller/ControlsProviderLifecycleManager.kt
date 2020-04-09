@@ -63,8 +63,6 @@ class ControlsProviderLifecycleManager(
 ) : IBinder.DeathRecipient {
 
     val token: IBinder = Binder()
-    @GuardedBy("subscriptions")
-    private val subscriptions = mutableListOf<IControlsSubscription>()
     private var requiresBound = false
     @GuardedBy("queuedServiceMethods")
     private val queuedServiceMethods: MutableSet<ServiceMethod> = ArraySet()
@@ -194,7 +192,7 @@ class ControlsProviderLifecycleManager(
      * Request a call to [IControlsProvider.loadSuggested].
      *
      * If the service is not bound, the call will be queued and the service will be bound first.
-     * The service will be unbound after the controls are returned or the call times out.
+     * The service will be unbound if the call times out.
      *
      * @param subscriber the subscriber that manages coordination for loading controls
      */
@@ -245,9 +243,7 @@ class ControlsProviderLifecycleManager(
         if (DEBUG) {
             Log.d(TAG, "startSubscription: $subscription")
         }
-        synchronized(subscriptions) {
-            subscriptions.add(subscription)
-        }
+
         wrapper?.request(subscription, requestLimit)
     }
 
@@ -261,9 +257,7 @@ class ControlsProviderLifecycleManager(
         if (DEBUG) {
             Log.d(TAG, "cancelSubscription: $subscription")
         }
-        synchronized(subscriptions) {
-            subscriptions.remove(subscription)
-        }
+
         wrapper?.cancel(subscription)
     }
 
@@ -280,17 +274,6 @@ class ControlsProviderLifecycleManager(
     fun unbindService() {
         onLoadCanceller?.run()
         onLoadCanceller = null
-
-        // be sure to cancel all subscriptions
-        val subs = synchronized(subscriptions) {
-            ArrayList(subscriptions).also {
-                subscriptions.clear()
-            }
-        }
-
-        subs.forEach {
-            wrapper?.cancel(it)
-        }
 
         bindService(false)
     }
