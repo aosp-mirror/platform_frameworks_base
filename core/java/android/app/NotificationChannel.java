@@ -102,7 +102,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_FG_SERVICE_SHOWN = "fgservice";
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
-    private static final String ATT_ALLOW_BUBBLE = "allow_bubble";
+    private static final String ATT_ALLOW_BUBBLE = "allow_bubbles";
     private static final String ATT_ORIG_IMP = "orig_imp";
     private static final String ATT_PARENT_CHANNEL = "parent";
     private static final String ATT_CONVERSATION_ID = "conv_id";
@@ -168,7 +168,12 @@ public final class NotificationChannel implements Parcelable {
             NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_DELETED = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
-    private static final boolean DEFAULT_ALLOW_BUBBLE = false;
+    /**
+     * @hide
+     */
+    public static final int DEFAULT_ALLOW_BUBBLE = -1;
+    private static final int ALLOW_BUBBLE_ON = 1;
+    private static final int ALLOW_BUBBLE_OFF = 0;
 
     @UnsupportedAppUsage
     private String mId;
@@ -193,7 +198,7 @@ public final class NotificationChannel implements Parcelable {
     private AudioAttributes mAudioAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
     // If this is a blockable system notification channel.
     private boolean mBlockableSystem = false;
-    private boolean mAllowBubbles = DEFAULT_ALLOW_BUBBLE;
+    private int mAllowBubbles = DEFAULT_ALLOW_BUBBLE;
     private boolean mImportanceLockedByOEM;
     private boolean mImportanceLockedDefaultApp;
     private String mParentId = null;
@@ -261,7 +266,7 @@ public final class NotificationChannel implements Parcelable {
         mAudioAttributes = in.readInt() > 0 ? AudioAttributes.CREATOR.createFromParcel(in) : null;
         mLightColor = in.readInt();
         mBlockableSystem = in.readBoolean();
-        mAllowBubbles = in.readBoolean();
+        mAllowBubbles = in.readInt();
         mImportanceLockedByOEM = in.readBoolean();
         mOriginalImportance = in.readInt();
         mParentId = in.readString();
@@ -320,7 +325,7 @@ public final class NotificationChannel implements Parcelable {
         }
         dest.writeInt(mLightColor);
         dest.writeBoolean(mBlockableSystem);
-        dest.writeBoolean(mAllowBubbles);
+        dest.writeInt(mAllowBubbles);
         dest.writeBoolean(mImportanceLockedByOEM);
         dest.writeInt(mOriginalImportance);
         dest.writeString(mParentId);
@@ -550,7 +555,14 @@ public final class NotificationChannel implements Parcelable {
      * @see Notification#getBubbleMetadata()
      */
     public void setAllowBubbles(boolean allowBubbles) {
-        mAllowBubbles = allowBubbles;
+        mAllowBubbles = allowBubbles ? ALLOW_BUBBLE_ON : ALLOW_BUBBLE_OFF;
+    }
+
+    /**
+     * @hide
+     */
+    public void setAllowBubbles(int allowed) {
+        mAllowBubbles = allowed;
     }
 
     /**
@@ -701,6 +713,13 @@ public final class NotificationChannel implements Parcelable {
      * @see Notification#getBubbleMetadata()
      */
     public boolean canBubble() {
+        return mAllowBubbles == ALLOW_BUBBLE_ON;
+    }
+
+    /**
+     * @hide
+     */
+    public int getAllowBubbles() {
         return mAllowBubbles;
     }
 
@@ -872,7 +891,7 @@ public final class NotificationChannel implements Parcelable {
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
         setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
         setBlockable(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
-        setAllowBubbles(safeBool(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
+        setAllowBubbles(safeInt(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
         setOriginalImportance(safeInt(parser, ATT_ORIG_IMP, DEFAULT_IMPORTANCE));
         setConversationId(parser.getAttributeValue(null, ATT_PARENT_CHANNEL),
                 parser.getAttributeValue(null, ATT_CONVERSATION_ID));
@@ -996,8 +1015,8 @@ public final class NotificationChannel implements Parcelable {
         if (isBlockable()) {
             out.attribute(null, ATT_BLOCKABLE_SYSTEM, Boolean.toString(isBlockable()));
         }
-        if (canBubble() != DEFAULT_ALLOW_BUBBLE) {
-            out.attribute(null, ATT_ALLOW_BUBBLE, Boolean.toString(canBubble()));
+        if (getAllowBubbles() != DEFAULT_ALLOW_BUBBLE) {
+            out.attribute(null, ATT_ALLOW_BUBBLE, Integer.toString(getAllowBubbles()));
         }
         if (getOriginalImportance() != DEFAULT_IMPORTANCE) {
             out.attribute(null, ATT_ORIG_IMP, Integer.toString(getOriginalImportance()));
@@ -1059,7 +1078,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
         record.put(ATT_GROUP, getGroup());
         record.put(ATT_BLOCKABLE_SYSTEM, isBlockable());
-        record.put(ATT_ALLOW_BUBBLE, canBubble());
+        record.put(ATT_ALLOW_BUBBLE, getAllowBubbles());
         // TODO: original importance
         return record;
     }
