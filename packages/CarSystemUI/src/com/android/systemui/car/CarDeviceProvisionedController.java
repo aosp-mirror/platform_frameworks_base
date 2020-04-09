@@ -24,7 +24,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
  */
 public interface CarDeviceProvisionedController extends DeviceProvisionedController {
     /**
-     * Returns {@code true} then SUW is in progress for the given user.
+     * Returns {@code true} when SUW is in progress for the given user.
      */
     boolean isUserSetupInProgress(int user);
 
