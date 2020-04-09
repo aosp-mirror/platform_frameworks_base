@@ -48,6 +48,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -97,6 +98,11 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
 
         mTestController = new AdminSecondaryLockScreenController(
                 mContext, mParent, mUpdateMonitor, mKeyguardCallback, mHandler);
+    }
+
+    @After
+    public void tearDown() {
+        ViewUtils.detachView(mParent);
     }
 
     @Test
