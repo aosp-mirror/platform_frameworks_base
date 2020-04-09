@@ -3374,7 +3374,15 @@ public class AudioService extends IAudioService.Stub
                 hdlr = h;
                 // Remove from client list so that it is re-inserted at top of list
                 iter.remove();
-                hdlr.getBinder().unlinkToDeath(hdlr, 0);
+                try {
+                    hdlr.getBinder().unlinkToDeath(hdlr, 0);
+                    if (cb != hdlr.getBinder()){
+                        hdlr = null;
+                    }
+                } catch (NoSuchElementException e) {
+                    hdlr = null;
+                    Log.w(TAG, "link does not exist ...");
+                }
                 break;
             }
         }
