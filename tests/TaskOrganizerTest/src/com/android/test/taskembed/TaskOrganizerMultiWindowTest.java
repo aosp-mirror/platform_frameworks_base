@@ -53,8 +53,9 @@ public class TaskOrganizerMultiWindowTest extends Activity {
                 return true;
             }
 
-            float x = e.getX(0);
+            float x = e.getRawX(0);
             float ratio = (float) x / (float) getWidth() ;
+            ratio = 1-ratio;
 
             LinearLayout.LayoutParams lp1 =
                 new LinearLayout.LayoutParams(0,
@@ -172,10 +173,14 @@ public class TaskOrganizerMultiWindowTest extends Activity {
         setContentView(splitView);
     }
 
+    private void addFlags(Intent intent) {
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+    }
+
     Intent makeSettingsIntent() {
         Intent intent = new Intent();
         intent.setAction(android.provider.Settings.ACTION_SETTINGS);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        addFlags(intent);
         return intent;
     }
 
@@ -183,7 +188,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_APP_CONTACTS);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        addFlags(intent);
         return intent;
     }
 
