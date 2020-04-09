@@ -158,17 +158,6 @@ public class AttentionDetectorTest extends AndroidTestCase {
     }
 
     @Test
-    public void testOnUserActivity_disablesSettingIfNotSufficientPermissions() {
-        when(mPackageManager.checkPermission(any(), any())).thenReturn(
-                PackageManager.PERMISSION_DENIED);
-
-        registerAttention();
-        boolean enabled = Settings.Secure.getIntForUser(getContext().getContentResolver(),
-                Settings.Secure.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT) == 1;
-        assertFalse(enabled);
-    }
-
-    @Test
     public void testOnUserActivity_doesntCrashIfNoAttentionService() {
         mAttentionManagerInternal = null;
         registerAttention();
