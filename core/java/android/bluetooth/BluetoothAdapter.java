@@ -979,14 +979,17 @@ public final class BluetoothAdapter {
                 8, BLUETOOTH_GET_STATE_CACHE_PROPERTY) {
                 @Override
                 protected Integer recompute(Void query) {
-                    // This function must be called while holding the
-                    // mServiceLock, and with mService not null. The public
-                    // getState() method makes this guarantee.
                     try {
-                        return mService.getState();
+                        mServiceLock.readLock().lock();
+                        if (mService != null) {
+                            return mService.getState();
+                        }
                     } catch (RemoteException e) {
-                        throw e.rethrowFromSystemServer();
+                        Log.e(TAG, "", e);
+                    } finally {
+                        mServiceLock.readLock().unlock();
                     }
+                    return BluetoothAdapter.STATE_OFF;
                 }
             };
 
@@ -1013,24 +1016,7 @@ public final class BluetoothAdapter {
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     @AdapterState
     public int getState() {
-        int state = BluetoothAdapter.STATE_OFF;
-
-        try {
-            mServiceLock.readLock().lock();
-            // The test for mService must either be outside the cache, or
-            // the cache must be invalidated when mService changes.
-            if (mService != null) {
-                state = mBluetoothGetStateCache.query(null);
-            }
-        } catch (RuntimeException e) {
-            if (e.getCause() instanceof RemoteException) {
-                Log.e(TAG, "", e.getCause());
-            } else {
-                throw e;
-            }
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
+        int state = mBluetoothGetStateCache.query(null);
 
         // Consider all internal states as OFF
         if (state == BluetoothAdapter.STATE_BLE_ON || state == BluetoothAdapter.STATE_BLE_TURNING_ON
