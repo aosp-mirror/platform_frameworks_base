@@ -4121,7 +4121,10 @@
          set of pages referenced over time.
          <p>Declaring the permission implies intention to use the API and the user of the
          device can grant permission through the Settings application.
-         <p>Protection level: signature|privileged|appop -->
+         <p>Protection level: signature|privileged|appop
+         <p>A data loader has to be the one which provides data to install an app.
+         <p>A data loader has to have both permission:LOADER_USAGE_STATS AND
+         appop:LOADER_USAGE_STATS allowed to be able to access the read logs. -->
     <permission android:name="android.permission.LOADER_USAGE_STATS"
         android:protectionLevel="signature|privileged|appop" />
     <uses-permission android:name="android.permission.LOADER_USAGE_STATS" />
