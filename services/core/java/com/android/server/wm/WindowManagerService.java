@@ -1696,15 +1696,14 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
 
-            getInsetsSourceControls(win, outActiveControls);
-
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "addWindow: New client %s"
                     + ": window=%s Callers=%s", client.asBinder(), win, Debug.getCallers(5));
-
 
             if (win.isVisibleOrAdding() && displayContent.updateOrientation()) {
                 displayContent.sendNewConfiguration();
             }
+
+            getInsetsSourceControls(win, outActiveControls);
         }
 
         Binder.restoreCallingIdentity(origId);
@@ -2400,7 +2399,6 @@ public class WindowManagerService extends IWindowManager.Stub
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
             outInsetsState.set(win.getInsetsState(), win.isClientLocal());
-            getInsetsSourceControls(win, outActiveControls);
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
                         + ", requestedWidth=" + requestedWidth
@@ -2431,6 +2429,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 outSurfaceSize.set(winAnimator.mSurfaceController.getWidth(),
                                          winAnimator.mSurfaceController.getHeight());
             }
+            getInsetsSourceControls(win, outActiveControls);
         }
 
         Binder.restoreCallingIdentity(origId);
@@ -6104,9 +6103,14 @@ public class WindowManagerService extends IWindowManager.Stub
         mRoot.forAllDisplays(dc -> {
             final int displayId = dc.getDisplayId();
             final WindowState inputMethodTarget = dc.mInputMethodTarget;
+            final WindowState inputMethodInputTarget = dc.mInputMethodInputTarget;
             if (inputMethodTarget != null) {
                 pw.print("  mInputMethodTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(inputMethodTarget);
+            }
+            if (inputMethodInputTarget != null) {
+                pw.print("  mInputMethodInputTarget in display# "); pw.print(displayId);
+                pw.print(' '); pw.println(inputMethodInputTarget);
             }
             if (mAccessibilityController != null) {
                 final Region magnificationRegion = new Region();
@@ -7359,7 +7363,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
                 if (imeTarget != null) {
-                    imeTarget.getDisplayContent().updateImeControlTarget(imeTarget);
+                    imeTarget.getDisplayContent().setInputMethodInputTarget(imeTarget);
                 }
             }
         }

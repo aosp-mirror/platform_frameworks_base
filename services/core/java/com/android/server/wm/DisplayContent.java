@@ -73,7 +73,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
-import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
@@ -199,7 +198,6 @@ import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
-import android.window.ITaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -539,6 +537,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     WindowState mInputMethodTarget;
 
+    /**
+     * The window which receives input from the input method. This is also a candidate of the
+     * input method control target.
+     */
+    WindowState mInputMethodInputTarget;
+
+    /**
+     * This controls the visibility and animation of the input method window.
+     */
     InsetsControlTarget mInputMethodControlTarget;
 
     /** If true hold off on modifying the animation layer of mInputMethodTarget */
@@ -3243,6 +3250,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mInsetsStateController.getSourceProvider(ITYPE_IME).setWindow(win,
                 null /* frameProvider */, null /* imeFrameProvider */);
         computeImeTarget(true /* updateImeTarget */);
+        updateImeControlTarget();
     }
 
     /**
@@ -3422,8 +3430,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim) {
-        // Always update control target. This is needed to handle rotation.
-        updateImeControlTarget(target);
         if (target == mInputMethodTarget && mInputMethodTargetWaitingAnim == targetWaitingAnim) {
             return;
         }
@@ -3432,22 +3438,28 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(false /* setLayoutNeeded */);
         updateImeParent();
+        updateImeControlTarget();
     }
 
     /**
-     * IME control target is the window that controls the IME visibility and animation.
-     * This window is same as the window on which startInput is called.
-     * @param target the window that receives IME control. This is ignored if we aren't attaching
-     *               the IME to an app (eg. when in multi-window mode).
+     * The IME input target is the window which receives input from IME. It is also a candidate
+     * which controls the visibility and animation of the input method window.
      *
-     * @see #getImeControlTarget()
+     * @param target the window that receives input from IME.
      */
-    void updateImeControlTarget(InsetsControlTarget target) {
+    void setInputMethodInputTarget(WindowState target) {
+        if (mInputMethodInputTarget != target) {
+            mInputMethodInputTarget = target;
+            updateImeControlTarget();
+        }
+    }
+
+    private void updateImeControlTarget() {
         if (!isImeAttachedToApp() && mRemoteInsetsControlTarget != null) {
             mInputMethodControlTarget = mRemoteInsetsControlTarget;
         } else {
-            // Otherwise, we just use the ime target
-            mInputMethodControlTarget = target;
+            // Otherwise, we just use the ime input target
+            mInputMethodControlTarget = mInputMethodInputTarget;
         }
         mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
     }
