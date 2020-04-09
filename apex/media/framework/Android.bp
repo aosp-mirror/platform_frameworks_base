@@ -94,7 +94,6 @@ stubs_defaults {
         // TODO(b/135922046) remove this
         include_dirs: ["frameworks/base/core/java"],
     },
-    sdk_version: "system_current",
 }
 
 droidstubs {
