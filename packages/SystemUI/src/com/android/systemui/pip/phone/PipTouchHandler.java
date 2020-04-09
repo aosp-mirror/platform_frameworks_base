@@ -510,7 +510,7 @@ public class PipTouchHandler {
         mHandler.removeCallbacks(mShowTargetAction);
 
         if (mTargetViewContainer.isAttachedToWindow()) {
-            mWindowManager.removeView(mTargetViewContainer);
+            mWindowManager.removeViewImmediate(mTargetViewContainer);
         }
     }
 
