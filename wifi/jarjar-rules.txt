@@ -53,6 +53,9 @@ rule com.google.protobuf.** com.android.server.x.wifi.protobuf.@1
 rule com.android.internal.messages.SystemMessageProto* com.android.server.x.wifi.messages.SystemMessageProto@1
 # Use our statically linked PlatformProperties library
 rule android.sysprop.** com.android.server.x.wifi.sysprop.@1
+# Use our statically linked HIDL stubs
+rule android.hardware.** com.android.server.x.wifi.hardware.@1
+rule android.hidl.** com.android.server.x.wifi.hidl.@1
 
 # used by both framework-wifi and wifi-service
 rule android.content.pm.BaseParceledListSlice* android.x.net.wifi.util.BaseParceledListSlice@1
