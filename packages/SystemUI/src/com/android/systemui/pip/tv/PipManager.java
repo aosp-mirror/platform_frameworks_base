@@ -289,7 +289,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         mMediaSessionManager =
                 (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
-        mPipTaskOrganizer.registerPipTransitionCallback(this);
 
         try {
             WindowManagerWrapper.getInstance().addPinnedStackListener(mPinnedStackListener);
