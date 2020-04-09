@@ -1680,7 +1680,9 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
             uid, process_name, managed_nice_name, fail_fn);
     isolateJitProfile(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
-  if ((mount_external != MOUNT_EXTERNAL_INSTALLER) && mount_storage_dirs) {
+  if (mount_external != MOUNT_EXTERNAL_INSTALLER &&
+      mount_external != MOUNT_EXTERNAL_PASS_THROUGH &&
+      mount_storage_dirs) {
     BindMountStorageDirs(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
 
