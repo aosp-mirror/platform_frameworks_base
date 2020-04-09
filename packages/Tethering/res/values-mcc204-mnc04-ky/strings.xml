@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="6246167638178412020">"Хотспоттун Интернети жок"</string>
+    <string name="no_upstream_notification_title" msgid="6246167638178412020">"Байланыш түйүнүндө Интернет жок"</string>
     <string name="no_upstream_notification_message" msgid="5010177541603431003">"Түзмөктөр Интернетке туташпай жатат"</string>
     <string name="no_upstream_notification_disable_button" msgid="2613861474440640595">"Туташуу түйүнүн өчүрүү"</string>
     <string name="upstream_roaming_notification_title" msgid="3633925855626231152">"Кошулуу түйүнү күйүк"</string>

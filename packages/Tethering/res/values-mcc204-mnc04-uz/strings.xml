@@ -16,15 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for no_upstream_notification_title (6246167638178412020) -->
-    <skip />
-    <!-- no translation found for no_upstream_notification_message (5010177541603431003) -->
-    <skip />
-    <!-- no translation found for no_upstream_notification_disable_button (2613861474440640595) -->
-    <skip />
-    <!-- no translation found for upstream_roaming_notification_title (3633925855626231152) -->
-    <skip />
-    <!-- no translation found for upstream_roaming_notification_message (1396837704184358258) -->
-    <skip />
+    <string name="no_upstream_notification_title" msgid="6246167638178412020">"Hotspot internetga ulanmagan"</string>
+    <string name="no_upstream_notification_message" msgid="5010177541603431003">"Qurilmalar internetga ulana olmayapti"</string>
+    <string name="no_upstream_notification_disable_button" msgid="2613861474440640595">"Hotspotni faolsizlantirish"</string>
+    <string name="upstream_roaming_notification_title" msgid="3633925855626231152">"Hotspot yoniq"</string>
+    <string name="upstream_roaming_notification_message" msgid="1396837704184358258">"Rouming vaqtida qoʻshimcha haq olinishi mumkin"</string>
     <string name="upstream_roaming_notification_continue_button" msgid="5324117849715705638">"Davom etish"</string>
 </resources>
