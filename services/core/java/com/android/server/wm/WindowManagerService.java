@@ -73,6 +73,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 
@@ -2108,6 +2109,10 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayContent dc = win.getDisplayContent();
             if (!dc.mWaitingForConfig) {
                 win.finishSeamlessRotation(false /* timeout */);
+            }
+
+            if (win.useBLASTSync()) {
+                result |= RELAYOUT_RES_BLAST_SYNC;
             }
 
             int attrChanges = 0;
