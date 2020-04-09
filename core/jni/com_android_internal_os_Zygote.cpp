@@ -119,6 +119,7 @@ typedef const std::function<void(std::string)>& fail_fn_t;
 
 static pid_t gSystemServerPid = 0;
 
+static constexpr const char* kVoldAppDataIsolation = "persist.sys.vold_app_data_isolation_enabled";
 static constexpr const char* kPropFuse = "persist.sys.fuse";
 static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
@@ -831,6 +832,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
              multiuser_get_uid(user_id, AID_EVERYBODY), fail_fn);
 
   bool isFuse = GetBoolProperty(kPropFuse, false);
+  bool isAppDataIsolationEnabled = GetBoolProperty(kVoldAppDataIsolation, false);
 
   if (isFuse) {
     if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH) {
@@ -840,6 +842,9 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
     } else if (mount_mode == MOUNT_EXTERNAL_INSTALLER) {
       const std::string installer_source = StringPrintf("/mnt/installer/%d", user_id);
       BindMount(installer_source, "/storage", fail_fn);
+    } else if (isAppDataIsolationEnabled && mount_mode == MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+      const std::string writable_source = StringPrintf("/mnt/androidwritable/%d", user_id);
+      BindMount(writable_source, "/storage", fail_fn);
     } else {
       BindMount(user_source, "/storage", fail_fn);
     }
