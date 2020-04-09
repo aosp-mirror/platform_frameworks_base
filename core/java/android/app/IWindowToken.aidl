@@ -30,4 +30,6 @@ import android.view.IWindow;
  */
 oneway interface IWindowToken {
     void onConfigurationChanged(in Configuration newConfig, int newDisplayId);
+
+    void onWindowTokenRemoved();
 }
