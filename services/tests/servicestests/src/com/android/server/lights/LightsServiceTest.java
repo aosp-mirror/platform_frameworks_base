@@ -63,6 +63,16 @@ public class LightsServiceTest {
                 fakeHwLight(105, LightsManager.LIGHT_TYPE_MICROPHONE, 2)
             };
         }
+
+        @Override
+        public int getInterfaceVersion() {
+            return this.VERSION;
+        }
+
+        @Override
+        public String getInterfaceHash() {
+            return this.HASH;
+        }
     };
 
     private static HwLight fakeHwLight(int id, int type, int ordinal) {
