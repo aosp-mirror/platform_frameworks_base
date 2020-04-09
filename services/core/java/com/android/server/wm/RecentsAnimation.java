@@ -165,17 +165,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "startRecentsActivity(): intent=%s", mTargetIntent);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "RecentsAnimation#startRecentsActivity");
 
-        // TODO(multi-display) currently only support recents animation in default display.
-        final DisplayContent dc =
-                mService.mRootWindowContainer.getDefaultDisplay().mDisplayContent;
-        if (!mWindowManager.canStartRecentsAnimation()) {
-            notifyAnimationCancelBeforeStart(recentsAnimationRunner);
-            ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
-                    "Can't start recents animation, nextAppTransition=%s",
-                        dc.mAppTransition.getAppTransition());
-            return;
-        }
-
         // If the activity is associated with the recents stack, then try and get that first
         ActivityStack targetStack = mDefaultTaskDisplayArea.getStack(WINDOWING_MODE_UNDEFINED,
                 mTargetActivityType);

@@ -79,7 +79,6 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         mService.mWindowManager.setRecentsAnimationController(mRecentsAnimationController);
         doNothing().when(mService.mWindowManager).initializeRecentsAnimation(
                 anyInt(), any(), any(), anyInt(), any(), any());
-        doReturn(true).when(mService.mWindowManager).canStartRecentsAnimation();
 
         final RecentTasks recentTasks = mService.getRecentTasks();
         spyOn(recentTasks);
