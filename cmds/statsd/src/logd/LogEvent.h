@@ -213,6 +213,7 @@ private:
     void parseExclusiveStateAnnotation(uint8_t annotationType);
     void parseTriggerStateResetAnnotation(uint8_t annotationType);
     void parseStateNestedAnnotation(uint8_t annotationType);
+    bool checkPreviousValueType(Type expected);
 
     /**
      * The below three variables are only valid during the execution of
