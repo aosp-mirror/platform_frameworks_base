@@ -205,7 +205,7 @@ public class EthernetTetheringTest {
                 requestWithStaticIpv4(localAddr, clientAddr));
 
         mTetheringEventCallback.awaitInterfaceTethered();
-        assertInterfaceHasIpAddress(iface, clientAddr);
+        assertInterfaceHasIpAddress(iface, localAddr);
 
         byte[] client1 = MacAddress.fromString("1:2:3:4:5:6").toByteArray();
         byte[] client2 = MacAddress.fromString("a:b:c:d:e:f").toByteArray();

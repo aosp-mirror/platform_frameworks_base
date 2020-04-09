@@ -92,7 +92,7 @@ public class PipTouchState {
 
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
-                addMovement(ev);
+                addMovementToVelocityTracker(ev);
 
                 mActivePointerId = ev.getPointerId(0);
                 if (DEBUG) {
@@ -120,7 +120,7 @@ public class PipTouchState {
                 }
 
                 // Update the velocity tracker
-                addMovement(ev);
+                addMovementToVelocityTracker(ev);
                 int pointerIndex = ev.findPointerIndex(mActivePointerId);
                 if (pointerIndex == -1) {
                     Log.e(TAG, "Invalid active pointer id on MOVE: " + mActivePointerId);
@@ -151,7 +151,7 @@ public class PipTouchState {
                 }
 
                 // Update the velocity tracker
-                addMovement(ev);
+                addMovementToVelocityTracker(ev);
 
                 int pointerIndex = ev.getActionIndex();
                 int pointerId = ev.getPointerId(pointerIndex);
@@ -174,7 +174,7 @@ public class PipTouchState {
                 }
 
                 // Update the velocity tracker
-                addMovement(ev);
+                addMovementToVelocityTracker(ev);
                 mVelocityTracker.computeCurrentVelocity(1000,
                         mViewConfig.getScaledMaximumFlingVelocity());
                 mVelocity.set(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
@@ -318,6 +318,20 @@ public class PipTouchState {
         return -1;
     }
 
+    void addMovementToVelocityTracker(MotionEvent event) {
+        if (mVelocityTracker == null) {
+            return;
+        }
+
+        // Add movement to velocity tracker using raw screen X and Y coordinates instead
+        // of window coordinates because the window frame may be moving at the same time.
+        float deltaX = event.getRawX() - event.getX();
+        float deltaY = event.getRawY() - event.getY();
+        event.offsetLocation(deltaX, deltaY);
+        mVelocityTracker.addMovement(event);
+        event.offsetLocation(-deltaX, -deltaY);
+    }
+
     private void initOrResetVelocityTracker() {
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
@@ -331,16 +345,6 @@ public class PipTouchState {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
-    }
-
-    private void addMovement(MotionEvent event) {
-        // Add movement to velocity tracker using raw screen X and Y coordinates instead
-        // of window coordinates because the window frame may be moving at the same time.
-        float deltaX = event.getRawX() - event.getX();
-        float deltaY = event.getRawY() - event.getY();
-        event.offsetLocation(deltaX, deltaY);
-        mVelocityTracker.addMovement(event);
-        event.offsetLocation(-deltaX, -deltaY);
     }
 
     public void dump(PrintWriter pw, String prefix) {

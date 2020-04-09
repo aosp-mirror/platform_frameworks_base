@@ -23,7 +23,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center_horizontal|fill_vertical"
-    android:padding="16dp"
+    android:paddingTop="@dimen/qs_media_panel_outer_padding"
+    android:paddingBottom="@dimen/qs_media_panel_outer_padding"
     android:background="@drawable/qs_media_background"
     >
 
@@ -42,7 +43,9 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/qs_media_panel_outer_padding"
+            android:paddingStart="@dimen/qs_media_panel_outer_padding"
+            android:paddingEnd="16dp"
         >
 
             <ImageView
@@ -139,6 +142,7 @@
         <!-- Seek Bar -->
         <SeekBar
             android:id="@+id/media_progress_bar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
             android:clickable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -154,6 +158,9 @@
             android:id="@+id/notification_media_progress_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingStart="@dimen/qs_media_panel_outer_padding"
+            android:paddingEnd="@dimen/qs_media_panel_outer_padding"
+            android:layout_marginBottom="10dp"
             android:layout_gravity="center"
             >
             <!-- width is set to "match_parent" to avoid extra layout calls -->
@@ -184,6 +191,8 @@
             android:layoutDirection="ltr"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingStart="@dimen/qs_media_panel_outer_padding"
+            android:paddingEnd="@dimen/qs_media_panel_outer_padding"
             android:gravity="center"
             >
             <ImageButton

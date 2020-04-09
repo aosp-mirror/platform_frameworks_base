@@ -102,12 +102,11 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
         // Turn off divider
         view.findViewById(R.id.two_target_divider).setVisibility(View.INVISIBLE);
 
-        // Enable the icon button when this Entry is a canManageSubscription entry.
+        // Enable the icon button when the help string in this WifiEntry is not null.
         final ImageButton imageButton = (ImageButton) view.findViewById(R.id.icon_button);
         final ImageView frictionImageView = (ImageView) view.findViewById(
                 R.id.friction_icon);
-        if (mWifiEntry.canManageSubscription() && !mWifiEntry.isSaved()
-                && !mWifiEntry.isSubscription()
+        if (mWifiEntry.getHelpUriString() != null
                 && mWifiEntry.getConnectedState() == WifiEntry.CONNECTED_STATE_DISCONNECTED) {
             final Drawable drawablehelp = getDrawable(R.drawable.ic_help);
             drawablehelp.setTintList(

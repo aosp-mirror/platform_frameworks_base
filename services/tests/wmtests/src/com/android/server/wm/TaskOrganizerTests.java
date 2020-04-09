@@ -192,6 +192,21 @@ public class TaskOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTaskNoDraw() throws RemoteException {
+        final ActivityStack stack = createStack();
+        final Task task = createTask(stack, false /* fakeDraw */);
+        final ITaskOrganizer organizer = registerMockOrganizer();
+
+        stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        verify(organizer, never()).onTaskAppeared(any());
+        assertTrue(stack.isOrganized());
+
+        mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer);
+        verify(organizer, never()).onTaskVanished(any());
+        assertFalse(stack.isOrganized());
+    }
+
+    @Test
     public void testClearOrganizer() throws RemoteException {
         final ActivityStack stack = createStack();
         final Task task = createTask(stack);

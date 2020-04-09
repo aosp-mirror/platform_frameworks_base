@@ -231,7 +231,12 @@ public class PipBoundsHandler {
     /**
      * @return {@link Rect} of the destination PiP window bounds.
      */
-    Rect getDestinationBounds(float aspectRatio, Rect bounds, Size minimalSize) {
+    Rect getDestinationBounds(ComponentName componentName, float aspectRatio, Rect bounds,
+            Size minimalSize) {
+        if (!componentName.equals(mLastPipComponentName)) {
+            onResetReentryBoundsUnchecked();
+            mLastPipComponentName = componentName;
+        }
         final Rect destinationBounds;
         if (bounds == null) {
             final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
@@ -246,11 +251,7 @@ public class PipBoundsHandler {
             transformBoundsToAspectRatio(destinationBounds, aspectRatio,
                     false /* useCurrentMinEdgeSize */);
         }
-        if (destinationBounds.equals(bounds)) {
-            return bounds;
-        }
         mAspectRatio = aspectRatio;
-        onResetReentryBoundsUnchecked();
         mLastDestinationBounds.set(destinationBounds);
         return destinationBounds;
     }
@@ -483,6 +484,7 @@ public class PipBoundsHandler {
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mLastPipComponentName=" + mLastPipComponentName);
         pw.println(innerPrefix + "mReentrySnapFraction=" + mReentrySnapFraction);
+        pw.println(innerPrefix + "mReentrySize=" + mReentrySize);
         pw.println(innerPrefix + "mDisplayInfo=" + mDisplayInfo);
         pw.println(innerPrefix + "mDefaultAspectRatio=" + mDefaultAspectRatio);
         pw.println(innerPrefix + "mMinAspectRatio=" + mMinAspectRatio);

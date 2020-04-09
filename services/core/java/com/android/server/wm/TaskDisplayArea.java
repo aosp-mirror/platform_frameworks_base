@@ -31,7 +31,6 @@ import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.window.DisplayAreaOrganizer.FEATURE_TASK_CONTAINER;
 
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
@@ -141,8 +140,9 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
      */
     private boolean mRemoved;
 
-    TaskDisplayArea(DisplayContent displayContent, WindowManagerService service) {
-        super(service, Type.ANY, "TaskContainers", FEATURE_TASK_CONTAINER);
+    TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
+            int displayAreaFeature) {
+        super(service, Type.ANY, name, displayAreaFeature);
         mDisplayContent = displayContent;
         mRootWindowContainer = service.mRoot;
         mAtmService = service.mAtmService;
@@ -1610,6 +1610,11 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         for (int i = mStackOrderChangedCallbacks.size() - 1; i >= 0; i--) {
             mStackOrderChangedCallbacks.get(i).onStackOrderChanged(stack);
         }
+    }
+
+    @Override
+    boolean canCreateRemoteAnimationTarget() {
+        return true;
     }
 
     /**

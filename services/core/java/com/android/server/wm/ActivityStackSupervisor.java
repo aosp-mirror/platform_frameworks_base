@@ -1469,7 +1469,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             if (toDisplay.getDisplayId() != stack.getDisplayId()) {
                 stack.reparent(toDisplay.getDefaultTaskDisplayArea(), false /* onTop */);
             } else {
-                toDisplay.mTaskContainers.positionStackAtBottom(stack);
+                toDisplay.getDefaultTaskDisplayArea().positionStackAtBottom(stack);
             }
 
             mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);

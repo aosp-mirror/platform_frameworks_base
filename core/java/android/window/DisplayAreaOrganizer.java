@@ -33,8 +33,8 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_SYSTEM_FIRST = 0;
     // The Root display area on a display
     public static final int FEATURE_ROOT = FEATURE_SYSTEM_FIRST;
-    // Display area hosting the task container.
-    public static final int FEATURE_TASK_CONTAINER = FEATURE_SYSTEM_FIRST + 1;
+    // Display area hosting the default task container.
+    public static final int FEATURE_DEFAULT_TASK_CONTAINER = FEATURE_SYSTEM_FIRST + 1;
     // Display area hosting non-activity window tokens.
     public static final int FEATURE_WINDOW_TOKENS = FEATURE_SYSTEM_FIRST + 2;
 
