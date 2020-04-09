@@ -460,8 +460,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             new IBiometricServiceReceiver.Stub() {
 
         @Override
-        public void onAuthenticationSucceeded(@AuthenticationResultType int authenticationType)
-                throws RemoteException {
+        public void onAuthenticationSucceeded(@AuthenticationResultType int authenticationType) {
             mExecutor.execute(() -> {
                 final AuthenticationResult result =
                         new AuthenticationResult(mCryptoObject, authenticationType);
@@ -470,42 +469,68 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         @Override
-        public void onAuthenticationFailed() throws RemoteException {
+        public void onAuthenticationFailed() {
             mExecutor.execute(() -> {
                 mAuthenticationCallback.onAuthenticationFailed();
             });
         }
 
         @Override
-        public void onError(int modality, int error, int vendorCode) throws RemoteException {
-            mExecutor.execute(() -> {
-                String errorMessage;
-                switch (modality) {
-                    case TYPE_FACE:
-                        errorMessage = FaceManager.getErrorString(mContext, error, vendorCode);
-                        break;
+        public void onError(@BiometricAuthenticator.Modality int modality, int error,
+                int vendorCode) {
 
-                    case TYPE_FINGERPRINT:
-                        errorMessage = FingerprintManager.getErrorString(mContext, error,
-                                vendorCode);
-                        break;
+            String errorMessage = null;
+            switch (modality) {
+                case TYPE_FACE:
+                    errorMessage = FaceManager.getErrorString(mContext, error, vendorCode);
+                    break;
 
+                case TYPE_FINGERPRINT:
+                    errorMessage = FingerprintManager.getErrorString(mContext, error, vendorCode);
+                    break;
+            }
+
+            // Look for generic errors, as it may be a combination of modalities, or no modality
+            // (e.g. attempted biometric authentication without biometric sensors).
+            if (errorMessage == null) {
+                switch (error) {
+                    case BIOMETRIC_ERROR_CANCELED:
+                        errorMessage = mContext.getString(R.string.biometric_error_canceled);
+                        break;
+                    case BIOMETRIC_ERROR_USER_CANCELED:
+                        errorMessage = mContext.getString(R.string.biometric_error_user_canceled);
+                        break;
+                    case BIOMETRIC_ERROR_HW_NOT_PRESENT:
+                        errorMessage = mContext.getString(R.string.biometric_error_hw_unavailable);
+                        break;
+                    case BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL:
+                        errorMessage = mContext.getString(
+                                R.string.biometric_error_device_not_secured);
+                        break;
                     default:
-                        errorMessage = "";
+                        Log.e(TAG, "Unknown error, modality: " + modality
+                                + " error: " + error
+                                + " vendorCode: " + vendorCode);
+                        errorMessage = mContext.getString(R.string.biometric_error_generic);
+                        break;
                 }
-                mAuthenticationCallback.onAuthenticationError(error, errorMessage);
+            }
+
+            final String stringToSend = errorMessage;
+            mExecutor.execute(() -> {
+                mAuthenticationCallback.onAuthenticationError(error, stringToSend);
             });
         }
 
         @Override
-        public void onAcquired(int acquireInfo, String message) throws RemoteException {
+        public void onAcquired(int acquireInfo, String message) {
             mExecutor.execute(() -> {
                 mAuthenticationCallback.onAuthenticationHelp(acquireInfo, message);
             });
         }
 
         @Override
-        public void onDialogDismissed(int reason) throws RemoteException {
+        public void onDialogDismissed(int reason) {
             // Check the reason and invoke OnClickListener(s) if necessary
             if (reason == DISMISSED_REASON_BIOMETRIC_CONFIRMED) {
                 mPositiveButtonInfo.executor.execute(() -> {
@@ -519,7 +544,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         @Override
-        public void onSystemEvent(int event) throws RemoteException {
+        public void onSystemEvent(int event) {
             mExecutor.execute(() -> {
                 mAuthenticationCallback.onSystemEvent(event);
             });

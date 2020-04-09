@@ -129,6 +129,7 @@ public class BiometricServiceTest {
         when(mInjector.getBiometricStrengthController(any()))
                 .thenReturn(mock(BiometricStrengthController.class));
         when(mInjector.getTrustManager()).thenReturn(mTrustManager);
+        when(mInjector.getDevicePolicyManager(any())).thenReturn(mDevicePolicyManager);
 
         when(mResources.getString(R.string.biometric_error_hw_unavailable))
                 .thenReturn(ERROR_HW_UNAVAILABLE);
@@ -158,7 +159,7 @@ public class BiometricServiceTest {
                 Authenticators.DEVICE_CREDENTIAL);
         waitForIdle();
         verify(mReceiver1).onError(
-                eq(BiometricAuthenticator.TYPE_NONE),
+                eq(BiometricAuthenticator.TYPE_CREDENTIAL),
                 eq(BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL),
                 eq(0 /* vendorCode */));
     }
@@ -1130,13 +1131,13 @@ public class BiometricServiceTest {
         };
 
         for (int i = 0; i < testCases.length; i++) {
-            final BiometricSensor authenticator =
+            final BiometricSensor sensor =
                     new BiometricSensor(0 /* id */,
                             BiometricAuthenticator.TYPE_FINGERPRINT,
                             testCases[i][0],
                             null /* impl */);
-            authenticator.updateStrength(testCases[i][1]);
-            assertEquals(testCases[i][2], authenticator.getActualStrength());
+            sensor.updateStrength(testCases[i][1]);
+            assertEquals(testCases[i][2], sensor.getActualStrength());
         }
     }
 
@@ -1296,8 +1297,8 @@ public class BiometricServiceTest {
 
         for (String s : mInjector.getConfiguration(null)) {
             SensorConfig config = new SensorConfig(s);
-            mBiometricService.mImpl.registerAuthenticator(config.mId, config.mModality,
-                config.mStrength, mFingerprintAuthenticator);
+            mBiometricService.mImpl.registerAuthenticator(config.id, config.modality,
+                config.strength, mFingerprintAuthenticator);
         }
     }
 
@@ -1458,14 +1459,19 @@ public class BiometricServiceTest {
 
         startPendingAuthSession(mBiometricService);
         waitForIdle();
+
+        assertNotNull(mBiometricService.mCurrentAuthSession);
+        assertEquals(AuthSession.STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.mState);
     }
 
     private static void startPendingAuthSession(BiometricService service) throws Exception {
         // Get the cookie so we can pretend the hardware is ready to authenticate
         // Currently we only support single modality per auth
-        assertEquals(service.mPendingAuthSession.mModalitiesWaiting.values().size(), 1);
-        final int cookie = service.mPendingAuthSession.mModalitiesWaiting.values()
-                .iterator().next();
+        final PreAuthInfo preAuthInfo = service.mPendingAuthSession.mPreAuthInfo;
+        assertEquals(preAuthInfo.eligibleSensors.size(), 1);
+        assertEquals(preAuthInfo.numSensorsWaitingForCookie(), 1);
+
+        final int cookie = preAuthInfo.eligibleSensors.get(0).getCookie();
         assertNotEquals(cookie, 0);
 
         service.mImpl.onReadyForAuthentication(cookie,
@@ -1520,13 +1526,21 @@ public class BiometricServiceTest {
     }
 
     private static int getCookieForCurrentSession(AuthSession session) {
-        assertEquals(session.mModalitiesMatched.values().size(), 1);
-        return session.mModalitiesMatched.values().iterator().next();
+        // Currently only tests authentication with a single sensor
+        final PreAuthInfo preAuthInfo = session.mPreAuthInfo;
+
+        assertEquals(preAuthInfo.eligibleSensors.size(), 1);
+        return preAuthInfo.eligibleSensors.get(0).getCookie();
     }
 
     private static int getCookieForPendingSession(AuthSession session) {
-        assertEquals(session.mModalitiesWaiting.values().size(), 1);
-        return session.mModalitiesWaiting.values().iterator().next();
+        // Currently only tests authentication with a single sensor
+        final PreAuthInfo requestWrapper = session.mPreAuthInfo;
+
+        assertEquals(requestWrapper.eligibleSensors.size(), 1);
+        assertEquals(requestWrapper.eligibleSensors.get(0).getSensorState(),
+                BiometricSensor.STATE_WAITING_FOR_COOKIE);
+        return requestWrapper.eligibleSensors.get(0).getCookie();
     }
 
     private static void waitForIdle() {
