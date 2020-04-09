@@ -220,6 +220,10 @@ class StorageManagerService extends IStorageManager.Stub
 
     private static final boolean ENABLE_ISOLATED_STORAGE = StorageManager.hasIsolatedStorage();
 
+    // A system property to control if obb app data isolation is enabled in vold.
+    private static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
+            "persist.sys.vold_app_data_isolation_enabled";
+
     /**
      * If {@code 1}, enables the isolated storage feature. If {@code -1},
      * disables the isolated storage feature. If {@code 0}, uses the default
@@ -595,6 +599,8 @@ class StorageManagerService extends IStorageManager.Stub
     private final StorageSessionController mStorageSessionController;
 
     private final boolean mIsFuseEnabled;
+
+    private final boolean mVoldAppDataIsolationEnabled;
 
     @GuardedBy("mLock")
     private final Set<Integer> mUidsWithLegacyExternalStorage = new ArraySet<>();
@@ -1516,7 +1522,7 @@ class StorageManagerService extends IStorageManager.Stub
         if (vol.type == VolumeInfo.TYPE_EMULATED) {
             if (newState != VolumeInfo.STATE_MOUNTED) {
                 mFuseMountedUser.remove(vol.getMountUserId());
-            } else {
+            } else if (mVoldAppDataIsolationEnabled){
                 final int userId = vol.getMountUserId();
                 mFuseMountedUser.add(userId);
                 // Async remount app storage so it won't block the main thread.
@@ -1740,6 +1746,8 @@ class StorageManagerService extends IStorageManager.Stub
         // incorrect until #updateFusePropFromSettings where we set the correct value and reboot if
         // different
         mIsFuseEnabled = SystemProperties.getBoolean(PROP_FUSE, DEFAULT_FUSE_ENABLED);
+        mVoldAppDataIsolationEnabled = mIsFuseEnabled && SystemProperties.getBoolean(
+                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
         mContext = context;
         mResolver = mContext.getContentResolver();
         mCallbacks = new Callbacks(FgThread.get().getLooper());
