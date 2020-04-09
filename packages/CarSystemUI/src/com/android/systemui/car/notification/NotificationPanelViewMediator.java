@@ -59,13 +59,13 @@ public class NotificationPanelViewMediator implements OverlayViewMediator,
     @Override
     public void registerListeners() {
         mCarNavigationBarController.registerTopBarTouchListener(
-                mNotificationPanelViewController.getTopNavBarNotificationTouchListener());
+                mNotificationPanelViewController.getDragOpenTouchListener());
         mCarNavigationBarController.registerBottomBarTouchListener(
-                mNotificationPanelViewController.getNavBarNotificationTouchListener());
+                mNotificationPanelViewController.getDragCloseTouchListener());
         mCarNavigationBarController.registerLeftBarTouchListener(
-                mNotificationPanelViewController.getNavBarNotificationTouchListener());
+                mNotificationPanelViewController.getDragCloseTouchListener());
         mCarNavigationBarController.registerRightBarTouchListener(
-                mNotificationPanelViewController.getNavBarNotificationTouchListener());
+                mNotificationPanelViewController.getDragCloseTouchListener());
 
         mCarNavigationBarController.registerNotificationController(
                 new CarNavigationBarController.NotificationsShadeController() {

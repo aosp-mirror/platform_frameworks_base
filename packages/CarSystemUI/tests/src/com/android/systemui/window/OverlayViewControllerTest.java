@@ -43,7 +43,7 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 @SmallTest
 public class OverlayViewControllerTest extends SysuiTestCase {
-    private MockOverlayViewController mOverlayViewController;
+    private TestOverlayViewController mOverlayViewController;
     private ViewGroup mBaseLayout;
 
     @Mock
@@ -56,7 +56,7 @@ public class OverlayViewControllerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(/* testClass= */ this);
 
-        mOverlayViewController = new MockOverlayViewController(R.id.overlay_view_controller_stub,
+        mOverlayViewController = new TestOverlayViewController(R.id.overlay_view_controller_stub,
                 mOverlayViewGlobalStateController);
 
         mBaseLayout = (ViewGroup) LayoutInflater.from(mContext).inflate(
@@ -130,12 +130,12 @@ public class OverlayViewControllerTest extends SysuiTestCase {
         assertThat(mOverlayViewController.mHideInternalCalled).isFalse();
     }
 
-    private static class MockOverlayViewController extends OverlayViewController {
+    private static class TestOverlayViewController extends OverlayViewController {
         boolean mOnFinishInflateCalled = false;
         boolean mShowInternalCalled = false;
         boolean mHideInternalCalled = false;
 
-        MockOverlayViewController(int stubId,
+        TestOverlayViewController(int stubId,
                 OverlayViewGlobalStateController overlayViewGlobalStateController) {
             super(stubId, overlayViewGlobalStateController);
         }
