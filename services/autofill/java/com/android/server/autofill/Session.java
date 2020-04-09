@@ -1228,6 +1228,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error requesting to hide fill UI", e);
             }
+
+            mInlineSessionController.hideInlineSuggestionsUiLocked(id);
         }
     }
 
