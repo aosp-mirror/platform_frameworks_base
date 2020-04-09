@@ -32,6 +32,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
@@ -63,6 +64,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 
@@ -1021,6 +1023,38 @@ public class ActivityRecordTests extends ActivityTestsBase {
         topActivity.completeFinishing("test");
 
         verify(topActivity).destroyIfPossible(anyString());
+    }
+
+    /**
+     * Verify that complete finish request for a show-when-locked activity must ensure the
+     * keyguard occluded state being updated.
+     */
+    @Test
+    public void testCompleteFinishing_showWhenLocked() {
+        // Make keyguard locked and set the top activity show-when-locked.
+        KeyguardController keyguardController = mActivity.mStackSupervisor.getKeyguardController();
+        doReturn(true).when(keyguardController).isKeyguardLocked();
+        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.mVisibleRequested = true;
+        topActivity.nowVisible = true;
+        topActivity.setState(RESUMED, "true");
+        doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
+                any() /* starting */, anyInt() /* configChanges */,
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
+        topActivity.setShowWhenLocked(true);
+
+        // Verify the stack-top activity is occluded keyguard.
+        assertEquals(topActivity, mStack.topRunningActivity());
+        assertTrue(mStack.topActivityOccludesKeyguard());
+
+        // Finish the top activity
+        topActivity.setState(PAUSED, "true");
+        topActivity.finishing = true;
+        topActivity.completeFinishing("test");
+
+        // Verify new top activity does not occlude keyguard.
+        assertEquals(mActivity, mStack.topRunningActivity());
+        assertFalse(mStack.topActivityOccludesKeyguard());
     }
 
     /**
