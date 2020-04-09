@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.UserInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Color;
@@ -188,7 +189,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private boolean mKeyguardShowing = false;
     private boolean mDeviceProvisioned = false;
-    private ToggleAction.State mAirplaneState = ToggleAction.State.Off;
+    private ToggleState mAirplaneState = ToggleState.Off;
     private boolean mIsWaitingForEcmExit = false;
     private boolean mHasTelephony;
     private boolean mHasVibrator;
@@ -607,7 +608,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public boolean shouldBeSeparated() {
-            return true;
+            return !shouldShowControls();
         }
 
         @Override
@@ -615,7 +616,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
             View v = super.create(context, convertView, parent, inflater);
             int textColor;
-            if (shouldBeSeparated()) {
+            if (shouldShowControls()) {
+                v.setBackgroundTintList(ColorStateList.valueOf(v.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_emergency_background)));
+                textColor = v.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_emergency_text);
+            } else if (shouldBeSeparated()) {
                 textColor = v.getResources().getColor(
                         com.android.systemui.R.color.global_actions_alert_text);
             } else {
@@ -625,7 +631,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             TextView messageView = v.findViewById(R.id.message);
             messageView.setTextColor(textColor);
             messageView.setSelected(true); // necessary for marquee to work
-            ImageView icon = (ImageView) v.findViewById(R.id.icon);
+            ImageView icon = v.findViewById(R.id.icon);
             icon.getDrawable().setTint(textColor);
             return v;
         }
@@ -1006,7 +1012,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             final boolean silentModeOn =
                     mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL;
             ((ToggleAction) mSilentModeAction).updateState(
-                    silentModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
+                    silentModeOn ? ToggleState.On : ToggleState.Off);
         }
     }
 
@@ -1034,6 +1040,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     public void onShow(DialogInterface dialog) {
         mMetricsLogger.visible(MetricsEvent.POWER_MENU);
         mUiEventLogger.log(GlobalActionsEvent.GA_POWER_MENU_OPEN);
+    }
+
+    private int getActionLayoutId() {
+        if (shouldShowControls()) {
+            return com.android.systemui.R.layout.global_actions_grid_item_v2;
+        }
+        return com.android.systemui.R.layout.global_actions_grid_item;
     }
 
     /**
@@ -1247,20 +1260,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         }
 
-        protected int getActionLayoutId(Context context) {
-            if (shouldShowControls()) {
-                return com.android.systemui.R.layout.global_actions_grid_item_v2;
-            }
-            return com.android.systemui.R.layout.global_actions_grid_item;
-        }
-
         public View create(
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
-            View v = inflater.inflate(getActionLayoutId(context), parent,
-                    false);
+            View v = inflater.inflate(getActionLayoutId(), parent, false /* attach */);
 
-            ImageView icon = (ImageView) v.findViewById(R.id.icon);
-            TextView messageView = (TextView) v.findViewById(R.id.message);
+            ImageView icon = v.findViewById(R.id.icon);
+            TextView messageView = v.findViewById(R.id.message);
             messageView.setSelected(true); // necessary for marquee to work
 
             if (mIcon != null) {
@@ -1279,30 +1284,30 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
+    private enum ToggleState {
+        Off(false),
+        TurningOn(true),
+        TurningOff(true),
+        On(false);
+
+        private final boolean mInTransition;
+
+        ToggleState(boolean intermediate) {
+            mInTransition = intermediate;
+        }
+
+        public boolean inTransition() {
+            return mInTransition;
+        }
+    }
+
     /**
      * A toggle action knows whether it is on or off, and displays an icon and status message
      * accordingly.
      */
-    private static abstract class ToggleAction implements Action {
+    private abstract class ToggleAction implements Action {
 
-        enum State {
-            Off(false),
-            TurningOn(true),
-            TurningOff(true),
-            On(false);
-
-            private final boolean inTransition;
-
-            State(boolean intermediate) {
-                inTransition = intermediate;
-            }
-
-            public boolean inTransition() {
-                return inTransition;
-            }
-        }
-
-        protected State mState = State.Off;
+        protected ToggleState mState = ToggleState.Off;
 
         // prefs
         protected int mEnabledIconResId;
@@ -1346,13 +1351,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 LayoutInflater inflater) {
             willCreate();
 
-            View v = inflater.inflate(com.android.systemui.R
-                    .layout.global_actions_grid_item, parent, false);
+            View v = inflater.inflate(getActionLayoutId(), parent, false /* attach */);
 
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
             final boolean enabled = isEnabled();
-            boolean on = ((mState == State.On) || (mState == State.TurningOn));
+            boolean on = ((mState == ToggleState.On) || (mState == ToggleState.TurningOn));
 
             if (messageView != null) {
                 messageView.setText(on ? mEnabledStatusMessageResId : mDisabledStatusMessageResId);
@@ -1377,7 +1381,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 return;
             }
 
-            final boolean nowOn = !(mState == State.On);
+            final boolean nowOn = !(mState == ToggleState.On);
             onToggle(nowOn);
             changeStateFromPress(nowOn);
         }
@@ -1394,12 +1398,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
          * @param buttonOn Whether the button was turned on or off
          */
         protected void changeStateFromPress(boolean buttonOn) {
-            mState = buttonOn ? State.On : State.Off;
+            mState = buttonOn ? ToggleState.On : ToggleState.Off;
         }
 
         abstract void onToggle(boolean on);
 
-        public void updateState(State state) {
+        public void updateState(ToggleState state) {
             mState = state;
         }
     }
@@ -1433,7 +1437,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
             // In ECM mode airplane state cannot be changed
             if (!TelephonyProperties.in_ecm_mode().orElse(false)) {
-                mState = buttonOn ? State.TurningOn : State.TurningOff;
+                mState = buttonOn ? ToggleState.TurningOn : ToggleState.TurningOff;
                 mAirplaneState = mState;
             }
         }
@@ -1568,7 +1572,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public void onServiceStateChanged(ServiceState serviceState) {
             if (!mHasTelephony) return;
             final boolean inAirplaneMode = serviceState.getState() == ServiceState.STATE_POWER_OFF;
-            mAirplaneState = inAirplaneMode ? ToggleAction.State.On : ToggleAction.State.Off;
+            mAirplaneState = inAirplaneMode ? ToggleState.On : ToggleState.Off;
             mAirplaneModeOn.updateState(mAirplaneState);
             mAdapter.notifyDataSetChanged();
         }
@@ -1627,7 +1631,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mContentResolver,
                 Settings.Global.AIRPLANE_MODE_ON,
                 0) == 1;
-        mAirplaneState = airplaneModeOn ? ToggleAction.State.On : ToggleAction.State.Off;
+        mAirplaneState = airplaneModeOn ? ToggleState.On : ToggleState.Off;
         mAirplaneModeOn.updateState(mAirplaneState);
     }
 
@@ -1644,7 +1648,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         intent.putExtra("state", on);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
         if (!mHasTelephony) {
-            mAirplaneState = on ? ToggleAction.State.On : ToggleAction.State.Off;
+            mAirplaneState = on ? ToggleState.On : ToggleState.Off;
         }
     }
 
