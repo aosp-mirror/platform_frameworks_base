@@ -112,8 +112,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private ViewGroup mBigClockContainer;
     @Mock
-    private ScrimController mScrimController;
-    @Mock
     private NotificationIconAreaController mNotificationAreaController;
     @Mock
     private HeadsUpManagerPhone mHeadsUpManager;
@@ -271,8 +269,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mGroupManager,
-                mNotificationShelfController,
-                mScrimController);
+                mNotificationShelfController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         mNotificationPanelViewController.setBar(mPanelBar);
 

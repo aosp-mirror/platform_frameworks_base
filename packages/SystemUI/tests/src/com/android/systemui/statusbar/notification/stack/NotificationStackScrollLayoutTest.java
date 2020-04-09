@@ -217,7 +217,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelfController(notificationShelfController);
         mStackScroller.setStatusBar(mBar);
-        mStackScroller.setScrimController(mock(ScrimController.class));
         mStackScroller.setGroupManager(mGroupManager);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
 

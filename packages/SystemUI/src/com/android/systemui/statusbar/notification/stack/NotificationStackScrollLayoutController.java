@@ -101,6 +101,7 @@ public class NotificationStackScrollLayoutController {
     private final NotificationSectionsManager mNotificationSectionsManager;
     private final Resources mResources;
     private final NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
+    private final ScrimController mScrimController;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -495,7 +496,8 @@ public class NotificationStackScrollLayoutController {
             NotificationSectionsManager notificationSectionsManager,
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
-            StatusBar statusBar) {
+            StatusBar statusBar,
+            ScrimController scrimController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -515,6 +517,7 @@ public class NotificationStackScrollLayoutController {
         mResources = resources;
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
         mStatusBar = statusBar;
+        mScrimController = scrimController;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -534,6 +537,8 @@ public class NotificationStackScrollLayoutController {
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
+
+        mScrimController.setScrimBehindChangeRunnable(mView::updateBackgroundDimming);
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
         mView.setCurrentUserid(mLockscreenUserManager.getCurrentUserId());
@@ -1009,10 +1014,6 @@ public class NotificationStackScrollLayoutController {
 
     public void setShelfController(NotificationShelfController notificationShelfController) {
         mView.setShelfController(notificationShelfController);
-    }
-
-    public void setScrimController(ScrimController scrimController) {
-        mView.setScrimController(scrimController);
     }
 
     public ExpandableView getFirstChildNotGone() {

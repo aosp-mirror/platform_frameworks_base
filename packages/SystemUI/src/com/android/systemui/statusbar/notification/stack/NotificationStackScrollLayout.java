@@ -339,7 +339,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             = new HashSet<>();
     private final NotificationRoundnessManager mRoundnessManager;
     private boolean mTrackingHeadsUp;
-    private ScrimController mScrimController;
     private boolean mForceNoOverlappingRendering;
     private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
     private boolean mAnimationRunning;
@@ -927,7 +926,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private void updateBackgroundDimming() {
+    void updateBackgroundDimming() {
         // No need to update the background color if it's not being drawn.
         if (!mShouldDrawNotificationBackground) {
             return;
@@ -5169,12 +5168,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setTrackedHeadsUpRow(row);
         mTrackingHeadsUp = row != null;
         mRoundnessManager.setTrackingHeadsUp(row);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setScrimController(ScrimController scrimController) {
-        mScrimController = scrimController;
-        mScrimController.setScrimBehindChangeRunnable(this::updateBackgroundDimming);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
