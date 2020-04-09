@@ -687,6 +687,19 @@ public abstract class ContentResolver implements ContentInterface {
     public static final int NOTIFY_DELETE = 1 << 4;
 
     /**
+     * Flag for {@link #notifyChange(Uri, ContentObserver, int)}: typically set
+     * by a {@link ContentProvider} to indicate that this notification should
+     * not be subject to any delays when dispatching to apps running in the
+     * background.
+     * <p>
+     * Using this flag may negatively impact system health and performance, and
+     * should be used sparingly.
+     *
+     * @hide
+     */
+    public static final int NOTIFY_NO_DELAY = 1 << 15;
+
+    /**
      * No exception, throttled by app standby normally.
      * @hide
      */
