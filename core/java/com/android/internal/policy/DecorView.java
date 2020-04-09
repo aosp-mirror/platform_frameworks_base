@@ -68,7 +68,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Build.VERSION_CODES;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -120,7 +119,6 @@ import com.android.internal.widget.DecorCaptionView;
 import com.android.internal.widget.FloatingToolbar;
 
 import java.util.List;
-import java.util.function.Function;
 
 /** @hide */
 public class DecorView extends FrameLayout implements RootViewSurfaceTaker, WindowCallbacks {
@@ -283,11 +281,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Insets mLastBackgroundInsets = Insets.NONE;
     private boolean mDrawLegacyNavigationBarBackground;
 
-    /**
-     * Whether the app targets an SDK that uses the new insets APIs.
-     */
-    private boolean mUseNewInsetsApi;
-
     private PendingInsetsController mPendingInsetsController = new PendingInsetsController();
 
     DecorView(Context context, int featureId, PhoneWindow window,
@@ -319,7 +312,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         initResizingPaints();
 
         mLegacyNavigationBarBackgroundPaint.setColor(Color.BLACK);
-        mUseNewInsetsApi = context.getApplicationInfo().targetSdkVersion >= VERSION_CODES.R;
     }
 
     void setBackgroundFallback(@Nullable Drawable fallbackDrawable) {
@@ -1189,23 +1181,23 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         // these flags wouldn't make the window draw behind the navigation bar, unless
         // LAYOUT_HIDE_NAVIGATION was set.
         //
-        // Note: Once the app targets R+, we no longer do this logic because we can't rely on
-        // SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION to indicate whether the app wants to handle it by
-        // themselves.
+        // Note: Once the app uses the R+ Window.setDecorFitsSystemWindows(false) API we no longer
+        // consume insets because they might no longer set SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION.
         boolean hideNavigation = (sysUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 || !(controller == null || controller.isRequestedVisible(ITYPE_NAVIGATION_BAR));
+        boolean decorFitsSystemWindows = mWindow.mDecorFitsSystemWindows;
         boolean forceConsumingNavBar = (mForceWindowDrawsBarBackgrounds
                         && (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
+                        && decorFitsSystemWindows
                         && !hideNavigation)
                 || (mLastShouldAlwaysConsumeSystemBars && hideNavigation);
 
         boolean consumingNavBar =
                 ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
-                        && !hideNavigation
-                        // TODO IME wrap_content windows need to have margin to work properly
-                        && (!mUseNewInsetsApi || isImeWindow))
+                        && decorFitsSystemWindows
+                        && !hideNavigation)
                 || forceConsumingNavBar;
 
         // If we didn't request fullscreen layout, but we still got it because of the
@@ -1216,6 +1208,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 || (attrs.flags & FLAG_FULLSCREEN) != 0
                 || !(controller == null || controller.isRequestedVisible(ITYPE_STATUS_BAR));
         boolean consumingStatusBar = (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == 0
+                && decorFitsSystemWindows
                 && (attrs.flags & FLAG_LAYOUT_IN_SCREEN) == 0
                 && (attrs.flags & FLAG_LAYOUT_INSET_DECOR) == 0
                 && mForceWindowDrawsBarBackgrounds
