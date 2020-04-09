@@ -747,7 +747,7 @@ public abstract class ContentCaptureService extends Service {
         void initializeForDelegate(DataShareReadAdapterDelegate delegate,
                 DataShareReadAdapter adapter, Executor executor) {
             mDataShareReadAdapterHardReferences.put(delegate, adapter);
-            mExecutorHardReferences.remove(delegate, executor);
+            mExecutorHardReferences.put(delegate, executor);
         }
 
         Executor getExecutor(DataShareReadAdapterDelegate delegate) {
