@@ -243,6 +243,26 @@ public class SizeCompatTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testAspectRatioMatchParentBoundsAndImeAttachable() {
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2000)
+                .setSystemDecorations(true).build());
+        prepareUnresizable(2f /* maxAspect */, SCREEN_ORIENTATION_UNSPECIFIED);
+        assertFitted();
+
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+        mActivity.mDisplayContent.mInputMethodTarget = addWindowToActivity(mActivity);
+        // Because the aspect ratio of display doesn't exceed the max aspect ratio of activity.
+        // The activity should still fill its parent container and IME can attach to the activity.
+        assertTrue(mActivity.matchParentBounds());
+        assertTrue(mActivity.mDisplayContent.isImeAttachedToApp());
+
+        final Rect letterboxInnerBounds = new Rect();
+        mActivity.getLetterboxInnerBounds(letterboxInnerBounds);
+        // The activity should not have letterbox.
+        assertTrue(letterboxInnerBounds.isEmpty());
+    }
+
+    @Test
     public void testMoveToDifferentOrientDisplay() {
         setUpDisplaySizeWithApp(1000, 2500);
         prepareUnresizable(-1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
