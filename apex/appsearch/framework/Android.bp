@@ -24,11 +24,11 @@ filegroup {
 java_library {
     name: "framework-appsearch",
     installable: true,
-    sdk_version: "core_platform", // TODO(b/146218515) should be core_current
+    sdk_version: "core_platform", // TODO(b/146218515) should be module_current
     srcs: [":framework-appsearch-sources"],
     hostdex: true, // for hiddenapi check
     libs: [
-        "framework-minus-apex",  // TODO(b/146218515) should be framework-system-stubs
+        "framework-minus-apex",  // TODO(b/146218515) should be removed
     ],
     static_libs: ["icing-java-proto-lite"],
     visibility: [
@@ -65,8 +65,7 @@ droidstubs {
         include_dirs: ["frameworks/base/core/java"],
     },
     args: metalava_appsearch_docs_args,
-    sdk_version: "core_current",
-    libs: ["android_system_stubs_current"],
+    sdk_version: "module_current",
 }
 
 java_library {
@@ -77,7 +76,6 @@ java_library {
             "java",
         ],
     },
-    sdk_version: "core_current",
-    libs: ["android_system_stubs_current"],
+    sdk_version: "module_current",
     installable: false,
 }
