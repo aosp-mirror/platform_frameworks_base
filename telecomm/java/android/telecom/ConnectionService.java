@@ -1857,25 +1857,23 @@ public abstract class ConnectionService extends Service {
         mConferenceById.put(callId, conference);
         mIdByConference.put(conference, callId);
         conference.addListener(mConferenceListener);
-        ParcelableConference parcelableConference = new ParcelableConference(
-                request.getAccountHandle(),
-                conference.getState(),
-                conference.getConnectionCapabilities(),
-                conference.getConnectionProperties(),
-                Collections.<String>emptyList(), //connectionIds
-                conference.getVideoProvider() == null ?
-                        null : conference.getVideoProvider().getInterface(),
-                conference.getVideoState(),
-                conference.getConnectTimeMillis(),
-                conference.getConnectionStartElapsedRealtimeMillis(),
-                conference.getStatusHints(),
-                conference.getExtras(),
-                conference.getAddress(),
-                conference.getAddressPresentation(),
-                conference.getCallerDisplayName(),
-                conference.getCallerDisplayNamePresentation(),
-                conference.getDisconnectCause(),
-                conference.isRingbackRequested());
+        ParcelableConference parcelableConference = new ParcelableConference.Builder(
+                request.getAccountHandle(), conference.getState())
+                .setConnectionCapabilities(conference.getConnectionCapabilities())
+                .setConnectionProperties(conference.getConnectionProperties())
+                .setVideoAttributes(conference.getVideoProvider() == null
+                                ? null : conference.getVideoProvider().getInterface(),
+                        conference.getVideoState())
+                .setConnectTimeMillis(conference.getConnectTimeMillis(),
+                        conference.getConnectionStartElapsedRealtimeMillis())
+                .setStatusHints(conference.getStatusHints())
+                .setExtras(conference.getExtras())
+                .setAddress(conference.getAddress(), conference.getAddressPresentation())
+                .setCallerDisplayName(conference.getCallerDisplayName(),
+                        conference.getCallerDisplayNamePresentation())
+                .setDisconnectCause(conference.getDisconnectCause())
+                .setRingbackRequested(conference.isRingbackRequested())
+                .build();
         if (conference.getState() != Connection.STATE_DISCONNECTED) {
             conference.setTelecomCallId(callId);
             mAdapter.setVideoProvider(callId, conference.getVideoProvider());
@@ -2476,23 +2474,25 @@ public abstract class ConnectionService extends Service {
                 }
             }
             conference.setTelecomCallId(id);
-            ParcelableConference parcelableConference = new ParcelableConference(
-                    conference.getPhoneAccountHandle(),
-                    conference.getState(),
-                    conference.getConnectionCapabilities(),
-                    conference.getConnectionProperties(),
-                    connectionIds,
-                    conference.getVideoProvider() == null ?
-                            null : conference.getVideoProvider().getInterface(),
-                    conference.getVideoState(),
-                    conference.getConnectTimeMillis(),
-                    conference.getConnectionStartElapsedRealtimeMillis(),
-                    conference.getStatusHints(),
-                    conference.getExtras(),
-                    conference.getAddress(),
-                    conference.getAddressPresentation(),
-                    conference.getCallerDisplayName(),
-                    conference.getCallerDisplayNamePresentation());
+            ParcelableConference parcelableConference = new ParcelableConference.Builder(
+                    conference.getPhoneAccountHandle(), conference.getState())
+                    .setConnectionCapabilities(conference.getConnectionCapabilities())
+                    .setConnectionProperties(conference.getConnectionProperties())
+                    .setConnectionIds(connectionIds)
+                    .setVideoAttributes(conference.getVideoProvider() == null
+                                    ? null : conference.getVideoProvider().getInterface(),
+                            conference.getVideoState())
+                    .setConnectTimeMillis(conference.getConnectTimeMillis(),
+                            conference.getConnectionStartElapsedRealtimeMillis())
+                    .setStatusHints(conference.getStatusHints())
+                    .setExtras(conference.getExtras())
+                    .setAddress(conference.getAddress(), conference.getAddressPresentation())
+                    .setCallerDisplayName(conference.getCallerDisplayName(),
+                            conference.getCallerDisplayNamePresentation())
+                    .setDisconnectCause(conference.getDisconnectCause())
+                    .setRingbackRequested(conference.isRingbackRequested())
+                    .setCallDirection(conference.getCallDirection())
+                    .build();
 
             mAdapter.addConferenceCall(id, parcelableConference);
             mAdapter.setVideoProvider(id, conference.getVideoProvider());

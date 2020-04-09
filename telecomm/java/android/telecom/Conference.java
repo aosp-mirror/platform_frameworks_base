@@ -1071,16 +1071,16 @@ public abstract class Conference extends Conferenceable {
      * This is applicable in two cases:
      * <ol>
      *     <li>When {@link #setConferenceState(boolean)} is used to mark a conference as
-     *     temporarily "not a conference"; we need to present the correct address in the in-call
-     *     UI.</li>
+     *     temporarily "not a conference"; we need to present the correct address presentation in
+     *     the in-call UI.</li>
      *     <li>When the conference is not hosted on the current device, we need to know the address
-     *     information for the purpose of showing the original address to the user, as well as for
-     *     logging to the call log.</li>
+     *     presentation information for the purpose of showing the original address to the user, as
+     *     well as for logging to the call log.</li>
      * </ol>
-     * @return The address of the conference, or {@code null} if not applicable.
+     * @return The address presentation of the conference.
      * @hide
      */
-    public final int getAddressPresentation() {
+    public final @TelecomManager.Presentation int getAddressPresentation() {
         return mAddressPresentation;
     }
 
