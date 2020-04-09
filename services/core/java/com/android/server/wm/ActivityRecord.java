@@ -7355,7 +7355,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final ActivityStack stack = getRootTask();
         return stack != null &&
-                stack.checkKeyguardVisibility(this, true /* shouldBeVisible */, true /* isTop */);
+                stack.checkKeyguardVisibility(this, true /* shouldBeVisible */,
+                        stack.topRunningActivity() == this /* isTop */);
     }
 
     void setTurnScreenOn(boolean turnScreenOn) {
