@@ -52,6 +52,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,6 +72,7 @@ public class NotificationEntryTest extends SysuiTestCase {
     private int mId;
 
     private NotificationEntry mEntry;
+    private final FakeSystemClock mClock = new FakeSystemClock();
 
     @Before
     public void setup() {
@@ -187,7 +189,7 @@ public class NotificationEntryTest extends SysuiTestCase {
                 .build();
 
         NotificationEntry entry =
-                new NotificationEntry(sbn, ranking);
+                new NotificationEntry(sbn, ranking, mClock.uptimeMillis());
 
         assertEquals(systemGeneratedSmartActions, entry.getSmartActions());
         assertEquals(NOTIFICATION_CHANNEL, entry.getChannel());

@@ -24,6 +24,7 @@ import static com.android.systemui.statusbar.notification.row.NotificationRowCon
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -555,8 +556,8 @@ public class NotificationEntryManager implements
         NotificationEntry entry = new NotificationEntry(
                 notification,
                 ranking,
-                mFgsFeatureController.isForegroundServiceDismissalEnabled());
-        mAllNotifications.add(entry);
+                mFgsFeatureController.isForegroundServiceDismissalEnabled(),
+                SystemClock.uptimeMillis());
 
         mLeakDetector.trackInstance(entry);
 
