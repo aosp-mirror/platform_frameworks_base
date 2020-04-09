@@ -98,7 +98,7 @@ class AnrHelper {
                 final long endTime = SystemClock.uptimeMillis();
                 Slog.d(TAG, "Completed ANR of " + r.mApp.processName + " in "
                         + (endTime - startTime) + "ms, latency " + reportLatency
-                        + (onlyDumpSelf ? "ms" : "ms (expired, only dump ANR app)"));
+                        + (onlyDumpSelf ? "ms (expired, only dump ANR app)" : "ms"));
             }
 
             mRunning.set(false);
