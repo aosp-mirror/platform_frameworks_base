@@ -27,8 +27,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.SpannedString;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -491,7 +489,11 @@ public final class ConversationActions implements Parcelable {
              */
             @NonNull
             public Builder setMaxSuggestions(@IntRange(from = -1) int maxSuggestions) {
-                mMaxSuggestions = Preconditions.checkArgumentNonnegative(maxSuggestions);
+                if (maxSuggestions < -1) {
+                    throw new IllegalArgumentException("maxSuggestions has to be greater than or "
+                            + "equal to -1.");
+                }
+                mMaxSuggestions = maxSuggestions;
                 return this;
             }
 
