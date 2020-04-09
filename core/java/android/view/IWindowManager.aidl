@@ -742,4 +742,11 @@ interface IWindowManager
      * Called to show global actions.
      */
     void showGlobalActions();
+
+    /**
+     * Sets layer tracing flags for SurfaceFlingerTrace. 
+     *
+     * @param flags see definition in SurfaceTracing.cpp
+     */
+    void setLayerTracingFlags(int flags);
 }
