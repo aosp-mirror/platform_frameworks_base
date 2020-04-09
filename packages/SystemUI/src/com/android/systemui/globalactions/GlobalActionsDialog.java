@@ -205,7 +205,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final IWindowManager mIWindowManager;
     private final Executor mBackgroundExecutor;
     private final ControlsListingController mControlsListingController;
-    private boolean mAnyControlsProviders = false;
+    private List<ControlsServiceInfo> mControlsServiceInfos = new ArrayList<>();
+    private ControlsController mControlsController;
+    private SharedPreferences mControlsPreferences;
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
@@ -271,6 +273,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mBackgroundExecutor = backgroundExecutor;
         mControlsListingController = controlsListingController;
         mBlurUtils = blurUtils;
+        mControlsController = controlsController;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -309,45 +312,54 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         });
 
-        String preferredControlsPackage = mContext.getResources()
-                .getString(com.android.systemui.R.string.config_controlsPreferredPackage);
         mControlsListingController.addCallback(list -> {
-            mAnyControlsProviders = !list.isEmpty();
-
-            /*
-             * See if any service providers match the preferred component. If they do,
-             * and there are no current favorites, and we haven't successfully loaded favorites to
-             * date, query the preferred component for a limited number of suggested controls.
-             */
-            ComponentName preferredComponent = null;
-            for (ControlsServiceInfo info : list) {
-                if (info.componentName.getPackageName().equals(preferredControlsPackage)) {
-                    preferredComponent = info.componentName;
-                    break;
-                }
-            }
-
-            if (preferredComponent == null) return;
-
-            SharedPreferences prefs = context.getSharedPreferences(PREFS_CONTROLS_FILE,
-                    Context.MODE_PRIVATE);
-            boolean isSeeded = prefs.getBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, false);
-            boolean hasFavorites = controlsController.getFavorites().size() > 0;
-            if (!isSeeded && !hasFavorites) {
-                controlsController.seedFavoritesForComponent(
-                        preferredComponent,
-                        (accepted) -> {
-                            Log.i(TAG, "Controls seeded: " + accepted);
-                            prefs.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED,
-                                    accepted).apply();
-                        }
-                );
-            }
+            mControlsServiceInfos = list;
         });
+
+        // Need to be user-specific with the context to make sure we read the correct prefs
+        Context userContext = context.createContextAsUser(
+                new UserHandle(mUserManager.getUserHandle()), 0);
+        mControlsPreferences = userContext.getSharedPreferences(PREFS_CONTROLS_FILE,
+            Context.MODE_PRIVATE);
+
     }
 
+    private void seedFavorites() {
+        if (mControlsServiceInfos.isEmpty()
+                || mControlsController.getFavorites().size() > 0
+                || mControlsPreferences.getBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, false)) {
+            return;
+        }
 
+        /*
+         * See if any service providers match the preferred component. If they do,
+         * and there are no current favorites, and we haven't successfully loaded favorites to
+         * date, query the preferred component for a limited number of suggested controls.
+         */
+        String preferredControlsPackage = mContext.getResources()
+                .getString(com.android.systemui.R.string.config_controlsPreferredPackage);
 
+        ComponentName preferredComponent = null;
+        for (ControlsServiceInfo info : mControlsServiceInfos) {
+            if (info.componentName.getPackageName().equals(preferredControlsPackage)) {
+                preferredComponent = info.componentName;
+                break;
+            }
+        }
+
+        if (preferredComponent == null) {
+            Log.i(TAG, "Controls seeding: No preferred component has been set, will not seed");
+            mControlsPreferences.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, true).apply();
+        }
+
+        mControlsController.seedFavoritesForComponent(
+                preferredComponent,
+                (accepted) -> {
+                    Log.i(TAG, "Controls seeded: " + accepted);
+                    mControlsPreferences.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED,
+                        accepted).apply();
+                });
+    }
 
     /**
      * Show the global actions dialog (creating if necessary)
@@ -393,6 +405,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         awakenIfNecessary();
         mDialog = createDialog();
         prepareDialog();
+        seedFavorites();
 
         // If we only have 1 item and it's a simple press action, just do this action.
         if (mAdapter.getCount() == 1
@@ -2017,6 +2030,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private boolean shouldShowControls() {
         return mKeyguardStateController.isUnlocked()
                 && mControlsUiController.getAvailable()
-                && mAnyControlsProviders;
+                && !mControlsServiceInfos.isEmpty();
     }
 }
