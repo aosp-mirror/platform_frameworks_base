@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 
@@ -110,6 +111,7 @@ public class NotificationStackScrollLayoutController {
 
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
+    private NotificationSwipeHelper mSwipeHelper;
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
@@ -217,7 +219,16 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public void onMenuReset(View row) {
-            mView.onMenuReset(row);
+            View translatingParentView = mSwipeHelper.getTranslatingParentView();
+            if (translatingParentView != null && row == translatingParentView) {
+                mSwipeHelper.clearExposedMenuView();
+                mSwipeHelper.clearTranslatingParentView();
+                if (row instanceof ExpandableNotificationRow) {
+                    mHeadsUpManager.setMenuShown(
+                            ((ExpandableNotificationRow) row).getEntry(), false);
+
+                }
+            }
         }
 
         @Override
@@ -228,7 +239,7 @@ public class NotificationStackScrollLayoutController {
                         .setCategory(MetricsEvent.ACTION_REVEAL_GEAR)
                         .setType(MetricsEvent.TYPE_ACTION));
                 mHeadsUpManager.setMenuShown(notificationRow.getEntry(), true);
-                mView.onMenuShown(row);
+                mSwipeHelper.onMenuShown(row);
                 mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
                         false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
                         false /* resetMenu */);
@@ -438,7 +449,31 @@ public class NotificationStackScrollLayoutController {
                 }
             };
 
-    private NotificationSwipeHelper mSwipeHelper;
+    private final OnHeadsUpChangedListener mOnHeadsUpChangedListener =
+            new OnHeadsUpChangedListener() {
+        @Override
+        public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
+            mView.setInHeadsUpPinnedMode(inPinnedMode);
+        }
+
+        @Override
+        public void onHeadsUpPinned(NotificationEntry entry) {
+
+        }
+
+        @Override
+        public void onHeadsUpUnPinned(NotificationEntry entry) {
+
+        }
+
+        @Override
+        public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
+            long numEntries = mHeadsUpManager.getAllEntries().count();
+            NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
+            mView.setNumHeadsUp(numEntries);
+            mView.setTopHeadsUpEntry(topEntry);
+        }
+    };
 
     @Inject
     public NotificationStackScrollLayoutController(
@@ -496,6 +531,8 @@ public class NotificationStackScrollLayoutController {
                 mSwipeHelper);
 
         mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
+        mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
+        mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
@@ -910,7 +947,23 @@ public class NotificationStackScrollLayoutController {
     }
 
     public RemoteInputController.Delegate createDelegate() {
-        return mView.createDelegate();
+        return new RemoteInputController.Delegate() {
+            public void setRemoteInputActive(NotificationEntry entry,
+                    boolean remoteInputActive) {
+                mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
+                entry.notifyHeightChanged(true /* needsAnimation */);
+                updateFooter();
+            }
+
+            public void lockScrollTo(NotificationEntry entry) {
+                mView.lockScrollTo(entry.getRow());
+            }
+
+            public void requestDisallowLongPressAndDismiss() {
+                mView.requestDisallowLongPress();
+                mView.requestDisallowDismiss();
+            }
+        };
     }
 
     public void updateSectionBoundaries(String reason) {
@@ -964,10 +1017,6 @@ public class NotificationStackScrollLayoutController {
 
     public ExpandableView getFirstChildNotGone() {
         return mView.getFirstChildNotGone();
-    }
-
-    public void setInHeadsUpPinnedMode(boolean inPinnedMode) {
-        mView.setInHeadsUpPinnedMode(inPinnedMode);
     }
 
     public void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {

@@ -3546,7 +3546,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private class MyOnHeadsUpChangedListener implements OnHeadsUpChangedListener {
         @Override
         public void onHeadsUpPinnedModeChanged(final boolean inPinnedMode) {
-            mNotificationStackScrollLayoutController.setInHeadsUpPinnedMode(inPinnedMode);
             if (inPinnedMode) {
                 mHeadsUpExistenceChangedRunnable.run();
                 updateNotificationTranslucency();
