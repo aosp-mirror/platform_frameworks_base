@@ -68,7 +68,7 @@ data class RenderInfo(
                 icon = appIconMap.get(componentName)
                 if (icon == null) {
                     icon = context.resources
-                        .getDrawable(R.drawable.ic_device_unknown_gm2_24px, null)
+                        .getDrawable(R.drawable.ic_device_unknown_on, null)
                     appIconMap.put(componentName, icon)
                 }
             } else {
@@ -267,10 +267,74 @@ private val deviceIconMap = mapOf<Int, IconState>(
     DeviceTypes.TYPE_ROUTINE to IconState(
         RenderInfo.APP_ICON_ID,
         RenderInfo.APP_ICON_ID
+    ),
+    DeviceTypes.TYPE_AC_HEATER to IconState(
+        R.drawable.ic_device_thermostat_off,
+        R.drawable.ic_device_thermostat_on
+    ),
+    DeviceTypes.TYPE_AC_UNIT to IconState(
+        R.drawable.ic_device_thermostat_off,
+        R.drawable.ic_device_thermostat_on
+    ),
+    DeviceTypes.TYPE_COFFEE_MAKER to IconState(
+        R.drawable.ic_device_kettle_off,
+        R.drawable.ic_device_kettle_on
+    ),
+    DeviceTypes.TYPE_DEHUMIDIFIER to IconState(
+        R.drawable.ic_device_air_freshener_off,
+        R.drawable.ic_device_air_freshener_on
+    ),
+    DeviceTypes.TYPE_RADIATOR to IconState(
+        R.drawable.ic_device_thermostat_off,
+        R.drawable.ic_device_thermostat_on
+    ),
+    DeviceTypes.TYPE_STANDMIXER to IconState(
+        R.drawable.ic_device_cooking_off,
+        R.drawable.ic_device_cooking_on
+    ),
+    DeviceTypes.TYPE_DISPLAY to IconState(
+        R.drawable.ic_device_display_off,
+        R.drawable.ic_device_display_on
+    ),
+    DeviceTypes.TYPE_DRYER to IconState(
+        R.drawable.ic_device_washer_off,
+        R.drawable.ic_device_washer_on
+    ),
+    DeviceTypes.TYPE_MOWER to IconState(
+        R.drawable.ic_device_outdoor_garden_off,
+        R.drawable.ic_device_outdoor_garden_on
+    ),
+    DeviceTypes.TYPE_SHOWER to IconState(
+        R.drawable.ic_device_water_off,
+        R.drawable.ic_device_water_on
+    ),
+    DeviceTypes.TYPE_AWNING to IconState(
+        R.drawable.ic_device_pergola_off,
+        R.drawable.ic_device_pergola_on
+    ),
+    DeviceTypes.TYPE_CLOSET to IconState(
+        R.drawable.ic_device_drawer_off,
+        R.drawable.ic_device_drawer_on
+    ),
+    DeviceTypes.TYPE_CURTAIN to IconState(
+        R.drawable.ic_device_blinds_off,
+        R.drawable.ic_device_blinds_on
+    ),
+    DeviceTypes.TYPE_DOOR to IconState(
+        R.drawable.ic_device_door_off,
+        R.drawable.ic_device_door_on
+    ),
+    DeviceTypes.TYPE_SHUTTER to IconState(
+        R.drawable.ic_device_window_off,
+        R.drawable.ic_device_window_on
+    ),
+    DeviceTypes.TYPE_HEATER to IconState(
+        R.drawable.ic_device_thermostat_off,
+        R.drawable.ic_device_thermostat_on
     )
 ).withDefault {
     IconState(
-        R.drawable.ic_device_unknown_gm2_24px,
-        R.drawable.ic_device_unknown_gm2_24px
+        R.drawable.ic_device_unknown_off,
+        R.drawable.ic_device_unknown_on
     )
 }
