@@ -573,6 +573,8 @@ public class AudioService extends IAudioService.Stub
     private boolean mMicMuteFromSwitch;
     private boolean mMicMuteFromApi;
     private boolean mMicMuteFromRestrictions;
+    // caches the value returned by AudioSystem.isMicrophoneMuted()
+    private boolean mMicMuteFromSystemCached;
 
     @GuardedBy("mSettingsLock")
     private int mAssistantUid;
@@ -933,6 +935,7 @@ public class AudioService extends IAudioService.Stub
 
         onIndicateSystemReady();
 
+        mMicMuteFromSystemCached = AudioSystem.isMicrophoneMuted();
         setMicMuteFromSwitchInput();
     }
 
@@ -1126,6 +1129,7 @@ public class AudioService extends IAudioService.Stub
         sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_SERVER_STATE,
                 SENDMSG_QUEUE, 1, 0, null, 0);
 
+        setMicrophoneMuteNoCallerCheck(getCurrentUserId()); // will also update the mic mute cache
         setMicMuteFromSwitchInput();
     }
 
@@ -3151,12 +3155,20 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /**
+     * Returns the microphone mute state as seen from the native audio system
+     * @return true if microphone is reported as muted by primary HAL
+     */
     public boolean isMicrophoneMuted() {
+        return mMicMuteFromSystemCached;
+    }
+
+    private boolean isMicrophoneSupposedToBeMuted() {
         return mMicMuteFromSwitch || mMicMuteFromRestrictions || mMicMuteFromApi;
     }
 
     private void setMicrophoneMuteNoCallerCheck(int userId) {
-        final boolean muted = isMicrophoneMuted();
+        final boolean muted = isMicrophoneSupposedToBeMuted();
         if (DEBUG_VOL) {
             Log.d(TAG, String.format("Mic mute %b, user=%d", muted, userId));
         }
@@ -3164,8 +3176,20 @@ public class AudioService extends IAudioService.Stub
         if (getCurrentUserId() == userId || userId == android.os.Process.SYSTEM_UID) {
             final boolean currentMute = AudioSystem.isMicrophoneMuted();
             final long identity = Binder.clearCallingIdentity();
-            AudioSystem.muteMicrophone(muted);
+            final int ret = AudioSystem.muteMicrophone(muted);
+
+            // update cache with the real state independently from what was set
+            mMicMuteFromSystemCached = AudioSystem.isMicrophoneMuted();
+            if (ret != AudioSystem.AUDIO_STATUS_OK) {
+                Log.e(TAG, "Error changing mic mute state to " + muted + " current:"
+                        + mMicMuteFromSystemCached);
+            }
             try {
+                // send the intent even if there was a failure to change the actual mute state:
+                // the AudioManager.setMicrophoneMute API doesn't have a return value to
+                // indicate if the call failed to successfully change the mute state, and receiving
+                // the intent may be the only time an application can resynchronize its mic mute
+                // state with the actual system mic mute state
                 if (muted != currentMute) {
                     sendMsg(mAudioHandler, MSG_BROADCAST_MICROPHONE_MUTE,
                                 SENDMSG_NOOP, 0, 0, null, 0);
@@ -6976,6 +7000,10 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mHdmiTvClient="); pw.println(mHdmiTvClient);
         pw.print("  mHdmiSystemAudioSupported="); pw.println(mHdmiSystemAudioSupported);
         pw.print("  mIsCallScreeningModeSupported="); pw.println(mIsCallScreeningModeSupported);
+        pw.print("  mic mute FromSwitch=" + mMicMuteFromSwitch
+                        + " FromRestrictions=" + mMicMuteFromRestrictions
+                        + " FromApi=" + mMicMuteFromApi
+                        + " from system=" + mMicMuteFromSystemCached);
 
         dumpAudioPolicies(pw);
         mDynPolicyLogger.dump(pw);
