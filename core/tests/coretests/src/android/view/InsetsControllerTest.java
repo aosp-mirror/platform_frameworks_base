@@ -696,8 +696,7 @@ public class InsetsControllerTest {
 
         // Simulate binder behavior by copying SurfaceControl. Otherwise, InsetsController will
         // attempt to release mLeash directly.
-        SurfaceControl copy = new SurfaceControl();
-        copy.copyFrom(mLeash);
+        SurfaceControl copy = new SurfaceControl(mLeash);
         return new InsetsSourceControl(type, copy, new Point());
     }
 

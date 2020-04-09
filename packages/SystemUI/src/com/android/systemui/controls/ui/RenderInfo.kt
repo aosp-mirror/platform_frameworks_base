@@ -56,13 +56,12 @@ data class RenderInfo(
             enabled: Boolean,
             offset: Int = 0
         ): RenderInfo {
-            val (fg, bg) = deviceColorMap.getValue(deviceType)
-
-            val iconKey = if (offset > 0) {
+            val key = if (offset > 0) {
                 deviceType * BUCKET_SIZE + offset
             } else deviceType
 
-            val iconState = deviceIconMap.getValue(iconKey)
+            val (fg, bg) = deviceColorMap.getValue(key)
+            val iconState = deviceIconMap.getValue(key)
             val resourceId = iconState[enabled]
             var icon: Drawable?
             if (resourceId == APP_ICON_ID) {

@@ -256,6 +256,14 @@ public class ShortcutService extends IShortcutService.Stub {
         String KEY_ICON_FORMAT = "icon_format";
     }
 
+    private static final int PACKAGE_MATCH_FLAGS =
+            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                    | PackageManager.MATCH_UNINSTALLED_PACKAGES;
+
+    private static final int SYSTEM_APP_MASK =
+            ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+
     final Context mContext;
 
     private final Object mLock = new Object();
@@ -268,6 +276,15 @@ public class ShortcutService extends IShortcutService.Stub {
             return !ri.activityInfo.exported;
         }
     };
+
+    private static Predicate<ResolveInfo> ACTIVITY_NOT_SYSTEM_NOR_ENABLED = (ri) -> {
+        final ApplicationInfo ai = ri.activityInfo.applicationInfo;
+        final boolean isSystemApp = ai != null && (ai.flags & SYSTEM_APP_MASK) != 0;
+        return !isSystemApp && !ri.activityInfo.enabled;
+    };
+
+    private static Predicate<ResolveInfo> ACTIVITY_NOT_INSTALLED = (ri) ->
+            !isInstalled(ri.activityInfo);
 
     // Temporarily reverted to anonymous inner class form due to: b/32554459
     private static Predicate<PackageInfo> PACKAGE_NOT_INSTALLED = new Predicate<PackageInfo>() {
@@ -349,11 +366,6 @@ public class ShortcutService extends IShortcutService.Stub {
     private List<Integer> mDirtyUserIds = new ArrayList<>();
 
     private final AtomicBoolean mBootCompleted = new AtomicBoolean();
-
-    private static final int PACKAGE_MATCH_FLAGS =
-            PackageManager.MATCH_DIRECT_BOOT_AWARE
-                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                    | PackageManager.MATCH_UNINSTALLED_PACKAGES;
 
     /**
      * Note we use a fine-grained lock for {@link #mUnlockedUsers} due to b/64303666.
@@ -3599,7 +3611,7 @@ public class ShortcutService extends IShortcutService.Stub {
         final long token = injectClearCallingIdentity();
         try {
             return mIPackageManager.getPackageInfo(
-                    packageName, PACKAGE_MATCH_FLAGS
+                    packageName, PACKAGE_MATCH_FLAGS | PackageManager.MATCH_DISABLED_COMPONENTS
                             | (getSignatures ? PackageManager.GET_SIGNING_CERTIFICATES : 0),
                     userId);
         } catch (RemoteException e) {
@@ -3634,7 +3646,8 @@ public class ShortcutService extends IShortcutService.Stub {
         final long start = getStatStartTime();
         final long token = injectClearCallingIdentity();
         try {
-            return mIPackageManager.getApplicationInfo(packageName, PACKAGE_MATCH_FLAGS, userId);
+            return mIPackageManager.getApplicationInfo(packageName,
+                    PACKAGE_MATCH_FLAGS | PackageManager.MATCH_DISABLED_COMPONENTS, userId);
         } catch (RemoteException e) {
             // Shouldn't happen.
             Slog.wtf(TAG, "RemoteException", e);
@@ -3665,8 +3678,9 @@ public class ShortcutService extends IShortcutService.Stub {
         final long start = getStatStartTime();
         final long token = injectClearCallingIdentity();
         try {
-            return mIPackageManager.getActivityInfo(activity,
-                    (PACKAGE_MATCH_FLAGS | PackageManager.GET_META_DATA), userId);
+            return mIPackageManager.getActivityInfo(activity, (PACKAGE_MATCH_FLAGS
+                    | PackageManager.MATCH_DISABLED_COMPONENTS | PackageManager.GET_META_DATA),
+                    userId);
         } catch (RemoteException e) {
             // Shouldn't happen.
             Slog.wtf(TAG, "RemoteException", e);
@@ -3711,7 +3725,8 @@ public class ShortcutService extends IShortcutService.Stub {
     List<PackageInfo> injectGetPackagesWithUninstalled(@UserIdInt int userId)
             throws RemoteException {
         final ParceledListSlice<PackageInfo> parceledList =
-                mIPackageManager.getInstalledPackages(PACKAGE_MATCH_FLAGS, userId);
+                mIPackageManager.getInstalledPackages(
+                        PACKAGE_MATCH_FLAGS | PackageManager.MATCH_DISABLED_COMPONENTS, userId);
         if (parceledList == null) {
             return Collections.emptyList();
         }
@@ -3810,6 +3825,12 @@ public class ShortcutService extends IShortcutService.Stub {
         return intent;
     }
 
+    private static boolean isSystemApp(@Nullable final ApplicationInfo ai) {
+        final int systemAppMask =
+                ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+        return ai != null && ((ai.flags & systemAppMask) != 0);
+    }
+
     /**
      * Same as queryIntentActivitiesAsUser, except it makes sure the package is installed,
      * and only returns exported activities.
@@ -3832,9 +3853,8 @@ public class ShortcutService extends IShortcutService.Stub {
         final List<ResolveInfo> resolved;
         final long token = injectClearCallingIdentity();
         try {
-            resolved =
-                    mContext.getPackageManager().queryIntentActivitiesAsUser(
-                            intent, PACKAGE_MATCH_FLAGS, userId);
+            resolved = mContext.getPackageManager().queryIntentActivitiesAsUser(intent,
+                    PACKAGE_MATCH_FLAGS | PackageManager.MATCH_DISABLED_COMPONENTS, userId);
         } finally {
             injectRestoreCallingIdentity(token);
         }
@@ -3842,9 +3862,8 @@ public class ShortcutService extends IShortcutService.Stub {
             return EMPTY_RESOLVE_INFO;
         }
         // Make sure the package is installed.
-        if (!isInstalled(resolved.get(0).activityInfo)) {
-            return EMPTY_RESOLVE_INFO;
-        }
+        resolved.removeIf(ACTIVITY_NOT_INSTALLED);
+        resolved.removeIf(ACTIVITY_NOT_SYSTEM_NOR_ENABLED);
         if (exportedOnly) {
             resolved.removeIf(ACTIVITY_NOT_EXPORTED);
         }
@@ -3852,8 +3871,8 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     /**
-     * Return the main activity that is enabled and exported.  If multiple activities are found,
-     * return the first one.
+     * Return the main activity that is exported and, for non-system apps, enabled.  If multiple
+     * activities are found, return the first one.
      */
     @Nullable
     ComponentName injectGetDefaultMainActivity(@NonNull String packageName, int userId) {
@@ -3868,7 +3887,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     /**
-     * Return whether an activity is enabled, exported and main.
+     * Return whether an activity is main, exported and, for non-system apps, enabled.
      */
     boolean injectIsMainActivity(@NonNull ComponentName activity, int userId) {
         final long start = getStatStartTime();
@@ -3902,7 +3921,8 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     /**
-     * Return all the enabled, exported and main activities from a package.
+     * Return all the main activities that are exported and, for non-system apps, enabled, from a
+     * package.
      */
     @NonNull
     List<ResolveInfo> injectGetMainActivities(@NonNull String packageName, int userId) {

@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Impossibile cercare reti"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Nessuna"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Salvata"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"Nessuna connessione"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Non connessa"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Disattivata"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Errore configurazione IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Impossibile connettersi a causa della bassa qualità della rete"</string>
@@ -212,7 +212,8 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Debug wireless"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Per trovare e utilizzare i dispositivi disponibili, attiva il debug wireless"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Accoppia il dispositivo con il codice QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Accoppia i nuovi dispositivi utilizzando lo scanner di codici QR"</string>
+    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
+    <skip />
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Accoppia dispositivo con codice di accoppiamento"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Accoppia i nuovi dispositivi utilizzando un codice di sei cifre"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositivi accoppiati"</string>
@@ -231,7 +232,8 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Impossibile accoppiare il dispositivo. Il codice QR non era corretto oppure il dispositivo non è connesso alla stessa rete."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Indirizzo IP e porta"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scansiona codice QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Accoppia il dispositivo tramite Wi-Fi eseguendo la scansione di un codice QR"</string>
+    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
+    <skip />
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Collegati a una rete Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, debug, sviluppatori"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Scorciatoia segnalazione bug"</string>
@@ -371,6 +373,10 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostra finestra di dialogo ANR per app in background"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostra avvisi canale di notifica"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Viene mostrato un avviso sullo schermo quando un\'app pubblica una notifica senza un canale valido"</string>
+    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
+    <skip />
+    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
+    <skip />
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forza autorizzazione app su memoria esterna"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Consente l\'installazione di qualsiasi app su memoria esterna, indipendentemente dai valori manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Imponi formato modificabile alle attività"</string>
@@ -513,13 +519,17 @@
     <string name="storage_category" msgid="2287342585424631813">"Archiviazione"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Dati condivisi"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Visualizza e modifica i dati condivisi"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Nessun dato condiviso per questo utente."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Si è verificato un errore durante il recupero dei dati condivisi. Riprova."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID dati condivisi: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Scadenza: <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="accessor_info_title" msgid="8289823651512477787">"Dati delle app condivisi"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Si è verificato un errore durante l\'eliminazione dei dati condivisi."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Nessun lease acquisito per questi dati condivisi. Vuoi eliminarli?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"App che condividono dati"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"Nessuna descrizione fornita dall\'app."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Scadenza lease: <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="delete_blob_text" msgid="2819192607255625697">"Elimina dati condivisi"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Eliminare dati condivisi?"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Eliminare i dati condivisi?"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"Gli utenti hanno applicazioni e contenuti personali"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Puoi limitare l\'accesso alle applicazioni e ai contenuti dal tuo account"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utente"</string>
@@ -539,4 +549,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informazioni profilo"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Prima di poter creare un profilo con limitazioni, devi impostare un blocco schermo per proteggere le tue app e i tuoi dati personali."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Imposta blocco"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Passa a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Aggiungi ospite"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Rimuovi ospite"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Ospite"</string>
 </resources>

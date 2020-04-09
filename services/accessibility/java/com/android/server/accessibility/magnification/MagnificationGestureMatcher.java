@@ -35,6 +35,8 @@ class MagnificationGestureMatcher {
     private static final int GESTURE_BASE = 100;
     public static final int GESTURE_TWO_FINGER_DOWN = GESTURE_BASE + 1;
     public static final int GESTURE_SWIPE = GESTURE_BASE + 2;
+    public static final int GESTURE_SINGLE_TAP = GESTURE_BASE + 3;
+    public static final int GESTURE_SINGLE_TAP_AND_HOLD = GESTURE_BASE + 4;
 
     @IntDef(prefix = {"GESTURE_MAGNIFICATION_"}, value = {
             GESTURE_TWO_FINGER_DOWN,
@@ -55,6 +57,10 @@ class MagnificationGestureMatcher {
                 return "GESTURE_SWIPE";
             case GESTURE_TWO_FINGER_DOWN:
                 return "GESTURE_TWO_FINGER_DOWN";
+            case GESTURE_SINGLE_TAP:
+                return "GESTURE_SINGLE_TAP";
+            case GESTURE_SINGLE_TAP_AND_HOLD:
+                return "GESTURE_SINGLE_TAP_AND_HOLD";
         }
         return "none";
     }

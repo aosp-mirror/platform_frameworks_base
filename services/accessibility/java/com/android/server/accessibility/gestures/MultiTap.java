@@ -24,8 +24,9 @@ import android.view.ViewConfiguration;
 /**
  * This class matches multi-tap gestures. The number of taps for each instance is specified in the
  * constructor.
+ * @hide
  */
-class MultiTap extends GestureMatcher {
+public class MultiTap extends GestureMatcher {
 
     // Maximum reasonable number of taps.
     public static final int MAX_TAPS = 10;
@@ -40,7 +41,8 @@ class MultiTap extends GestureMatcher {
     float mBaseX;
     float mBaseY;
 
-    MultiTap(Context context, int taps, int gesture, GestureMatcher.StateChangeListener listener) {
+    public MultiTap(Context context, int taps, int gesture,
+            GestureMatcher.StateChangeListener listener) {
         super(gesture, new Handler(context.getMainLooper()), listener);
         mTargetTaps = taps;
         mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();

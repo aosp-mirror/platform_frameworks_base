@@ -43,20 +43,23 @@ using android::base::StringPrintf;
 using std::unique_ptr;
 
 struct ConfigReceiverDeathCookie {
-    ConfigReceiverDeathCookie(sp<ConfigManager> configManager, const ConfigKey& configKey,
-                              const shared_ptr<IPendingIntentRef>& pir):
-        mConfigManager(configManager),
-        mConfigKey(configKey),
-        mPir(pir) {}
+    ConfigReceiverDeathCookie(const wp<ConfigManager>& configManager, const ConfigKey& configKey,
+                              const shared_ptr<IPendingIntentRef>& pir) :
+            mConfigManager(configManager), mConfigKey(configKey), mPir(pir) {
+    }
 
-    sp<ConfigManager> mConfigManager;
+    wp<ConfigManager> mConfigManager;
     ConfigKey mConfigKey;
     shared_ptr<IPendingIntentRef> mPir;
 };
 
 void ConfigManager::configReceiverDied(void* cookie) {
     auto cookie_ = static_cast<ConfigReceiverDeathCookie*>(cookie);
-    sp<ConfigManager>& thiz = cookie_->mConfigManager;
+    sp<ConfigManager> thiz = cookie_->mConfigManager.promote();
+    if (!thiz) {
+        return;
+    }
+
     ConfigKey& configKey = cookie_->mConfigKey;
     shared_ptr<IPendingIntentRef>& pir = cookie_->mPir;
 
@@ -74,20 +77,23 @@ void ConfigManager::configReceiverDied(void* cookie) {
 }
 
 struct ActiveConfigChangedReceiverDeathCookie {
-    ActiveConfigChangedReceiverDeathCookie(sp<ConfigManager> configManager, const int uid,
-                                           const shared_ptr<IPendingIntentRef>& pir):
-        mConfigManager(configManager),
-        mUid(uid),
-        mPir(pir) {}
+    ActiveConfigChangedReceiverDeathCookie(const wp<ConfigManager>& configManager, const int uid,
+                                           const shared_ptr<IPendingIntentRef>& pir) :
+            mConfigManager(configManager), mUid(uid), mPir(pir) {
+    }
 
-    sp<ConfigManager> mConfigManager;
+    wp<ConfigManager> mConfigManager;
     int mUid;
     shared_ptr<IPendingIntentRef> mPir;
 };
 
 void ConfigManager::activeConfigChangedReceiverDied(void* cookie) {
     auto cookie_ = static_cast<ActiveConfigChangedReceiverDeathCookie*>(cookie);
-    sp<ConfigManager>& thiz = cookie_->mConfigManager;
+    sp<ConfigManager> thiz = cookie_->mConfigManager.promote();
+    if (!thiz) {
+        return;
+    }
+
     int uid = cookie_->mUid;
     shared_ptr<IPendingIntentRef>& pir = cookie_->mPir;
 

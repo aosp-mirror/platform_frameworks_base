@@ -64,7 +64,7 @@ public class WifiEntryPreferenceTest {
 
     private static final String MOCK_TITLE = "title";
     private static final String MOCK_SUMMARY = "summary";
-
+    private static final String FAKE_URI_STRING = "fakeuri";
 
     @Before
     public void setUp() {
@@ -155,22 +155,23 @@ public class WifiEntryPreferenceTest {
     }
 
     @Test
-    public void canManageSubscription_shouldSetImageButtonVisible() {
-        when(mMockWifiEntry.canManageSubscription()).thenReturn(true);
+    public void notNull_whenGetHelpUriString_shouldSetImageButtonVisible() {
+        when(mMockWifiEntry.getHelpUriString()).thenReturn(FAKE_URI_STRING);
         final WifiEntryPreference pref =
                 new WifiEntryPreference(mContext, mMockWifiEntry, mMockIconInjector);
         final LayoutInflater inflater = LayoutInflater.from(mContext);
         final View view = inflater.inflate(pref.getLayoutResource(), new LinearLayout(mContext),
                 false);
         final PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(view);
+
         pref.onBindViewHolder(holder);
 
         assertThat(view.findViewById(R.id.icon_button).getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
-    public void helpButton_whenCanManageSubscription_shouldSetCorrectContentDescription() {
-        when(mMockWifiEntry.canManageSubscription()).thenReturn(true);
+    public void helpButton_whenGetHelpUriStringNotNull_shouldSetCorrectContentDescription() {
+        when(mMockWifiEntry.getHelpUriString()).thenReturn(FAKE_URI_STRING);
         final WifiEntryPreference pref =
                 new WifiEntryPreference(mContext, mMockWifiEntry, mMockIconInjector);
         final LayoutInflater inflater = LayoutInflater.from(mContext);

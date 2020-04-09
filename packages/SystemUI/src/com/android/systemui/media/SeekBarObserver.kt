@@ -46,19 +46,6 @@ class SeekBarObserver(view: View) : Observer<SeekBarViewModel.Progress> {
     /** Updates seek bar views when the data model changes. */
     @UiThread
     override fun onChanged(data: SeekBarViewModel.Progress) {
-        if (data.enabled && seekBarView.visibility == View.GONE) {
-            seekBarView.visibility = View.VISIBLE
-            elapsedTimeView.visibility = View.VISIBLE
-            totalTimeView.visibility = View.VISIBLE
-        } else if (!data.enabled && seekBarView.visibility == View.VISIBLE) {
-            seekBarView.visibility = View.GONE
-            elapsedTimeView.visibility = View.GONE
-            totalTimeView.visibility = View.GONE
-            return
-        }
-
-        // TODO: update the style of the disabled progress bar
-        seekBarView.setEnabled(data.seekAvailable)
 
         data.color?.let {
             var tintList = ColorStateList.valueOf(it)
@@ -70,6 +57,17 @@ class SeekBarObserver(view: View) : Observer<SeekBarViewModel.Progress> {
             elapsedTimeView.setTextColor(it)
             totalTimeView.setTextColor(it)
         }
+
+        if (!data.enabled) {
+            seekBarView.setEnabled(false)
+            seekBarView.getThumb().setAlpha(0)
+            elapsedTimeView.setText("")
+            totalTimeView.setText("")
+            return
+        }
+
+        seekBarView.getThumb().setAlpha(if (data.seekAvailable) 255 else 0)
+        seekBarView.setEnabled(data.seekAvailable)
 
         data.elapsedTime?.let {
             seekBarView.setProgress(it)

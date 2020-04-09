@@ -51,10 +51,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Tests for the {@link DisplayContent.TaskStackContainers} container in {@link DisplayContent}.
+ * Tests for the {@link TaskDisplayArea} container.
  *
  * Build/Install/Run:
- *  atest WmTests:TaskStackContainersTests
+ *  atest WmTests:TaskDisplayAreaTests
  */
 @SmallTest
 @Presubmit
@@ -154,8 +154,9 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                 ACTIVITY_TYPE_STANDARD, mDisplayContent);
         final Task newStack = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        doReturn(newStack).when(mDisplayContent.mTaskContainers).createStack(anyInt(),
-                anyInt(), anyBoolean(), any(), any(), anyBoolean());
+        final TaskDisplayArea taskDisplayArea = candidateTask.getDisplayArea();
+        doReturn(newStack).when(taskDisplayArea).createStack(anyInt(), anyInt(), anyBoolean(),
+                any(), any(), anyBoolean());
 
         final int type = ACTIVITY_TYPE_STANDARD;
         assertGetOrCreateStack(WINDOWING_MODE_FULLSCREEN, type, candidateTask,
@@ -186,7 +187,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     private void assertGetOrCreateStack(int windowingMode, int activityType, Task candidateTask,
             boolean reuseCandidate) {
-        final TaskDisplayArea taskDisplayArea = (TaskDisplayArea) candidateTask.getParent();
+        final TaskDisplayArea taskDisplayArea = candidateTask.getDisplayArea();
         final ActivityStack stack = taskDisplayArea.getOrCreateStack(windowingMode, activityType,
                 false /* onTop */, null /* intent */, candidateTask /* candidateTask */);
         assertEquals(reuseCandidate, stack == candidateTask);

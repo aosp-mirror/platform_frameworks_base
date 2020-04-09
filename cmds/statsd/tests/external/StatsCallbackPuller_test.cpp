@@ -190,13 +190,13 @@ TEST_F(StatsCallbackPullerTest, RegisterAndTimeout) {
     int32_t uid = 123;
     values.push_back(value);
 
-    StatsPullerManager pullerManager;
-    pullerManager.RegisterPullAtomCallback(uid, pullTagId, pullCoolDownNs, pullTimeoutNs,
-                                           vector<int32_t>(), cb);
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
+    pullerManager->RegisterPullAtomCallback(uid, pullTagId, pullCoolDownNs, pullTimeoutNs,
+                                            vector<int32_t>(), cb);
     vector<shared_ptr<LogEvent>> dataHolder;
     int64_t startTimeNs = getElapsedRealtimeNs();
     // Returns false, since StatsPuller code will evaluate the timeout.
-    EXPECT_FALSE(pullerManager.Pull(pullTagId, {uid}, &dataHolder));
+    EXPECT_FALSE(pullerManager->Pull(pullTagId, {uid}, &dataHolder));
     int64_t endTimeNs = getElapsedRealtimeNs();
     int64_t actualPullDurationNs = endTimeNs - startTimeNs;
 
