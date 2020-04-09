@@ -420,6 +420,7 @@ message Atom {
         RankingSelected ranking_selected = 260 [(module) = "framework"];
         TvSettingsUIInteracted tvsettings_ui_interacted = 261 [(module) = "tv_settings"];
         LauncherStaticLayout launcher_snapshot = 262 [(module) = "sysui"];
+        PackageInstallerV2Reported package_installer_v2_reported = 263 [(module) = "framework"];
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
@@ -9305,6 +9306,25 @@ message TvSettingsUIInteracted {
 
     /** Additional information (e.g., navigation direction on page focused) */
     optional string additional_info = 3;
+}
+
+/**
+ * Logs information about a package installation using package installer V2 APIs.
+ *
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/pm/PackageInstallerSession.java
+ */
+message PackageInstallerV2Reported {
+    // Whether this installation uses Incremental File System
+    optional bool is_incremental = 1;
+    // Name of the package that is intended to be installed
+    optional string package_name = 2;
+    // The duration between when the install was requested to when the install has completed
+    optional int64 duration_millis = 3;
+    // Installation result in final integer, which are SystemApi's.
+    // Return_code 1 indicates success.
+    // For full list, see frameworks/base/core/java/android/content/pm/PackageManager.java
+    optional int32 return_code  = 4;
 }
 
 /**
