@@ -264,8 +264,8 @@ public final class LocationRequest implements Parcelable {
                 /* numUpdates= */ Integer.MAX_VALUE,
                 /* smallestDisplacement= */ 0,
                 /* hideFromAppOps= */ false,
-                /* lowPowerMode= */ false,
                 /* locationSettingsIgnored= */ false,
+                /* lowPowerMode= */ false,
                 /* workSource= */ null);
     }
 
@@ -282,8 +282,8 @@ public final class LocationRequest implements Parcelable {
                 src.mNumUpdates,
                 src.mSmallestDisplacement,
                 src.mHideFromAppOps,
-                src.mLowPowerMode,
                 src.mLocationSettingsIgnored,
+                src.mLowPowerMode,
                 src.mWorkSource);
     }
 
