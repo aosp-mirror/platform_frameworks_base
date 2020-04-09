@@ -32,7 +32,7 @@ import android.graphics.Rect;
      * @param displayId The logical display id.
      * @param bounds The window magnifier bounds in screen coordinates.
      */
-    void onWindowMagnifierBoundsChanged(int display, in Rect bounds);
+    void onWindowMagnifierBoundsChanged(int displayId, in Rect bounds);
     /**
      * Changes the magnification mode on specified display. It is invoked by System UI when the
      *  switch button is toggled.
@@ -40,5 +40,5 @@ import android.graphics.Rect;
      * @param displayId The logical display id.
      * @param magnificationMode new magnification mode.
      */
-    void onChangeMagnificationMode(int display, int magnificationMode);
+    void onChangeMagnificationMode(int displayId, int magnificationMode);
 }
