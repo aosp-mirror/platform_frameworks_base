@@ -16,13 +16,18 @@
 
 package com.android.server.wm;
 
+import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
 import android.os.IBinder;
@@ -84,5 +89,20 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         WindowToken windowToken = mWm.mRoot.getWindowToken(token);
         assertFalse(windowToken.mRoundedCornerOverlay);
         assertTrue(windowToken.mFromClientToken);
+    }
+
+    @Test(expected = SecurityException.class)
+    public void testRemoveWindowToken_ownerUidNotMatch_throwException() {
+        IBinder token = mock(IBinder.class);
+        mWm.addWindowTokenWithOptions(token, TYPE_TOAST, mDisplayContent.getDisplayId(),
+                null /* options */, null /* options */);
+
+        spyOn(mWm);
+        when(mWm.checkCallingPermission(anyString(), anyString())).thenReturn(false);
+        WindowToken windowToken = mWm.mRoot.getWindowToken(token);
+        spyOn(windowToken);
+        when(windowToken.getOwnerUid()).thenReturn(INVALID_UID);
+
+        mWm.removeWindowToken(token, mDisplayContent.getDisplayId());
     }
 }
