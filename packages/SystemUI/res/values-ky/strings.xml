@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Уруксат берүү"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB мүчүлүштүктөрүн оңдоого уруксат жок"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Учурда бул аккаунтта USB аркылуу мүчүлүштүктөрдү оңдоо функциясын иштетүүгө болбойт. Негизги колдонуучунун аккаунтуна кириңиз."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Бул тармакта мүчүлүштүктөрдү зымсыз оңдоого уруксат берилсинби?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Бул тармакта мүчүлүштүктөрдү Wi-Fi аркылуу оңдоого уруксат берилсинби?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Тармактын аталышы (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi дареги (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Бул тармакта ар дайым уруксат берилсин"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Уруксат берүү"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Мүчүлүштүктөрдү зымсыз оңдоого уруксат берилген жок"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Учурда бул түзмөккө кирген колдонуучу мүчүлүштүктөрдү зымсыз оңдоо функциясын күйгүзө албайт. Бул функцияны колдонуу үчүн негизги колдонуучунун аккаунтуна которулуңуз."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоого уруксат берилген жок"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Учурда бул түзмөккө кирген колдонуучу мүчүлүштүктөрдү Wi-Fi аркылуу оңдоо функциясын күйгүзө албайт. Бул функцияны колдонуу үчүн негизги колдонуучунун аккаунтуна которулуңуз."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB порту өчүрүлдү"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Түзмөгүңүздүн ичине суюктук же булганч нерселер кирип кетпеши үчүн USB порту өчүрүлдү. Азырынча ал аркылуу башка түзмөктөргө туташууга болбойт.\n\nUSB портун кайра колдонуу мүмкүн болгондо, билдирме аласыз."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Кубаттагычтарды жана аксессуарларды аныктоо үчүн USB оюкчасы иштетилди"</string>
@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Скриншот тартууга колдонмо же ишканаңыз тыюу салган."</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Скриншотту четке кагуу"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Скриншотту ачуу"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Экранды жаздыргыч"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"экрандан видео жаздырып алуу"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды жаздыруу сеансы боюнча учурдагы билдирме"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Жаздырып башталсынбы?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Жаздыруу учурунда Android тутуму экраныңызда көрүнүп турган жана түзмөктө ойнотулуп жаткан бардык купуя маалыматты жаздырып алат. Буга сырсөздөр, төлөм маалыматы, сүрөттөр, билдирүүлөр жана аудио файлдар кирет."</string>
@@ -97,7 +97,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Музыка, чалуулар жана рингтондор сыяктуу түзмөгүңүздөгү добуштар"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Микрофон"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Түзмөктүн аудиосу жана микрофон"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Старт"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Баштадык"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Экран жаздырылууда"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Экран жана аудио жаздырылууда"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Экранды басууларды көрсөтүү"</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Сырсөз туура эмес"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Өтө көп жолу туура эмес аракет кылынды.\n<xliff:g id="NUMBER">%d</xliff:g> секунддан кийин кайра кайталаңыз."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Кайра кайталаңыз. <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> аракеттен <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> аракет калды."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Дайын-даректериңиз өчүрүлөт"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Эгер графикалык ачкычты кийинки жолу туура эмес киргизсеңиз, бул түзмөктүн маалыматы өчүрүлөт."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Эгер PIN кодду кийинки жолу туура эмес киргизсеңиз, бул түзмөктүн маалыматы өчүрүлөт."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Эгер сырсөздү кийинки жолу туура эмес киргизсеңиз, бул түзмөктүн маалыматы өчүрүлөт."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Эгер графикалык кийинки жолу туура эмес киргизсеңиз, бул колдонуучу өчүрүлөт."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Эгер PIN кодду кийинки жолу туура эмес киргизсеңиз, бул колдонуучу өчүрүлөт."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Эгер сырсөздү кийинки жолу туура эмес киргизсеңиз, бул колдонуучу өчүрүлөт."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Эгер графикалык ачкычты кийинки жолу туура эмес киргизсеңиз, жумуш профилиңиз жана анын маалыматы өчүрүлөт."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Эгер PIN кодду кийинки жолу туура эмес киргизсеңиз, жумуш профилиңиз жана анын маалыматы өчүрүлөт."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Эгер сырсөздү кийинки жолу туура эмес киргизсеңиз, жумуш профилиңиз жана анын маалыматы өчүрүлөт."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Өтө көп жолу туура эмес аракет кылынды. Бул түзмөктүн маалыматы өчүрүлөт."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Өтө көп жолу туура эмес аракет кылынды. Бул колдонуучу өчүрүлөт."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Өтө көп жолу туура эмес аракет кылынды. Бул жумуш профили жана андагы маалымат өчүрүлөт."</string>
@@ -384,7 +394,7 @@
     <string name="quick_settings_connected" msgid="3873605509184830379">"Туташкан"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Туташып турат, батареянын деңгээли – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Туташууда…"</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Тетеринг"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Модем режими"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Байланыш түйүнү"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Күйгүзүлүүдө…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Трафикти үнөмдөө күйүк"</string>
@@ -418,7 +428,7 @@
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC өчүрүлгөн"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC иштетилген"</string>
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Экранды жаздыруу"</string>
-    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Старт"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Баштадык"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Токтотуу"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Колдонмолорду которуштуруу үчүн өйдө сүрүңүз"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Колдонмолорду тез которуштуруу үчүн оңго сүйрөңүз"</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Профилди көрсөтүү"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Колдонуучу кошуу"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Жаңы колдонуучу"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Конок"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Конок кошуу"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Конокту алып салуу"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Конокту алып саласызбы?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Бул сеанстагы бардык колдонмолор жана дайындар өчүрүлөт."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Алып салуу"</string>
@@ -503,7 +510,7 @@
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Үнсүз билдирмелер"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Эскертүүлөр"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Жазышуулар"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Маанилүү эмес билдирмелердин баарын өчүрүү"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Бардык үнсүз билдирмелерди өчүрүү"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\"Тынчымды алба\" режиминде билдирмелер тындырылды"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Азыр баштоо"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Билдирме жок"</string>
@@ -976,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"Түзмөк кызматтары"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Аталышы жок"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Бул колдонмону өчүрүп күйгүзүп, толук экранга өтүү үчүн таптап коюңуз."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> көбүктөрүнүн жөндөөлөрү"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> калкып чыкма билдирмелер жөндөөлөрү"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Башкаруу"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> колдонмосунан <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> жана дагы <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> колдонмодон <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -988,7 +995,7 @@
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Жабуу"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Жазышуу калкып чыкма билдирмеде көрүнбөсүн"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Калкып чыкма билдирмелер аркылуу маектешүү"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Жаңы жазышуулар калкыма сүрөтчөлөр же билдирмелер болуп көрүнөт. Калкып чыкма билдирмени ачуу үчүн таптап коюңуз. Жылдыруу үчүн сүйрөңүз."</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Жаңы жазышуулар калкыма сүрөтчөлөр же калкып чыкма билдирмелер болуп көрүнөт. Калкып чыкма билдирмелерди ачуу үчүн таптап коюңуз. Жылдыруу үчүн сүйрөңүз."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Калкып чыкма билдирмелерди каалаган убакта көзөмөлдөңүз"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Бул колдонмодогу калкып чыкма билдирмелерди өчүрүү үчүн \"Башкарууну\" басыңыз"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Түшүндүм"</string>
@@ -997,25 +1004,21 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Көшүү режими"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Чоңойтуу терезеси"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Чоңойтуу терезесин башкаруу каражаттары"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Түзмөктү көзөмөлдөө элементтери"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Байланыштырылган түзмөктөрүңүз үчүн көзөмөлдөрдү кошуңуз"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Түзмөктү көзөмөлдөө элементтерин жөндөө"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Көзөмөлдөргө өтүү үчүн күйгүзүү/өчүрүү баскычын басып туруңуз"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Көзөмөлдөрдү кошуу үчүн колдонмо тандаңыз"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> көзөмөл кошулду.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> көзөмөл кошулду.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Башкаруу элементтери"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Күйгүзүү/өчүрүү баскычынын менюсу үчүн көзөмөлдөрдү тандаңыз"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Жалдыруу үчүн көзөмөлдү сүйрөп келиңиз"</string>
+    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Жылдыруу үчүн көзөмөлдү сүйрөп келиңиз"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Бардык көзөмөлдөрдүн тизмеси жүктөлгөн жок."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Башка"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Ыкчам көзөмөлгө кошуу"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Түзмөктү көзөмөлдөө элементтерине кошуу"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Сүйүктүүлөргө кошуу"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> бул көзөмөлдү сүйүктүүлөргө кошууну сунуштады."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Башкаруу элементтери жаңырды"</string>
