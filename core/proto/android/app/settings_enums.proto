@@ -2674,4 +2674,14 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     FUELGAUGE_ADVANCED_BATTERY_OPTION = 1842;
+
+    // OPEN: Settings > System > Gestures > Power menu
+    // CATEGORY: SETTINGS
+    // OS: R
+    POWER_MENU_SETTINGS = 1843;
+
+    // OPEN: Settings > System > Gestures > Power menu > Device controls
+    // CATEGORY: SETTINGS
+    // OS: R
+    DEVICE_CONTROLS_SETTINGS = 1844;
 }
