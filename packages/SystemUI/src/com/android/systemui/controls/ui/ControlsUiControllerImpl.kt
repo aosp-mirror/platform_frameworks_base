@@ -429,7 +429,8 @@ class ControlsUiControllerImpl @Inject constructor (
         }
 
         // add spacers if necessary to keep control size consistent
-        var spacersToAdd = maxColumns - (selectedStructure.controls.size % maxColumns)
+        val mod = selectedStructure.controls.size % maxColumns
+        var spacersToAdd = if (mod == 0) 0 else maxColumns - mod
         while (spacersToAdd > 0) {
             lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
             spacersToAdd--
