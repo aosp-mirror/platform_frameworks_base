@@ -2304,14 +2304,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    void resetSurfacePositionForAnimationLeash(Transaction t) {
+        t.setPosition(mSurfaceControl, 0, 0);
+        mLastSurfacePosition.set(0, 0);
+    }
+
     @Override
     public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
         mLastLayer = -1;
         reassignLayer(t);
 
         // Leash is now responsible for position, so set our position to 0.
-        t.setPosition(mSurfaceControl, 0, 0);
-        mLastSurfacePosition.set(0, 0);
+        resetSurfacePositionForAnimationLeash(t);
     }
 
     @Override
