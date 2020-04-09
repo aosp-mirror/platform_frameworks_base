@@ -34,6 +34,8 @@ import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.NoSuchElementException;
+
 /**
  * Encapsulates all logic for secondary lockscreen state management.
  */
@@ -79,7 +81,9 @@ public class AdminSecondaryLockScreenController {
     private final IKeyguardCallback mCallback = new IKeyguardCallback.Stub() {
         @Override
         public void onDismiss() {
-            dismiss(UserHandle.getCallingUserId());
+            mHandler.post(() -> {
+                dismiss(UserHandle.getCallingUserId());
+            });
         }
 
         @Override
@@ -91,7 +95,9 @@ public class AdminSecondaryLockScreenController {
             if (surfacePackage != null) {
                 mView.setChildSurfacePackage(surfacePackage);
             } else {
-                dismiss(KeyguardUpdateMonitor.getCurrentUser());
+                mHandler.post(() -> {
+                    dismiss(KeyguardUpdateMonitor.getCurrentUser());
+                });
             }
         }
     };
@@ -122,6 +128,7 @@ public class AdminSecondaryLockScreenController {
                         // If the remote content is not readied within the timeout period,
                         // move on without the secondary lockscreen.
                         dismiss(userId);
+                        Log.w(TAG, "Timed out waiting for secondary lockscreen content.");
                     },
                     REMOTE_CONTENT_READY_TIMEOUT_MILLIS);
         }
@@ -150,8 +157,12 @@ public class AdminSecondaryLockScreenController {
      * Displays the Admin security Surface view.
      */
     public void show(Intent serviceIntent) {
-        mContext.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
-        mParent.addView(mView);
+        if (mClient == null) {
+            mContext.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
+        }
+        if (!mView.isAttachedToWindow()) {
+            mParent.addView(mView);
+        }
     }
 
     /**
@@ -162,7 +173,11 @@ public class AdminSecondaryLockScreenController {
             mParent.removeView(mView);
         }
         if (mClient != null) {
-            mClient.asBinder().unlinkToDeath(mKeyguardClientDeathRecipient, 0);
+            try {
+                mClient.asBinder().unlinkToDeath(mKeyguardClientDeathRecipient, 0);
+            } catch (NoSuchElementException e) {
+                Log.w(TAG, "IKeyguardClient death recipient already released");
+            }
             mContext.unbindService(mConnection);
             mClient = null;
         }
@@ -185,10 +200,12 @@ public class AdminSecondaryLockScreenController {
 
     private void dismiss(int userId) {
         mHandler.removeCallbacksAndMessages(null);
-        if (mView != null && mView.isAttachedToWindow()
-                && userId == KeyguardUpdateMonitor.getCurrentUser()) {
+        if (mView.isAttachedToWindow() && userId == KeyguardUpdateMonitor.getCurrentUser()) {
             hide();
-            mKeyguardCallback.dismiss(true, userId);
+            if (mKeyguardCallback != null) {
+                mKeyguardCallback.dismiss(/* securityVerified= */ true, userId,
+                        /* bypassSecondaryLockScreen= */true);
+            }
         }
     }
 
