@@ -367,7 +367,8 @@ public:
     enum {
         NESTED_POS = 0x0,
         PRIMARY_POS = 0x1,
-        EXCLUSIVE_POS = 0x2
+        EXCLUSIVE_POS = 0x2,
+        UID_POS = 0x3
     };
 
     inline void setNested(bool nested) { setBitmaskAtPos(NESTED_POS, nested); }
@@ -375,6 +376,8 @@ public:
     inline void setPrimaryField(bool primary) { setBitmaskAtPos(PRIMARY_POS, primary); }
 
     inline void setExclusiveState(bool exclusive) { setBitmaskAtPos(EXCLUSIVE_POS, exclusive); }
+
+    inline void setUidField(bool isUid) { setBitmaskAtPos(UID_POS, isUid); }
 
     inline void setResetState(int resetState) { mResetState = resetState; }
 
@@ -386,6 +389,9 @@ public:
 
     // Default value = false
     inline bool isExclusiveState() const { return getValueFromBitmask(EXCLUSIVE_POS); }
+
+    // Default value = false
+    inline bool isUidField() const { return getValueFromBitmask(UID_POS); }
 
     // If a reset state is not sent in the StatsEvent, returns -1. Note that a
     // reset satate is only sent if and only if a reset should be triggered.
@@ -402,7 +408,7 @@ private:
     }
 
     // This is a bitmask over all annotations stored in boolean form. Because
-    // there are only 3 booleans, just one byte is required.
+    // there are only 4 booleans, just one byte is required.
     uint8_t mBooleanBitmask = 0;
 
     int mResetState = -1;
@@ -449,7 +455,7 @@ int getUidIfExists(const FieldValue& value);
 void translateFieldMatcher(const FieldMatcher& matcher, std::vector<Matcher>* output);
 
 bool isAttributionUidField(const Field& field, const Value& value);
-bool isUidField(const Field& field, const Value& value);
+bool isUidField(const FieldValue& fieldValue);
 
 bool equalDimensions(const std::vector<Matcher>& dimension_a,
                      const std::vector<Matcher>& dimension_b);
