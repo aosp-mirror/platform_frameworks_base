@@ -361,7 +361,6 @@ class ControlsUiControllerImpl @Inject constructor (
                 .setTint(context.resources.getColor(R.color.control_spinner_dropdown, null))
         }
         parent.requireViewById<ImageView>(R.id.app_icon).apply {
-            setContentDescription(selectionItem.getTitle())
             setImageDrawable(selectionItem.icon)
         }
 
@@ -585,7 +584,6 @@ private class ItemAdapter(
             setText(item.getTitle())
         }
         view.requireViewById<ImageView>(R.id.app_icon).apply {
-            setContentDescription(item.appName)
             setImageDrawable(item.icon)
         }
         return view
