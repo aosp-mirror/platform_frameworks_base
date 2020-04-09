@@ -45,7 +45,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     companion object {
         private const val TAG = "ControlsBindingControllerImpl"
         private const val MAX_CONTROLS_REQUEST = 100000L
-        private const val SUGGESTED_CONTROLS_REQUEST = 4L
+        private const val SUGGESTED_CONTROLS_REQUEST = 6L
     }
 
     private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
@@ -60,6 +60,11 @@ open class ControlsBindingControllerImpl @Inject constructor(
      * this controller. Only one can be active at any time
      */
     private var statefulControlSubscriber: StatefulControlSubscriber? = null
+
+    /*
+     * Will track any active load subscriber. Only one can be active at any time.
+     */
+    private var loadSubscriber: LoadSubscriber? = null
 
     private val actionCallbackService = object : IControlsActionCallback.Stub() {
         override fun accept(
@@ -99,17 +104,24 @@ open class ControlsBindingControllerImpl @Inject constructor(
         component: ComponentName,
         callback: ControlsBindingController.LoadCallback
     ): Runnable {
-        val subscriber = LoadSubscriber(callback, MAX_CONTROLS_REQUEST)
-        retrieveLifecycleManager(component).maybeBindAndLoad(subscriber)
-        return subscriber.loadCancel()
+        loadSubscriber?.loadCancel()
+
+        val ls = LoadSubscriber(callback, MAX_CONTROLS_REQUEST)
+        loadSubscriber = ls
+
+        retrieveLifecycleManager(component).maybeBindAndLoad(ls)
+        return ls.loadCancel()
     }
 
     override fun bindAndLoadSuggested(
         component: ComponentName,
         callback: ControlsBindingController.LoadCallback
     ) {
-        val subscriber = LoadSubscriber(callback, SUGGESTED_CONTROLS_REQUEST)
-        retrieveLifecycleManager(component).maybeBindAndLoadSuggested(subscriber)
+        loadSubscriber?.loadCancel()
+        val ls = LoadSubscriber(callback, SUGGESTED_CONTROLS_REQUEST)
+        loadSubscriber = ls
+
+        retrieveLifecycleManager(component).maybeBindAndLoadSuggested(ls)
     }
 
     override fun subscribe(structureInfo: StructureInfo) {
@@ -152,13 +164,16 @@ open class ControlsBindingControllerImpl @Inject constructor(
     override fun changeUser(newUser: UserHandle) {
         if (newUser == currentUser) return
 
-        unsubscribe()
         unbind()
-        currentProvider = null
         currentUser = newUser
     }
 
     private fun unbind() {
+        unsubscribe()
+
+        loadSubscriber?.loadCancel()
+        loadSubscriber = null
+
         currentProvider?.unbindService()
         currentProvider = null
     }
@@ -210,6 +225,20 @@ open class ControlsBindingControllerImpl @Inject constructor(
         val callback: ControlsBindingController.LoadCallback
     ) : CallbackRunnable(token) {
         override fun doRun() {
+            Log.d(TAG, "LoadSubscription: Complete and loading controls")
+            callback.accept(list)
+        }
+    }
+
+    private inner class OnCancelAndLoadRunnable(
+        token: IBinder,
+        val list: List<Control>,
+        val subscription: IControlsSubscription,
+        val callback: ControlsBindingController.LoadCallback
+    ) : CallbackRunnable(token) {
+        override fun doRun() {
+            Log.d(TAG, "LoadSubscription: Canceling and loading controls")
+            provider?.cancelSubscription(subscription)
             callback.accept(list)
         }
     }
@@ -220,6 +249,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
         val requestLimit: Long
     ) : CallbackRunnable(token) {
         override fun doRun() {
+            Log.d(TAG, "LoadSubscription: Starting subscription")
             provider?.startSubscription(subscription, requestLimit)
         }
     }
@@ -254,34 +284,54 @@ open class ControlsBindingControllerImpl @Inject constructor(
         val requestLimit: Long
     ) : IControlsSubscriber.Stub() {
         val loadedControls = ArrayList<Control>()
-        var hasError = false
+        private var isTerminated = false
         private var _loadCancelInternal: (() -> Unit)? = null
+        private lateinit var subscription: IControlsSubscription
+
         fun loadCancel() = Runnable {
-                Log.d(TAG, "Cancel load requested")
-                _loadCancelInternal?.invoke()
-            }
+            Log.d(TAG, "Cancel load requested")
+            _loadCancelInternal?.invoke()
+        }
 
         override fun onSubscribe(token: IBinder, subs: IControlsSubscription) {
-            _loadCancelInternal = subs::cancel
+            subscription = subs
+            _loadCancelInternal = { currentProvider?.cancelSubscription(subscription) }
             backgroundExecutor.execute(OnSubscribeRunnable(token, subs, requestLimit))
         }
 
         override fun onNext(token: IBinder, c: Control) {
-            backgroundExecutor.execute { loadedControls.add(c) }
+            backgroundExecutor.execute {
+                if (isTerminated) return@execute
+
+                loadedControls.add(c)
+
+                // Once we have reached our requestLimit, send a request to cancel, and immediately
+                // load the results. Calls to onError() and onComplete() are not required after
+                // cancel.
+                if (loadedControls.size >= requestLimit) {
+                    maybeTerminateAndRun(
+                        OnCancelAndLoadRunnable(token, loadedControls, subscription, callback)
+                    )
+                }
+            }
         }
+
         override fun onError(token: IBinder, s: String) {
-            hasError = true
-            _loadCancelInternal = {}
-            currentProvider?.cancelLoadTimeout()
-            backgroundExecutor.execute(OnLoadErrorRunnable(token, s, callback))
+            maybeTerminateAndRun(OnLoadErrorRunnable(token, s, callback))
         }
 
         override fun onComplete(token: IBinder) {
+            maybeTerminateAndRun(OnLoadRunnable(token, loadedControls, callback))
+        }
+
+        private fun maybeTerminateAndRun(postTerminateFn: Runnable) {
+            if (isTerminated) return
+
+            isTerminated = true
             _loadCancelInternal = {}
-            if (!hasError) {
-                currentProvider?.cancelLoadTimeout()
-                backgroundExecutor.execute(OnLoadRunnable(token, loadedControls, callback))
-            }
+            currentProvider?.cancelLoadTimeout()
+
+            backgroundExecutor.execute(postTerminateFn)
         }
     }
 }
