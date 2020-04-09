@@ -8019,6 +8019,33 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /** Set layer tracing flags. */
+    public void setLayerTracingFlags(int flags) {
+        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
+                "setLayerTracingFlags");
+        long token = Binder.clearCallingIdentity();
+        try {
+            Parcel data = null;
+            try {
+                IBinder sf = ServiceManager.getService("SurfaceFlinger");
+                if (sf != null) {
+                    data = Parcel.obtain();
+                    data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                    data.writeInt(flags);
+                    sf.transact(1033 /* LAYER_TRACE_FLAGS_CODE */, data, null, 0 /* flags */);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set layer tracing flags");
+            } finally {
+                if (data != null) {
+                    data.recycle();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     @Override
     public boolean mirrorDisplay(int displayId, SurfaceControl outSurfaceControl) {
         if (!checkCallingPermission(READ_FRAME_BUFFER, "mirrorDisplay()")) {
