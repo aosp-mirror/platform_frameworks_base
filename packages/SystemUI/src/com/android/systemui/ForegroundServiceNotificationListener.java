@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.util.time.SystemClock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -49,7 +50,8 @@ public class ForegroundServiceNotificationListener {
     public ForegroundServiceNotificationListener(Context context,
             ForegroundServiceController foregroundServiceController,
             NotificationEntryManager notificationEntryManager,
-            NotifPipeline notifPipeline) {
+            NotifPipeline notifPipeline,
+            SystemClock systemClock) {
         mContext = context;
         mForegroundServiceController = foregroundServiceController;
 
@@ -76,7 +78,8 @@ public class ForegroundServiceNotificationListener {
                 removeNotification(entry.getSbn());
             }
         });
-        mEntryManager.addNotificationLifetimeExtender(new ForegroundServiceLifetimeExtender());
+        mEntryManager.addNotificationLifetimeExtender(
+                new ForegroundServiceLifetimeExtender(systemClock));
 
         notifPipeline.addCollectionListener(new NotifCollectionListener() {
             @Override
