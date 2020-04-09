@@ -48,7 +48,6 @@ stubs_defaults {
     name: "framework-sdkextensions-stubs-defaults",
     srcs: [ ":framework-sdkextensions-sources" ],
     libs: [ "framework-annotations-lib" ],
-    sdk_version: "system_current",
 }
 
 droidstubs {
