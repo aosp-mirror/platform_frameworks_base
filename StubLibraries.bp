@@ -309,13 +309,31 @@ java_defaults {
 }
 
 java_library_static {
-    name: "android_stubs_current",
+    name: "android_monolith_stubs_current",
     srcs: [ ":api-stubs-docs" ],
     defaults: ["android_defaults_stubs_current"],
 }
 
 java_library_static {
-    name: "android_system_stubs_current",
+    name: "android_merged_stubs_current",
+    srcs: [ ":api-stubs-docs-non-updatable" ],
+    static_libs: [
+        "conscrypt.module.public.api.stubs",
+        "framework-sdkextensions.stubs",
+        "framework-tethering.stubs",
+        "updatable_media_stubs.public",
+    ],
+    defaults: ["android_defaults_stubs_current"],
+}
+
+java_library_static {
+    name: "android_stubs_current",
+    static_libs: ["android_merged_stubs_current"],
+    defaults: ["android_defaults_stubs_current"],
+}
+
+java_library_static {
+    name: "android_system_monolith_stubs_current",
     srcs: [ ":system-api-stubs-docs" ],
     defaults: [
         "android_defaults_stubs_current",
@@ -332,6 +350,24 @@ java_library_static {
             dest: "android_system.jar",
         },
     ],
+}
+
+java_library_static {
+    name: "android_system_merged_stubs_current",
+    srcs: [ ":system-api-stubs-docs-non-updatable" ],
+    static_libs: [
+        "conscrypt.module.public.api.stubs",
+        "framework-sdkextensions.stubs.system",
+        "framework-tethering.stubs.system",
+        "updatable_media_stubs",
+    ],
+    defaults: ["android_defaults_stubs_current"],
+}
+
+java_library_static {
+    name: "android_system_stubs_current",
+    static_libs: ["android_system_merged_stubs_current"],
+    defaults: ["android_defaults_stubs_current"],
 }
 
 java_library_static {
