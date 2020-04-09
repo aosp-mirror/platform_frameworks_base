@@ -240,14 +240,20 @@ void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last,
     last[1] = last[2] = false;
 }
 
+// Assumes that mValues is not empty
+bool LogEvent::checkPreviousValueType(Type expected) {
+    return mValues[mValues.size() - 1].mValue.getType() == expected;
+}
+
 void LogEvent::parseIsUidAnnotation(uint8_t annotationType) {
-    if (mValues.empty() || annotationType != BOOL_TYPE) {
+    if (mValues.empty() || !checkPreviousValueType(INT) || annotationType != BOOL_TYPE) {
         mValid = false;
         return;
     }
 
     bool isUid = readNextValue<uint8_t>();
     if (isUid) mUidFieldIndex = mValues.size() - 1;
+    mValues[mValues.size() - 1].mAnnotations.setUidField(isUid);
 }
 
 void LogEvent::parseTruncateTimestampAnnotation(uint8_t annotationType) {
