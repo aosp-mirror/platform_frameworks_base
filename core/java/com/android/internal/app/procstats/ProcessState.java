@@ -1436,7 +1436,7 @@ public final class ProcessState {
             }
             int index = durationByState.indexOfKey(aggregatedType);
             if (index >= 0) {
-                durationByState.put(aggregatedType, time + durationByState.valueAt(aggregatedType));
+                durationByState.put(aggregatedType, time + durationByState.valueAt(index));
             } else {
                 durationByState.put(aggregatedType, time);
             }
@@ -1502,14 +1502,15 @@ public final class ProcessState {
         proto.write(ProcessStatsProto.UID, uid);
 
         for (int i = 0; i < durationByState.size(); i++) {
-            final int aggregatedKey = mPssTable.getKeyAt(i);
-
             final long stateToken = proto.start(ProcessStatsProto.STATES);
+
+            final int aggregatedKey = durationByState.keyAt(i);
+
             DumpUtils.printAggregatedProcStateTagProto(proto,
                     ProcessStatsStateProto.SCREEN_STATE,
                     ProcessStatsStateProto.PROCESS_STATE,
-                    durationByState.keyAt(i));
-            proto.write(ProcessStatsStateProto.DURATION_MS, durationByState.valueAt(i));
+                    aggregatedKey);
+            proto.write(ProcessStatsStateProto.DURATION_MS, durationByState.get(aggregatedKey));
 
             ProtoUtils.toAggStatsProto(proto, ProcessStatsStateProto.RSS,
                     0, /* do not output a minimum value */
