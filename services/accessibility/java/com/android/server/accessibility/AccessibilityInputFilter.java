@@ -16,9 +16,11 @@
 
 package com.android.server.accessibility;
 
+import android.annotation.MainThread;
 import android.content.Context;
 import android.graphics.Region;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -33,6 +35,7 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
+import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
@@ -424,14 +427,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             if ((mEnabledFeatures & FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER) != 0
                     || ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0)
                     || ((mEnabledFeatures & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0)) {
-                final boolean detectControlGestures = (mEnabledFeatures
-                        & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0;
-                final boolean triggerable = (mEnabledFeatures
-                        & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0;
-                MagnificationGestureHandler magnificationGestureHandler =
-                        new FullScreenMagnificationGestureHandler(displayContext,
-                                mAms.getMagnificationController(),
-                                detectControlGestures, triggerable, displayId);
+                final MagnificationGestureHandler magnificationGestureHandler =
+                        createMagnificationGestureHandler(displayId,
+                                displayContext);
                 addFirstEventHandler(displayId, magnificationGestureHandler);
                 mMagnificationGestureHandler.put(displayId, magnificationGestureHandler);
             }
@@ -527,6 +525,25 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         resetStreamState();
     }
 
+    private MagnificationGestureHandler createMagnificationGestureHandler(
+            int displayId, Context displayContext) {
+        final boolean detectControlGestures = (mEnabledFeatures
+                & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0;
+        final boolean triggerable = (mEnabledFeatures
+                & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0;
+        MagnificationGestureHandler magnificationGestureHandler;
+        if (mAms.getMagnificationMode(displayId)
+                == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW && triggerable) {
+            magnificationGestureHandler = new WindowMagnificationGestureHandler(
+                    displayContext, mAms.getWindowMagnificationMgr(), displayId);
+        } else {
+            magnificationGestureHandler = new FullScreenMagnificationGestureHandler(
+                    displayContext, mAms.getMagnificationController(),
+                    detectControlGestures, triggerable, displayId);
+        }
+        return magnificationGestureHandler;
+    }
+
     void resetStreamState() {
         if (mTouchScreenStreamState != null) {
             mTouchScreenStreamState.reset();
@@ -542,6 +559,51 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     @Override
     public void onDestroy() {
         /* ignore */
+    }
+
+    /**
+     * Called when the magnification mode is changed on specific display.
+     * @param display The logical display
+     */
+    @MainThread
+    public void onMagnificationModeChanged(Display display) {
+        final int displayId = display.getDisplayId();
+        final MagnificationGestureHandler magnificationGestureHandler =
+                mMagnificationGestureHandler.get(displayId);
+        if (magnificationGestureHandler == null) {
+            return;
+        }
+        magnificationGestureHandler.onDestroy();
+        final MagnificationGestureHandler currentMagnificationGestureHandler =
+                createMagnificationGestureHandler(displayId,
+                        mContext.createDisplayContext(display));
+        switchEventStreamTransformation(displayId, magnificationGestureHandler,
+                currentMagnificationGestureHandler);
+        mMagnificationGestureHandler.put(displayId, currentMagnificationGestureHandler);
+    }
+
+    @MainThread
+    private void switchEventStreamTransformation(int displayId,
+            EventStreamTransformation oldStreamTransformation,
+            EventStreamTransformation currentStreamTransformation) {
+        EventStreamTransformation eventStreamTransformation = mEventHandler.get(displayId);
+        if (eventStreamTransformation == null) {
+            return;
+        }
+        if (eventStreamTransformation == oldStreamTransformation) {
+            currentStreamTransformation.setNext(oldStreamTransformation.getNext());
+            mEventHandler.put(displayId, currentStreamTransformation);
+        } else {
+            while (eventStreamTransformation != null) {
+                if (eventStreamTransformation.getNext() == oldStreamTransformation) {
+                    eventStreamTransformation.setNext(currentStreamTransformation);
+                    currentStreamTransformation.setNext(oldStreamTransformation.getNext());
+                    return;
+                } else {
+                    eventStreamTransformation = eventStreamTransformation.getNext();
+                }
+            }
+        }
     }
 
     /**
