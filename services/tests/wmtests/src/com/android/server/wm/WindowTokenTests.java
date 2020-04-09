@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -152,7 +153,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
         token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class), TYPE_TOAST,
                 true /* persistOnEmpty */, mDisplayContent, true /* ownerCanManageAppTokens */,
-                true /* roundedCornerOverlay */, true /* fromClientToken */);
+                INVALID_UID, true /* roundedCornerOverlay */, true /* fromClientToken */);
         assertTrue(token.mRoundedCornerOverlay);
         assertTrue(token.mFromClientToken);
     }
@@ -166,7 +167,7 @@ public class WindowTokenTests extends WindowTestsBase {
     public void testSurfaceCreatedForWindowToken() {
         final WindowToken fromClientToken = new WindowToken(mDisplayContent.mWmService,
                 mock(IBinder.class), TYPE_APPLICATION_OVERLAY, true /* persistOnEmpty */,
-                mDisplayContent, true /* ownerCanManageAppTokens */,
+                mDisplayContent, true /* ownerCanManageAppTokens */, INVALID_UID,
                 true /* roundedCornerOverlay */, true /* fromClientToken */);
         assertNull(fromClientToken.mSurfaceControl);
 
@@ -175,7 +176,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
         final WindowToken nonClientToken = new WindowToken(mDisplayContent.mWmService,
                 mock(IBinder.class), TYPE_TOAST, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, true /* roundedCornerOverlay */,
+                true /* ownerCanManageAppTokens */, INVALID_UID, true /* roundedCornerOverlay */,
                 false /* fromClientToken */);
         assertNotNull(nonClientToken.mSurfaceControl);
     }
