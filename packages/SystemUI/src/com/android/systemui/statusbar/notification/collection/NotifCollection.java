@@ -47,6 +47,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Notification;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -387,7 +388,7 @@ public class NotifCollection implements Dumpable {
 
         if (entry == null) {
             // A new notification!
-            entry = new NotificationEntry(sbn, ranking);
+            entry = new NotificationEntry(sbn, ranking, SystemClock.uptimeMillis());
             mNotificationSet.put(sbn.getKey(), entry);
 
             mLogger.logNotifPosted(sbn.getKey());
