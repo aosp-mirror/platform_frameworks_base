@@ -15,6 +15,9 @@
       "name": "OverlayHostTests"
     },
     {
+      "name": "OverlayRemountedTest"
+    },
+    {
       "name": "CtsAppSecurityHostTestCases",
       "options": [
         {
