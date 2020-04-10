@@ -12,17 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-java_test_host {
-    name: "OverlayRemountedTest",
-    srcs: ["src/**/*.java"],
-    libs: [
-        "tradefed",
-        "junit",
-    ],
-    test_suites: ["general-tests"],
-    java_resources: [
-        ":OverlayRemountedTest_SharedLibrary",
-        ":OverlayRemountedTest_SharedLibraryOverlay",
-        ":OverlayRemountedTest_Target",
-    ],
+android_test_helper_app {
+    name: "OverlayRemountedTest_Overlay",
+    sdk_version: "current",
 }
