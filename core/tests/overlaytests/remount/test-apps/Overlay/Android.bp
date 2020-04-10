@@ -15,4 +15,7 @@
 android_test_helper_app {
     name: "OverlayRemountedTest_Overlay",
     sdk_version: "current",
+    apex_available: [
+        "com.android.overlaytest.overlay",
+    ],
 }
