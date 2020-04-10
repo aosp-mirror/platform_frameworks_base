@@ -70,7 +70,9 @@ import java.util.List;
  * {@link DisplayArea} that represents a section of a screen that contains app window containers.
  */
 final class TaskDisplayArea extends DisplayArea<ActivityStack> {
+
     DisplayContent mDisplayContent;
+
     /**
      * A control placed at the appropriate level for transitions to occur.
      */
@@ -1068,7 +1070,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     /**
      * Find task for putting the Activity in.
      */
-    void findTaskLocked(final ActivityRecord r, final boolean isPreferredDisplay,
+    void findTaskLocked(final ActivityRecord r, final boolean isPreferredDisplayArea,
             RootWindowContainer.FindTaskResult result) {
         mTmpFindTaskResult.clear();
         for (int stackNdx = getStackCount() - 1; stackNdx >= 0; --stackNdx) {
@@ -1090,7 +1092,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
                 if (mTmpFindTaskResult.mIdealMatch) {
                     result.setTo(mTmpFindTaskResult);
                     return;
-                } else if (isPreferredDisplay) {
+                } else if (isPreferredDisplayArea) {
                     // Note: since the traversing through the stacks is top down, the floating
                     // tasks should always have lower priority than any affinity-matching tasks
                     // in the fullscreen stacks

@@ -400,7 +400,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         taskDisplayArea.getRootHomeTask().removeIfPossible();
         taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
 
-        doReturn(true).when(mRootWindowContainer).resumeHomeActivity(any(), any(), anyInt());
+        doReturn(true).when(mRootWindowContainer).resumeHomeActivity(any(), any(), any());
 
         mService.setBooted(true);
 
@@ -408,7 +408,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         mRootWindowContainer.resumeFocusedStacksTopActivities();
 
         // Verify that home activity was started on the default display
-        verify(mRootWindowContainer).resumeHomeActivity(any(), any(), eq(DEFAULT_DISPLAY));
+        verify(mRootWindowContainer).resumeHomeActivity(any(), any(), eq(taskDisplayArea));
     }
 
     /**
@@ -430,7 +430,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
         new ActivityBuilder(mService).setTask(task).build();
 
-        doReturn(true).when(mRootWindowContainer).resumeHomeActivity(any(), any(), anyInt());
+        doReturn(true).when(mRootWindowContainer).resumeHomeActivity(any(), any(), any());
 
         mService.setBooted(true);
 
@@ -438,7 +438,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         mRootWindowContainer.resumeFocusedStacksTopActivities();
 
         // Verify that home activity was started on the default display
-        verify(mRootWindowContainer).resumeHomeActivity(any(), any(), eq(DEFAULT_DISPLAY));
+        verify(mRootWindowContainer).resumeHomeActivity(any(), any(), eq(taskDisplayArea));
     }
 
     /**
@@ -575,8 +575,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 secondDisplay.mDisplayId, true /* allowInstrumenting */, true /* fromHomeKey */);
 
         try {
-            verify(mRootWindowContainer, never()).resolveSecondaryHomeActivity(anyInt(),
-                    anyInt());
+            verify(mRootWindowContainer, never()).resolveSecondaryHomeActivity(anyInt(), any());
         } finally {
             mRootWindowContainer.mCurrentUser = currentUser;
         }
@@ -596,7 +595,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         mRootWindowContainer.startHomeOnDisplay(0 /* userId */, "testStartSecondaryHome",
                 secondDisplay.mDisplayId, true /* allowInstrumenting */, true /* fromHomeKey */);
 
-        verify(mRootWindowContainer, never()).resolveSecondaryHomeActivity(anyInt(), anyInt());
+        verify(mRootWindowContainer, never()).resolveSecondaryHomeActivity(anyInt(), any());
     }
 
     /**
@@ -634,7 +633,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         // Run the test.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
-                .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
+                .resolveSecondaryHomeActivity(0 /* userId */, mock(TaskDisplayArea.class));
         final ActivityInfo aInfoSecondary = getFakeHomeActivityInfo(false /* primaryHome*/);
         assertEquals(aInfoSecondary.name, resolvedInfo.first.name);
         assertEquals(aInfoSecondary.applicationInfo.packageName,
@@ -665,7 +664,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         // Run the test.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
-                .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
+                .resolveSecondaryHomeActivity(0 /* userId */, mock(TaskDisplayArea.class));
         assertEquals(aInfoSecondary.name, resolvedInfo.first.name);
         assertEquals(aInfoSecondary.applicationInfo.packageName,
                 resolvedInfo.first.applicationInfo.packageName);
@@ -686,7 +685,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         // Run the test.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
-                .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
+                .resolveSecondaryHomeActivity(0 /* userId */, mock(TaskDisplayArea.class));
         final ActivityInfo aInfoSecondary = getFakeHomeActivityInfo(false /* primaryHome*/);
         assertEquals(aInfoSecondary.name, resolvedInfo.first.name);
         assertEquals(aInfoSecondary.applicationInfo.packageName,
@@ -718,7 +717,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         // Run the test.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
-                .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
+                .resolveSecondaryHomeActivity(0 /* userId */, mock(TaskDisplayArea.class));
         assertEquals(aInfoPrimary.name, resolvedInfo.first.name);
         assertEquals(aInfoPrimary.applicationInfo.packageName,
                 resolvedInfo.first.applicationInfo.packageName);
@@ -752,7 +751,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         // Use the first one of matched activities in the same package as selected primary home.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
-                .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
+                .resolveSecondaryHomeActivity(0 /* userId */, mock(TaskDisplayArea.class));
 
         assertEquals(infoFake1.activityInfo.applicationInfo.packageName,
                 resolvedInfo.first.applicationInfo.packageName);
@@ -862,7 +861,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 .getSecondaryHomeIntent(null /* preferredPackage */);
         final ActivityInfo aInfoSecondary = getFakeHomeActivityInfo(false);
         doReturn(Pair.create(aInfoSecondary, secondaryHomeIntent)).when(mRootWindowContainer)
-                .resolveSecondaryHomeActivity(anyInt(), anyInt());
+                .resolveSecondaryHomeActivity(anyInt(), any());
     }
 
     private ActivityInfo getFakeHomeActivityInfo(boolean primaryHome) {

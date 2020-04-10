@@ -2422,7 +2422,7 @@ class ActivityStarter {
         // be destroyed.
         mTargetStack = intentActivity.getRootTask();
         mSupervisor.handleNonResizableTaskIfNeeded(intentTask, WINDOWING_MODE_UNDEFINED,
-                DEFAULT_DISPLAY, mTargetStack);
+                mRootWindowContainer.getDefaultTaskDisplayArea(), mTargetStack);
     }
 
     private void resumeTargetStackIfNeeded() {
