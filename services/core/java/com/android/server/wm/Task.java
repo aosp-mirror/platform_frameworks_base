@@ -120,6 +120,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
@@ -213,7 +214,6 @@ class Task extends WindowContainer<WindowContainer> {
 
     static final int INVALID_MIN_SIZE = -1;
     private float mShadowRadius = 0;
-    private final Rect mLastSurfaceCrop = new Rect();
 
     /**
      * The modes to control how the stack is moved to the front when calling {@link Task#reparent}.
@@ -397,6 +397,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     private Dimmer mDimmer = new Dimmer(this);
     private final Rect mTmpDimBoundsRect = new Rect();
+    private final Point mLastSurfaceSize = new Point();
 
     /** @see #setCanAffectSystemUiFlags */
     private boolean mCanAffectSystemUiFlags = true;
@@ -1943,6 +1944,10 @@ class Task extends WindowContainer<WindowContainer> {
         mTmpPrevBounds.set(getBounds());
         final boolean wasInMultiWindowMode = inMultiWindowMode();
         super.onConfigurationChanged(newParentConfig);
+        // Only need to update surface size here since the super method will handle updating
+        // surface position.
+        updateSurfaceSize(getPendingTransaction());
+
         if (wasInMultiWindowMode != inMultiWindowMode()) {
             mStackSupervisor.scheduleUpdateMultiWindowMode(this);
         }
@@ -1993,6 +1998,57 @@ class Task extends WindowContainer<WindowContainer> {
         // Only do an animation into and out-of freeform mode for now. Other mode
         // transition animations are currently handled by system-ui.
         return (prevWinMode == WINDOWING_MODE_FREEFORM) != (newWinMode == WINDOWING_MODE_FREEFORM);
+    }
+
+    void updateSurfaceSize(SurfaceControl.Transaction transaction) {
+        if (mSurfaceControl == null || mCreatedByOrganizer) {
+            return;
+        }
+
+        // Apply crop to root tasks only and clear the crops of the descendant tasks.
+        int width = 0;
+        int height = 0;
+        if (isRootTask()) {
+            final Rect taskBounds = getBounds();
+            width = taskBounds.width();
+            height = taskBounds.height();
+
+            final int outset = getTaskOutset();
+            width += 2 * outset;
+            height += 2 * outset;
+        }
+        if (width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
+            return;
+        }
+        transaction.setWindowCrop(mSurfaceControl, width, height);
+        mLastSurfaceSize.set(width, height);
+    }
+
+    /**
+     * Calculate an amount by which to expand the task bounds in each direction.
+     * Used to make room for shadows in the pinned windowing mode.
+     */
+    int getTaskOutset() {
+        // If we are drawing shadows on the task then don't outset the stack.
+        if (mWmService.mRenderShadowsInCompositor) {
+            return 0;
+        }
+        DisplayContent displayContent = getDisplayContent();
+        if (inPinnedWindowingMode() && displayContent != null) {
+            final DisplayMetrics displayMetrics = displayContent.getDisplayMetrics();
+
+            // We multiply by two to match the client logic for converting view elevation
+            // to insets, as in {@link WindowManager.LayoutParams#setSurfaceInsets}
+            return (int) Math.ceil(
+                    mWmService.dipToPixel(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP, displayMetrics)
+                            * 2);
+        }
+        return 0;
+    }
+
+    @VisibleForTesting
+    Point getLastSurfaceSize() {
+        return mLastSurfaceSize;
     }
 
     @VisibleForTesting
@@ -2803,28 +2859,6 @@ class Task extends WindowContainer<WindowContainer> {
         return boundsChange;
     }
 
-    private void updateSurfaceCrop() {
-        // Only update the crop if we are drawing shadows on the task.
-        if (mSurfaceControl == null || !mWmService.mRenderShadowsInCompositor || !isRootTask()) {
-            return;
-        }
-
-        if (inSplitScreenWindowingMode()) {
-            // inherit crop from parent
-            mTmpRect.setEmpty();
-        } else {
-            getBounds(mTmpRect);
-        }
-
-        mTmpRect.offsetTo(0, 0);
-        if (mLastSurfaceCrop.equals(mTmpRect)) {
-            return;
-        }
-
-        getPendingTransaction().setWindowCrop(mSurfaceControl, mTmpRect);
-        mLastSurfaceCrop.set(mTmpRect);
-    }
-
     @Override
     public boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
             ConfigurationContainer requestingContainer) {
@@ -3453,7 +3487,6 @@ class Task extends WindowContainer<WindowContainer> {
             mTmpDimBoundsRect.offsetTo(0, 0);
         }
 
-        updateSurfaceCrop();
         updateShadowsRadius(isFocused(), getPendingTransaction());
 
         if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
