@@ -600,6 +600,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
             statsd.registerPullAtomCallback(key.getUid(), key.getAtom(), value.getCoolDownMillis(),
                     value.getTimeoutMillis(), value.getAdditiveFields(), value.getCallback());
         }
+        statsd.allPullersFromBootRegistered();
     }
 
     // Pre-condition: the Binder calling identity has already been cleared
