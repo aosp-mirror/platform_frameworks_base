@@ -18,6 +18,7 @@ package com.android.systemui.globalactions;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
@@ -52,6 +53,8 @@ import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.RingerModeLiveData;
+import com.android.systemui.util.RingerModeTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -95,6 +98,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock private ControlsListingController mControlsListingController;
     @Mock private ControlsController mControlsController;
     @Mock private UiEventLogger mUiEventLogger;
+    @Mock private RingerModeTracker mRingerModeTracker;
+    @Mock private RingerModeLiveData mRingerModeLiveData;
 
     private TestableLooper mTestableLooper;
 
@@ -103,6 +108,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
+
+        when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
         mGlobalActionsDialog = new GlobalActionsDialog(mContext,
                 mWindowManagerFuncs,
                 mAudioManager,
@@ -133,7 +140,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mBackgroundExecutor,
                 mControlsListingController,
                 mControlsController,
-                mUiEventLogger
+                mUiEventLogger,
+                mRingerModeTracker
         );
     }
     @Test

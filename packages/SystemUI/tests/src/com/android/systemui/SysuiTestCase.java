@@ -38,6 +38,8 @@ import com.android.systemui.broadcast.FakeBroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -97,6 +99,12 @@ public abstract class SysuiTestCase {
         // A lot of tests get the LocalBluetoothManager, often via several layers of indirection.
         // None of them actually need it.
         mDependency.injectMockDependency(LocalBluetoothManager.class);
+
+        // Notifications tests are injecting one of these, causing many classes (including
+        // KeyguardUpdateMonitor to be created (injected).
+        // TODO(b/1531701009) Clean up NotificationContentView creation to prevent this
+        mDependency.injectMockDependency(SmartReplyController.class);
+        mDependency.injectMockDependency(NotificationBlockingHelperManager.class);
     }
 
     @After
