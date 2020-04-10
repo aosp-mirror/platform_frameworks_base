@@ -2198,7 +2198,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // split-screen in split-screen.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                taskDisplayArea.onSplitScreenModeDismissed();
+                taskDisplayArea.onSplitScreenModeDismissed(task.getStack());
                 taskDisplayArea.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
                         true /* notifyClients */);
             }
