@@ -142,7 +142,13 @@ class IdmapResMap {
 class LoadedIdmap {
  public:
   // Loads an IDMAP from a chunk of memory. Returns nullptr if the IDMAP data was malformed.
-  static std::unique_ptr<const LoadedIdmap> Load(const StringPiece& idmap_data);
+  static std::unique_ptr<const LoadedIdmap> Load(const StringPiece& idmap_path,
+                                                 const StringPiece& idmap_data);
+
+  // Returns the path to the IDMAP.
+  inline const std::string& IdmapPath() const {
+    return idmap_path_;
+  }
 
   // Returns the path to the RRO (Runtime Resource Overlay) APK for which this IDMAP was generated.
   inline const std::string& OverlayApkPath() const {
@@ -167,6 +173,10 @@ class LoadedIdmap {
     return OverlayDynamicRefTable(data_header_, overlay_entries_, target_assigned_package_id);
   }
 
+  // Returns whether the idmap file on disk has not been modified since the construction of this
+  // LoadedIdmap.
+  bool IsUpToDate() const;
+
  protected:
   // Exposed as protected so that tests can subclass and mock this class out.
   LoadedIdmap() = default;
@@ -177,13 +187,17 @@ class LoadedIdmap {
   const Idmap_overlay_entry* overlay_entries_;
   const std::unique_ptr<ResStringPool> string_pool_;
 
+  const std::string idmap_path_;
   std::string overlay_apk_path_;
   std::string target_apk_path_;
+  const time_t idmap_last_mod_time_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedIdmap);
 
-  explicit LoadedIdmap(const Idmap_header* header,
+  explicit LoadedIdmap(std::string&& idmap_path,
+                       time_t last_mod_time,
+                       const Idmap_header* header,
                        const Idmap_data_header* data_header,
                        const Idmap_target_entry* target_entries,
                        const Idmap_overlay_entry* overlay_entries,
