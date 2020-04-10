@@ -812,7 +812,7 @@ public abstract class NetworkAgent {
      *        this is the destination the probes are being redirected to, otherwise {@code null}.
      */
     public void onValidationStatus(@ValidationStatus int status, @Nullable Uri redirectUri) {
-        networkStatus(status, redirectUri.toString());
+        networkStatus(status, null == redirectUri ? "" : redirectUri.toString());
     }
     /** @hide TODO delete once subclasses have moved to onValidationStatus */
     protected void networkStatus(int status, String redirectUrl) {
