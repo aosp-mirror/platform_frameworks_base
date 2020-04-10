@@ -75,6 +75,9 @@ public final class NotificationClicker implements View.OnClickListener {
             // We never want to open the app directly if the user clicks in between
             // the notifications.
             return;
+        } else if (row.areGutsExposed()) {
+            // ignore click if guts are exposed
+            return;
         }
 
         // Mark notification for one frame.
