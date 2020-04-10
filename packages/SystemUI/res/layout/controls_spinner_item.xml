@@ -30,6 +30,7 @@
         android:layout_gravity="center"
         android:layout_width="@dimen/controls_header_app_icon_size"
         android:layout_height="@dimen/controls_header_app_icon_size"
+        android:contentDescription="@null"
         android:layout_marginEnd="10dp" />
 
     <TextView
