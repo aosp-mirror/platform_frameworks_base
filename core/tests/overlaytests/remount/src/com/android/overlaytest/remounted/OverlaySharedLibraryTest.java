@@ -16,42 +16,13 @@
 
 package com.android.overlaytest.remounted;
 
-import static org.junit.Assert.assertTrue;
-
-import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
-import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.RuleChain;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 @RunWith(DeviceJUnit4ClassRunner.class)
-public class OverlaySharedLibraryTest extends BaseHostJUnit4Test {
-    private static final String TARGET_APK = "OverlayRemountedTest_Target.apk";
-    private static final String TARGET_PACKAGE = "com.android.overlaytest.remounted.target";
-    private static final String SHARED_LIBRARY_APK =
-            "OverlayRemountedTest_SharedLibrary.apk";
-    private static final String SHARED_LIBRARY_PACKAGE =
-            "com.android.overlaytest.remounted.shared_library";
-    private static final String SHARED_LIBRARY_OVERLAY_APK =
-            "OverlayRemountedTest_SharedLibraryOverlay.apk";
-    private static final String SHARED_LIBRARY_OVERLAY_PACKAGE =
-            "com.android.overlaytest.remounted.shared_library.overlay";
-
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
-    public final SystemPreparer preparer = new SystemPreparer(temporaryFolder, this::getDevice);
-
-    @Rule
-    public final RuleChain ruleChain = RuleChain.outerRule(temporaryFolder).around(preparer);
-
-    @Before
-    public void startBefore() throws DeviceNotAvailableException {
-        getDevice().waitForDeviceAvailable();
-    }
+public class OverlaySharedLibraryTest extends OverlayRemountedTestBase {
 
     @Test
     public void testSharedLibrary() throws Exception {
@@ -60,7 +31,7 @@ public class OverlaySharedLibraryTest extends BaseHostJUnit4Test {
         final String libraryResource = resourceName(SHARED_LIBRARY_PACKAGE, "bool",
                 "shared_library_overlaid");
 
-        preparer.pushResourceFile(SHARED_LIBRARY_APK, "/product/app/SharedLibrary.apk")
+        mPreparer.pushResourceFile(SHARED_LIBRARY_APK, "/product/app/SharedLibrary.apk")
                 .installResourceApk(SHARED_LIBRARY_OVERLAY_APK, SHARED_LIBRARY_OVERLAY_PACKAGE)
                 .reboot()
                 .setOverlayEnabled(SHARED_LIBRARY_OVERLAY_PACKAGE, false)
@@ -71,7 +42,7 @@ public class OverlaySharedLibraryTest extends BaseHostJUnit4Test {
         assertResource(libraryResource, "false");
 
         // Overlay the shared library resource.
-        preparer.setOverlayEnabled(SHARED_LIBRARY_OVERLAY_PACKAGE, true);
+        mPreparer.setOverlayEnabled(SHARED_LIBRARY_OVERLAY_PACKAGE, true);
         assertResource(targetResource, "true");
         assertResource(libraryResource, "true");
     }
@@ -83,7 +54,7 @@ public class OverlaySharedLibraryTest extends BaseHostJUnit4Test {
         final String libraryResource = resourceName(SHARED_LIBRARY_PACKAGE, "bool",
                 "shared_library_overlaid");
 
-        preparer.pushResourceFile(SHARED_LIBRARY_APK, "/product/app/SharedLibrary.apk")
+        mPreparer.pushResourceFile(SHARED_LIBRARY_APK, "/product/app/SharedLibrary.apk")
                 .installResourceApk(SHARED_LIBRARY_OVERLAY_APK, SHARED_LIBRARY_OVERLAY_PACKAGE)
                 .setOverlayEnabled(SHARED_LIBRARY_OVERLAY_PACKAGE, true)
                 .reboot()
@@ -91,19 +62,5 @@ public class OverlaySharedLibraryTest extends BaseHostJUnit4Test {
 
         assertResource(targetResource, "true");
         assertResource(libraryResource, "true");
-    }
-
-    /** Builds the full name of a resource in the form package:type/entry. */
-    String resourceName(String pkg, String type, String entry) {
-        return String.format("%s:%s/%s", pkg, type, entry);
-    }
-
-    void assertResource(String resourceName, String expectedValue)
-            throws DeviceNotAvailableException {
-        final String result = getDevice().executeShellCommand(
-                String.format("cmd overlay lookup %s %s", TARGET_PACKAGE, resourceName));
-        assertTrue(String.format("expected: <[%s]> in: <[%s]>", expectedValue, result),
-                result.equals(expectedValue + "\n") ||
-                result.endsWith("-> " + expectedValue + "\n"));
     }
 }
