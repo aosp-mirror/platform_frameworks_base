@@ -673,7 +673,7 @@
         </activity>
 
         <activity android:name=".controls.management.ControlsProviderSelectorActivity"
-                  android:label="Controls Providers"
+                  android:label="@string/controls_providers_title"
                   android:theme="@style/Theme.ControlsManagement"
                   android:showForAllUsers="true"
                   android:clearTaskOnLaunch="true"
