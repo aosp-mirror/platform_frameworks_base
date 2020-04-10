@@ -365,6 +365,8 @@ class ControlsControllerImpl @Inject constructor (
         componentName: ComponentName,
         callback: Consumer<Boolean>
     ) {
+        if (seedingInProgress) return
+
         Log.i(TAG, "Beginning request to seed favorites for: $componentName")
         if (!confirmAvailability()) {
             if (userChanging) {
@@ -491,6 +493,13 @@ class ControlsControllerImpl @Inject constructor (
         if (!confirmAvailability()) return
         executor.execute {
             Favorites.replaceControls(structureInfo)
+            persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+        }
+    }
+
+    override fun resetFavorites() {
+        executor.execute {
+            Favorites.clear()
             persistenceWrapper.storeFavorites(Favorites.getAllStructures())
         }
     }

@@ -16,18 +16,26 @@
 
 package com.android.systemui.controls.ui
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.ComponentName
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.os.Process
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.util.TypedValue
 import android.util.Log
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
@@ -76,6 +84,8 @@ class ControlsUiControllerImpl @Inject constructor (
     companion object {
         private const val PREF_COMPONENT = "controls_component"
         private const val PREF_STRUCTURE = "controls_structure"
+
+        private const val FADE_IN_MILLIS = 225L
 
         private val EMPTY_COMPONENT = ComponentName("", "")
         private val EMPTY_STRUCTURE = StructureInfo(
@@ -153,7 +163,20 @@ class ControlsUiControllerImpl @Inject constructor (
 
     private fun reload(parent: ViewGroup) {
         if (hidden) return
-        show(parent)
+
+        val fadeAnim = ObjectAnimator.ofFloat(parent, "alpha", 1.0f, 0.0f)
+        fadeAnim.setInterpolator(AccelerateInterpolator(1.0f))
+        fadeAnim.setDuration(FADE_IN_MILLIS)
+        fadeAnim.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                show(parent)
+                val showAnim = ObjectAnimator.ofFloat(parent, "alpha", 0.0f, 1.0f)
+                showAnim.setInterpolator(DecelerateInterpolator(1.0f))
+                showAnim.setDuration(FADE_IN_MILLIS)
+                showAnim.start()
+            }
+        })
+        fadeAnim.start()
     }
 
     private fun showSeedingView(items: List<SelectionItem>) {
@@ -229,7 +252,8 @@ class ControlsUiControllerImpl @Inject constructor (
 
     private fun createMenu() {
         val items = arrayOf(
-            context.resources.getString(R.string.controls_menu_add)
+            context.resources.getString(R.string.controls_menu_add),
+            "Reset"
         )
         var adapter = ArrayAdapter<String>(context, R.layout.controls_more_item, items)
 
@@ -249,6 +273,8 @@ class ControlsUiControllerImpl @Inject constructor (
                             when (pos) {
                                 // 0: Add Control
                                 0 -> startFavoritingActivity(view.context, selectedStructure)
+                                // 1: TEMPORARY for reset controls
+                                1 -> showResetConfirmation()
                                 else -> Log.w(ControlsUiController.TAG,
                                     "Unsupported index ($pos) on 'more' menu selection")
                             }
@@ -273,6 +299,39 @@ class ControlsUiControllerImpl @Inject constructor (
                 }
             }
         })
+    }
+
+    private fun showResetConfirmation() {
+        val builder = AlertDialog.Builder(
+            context,
+            android.R.style.Theme_DeviceDefault_Dialog_Alert
+        ).apply {
+            setMessage("For testing purposes: Would you like to " +
+                "reset your favorited device controls?")
+            setPositiveButton(
+                android.R.string.ok,
+                DialogInterface.OnClickListener { dialog, _ ->
+                    val userHandle = Process.myUserHandle()
+                    val userContext = context.createContextAsUser(userHandle, 0)
+                    val prefs = userContext.getSharedPreferences(
+                        "controls_prefs", Context.MODE_PRIVATE)
+                    prefs.edit().putBoolean("ControlsSeedingCompleted", false).apply()
+                    controlsController.get().resetFavorites()
+                    dialog.dismiss()
+                    context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
+            })
+            setNegativeButton(
+                android.R.string.cancel,
+                DialogInterface.OnClickListener {
+                    dialog, _ -> dialog.cancel()
+                }
+            )
+        }
+        builder.create().apply {
+            getWindow().apply {
+                setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+            }
+        }.show()
     }
 
     private fun createDropDown(items: List<SelectionItem>) {
@@ -370,7 +429,8 @@ class ControlsUiControllerImpl @Inject constructor (
         }
 
         // add spacers if necessary to keep control size consistent
-        var spacersToAdd = selectedStructure.controls.size % maxColumns
+        val mod = selectedStructure.controls.size % maxColumns
+        var spacersToAdd = if (mod == 0) 0 else maxColumns - mod
         while (spacersToAdd > 0) {
             lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
             spacersToAdd--

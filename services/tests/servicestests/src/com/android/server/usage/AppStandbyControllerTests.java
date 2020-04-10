@@ -818,6 +818,69 @@ public class AppStandbyControllerTests {
         assertBucket(STANDBY_BUCKET_RESTRICTED);
     }
 
+    /**
+     * Test that an app is "timed out" into the RESTRICTED bucket if prediction tries to put it into
+     * a low bucket after the RESTRICTED timeout.
+     */
+    @Test
+    public void testRestrictedTimeoutOverridesRestoredLowBucketPrediction() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Predict to RARE Not long enough to time out into RESTRICTED.
+        mInjector.mElapsedRealtime += RARE_THRESHOLD;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_RARE);
+
+        // Add a short timeout event
+        mInjector.mElapsedRealtime += 1000;
+        reportEvent(mController, SYSTEM_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+        mInjector.mElapsedRealtime += 1000;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Long enough that it could have timed out into RESTRICTED. Instead of reverting to
+        // predicted RARE, should go into RESTRICTED
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Ensure that prediction can still raise it out despite this override.
+        mInjector.mElapsedRealtime += 1;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+    }
+
+    /**
+     * Test that an app is "timed out" into the RESTRICTED bucket if prediction tries to put it into
+     * a low bucket after the RESTRICTED timeout.
+     */
+    @Test
+    public void testRestrictedTimeoutOverridesPredictionLowBucket() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+
+        // Not long enough to time out into RESTRICTED.
+        mInjector.mElapsedRealtime += RARE_THRESHOLD;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_RARE);
+
+        mInjector.mElapsedRealtime += 1;
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+
+        // Long enough that it could have timed out into RESTRICTED.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
     @Test
     public void testPredictionRaiseFromRestrictedTimeout_highBucket() {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);

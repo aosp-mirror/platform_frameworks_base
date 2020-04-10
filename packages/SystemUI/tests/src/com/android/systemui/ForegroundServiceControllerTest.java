@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import junit.framework.Assert;
 
@@ -69,6 +70,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     private ForegroundServiceController mFsc;
     private ForegroundServiceNotificationListener mListener;
     private NotificationEntryListener mEntryListener;
+    private final FakeSystemClock mClock = new FakeSystemClock();
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private AppOpsController mAppOpsController;
     @Mock private Handler mMainHandler;
@@ -80,9 +82,10 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         MockitoAnnotations.initMocks(this);
-        mFsc = new ForegroundServiceController(mEntryManager, mAppOpsController, mMainHandler);
+        mFsc = new ForegroundServiceController(
+                mEntryManager, mAppOpsController, mMainHandler);
         mListener = new ForegroundServiceNotificationListener(
-                mContext, mFsc, mEntryManager, mNotifPipeline);
+                mContext, mFsc, mEntryManager, mNotifPipeline, mClock);
         ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
                 ArgumentCaptor.forClass(NotificationEntryListener.class);
         verify(mEntryManager).addNotificationEntryListener(

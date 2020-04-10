@@ -39,9 +39,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.UserInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
@@ -70,6 +72,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
@@ -188,7 +191,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private boolean mKeyguardShowing = false;
     private boolean mDeviceProvisioned = false;
-    private ToggleAction.State mAirplaneState = ToggleAction.State.Off;
+    private ToggleState mAirplaneState = ToggleState.Off;
     private boolean mIsWaitingForEcmExit = false;
     private boolean mHasTelephony;
     private boolean mHasVibrator;
@@ -205,7 +208,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final IWindowManager mIWindowManager;
     private final Executor mBackgroundExecutor;
     private final ControlsListingController mControlsListingController;
-    private boolean mAnyControlsProviders = false;
+    private List<ControlsServiceInfo> mControlsServiceInfos = new ArrayList<>();
+    private ControlsController mControlsController;
+    private SharedPreferences mControlsPreferences;
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
@@ -271,6 +276,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mBackgroundExecutor = backgroundExecutor;
         mControlsListingController = controlsListingController;
         mBlurUtils = blurUtils;
+        mControlsController = controlsController;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -309,45 +315,54 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         });
 
-        String preferredControlsPackage = mContext.getResources()
-                .getString(com.android.systemui.R.string.config_controlsPreferredPackage);
         mControlsListingController.addCallback(list -> {
-            mAnyControlsProviders = !list.isEmpty();
-
-            /*
-             * See if any service providers match the preferred component. If they do,
-             * and there are no current favorites, and we haven't successfully loaded favorites to
-             * date, query the preferred component for a limited number of suggested controls.
-             */
-            ComponentName preferredComponent = null;
-            for (ControlsServiceInfo info : list) {
-                if (info.componentName.getPackageName().equals(preferredControlsPackage)) {
-                    preferredComponent = info.componentName;
-                    break;
-                }
-            }
-
-            if (preferredComponent == null) return;
-
-            SharedPreferences prefs = context.getSharedPreferences(PREFS_CONTROLS_FILE,
-                    Context.MODE_PRIVATE);
-            boolean isSeeded = prefs.getBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, false);
-            boolean hasFavorites = controlsController.getFavorites().size() > 0;
-            if (!isSeeded && !hasFavorites) {
-                controlsController.seedFavoritesForComponent(
-                        preferredComponent,
-                        (accepted) -> {
-                            Log.i(TAG, "Controls seeded: " + accepted);
-                            prefs.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED,
-                                    accepted).apply();
-                        }
-                );
-            }
+            mControlsServiceInfos = list;
         });
+
+        // Need to be user-specific with the context to make sure we read the correct prefs
+        Context userContext = context.createContextAsUser(
+                new UserHandle(mUserManager.getUserHandle()), 0);
+        mControlsPreferences = userContext.getSharedPreferences(PREFS_CONTROLS_FILE,
+            Context.MODE_PRIVATE);
+
     }
 
+    private void seedFavorites() {
+        if (mControlsServiceInfos.isEmpty()
+                || mControlsController.getFavorites().size() > 0
+                || mControlsPreferences.getBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, false)) {
+            return;
+        }
 
+        /*
+         * See if any service providers match the preferred component. If they do,
+         * and there are no current favorites, and we haven't successfully loaded favorites to
+         * date, query the preferred component for a limited number of suggested controls.
+         */
+        String preferredControlsPackage = mContext.getResources()
+                .getString(com.android.systemui.R.string.config_controlsPreferredPackage);
 
+        ComponentName preferredComponent = null;
+        for (ControlsServiceInfo info : mControlsServiceInfos) {
+            if (info.componentName.getPackageName().equals(preferredControlsPackage)) {
+                preferredComponent = info.componentName;
+                break;
+            }
+        }
+
+        if (preferredComponent == null) {
+            Log.i(TAG, "Controls seeding: No preferred component has been set, will not seed");
+            mControlsPreferences.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, true).apply();
+        }
+
+        mControlsController.seedFavoritesForComponent(
+                preferredComponent,
+                (accepted) -> {
+                    Log.i(TAG, "Controls seeded: " + accepted);
+                    mControlsPreferences.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED,
+                        accepted).apply();
+                });
+    }
 
     /**
      * Show the global actions dialog (creating if necessary)
@@ -393,6 +408,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         awakenIfNecessary();
         mDialog = createDialog();
         prepareDialog();
+        seedFavorites();
 
         // If we only have 1 item and it's a simple press action, just do this action.
         if (mAdapter.getCount() == 1
@@ -594,7 +610,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public boolean shouldBeSeparated() {
-            return true;
+            return !shouldShowControls();
         }
 
         @Override
@@ -602,7 +618,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
             View v = super.create(context, convertView, parent, inflater);
             int textColor;
-            if (shouldBeSeparated()) {
+            if (shouldShowControls()) {
+                v.setBackgroundTintList(ColorStateList.valueOf(v.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_emergency_background)));
+                textColor = v.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_emergency_text);
+            } else if (shouldBeSeparated()) {
                 textColor = v.getResources().getColor(
                         com.android.systemui.R.color.global_actions_alert_text);
             } else {
@@ -612,7 +633,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             TextView messageView = v.findViewById(R.id.message);
             messageView.setTextColor(textColor);
             messageView.setSelected(true); // necessary for marquee to work
-            ImageView icon = (ImageView) v.findViewById(R.id.icon);
+            ImageView icon = v.findViewById(R.id.icon);
             icon.getDrawable().setTint(textColor);
             return v;
         }
@@ -993,7 +1014,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             final boolean silentModeOn =
                     mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL;
             ((ToggleAction) mSilentModeAction).updateState(
-                    silentModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
+                    silentModeOn ? ToggleState.On : ToggleState.Off);
         }
     }
 
@@ -1021,6 +1042,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     public void onShow(DialogInterface dialog) {
         mMetricsLogger.visible(MetricsEvent.POWER_MENU);
         mUiEventLogger.log(GlobalActionsEvent.GA_POWER_MENU_OPEN);
+    }
+
+    private int getActionLayoutId() {
+        if (shouldShowControls()) {
+            return com.android.systemui.R.layout.global_actions_grid_item_v2;
+        }
+        return com.android.systemui.R.layout.global_actions_grid_item;
     }
 
     /**
@@ -1234,20 +1262,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         }
 
-        protected int getActionLayoutId(Context context) {
-            if (shouldShowControls()) {
-                return com.android.systemui.R.layout.global_actions_grid_item_v2;
-            }
-            return com.android.systemui.R.layout.global_actions_grid_item;
-        }
-
         public View create(
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
-            View v = inflater.inflate(getActionLayoutId(context), parent,
-                    false);
+            View v = inflater.inflate(getActionLayoutId(), parent, false /* attach */);
 
-            ImageView icon = (ImageView) v.findViewById(R.id.icon);
-            TextView messageView = (TextView) v.findViewById(R.id.message);
+            ImageView icon = v.findViewById(R.id.icon);
+            TextView messageView = v.findViewById(R.id.message);
             messageView.setSelected(true); // necessary for marquee to work
 
             if (mIcon != null) {
@@ -1266,30 +1286,30 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
+    private enum ToggleState {
+        Off(false),
+        TurningOn(true),
+        TurningOff(true),
+        On(false);
+
+        private final boolean mInTransition;
+
+        ToggleState(boolean intermediate) {
+            mInTransition = intermediate;
+        }
+
+        public boolean inTransition() {
+            return mInTransition;
+        }
+    }
+
     /**
      * A toggle action knows whether it is on or off, and displays an icon and status message
      * accordingly.
      */
-    private static abstract class ToggleAction implements Action {
+    private abstract class ToggleAction implements Action {
 
-        enum State {
-            Off(false),
-            TurningOn(true),
-            TurningOff(true),
-            On(false);
-
-            private final boolean inTransition;
-
-            State(boolean intermediate) {
-                inTransition = intermediate;
-            }
-
-            public boolean inTransition() {
-                return inTransition;
-            }
-        }
-
-        protected State mState = State.Off;
+        protected ToggleState mState = ToggleState.Off;
 
         // prefs
         protected int mEnabledIconResId;
@@ -1333,13 +1353,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 LayoutInflater inflater) {
             willCreate();
 
-            View v = inflater.inflate(com.android.systemui.R
-                    .layout.global_actions_grid_item, parent, false);
+            View v = inflater.inflate(getActionLayoutId(), parent, false /* attach */);
 
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
             final boolean enabled = isEnabled();
-            boolean on = ((mState == State.On) || (mState == State.TurningOn));
+            boolean on = ((mState == ToggleState.On) || (mState == ToggleState.TurningOn));
 
             if (messageView != null) {
                 messageView.setText(on ? mEnabledStatusMessageResId : mDisabledStatusMessageResId);
@@ -1364,7 +1383,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 return;
             }
 
-            final boolean nowOn = !(mState == State.On);
+            final boolean nowOn = !(mState == ToggleState.On);
             onToggle(nowOn);
             changeStateFromPress(nowOn);
         }
@@ -1381,12 +1400,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
          * @param buttonOn Whether the button was turned on or off
          */
         protected void changeStateFromPress(boolean buttonOn) {
-            mState = buttonOn ? State.On : State.Off;
+            mState = buttonOn ? ToggleState.On : ToggleState.Off;
         }
 
         abstract void onToggle(boolean on);
 
-        public void updateState(State state) {
+        public void updateState(ToggleState state) {
             mState = state;
         }
     }
@@ -1420,7 +1439,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
             // In ECM mode airplane state cannot be changed
             if (!TelephonyProperties.in_ecm_mode().orElse(false)) {
-                mState = buttonOn ? State.TurningOn : State.TurningOff;
+                mState = buttonOn ? ToggleState.TurningOn : ToggleState.TurningOff;
                 mAirplaneState = mState;
             }
         }
@@ -1555,7 +1574,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public void onServiceStateChanged(ServiceState serviceState) {
             if (!mHasTelephony) return;
             final boolean inAirplaneMode = serviceState.getState() == ServiceState.STATE_POWER_OFF;
-            mAirplaneState = inAirplaneMode ? ToggleAction.State.On : ToggleAction.State.Off;
+            mAirplaneState = inAirplaneMode ? ToggleState.On : ToggleState.Off;
             mAirplaneModeOn.updateState(mAirplaneState);
             mAdapter.notifyDataSetChanged();
         }
@@ -1614,7 +1633,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mContentResolver,
                 Settings.Global.AIRPLANE_MODE_ON,
                 0) == 1;
-        mAirplaneState = airplaneModeOn ? ToggleAction.State.On : ToggleAction.State.Off;
+        mAirplaneState = airplaneModeOn ? ToggleState.On : ToggleState.Off;
         mAirplaneModeOn.updateState(mAirplaneState);
     }
 
@@ -1631,7 +1650,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         intent.putExtra("state", on);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
         if (!mHasTelephony) {
-            mAirplaneState = on ? ToggleAction.State.On : ToggleAction.State.Off;
+            mAirplaneState = on ? ToggleState.On : ToggleState.Off;
         }
     }
 
@@ -1888,6 +1907,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                 mGlobalActionsLayout);
                     })
                     .start();
+            ViewGroup root = (ViewGroup) mGlobalActionsLayout.getRootView();
+            root.setOnApplyWindowInsetsListener((v, windowInsets) -> {
+                if (mControlsUiController != null) {
+                    Insets insets = windowInsets.getInsets(WindowInsets.Type.all());
+                    root.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                }
+                return WindowInsets.CONSUMED;
+            });
             if (mControlsUiController != null) {
                 mControlsUiController.show(mControlsView);
             }
@@ -2017,6 +2044,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private boolean shouldShowControls() {
         return mKeyguardStateController.isUnlocked()
                 && mControlsUiController.getAvailable()
-                && mAnyControlsProviders;
+                && !mControlsServiceInfos.isEmpty();
     }
 }

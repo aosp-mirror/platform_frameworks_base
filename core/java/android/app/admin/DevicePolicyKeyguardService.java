@@ -16,12 +16,15 @@
 
 package android.app.admin;
 
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.SurfaceControlViewHost;
@@ -41,25 +44,32 @@ import android.view.SurfaceControlViewHost;
 @SystemApi
 public class DevicePolicyKeyguardService extends Service {
     private static final String TAG = "DevicePolicyKeyguardService";
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private IKeyguardCallback mCallback;
 
     private final IKeyguardClient mClient = new IKeyguardClient.Stub() {
+        @MainThread
         @Override
         public void onCreateKeyguardSurface(@Nullable IBinder hostInputToken,
-                IKeyguardCallback callback) {
+                @NonNull IKeyguardCallback callback) {
             mCallback = callback;
-            SurfaceControlViewHost.SurfacePackage surfacePackage =
-                    DevicePolicyKeyguardService.this.onCreateKeyguardSurface(hostInputToken);
+            mHandler.post(() -> {
+                SurfaceControlViewHost.SurfacePackage surfacePackage =
+                        DevicePolicyKeyguardService.this.onCreateKeyguardSurface(hostInputToken);
 
-            if (mCallback != null) {
                 try {
                     mCallback.onRemoteContentReady(surfacePackage);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to return created SurfacePackage", e);
                 }
-            }
+            });
         }
     };
+
+    @Override
+    public void onDestroy() {
+        mHandler.removeCallbacksAndMessages(null);
+    }
 
     @Override
     @Nullable
@@ -97,6 +107,10 @@ public class DevicePolicyKeyguardService extends Service {
      */
     @Nullable
     public void dismiss() {
+        if (mCallback == null) {
+            Log.w(TAG, "KeyguardCallback was unexpectedly null");
+            return;
+        }
         try {
             mCallback.onDismiss();
         } catch (RemoteException e) {
