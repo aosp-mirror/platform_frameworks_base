@@ -16,14 +16,10 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static android.service.notification.NotificationStats.DISMISSAL_SHADE;
-import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
-
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.ANCHOR_SCROLLING;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
-import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -49,10 +45,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.notification.NotificationListenerService;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -83,8 +77,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
@@ -96,27 +88,21 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper.DragDownCallback;
 import com.android.systemui.statusbar.EmptyShadeView;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
+import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
-import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -136,7 +122,6 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.Assert;
 
 import java.io.FileDescriptor;
@@ -225,7 +210,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mBottomMargin;
     private int mBottomInset = 0;
     private float mQsExpansionFraction;
-    private int mCurrentUserId;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -468,12 +452,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mHeadsUpInset;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final Rect mTmpRect = new Rect();
-    private final FeatureFlags mFeatureFlags;
-    private final NotifPipeline mNotifPipeline;
-    private final NotifCollection mNotifCollection;
-    private final NotificationEntryManager mEntryManager;
-    private final IStatusBarService mBarService = IStatusBarService.Stub.asInterface(
-            ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+    private DismissAllAnimationListener mDismissAllAnimationListener;
     @VisibleForTesting
     protected final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     protected final UiEventLogger mUiEventLogger;
@@ -558,13 +537,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             NotificationSectionsManager notificationSectionsManager,
             ForegroundServiceSectionController fgsSectionController,
             ForegroundServiceDismissalFeatureController fgsFeatureController,
-            FeatureFlags featureFlags,
-            NotifPipeline notifPipeline,
-            NotificationEntryManager entryManager,
-            NotifCollection notifCollection,
-            UiEventLogger uiEventLogger,
             GroupMembershipManager groupMembershipManager,
-            GroupExpansionManager groupExpansionManager
+            GroupExpansionManager groupExpansionManager,
+            UiEventLogger uiEventLogger
     ) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
@@ -613,36 +588,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mDebugPaint.setTextSize(25f);
         }
         mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
-
-        TunerService tunerService = Dependency.get(TunerService.class);
-        tunerService.addTunable((key, newValue) -> {
-            if (key.equals(HIGH_PRIORITY)) {
-                mHighPriorityBeforeSpeedBump = "1".equals(newValue);
-            }
-        }, HIGH_PRIORITY);
-
-        mFeatureFlags = featureFlags;
-        mNotifPipeline = notifPipeline;
-        mEntryManager = entryManager;
-        mNotifCollection = notifCollection;
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            mNotifPipeline.addCollectionListener(new NotifCollectionListener() {
-                @Override
-                public void onEntryUpdated(NotificationEntry entry) {
-                    NotificationStackScrollLayout.this.onEntryUpdated(entry);
-                }
-            });
-        } else {
-            mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
-                @Override
-                public void onPreEntryUpdated(NotificationEntry entry) {
-                    NotificationStackScrollLayout.this.onEntryUpdated(entry);
-                }
-            });
-        }
         mGroupMembershipManager = groupMembershipManager;
         mGroupExpansionManager = groupExpansionManager;
-
         mDynamicPrivacyController = dynamicPrivacyController;
         mStatusbarStateController = statusbarStateController;
         initializeForegroundServiceSection(fgsFeatureController);
@@ -707,10 +654,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mFooterView == null) {
             return;
         }
+        // TODO: move this logic to controller, which will invoke updateFooterView directly
         boolean showDismissView = mClearAllEnabled && hasActiveClearableNotifications(ROWS_ALL);
-        boolean showFooterView = (showDismissView || hasActiveNotifications())
+        RemoteInputController remoteInputController = mRemoteInputManager.getController();
+        boolean showFooterView = (showDismissView || mController.hasActiveNotifications())
                 && mStatusBarState != StatusBarState.KEYGUARD
-                && !mRemoteInputManager.getController().isRemoteInputActive();
+                && (remoteInputController == null || !remoteInputController.isRemoteInputActive());
         boolean showHistory = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
 
@@ -5292,8 +5241,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateFooter();
         requestChildrenUpdate();
         onUpdateRowStates();
-
-        mEntryManager.updateNotifications("StatusBar state changed");
         updateVisibility();
     }
 
@@ -5697,10 +5644,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mController;
     }
 
-    void setCurrentUserid(int userId) {
-        mCurrentUserId = userId;
-    }
-
     void addSwipedOutView(View v) {
         mSwipedOutViews.add(v);
     }
@@ -5772,6 +5715,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     boolean getCheckSnoozeLeaveBehind() {
         return mCheckForLeavebehind;
+    }
+
+    void setDismissAllAnimationListener(DismissAllAnimationListener dismissAllAnimationListener) {
+        mDismissAllAnimationListener = dismissAllAnimationListener;
+    }
+
+    public void setHighPriorityBeforeSpeedBump(boolean highPriorityBeforeSpeedBump) {
+        mHighPriorityBeforeSpeedBump = highPriorityBeforeSpeedBump;
     }
 
     /**
@@ -6127,19 +6078,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     // --------------------- NotificationEntryManager/NotifPipeline methods ------------------------
 
-    private void onEntryUpdated(NotificationEntry entry) {
+    void onEntryUpdated(NotificationEntry entry) {
         // If the row already exists, the user may have performed a dismiss action on the
         // notification. Since it's not clearable we should snap it back.
         if (entry.rowExists() && !entry.getSbn().isClearable()) {
             snapViewIfNeeded(entry);
-        }
-    }
-
-    private boolean hasActiveNotifications() {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            return !mNotifPipeline.getShadeList().isEmpty();
-        } else {
-            return mEntryManager.hasActiveNotifications();
         }
     }
 
@@ -6149,57 +6092,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void onDismissAllAnimationsEnd(
             List<ExpandableNotificationRow> viewsToRemove,
             @SelectedRows int selectedRows) {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            if (selectedRows == ROWS_ALL) {
-                mNotifCollection.dismissAllNotifications(mCurrentUserId);
-            } else {
-                final List<Pair<NotificationEntry, DismissedByUserStats>>
-                        entriesWithRowsDismissedFromShade = new ArrayList<>();
-                final int numVisibleEntries = mNotifPipeline.getShadeListCount();
-                for (int i = 0; i < viewsToRemove.size(); i++) {
-                    final NotificationEntry entry = viewsToRemove.get(i).getEntry();
-                    entriesWithRowsDismissedFromShade.add(
-                            new Pair<NotificationEntry, DismissedByUserStats>(
-                                    entry,
-                                    getDismissedByUserStats(entry, numVisibleEntries)));
-                }
-                mNotifCollection.dismissNotifications(entriesWithRowsDismissedFromShade);
-            }
-        } else {
-            for (ExpandableNotificationRow rowToRemove : viewsToRemove) {
-                if (canChildBeDismissed(rowToRemove)) {
-                    mEntryManager.performRemoveNotification(
-                            rowToRemove.getEntry().getSbn(),
-                            getDismissedByUserStats(
-                                    rowToRemove.getEntry(),
-                                    mEntryManager.getActiveNotificationsCount()),
-                            NotificationListenerService.REASON_CANCEL_ALL);
-                } else {
-                    rowToRemove.resetTranslation();
-                }
-            }
-            if (selectedRows == ROWS_ALL) {
-                try {
-                    mBarService.onClearAllNotifications(mCurrentUserId);
-                } catch (Exception ex) {
-                }
-            }
+        if (mDismissAllAnimationListener != null) {
+            mDismissAllAnimationListener.onAnimationEnd(viewsToRemove, selectedRows);
         }
-    }
-
-    private DismissedByUserStats getDismissedByUserStats(
-            NotificationEntry entry,
-            int numVisibleEntries
-    ) {
-        return new DismissedByUserStats(
-            DISMISSAL_SHADE,
-            DISMISS_SENTIMENT_NEUTRAL,
-            NotificationVisibility.obtain(
-                    entry.getKey(),
-                    entry.getRanking().getRank(),
-                    numVisibleEntries,
-                    true,
-                    NotificationLogger.getNotificationLocation(entry)));
     }
 
     public void setKeyguardMediaControllorVisible(boolean keyguardMediaControllorVisible) {
@@ -6218,7 +6113,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         /* Only ever called as a consequence of a lockscreen expansion gesture. */
         @Override
         public boolean onDraggedDown(View startingChild, int dragLengthY) {
-            boolean canDragDown = hasActiveNotifications() || mKeyguardMediaControllorVisible;
+            boolean canDragDown =
+                    mController.hasActiveNotifications() || mKeyguardMediaControllorVisible;
             if (mStatusBarState == StatusBarState.KEYGUARD && canDragDown) {
                 mLockscreenGestureLogger.write(
                         MetricsEvent.ACTION_LS_SHADE,
@@ -6424,7 +6320,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /** Enum for selecting some or all notification rows (does not included non-notif views). */
     @Retention(SOURCE)
     @IntDef({ROWS_ALL, ROWS_HIGH_PRIORITY, ROWS_GENTLE})
-    public @interface SelectedRows {}
+    @interface SelectedRows {}
     /** All rows representing notifs. */
     public static final int ROWS_ALL = 0;
     /** Only rows where entry.isHighPriority() is true. */
@@ -6465,5 +6361,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     interface KeyguardBypassEnabledProvider {
         boolean getBypassEnabled();
+    }
+
+    interface DismissAllAnimationListener {
+        void onAnimationEnd(
+                List<ExpandableNotificationRow> viewsToRemove, @SelectedRows int selectedRows);
     }
 }

@@ -516,6 +516,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         return mLifetimeExtenders;
     }
 
+    @Nullable
     public RemoteInputController getController() {
         return mRemoteInputController;
     }
