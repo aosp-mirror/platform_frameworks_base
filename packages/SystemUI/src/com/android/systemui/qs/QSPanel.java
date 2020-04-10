@@ -47,7 +47,6 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
-import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -75,7 +74,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
@@ -105,8 +103,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final Executor mForegroundExecutor;
     private final DelayableExecutor mBackgroundExecutor;
-    private LocalMediaManager mLocalMediaManager;
-    private MediaDevice mDevice;
     private boolean mUpdateCarousel = false;
 
     protected boolean mExpanded;
@@ -129,34 +125,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     private BrightnessMirrorController mBrightnessMirrorController;
     private View mDivider;
-
-    private final LocalMediaManager.DeviceCallback mDeviceCallback =
-            new LocalMediaManager.DeviceCallback() {
-        @Override
-        public void onDeviceListUpdate(List<MediaDevice> devices) {
-            if (mLocalMediaManager == null) {
-                return;
-            }
-            MediaDevice currentDevice = mLocalMediaManager.getCurrentConnectedDevice();
-            // Check because this can be called several times while changing devices
-            if (mDevice == null || !mDevice.equals(currentDevice)) {
-                mDevice = currentDevice;
-                for (QSMediaPlayer p : mMediaPlayers) {
-                    p.updateDevice(mDevice);
-                }
-            }
-        }
-
-        @Override
-        public void onSelectedDeviceStateChanged(MediaDevice device, int state) {
-            if (mDevice == null || !mDevice.equals(device)) {
-                mDevice = device;
-                for (QSMediaPlayer p : mMediaPlayers) {
-                    p.updateDevice(mDevice);
-                }
-            }
-        }
-    };
 
     @Inject
     public QSPanel(
@@ -277,7 +245,14 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         if (player == null) {
             Log.d(TAG, "creating new player");
-            player = new QSMediaPlayer(mContext, this, mNotificationMediaManager,
+            // Set up listener for device changes
+            // TODO: integrate with MediaTransferManager?
+            InfoMediaManager imm = new InfoMediaManager(mContext, notif.getPackageName(),
+                    notif.getNotification(), mLocalBluetoothManager);
+            LocalMediaManager routeManager = new LocalMediaManager(mContext, mLocalBluetoothManager,
+                    imm, notif.getPackageName());
+
+            player = new QSMediaPlayer(mContext, this, mNotificationMediaManager, routeManager,
                     mForegroundExecutor, mBackgroundExecutor);
             player.setListening(mListening);
             if (player.isPlaying()) {
@@ -292,22 +267,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         Log.d(TAG, "setting player session");
         player.setMediaSession(token, icon, iconColor, bgColor, actionsContainer,
-                notif.getNotification(), mDevice);
+                notif.getNotification());
 
         if (mMediaPlayers.size() > 0) {
             ((View) mMediaCarousel.getParent()).setVisibility(View.VISIBLE);
-
-            if (mLocalMediaManager == null) {
-                // Set up listener for device changes
-                // TODO: integrate with MediaTransferManager?
-                InfoMediaManager imm =
-                        new InfoMediaManager(mContext, null, null, mLocalBluetoothManager);
-                mLocalMediaManager = new LocalMediaManager(mContext, mLocalBluetoothManager, imm,
-                        null);
-                mLocalMediaManager.startScan();
-                mDevice = mLocalMediaManager.getCurrentConnectedDevice();
-                mLocalMediaManager.registerCallback(mDeviceCallback);
-            }
         }
     }
 
@@ -330,11 +293,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mMediaCarousel.removeView(player.getView());
         if (mMediaPlayers.size() == 0) {
             ((View) mMediaCarousel.getParent()).setVisibility(View.GONE);
-            if (mLocalMediaManager != null) {
-                mLocalMediaManager.stopScan();
-                mLocalMediaManager.unregisterCallback(mDeviceCallback);
-                mLocalMediaManager = null;
-            }
         }
         return true;
     }
@@ -404,11 +362,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             mBrightnessMirrorController.removeCallback(this);
         }
         mDumpManager.unregisterDumpable(getDumpableTag());
-        if (mLocalMediaManager != null) {
-            mLocalMediaManager.stopScan();
-            mLocalMediaManager.unregisterCallback(mDeviceCallback);
-            mLocalMediaManager = null;
-        }
         super.onDetachedFromWindow();
     }
 

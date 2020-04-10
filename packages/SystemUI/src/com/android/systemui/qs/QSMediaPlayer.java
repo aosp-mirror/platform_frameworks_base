@@ -34,7 +34,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.android.settingslib.media.MediaDevice;
+import com.android.settingslib.media.LocalMediaManager;
 import com.android.systemui.R;
 import com.android.systemui.media.MediaControlPanel;
 import com.android.systemui.media.SeekBarObserver;
@@ -74,9 +74,10 @@ public class QSMediaPlayer extends MediaControlPanel {
      * @param backgroundExecutor
      */
     public QSMediaPlayer(Context context, ViewGroup parent, NotificationMediaManager manager,
-            Executor foregroundExecutor, DelayableExecutor backgroundExecutor) {
-        super(context, parent, manager, R.layout.qs_media_panel, QS_ACTION_IDS, foregroundExecutor,
-                backgroundExecutor);
+            LocalMediaManager routeManager, Executor foregroundExecutor,
+            DelayableExecutor backgroundExecutor) {
+        super(context, parent, manager, routeManager, R.layout.qs_media_panel, QS_ACTION_IDS,
+                foregroundExecutor, backgroundExecutor);
         mParent = (QSPanel) parent;
         mBackgroundExecutor = backgroundExecutor;
         mSeekBarViewModel = new SeekBarViewModel(backgroundExecutor);
@@ -101,12 +102,12 @@ public class QSMediaPlayer extends MediaControlPanel {
      * @param device current playback device
      */
     public void setMediaSession(MediaSession.Token token, Icon icon, int iconColor,
-            int bgColor, View actionsContainer, Notification notif, MediaDevice device) {
+            int bgColor, View actionsContainer, Notification notif) {
 
         String appName = Notification.Builder.recoverBuilder(getContext(), notif)
                 .loadHeaderAppName();
         super.setMediaSession(token, icon, iconColor, bgColor, notif.contentIntent,
-                appName, device);
+                appName);
 
         // Media controls
         LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
