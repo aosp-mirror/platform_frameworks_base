@@ -31,6 +31,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -43,6 +45,8 @@ class AllModelTest : SysuiTestCase() {
 
     @Mock
     lateinit var pendingIntent: PendingIntent
+    @Mock
+    lateinit var controlsModelCallback: ControlsModel.ControlsModelCallback
 
     val idPrefix = "controlId"
     val favoritesIndices = listOf(7, 3, 1, 9)
@@ -84,7 +88,7 @@ class AllModelTest : SysuiTestCase() {
                     it in favoritesIndices
             )
         }
-        model = AllModel(controls, favoritesList, EMPTY_STRING)
+        model = AllModel(controls, favoritesList, EMPTY_STRING, controlsModelCallback)
     }
 
     @Test
@@ -93,28 +97,28 @@ class AllModelTest : SysuiTestCase() {
         // Zones are sorted by order of appearance, with empty at the end with special header.
         val expected = listOf(
                 ZoneNameWrapper("1"),
-                ControlWrapper(controls[0]),
-                ControlWrapper(controls[3]),
-                ControlWrapper(controls[6]),
-                ControlWrapper(controls[9]),
+                ControlStatusWrapper(controls[0]),
+                ControlStatusWrapper(controls[3]),
+                ControlStatusWrapper(controls[6]),
+                ControlStatusWrapper(controls[9]),
                 ZoneNameWrapper("2"),
-                ControlWrapper(controls[1]),
-                ControlWrapper(controls[4]),
-                ControlWrapper(controls[7]),
+                ControlStatusWrapper(controls[1]),
+                ControlStatusWrapper(controls[4]),
+                ControlStatusWrapper(controls[7]),
                 ZoneNameWrapper("0"),
-                ControlWrapper(controls[2]),
-                ControlWrapper(controls[5]),
-                ControlWrapper(controls[8]),
+                ControlStatusWrapper(controls[2]),
+                ControlStatusWrapper(controls[5]),
+                ControlStatusWrapper(controls[8]),
                 ZoneNameWrapper(EMPTY_STRING),
-                ControlWrapper(controls[10]),
-                ControlWrapper(controls[11])
+                ControlStatusWrapper(controls[10]),
+                ControlStatusWrapper(controls[11])
         )
         expected.zip(model.elements).forEachIndexed { index, it ->
             assertEquals("Error in item at index $index", it.first, it.second)
         }
     }
 
-    private fun sameControl(controlInfo: ControlInfo.Builder, control: Control): Boolean {
+    private fun sameControl(controlInfo: ControlInfo, control: Control): Boolean {
         return controlInfo.controlId == control.controlId &&
                 controlInfo.controlTitle == control.title &&
                 controlInfo.controlSubtitle == control.subtitle &&
@@ -124,10 +128,11 @@ class AllModelTest : SysuiTestCase() {
     @Test
     fun testAllEmpty_noHeader() {
         val selected_controls = listOf(controls[10], controls[11])
-        val new_model = AllModel(selected_controls, emptyList(), EMPTY_STRING)
+        val new_model = AllModel(selected_controls, emptyList(), EMPTY_STRING,
+                controlsModelCallback)
         val expected = listOf(
-                ControlWrapper(controls[10]),
-                ControlWrapper(controls[11])
+                ControlStatusWrapper(controls[10]),
+                ControlStatusWrapper(controls[11])
         )
 
         expected.zip(new_model.elements).forEachIndexed { index, it ->
@@ -154,6 +159,8 @@ class AllModelTest : SysuiTestCase() {
         model.favorites.zip(expectedFavorites).forEach {
             assertTrue(sameControl(it.first, it.second))
         }
+
+        verify(controlsModelCallback).onFirstChange()
     }
 
     @Test
@@ -163,10 +170,12 @@ class AllModelTest : SysuiTestCase() {
         model.changeFavoriteStatus(id, true)
         assertTrue(
                 (model.elements.first {
-                    it is ControlWrapper && it.controlStatus.control.controlId == id
-                } as ControlWrapper)
+                    it is ControlStatusWrapper && it.controlStatus.control.controlId == id
+                } as ControlStatusWrapper)
                         .controlStatus.favorite
         )
+
+        verify(controlsModelCallback).onFirstChange()
     }
 
     @Test
@@ -180,6 +189,8 @@ class AllModelTest : SysuiTestCase() {
         model.favorites.zip(expectedFavorites).forEach {
             assertTrue(sameControl(it.first, it.second))
         }
+
+        verify(controlsModelCallback, never()).onFirstChange()
     }
 
     @Test
@@ -194,6 +205,8 @@ class AllModelTest : SysuiTestCase() {
         model.favorites.zip(expectedFavorites).forEach {
             assertTrue(sameControl(it.first, it.second))
         }
+
+        verify(controlsModelCallback).onFirstChange()
     }
 
     @Test
@@ -203,10 +216,12 @@ class AllModelTest : SysuiTestCase() {
         model.changeFavoriteStatus(id, false)
         assertFalse(
                 (model.elements.first {
-                    it is ControlWrapper && it.controlStatus.control.controlId == id
-                } as ControlWrapper)
+                    it is ControlStatusWrapper && it.controlStatus.control.controlId == id
+                } as ControlStatusWrapper)
                         .controlStatus.favorite
         )
+
+        verify(controlsModelCallback).onFirstChange()
     }
 
     @Test
@@ -219,5 +234,7 @@ class AllModelTest : SysuiTestCase() {
         model.favorites.zip(expectedFavorites).forEach {
             assertTrue(sameControl(it.first, it.second))
         }
+
+        verify(controlsModelCallback, never()).onFirstChange()
     }
 }
