@@ -27,6 +27,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -46,16 +47,27 @@ import android.view.Surface;
 
 import com.android.internal.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Contains information about the layout-properties of a display. This refers to internal layout
  * like insets/cutout/rotation. In general, this can be thought of as the System-UI analog to
  * DisplayPolicy.
  */
 public class DisplayLayout {
+    @IntDef(prefix = { "NAV_BAR_" }, value = {
+            NAV_BAR_LEFT,
+            NAV_BAR_RIGHT,
+            NAV_BAR_BOTTOM,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NavBarPosition {}
+
     // Navigation bar position values
-    private static final int NAV_BAR_LEFT = 1 << 0;
-    private static final int NAV_BAR_RIGHT = 1 << 1;
-    private static final int NAV_BAR_BOTTOM = 1 << 2;
+    public static final int NAV_BAR_LEFT = 1 << 0;
+    public static final int NAV_BAR_RIGHT = 1 << 1;
+    public static final int NAV_BAR_BOTTOM = 1 << 2;
 
     private int mUiMode;
     private int mWidth;
@@ -211,6 +223,14 @@ public class DisplayLayout {
     public void getStableBounds(Rect outBounds) {
         outBounds.set(0, 0, mWidth, mHeight);
         outBounds.inset(mStableInsets);
+    }
+
+    /**
+     * Gets navigation bar position for this layout
+     * @return Navigation bar position for this layout.
+     */
+    public @NavBarPosition int getNavigationBarPosition(Resources res) {
+        return navigationBarPosition(res, mWidth, mHeight, mRotation);
     }
 
     /**
@@ -437,8 +457,8 @@ public class DisplayLayout {
     }
 
     /** Retrieve navigation bar position from resources based on rotation and size. */
-    public static int navigationBarPosition(Resources res, int displayWidth, int displayHeight,
-            int rotation) {
+    public static @NavBarPosition int navigationBarPosition(Resources res, int displayWidth,
+            int displayHeight, int rotation) {
         boolean navBarCanMove = displayWidth != displayHeight && res.getBoolean(
                 com.android.internal.R.bool.config_navBarCanMove);
         if (navBarCanMove && displayWidth > displayHeight) {
