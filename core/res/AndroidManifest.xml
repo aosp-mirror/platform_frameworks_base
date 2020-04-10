@@ -1099,9 +1099,9 @@
         android:description="@string/permgroupdesc_phone"
         android:priority="500" />
 
-    <!-- Allows read only access to phone state, including the phone number of the device,
-         current cellular network information, the status of any ongoing calls, and a list of any
-         {@link android.telecom.PhoneAccount}s registered on the device.
+    <!-- Allows read only access to phone state, including the current cellular network information,
+         the status of any ongoing calls, and a list of any {@link android.telecom.PhoneAccount}s
+         registered on the device.
          <p class="note"><strong>Note:</strong> If <em>both</em> your <a
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
          minSdkVersion}</a> and <a
