@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
@@ -128,6 +129,11 @@ public abstract class InlineSuggestionRenderService extends Service {
         }
     }
 
+    private void handleGetInlineSuggestionsRendererInfo(@NonNull RemoteCallback callback) {
+        final Bundle rendererInfo = onGetInlineSuggestionsRendererInfo();
+        callback.sendResult(rendererInfo);
+    }
+
     private void sendResult(@NonNull IInlineSuggestionUiCallback callback,
             @Nullable SurfaceControlViewHost.SurfacePackage surface) {
         try {
@@ -150,6 +156,13 @@ public abstract class InlineSuggestionRenderService extends Service {
                             InlineSuggestionRenderService::handleRenderSuggestion,
                             InlineSuggestionRenderService.this, callback, presentation,
                             width, height, hostInputToken, displayId));
+                }
+
+                @Override
+                public void getInlineSuggestionsRendererInfo(@NonNull RemoteCallback callback) {
+                    mHandler.sendMessage(obtainMessage(
+                            InlineSuggestionRenderService::handleGetInlineSuggestionsRendererInfo,
+                            InlineSuggestionRenderService.this, callback));
                 }
             }.asBinder();
         }
