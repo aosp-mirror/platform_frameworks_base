@@ -880,10 +880,12 @@ jobject JTuner::getFrontendIds() {
 
 jobject JTuner::openFrontendById(int id) {
     sp<IFrontend> fe;
-    mTuner->openFrontendById(id, [&](Result, const sp<IFrontend>& frontend) {
+    Result res;
+    mTuner->openFrontendById(id, [&](Result r, const sp<IFrontend>& frontend) {
         fe = frontend;
+        res = r;
     });
-    if (fe == nullptr) {
+    if (res != Result::SUCCESS || fe == nullptr) {
         ALOGE("Failed to open frontend");
         return NULL;
     }
@@ -906,7 +908,7 @@ jobject JTuner::openFrontendById(int id) {
             (jint) jId);
 }
 
-jobject JTuner::getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps) {
+jobject JTuner::getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/AnalogFrontendCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(II)V");
 
@@ -915,7 +917,7 @@ jobject JTuner::getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabil
     return env->NewObject(clazz, capsInit, typeCap, sifStandardCap);
 }
 
-jobject JTuner::getAtsc3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps) {
+jobject JTuner::getAtsc3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/Atsc3FrontendCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIII)V");
 
@@ -930,7 +932,7 @@ jobject JTuner::getAtsc3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabili
             codeRateCap, fecCap, demodOutputFormatCap);
 }
 
-jobject JTuner::getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps) {
+jobject JTuner::getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/AtscFrontendCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(I)V");
 
@@ -939,7 +941,7 @@ jobject JTuner::getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilit
     return env->NewObject(clazz, capsInit, modulationCap);
 }
 
-jobject JTuner::getDvbcFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps) {
+jobject JTuner::getDvbcFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/DvbcFrontendCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(III)V");
 
@@ -950,7 +952,7 @@ jobject JTuner::getDvbcFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilit
     return env->NewObject(clazz, capsInit, modulationCap, fecCap, annexCap);
 }
 
-jobject JTuner::getDvbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps) {
+jobject JTuner::getDvbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/DvbsFrontendCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IJI)V");
 
@@ -961,7 +963,7 @@ jobject JTuner::getDvbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilit
     return env->NewObject(clazz, capsInit, modulationCap, innerfecCap, standard);
 }
 
-jobject JTuner::getDvbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps) {
+jobject JTuner::getDvbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/DvbtFrontendCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIIIZZ)V");
 
@@ -978,7 +980,7 @@ jobject JTuner::getDvbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilit
             coderateCap, hierarchyCap, guardIntervalCap, isT2Supported, isMisoSupported);
 }
 
-jobject JTuner::getIsdbs3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps) {
+jobject JTuner::getIsdbs3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/Isdbs3FrontendCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(II)V");
 
@@ -988,7 +990,7 @@ jobject JTuner::getIsdbs3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabil
     return env->NewObject(clazz, capsInit, modulationCap, coderateCap);
 }
 
-jobject JTuner::getIsdbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps) {
+jobject JTuner::getIsdbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/IsdbsFrontendCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(II)V");
 
@@ -998,7 +1000,7 @@ jobject JTuner::getIsdbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabili
     return env->NewObject(clazz, capsInit, modulationCap, coderateCap);
 }
 
-jobject JTuner::getIsdbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps) {
+jobject JTuner::getIsdbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/IsdbtFrontendCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIII)V");
 
@@ -1044,31 +1046,58 @@ jobject JTuner::getFrontendInfo(int id) {
     jobject jcaps = NULL;
     switch(feInfo.type) {
         case FrontendType::ANALOG:
-            jcaps = getAnalogFrontendCaps(env, caps);
+            if (FrontendInfo::FrontendCapabilities::hidl_discriminator::analogCaps
+                    == caps.getDiscriminator()) {
+                jcaps = getAnalogFrontendCaps(env, caps);
+            }
             break;
         case FrontendType::ATSC3:
-            jcaps = getAtsc3FrontendCaps(env, caps);
+            if (FrontendInfo::FrontendCapabilities::hidl_discriminator::atsc3Caps
+                    == caps.getDiscriminator()) {
+                jcaps = getAtsc3FrontendCaps(env, caps);
+            }
             break;
         case FrontendType::ATSC:
-            jcaps = getAtscFrontendCaps(env, caps);
+            if (FrontendInfo::FrontendCapabilities::hidl_discriminator::atscCaps
+                    == caps.getDiscriminator()) {
+                jcaps = getAtscFrontendCaps(env, caps);
+            }
             break;
         case FrontendType::DVBC:
-            jcaps = getDvbcFrontendCaps(env, caps);
+            if (FrontendInfo::FrontendCapabilities::hidl_discriminator::dvbcCaps
+                    == caps.getDiscriminator()) {
+                jcaps = getDvbcFrontendCaps(env, caps);
+            }
             break;
         case FrontendType::DVBS:
-            jcaps = getDvbsFrontendCaps(env, caps);
+            if (FrontendInfo::FrontendCapabilities::hidl_discriminator::dvbsCaps
+                    == caps.getDiscriminator()) {
+                jcaps = getDvbsFrontendCaps(env, caps);
+            }
             break;
         case FrontendType::DVBT:
-            jcaps = getDvbtFrontendCaps(env, caps);
+            if (FrontendInfo::FrontendCapabilities::hidl_discriminator::dvbtCaps
+                    == caps.getDiscriminator()) {
+                jcaps = getDvbtFrontendCaps(env, caps);
+            }
             break;
         case FrontendType::ISDBS:
-            jcaps = getIsdbsFrontendCaps(env, caps);
+            if (FrontendInfo::FrontendCapabilities::hidl_discriminator::isdbsCaps
+                    == caps.getDiscriminator()) {
+                jcaps = getIsdbsFrontendCaps(env, caps);
+            }
             break;
         case FrontendType::ISDBS3:
-            jcaps = getIsdbs3FrontendCaps(env, caps);
+            if (FrontendInfo::FrontendCapabilities::hidl_discriminator::isdbs3Caps
+                    == caps.getDiscriminator()) {
+                jcaps = getIsdbs3FrontendCaps(env, caps);
+            }
             break;
         case FrontendType::ISDBT:
-            jcaps = getIsdbtFrontendCaps(env, caps);
+            if (FrontendInfo::FrontendCapabilities::hidl_discriminator::isdbtCaps
+                    == caps.getDiscriminator()) {
+                jcaps = getIsdbtFrontendCaps(env, caps);
+            }
             break;
         default:
             break;
@@ -2308,7 +2337,7 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
     gFields.dvrPlaybackContext = env->GetFieldID(dvrPlaybackClazz, "mNativeContext", "J");
     gFields.dvrPlaybackInitID = env->GetMethodID(dvrPlaybackClazz, "<init>", "()V");
     gFields.onDvrPlaybackStatusID =
-            env->GetMethodID(dvrRecorderClazz, "onPlaybackStatusChanged", "(I)V");
+            env->GetMethodID(dvrPlaybackClazz, "onPlaybackStatusChanged", "(I)V");
 
     jclass linearBlockClazz = env->FindClass("android/media/MediaCodec$LinearBlock");
     gFields.linearBlockInitID = env->GetMethodID(linearBlockClazz, "<init>", "()V");
@@ -3101,6 +3130,11 @@ static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv* env, jobject thiz) 
     return tuner->getDemuxCaps();
 }
 
+static jint android_media_tv_Tuner_open_demux(JNIEnv* env, jobject thiz, jint /* handle */) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return (jint) tuner->openDemux();
+}
+
 static jint android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<Dvr> dvrSp = getDvr(env, dvr);
     if (dvrSp == NULL) {
@@ -3425,6 +3459,7 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_dvr_playback },
     { "nativeGetDemuxCapabilities", "()Landroid/media/tv/tuner/DemuxCapabilities;",
             (void *)android_media_tv_Tuner_get_demux_caps },
+    { "nativeOpenDemuxByhandle", "(I)I", (void *)android_media_tv_Tuner_open_demux },
 };
 
 static const JNINativeMethod gFilterMethods[] = {
