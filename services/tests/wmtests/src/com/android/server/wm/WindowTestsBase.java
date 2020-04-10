@@ -41,6 +41,7 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -296,12 +297,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
             int ownerId, boolean ownerCanAddInternalSystemWindow) {
-        return createWindow(parent, type, token, name, ownerId, ownerCanAddInternalSystemWindow,
-                mWm, mMockSession, mIWindow, mSystemServicesTestRule.getPowerManagerWrapper());
+        return createWindow(parent, type, token, name, ownerId, UserHandle.getUserId(ownerId),
+                ownerCanAddInternalSystemWindow, mWm, mMockSession, mIWindow,
+                mSystemServicesTestRule.getPowerManagerWrapper());
     }
 
     static WindowState createWindow(WindowState parent, int type, WindowToken token,
-            String name, int ownerId, boolean ownerCanAddInternalSystemWindow,
+            String name, int ownerId, int userId, boolean ownerCanAddInternalSystemWindow,
             WindowManagerService service, Session session, IWindow iWindow,
             WindowState.PowerManagerWrapper powerManagerWrapper) {
         synchronized (service.mGlobalLock) {
@@ -309,8 +311,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             attrs.setTitle(name);
 
             final WindowState w = new WindowState(service, session, iWindow, token, parent,
-                    OP_NONE,
-                    0, attrs, VISIBLE, ownerId, ownerCanAddInternalSystemWindow,
+                    OP_NONE, 0, attrs, VISIBLE, ownerId, userId,
+                    ownerCanAddInternalSystemWindow,
                     powerManagerWrapper);
             // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
             // adding it to the token...
