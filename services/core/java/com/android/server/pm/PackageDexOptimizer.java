@@ -51,6 +51,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.storage.StorageManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -79,7 +80,7 @@ import java.util.Map;
  * Helper class for running dexopt command on packages.
  */
 public class PackageDexOptimizer {
-    private static final String TAG = "PackageManager.DexOptimizer";
+    private static final String TAG = "PackageDexOptimizer";
     static final String OAT_DIR_NAME = "oat";
     // TODO b/19550105 Remove error codes and use exceptions
     public static final int DEX_OPT_SKIPPED = 0;
@@ -305,6 +306,55 @@ public class PackageDexOptimizer {
             Slog.w(TAG, "Failed to dexopt", e);
             return DEX_OPT_FAILED;
         }
+    }
+
+    /**
+     * Perform dexopt (if needed) on a system server code path).
+     */
+    public int dexoptSystemServerPath(
+            String dexPath, PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options) {
+        int dexoptFlags = DEXOPT_PUBLIC
+                | (options.isBootComplete() ? DEXOPT_BOOTCOMPLETE : 0)
+                | (options.isDexoptIdleBackgroundJob() ? DEXOPT_IDLE_BACKGROUND_JOB : 0);
+
+        int result = DEX_OPT_SKIPPED;
+        for (String isa : dexUseInfo.getLoaderIsas()) {
+            int dexoptNeeded = getDexoptNeeded(
+                    dexPath,
+                    isa,
+                    options.getCompilerFilter(),
+                    dexUseInfo.getClassLoaderContext(),
+                    /* newProfile= */false,
+                    /* downgrade= */ false);
+
+            if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
+                continue;
+            }
+            try {
+                mInstaller.dexopt(
+                        dexPath,
+                        android.os.Process.SYSTEM_UID,
+                        /* packageName= */ "android",
+                        isa,
+                        dexoptNeeded,
+                        /* oatDir= */ null,
+                        dexoptFlags,
+                        options.getCompilerFilter(),
+                        StorageManager.UUID_PRIVATE_INTERNAL,
+                        dexUseInfo.getClassLoaderContext(),
+                        /* seInfo= */ null,
+                        /* downgrade= */ false ,
+                        /* targetSdk= */ 0,
+                        /* profileName */ null,
+                        /* dexMetadataPath */ null,
+                        getReasonName(options.getCompilationReason()));
+            } catch (InstallerException e) {
+                Slog.w(TAG, "Failed to dexopt", e);
+                return DEX_OPT_FAILED;
+            }
+            result = DEX_OPT_PERFORMED;
+        }
+        return result;
     }
 
     private String getAugmentedReasonName(int compilationReason, boolean useDexMetadata) {
