@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="221932678126754542">"热点无法访问互联网"</string>
+    <string name="no_upstream_notification_title" msgid="221932678126754542">"热点没有网络连接"</string>
     <string name="no_upstream_notification_message" msgid="4145932079850792642">"设备无法连接到互联网"</string>
     <string name="no_upstream_notification_disable_button" msgid="2164668551525869970">"关闭热点"</string>
     <string name="upstream_roaming_notification_title" msgid="8448552978815624701">"热点已开启"</string>
