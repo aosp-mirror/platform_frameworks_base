@@ -16,19 +16,27 @@
 
 package com.android.systemui.controls.ui
 
+import android.app.Dialog
 import android.app.PendingIntent
 import android.content.Intent
-import android.provider.Settings
+import android.service.controls.Control
 import android.service.controls.actions.BooleanAction
 import android.service.controls.actions.CommandAction
 import android.util.Log
 import android.view.HapticFeedbackConstants
 
+import com.android.systemui.R
+
 object ControlActionCoordinator {
     public const val MIN_LEVEL = 0
     public const val MAX_LEVEL = 10000
 
-    private var useDetailDialog: Boolean? = null
+    private var dialog: Dialog? = null
+
+    fun closeDialog() {
+        dialog?.dismiss()
+        dialog = null
+    }
 
     fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {
         cvh.action(BooleanAction(templateId, !isChecked))
@@ -37,31 +45,39 @@ object ControlActionCoordinator {
         cvh.clipLayer.setLevel(nextLevel)
     }
 
-    fun touch(cvh: ControlViewHolder, templateId: String) {
-        cvh.action(CommandAction(templateId))
+    fun touch(cvh: ControlViewHolder, templateId: String, control: Control) {
+        if (cvh.usePanel()) {
+            showDialog(cvh, control.getAppIntent().getIntent())
+        } else {
+            cvh.action(CommandAction(templateId))
+        }
     }
 
+    /**
+     * Allow apps to specify whether they would like to appear in a detail panel or within
+     * the full activity by setting the {@link Control#EXTRA_USE_PANEL} flag. In order for
+     * activities to determine how they are being launched, they should inspect the
+     * {@link Control#EXTRA_USE_PANEL} flag for a value of true.
+     */
     fun longPress(cvh: ControlViewHolder) {
         // Long press snould only be called when there is valid control state, otherwise ignore
         cvh.cws.control?.let {
-            if (useDetailDialog == null) {
-                useDetailDialog = Settings.Secure.getInt(cvh.context.getContentResolver(),
-                    "systemui.controls_use_detail_panel", 0) != 0
-            }
-
             try {
+                it.getAppIntent().send()
                 cvh.layout.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                if (useDetailDialog!!) {
-                    DetailDialog(cvh.context, it.getAppIntent()).show()
-                } else {
-                    it.getAppIntent().send()
-                    val closeDialog = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-                    cvh.context.sendBroadcast(closeDialog)
-                }
+                cvh.context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
             } catch (e: PendingIntent.CanceledException) {
                 Log.e(ControlsUiController.TAG, "Error sending pending intent", e)
-                cvh.setTransientStatus("Error opening application")
+                cvh.setTransientStatus(
+                    cvh.context.resources.getString(R.string.controls_error_failed))
             }
+        }
+    }
+
+    private fun showDialog(cvh: ControlViewHolder, intent: Intent) {
+        dialog = DetailDialog(cvh, intent).also {
+            it.setOnDismissListener { _ -> dialog = null }
+            it.show()
         }
     }
 }
