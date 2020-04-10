@@ -382,6 +382,7 @@ public class BlobStoreManagerServiceTest {
         doReturn(hasLeases).when(blobMetadata).hasLeases();
         doReturn(blobHandle).when(blobMetadata).getBlobHandle();
         doCallRealMethod().when(blobMetadata).shouldBeDeleted(anyBoolean());
+        doReturn(true).when(blobMetadata).hasLeaseWaitTimeElapsedForAll();
         return blobMetadata;
     }
 
