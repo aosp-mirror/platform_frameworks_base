@@ -112,7 +112,7 @@ class WindowTestUtils {
 
         TestWindowState(WindowManagerService service, Session session, IWindow window,
                 WindowManager.LayoutParams attrs, WindowToken token) {
-            super(service, session, window, token, null, OP_NONE, 0, attrs, 0, 0,
+            super(service, session, window, token, null, OP_NONE, 0, attrs, 0, 0, 0,
                     false /* ownerCanAddInternalSystemWindow */);
         }
 
