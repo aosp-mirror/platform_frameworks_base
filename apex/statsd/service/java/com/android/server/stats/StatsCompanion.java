@@ -87,6 +87,9 @@ public class StatsCompanion {
             if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 mStatsCompanionService.systemReady();
             }
+            if (phase == PHASE_BOOT_COMPLETED) {
+                mStatsCompanionService.bootCompleted();
+            }
         }
     }
 

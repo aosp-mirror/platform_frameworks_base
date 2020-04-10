@@ -112,6 +112,18 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final HashMap<Long, String> mDeletedFiles = new HashMap<>();
     private final CompanionHandler mHandler;
 
+    // Flag that is set when PHASE_BOOT_COMPLETED is triggered in the StatsCompanion lifecycle. This
+    // and the flag mSentBootComplete below is used for synchronization to ensure that the boot
+    // complete signal is only ever sent once to statsd. Two signals are needed because
+    // #sayHiToStatsd can be called from both statsd and #onBootPhase
+    // PHASE_THIRD_PARTY_APPS_CAN_START.
+    @GuardedBy("sStatsdLock")
+    private boolean mBootCompleted = false;
+    // Flag that is set when IStatsd#bootCompleted is called. This flag ensures that boot complete
+    // signal is only ever sent once.
+    @GuardedBy("sStatsdLock")
+    private boolean mSentBootComplete = false;
+
     public StatsCompanionService(Context context) {
         super();
         mContext = context;
@@ -688,6 +700,19 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     List.of(appUpdateReceiver, userUpdateReceiver, shutdownEventReceiver));
 
             final long token = Binder.clearCallingIdentity();
+
+            // Used so we can call statsd.bootComplete() outside of the lock.
+            boolean shouldSendBootComplete = false;
+            synchronized (sStatsdLock) {
+                if (mBootCompleted && !mSentBootComplete) {
+                    mSentBootComplete = true;
+                    shouldSendBootComplete = true;
+                }
+            }
+            if (shouldSendBootComplete) {
+                statsd.bootCompleted();
+            }
+
             try {
                 // Pull the latest state of UID->app name, version mapping when
                 // statsd starts.
@@ -749,6 +774,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     mContext.unregisterReceiver(receiver);
                 }
                 statsdNotReadyLocked();
+                mSentBootComplete = false;
             }
         }
     }
@@ -756,6 +782,28 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void statsdNotReadyLocked() {
         sStatsd = null;
         mStatsManagerService.statsdNotReady();
+    }
+
+    void bootCompleted() {
+        IStatsd statsd = getStatsdNonblocking();
+        synchronized (sStatsdLock) {
+            mBootCompleted = true;
+            if (mSentBootComplete) {
+                // do not send a boot complete a second time.
+                return;
+            }
+            if (statsd == null) {
+                // Statsd is not yet ready.
+                // Delay the boot completed ping to {@link #sayHiToStatsd()}
+                return;
+            }
+            mSentBootComplete = true;
+        }
+        try {
+            statsd.bootCompleted();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to notify statsd that boot completed");
+        }
     }
 
     @Override

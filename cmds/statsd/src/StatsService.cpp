@@ -1054,6 +1054,14 @@ Status StatsService::statsCompanionReady() {
     return Status::ok();
 }
 
+Status StatsService::bootCompleted() {
+    ENFORCE_UID(AID_SYSTEM);
+
+    VLOG("StatsService::bootCompleted was called");
+
+    return Status::ok();
+}
+
 void StatsService::Startup() {
     mConfigManager->Startup();
     mProcessor->LoadActiveConfigsFromDisk();
@@ -1212,6 +1220,14 @@ Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
     android::os::statsd::util::stats_write(android::os::statsd::util::APP_BREADCRUMB_REPORTED,
                                (int32_t) AIBinder_getCallingUid(), label,
                                state);
+    return Status::ok();
+}
+
+Status StatsService::allPullersFromBootRegistered() {
+    ENFORCE_UID(AID_SYSTEM);
+
+    VLOG("StatsService::allPullersFromBootRegistered was called");
+
     return Status::ok();
 }
 
