@@ -544,6 +544,15 @@ class ControlsControllerImpl @Inject constructor (
     override fun getFavoritesForComponent(componentName: ComponentName): List<StructureInfo> =
         Favorites.getStructuresForComponent(componentName)
 
+    override fun getFavoritesForStructure(
+        componentName: ComponentName,
+        structureName: CharSequence
+    ): List<ControlInfo> {
+        return Favorites.getControlsForStructure(
+                StructureInfo(componentName, structureName, emptyList())
+        )
+    }
+
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("ControlsController state:")
         pw.println("  Available: $available")
