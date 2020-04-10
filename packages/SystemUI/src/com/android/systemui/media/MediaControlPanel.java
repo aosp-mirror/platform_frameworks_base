@@ -44,9 +44,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
+import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.media.MediaOutputSliceConstants;
 import com.android.settingslib.widget.AdaptiveIcon;
@@ -66,6 +68,7 @@ import java.util.concurrent.Executor;
 public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
     private final NotificationMediaManager mMediaManager;
+    @Nullable private final LocalMediaManager mLocalMediaManager;
     private final Executor mForegroundExecutor;
     private final Executor mBackgroundExecutor;
 
@@ -77,6 +80,7 @@ public class MediaControlPanel {
     private int mForegroundColor;
     private int mBackgroundColor;
     protected ComponentName mRecvComponent;
+    private MediaDevice mDevice;
     private boolean mIsRegistered = false;
 
     private final int[] mActionIds;
@@ -121,19 +125,44 @@ public class MediaControlPanel {
         }
     };
 
+    private final LocalMediaManager.DeviceCallback mDeviceCallback =
+            new LocalMediaManager.DeviceCallback() {
+        @Override
+        public void onDeviceListUpdate(List<MediaDevice> devices) {
+            if (mLocalMediaManager == null) {
+                return;
+            }
+            MediaDevice currentDevice = mLocalMediaManager.getCurrentConnectedDevice();
+            // Check because this can be called several times while changing devices
+            if (mDevice == null || !mDevice.equals(currentDevice)) {
+                mDevice = currentDevice;
+                updateDevice(mDevice);
+            }
+        }
+
+        @Override
+        public void onSelectedDeviceStateChanged(MediaDevice device, int state) {
+            if (mDevice == null || !mDevice.equals(device)) {
+                mDevice = device;
+                updateDevice(mDevice);
+            }
+        }
+    };
+
     /**
      * Initialize a new control panel
      * @param context
      * @param parent
      * @param manager
+     * @param routeManager Manager used to listen for device change events.
      * @param layoutId layout resource to use for this control panel
      * @param actionIds resource IDs for action buttons in the layout
      * @param foregroundExecutor foreground executor
      * @param backgroundExecutor background executor, used for processing artwork
      */
     public MediaControlPanel(Context context, ViewGroup parent, NotificationMediaManager manager,
-            @LayoutRes int layoutId, int[] actionIds, Executor foregroundExecutor,
-            Executor backgroundExecutor) {
+            @Nullable LocalMediaManager routeManager, @LayoutRes int layoutId, int[] actionIds,
+            Executor foregroundExecutor, Executor backgroundExecutor) {
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mMediaNotifView = (LinearLayout) inflater.inflate(layoutId, parent, false);
@@ -144,6 +173,7 @@ public class MediaControlPanel {
         // mStateListener to be unregistered in detach.
         mMediaNotifView.addOnAttachStateChangeListener(mStateListener);
         mMediaManager = manager;
+        mLocalMediaManager = routeManager;
         mActionIds = actionIds;
         mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
@@ -176,7 +206,7 @@ public class MediaControlPanel {
      * @param device
      */
     public void setMediaSession(MediaSession.Token token, Icon icon, int iconColor,
-            int bgColor, PendingIntent contentIntent, String appNameString, MediaDevice device) {
+            int bgColor, PendingIntent contentIntent, String appNameString) {
         mToken = token;
         mForegroundColor = iconColor;
         mBackgroundColor = bgColor;
@@ -253,9 +283,9 @@ public class MediaControlPanel {
 
         // Transfer chip
         mSeamless = mMediaNotifView.findViewById(R.id.media_seamless);
-        if (mSeamless != null) {
+        if (mSeamless != null && mLocalMediaManager != null) {
             mSeamless.setVisibility(View.VISIBLE);
-            updateDevice(device);
+            updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
             ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
             mSeamless.setOnClickListener(v -> {
                 final Intent intent = new Intent()
@@ -366,7 +396,7 @@ public class MediaControlPanel {
      * Update the current device information
      * @param device device information to display
      */
-    public void updateDevice(MediaDevice device) {
+    private void updateDevice(MediaDevice device) {
         if (mSeamless == null) {
             return;
         }
@@ -456,6 +486,10 @@ public class MediaControlPanel {
         Assert.isMainThread();
         if (!mIsRegistered) {
             mMediaManager.addCallback(mMediaListener);
+            if (mLocalMediaManager != null) {
+                mLocalMediaManager.registerCallback(mDeviceCallback);
+                mLocalMediaManager.startScan();
+            }
             mIsRegistered = true;
         }
     }
@@ -463,6 +497,10 @@ public class MediaControlPanel {
     private void makeInactive() {
         Assert.isMainThread();
         if (mIsRegistered) {
+            if (mLocalMediaManager != null) {
+                mLocalMediaManager.stopScan();
+                mLocalMediaManager.unregisterCallback(mDeviceCallback);
+            }
             mMediaManager.removeCallback(mMediaListener);
             mIsRegistered = false;
         }
