@@ -239,6 +239,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mInitialized = true;
         mContext = context;
         mPipBoundsHandler = pipBoundsHandler;
+        // Ensure that we have the display info in case we get calls to update the bounds before the
+        // listener calls back
+        final DisplayInfo displayInfo = new DisplayInfo();
+        context.getDisplay().getDisplayInfo(displayInfo);
+        mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
+
         mResizeAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
