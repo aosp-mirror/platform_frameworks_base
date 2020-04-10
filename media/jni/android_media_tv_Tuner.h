@@ -188,9 +188,9 @@ struct JTuner : public RefBase {
     jobject openDvr(DvrType type, jlong bufferSize);
     jobject getDemuxCaps();
     jobject getFrontendStatus(jintArray types);
+    Result openDemux();
 
 protected:
-    Result openDemux();
     virtual ~JTuner();
 
 private:
@@ -204,15 +204,15 @@ private:
     sp<ILnb> mLnb;
     sp<IDemux> mDemux;
     uint32_t mDemuxId;
-    static jobject getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
-    static jobject getAtsc3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
-    static jobject getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
-    static jobject getDvbcFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
-    static jobject getDvbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
-    static jobject getDvbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
-    static jobject getIsdbs3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
-    static jobject getIsdbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
-    static jobject getIsdbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
+    static jobject getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+    static jobject getAtsc3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+    static jobject getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+    static jobject getDvbcFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+    static jobject getDvbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+    static jobject getDvbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+    static jobject getIsdbs3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+    static jobject getIsdbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+    static jobject getIsdbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
 };
 
 }  // namespace android
