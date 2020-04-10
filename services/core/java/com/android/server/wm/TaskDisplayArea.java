@@ -1415,8 +1415,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         ActivityStack homeTask = getRootHomeTask();
         if (homeTask == null && mDisplayContent.supportsSystemDecorations()
                 && !mDisplayContent.isUntrustedVirtualDisplay()) {
-            homeTask = createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME,
-                    false /* onTop */);
+            homeTask = createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, false /* onTop */);
         }
         return homeTask;
     }
