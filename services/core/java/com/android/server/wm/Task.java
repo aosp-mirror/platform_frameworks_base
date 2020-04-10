@@ -2572,6 +2572,80 @@ class Task extends WindowContainer<WindowContainer> {
         return currentCount[0];
     }
 
+    /**
+     * Find next proper focusable stack and make it focused.
+     * @return The stack that now got the focus, {@code null} if none found.
+     */
+    ActivityStack adjustFocusToNextFocusableTask(String reason) {
+        return adjustFocusToNextFocusableTask(reason, false /* allowFocusSelf */,
+                true /* moveParentsToTop */);
+    }
+
+    /** Return the next focusable task by looking from the siblings and parent tasks */
+    private Task getNextFocusableTask(boolean allowFocusSelf) {
+        final WindowContainer parent = getParent();
+        if (parent == null) {
+            return null;
+        }
+
+        final Task focusableTask = parent.getTask((task) -> (allowFocusSelf || task != this)
+                && ((ActivityStack) task).isFocusableAndVisible());
+        if (focusableTask == null && parent.asTask() != null) {
+            return parent.asTask().getNextFocusableTask(allowFocusSelf);
+        } else {
+            return focusableTask;
+        }
+    }
+
+    /**
+     * Find next proper focusable task and make it focused.
+     * @param reason The reason of making the adjustment.
+     * @param allowFocusSelf Is the focus allowed to remain on the same task.
+     * @param moveParentsToTop Whether to move parents to top while making the task focused.
+     * @return The root task that now got the focus, {@code null} if none found.
+     */
+    ActivityStack adjustFocusToNextFocusableTask(String reason, boolean allowFocusSelf,
+            boolean moveParentsToTop) {
+        ActivityStack focusableTask = (ActivityStack) getNextFocusableTask(allowFocusSelf);
+        if (focusableTask == null) {
+            focusableTask = mRootWindowContainer.getNextFocusableStack((ActivityStack) this,
+                    !allowFocusSelf);
+        }
+        if (focusableTask == null) {
+            return null;
+        }
+
+        final String myReason = reason + " adjustFocusToNextFocusableStack";
+        final ActivityRecord top = focusableTask.topRunningActivity();
+        final ActivityStack rootTask = (ActivityStack) focusableTask.getRootTask();
+        if (focusableTask.isActivityTypeHome() && (top == null || !top.mVisibleRequested)) {
+            // If we will be focusing on the home stack next and its current top activity isn't
+            // visible, then use the move the home stack task to top to make the activity visible.
+            focusableTask.getDisplayArea().moveHomeActivityToTop(myReason);
+            return rootTask;
+        }
+
+        if (!moveParentsToTop) {
+            // Only move the next stack to top in its task container.
+            WindowContainer parent = focusableTask.getParent();
+            parent.positionChildAt(POSITION_TOP, focusableTask, false /* includingParents */);
+            return rootTask;
+        }
+
+        // Move the entire hierarchy to top with updating global top resumed activity
+        // and focused application if needed.
+        focusableTask.moveToFront(myReason);
+        // Top display focused stack is changed, update top resumed activity if needed.
+        if (rootTask.mResumedActivity != null) {
+            mStackSupervisor.updateTopResumedActivityIfNeeded();
+            // Set focused app directly because if the next focused activity is already resumed
+            // (e.g. the next top activity is on a different display), there won't have activity
+            // state change to update it.
+            mAtmService.setResumedActivityUncheckLocked(rootTask.mResumedActivity, reason);
+        }
+        return rootTask;
+    }
+
     /** Calculate the minimum possible position for a task that can be shown to the user.
      *  The minimum position will be above all other tasks that can't be shown.
      *  @param minPosition The minimum position the caller is suggesting.
