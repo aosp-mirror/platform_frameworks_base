@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.theme.icon.flower"
+          package="com.android.theme.icon.vessel"
           android:versionCode="1"
           android:versionName="1.0">
     <overlay
@@ -23,5 +23,5 @@
         android:category="android.theme.customization.adaptive_icon_shape"
         android:priority="1"/>
 
-    <application android:label="@string/icon_shape_flower_overlay" android:hasCode="false"/>
+    <application android:label="@string/icon_shape_vessel_overlay" android:hasCode="false"/>
 </manifest>
