@@ -20,90 +20,80 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
-import android.telephony.CellInfo;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellInfoWcdma;
-import android.telephony.CellLocation;
-import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
+import android.util.Slog;
 
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * A service that listens to connectivity and SIM card changes and determines if the emergency mode
- * should be enabled
+ * A service that listens to connectivity and SIM card changes and determines if the emergency
+ * affordance should be enabled.
  */
 public class EmergencyAffordanceService extends SystemService {
 
     private static final String TAG = "EmergencyAffordanceService";
+    private static final boolean DBG = false;
 
-    private static final int NUM_SCANS_UNTIL_ABORT = 4;
+    private static final String SERVICE_NAME = "emergency_affordance";
 
     private static final int INITIALIZE_STATE = 1;
-    private static final int CELL_INFO_STATE_CHANGED = 2;
-    private static final int SUBSCRIPTION_CHANGED = 3;
-
     /**
-     * Global setting, whether the last scan of the sim cards reveal that a sim was inserted that
-     * requires the emergency affordance. The value is a boolean (1 or 0).
-     * @hide
+     * @param arg1 slot Index
+     * @param arg2 0
+     * @param obj ISO country code
      */
-    private static final String EMERGENCY_SIM_INSERTED_SETTING = "emergency_sim_inserted_before";
+    private static final int NETWORK_COUNTRY_CHANGED = 2;
+    private static final int SUBSCRIPTION_CHANGED = 3;
+    private static final int UPDATE_AIRPLANE_MODE_STATUS = 4;
+
+    // Global Settings to override emergency affordance country ISO for debugging.
+    // Available only on debug build. The value is a country ISO string in lower case (eg. "us").
+    private static final String EMERGENCY_AFFORDANCE_OVERRIDE_ISO =
+            "emergency_affordance_override_iso";
 
     private final Context mContext;
-    private final ArrayList<Integer> mEmergencyCallMccNumbers;
-
-    private final Object mLock = new Object();
-
-    private TelephonyManager mTelephonyManager;
+    // Country ISOs that require affordance
+    private final ArrayList<String> mEmergencyCallCountryIsos;
     private SubscriptionManager mSubscriptionManager;
-    private boolean mEmergencyAffordanceNeeded;
+    private TelephonyManager mTelephonyManager;
     private MyHandler mHandler;
-    private int mScansCompleted;
-    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
-        @Override
-        public void onCellInfoChanged(List<CellInfo> cellInfo) {
-            if (!isEmergencyAffordanceNeeded()) {
-                requestCellScan();
-            }
-        }
-
-        @Override
-        public void onCellLocationChanged(CellLocation location) {
-            if (!isEmergencyAffordanceNeeded()) {
-                requestCellScan();
-            }
-        }
-    };
-    private BroadcastReceiver mAirplaneModeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Settings.Global.getInt(context.getContentResolver(),
-                    Settings.Global.AIRPLANE_MODE_ON, 0) == 0) {
-                startScanning();
-                requestCellScan();
-            }
-        }
-    };
-    private boolean mSimNeedsEmergencyAffordance;
-    private boolean mNetworkNeedsEmergencyAffordance;
+    private boolean mAnySimNeedsEmergencyAffordance;
+    private boolean mAnyNetworkNeedsEmergencyAffordance;
+    private boolean mEmergencyAffordanceNeeded;
+    private boolean mAirplaneModeEnabled;
     private boolean mVoiceCapable;
 
-    private void requestCellScan() {
-        mHandler.obtainMessage(CELL_INFO_STATE_CHANGED).sendToTarget();
-    }
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED.equals(intent.getAction())) {
+                String countryCode = intent.getStringExtra(TelephonyManager.EXTRA_NETWORK_COUNTRY);
+                int slotId = intent.getIntExtra(SubscriptionManager.EXTRA_SLOT_INDEX,
+                        SubscriptionManager.INVALID_SIM_SLOT_INDEX);
+                mHandler.obtainMessage(
+                        NETWORK_COUNTRY_CHANGED, slotId, 0, countryCode).sendToTarget();
+            } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(intent.getAction())) {
+                mHandler.obtainMessage(UPDATE_AIRPLANE_MODE_STATUS).sendToTarget();
+            }
+        }
+    };
 
     private SubscriptionManager.OnSubscriptionsChangedListener mSubscriptionChangedListener
             = new SubscriptionManager.OnSubscriptionsChangedListener() {
@@ -116,207 +106,200 @@ public class EmergencyAffordanceService extends SystemService {
     public EmergencyAffordanceService(Context context) {
         super(context);
         mContext = context;
-        int[] numbers = context.getResources().getIntArray(
-                com.android.internal.R.array.config_emergency_mcc_codes);
-        mEmergencyCallMccNumbers = new ArrayList<>(numbers.length);
-        for (int i = 0; i < numbers.length; i++) {
-            mEmergencyCallMccNumbers.add(numbers[i]);
+        String[] isos = context.getResources().getStringArray(
+                com.android.internal.R.array.config_emergency_iso_country_codes);
+        mEmergencyCallCountryIsos = new ArrayList<>(isos.length);
+        for (String iso : isos) {
+            mEmergencyCallCountryIsos.add(iso);
         }
-    }
 
-    private void updateEmergencyAffordanceNeeded() {
-        synchronized (mLock) {
-            mEmergencyAffordanceNeeded = mVoiceCapable && (mSimNeedsEmergencyAffordance ||
-                    mNetworkNeedsEmergencyAffordance);
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
-                    mEmergencyAffordanceNeeded ? 1 : 0);
-            if (mEmergencyAffordanceNeeded) {
-                stopScanning();
+        if (Build.IS_DEBUGGABLE) {
+            String overrideIso = Settings.Global.getString(
+                    mContext.getContentResolver(), EMERGENCY_AFFORDANCE_OVERRIDE_ISO);
+            if (!TextUtils.isEmpty(overrideIso)) {
+                if (DBG) Slog.d(TAG, "Override ISO to " + overrideIso);
+                mEmergencyCallCountryIsos.clear();
+                mEmergencyCallCountryIsos.add(overrideIso);
             }
-        }
-    }
-
-    private void stopScanning() {
-        synchronized (mLock) {
-            mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
-            mScansCompleted = 0;
-        }
-    }
-
-    private boolean isEmergencyAffordanceNeeded() {
-        synchronized (mLock) {
-            return mEmergencyAffordanceNeeded;
         }
     }
 
     @Override
     public void onStart() {
+        if (DBG) Slog.i(TAG, "onStart");
+        publishBinderService(SERVICE_NAME, new BinderService());
     }
 
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-            mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
-            mVoiceCapable = mTelephonyManager.isVoiceCapable();
-            if (!mVoiceCapable) {
-                updateEmergencyAffordanceNeeded();
-                return;
-            }
-            mSubscriptionManager = SubscriptionManager.from(mContext);
-            HandlerThread thread = new HandlerThread(TAG);
-            thread.start();
-            mHandler = new MyHandler(thread.getLooper());
-            mHandler.obtainMessage(INITIALIZE_STATE).sendToTarget();
-            startScanning();
-            IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-            mContext.registerReceiver(mAirplaneModeReceiver, filter);
-            mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionChangedListener);
+            if (DBG) Slog.i(TAG, "onBootPhase");
+            handleThirdPartyBootPhase();
         }
-    }
-
-    private void startScanning() {
-        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CELL_INFO
-                | PhoneStateListener.LISTEN_CELL_LOCATION);
     }
 
     /** Handler to do the heavier work on */
     private class MyHandler extends Handler {
-
         public MyHandler(Looper l) {
             super(l);
         }
 
         @Override
         public void handleMessage(Message msg) {
+            if (DBG) Slog.d(TAG, "handleMessage: " + msg.what);
             switch (msg.what) {
                 case INITIALIZE_STATE:
                     handleInitializeState();
                     break;
-                case CELL_INFO_STATE_CHANGED:
-                    handleUpdateCellInfo();
+                case NETWORK_COUNTRY_CHANGED:
+                    final String countryIso = (String) msg.obj;
+                    final int slotId = msg.arg1;
+                    handleNetworkCountryChanged(countryIso, slotId);
                     break;
                 case SUBSCRIPTION_CHANGED:
                     handleUpdateSimSubscriptionInfo();
                     break;
+                case UPDATE_AIRPLANE_MODE_STATUS:
+                    handleUpdateAirplaneModeStatus();
+                    break;
+                default:
+                    Slog.e(TAG, "Unexpected message received: " + msg.what);
             }
         }
     }
 
     private void handleInitializeState() {
-        if (handleUpdateSimSubscriptionInfo()) {
-            return;
-        }
-        if (handleUpdateCellInfo()) {
-            return;
-        }
+        if (DBG) Slog.d(TAG, "handleInitializeState");
+        handleUpdateAirplaneModeStatus();
+        handleUpdateSimSubscriptionInfo();
+        updateNetworkCountry();
         updateEmergencyAffordanceNeeded();
     }
 
-    private boolean handleUpdateSimSubscriptionInfo() {
-        boolean neededBefore = simNeededAffordanceBefore();
-        boolean neededNow = neededBefore;
+    private void handleThirdPartyBootPhase() {
+        if (DBG) Slog.d(TAG, "handleThirdPartyBootPhase");
+        mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
+        mVoiceCapable = mTelephonyManager.isVoiceCapable();
+        if (!mVoiceCapable) {
+            updateEmergencyAffordanceNeeded();
+            return;
+        }
+
+        HandlerThread thread = new HandlerThread(TAG);
+        thread.start();
+        mHandler = new MyHandler(thread.getLooper());
+
+        mSubscriptionManager = SubscriptionManager.from(mContext);
+        mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionChangedListener);
+
+        IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        filter.addAction(TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED);
+        mContext.registerReceiver(mBroadcastReceiver, filter);
+
+        mHandler.obtainMessage(INITIALIZE_STATE).sendToTarget();
+    }
+
+    private void handleUpdateAirplaneModeStatus() {
+        mAirplaneModeEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
+        if (DBG) Slog.d(TAG, "APM status updated to " + mAirplaneModeEnabled);
+    }
+
+    private void handleUpdateSimSubscriptionInfo() {
         List<SubscriptionInfo> activeSubscriptionInfoList =
                 mSubscriptionManager.getActiveSubscriptionInfoList();
+        if (DBG) Slog.d(TAG, "handleUpdateSimSubscriptionInfo: " + activeSubscriptionInfoList);
         if (activeSubscriptionInfoList == null) {
-            setSimNeedsEmergencyAffordance(neededNow);
-            return neededNow;
+            return;
         }
+
+        boolean needsAffordance = false;
         for (SubscriptionInfo info : activeSubscriptionInfoList) {
-            int mcc = info.getMcc();
-            if (mccRequiresEmergencyAffordance(mcc)) {
-                neededNow = true;
+            if (isoRequiresEmergencyAffordance(info.getCountryIso())) {
+                needsAffordance = true;
                 break;
-            } else if (mcc != 0 && mcc != Integer.MAX_VALUE){
-                // a Sim with a different mcc code was found
-                neededNow = false;
-            }
-            String simOperator = mTelephonyManager
-                    .createForSubscriptionId(info.getSubscriptionId()).getSimOperator();
-            mcc = 0;
-            if (simOperator != null && simOperator.length() >= 3) {
-                mcc = Integer.parseInt(simOperator.substring(0, 3));
-            }
-            if (mcc != 0) {
-                if (mccRequiresEmergencyAffordance(mcc)) {
-                    neededNow = true;
-                    break;
-                } else {
-                    // a Sim with a different mcc code was found
-                    neededNow = false;
-                }
             }
         }
-        setSimNeedsEmergencyAffordance(neededNow);
-        return neededNow;
+
+        mAnySimNeedsEmergencyAffordance = needsAffordance;
+        updateEmergencyAffordanceNeeded();
     }
 
-    private void setSimNeedsEmergencyAffordance(boolean simNeedsEmergencyAffordance) {
-        if (simNeededAffordanceBefore() != simNeedsEmergencyAffordance) {
+    private void handleNetworkCountryChanged(String countryIso, int slotId) {
+        if (DBG) {
+            Slog.d(TAG, "handleNetworkCountryChanged: countryIso=" + countryIso
+                    + ", slotId=" + slotId);
+        }
+
+        if (TextUtils.isEmpty(countryIso) && mAirplaneModeEnabled) {
+            Slog.w(TAG, "Ignore empty countryIso report when APM is on.");
+            return;
+        }
+
+        updateNetworkCountry();
+
+        updateEmergencyAffordanceNeeded();
+    }
+
+    private void updateNetworkCountry() {
+        boolean needsAffordance = false;
+
+        final int activeModems = mTelephonyManager.getActiveModemCount();
+        for (int i = 0; i < activeModems; i++) {
+            String countryIso = mTelephonyManager.getNetworkCountryIso(i);
+            if (DBG) Slog.d(TAG, "UpdateNetworkCountry: slotId=" + i + " countryIso=" + countryIso);
+            if (isoRequiresEmergencyAffordance(countryIso)) {
+                needsAffordance = true;
+                break;
+            }
+        }
+
+        mAnyNetworkNeedsEmergencyAffordance = needsAffordance;
+
+        updateEmergencyAffordanceNeeded();
+    }
+
+    private boolean isoRequiresEmergencyAffordance(String iso) {
+        return mEmergencyCallCountryIsos.contains(iso);
+    }
+
+    private void updateEmergencyAffordanceNeeded() {
+        if (DBG) {
+            Slog.d(TAG, "updateEmergencyAffordanceNeeded: mEmergencyAffordanceNeeded="
+                    + mEmergencyAffordanceNeeded + ", mVoiceCapable=" + mVoiceCapable
+                    + ", mAnySimNeedsEmergencyAffordance=" + mAnySimNeedsEmergencyAffordance
+                    + ", mAnyNetworkNeedsEmergencyAffordance="
+                    + mAnyNetworkNeedsEmergencyAffordance);
+        }
+        boolean lastAffordanceNeeded = mEmergencyAffordanceNeeded;
+
+        mEmergencyAffordanceNeeded = mVoiceCapable
+                && (mAnySimNeedsEmergencyAffordance || mAnyNetworkNeedsEmergencyAffordance);
+
+        if (lastAffordanceNeeded != mEmergencyAffordanceNeeded) {
             Settings.Global.putInt(mContext.getContentResolver(),
-                    EMERGENCY_SIM_INSERTED_SETTING,
-                    simNeedsEmergencyAffordance ? 1 : 0);
-        }
-        if (simNeedsEmergencyAffordance != mSimNeedsEmergencyAffordance) {
-            mSimNeedsEmergencyAffordance = simNeedsEmergencyAffordance;
-            updateEmergencyAffordanceNeeded();
+                    Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
+                    mEmergencyAffordanceNeeded ? 1 : 0);
         }
     }
 
-    private boolean simNeededAffordanceBefore() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                EMERGENCY_SIM_INSERTED_SETTING, 0) != 0;
+    private void dumpInternal(IndentingPrintWriter ipw) {
+        ipw.println("EmergencyAffordanceService (dumpsys emergency_affordance) state:\n");
+        ipw.println("mEmergencyAffordanceNeeded=" + mEmergencyAffordanceNeeded);
+        ipw.println("mVoiceCapable=" + mVoiceCapable);
+        ipw.println("mAnySimNeedsEmergencyAffordance=" + mAnySimNeedsEmergencyAffordance);
+        ipw.println("mAnyNetworkNeedsEmergencyAffordance=" + mAnyNetworkNeedsEmergencyAffordance);
+        ipw.println("mEmergencyCallCountryIsos=" + String.join(",", mEmergencyCallCountryIsos));
     }
 
-    private boolean handleUpdateCellInfo() {
-        List<CellInfo> cellInfos = mTelephonyManager.getAllCellInfo();
-        if (cellInfos == null) {
-            return false;
-        }
-        boolean stopScanningAfterScan = false;
-        for (CellInfo cellInfo : cellInfos) {
-            int mcc = 0;
-            if (cellInfo instanceof CellInfoGsm) {
-                mcc = ((CellInfoGsm) cellInfo).getCellIdentity().getMcc();
-            } else if (cellInfo instanceof CellInfoLte) {
-                mcc = ((CellInfoLte) cellInfo).getCellIdentity().getMcc();
-            } else if (cellInfo instanceof CellInfoWcdma) {
-                mcc = ((CellInfoWcdma) cellInfo).getCellIdentity().getMcc();
+    private final class BinderService extends Binder {
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) {
+                return;
             }
-            if (mccRequiresEmergencyAffordance(mcc)) {
-                setNetworkNeedsEmergencyAffordance(true);
-                return true;
-            } else if (mcc != 0 && mcc != Integer.MAX_VALUE) {
-                // we found an mcc that isn't in the list, abort
-                stopScanningAfterScan = true;
-            }
-        }
-        if (stopScanningAfterScan) {
-            stopScanning();
-        } else {
-            onCellScanFinishedUnsuccessful();
-        }
-        setNetworkNeedsEmergencyAffordance(false);
-        return false;
-    }
 
-    private void setNetworkNeedsEmergencyAffordance(boolean needsAffordance) {
-        synchronized (mLock) {
-            mNetworkNeedsEmergencyAffordance = needsAffordance;
-            updateEmergencyAffordanceNeeded();
+            dumpInternal(new IndentingPrintWriter(pw, "  "));
         }
-    }
-
-    private void onCellScanFinishedUnsuccessful() {
-        synchronized (mLock) {
-            mScansCompleted++;
-            if (mScansCompleted >= NUM_SCANS_UNTIL_ABORT) {
-                stopScanning();
-            }
-        }
-    }
-
-    private boolean mccRequiresEmergencyAffordance(int mcc) {
-        return mEmergencyCallMccNumbers.contains(mcc);
     }
 }
