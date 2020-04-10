@@ -14684,17 +14684,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         }
-        if (isAccessibilityPane()) {
-            if (isVisible != oldVisible) {
+
+        if (isVisible != oldVisible) {
+            if (isAccessibilityPane()) {
                 notifyViewAccessibilityStateChangedIfNeeded(isVisible
                         ? AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_APPEARED
                         : AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED);
             }
-        }
 
-        notifyAppearedOrDisappearedForContentCaptureIfNeeded(isVisible);
-        if (!getSystemGestureExclusionRects().isEmpty() && isVisible != oldVisible) {
-            postUpdateSystemGestureExclusionRects();
+            notifyAppearedOrDisappearedForContentCaptureIfNeeded(isVisible);
+
+            if (!getSystemGestureExclusionRects().isEmpty()) {
+                postUpdateSystemGestureExclusionRects();
+            }
         }
     }
 
