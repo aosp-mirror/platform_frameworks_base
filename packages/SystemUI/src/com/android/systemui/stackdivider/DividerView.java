@@ -1042,7 +1042,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         dockedTaskRect = dockedTaskRect == null ? dockedRect : dockedTaskRect;
         otherTaskRect = otherTaskRect == null ? otherRect : otherTaskRect;
 
-        mDividerPositionX = dockedRect.right;
+        mDividerPositionX = mSplitLayout.getPrimarySplitSide() == DOCKED_RIGHT
+                ? otherRect.right : dockedRect.right;
         mDividerPositionY = dockedRect.bottom;
 
         if (DEBUG) {
