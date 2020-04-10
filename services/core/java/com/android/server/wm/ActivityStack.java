@@ -3407,18 +3407,6 @@ class ActivityStack extends Task {
         outBounds.set(mBoundsAnimationSourceHintBounds);
     }
 
-    /**
-     * @return the final animation bounds if the task stack is currently being animated, or the
-     *         current stack bounds otherwise.
-     */
-    void getAnimationOrCurrentBounds(Rect outBounds) {
-        if ((mBoundsAnimatingRequested || mBoundsAnimating) && !mBoundsAnimationTarget.isEmpty()) {
-            getFinalAnimationBounds(outBounds);
-            return;
-        }
-        getBounds(outBounds);
-    }
-
     /** Bounds of the stack with other system factors taken into consideration. */
     void getDimBounds(Rect out) {
         getBounds(out);

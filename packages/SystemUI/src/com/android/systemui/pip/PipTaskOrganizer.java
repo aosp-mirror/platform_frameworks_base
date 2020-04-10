@@ -317,17 +317,22 @@ public class PipTaskOrganizer extends TaskOrganizer {
 
     /**
      * TODO(b/152809058): consolidate the display info handling logic in SysUI
+     *
+     * @param destinationBoundsOut the current destination bounds will be populated to this param
      */
     @SuppressWarnings("unchecked")
-    public void onMovementBoundsChanged(boolean fromImeAdjustment, boolean fromShelfAdjustment) {
+    public void onMovementBoundsChanged(Rect destinationBoundsOut,
+            boolean fromImeAdjustment, boolean fromShelfAdjustment) {
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getCurrentAnimator();
+        destinationBoundsOut.set(mLastReportedBounds);
         if (animator == null || !animator.isRunning()
                 || animator.getTransitionDirection() != TRANSITION_DIRECTION_TO_PIP) {
             return;
         }
 
         final Rect currentDestinationBounds = animator.getDestinationBounds();
+        destinationBoundsOut.set(currentDestinationBounds);
         if (!fromImeAdjustment && !fromShelfAdjustment
                 && mPipBoundsHandler.getDisplayBounds().contains(currentDestinationBounds)) {
             // no need to update the destination bounds, bail early
@@ -342,6 +347,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
             animator.updateEndValue(newDestinationBounds);
         }
         animator.setDestinationBounds(newDestinationBounds);
+        destinationBoundsOut.set(newDestinationBounds);
     }
 
     /**
