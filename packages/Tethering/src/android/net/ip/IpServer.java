@@ -18,6 +18,7 @@ package android.net.ip;
 
 import static android.net.InetAddresses.parseNumericAddress;
 import static android.net.RouteInfo.RTN_UNICAST;
+import static android.net.TetheringManager.TetheringRequest.checkStaticAddressConfiguration;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 import static android.net.util.NetworkConstants.FF;
@@ -511,17 +512,24 @@ public class IpServer extends StateMachine {
         }
     }
 
-    private boolean startDhcp(Inet4Address addr, int prefixLen) {
+    private boolean startDhcp(final LinkAddress serverLinkAddr, final LinkAddress clientLinkAddr) {
         if (mUsingLegacyDhcp) {
             return true;
         }
+
+        final Inet4Address addr = (Inet4Address) serverLinkAddr.getAddress();
+        final int prefixLen = serverLinkAddr.getPrefixLength();
+        final Inet4Address clientAddr = clientLinkAddr == null ? null :
+                (Inet4Address) clientLinkAddr.getAddress();
+
         final DhcpServingParamsParcel params;
         params = new DhcpServingParamsParcelExt()
                 .setDefaultRouters(addr)
                 .setDhcpLeaseTimeSecs(DHCP_LEASE_TIME_SECS)
                 .setDnsServers(addr)
-                .setServerAddr(new LinkAddress(addr, prefixLen))
-                .setMetered(true);
+                .setServerAddr(serverLinkAddr)
+                .setMetered(true)
+                .setSingleClientAddr(clientAddr);
         // TODO: also advertise link MTU
 
         mDhcpServerStartIndex++;
@@ -556,9 +564,10 @@ public class IpServer extends StateMachine {
         }
     }
 
-    private boolean configureDhcp(boolean enable, Inet4Address addr, int prefixLen) {
+    private boolean configureDhcp(boolean enable, final LinkAddress serverAddr,
+            final LinkAddress clientAddr) {
         if (enable) {
-            return startDhcp(addr, prefixLen);
+            return startDhcp(serverAddr, clientAddr);
         } else {
             stopDhcp();
             return true;
@@ -606,7 +615,7 @@ public class IpServer extends StateMachine {
                 // code that calls into NetworkManagementService directly.
                 srvAddr = (Inet4Address) parseNumericAddress(BLUETOOTH_IFACE_ADDR);
                 mIpv4Address = new LinkAddress(srvAddr, BLUETOOTH_DHCP_PREFIX_LENGTH);
-                return configureDhcp(enabled, srvAddr, BLUETOOTH_DHCP_PREFIX_LENGTH);
+                return configureDhcp(enabled, mIpv4Address, null /* clientAddress */);
             }
             mIpv4Address = new LinkAddress(srvAddr, prefixLen);
         } catch (IllegalArgumentException e) {
@@ -643,7 +652,7 @@ public class IpServer extends StateMachine {
             mLinkProperties.removeRoute(route);
         }
 
-        return configureDhcp(enabled, srvAddr, prefixLen);
+        return configureDhcp(enabled, mIpv4Address, mStaticIpv4ClientAddr);
     }
 
     private String getRandomWifiIPv4Address() {
@@ -962,7 +971,14 @@ public class IpServer extends StateMachine {
     }
 
     private void maybeConfigureStaticIp(final TetheringRequestParcel request) {
-        if (request == null) return;
+        // Ignore static address configuration if they are invalid or null. In theory, static
+        // addresses should not be invalid here because TetheringManager do not allow caller to
+        // specify invalid static address configuration.
+        if (request == null || request.localIPv4Address == null
+                || request.staticClientAddress == null || !checkStaticAddressConfiguration(
+                request.localIPv4Address, request.staticClientAddress)) {
+            return;
+        }
 
         mStaticIpv4ServerAddr = request.localIPv4Address;
         mStaticIpv4ClientAddr = request.staticClientAddress;
