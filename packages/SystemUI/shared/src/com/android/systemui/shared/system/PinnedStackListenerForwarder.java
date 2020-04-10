@@ -18,7 +18,6 @@ package com.android.systemui.shared.system;
 
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
-import android.graphics.Rect;
 import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
@@ -53,9 +52,9 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
     }
 
     @Override
-    public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment) {
+    public void onMovementBoundsChanged(boolean fromImeAdjustment) {
         for (PinnedStackListener listener : mListeners) {
-            listener.onMovementBoundsChanged(animatingBounds, fromImeAdjustment);
+            listener.onMovementBoundsChanged(fromImeAdjustment);
         }
     }
 
@@ -108,7 +107,7 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
     public static class PinnedStackListener {
         public void onListenerRegistered(IPinnedStackController controller) {}
 
-        public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment) {}
+        public void onMovementBoundsChanged(boolean fromImeAdjustment) {}
 
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}
 

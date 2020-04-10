@@ -37,13 +37,9 @@ oneway interface IPinnedStackListener {
 
     /**
      * Called when the window manager has detected a change that would cause the movement bounds
-     * to be changed (ie. after configuration change, aspect ratio change, etc). It then provides
-     * the components that allow the listener to calculate the movement bounds itself.
-     * The {@param animatingBounds} are provided to indicate the current target bounds of the
-     * pinned stack (the final bounds if animating, the current bounds if not),
-     * which may be helpful in calculating dependent animation bounds.
+     * to be changed (ie. after configuration change, aspect ratio change, etc).
      */
-    void onMovementBoundsChanged(in Rect animatingBounds, boolean fromImeAdjustment);
+    void onMovementBoundsChanged(boolean fromImeAdjustment);
 
     /**
      * Called when window manager decides to adjust the pinned stack bounds because of the IME, or
