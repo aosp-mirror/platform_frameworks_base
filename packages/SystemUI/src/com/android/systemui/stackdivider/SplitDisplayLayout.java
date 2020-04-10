@@ -101,7 +101,16 @@ public class SplitDisplayLayout {
     }
 
     int getPrimarySplitSide() {
-        return mDisplayLayout.isLandscape() ? DOCKED_LEFT : DOCKED_TOP;
+        switch (mDisplayLayout.getNavigationBarPosition(mContext.getResources())) {
+            case DisplayLayout.NAV_BAR_BOTTOM:
+                return mDisplayLayout.isLandscape() ? DOCKED_LEFT : DOCKED_TOP;
+            case DisplayLayout.NAV_BAR_LEFT:
+                return DOCKED_RIGHT;
+            case DisplayLayout.NAV_BAR_RIGHT:
+                return DOCKED_LEFT;
+            default:
+                return DOCKED_INVALID;
+        }
     }
 
     boolean isMinimized() {
