@@ -83,6 +83,7 @@ import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.RelativeTouchListener;
@@ -329,6 +330,8 @@ public class BubbleStackView extends FrameLayout {
 
     @NonNull
     private final SurfaceSynchronizer mSurfaceSynchronizer;
+
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
 
     /**
      * The currently magnetized object, which is being dragged and will be attracted to the magnetic
@@ -626,13 +629,15 @@ public class BubbleStackView extends FrameLayout {
     public BubbleStackView(Context context, BubbleData data,
             @Nullable SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
-            SysUiState sysUiState) {
+            SysUiState sysUiState,
+            NotificationShadeWindowController notificationShadeWindowController) {
         super(context);
 
         mBubbleData = data;
         mInflater = LayoutInflater.from(context);
 
         mSysUiState = sysUiState;
+        mNotificationShadeWindowController = notificationShadeWindowController;
 
         Resources res = getResources();
         mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
@@ -1557,7 +1562,11 @@ public class BubbleStackView extends FrameLayout {
      */
     @Override
     public void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
-
+        // If the notification shade is expanded, we shouldn't let the ActivityView steal any touch
+        // events from any location.
+        if (mNotificationShadeWindowController.getPanelExpanded()) {
+            touchableRegion.setEmpty();
+        }
     }
 
     /**
