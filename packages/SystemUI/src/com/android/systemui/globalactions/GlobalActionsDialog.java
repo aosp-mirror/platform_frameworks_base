@@ -222,11 +222,27 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private ControlsController mControlsController;
     private SharedPreferences mControlsPreferences;
     private final RingerModeTracker mRingerModeTracker;
+    private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
         @UiEvent(doc = "The global actions / power menu surface became visible on the screen.")
-        GA_POWER_MENU_OPEN(337);
+        GA_POWER_MENU_OPEN(337),
+
+        @UiEvent(doc = "The global actions bugreport button was pressed.")
+        GA_BUGREPORT_PRESS(344),
+
+        @UiEvent(doc = "The global actions bugreport button was long pressed.")
+        GA_BUGREPORT_LONG_PRESS(345),
+
+        @UiEvent(doc = "The global actions emergency button was pressed.")
+        GA_EMERGENCY_DIALER_PRESS(346),
+
+        @UiEvent(doc = "The global actions screenshot button was pressed.")
+        GA_SCREENSHOT_PRESS(347),
+
+        @UiEvent(doc = "The global actions screenshot button was long pressed.")
+        GA_SCREENSHOT_LONG_PRESS(348);
 
         private final int mId;
 
@@ -679,7 +695,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
-    private class EmergencyDialerAction extends EmergencyAction {
+    @VisibleForTesting
+    class EmergencyDialerAction extends EmergencyAction {
         private EmergencyDialerAction() {
             super(com.android.systemui.R.drawable.ic_emergency_star,
                     R.string.global_action_emergency);
@@ -688,6 +705,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         @Override
         public void onPress() {
             mMetricsLogger.action(MetricsEvent.ACTION_EMERGENCY_DIALER_FROM_POWER_MENU);
+            mUiEventLogger.log(GlobalActionsEvent.GA_EMERGENCY_DIALER_PRESS);
             if (mTelecomManager != null) {
                 Intent intent = mTelecomManager.createLaunchEmergencyDialerIntent(
                         null /* number */);
@@ -699,6 +717,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mContext.startActivityAsUser(intent, UserHandle.CURRENT);
             }
         }
+    }
+
+    @VisibleForTesting
+    EmergencyDialerAction makeEmergencyDialerActionForTesting() {
+        return new EmergencyDialerAction();
     }
 
     private final class RestartAction extends SinglePressAction implements LongPressAction {
@@ -731,7 +754,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
-    private class ScreenshotAction extends SinglePressAction implements LongPressAction {
+    @VisibleForTesting
+    class ScreenshotAction extends SinglePressAction implements LongPressAction {
         public ScreenshotAction() {
             super(R.drawable.ic_screenshot, R.string.global_action_screenshot);
         }
@@ -747,8 +771,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 public void run() {
                     mScreenshotHelper.takeScreenshot(1, true, true, mHandler, null);
                     mMetricsLogger.action(MetricsEvent.ACTION_SCREENSHOT_POWER_MENU);
+                    mUiEventLogger.log(GlobalActionsEvent.GA_SCREENSHOT_PRESS);
                 }
-            }, 500);
+            }, mDialogPressDelay);
         }
 
         @Override
@@ -764,6 +789,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         @Override
         public boolean onLongPress() {
             if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SCREENRECORD_LONG_PRESS)) {
+                mUiEventLogger.log(GlobalActionsEvent.GA_SCREENSHOT_LONG_PRESS);
                 mScreenRecordHelper.launchRecordPrompt();
             } else {
                 onPress();
@@ -772,7 +798,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
-    private class BugReportAction extends SinglePressAction implements LongPressAction {
+    @VisibleForTesting
+    ScreenshotAction makeScreenshotActionForTesting() {
+        return new ScreenshotAction();
+    }
+
+    @VisibleForTesting
+    class BugReportAction extends SinglePressAction implements LongPressAction {
 
         public BugReportAction() {
             super(R.drawable.ic_lock_bugreport, R.string.bugreport_title);
@@ -795,6 +827,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         // Take an "interactive" bugreport.
                         mMetricsLogger.action(
                                 MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_INTERACTIVE);
+                        mUiEventLogger.log(GlobalActionsEvent.GA_BUGREPORT_PRESS);
                         if (!mIActivityManager.launchBugReportHandlerApp()) {
                             Log.w(TAG, "Bugreport handler could not be launched");
                             mIActivityManager.requestInteractiveBugReport();
@@ -802,7 +835,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     } catch (RemoteException e) {
                     }
                 }
-            }, 500);
+            }, mDialogPressDelay);
         }
 
         @Override
@@ -815,6 +848,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             try {
                 // Take a "full" bugreport.
                 mMetricsLogger.action(MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_FULL);
+                mUiEventLogger.log(GlobalActionsEvent.GA_BUGREPORT_LONG_PRESS);
                 mIActivityManager.requestFullBugReport();
             } catch (RemoteException e) {
             }
@@ -829,6 +863,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public boolean showBeforeProvisioning() {
             return false;
         }
+    }
+
+    @VisibleForTesting
+    BugReportAction makeBugReportActionForTesting() {
+        return new BugReportAction();
     }
 
     private final class LogoutAction extends SinglePressAction {
@@ -858,7 +897,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 } catch (RemoteException re) {
                     Log.e(TAG, "Couldn't logout user " + re);
                 }
-            }, 500);
+            }, mDialogPressDelay);
         }
     }
 
@@ -1599,6 +1638,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private static final int MESSAGE_REFRESH = 1;
     private static final int MESSAGE_SHOW = 2;
     private static final int DIALOG_DISMISS_DELAY = 300; // ms
+    private static final int DIALOG_PRESS_DELAY = 500; // ms
+
+    @VisibleForTesting void setZeroDialogPressDelayForTesting() {
+        mDialogPressDelay = 0; // ms
+    }
 
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
