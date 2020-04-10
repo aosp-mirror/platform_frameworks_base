@@ -31,6 +31,11 @@ interface IStatsd {
     oneway void systemRunning();
 
     /**
+     * Tell the stats daemon that the android system has finished booting.
+     */
+    oneway void bootCompleted();
+
+    /**
      * Tell the stats daemon that the StatsCompanionService is up and running.
      * Two-way binder call so that caller knows message received.
      */
@@ -182,10 +187,15 @@ interface IStatsd {
      */
     void sendAppBreadcrumbAtom(int label, int state);
 
-   /**
-    * Registers a puller callback function that, when invoked, pulls the data
-    * for the specified atom tag.
-    */
+    /**
+     * Tell the stats daemon that all the pullers registered during boot have been sent.
+     */
+    oneway void allPullersFromBootRegistered();
+
+    /**
+     * Registers a puller callback function that, when invoked, pulls the data
+     * for the specified atom tag.
+     */
     oneway void registerPullAtomCallback(int uid, int atomTag, long coolDownMillis,
                                          long timeoutMillis,in int[] additiveFields,
                                          IPullAtomCallback pullerCallback);
