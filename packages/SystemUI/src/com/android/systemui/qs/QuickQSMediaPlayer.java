@@ -54,7 +54,7 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
      */
     public QuickQSMediaPlayer(Context context, ViewGroup parent, Executor foregroundExecutor,
             Executor backgroundExecutor, ActivityStarter activityStarter) {
-        super(context, parent, null, R.layout.qqs_media_panel, QQS_ACTION_IDS,
+        super(context, parent, null, R.layout.qs_media_panel, QQS_ACTION_IDS,
                 foregroundExecutor, backgroundExecutor, activityStarter);
     }
 

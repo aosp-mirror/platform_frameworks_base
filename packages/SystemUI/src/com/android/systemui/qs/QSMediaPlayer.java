@@ -37,7 +37,9 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintSet;
 import com.android.settingslib.media.LocalMediaManager;
+import com.android.internal.widget.MediaNotificationView;
 import com.android.systemui.R;
 import com.android.systemui.media.IlluminationDrawable;
 import com.android.systemui.media.MediaControlPanel;
@@ -169,7 +171,7 @@ public class QSMediaPlayer extends MediaControlPanel {
 
         super.setMediaSession(token, icon, largeIcon, iconColor, bgColor, contentIntent, appName,
                 key);
-
+        ConstraintSet constraintSet = mMediaNotifView.getConstraintSet(R.id.expanded);
         // Media controls
         if (actionsContainer != null) {
             LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
@@ -179,7 +181,7 @@ public class QSMediaPlayer extends MediaControlPanel {
                 ImageButton thatBtn = parentActionsLayout.findViewById(NOTIF_ACTION_IDS[i]);
                 if (thatBtn == null || thatBtn.getDrawable() == null
                         || thatBtn.getVisibility() != View.VISIBLE) {
-                    thisBtn.setVisibility(View.GONE);
+                    constraintSet.setVisibility(QS_ACTION_IDS[i], ConstraintSet.GONE);
                     continue;
                 }
 
@@ -190,7 +192,7 @@ public class QSMediaPlayer extends MediaControlPanel {
 
                 Drawable thatIcon = thatBtn.getDrawable();
                 thisBtn.setImageDrawable(thatIcon.mutate());
-                thisBtn.setVisibility(View.VISIBLE);
+                constraintSet.setVisibility(QS_ACTION_IDS[i], ConstraintSet.VISIBLE);
                 thisBtn.setOnClickListener(v -> {
                     Log.d(TAG, "clicking on other button");
                     thatBtn.performClick();
@@ -199,8 +201,7 @@ public class QSMediaPlayer extends MediaControlPanel {
 
             // Hide any unused buttons
             for (; i < QS_ACTION_IDS.length; i++) {
-                ImageButton thisBtn = mMediaNotifView.findViewById(QS_ACTION_IDS[i]);
-                thisBtn.setVisibility(View.GONE);
+                constraintSet.setVisibility(QS_ACTION_IDS[i], ConstraintSet.GONE);
             }
         }
 
@@ -214,41 +215,19 @@ public class QSMediaPlayer extends MediaControlPanel {
 
     private void initLongPressMenu(int iconColor) {
         // Set up long press menu
-        View guts = mMediaNotifView.findViewById(R.id.media_guts);
-        View options = mMediaNotifView.findViewById(R.id.qs_media_controls_options);
-        options.setMinimumHeight(guts.getHeight());
-
-        View clearView = options.findViewById(R.id.remove);
-        clearView.setOnClickListener(b -> {
-            removePlayer();
-        });
-        ImageView removeIcon = options.findViewById(R.id.remove_icon);
-        removeIcon.setImageTintList(ColorStateList.valueOf(iconColor));
-        TextView removeText = options.findViewById(R.id.remove_text);
-        removeText.setTextColor(iconColor);
-
-        TextView cancelView = options.findViewById(R.id.cancel);
-        cancelView.setTextColor(iconColor);
-        cancelView.setOnClickListener(b -> {
-            options.setVisibility(View.GONE);
-            guts.setVisibility(View.VISIBLE);
-        });
-        // ... but don't enable it yet, and make sure is reset when the session is updated
-        mMediaNotifView.setOnLongClickListener(null);
-        options.setVisibility(View.GONE);
-        guts.setVisibility(View.VISIBLE);
+        // TODO: b/156036025 bring back media guts
     }
 
     @Override
     protected void resetButtons() {
         super.resetButtons();
         mSeekBarViewModel.clearController();
-        View guts = mMediaNotifView.findViewById(R.id.media_guts);
+//        View guts = mMediaNotifView.findViewById(R.id.media_guts);
         View options = mMediaNotifView.findViewById(R.id.qs_media_controls_options);
 
         mMediaNotifView.setOnLongClickListener(v -> {
             // Replace player view with close/cancel view
-            guts.setVisibility(View.GONE);
+            // TODO: b/156036025 make this work
             options.setVisibility(View.VISIBLE);
             return true; // consumed click
         });

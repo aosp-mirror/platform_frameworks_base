@@ -53,6 +53,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
@@ -70,7 +71,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
- * Base media control panel for System UI
+ * A view controller used for Media Playback.
  */
 public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
@@ -80,7 +81,7 @@ public class MediaControlPanel {
     private final ActivityStarter mActivityStarter;
 
     private Context mContext;
-    protected LinearLayout mMediaNotifView;
+    protected MotionLayout mMediaNotifView;
     private View mSeamless;
     private MediaSession.Token mToken;
     private MediaController mController;
@@ -187,7 +188,7 @@ public class MediaControlPanel {
             ActivityStarter activityStarter) {
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        mMediaNotifView = (LinearLayout) inflater.inflate(layoutId, parent, false);
+        mMediaNotifView = (MotionLayout) inflater.inflate(layoutId, parent, false);
         // TODO(b/150854549): removeOnAttachStateChangeListener when this doesn't inflate views
         // mStateListener shouldn't need to be unregistered since this object shares the same
         // lifecycle with the inflated view. It would be better, however, if this controller used an

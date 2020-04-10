@@ -1232,7 +1232,7 @@
     <dimen name="qs_media_padding">8dp</dimen>
     <dimen name="qs_media_panel_outer_padding">16dp</dimen>
     <dimen name="qs_media_corner_radius">10dp</dimen>
-    <dimen name="qs_media_album_size">72dp</dimen>
+    <dimen name="qs_media_album_size">52dp</dimen>
     <dimen name="qs_seamless_icon_size">20dp</dimen>
     <dimen name="qqs_media_spacing">8dp</dimen>
 
