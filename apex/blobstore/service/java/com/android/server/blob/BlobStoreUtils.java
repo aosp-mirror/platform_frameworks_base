@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.text.format.TimeMigrationUtils;
 import android.util.Slog;
 
 class BlobStoreUtils {
@@ -55,5 +56,10 @@ class BlobStoreUtils {
         return resources == null
                 ? Resources.ID_NULL
                 : getDescriptionResourceId(resources, resourceEntryName, packageName);
+    }
+
+    @NonNull
+    static String formatTime(long timeMs) {
+        return TimeMigrationUtils.formatMillisWithFixedFormat(timeMs);
     }
 }
