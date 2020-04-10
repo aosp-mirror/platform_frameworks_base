@@ -79,6 +79,10 @@ public class DexManager {
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST =
             "pm.dexopt.priv-apps-oob-list";
 
+    // System server cannot load executable code outside system partitions.
+    // However it can load verification data - thus we pick the "verify" compiler filter.
+    private static final String SYSTEM_SERVER_COMPILER_FILTER = "verify";
+
     private final Context mContext;
 
     // Maps package name to code locations.
@@ -501,8 +505,17 @@ public class DexManager {
             return PackageDexOptimizer.DEX_OPT_FAILED;
         }
 
-        PackageDexOptimizer pdo = getPackageDexOptimizer(options);
-        String packageName = options.getPackageName();
+        // Override compiler filter for system server to the expected one.
+        //
+        // We could let the caller do this every time the invoke PackageManagerServer#dexopt.
+        // However, there are a few places were this will need to be done which creates
+        // redundancy and the danger of overlooking the config (and thus generating code that will
+        // waste storage and time).
+        DexoptOptions overriddenOptions = options.overrideCompilerFilter(
+                SYSTEM_SERVER_COMPILER_FILTER);
+
+        PackageDexOptimizer pdo = getPackageDexOptimizer(overriddenOptions);
+        String packageName = overriddenOptions.getPackageName();
         PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
         if (useInfo.getDexUseInfoMap().isEmpty()) {
             if (DEBUG) {
@@ -527,7 +540,7 @@ public class DexManager {
                 continue;
             }
 
-            int newResult = pdo.dexoptSystemServerPath(dexPath, dexUseInfo, options);
+            int newResult = pdo.dexoptSystemServerPath(dexPath, dexUseInfo, overriddenOptions);
 
             // The end result is:
             //  - FAILED if any path failed,

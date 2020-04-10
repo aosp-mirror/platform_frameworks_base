@@ -166,4 +166,17 @@ public final class DexoptOptions {
     public int getCompilationReason() {
         return mCompilationReason;
     }
+
+    /**
+     * Creates a new set of DexoptOptions which are the same with the exception of the compiler
+     * filter (set to the given value).
+     */
+    public DexoptOptions overrideCompilerFilter(String newCompilerFilter) {
+        return new DexoptOptions(
+                mPackageName,
+                mCompilationReason,
+                newCompilerFilter,
+                mSplitName,
+                mFlags);
+    }
 }
