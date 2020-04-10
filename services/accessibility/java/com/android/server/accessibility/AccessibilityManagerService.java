@@ -108,6 +108,7 @@ import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -1368,7 +1369,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return relevantEventTypes;
     }
 
-    private void updateMagnificationModeChangeSettingsLocked() {
+    private void updateMagnificationModeChangeSettingsLocked(AccessibilityUserState userState) {
+        if (userState.mUserId != mCurrentUserId) {
+            return;
+        }
+
+        final boolean windowMagnificationEnabled = userState.isShortcutMagnificationEnabledLocked()
+                && (userState.getMagnificationModeLocked()
+                == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        if (windowMagnificationEnabled == getWindowMagnificationMgr().isConnected()) {
+            return;
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final StatusBarManagerInternal service = LocalServices.getService(
+                    StatusBarManagerInternal.class);
+            service.requestWindowMagnificationConnection(windowMagnificationEnabled);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::notifyMagnificationModeChangeToInputFilter,
                 this));
@@ -1766,7 +1786,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         scheduleUpdateClientsIfNeededLocked(userState);
         updateAccessibilityShortcutKeyTargetsLocked(userState);
         updateAccessibilityButtonTargetsLocked(userState);
-        updateMagnificationModeChangeSettingsLocked();
+        updateMagnificationModeChangeSettingsLocked(userState);
     }
 
     private void updateWindowsForAccessibilityCallbackLocked(AccessibilityUserState userState) {
@@ -3097,7 +3117,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     readUserRecommendedUiTimeoutSettingsLocked(userState);
                 } else if (mMagnificationModeUri.equals(uri)) {
                     if (readMagnificationModeLocked(userState)) {
-                        updateMagnificationModeChangeSettingsLocked();
+                        updateMagnificationModeChangeSettingsLocked(userState);
                     }
                 }
             }
