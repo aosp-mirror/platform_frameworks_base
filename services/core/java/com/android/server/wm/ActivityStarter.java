@@ -55,7 +55,6 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
@@ -167,8 +166,8 @@ class ActivityStarter {
     private int mStartFlags;
     private ActivityRecord mSourceRecord;
 
-    // The display to launch the activity onto, barring any strong reason to do otherwise.
-    private int mPreferredDisplayId;
+    // The task display area to launch the activity onto, barring any strong reason to do otherwise.
+    private TaskDisplayArea mPreferredTaskDisplayArea;
     // The windowing mode to apply to the root task, if possible
     private int mPreferredWindowingMode;
 
@@ -538,7 +537,7 @@ class ActivityStarter {
         mDoResume = starter.mDoResume;
         mStartFlags = starter.mStartFlags;
         mSourceRecord = starter.mSourceRecord;
-        mPreferredDisplayId = starter.mPreferredDisplayId;
+        mPreferredTaskDisplayArea = starter.mPreferredTaskDisplayArea;
         mPreferredWindowingMode = starter.mPreferredWindowingMode;
 
         mInTask = starter.mInTask;
@@ -1631,7 +1630,7 @@ class ActivityStarter {
         // Update the recent tasks list immediately when the activity starts
         mSupervisor.mRecentTasks.add(mStartActivity.getTask());
         mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.getTask(),
-                mPreferredWindowingMode, mPreferredDisplayId, mTargetStack);
+                mPreferredWindowingMode, mPreferredTaskDisplayArea, mTargetStack);
 
         return START_SUCCESS;
     }
@@ -1684,9 +1683,9 @@ class ActivityStarter {
 
         mSupervisor.getLaunchParamsController().calculate(targetTask, r.info.windowLayout, r,
                 sourceRecord, mOptions, PHASE_BOUNDS, mLaunchParams);
-        mPreferredDisplayId = mLaunchParams.hasPreferredDisplay()
-                ? mLaunchParams.mPreferredDisplayId
-                : DEFAULT_DISPLAY;
+        mPreferredTaskDisplayArea = mLaunchParams.hasPreferredTaskDisplayArea()
+                ? mLaunchParams.mPreferredTaskDisplayArea
+                : mRootWindowContainer.getDefaultTaskDisplayArea();
         mPreferredWindowingMode = mLaunchParams.mWindowingMode;
     }
 
@@ -1703,10 +1702,12 @@ class ActivityStarter {
         // Do not start home activity if it cannot be launched on preferred display. We are not
         // doing this in ActivityStackSupervisor#canPlaceEntityOnDisplay because it might
         // fallback to launch on other displays.
-        if (r.isActivityTypeHome() && !mRootWindowContainer.canStartHomeOnDisplay(r.info,
-                mPreferredDisplayId, true /* allowInstrumenting */)) {
-            Slog.w(TAG, "Cannot launch home on display " + mPreferredDisplayId);
-            return START_CANCELED;
+        if (r.isActivityTypeHome()) {
+            if (!mRootWindowContainer.canStartHomeOnDisplayArea(r.info, mPreferredTaskDisplayArea,
+                    true /* allowInstrumenting */)) {
+                Slog.w(TAG, "Cannot launch home on display area " + mPreferredTaskDisplayArea);
+                return START_CANCELED;
+            }
         }
 
         if (mRestrictedBgActivity && (newTask || !targetTask.isUidPresent(mCallingUid))
@@ -1841,10 +1842,10 @@ class ActivityStarter {
                 && top.attachedToProcess()
                 && ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
                 || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK))
-                // This allows home activity to automatically launch on secondary display when
-                // display added, if home was the top activity on default display, instead of
-                // sending new intent to the home activity on default display.
-                && (!top.isActivityTypeHome() || top.getDisplayId() == mPreferredDisplayId);
+                // This allows home activity to automatically launch on secondary task display area
+                // when it was added, if home was the top activity on default task display area,
+                // instead of sending new intent to the home activity on default display area.
+                && (!top.isActivityTypeHome() || top.getDisplayArea() == mPreferredTaskDisplayArea);
         if (!dontStart) {
             return START_SUCCESS;
         }
@@ -1866,7 +1867,7 @@ class ActivityStarter {
         // Don't use mStartActivity.task to show the toast. We're not starting a new activity but
         // reusing 'top'. Fields in mStartActivity may not be fully initialized.
         mSupervisor.handleNonResizableTaskIfNeeded(top.getTask(),
-                mLaunchParams.mWindowingMode, mPreferredDisplayId, topStack);
+                mLaunchParams.mWindowingMode, mPreferredTaskDisplayArea, topStack);
 
         return START_DELIVERED_TO_TOP;
     }
@@ -2010,7 +2011,7 @@ class ActivityStarter {
         mDoResume = false;
         mStartFlags = 0;
         mSourceRecord = null;
-        mPreferredDisplayId = INVALID_DISPLAY;
+        mPreferredTaskDisplayArea = null;
         mPreferredWindowingMode = WINDOWING_MODE_UNDEFINED;
 
         mInTask = null;
@@ -2060,9 +2061,9 @@ class ActivityStarter {
         // after we located a reusable task (which might be resided in another display).
         mSupervisor.getLaunchParamsController().calculate(inTask, r.info.windowLayout, r,
                 sourceRecord, options, PHASE_DISPLAY, mLaunchParams);
-        mPreferredDisplayId = mLaunchParams.hasPreferredDisplay()
-                ? mLaunchParams.mPreferredDisplayId
-                : DEFAULT_DISPLAY;
+        mPreferredTaskDisplayArea = mLaunchParams.hasPreferredTaskDisplayArea()
+                ? mLaunchParams.mPreferredTaskDisplayArea
+                : mRootWindowContainer.getDefaultTaskDisplayArea();
         mPreferredWindowingMode = mLaunchParams.mWindowingMode;
 
         mLaunchMode = r.launchMode;
@@ -2334,14 +2335,14 @@ class ActivityStarter {
             } else {
                 // Otherwise find the best task to put the activity in.
                 intentActivity =
-                        mRootWindowContainer.findTask(mStartActivity, mPreferredDisplayId);
+                        mRootWindowContainer.findTask(mStartActivity, mPreferredTaskDisplayArea);
             }
         }
 
         if (intentActivity != null
                 && (mStartActivity.isActivityTypeHome() || intentActivity.isActivityTypeHome())
-                && intentActivity.getDisplayId() != mPreferredDisplayId) {
-            // Do not reuse home activity on other displays.
+                && intentActivity.getDisplayArea() != mPreferredTaskDisplayArea) {
+            // Do not reuse home activity on other display areas.
             intentActivity = null;
         }
 
@@ -2363,7 +2364,7 @@ class ActivityStarter {
         // the same behavior as if a new instance was being started, which means not bringing it
         // to the front if the caller is not itself in the front.
         final boolean differentTopTask;
-        if (mPreferredDisplayId == mTargetStack.getDisplayId()) {
+        if (mTargetStack.getDisplayArea() == mPreferredTaskDisplayArea) {
             final ActivityStack focusStack = mTargetStack.getDisplay().getFocusedStack();
             final ActivityRecord curTop = (focusStack == null)
                     ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);

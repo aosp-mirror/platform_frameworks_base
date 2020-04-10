@@ -426,7 +426,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Start activity and delivered new intent.
         starter.getIntent().setComponent(splitSecondReusableActivity.mActivityComponent);
-        doReturn(splitSecondReusableActivity).when(mRootWindowContainer).findTask(any(), anyInt());
+        doReturn(splitSecondReusableActivity).when(mRootWindowContainer).findTask(any(), any());
         final int result = starter.setReason("testSplitScreenDeliverToTop").execute();
 
         // Ensure result is delivering intent to top.
@@ -462,7 +462,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Start activity and delivered new intent.
         starter.getIntent().setComponent(splitSecondReusableActivity.mActivityComponent);
-        doReturn(splitSecondReusableActivity).when(mRootWindowContainer).findTask(any(), anyInt());
+        doReturn(splitSecondReusableActivity).when(mRootWindowContainer).findTask(any(), any());
         final int result = starter.setReason("testSplitScreenMoveToFront").execute();
 
         // Ensure result is moving task to front.

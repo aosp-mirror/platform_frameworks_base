@@ -537,8 +537,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         doReturn(true).when(mRootWindowContainer)
                 .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean(), anyBoolean());
-        doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplay(
-                any(), anyInt(), anyBoolean());
+        doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplayArea(any(), any(),
+                anyBoolean());
 
         mRootWindowContainer.startHomeOnAllDisplays(0, "testStartHome");
 
@@ -578,17 +578,19 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         // Can not start home if we don't want to start home while home is being instrumented.
         doReturn(true).when(app).isInstrumenting();
-        assertFalse(mRootWindowContainer.canStartHomeOnDisplay(info, DEFAULT_DISPLAY,
+        final TaskDisplayArea defaultTaskDisplayArea = mRootWindowContainer
+                .getDefaultTaskDisplayArea();
+        assertFalse(mRootWindowContainer.canStartHomeOnDisplayArea(info, defaultTaskDisplayArea,
                 false /* allowInstrumenting*/));
 
         // Can start home for other cases.
-        assertTrue(mRootWindowContainer.canStartHomeOnDisplay(info, DEFAULT_DISPLAY,
+        assertTrue(mRootWindowContainer.canStartHomeOnDisplayArea(info, defaultTaskDisplayArea,
                 true /* allowInstrumenting*/));
 
         doReturn(false).when(app).isInstrumenting();
-        assertTrue(mRootWindowContainer.canStartHomeOnDisplay(info, DEFAULT_DISPLAY,
+        assertTrue(mRootWindowContainer.canStartHomeOnDisplayArea(info, defaultTaskDisplayArea,
                 false /* allowInstrumenting*/));
-        assertTrue(mRootWindowContainer.canStartHomeOnDisplay(info, DEFAULT_DISPLAY,
+        assertTrue(mRootWindowContainer.canStartHomeOnDisplayArea(info, defaultTaskDisplayArea,
                 true /* allowInstrumenting*/));
     }
 
@@ -694,8 +696,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         resolutions.add(resolveInfo);
         doReturn(resolutions).when(mRootWindowContainer).resolveActivities(anyInt(),
                 refEq(secondaryHomeIntent));
-        doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplay(
-                any(), anyInt(), anyBoolean());
+        doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplayArea(any(), any(),
+                anyBoolean());
 
         // Run the test.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
@@ -747,8 +749,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         resolutions.add(infoFake2);
         doReturn(resolutions).when(mRootWindowContainer).resolveActivities(anyInt(), any());
 
-        doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplay(
-                any(), anyInt(), anyBoolean());
+        doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplayArea(any(), any(),
+                anyBoolean());
 
         // Run the test.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
@@ -781,8 +783,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         resolutions.add(infoFake2);
         doReturn(resolutions).when(mRootWindowContainer).resolveActivities(anyInt(), any());
 
-        doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplay(
-                any(), anyInt(), anyBoolean());
+        doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplayArea(any(), any(),
+                anyBoolean());
 
         // Use the first one of matched activities in the same package as selected primary home.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
@@ -836,8 +838,9 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 .setTask(task).build();
 
         // Make sure the root task is valid and can be reused on default display.
-        final ActivityStack stack = mRootWindowContainer.getValidLaunchStackOnDisplay(
-                DEFAULT_DISPLAY, activity, task, null, null);
+        final ActivityStack stack = mRootWindowContainer.getValidLaunchStackInTaskDisplayArea(
+                mRootWindowContainer.getDefaultTaskDisplayArea(), activity, task, null,
+                null);
         assertEquals(task, stack);
     }
 

@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -27,6 +26,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
@@ -163,7 +163,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         mTarget.getLaunchParams(mTestTask, null, mResult);
 
-        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -177,7 +177,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         mTarget.getLaunchParams(null, activity, mResult);
 
-        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -190,7 +190,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         mTarget.getLaunchParams(mTestTask, null, mResult);
 
-        assertEquals(INVALID_DISPLAY, mResult.mPreferredDisplayId);
+        assertNull(mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -223,7 +223,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
         mTarget.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
 
-        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -241,7 +241,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         mTarget.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
 
-        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -282,7 +282,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         target.getLaunchParams(mTestTask, null, mResult);
 
-        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -301,7 +301,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
         target.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
 
-        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -328,7 +328,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         target.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
 
-        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }

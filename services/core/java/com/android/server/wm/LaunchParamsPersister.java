@@ -318,7 +318,9 @@ class LaunchParamsPersister {
         final DisplayContent display = mSupervisor.mRootWindowContainer.getDisplayContent(
                 persistableParams.mDisplayUniqueId);
         if (display != null) {
-            outParams.mPreferredDisplayId =  display.mDisplayId;
+            // TODO(b/153764726): Investigate if task display area needs to be persisted vs
+            // always choosing the default one.
+            outParams.mPreferredTaskDisplayArea = display.getDefaultTaskDisplayArea();
         }
         outParams.mWindowingMode = persistableParams.mWindowingMode;
         outParams.mBounds.set(persistableParams.mBounds);

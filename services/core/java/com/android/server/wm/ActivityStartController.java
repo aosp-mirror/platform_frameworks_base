@@ -184,8 +184,8 @@ public class ActivityStartController {
         }
         final int displayId = taskDisplayArea.getDisplayId();
         options.setLaunchDisplayId(displayId);
-        // TODO(b/152116619): Enable after complete switch to WindowContainerToken
-        //options.setLaunchWindowContainerToken(taskDisplayArea.getWindowContainerToken());
+        options.setLaunchTaskDisplayArea(taskDisplayArea.mRemoteToken
+                .toWindowContainerToken());
 
         // The home activity will be started later, defer resuming to avoid unneccerary operations
         // (e.g. start home recursively) when creating home stack.

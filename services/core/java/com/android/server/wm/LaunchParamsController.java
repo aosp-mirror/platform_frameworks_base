@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
@@ -26,6 +25,7 @@ import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo.WindowLayout;
 import android.graphics.Rect;
@@ -108,11 +108,13 @@ class LaunchParamsController {
 
         if (activity != null && activity.requestedVrComponent != null) {
             // Check if the Activity is a VR activity. If so, it should be launched in main display.
-            result.mPreferredDisplayId = DEFAULT_DISPLAY;
+            result.mPreferredTaskDisplayArea = mService.mRootWindowContainer
+                    .getDefaultTaskDisplayArea();
         } else if (mService.mVr2dDisplayId != INVALID_DISPLAY) {
             // Get the virtual display ID from ActivityTaskManagerService. If that's set we
             // should always use that.
-            result.mPreferredDisplayId = mService.mVr2dDisplayId;
+            result.mPreferredTaskDisplayArea = mService.mRootWindowContainer
+                    .getDisplayContent(mService.mVr2dDisplayId).getDefaultTaskDisplayArea();
         }
     }
 
@@ -136,9 +138,10 @@ class LaunchParamsController {
         mService.deferWindowLayout();
 
         try {
-            if (mTmpParams.hasPreferredDisplay()
-                    && mTmpParams.mPreferredDisplayId != task.getStack().getDisplay().mDisplayId) {
-                mService.moveStackToDisplay(task.getRootTaskId(), mTmpParams.mPreferredDisplayId);
+            if (mTmpParams.mPreferredTaskDisplayArea != null
+                    && task.getDisplayArea() != mTmpParams.mPreferredTaskDisplayArea) {
+                mService.mRootWindowContainer.moveStackToTaskDisplayArea(task.getRootTaskId(),
+                        mTmpParams.mPreferredTaskDisplayArea, true /* onTop */);
             }
 
             if (mTmpParams.hasWindowingMode()
@@ -184,8 +187,9 @@ class LaunchParamsController {
         /** The bounds within the parent container. */
         final Rect mBounds = new Rect();
 
-        /** The id of the display the {@link Task} would prefer to be on. */
-        int mPreferredDisplayId;
+        /** The display area the {@link Task} would prefer to be on. */
+        @Nullable
+        TaskDisplayArea mPreferredTaskDisplayArea;
 
         /** The windowing mode to be in. */
         int mWindowingMode;
@@ -193,20 +197,20 @@ class LaunchParamsController {
         /** Sets values back to default. {@link #isEmpty} will return {@code true} once called. */
         void reset() {
             mBounds.setEmpty();
-            mPreferredDisplayId = INVALID_DISPLAY;
+            mPreferredTaskDisplayArea = null;
             mWindowingMode = WINDOWING_MODE_UNDEFINED;
         }
 
         /** Copies the values set on the passed in {@link LaunchParams}. */
         void set(LaunchParams params) {
             mBounds.set(params.mBounds);
-            mPreferredDisplayId = params.mPreferredDisplayId;
+            mPreferredTaskDisplayArea = params.mPreferredTaskDisplayArea;
             mWindowingMode = params.mWindowingMode;
         }
 
         /** Returns {@code true} if no values have been explicitly set. */
         boolean isEmpty() {
-            return mBounds.isEmpty() && mPreferredDisplayId == INVALID_DISPLAY
+            return mBounds.isEmpty() && mPreferredTaskDisplayArea == null
                     && mWindowingMode == WINDOWING_MODE_UNDEFINED;
         }
 
@@ -214,8 +218,8 @@ class LaunchParamsController {
             return mWindowingMode != WINDOWING_MODE_UNDEFINED;
         }
 
-        boolean hasPreferredDisplay() {
-            return mPreferredDisplayId != INVALID_DISPLAY;
+        boolean hasPreferredTaskDisplayArea() {
+            return mPreferredTaskDisplayArea != null;
         }
 
         @Override
@@ -225,7 +229,7 @@ class LaunchParamsController {
 
             LaunchParams that = (LaunchParams) o;
 
-            if (mPreferredDisplayId != that.mPreferredDisplayId) return false;
+            if (mPreferredTaskDisplayArea != that.mPreferredTaskDisplayArea) return false;
             if (mWindowingMode != that.mWindowingMode) return false;
             return mBounds != null ? mBounds.equals(that.mBounds) : that.mBounds == null;
         }
@@ -233,7 +237,8 @@ class LaunchParamsController {
         @Override
         public int hashCode() {
             int result = mBounds != null ? mBounds.hashCode() : 0;
-            result = 31 * result + mPreferredDisplayId;
+            result = 31 * result + (mPreferredTaskDisplayArea != null
+                    ? mPreferredTaskDisplayArea.hashCode() : 0);
             result = 31 * result + mWindowingMode;
             return result;
         }

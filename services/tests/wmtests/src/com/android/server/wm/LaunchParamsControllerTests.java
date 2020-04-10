@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -112,7 +111,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mService).setComponent(name)
                 .setUid(userId).build();
         final LaunchParams expected = new LaunchParams();
-        expected.mPreferredDisplayId = 3;
+        expected.mPreferredTaskDisplayArea = mock(TaskDisplayArea.class);
         expected.mWindowingMode = WINDOWING_MODE_PINNED;
         expected.mBounds.set(200, 300, 400, 500);
 
@@ -183,7 +182,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final LaunchParams params = new LaunchParams();
         params.mWindowingMode = WINDOWING_MODE_FREEFORM;
         params.mBounds.set(0, 0, 30, 20);
-        params.mPreferredDisplayId = 3;
+        params.mPreferredTaskDisplayArea = mock(TaskDisplayArea.class);
 
         final InstrumentedPositioner positioner2 = new InstrumentedPositioner(RESULT_CONTINUE,
                 params);
@@ -228,8 +227,8 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
      */
     @Test
     public void testVrPreferredDisplay() {
-        final int vr2dDisplayId = 1;
-        mService.mVr2dDisplayId = vr2dDisplayId;
+        final TestDisplayContent vrDisplay = createNewDisplayContent();
+        mService.mVr2dDisplayId = vrDisplay.mDisplayId;
 
         final LaunchParams result = new LaunchParams();
         final ActivityRecord vrActivity = new ActivityBuilder(mService).build();
@@ -238,16 +237,17 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         // VR activities should always land on default display.
         mController.calculate(null /*task*/, null /*layout*/, vrActivity /*activity*/,
                 null /*source*/, null /*options*/, PHASE_BOUNDS, result);
-        assertEquals(DEFAULT_DISPLAY, result.mPreferredDisplayId);
+        assertEquals(mRootWindowContainer.getDefaultTaskDisplayArea(),
+                result.mPreferredTaskDisplayArea);
 
         // Otherwise, always lands on VR 2D display.
         final ActivityRecord vr2dActivity = new ActivityBuilder(mService).build();
         mController.calculate(null /*task*/, null /*layout*/, vr2dActivity /*activity*/,
                 null /*source*/, null /*options*/, PHASE_BOUNDS, result);
-        assertEquals(vr2dDisplayId, result.mPreferredDisplayId);
+        assertEquals(vrDisplay.getDefaultTaskDisplayArea(), result.mPreferredTaskDisplayArea);
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/, null /*source*/,
                 null /*options*/, PHASE_BOUNDS, result);
-        assertEquals(vr2dDisplayId, result.mPreferredDisplayId);
+        assertEquals(vrDisplay.getDefaultTaskDisplayArea(), result.mPreferredTaskDisplayArea);
 
         mService.mVr2dDisplayId = INVALID_DISPLAY;
     }
@@ -282,9 +282,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final LaunchParams params = new LaunchParams();
         final TestDisplayContent display = createNewDisplayContent();
         final TaskDisplayArea preferredTaskDisplayArea = display.getDefaultTaskDisplayArea();
-        // TODO(b/152116619): Enable after complete switch to WindowContainerToken
-        //params.mPreferredWindowContainerToken = preferredTaskDisplayAreaToken;
-        params.mPreferredDisplayId = display.mDisplayId;
+        params.mPreferredTaskDisplayArea = preferredTaskDisplayArea;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
         final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
@@ -433,7 +431,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         void saveTask(Task task, DisplayContent display) {
             final int userId = task.mUserId;
             final ComponentName realActivity = task.realActivity;
-            mTmpParams.mPreferredDisplayId = task.getDisplayId();
+            mTmpParams.mPreferredTaskDisplayArea = task.getDisplayArea();
             mTmpParams.mWindowingMode = task.getWindowingMode();
             if (task.mLastNonFullscreenBounds != null) {
                 mTmpParams.mBounds.set(task.mLastNonFullscreenBounds);

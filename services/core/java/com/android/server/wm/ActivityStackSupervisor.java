@@ -1053,6 +1053,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return true;
     }
 
+    /** Check if caller is allowed to launch activities on specified task display area. */
+    boolean isCallerAllowedToLaunchOnTaskDisplayArea(int callingPid, int callingUid,
+            TaskDisplayArea taskDisplayArea, ActivityInfo aInfo) {
+        return isCallerAllowedToLaunchOnDisplay(callingPid, callingUid,
+                taskDisplayArea != null ? taskDisplayArea.getDisplayId() : DEFAULT_DISPLAY, aInfo);
+    }
+
     /** Check if caller is allowed to launch activities on specified display. */
     boolean isCallerAllowedToLaunchOnDisplay(int callingPid, int callingUid, int launchDisplayId,
             ActivityInfo aInfo) {
@@ -2131,18 +2138,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         removeRestartTimeouts(r);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(RESTART_ACTIVITY_PROCESS_TIMEOUT_MSG, r),
                 WindowManagerService.WINDOW_FREEZE_TIMEOUT_DURATION);
-    }
-
-    // TODO(b/152116619): Remove after complete switch to TaskDisplayArea
-    void handleNonResizableTaskIfNeeded(Task task, int preferredWindowingMode,
-            int preferredDisplayId, ActivityStack actualStack) {
-        final DisplayContent preferredDisplayContent = mRootWindowContainer
-                .getDisplayContent(preferredDisplayId);
-        final TaskDisplayArea preferredDisplayArea = preferredDisplayContent != null
-                ? preferredDisplayContent.getDefaultTaskDisplayArea()
-                : null;
-        handleNonResizableTaskIfNeeded(task, preferredWindowingMode, preferredDisplayArea,
-                actualStack);
     }
 
     void handleNonResizableTaskIfNeeded(Task task, int preferredWindowingMode,
