@@ -25,6 +25,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     @UiThreadTest
     @Test
     public void showSecurityScreen_canInflateAllModes() {
+        mDependency.injectMockDependency(KeyguardStateController.class);
         KeyguardSecurityContainer keyguardSecurityContainer =
                 new KeyguardSecurityContainer(getContext());
 
