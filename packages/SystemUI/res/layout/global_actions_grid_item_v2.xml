@@ -18,15 +18,16 @@
      work around this for now with LinearLayouts. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="0dp"
+    android:layout_weight="1"
     android:layout_height="wrap_content"
     android:gravity="center"
     android:paddingTop="@dimen/global_actions_grid_item_vertical_margin"
     android:paddingBottom="@dimen/global_actions_grid_item_vertical_margin"
     android:paddingLeft="@dimen/global_actions_grid_item_side_margin"
     android:paddingRight="@dimen/global_actions_grid_item_side_margin"
-    android:layout_marginRight="3dp"
-    android:layout_marginLeft="3dp"
+    android:layout_marginRight="@dimen/control_base_item_margin"
+    android:layout_marginLeft="@dimen/control_base_item_margin"
     android:background="@drawable/control_background">
     <LinearLayout
         android:layout_width="@dimen/global_actions_grid_item_width"

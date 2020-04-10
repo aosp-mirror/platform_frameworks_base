@@ -4274,9 +4274,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         logPerformShow("performShow on ");
 
         final int drawState = mWinAnimator.mDrawState;
-        if ((drawState == HAS_DRAWN || drawState == READY_TO_SHOW)
-                && mAttrs.type != TYPE_APPLICATION_STARTING && mActivityRecord != null) {
-            mActivityRecord.onFirstWindowDrawn(this, mWinAnimator);
+        if ((drawState == HAS_DRAWN || drawState == READY_TO_SHOW) && mActivityRecord != null) {
+            if (mAttrs.type != TYPE_APPLICATION_STARTING) {
+                mActivityRecord.onFirstWindowDrawn(this, mWinAnimator);
+            } else {
+                mActivityRecord.onStartingWindowDrawn();
+            }
         }
 
         if (mWinAnimator.mDrawState != READY_TO_SHOW || !isReadyForDisplay()) {

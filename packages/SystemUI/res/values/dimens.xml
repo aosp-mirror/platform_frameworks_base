@@ -1008,6 +1008,9 @@
     <dimen name="global_actions_grid_container_shadow_offset">20dp</dimen>
     <dimen name="global_actions_grid_container_negative_shadow_offset">-20dp</dimen>
 
+    <!-- Margins at the left and right of the power menu and home controls widgets. -->
+    <dimen name="global_actions_side_margin">16dp</dimen>
+
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
     <dimen name="burn_in_prevention_offset_x">8dp</dimen>
@@ -1232,7 +1235,6 @@
     <dimen name="controls_header_side_margin">4dp</dimen>
     <dimen name="controls_header_menu_size">48dp</dimen>
     <dimen name="controls_header_app_icon_size">40dp</dimen>
-    <dimen name="controls_list_side_margin">16dp</dimen>
     <dimen name="controls_top_margin">44dp</dimen>
     <dimen name="control_header_text_size">22sp</dimen>
     <dimen name="control_text_size">14sp</dimen>

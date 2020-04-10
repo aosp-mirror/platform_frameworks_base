@@ -120,9 +120,9 @@ bool isAttributionUidField(const FieldValue& value) {
 }
 
 int32_t getUidIfExists(const FieldValue& value) {
-    // the field is uid field if the field is the uid field in attribution node or marked as
-    // is_uid in atoms.proto
-    bool isUid = isAttributionUidField(value) || isUidField(value.mField, value.mValue);
+    // the field is uid field if the field is the uid field in attribution node
+    // or annotated as such in the atom
+    bool isUid = isAttributionUidField(value) || isUidField(value);
     return isUid ? value.mValue.int_value : -1;
 }
 
@@ -134,16 +134,8 @@ bool isAttributionUidField(const Field& field, const Value& value) {
     return false;
 }
 
-bool isUidField(const Field& field, const Value& value) {
-    auto it = android::util::AtomsInfo::kAtomsWithUidField.find(field.getTag());
-
-    if (it != android::util::AtomsInfo::kAtomsWithUidField.end()) {
-        int uidField = it->second;  // uidField is the field number in proto
-        return field.getDepth() == 0 && field.getPosAtDepth(0) == uidField &&
-               value.getType() == INT;
-    }
-
-    return false;
+bool isUidField(const FieldValue& fieldValue) {
+    return fieldValue.mAnnotations.isUidField();
 }
 
 Value::Value(const Value& from) {

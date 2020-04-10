@@ -1836,8 +1836,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Bundle addSyntheticRestrictions(Bundle restrictions) {
             if (disableCamera) {
                 restrictions.putBoolean(UserManager.DISALLOW_CAMERA, true);
-            } else {
-                restrictions.remove(UserManager.DISALLOW_CAMERA);
+            }
+            if (requireAutoTime) {
+                restrictions.putBoolean(UserManager.DISALLOW_CONFIG_DATE_TIME, true);
             }
             return restrictions;
         }
@@ -1864,7 +1865,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Bundle getEffectiveRestrictions() {
             return addSyntheticRestrictions(
-                    removeDeprecatedRestrictions(ensureUserRestrictions()));
+                    removeDeprecatedRestrictions(new Bundle(ensureUserRestrictions())));
         }
 
         Bundle getLocalUserRestrictions(int adminType) {
@@ -2701,10 +2702,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Slog.i(LOG_TAG, "Clearing the DO...");
         final ComponentName doAdminReceiver = doAdmin.info.getComponent();
         clearDeviceOwnerLocked(doAdmin, doUserId);
-        // TODO(b/143516163): If we have a power cut here, we might leave active admin. Consider if
-        // it is worth the complexity to make it more robust.
         Slog.i(LOG_TAG, "Removing admin artifacts...");
-        // TODO(b/143516163): Clean up application restrictions in UserManager.
+        // TODO(b/149075700): Clean up application restrictions in UserManager.
         removeAdminArtifacts(doAdminReceiver, doUserId);
         Slog.i(LOG_TAG, "Migration complete.");
 
@@ -2746,16 +2745,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // The following policies weren't available to PO, but will be available after migration.
         parentAdmin.disableCamera = doAdmin.disableCamera;
-
-        // TODO(b/143516163): Uncomment once corresponding APIs are available via parent instance.
-        // parentAdmin.disableScreenCapture = doAdmin.disableScreenCapture;
-        // parentAdmin.accountTypesWithManagementDisabled.addAll(
-        //         doAdmin.accountTypesWithManagementDisabled);
+        parentAdmin.requireAutoTime = doAdmin.requireAutoTime;
+        parentAdmin.disableScreenCapture = doAdmin.disableScreenCapture;
+        parentAdmin.accountTypesWithManagementDisabled.addAll(
+                doAdmin.accountTypesWithManagementDisabled);
 
         moveDoUserRestrictionsToCopeParent(doAdmin, parentAdmin);
-
-        // TODO(b/143516163): migrate network and security logging state, currently they are
-        // turned off when DO is removed.
     }
 
     private void moveDoUserRestrictionsToCopeParent(ActiveAdmin doAdmin, ActiveAdmin parentAdmin) {
@@ -2775,7 +2770,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * a managed profile.
      */
     @GuardedBy("getLockObject()")
-    void applyManagedProfileRestrictionIfDeviceOwnerLocked() {
+    private void applyManagedProfileRestrictionIfDeviceOwnerLocked() {
         final int doUserId = mOwners.getDeviceOwnerUserId();
         if (doUserId == UserHandle.USER_NULL) {
             logIfVerbose("No DO found, skipping application of restriction.");
@@ -3999,11 +3994,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mOwners.systemReady();
                 break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
-                maybeStartSecurityLogMonitorOnActivityManagerReady();
                 synchronized (getLockObject()) {
                     migrateToProfileOnOrganizationOwnedDeviceIfCompLocked();
                     applyManagedProfileRestrictionIfDeviceOwnerLocked();
                 }
+                maybeStartSecurityLogMonitorOnActivityManagerReady();
                 final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
                 if (userId >= 0) {
                     updatePersonalAppSuspension(userId, false /* running */);
@@ -7839,16 +7834,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Objects.requireNonNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
+        boolean requireAutoTimeChanged = false;
         synchronized (getLockObject()) {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             if (admin.requireAutoTime != required) {
                 admin.requireAutoTime = required;
                 saveSettingsLocked(userHandle);
+                requireAutoTimeChanged = true;
             }
         }
-
-        // TODO: (b/145604635) Add upgrade case
+        // requireAutoTime is now backed by DISALLOW_CONFIG_DATE_TIME restriction, so propagate
+        // updated restrictions to the framework.
+        if (requireAutoTimeChanged) {
+            pushUserRestrictions(userHandle);
+        }
         // Turn AUTO_TIME on in settings if it is required
         if (required) {
             mInjector.binderWithCleanCallingIdentity(

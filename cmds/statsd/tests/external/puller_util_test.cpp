@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "../metrics/metrics_test_helper.h"
+#include "annotations.h"
 #include "stats_event.h"
 #include "statslog_statsdtest.h"
 #include "tests/statsd_test_util.h"
@@ -53,15 +54,15 @@ int hostNonAdditiveData = 22;
 
 void extractIntoVector(vector<shared_ptr<LogEvent>> events,
                       vector<vector<int>>& ret) {
-  ret.clear();
-  status_t err;
-  for (const auto& event : events) {
-    vector<int> vec;
-    vec.push_back(event->GetInt(1, &err));
-    vec.push_back(event->GetInt(2, &err));
-    vec.push_back(event->GetInt(3, &err));
-    ret.push_back(vec);
-  }
+    ret.clear();
+    status_t err;
+    for (const auto& event : events) {
+        vector<int> vec;
+        vec.push_back(event->GetInt(1, &err));
+        vec.push_back(event->GetInt(2, &err));
+        vec.push_back(event->GetInt(3, &err));
+        ret.push_back(vec);
+    }
 }
 
 std::shared_ptr<LogEvent> makeUidLogEvent(uint64_t timestampNs, int uid, int data1, int data2) {
@@ -70,6 +71,7 @@ std::shared_ptr<LogEvent> makeUidLogEvent(uint64_t timestampNs, int uid, int dat
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_addBoolAnnotation(statsEvent, ANNOTATION_ID_IS_UID, true);
     AStatsEvent_writeInt32(statsEvent, data1);
     AStatsEvent_writeInt32(statsEvent, data2);
 

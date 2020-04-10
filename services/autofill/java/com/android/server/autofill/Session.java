@@ -652,10 +652,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return mService.isInlineSuggestionsEnabled();
     }
 
-    private boolean isInlineSuggestionRenderServiceAvailable() {
-        return mService.getRemoteInlineSuggestionRenderServiceLocked() != null;
-    }
-
     /**
      * Clears the existing response for the partition, reads a new structure, and then requests a
      * new fill response from the fill service.
@@ -715,14 +711,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // Only ask IME to create inline suggestions request if Autofill provider supports it and
         // the render service is available.
-        if (isInlineSuggestionsEnabledByAutofillProviderLocked()
-                && isInlineSuggestionRenderServiceAvailable()) {
+        final RemoteInlineSuggestionRenderService remoteRenderService =
+                mService.getRemoteInlineSuggestionRenderServiceLocked();
+        if (isInlineSuggestionsEnabledByAutofillProviderLocked() && remoteRenderService != null) {
             Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestConsumer =
                     mAssistReceiver.newAutofillRequestLocked(/*isInlineRequest=*/ true);
             if (inlineSuggestionsRequestConsumer != null) {
-                // TODO(b/146454892): pipe the uiExtras from the ExtServices.
-                mInlineSessionController.onCreateInlineSuggestionsRequestLocked(mCurrentViewId,
-                        inlineSuggestionsRequestConsumer, Bundle.EMPTY);
+                remoteRenderService.getInlineSuggestionsRendererInfo(
+                        new RemoteCallback((extras) -> {
+                            mInlineSessionController.onCreateInlineSuggestionsRequestLocked(
+                                    mCurrentViewId, inlineSuggestionsRequestConsumer, extras);
+                        }
+                ));
             }
         } else {
             mAssistReceiver.newAutofillRequestLocked(/*isInlineRequest=*/ false);
@@ -1228,6 +1228,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error requesting to hide fill UI", e);
             }
+
+            mInlineSessionController.hideInlineSuggestionsUiLocked(id);
         }
     }
 
@@ -3128,13 +3130,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // 1. the field is augmented autofill only (when standard autofill provider is None or
         // when it returns null response)
         // 2. standard autofill provider doesn't support inline suggestion
-        if (isInlineSuggestionRenderServiceAvailable()
+        final RemoteInlineSuggestionRenderService remoteRenderService =
+                mService.getRemoteInlineSuggestionRenderServiceLocked();
+        if (remoteRenderService != null
                 && (mForAugmentedAutofillOnly
                 || !isInlineSuggestionsEnabledByAutofillProviderLocked())) {
             if (sDebug) Slog.d(TAG, "Create inline request for augmented autofill");
-            // TODO(b/146454892): pipe the uiExtras from the ExtServices.
-            mInlineSessionController.onCreateInlineSuggestionsRequestLocked(mCurrentViewId,
-                    /*requestConsumer=*/ requestAugmentedAutofill, Bundle.EMPTY);
+            remoteRenderService.getInlineSuggestionsRendererInfo(new RemoteCallback(
+                    (extras) -> {
+                        mInlineSessionController.onCreateInlineSuggestionsRequestLocked(
+                                mCurrentViewId, /*requestConsumer=*/ requestAugmentedAutofill,
+                                extras);
+                    }, mHandler));
         } else {
             requestAugmentedAutofill.accept(
                     mInlineSessionController.getInlineSuggestionsRequestLocked().orElse(null));

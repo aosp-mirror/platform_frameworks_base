@@ -125,7 +125,7 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
         loadSubscriberCaptor.value.onSubscribe(Binder(), subscription)
 
         canceller.run()
-        verify(subscription).cancel()
+        verify(providers[0]).cancelSubscription(subscription)
     }
 
     @Test
@@ -145,7 +145,7 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
         loadSubscriberCaptor.value.onComplete(b)
         canceller.run()
-        verify(subscription, never()).cancel()
+        verify(providers[0], never()).cancelSubscription(subscription)
     }
 
     @Test
@@ -203,7 +203,7 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
         loadSubscriberCaptor.value.onError(b, "")
         canceller.run()
-        verify(subscription, never()).cancel()
+        verify(providers[0], never()).cancelSubscription(subscription)
     }
 
     @Test

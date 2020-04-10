@@ -832,7 +832,7 @@ public final class ContentCaptureManager {
         void initializeForDelegate(DataShareAdapterDelegate delegate, DataShareWriteAdapter adapter,
                 Executor executor) {
             mWriteAdapterHardReferences.put(delegate, adapter);
-            mExecutorHardReferences.remove(delegate, executor);
+            mExecutorHardReferences.put(delegate, executor);
         }
 
         Executor getExecutor(DataShareAdapterDelegate delegate) {

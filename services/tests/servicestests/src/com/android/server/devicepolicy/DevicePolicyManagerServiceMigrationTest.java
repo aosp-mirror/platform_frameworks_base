@@ -19,6 +19,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.android.server.devicepolicy.DpmTestUtils.writeInputStreamToFile;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -378,6 +379,15 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
                     33, dpm.getParentProfileInstance(admin1).getPasswordHistoryLength(admin1));
             assertEquals("Password history policy was put into non-parent PO instance",
                     0, dpm.getPasswordHistoryLength(admin1));
+            assertTrue("Screen capture restriction wasn't migrated to PO parent instance",
+                    dpm.getParentProfileInstance(admin1).getScreenCaptureDisabled(admin1));
+
+            assertArrayEquals("Accounts with management disabled weren't migrated to PO parent",
+                    new String[] {"com.google-primary"},
+                    dpm.getParentProfileInstance(admin1).getAccountTypesWithManagementDisabled());
+            assertArrayEquals("Accounts with management disabled for profile were lost",
+                    new String[] {"com.google-profile"},
+                    dpm.getAccountTypesWithManagementDisabled());
 
             assertTrue("User restriction wasn't migrated to PO parent instance",
                     dpm.getParentProfileInstance(admin1).getUserRestrictions(admin1)
@@ -385,7 +395,15 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
             assertFalse("User restriction was put into non-parent PO instance",
                     dpm.getUserRestrictions(admin1).containsKey(UserManager.DISALLOW_BLUETOOTH));
 
-            // TODO(b/143516163): verify more policies.
+            assertTrue("User restriction wasn't migrated to PO parent instance",
+                    dpms.getProfileOwnerAdminLocked(COPE_PROFILE_USER_ID)
+                            .getParentActiveAdmin()
+                            .getEffectiveRestrictions()
+                            .containsKey(UserManager.DISALLOW_CONFIG_DATE_TIME));
+            assertFalse("User restriction was put into non-parent PO instance",
+                    dpms.getProfileOwnerAdminLocked(COPE_PROFILE_USER_ID)
+                            .getEffectiveRestrictions()
+                            .containsKey(UserManager.DISALLOW_CONFIG_DATE_TIME));
         });
     }
 

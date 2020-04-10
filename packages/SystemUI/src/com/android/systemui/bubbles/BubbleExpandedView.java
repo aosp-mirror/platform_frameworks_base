@@ -16,6 +16,7 @@
 
 package com.android.systemui.bubbles;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.view.Display.INVALID_DISPLAY;
@@ -126,6 +127,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                     ActivityOptions options = ActivityOptions.makeCustomAnimation(getContext(),
                             0 /* enterResId */, 0 /* exitResId */);
                     options.setTaskAlwaysOnTop(true);
+                    options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
                     // Post to keep the lifecycle normal
                     post(() -> {
                         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
