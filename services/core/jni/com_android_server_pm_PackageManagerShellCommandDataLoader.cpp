@@ -410,6 +410,8 @@ private:
 
     // Installation.
     bool onPrepareImage(dataloader::DataLoaderInstallationFiles addedFiles) final {
+        ALOGE("onPrepareImage: start.");
+
         JNIEnv* env = GetOrAttachJNIEnvironment(mJvm);
         const auto& jni = jniIds(env);
 

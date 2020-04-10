@@ -289,10 +289,11 @@ private:
                         Clock::time_point scheduledTs);
 
 private:
-    std::unique_ptr<VoldServiceWrapper> const mVold;
-    std::unique_ptr<DataLoaderManagerWrapper> const mDataLoaderManager;
-    std::unique_ptr<IncFsWrapper> const mIncFs;
-    std::unique_ptr<AppOpsManagerWrapper> const mAppOpsManager;
+    const std::unique_ptr<VoldServiceWrapper> mVold;
+    const std::unique_ptr<DataLoaderManagerWrapper> mDataLoaderManager;
+    const std::unique_ptr<IncFsWrapper> mIncFs;
+    const std::unique_ptr<AppOpsManagerWrapper> mAppOpsManager;
+    const std::unique_ptr<JniWrapper> mJni;
     const std::string mIncrementalDir;
 
     mutable std::mutex mLock;

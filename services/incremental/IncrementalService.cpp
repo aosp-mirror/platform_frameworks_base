@@ -237,6 +237,7 @@ IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_v
         mDataLoaderManager(sm.getDataLoaderManager()),
         mIncFs(sm.getIncFs()),
         mAppOpsManager(sm.getAppOpsManager()),
+        mJni(sm.getJni()),
         mIncrementalDir(rootDir) {
     if (!mVold) {
         LOG(FATAL) << "Vold service is unavailable";
@@ -249,7 +250,10 @@ IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_v
     }
 
     mJobQueue.reserve(16);
-    mJobProcessor = std::thread([this]() { runJobProcessing(); });
+    mJobProcessor = std::thread([this]() {
+        mJni->initializeForCurrentThread();
+        runJobProcessing();
+    });
 
     mountExistingImages();
 }
@@ -1248,9 +1252,10 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
             continue;
         }
 
-        jobQueue.emplace_back([this, zipFile, entry, ifs, libFileId,
-                               libPath = std::move(targetLibPath), makeFileTs]() mutable {
-            extractZipFile(ifs, zipFile.get(), entry, libFileId, libPath, makeFileTs);
+        jobQueue.emplace_back([this, zipFile, entry, ifs = std::weak_ptr<IncFsMount>(ifs),
+                               libFileId, libPath = std::move(targetLibPath),
+                               makeFileTs]() mutable {
+            extractZipFile(ifs.lock(), zipFile.get(), entry, libFileId, libPath, makeFileTs);
         });
 
         if (sEnablePerfLogging) {
@@ -1296,6 +1301,11 @@ void IncrementalService::extractZipFile(const IfsMountPtr& ifs, ZipArchiveHandle
                                         ZipEntry& entry, const incfs::FileId& libFileId,
                                         std::string_view targetLibPath,
                                         Clock::time_point scheduledTs) {
+    if (!ifs) {
+        LOG(INFO) << "Skipping zip file " << targetLibPath << " extraction for an expired mount";
+        return;
+    }
+
     auto libName = path::basename(targetLibPath);
     auto startedTs = Clock::now();
 

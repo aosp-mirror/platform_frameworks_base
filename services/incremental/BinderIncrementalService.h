@@ -18,6 +18,7 @@
 
 #include <binder/BinderService.h>
 #include <binder/IServiceManager.h>
+#include <jni.h>
 
 #include "IncrementalService.h"
 #include "android/os/incremental/BnIncrementalService.h"
@@ -28,9 +29,9 @@ namespace android::os::incremental {
 class BinderIncrementalService : public BnIncrementalService,
                                  public BinderService<BinderIncrementalService> {
 public:
-    BinderIncrementalService(const sp<IServiceManager>& sm);
+    BinderIncrementalService(const sp<IServiceManager>& sm, JNIEnv* env);
 
-    static BinderIncrementalService* start();
+    static BinderIncrementalService* start(JNIEnv* env);
     static const char16_t* getServiceName() { return u"incremental"; }
     status_t dump(int fd, const Vector<String16>& args) final;
 

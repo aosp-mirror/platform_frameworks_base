@@ -58,10 +58,10 @@ static bool incFsValid(const sp<IVold>& vold) {
     return true;
 }
 
-BinderIncrementalService::BinderIncrementalService(const sp<IServiceManager>& sm)
-      : mImpl(RealServiceManager(sm), getIncrementalDir()) {}
+BinderIncrementalService::BinderIncrementalService(const sp<IServiceManager>& sm, JNIEnv* env)
+      : mImpl(RealServiceManager(sm, env), getIncrementalDir()) {}
 
-BinderIncrementalService* BinderIncrementalService::start() {
+BinderIncrementalService* BinderIncrementalService::start(JNIEnv* env) {
     if (!incFsEnabled()) {
         return nullptr;
     }
@@ -81,7 +81,7 @@ BinderIncrementalService* BinderIncrementalService::start() {
         return nullptr;
     }
 
-    sp<BinderIncrementalService> self(new BinderIncrementalService(sm));
+    sp<BinderIncrementalService> self(new BinderIncrementalService(sm, env));
     status_t ret = sm->addService(String16{getServiceName()}, self);
     if (ret != android::OK) {
         return nullptr;
@@ -290,8 +290,8 @@ binder::Status BinderIncrementalService::waitForNativeBinariesExtraction(int sto
 
 } // namespace android::os::incremental
 
-jlong Incremental_IncrementalService_Start() {
-    return (jlong)android::os::incremental::BinderIncrementalService::start();
+jlong Incremental_IncrementalService_Start(JNIEnv* env) {
+    return (jlong)android::os::incremental::BinderIncrementalService::start(env);
 }
 void Incremental_IncrementalService_OnSystemReady(jlong self) {
     if (self) {
