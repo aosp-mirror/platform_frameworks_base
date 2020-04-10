@@ -23,6 +23,14 @@ import org.junit.runner.RunWith;
 
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class OverlaySharedLibraryTest extends OverlayRemountedTestBase {
+    private static final String SHARED_LIBRARY_APK =
+            "OverlayRemountedTest_SharedLibrary.apk";
+    private static final String SHARED_LIBRARY_PACKAGE =
+            "com.android.overlaytest.remounted.shared_library";
+    private static final String SHARED_LIBRARY_OVERLAY_APK =
+            "OverlayRemountedTest_SharedLibraryOverlay.apk";
+    private static final String SHARED_LIBRARY_OVERLAY_PACKAGE =
+            "com.android.overlaytest.remounted.shared_library.overlay";
 
     @Test
     public void testSharedLibrary() throws Exception {

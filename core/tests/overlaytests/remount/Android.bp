@@ -21,6 +21,8 @@ java_test_host {
     ],
     test_suites: ["general-tests"],
     java_resources: [
+        ":com.android.overlaytest.overlaid",
+        ":com.android.overlaytest.overlay",
         ":OverlayRemountedTest_SharedLibrary",
         ":OverlayRemountedTest_SharedLibraryOverlay",
         ":OverlayRemountedTest_Target",
