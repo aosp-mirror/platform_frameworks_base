@@ -17,6 +17,7 @@
 package android.service.autofill;
 
 import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.service.autofill.IInlineSuggestionUiCallback;
 import android.service.autofill.InlinePresentation;
 
@@ -29,4 +30,5 @@ oneway interface IInlineSuggestionRenderService {
     void renderSuggestion(in IInlineSuggestionUiCallback callback,
                           in InlinePresentation presentation, int width, int height,
                           in IBinder hostInputToken, int displayId);
+    void getInlineSuggestionsRendererInfo(in RemoteCallback callback);
 }
