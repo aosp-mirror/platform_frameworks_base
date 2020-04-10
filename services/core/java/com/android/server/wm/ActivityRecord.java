@@ -2669,15 +2669,28 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return this;
         }
 
-        // Ensure activity visibilities and update lockscreen occluded/dismiss state when
-        // finishing the top activity that occluded keyguard. So that, the
-        // ActivityStack#mTopActivityOccludesKeyguard can be updated and the activity below won't
-        // be resumed.
-        if (isState(PAUSED)
-                && mStackSupervisor.getKeyguardController().isKeyguardLocked()
-                && getStack().topActivityOccludesKeyguard()) {
-            getDisplay().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                    false /* preserveWindows */, false /* notifyClients */);
+        final boolean isCurrentVisible = mVisibleRequested || isState(PAUSED);
+        if (isCurrentVisible) {
+            final ActivityStack stack = getStack();
+            final ActivityRecord activity = stack.mResumedActivity;
+            boolean ensureVisibility = false;
+            if (activity != null && !activity.occludesParent()) {
+                // If the resume activity is not opaque, we need to make sure the visibilities of
+                // activities be updated, they may be seen by users.
+                ensureVisibility = true;
+            } else if (mStackSupervisor.getKeyguardController().isKeyguardLocked()
+                    && stack.topActivityOccludesKeyguard()) {
+                // Ensure activity visibilities and update lockscreen occluded/dismiss state when
+                // finishing the top activity that occluded keyguard. So that, the
+                // ActivityStack#mTopActivityOccludesKeyguard can be updated and the activity below
+                // won't be resumed.
+                ensureVisibility = true;
+            }
+
+            if (ensureVisibility) {
+                getDisplay().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                        false /* preserveWindows */, true /* notifyClients */);
+            }
         }
 
         boolean activityRemoved = false;
@@ -2698,7 +2711,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // than destroy immediately.
         final boolean isNextNotYetVisible = next != null
                 && (!next.nowVisible || !next.mVisibleRequested);
-        if ((mVisibleRequested || isState(PAUSED)) && isNextNotYetVisible) {
+        if (isCurrentVisible && isNextNotYetVisible) {
             // Add this activity to the list of stopping activities. It will be processed and
             // destroyed when the next activity reports idle.
             addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
