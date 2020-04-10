@@ -80,11 +80,11 @@ public class BiometricStrengthController {
             return;
         }
 
-        for (BiometricService.AuthenticatorWrapper authenticator : mService.mAuthenticators) {
-            final int id = authenticator.id;
+        for (BiometricSensor sensor : mService.mSensors) {
+            final int id = sensor.id;
             if (idToStrength.containsKey(id)) {
                 final int newStrength = idToStrength.get(id);
-                authenticator.updateStrength(newStrength);
+                sensor.updateStrength(newStrength);
             }
         }
     }

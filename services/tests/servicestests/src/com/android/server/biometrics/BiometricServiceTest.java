@@ -317,7 +317,7 @@ public class BiometricServiceTest {
                 null /* authenticators */);
         waitForIdle();
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
-        verify(mBiometricService.mAuthenticators.get(0).impl).prepareForAuthentication(
+        verify(mBiometricService.mSensors.get(0).impl).prepareForAuthentication(
                 eq(true) /* requireConfirmation */,
                 any(IBinder.class),
                 anyLong() /* sessionId */,
@@ -336,7 +336,7 @@ public class BiometricServiceTest {
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
                 null /* authenticators */);
         waitForIdle();
-        verify(mBiometricService.mAuthenticators.get(0).impl).prepareForAuthentication(
+        verify(mBiometricService.mSensors.get(0).impl).prepareForAuthentication(
                 eq(false) /* requireConfirmation */,
                 any(IBinder.class),
                 anyLong() /* sessionId */,
@@ -375,7 +375,7 @@ public class BiometricServiceTest {
         // Invokes <Modality>Service#prepareForAuthentication
         ArgumentCaptor<Integer> cookieCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
-        verify(mBiometricService.mAuthenticators.get(0).impl).prepareForAuthentication(
+        verify(mBiometricService.mSensors.get(0).impl).prepareForAuthentication(
                 anyBoolean() /* requireConfirmation */,
                 any(IBinder.class),
                 anyLong() /* sessionId */,
@@ -396,7 +396,7 @@ public class BiometricServiceTest {
                 AuthSession.STATE_AUTH_STARTED);
 
         // startPreparedClient invoked
-        verify(mBiometricService.mAuthenticators.get(0).impl)
+        verify(mBiometricService.mSensors.get(0).impl)
                 .startPreparedClient(cookieCaptor.getValue());
 
         // StatusBar showBiometricDialog invoked
@@ -876,7 +876,7 @@ public class BiometricServiceTest {
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED),
                 eq(0 /* vendorCode */));
-        verify(mBiometricService.mAuthenticators.get(0).impl).cancelAuthenticationFromService(
+        verify(mBiometricService.mSensors.get(0).impl).cancelAuthenticationFromService(
                 any(),
                 any(),
                 anyInt(),
@@ -901,7 +901,7 @@ public class BiometricServiceTest {
                 BiometricPrompt.DISMISSED_REASON_NEGATIVE, null /* credentialAttestation */);
         waitForIdle();
 
-        verify(mBiometricService.mAuthenticators.get(0).impl,
+        verify(mBiometricService.mSensors.get(0).impl,
                 never()).cancelAuthenticationFromService(
                 any(),
                 any(),
@@ -927,7 +927,7 @@ public class BiometricServiceTest {
                 BiometricPrompt.DISMISSED_REASON_USER_CANCEL, null /* credentialAttestation */);
         waitForIdle();
 
-        verify(mBiometricService.mAuthenticators.get(0).impl,
+        verify(mBiometricService.mSensors.get(0).impl,
                 never()).cancelAuthenticationFromService(
                 any(),
                 any(),
@@ -952,7 +952,7 @@ public class BiometricServiceTest {
         waitForIdle();
 
         // doesn't send cancel to HAL
-        verify(mBiometricService.mAuthenticators.get(0).impl,
+        verify(mBiometricService.mSensors.get(0).impl,
                 never()).cancelAuthenticationFromService(
                 any(),
                 any(),
@@ -1130,8 +1130,8 @@ public class BiometricServiceTest {
         };
 
         for (int i = 0; i < testCases.length; i++) {
-            final BiometricService.AuthenticatorWrapper authenticator =
-                    new BiometricService.AuthenticatorWrapper(0 /* id */,
+            final BiometricSensor authenticator =
+                    new BiometricSensor(0 /* id */,
                             BiometricAuthenticator.TYPE_FINGERPRINT,
                             testCases[i][0],
                             null /* impl */);
@@ -1173,9 +1173,9 @@ public class BiometricServiceTest {
                 mFingerprintAuthenticator);
 
         // Downgrade the authenticator
-        for (BiometricService.AuthenticatorWrapper wrapper : mBiometricService.mAuthenticators) {
-            if (wrapper.id == testId) {
-                wrapper.updateStrength(Authenticators.BIOMETRIC_WEAK);
+        for (BiometricSensor sensor : mBiometricService.mSensors) {
+            if (sensor.id == testId) {
+                sensor.updateStrength(Authenticators.BIOMETRIC_WEAK);
             }
         }
 
@@ -1230,9 +1230,9 @@ public class BiometricServiceTest {
                 anyLong() /* sessionId */);
 
         // Un-downgrading the authenticator allows successful strong auth
-        for (BiometricService.AuthenticatorWrapper wrapper : mBiometricService.mAuthenticators) {
-            if (wrapper.id == testId) {
-                wrapper.updateStrength(Authenticators.BIOMETRIC_STRONG);
+        for (BiometricSensor sensor : mBiometricService.mSensors) {
+            if (sensor.id == testId) {
+                sensor.updateStrength(Authenticators.BIOMETRIC_STRONG);
             }
         }
 

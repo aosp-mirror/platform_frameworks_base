@@ -130,9 +130,8 @@ public class BiometricService extends SystemService {
     @VisibleForTesting
     ITrustManager mTrustManager;
 
-    // Get and cache the available authenticator (manager) classes. Used since aidl doesn't support
-    // polymorphism :/
-    final ArrayList<AuthenticatorWrapper> mAuthenticators = new ArrayList<>();
+    // Get and cache the available biometric authenticators and their associated info.
+    final ArrayList<BiometricSensor> mSensors = new ArrayList<>();
 
     BiometricStrengthController mBiometricStrengthController;
 
@@ -257,63 +256,6 @@ public class BiometricService extends SystemService {
             }
         }
     };
-
-    /**
-     * Wraps IBiometricAuthenticator implementation and stores information about the authenticator.
-     * TODO(b/141025588): Consider refactoring the tests to not rely on this implementation detail.
-     */
-    @VisibleForTesting
-    public static final class AuthenticatorWrapper {
-        public final int id;
-        public final int OEMStrength; // strength as configured by the OEM
-        private int updatedStrength; // strength updated by BiometricStrengthController
-        public final int modality;
-        public final IBiometricAuthenticator impl;
-
-        AuthenticatorWrapper(int id, int modality, int strength,
-                IBiometricAuthenticator impl) {
-            this.id = id;
-            this.modality = modality;
-            this.OEMStrength = strength;
-            this.updatedStrength = strength;
-            this.impl = impl;
-        }
-
-        /**
-         * Returns the actual strength, taking any updated strengths into effect. Since more bits
-         * means lower strength, the resulting strength is never stronger than the OEM's configured
-         * strength.
-         * @return a bitfield, see {@link Authenticators}
-         */
-        int getActualStrength() {
-            return OEMStrength | updatedStrength;
-        }
-
-        boolean isDowngraded() {
-            return OEMStrength != updatedStrength;
-        }
-
-        /**
-         * Stores the updated strength, which takes effect whenever {@link #getActualStrength()}
-         * is checked.
-         * @param newStrength
-         */
-        void updateStrength(int newStrength) {
-            String log = "updateStrength: Before(" + toString() + ")";
-            updatedStrength = newStrength;
-            log += " After(" + toString() + ")";
-            Slog.d(TAG, log);
-        }
-
-        @Override
-        public String toString() {
-            return "ID(" + id + ")"
-                    + " OEMStrength: " + OEMStrength
-                    + " updatedStrength: " + updatedStrength
-                    + " modality " + modality
-                    + " authenticator: " + impl;
-        }
-    }
 
     @VisibleForTesting
     public static class SettingObserver extends ContentObserver {
@@ -633,8 +575,8 @@ public class BiometricService extends SystemService {
             checkInternalPermission();
 
             try {
-                for (AuthenticatorWrapper authenticator : mAuthenticators) {
-                    if (authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
+                for (BiometricSensor sensor : mSensors) {
+                    if (sensor.impl.hasEnrolledTemplates(userId, opPackageName)) {
                         return true;
                     }
                 }
@@ -670,8 +612,8 @@ public class BiometricService extends SystemService {
                 throw new IllegalStateException("Unsupported strength");
             }
 
-            for (AuthenticatorWrapper wrapper : mAuthenticators) {
-                if (wrapper.id == id) {
+            for (BiometricSensor sensor : mSensors) {
+                if (sensor.id == id) {
                     throw new IllegalStateException("Cannot register duplicate authenticator");
                 }
             }
@@ -690,7 +632,7 @@ public class BiometricService extends SystemService {
                 throw new IllegalStateException("Cannot register unknown id");
             }
 
-            mAuthenticators.add(new AuthenticatorWrapper(id, modality, strength, authenticator));
+            mSensors.add(new BiometricSensor(id, modality, strength, authenticator));
 
             mBiometricStrengthController.updateStrengths();
         }
@@ -714,8 +656,8 @@ public class BiometricService extends SystemService {
             checkInternalPermission();
 
             try {
-                for (AuthenticatorWrapper authenticator : mAuthenticators) {
-                    authenticator.impl.setActiveUser(userId);
+                for (BiometricSensor sensor : mSensors) {
+                    sensor.impl.setActiveUser(userId);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
@@ -727,8 +669,8 @@ public class BiometricService extends SystemService {
             checkInternalPermission();
 
             try {
-                for (AuthenticatorWrapper authenticator : mAuthenticators) {
-                    authenticator.impl.resetLockout(token);
+                for (BiometricSensor sensor : mSensors) {
+                    sensor.impl.resetLockout(token);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
@@ -740,14 +682,14 @@ public class BiometricService extends SystemService {
             checkInternalPermission();
 
             final List<Long> ids = new ArrayList<>();
-            for (AuthenticatorWrapper authenticator : mAuthenticators) {
+            for (BiometricSensor sensor : mSensors) {
                 try {
-                    final long id = authenticator.impl.getAuthenticatorId();
-                    if (Utils.isAtLeastStrength(authenticator.getActualStrength(),
+                    final long id = sensor.impl.getAuthenticatorId();
+                    if (Utils.isAtLeastStrength(sensor.getActualStrength(),
                             Authenticators.BIOMETRIC_STRONG) && id != 0) {
                         ids.add(id);
                     } else {
-                        Slog.d(TAG, "Authenticator " + authenticator + ", authenticatorID " + id
+                        Slog.d(TAG, "Sensor " + sensor + ", sensorId " + id
                                 + " cannot participate in Keystore operations");
                     }
                 } catch (RemoteException e) {
@@ -961,43 +903,43 @@ public class BiometricService extends SystemService {
      * @return A Pair with `first` being modality, and `second` being @BiometricStatus
      */
     private Pair<Integer, Integer> getStatusForBiometricAuthenticator(
-            AuthenticatorWrapper authenticator, int userId, String opPackageName,
+            BiometricSensor sensor, int userId, String opPackageName,
             boolean checkDevicePolicyManager, int requestedStrength) {
         if (checkDevicePolicyManager) {
-            if (isBiometricDisabledByDevicePolicy(authenticator.modality, userId)) {
+            if (isBiometricDisabledByDevicePolicy(sensor.modality, userId)) {
                 return new Pair<>(TYPE_NONE, BIOMETRIC_DISABLED_BY_DEVICE_POLICY);
             }
         }
 
         final boolean wasStrongEnough =
-                Utils.isAtLeastStrength(authenticator.OEMStrength, requestedStrength);
+                Utils.isAtLeastStrength(sensor.oemStrength, requestedStrength);
         final boolean isStrongEnough =
-                Utils.isAtLeastStrength(authenticator.getActualStrength(), requestedStrength);
+                Utils.isAtLeastStrength(sensor.getActualStrength(), requestedStrength);
 
         if (wasStrongEnough && !isStrongEnough) {
-            return new Pair<>(authenticator.modality,
+            return new Pair<>(sensor.modality,
                     BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE);
         } else if (!wasStrongEnough) {
             return new Pair<>(TYPE_NONE, BIOMETRIC_INSUFFICIENT_STRENGTH);
         }
 
         try {
-            if (!authenticator.impl.isHardwareDetected(opPackageName)) {
-                return new Pair<>(authenticator.modality, BIOMETRIC_HARDWARE_NOT_DETECTED);
+            if (!sensor.impl.isHardwareDetected(opPackageName)) {
+                return new Pair<>(sensor.modality, BIOMETRIC_HARDWARE_NOT_DETECTED);
             }
 
-            if (!authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
-                return new Pair<>(authenticator.modality, BIOMETRIC_NOT_ENROLLED);
+            if (!sensor.impl.hasEnrolledTemplates(userId, opPackageName)) {
+                return new Pair<>(sensor.modality, BIOMETRIC_NOT_ENROLLED);
             }
         } catch (RemoteException e) {
-            return new Pair<>(authenticator.modality, BIOMETRIC_HARDWARE_NOT_DETECTED);
+            return new Pair<>(sensor.modality, BIOMETRIC_HARDWARE_NOT_DETECTED);
         }
 
-        if (!isEnabledForApp(authenticator.modality, userId)) {
+        if (!isEnabledForApp(sensor.modality, userId)) {
             return new Pair<>(TYPE_NONE, BIOMETRIC_NOT_ENABLED_FOR_APPS);
         }
 
-        return new Pair<>(authenticator.modality, BIOMETRIC_OK);
+        return new Pair<>(sensor.modality, BIOMETRIC_OK);
     }
 
     /**
@@ -1039,17 +981,17 @@ public class BiometricService extends SystemService {
         int biometricModality = TYPE_NONE;
         @BiometricStatus int biometricStatus = BIOMETRIC_NO_HARDWARE;
 
-        for (AuthenticatorWrapper authenticator : mAuthenticators) {
+        for (BiometricSensor sensor : mSensors) {
             final int requestedStrength = Utils.getPublicBiometricStrength(bundle);
             Pair<Integer, Integer> result = getStatusForBiometricAuthenticator(
-                    authenticator, userId, opPackageName, checkDevicePolicyManager,
+                    sensor, userId, opPackageName, checkDevicePolicyManager,
                     requestedStrength);
 
             biometricStatus = result.second;
 
             Slog.d(TAG, "Package: " + opPackageName
-                    + " Authenticator ID: " + authenticator.id
-                    + " Modality: " + authenticator.modality
+                    + " Authenticator ID: " + sensor.id
+                    + " Modality: " + sensor.modality
                     + " Reported Modality: " + result.first
                     + " Status: " + biometricStatus);
 
@@ -1143,7 +1085,6 @@ public class BiometricService extends SystemService {
                     latency,
                     mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
         } else {
-
             final long latency = System.currentTimeMillis() - mCurrentAuthSession.mStartTimeMs;
 
             int error = reason == BiometricPrompt.DISMISSED_REASON_NEGATIVE
@@ -1538,11 +1479,11 @@ public class BiometricService extends SystemService {
             while (it.hasNext()) {
                 Map.Entry<Integer, Integer> pair = (Map.Entry) it.next();
                 boolean foundAuthenticator = false;
-                for (AuthenticatorWrapper authenticator : mAuthenticators) {
-                    if (authenticator.modality == pair.getKey()) {
+                for (BiometricSensor sensor : mSensors) {
+                    if (sensor.modality == pair.getKey()) {
                         foundAuthenticator = true;
                         try {
-                            authenticator.impl.startPreparedClient(pair.getValue());
+                            sensor.impl.startPreparedClient(pair.getValue());
                         } catch (RemoteException e) {
                             Slog.e(TAG, "Remote exception", e);
                         }
@@ -1648,10 +1589,10 @@ public class BiometricService extends SystemService {
                         sessionId);
             } else {
                 mPendingAuthSession.mState = AuthSession.STATE_AUTH_CALLED;
-                for (AuthenticatorWrapper authenticator : mAuthenticators) {
+                for (BiometricSensor sensor : mSensors) {
                     // TODO(b/141025588): use ids instead of modalities to avoid ambiguity.
-                    if (authenticator.modality == modality) {
-                        authenticator.impl.prepareForAuthentication(requireConfirmation, token,
+                    if (sensor.modality == modality) {
+                        sensor.impl.prepareForAuthentication(requireConfirmation, token,
                                 sessionId, userId, mInternalReceiver, opPackageName, cookie,
                                 callingUid, callingPid, callingUserId);
                         break;
@@ -1706,10 +1647,10 @@ public class BiometricService extends SystemService {
 
         // TODO: For multiple modalities, send a single ERROR_CANCELED only when all
         // drivers have canceled authentication.
-        for (AuthenticatorWrapper authenticator : mAuthenticators) {
-            if ((authenticator.modality & mCurrentAuthSession.mModality) != 0) {
+        for (BiometricSensor sensor : mSensors) {
+            if ((sensor.modality & mCurrentAuthSession.mModality) != 0) {
                 try {
-                    authenticator.impl.cancelAuthenticationFromService(token, opPackageName,
+                    sensor.impl.cancelAuthenticationFromService(token, opPackageName,
                             callingUid, callingPid, callingUserId, fromClient);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to cancel authentication");
