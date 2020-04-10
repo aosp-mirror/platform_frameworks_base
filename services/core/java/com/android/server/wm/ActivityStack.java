@@ -757,7 +757,7 @@ class ActivityStack extends Task {
                 // warning toast about it.
                 mAtmService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                taskDisplayArea.onSplitScreenModeDismissed();
+                taskDisplayArea.onSplitScreenModeDismissed(this);
             }
         }
 
