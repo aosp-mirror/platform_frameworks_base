@@ -1955,6 +1955,7 @@ public class Vpn {
                 profile.ipsecCaCert = caCert;
 
                 // Start VPN profile
+                profile.setAllowedAlgorithms(Ikev2VpnProfile.DEFAULT_ALGORITHMS);
                 startVpnProfilePrivileged(profile, VpnConfig.LEGACY_VPN, keyStore);
                 return;
             case VpnProfile.TYPE_IKEV2_IPSEC_PSK:
@@ -1963,6 +1964,7 @@ public class Vpn {
                         Ikev2VpnProfile.encodeForIpsecSecret(profile.ipsecSecret.getBytes());
 
                 // Start VPN profile
+                profile.setAllowedAlgorithms(Ikev2VpnProfile.DEFAULT_ALGORITHMS);
                 startVpnProfilePrivileged(profile, VpnConfig.LEGACY_VPN, keyStore);
                 return;
             case VpnProfile.TYPE_L2TP_IPSEC_PSK:
@@ -2359,7 +2361,7 @@ public class Vpn {
                     final IkeSessionParams ikeSessionParams =
                             VpnIkev2Utils.buildIkeSessionParams(mContext, mProfile, network);
                     final ChildSessionParams childSessionParams =
-                            VpnIkev2Utils.buildChildSessionParams();
+                            VpnIkev2Utils.buildChildSessionParams(mProfile.getAllowedAlgorithms());
 
                     // TODO: Remove the need for adding two unused addresses with
                     // IPsec tunnels.
