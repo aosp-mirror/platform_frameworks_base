@@ -149,15 +149,21 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
     return error(idmap.GetErrorMessage());
   }
 
+  // idmap files are mapped with mmap in libandroidfw. Deleting and recreating the idmap guarantees
+  // that existing memory maps will continue to be valid and unaffected.
+  unlink(idmap_path.c_str());
+
   umask(kIdmapFilePermissionMask);
   std::ofstream fout(idmap_path);
   if (fout.fail()) {
     return error("failed to open idmap path " + idmap_path);
   }
+
   BinaryStreamVisitor visitor(fout);
   (*idmap)->accept(&visitor);
   fout.close();
   if (fout.fail()) {
+    unlink(idmap_path.c_str());
     return error("failed to write to idmap path " + idmap_path);
   }
 
