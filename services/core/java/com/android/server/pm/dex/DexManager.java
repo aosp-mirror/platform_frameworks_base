@@ -232,6 +232,10 @@ public class DexManager {
     private boolean isSystemServerDexPathSupportedForOdex(String dexPath) {
         ArrayList<PackagePartitions.SystemPartition> partitions =
                 PackagePartitions.getOrderedPartitions(identity());
+        // First check the apex partition as it's not part of the SystemPartitions.
+        if (dexPath.startsWith("/apex/")) {
+            return true;
+        }
         for (int i = 0; i < partitions.size(); i++) {
             if (partitions.get(i).containsPath(dexPath)) {
                 return true;
