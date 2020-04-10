@@ -16,15 +16,20 @@
 
 package com.android.server.am;
 
+import static android.app.AppOpsManager.OP_NONE;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.app.Activity;
 import android.app.BroadcastOptions;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.BugreportManager;
+import android.os.BugreportParams;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -43,6 +48,8 @@ public final class BugReportHandlerUtil {
     private static final String SHELL_APP_PACKAGE = "com.android.shell";
     private static final String INTENT_BUGREPORT_REQUESTED =
             "com.android.internal.intent.action.BUGREPORT_REQUESTED";
+    private static final String INTENT_GET_BUGREPORT_HANDLER_RESPONSE =
+            "com.android.internal.intent.action.GET_BUGREPORT_HANDLER_RESPONSE";
 
     /**
      * Check is BugReportHandler enabled on the device.
@@ -100,6 +107,43 @@ public final class BugReportHandlerUtil {
             return false;
         }
 
+        if (getBugReportHandlerAppResponseReceivers(context, handlerApp, handlerUser).isEmpty()) {
+            // Just try to launch bugreport handler app to handle bugreport request
+            // because the bugreport handler app is old and not support to provide response to
+            // let BugReportHandlerUtil know it is available or not.
+            launchBugReportHandlerApp(context, handlerApp, handlerUser);
+            return true;
+        }
+
+        Slog.i(TAG, "Getting response from bug report handler app: " + handlerApp);
+        Intent intent = new Intent(INTENT_GET_BUGREPORT_HANDLER_RESPONSE);
+        intent.setPackage(handlerApp);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            // Handler app's BroadcastReceiver should call setResultCode(Activity.RESULT_OK) to
+            // let BugreportHandlerResponseBroadcastReceiver know the handler app is available.
+            context.sendOrderedBroadcastAsUser(intent,
+                    UserHandle.of(handlerUser),
+                    android.Manifest.permission.DUMP,
+                    OP_NONE, /* options= */ null,
+                    new BugreportHandlerResponseBroadcastReceiver(handlerApp, handlerUser),
+                    /* scheduler= */ null,
+                    Activity.RESULT_CANCELED,
+                    /* initialData= */ null,
+                    /* initialExtras= */ null);
+        } catch (RuntimeException e) {
+            Slog.e(TAG, "Error while trying to get response from bug report handler app.", e);
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return true;
+    }
+
+    private static void launchBugReportHandlerApp(Context context, String handlerApp,
+            int handlerUser) {
         Slog.i(TAG, "Launching bug report handler app: " + handlerApp);
         Intent intent = new Intent(INTENT_BUGREPORT_REQUESTED);
         intent.setPackage(handlerApp);
@@ -115,11 +159,9 @@ public final class BugReportHandlerUtil {
                     options.toBundle());
         } catch (RuntimeException e) {
             Slog.e(TAG, "Error while trying to launch bugreport handler app.", e);
-            return false;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        return true;
     }
 
     private static String getCustomBugReportHandlerApp(Context context) {
@@ -159,6 +201,16 @@ public final class BugReportHandlerUtil {
                         handlerUser);
     }
 
+    private static List<ResolveInfo> getBugReportHandlerAppResponseReceivers(Context context,
+            String handlerApp, int handlerUser) {
+        // Use the app package and the user id to retrieve the receiver that can provide response
+        Intent intent = new Intent(INTENT_GET_BUGREPORT_HANDLER_RESPONSE);
+        intent.setPackage(handlerApp);
+        return context.getPackageManager()
+                .queryBroadcastReceiversAsUser(intent, PackageManager.MATCH_SYSTEM_ONLY,
+                        handlerUser);
+    }
+
     private static String getDefaultBugReportHandlerApp(Context context) {
         return context.getResources().getString(
                 com.android.internal.R.string.config_defaultBugReportHandlerApp);
@@ -174,6 +226,32 @@ public final class BugReportHandlerUtil {
                     Settings.Global.CUSTOM_BUGREPORT_HANDLER_USER, UserHandle.USER_SYSTEM);
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private static class BugreportHandlerResponseBroadcastReceiver extends BroadcastReceiver {
+        private final String handlerApp;
+        private final int handlerUser;
+
+        BugreportHandlerResponseBroadcastReceiver(String handlerApp, int handlerUser) {
+            this.handlerApp = handlerApp;
+            this.handlerUser = handlerUser;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (getResultCode() == Activity.RESULT_OK) {
+                // Try to launch bugreport handler app to handle bugreport request because the
+                // bugreport handler app is available.
+                launchBugReportHandlerApp(context, handlerApp, handlerUser);
+                return;
+            }
+
+            Slog.w(TAG, "Request bug report because no response from handler app.");
+            BugreportManager bugreportManager = context.getSystemService(BugreportManager.class);
+            bugreportManager.requestBugreport(
+                    new BugreportParams(BugreportParams.BUGREPORT_MODE_INTERACTIVE),
+                    /* shareTitle= */null, /* shareDescription= */ null);
         }
     }
 }
