@@ -27,21 +27,11 @@ import org.junit.rules.RuleChain;
 import org.junit.rules.TemporaryFolder;
 
 public class OverlayRemountedTestBase extends BaseHostJUnit4Test {
-    static final long ASSERT_RESOURCE_TIMEOUT_MS = 30000;
-
+    private static final long ASSERT_RESOURCE_TIMEOUT_MS = 30000;
     static final String TARGET_APK = "OverlayRemountedTest_Target.apk";
     static final String TARGET_PACKAGE = "com.android.overlaytest.remounted.target";
-    static final String TARGET_UPGRADE_APK = "OverlayRemountedTest_TargetUpgrade.apk";
     static final String OVERLAY_APK = "OverlayRemountedTest_Overlay.apk";
     static final String OVERLAY_PACKAGE = "com.android.overlaytest.remounted.target.overlay";
-    static final String SHARED_LIBRARY_APK =
-            "OverlayRemountedTest_SharedLibrary.apk";
-    static final String SHARED_LIBRARY_PACKAGE =
-            "com.android.overlaytest.remounted.shared_library";
-    static final String SHARED_LIBRARY_OVERLAY_APK =
-            "OverlayRemountedTest_SharedLibraryOverlay.apk";
-    static final String SHARED_LIBRARY_OVERLAY_PACKAGE =
-            "com.android.overlaytest.remounted.shared_library.overlay";
 
     private final TemporaryFolder mTemporaryFolder = new TemporaryFolder();
     protected final SystemPreparer mPreparer = new SystemPreparer(mTemporaryFolder,
