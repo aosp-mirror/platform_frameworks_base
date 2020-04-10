@@ -1213,6 +1213,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
+    "315395835": {
+      "message": "Trying to add window with invalid user=%d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "342460966": {
       "message": "DRAG %s: pos=(%d,%d)",
       "level": "INFO",

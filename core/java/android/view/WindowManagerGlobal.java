@@ -144,6 +144,7 @@ public final class WindowManagerGlobal {
     public static final int ADD_PERMISSION_DENIED = -8;
     public static final int ADD_INVALID_DISPLAY = -9;
     public static final int ADD_INVALID_TYPE = -10;
+    public static final int ADD_INVALID_USER = -11;
 
     @UnsupportedAppUsage
     private static WindowManagerGlobal sDefaultWindowManager;
@@ -325,7 +326,7 @@ public final class WindowManagerGlobal {
     }
 
     public void addView(View view, ViewGroup.LayoutParams params,
-            Display display, Window parentWindow) {
+            Display display, Window parentWindow, int userId) {
         if (view == null) {
             throw new IllegalArgumentException("view must not be null");
         }
@@ -402,7 +403,7 @@ public final class WindowManagerGlobal {
 
             // do this last because it fires off messages to start doing things
             try {
-                root.setView(view, wparams, panelParentView);
+                root.setView(view, wparams, panelParentView, userId);
             } catch (RuntimeException e) {
                 // BadTokenException or InvalidDisplayException, clean up.
                 if (index >= 0) {
