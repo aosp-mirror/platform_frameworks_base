@@ -21,19 +21,15 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.CommandQueue;
@@ -89,37 +85,6 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     @Override
     public void start() {
         mCommandQueue.addCallback(this);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.WINDOW_MAGNIFICATION),
-                true, new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateWindowMagnification();
-                    }
-                });
-    }
-
-    private void updateWindowMagnification() {
-        try {
-            boolean enable = Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.WINDOW_MAGNIFICATION) != 0;
-            if (enable) {
-                enableMagnification(
-                        mContext.getResources().getInteger(R.integer.magnification_default_scale));
-            } else {
-                disableMagnification();
-            }
-        } catch (Settings.SettingNotFoundException e) {
-            disableMagnification();
-        }
-    }
-
-    private void enableMagnification(float scale) {
-        enableWindowMagnification(Display.DEFAULT_DISPLAY, scale, Float.NaN, Float.NaN);
-    }
-
-    private void disableMagnification() {
-        disableWindowMagnification(Display.DEFAULT_DISPLAY);
     }
 
     @MainThread
