@@ -384,12 +384,12 @@ message Atom {
         PerfettoUploaded perfetto_uploaded = 229 [(module) = "perfetto"];
         VmsClientConnectionStateChanged vms_client_connection_state_changed =
                 230 [(module) = "car"];
-        MediaProviderScanEvent media_provider_scan_event = 233 [(module) = "mediaprovider"];
-        MediaProviderDeletionEvent media_provider_deletion_event = 234 [(module) = "mediaprovider"];
-        MediaProviderPermissionEvent media_provider_permission_event =
+        MediaProviderScanOccurred media_provider_scan_occurred = 233 [(module) = "mediaprovider"];
+        MediaContentDeleted media_content_deleted = 234 [(module) = "mediaprovider"];
+        MediaProviderPermissionRequested media_provider_permission_requested =
             235 [(module) = "mediaprovider"];
-        MediaProviderSchemaChange media_provider_schema_change = 236 [(module) = "mediaprovider"];
-        MediaProviderIdleMaintenance media_provider_idle_maintenance =
+        MediaProviderSchemaChanged media_provider_schema_changed = 236 [(module) = "mediaprovider"];
+        MediaProviderIdleMaintenanceFinished media_provider_idle_maintenance_finished =
             237 [(module) = "mediaprovider"];
         RebootEscrowRecoveryReported reboot_escrow_recovery_reported = 238 [(module) = "framework"];
         BootTimeEventDuration boot_time_event_duration_reported = 239 [(module) = "framework"];
@@ -4456,7 +4456,7 @@ message VmsClientConnectionStateChanged {
  * Logged from:
  *   packages/providers/MediaProvider/src/com/android/providers/media/scan/ModernMediaScanner.java
  */
-message MediaProviderScanEvent {
+message MediaProviderScanOccurred {
     enum Reason {
         // Scan triggered due to unknown reason
         UNKNOWN = 0;
@@ -4490,15 +4490,13 @@ message MediaProviderScanEvent {
  * Logged from:
  *   packages/providers/MediaProvider/src/com/android/providers/media/MediaProvider.java
  */
-message MediaProviderDeletionEvent {
+message MediaContentDeleted {
     // Volume type that this event pertains to
     optional android.stats.mediaprovider.VolumeType volume_type = 1;
-    // Device timestamp when this deletion event occurred
-    optional int64 timestamp_millis = 2;
-    // App that requested deletion
-    optional string package_name = 3;
+    // UID of app that requested deletion
+    optional int32 uid = 2 [(is_uid) = true];
     // Number of items that were deleted
-    optional int32 item_count = 4;
+    optional int32 item_count = 3;
 }
 
 /**
@@ -4507,7 +4505,7 @@ message MediaProviderDeletionEvent {
  * Logged from:
  *   packages/providers/MediaProvider/src/com/android/providers/media/PermissionActivity.java
  */
-message MediaProviderPermissionEvent {
+message MediaProviderPermissionRequested {
     enum Result {
         UNKNOWN = 0;
         USER_GRANTED = 1;
@@ -4519,14 +4517,12 @@ message MediaProviderPermissionEvent {
 
     // Volume type that this event pertains to
     optional android.stats.mediaprovider.VolumeType volume_type = 1;
-    // Device timestamp when this permission event occurred
-    optional int64 timestamp_millis = 2;
-    // App that requested permission
-    optional string package_name = 3;
+    // UID of app that requested permission
+    optional int32 uid = 2 [(is_uid) = true];
     // Number of items that were requested
-    optional int32 item_count = 4;
+    optional int32 item_count = 3;
     // Result of this request
-    optional Result result = 5;
+    optional Result result = 4;
 }
 
 /**
@@ -4535,7 +4531,7 @@ message MediaProviderPermissionEvent {
  * Logged from:
  *   packages/providers/MediaProvider/src/com/android/providers/media/DatabaseHelper.java
  */
-message MediaProviderSchemaChange {
+message MediaProviderSchemaChanged {
     // Volume type that this event pertains to
     optional android.stats.mediaprovider.VolumeType volume_type = 1;
     // Old database version code
@@ -4554,7 +4550,7 @@ message MediaProviderSchemaChange {
  * Logged from:
  *   packages/providers/MediaProvider/src/com/android/providers/media/MediaProvider.java
  */
-message MediaProviderIdleMaintenance {
+message MediaProviderIdleMaintenanceFinished {
     // Volume type that this event pertains to
     optional android.stats.mediaprovider.VolumeType volume_type = 1;
 
