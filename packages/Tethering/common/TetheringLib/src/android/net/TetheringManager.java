@@ -571,9 +571,8 @@ public class TetheringManager {
             /**
              * Configure tethering with static IPv4 assignment.
              *
-             * The clientAddress must be in the localIPv4Address prefix. A DHCP server will be
-             * started, but will only be able to offer the client address. The two addresses must
-             * be in the same prefix.
+             * A DHCP server will be started, but will only be able to offer the client address.
+             * The two addresses must be in the same prefix.
              *
              * @param localIPv4Address The preferred local IPv4 link address to use.
              * @param clientAddress The static client address.
@@ -584,10 +583,7 @@ public class TetheringManager {
                     @NonNull final LinkAddress clientAddress) {
                 Objects.requireNonNull(localIPv4Address);
                 Objects.requireNonNull(clientAddress);
-                if (localIPv4Address.getPrefixLength() != clientAddress.getPrefixLength()
-                        || !localIPv4Address.isIpv4() || !clientAddress.isIpv4()
-                        || !new IpPrefix(localIPv4Address.toString()).equals(
-                        new IpPrefix(clientAddress.toString()))) {
+                if (!checkStaticAddressConfiguration(localIPv4Address, clientAddress)) {
                     throw new IllegalArgumentException("Invalid server or client addresses");
                 }
 
@@ -654,6 +650,19 @@ public class TetheringManager {
         /** Check if show entitlement ui.  */
         public boolean getShouldShowEntitlementUi() {
             return mRequestParcel.showProvisioningUi;
+        }
+
+        /**
+         * Check whether the two addresses are ipv4 and in the same prefix.
+         * @hide
+         */
+        public static boolean checkStaticAddressConfiguration(
+                @NonNull final LinkAddress localIPv4Address,
+                @NonNull final LinkAddress clientAddress) {
+            return localIPv4Address.getPrefixLength() == clientAddress.getPrefixLength()
+                    && localIPv4Address.isIpv4() && clientAddress.isIpv4()
+                    && new IpPrefix(localIPv4Address.toString()).equals(
+                    new IpPrefix(clientAddress.toString()));
         }
 
         /**
