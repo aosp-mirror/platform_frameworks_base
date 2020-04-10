@@ -20,7 +20,7 @@
     android:id="@+id/notification_guts"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
+    android:focusable="true"
     android:clipChildren="false"
     android:clipToPadding="true"
     android:orientation="vertical"
