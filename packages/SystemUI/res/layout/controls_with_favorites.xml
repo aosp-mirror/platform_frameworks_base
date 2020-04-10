@@ -72,6 +72,6 @@
       android:layout_height="wrap_content"
       android:orientation="vertical"
       android:paddingTop="30dp"
-      android:layout_marginLeft="@dimen/controls_list_side_margin"
-      android:layout_marginRight="@dimen/controls_list_side_margin" />
+      android:layout_marginLeft="@dimen/global_actions_side_margin"
+      android:layout_marginRight="@dimen/global_actions_side_margin" />
 </merge>

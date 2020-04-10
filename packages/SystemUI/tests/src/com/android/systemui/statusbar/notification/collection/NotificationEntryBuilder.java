@@ -29,6 +29,7 @@ import android.service.notification.StatusBarNotification;
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import java.util.ArrayList;
 
@@ -44,16 +45,22 @@ import java.util.ArrayList;
 public class NotificationEntryBuilder {
     private final SbnBuilder mSbnBuilder = new SbnBuilder();
     private final RankingBuilder mRankingBuilder = new RankingBuilder();
+    private final FakeSystemClock mClock = new FakeSystemClock();
     private StatusBarNotification mSbn = null;
 
     /* ListEntry properties */
     private GroupEntry mParent;
     private int mSection = -1;
 
+    /* If set, use this creation time instead of mClock.uptimeMillis */
+    private long mCreationTime = -1;
+
     public NotificationEntry build() {
         StatusBarNotification sbn = mSbn != null ? mSbn : mSbnBuilder.build();
         mRankingBuilder.setKey(sbn.getKey());
-        final NotificationEntry entry = new NotificationEntry(sbn, mRankingBuilder.build());
+        long creationTime = mCreationTime != -1 ? mCreationTime : mClock.uptimeMillis();
+        final NotificationEntry entry = new NotificationEntry(
+                sbn, mRankingBuilder.build(), mClock.uptimeMillis());
 
         /* ListEntry properties */
         entry.setParent(mParent);
@@ -83,6 +90,14 @@ public class NotificationEntryBuilder {
      */
     public NotificationEntryBuilder setSbn(@Nullable StatusBarNotification sbn) {
         mSbn = sbn;
+        return this;
+    }
+
+    /**
+     * Set the creation time
+     */
+    public NotificationEntryBuilder setCreationTime(long creationTime) {
+        mCreationTime = creationTime;
         return this;
     }
 

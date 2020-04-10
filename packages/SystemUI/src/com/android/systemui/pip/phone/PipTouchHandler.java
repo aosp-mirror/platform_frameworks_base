@@ -510,7 +510,7 @@ public class PipTouchHandler {
         mHandler.removeCallbacks(mShowTargetAction);
 
         if (mTargetViewContainer.isAttachedToWindow()) {
-            mWindowManager.removeView(mTargetViewContainer);
+            mWindowManager.removeViewImmediate(mTargetViewContainer);
         }
     }
 
@@ -592,8 +592,14 @@ public class PipTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_HOVER_ENTER:
-                mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                        mMovementBounds, false /* allowMenuTimeout */, false /* willResizeMenu */);
+                // If Touch Exploration is enabled, some a11y services (e.g. Talkback) is probably
+                // on and changing MotionEvents into HoverEvents.
+                // Let's not enable menu show/hide for a11y services.
+                if (!mAccessibilityManager.isTouchExplorationEnabled()) {
+                    mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
+                            mMovementBounds, false /* allowMenuTimeout */,
+                            false /* willResizeMenu */);
+                }
             case MotionEvent.ACTION_HOVER_MOVE: {
                 if (!shouldDeliverToMenu && !mSendingHoverAccessibilityEvents) {
                     sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
@@ -602,7 +608,12 @@ public class PipTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_HOVER_EXIT: {
-                mMenuController.hideMenu();
+                // If Touch Exploration is enabled, some a11y services (e.g. Talkback) is probably
+                // on and changing MotionEvents into HoverEvents.
+                // Let's not enable menu show/hide for a11y services.
+                if (!mAccessibilityManager.isTouchExplorationEnabled()) {
+                    mMenuController.hideMenu();
+                }
                 if (!shouldDeliverToMenu && mSendingHoverAccessibilityEvents) {
                     sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
                     mSendingHoverAccessibilityEvents = false;

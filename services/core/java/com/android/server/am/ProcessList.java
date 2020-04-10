@@ -154,6 +154,9 @@ public final class ProcessList {
     static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.sys.vold_app_data_isolation_enabled";
 
+    // A system property to control if fuse is enabled.
+    static final String ANDROID_FUSE_ENABLED = "persist.sys.fuse";
+
     // The minimum time we allow between crashes, for us to consider this
     // application to be bad and stop and its services and reject broadcasts.
     static final int MIN_CRASH_INTERVAL = 60 * 1000;
@@ -715,8 +718,13 @@ public final class ProcessList {
         // want some apps enabled while some apps disabled
         mAppDataIsolationEnabled =
                 SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
-        mVoldAppDataIsolationEnabled = SystemProperties.getBoolean(
+        boolean fuseEnabled = SystemProperties.getBoolean(ANDROID_FUSE_ENABLED, false);
+        boolean voldAppDataIsolationEnabled = SystemProperties.getBoolean(
                 ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
+        if (!fuseEnabled && voldAppDataIsolationEnabled) {
+            Slog.e(TAG, "Fuse is not enabled while vold app data isolation is enabled");
+        }
+        mVoldAppDataIsolationEnabled = fuseEnabled && voldAppDataIsolationEnabled;
         mAppDataIsolationWhitelistedApps = new ArrayList<>(
                 SystemConfig.getInstance().getAppDataIsolationWhitelistedApps());
 

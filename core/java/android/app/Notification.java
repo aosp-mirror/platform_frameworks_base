@@ -7589,10 +7589,8 @@ public class Notification implements Parcelable
                     >= Build.VERSION_CODES.P;
             boolean isOneToOne;
             CharSequence nameReplacement = null;
-            Icon avatarReplacement = null;
             if (!atLeastP) {
                 isOneToOne = TextUtils.isEmpty(conversationTitle);
-                avatarReplacement = mBuilder.mN.mLargeIcon;
                 if (hasOnlyWhiteSpaceSenders()) {
                     isOneToOne = true;
                     nameReplacement = conversationTitle;
@@ -7641,7 +7639,7 @@ public class Notification implements Parcelable
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsCollapsed",
                     isCollapsed);
             contentView.setIcon(R.id.status_bar_latest_event_content, "setAvatarReplacement",
-                    avatarReplacement);
+                    mBuilder.mN.mLargeIcon);
             contentView.setCharSequence(R.id.status_bar_latest_event_content, "setNameReplacement",
                     nameReplacement);
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsOneToOne",

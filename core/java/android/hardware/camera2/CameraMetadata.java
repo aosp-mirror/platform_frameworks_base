@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.annotation.NonNull;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
@@ -100,6 +101,8 @@ public abstract class CameraMetadata<TKey> {
      *
      * @hide
      */
+    @UnsupportedAppUsage(publicAlternatives = "This method is exposed for native "
+                        + "{@code ACameraMetadata_fromCameraMetadata} in {@code libcamera2ndk}.")
     public long getNativeMetadataPtr() {
         if (mNativeInstance == null) {
             return 0;

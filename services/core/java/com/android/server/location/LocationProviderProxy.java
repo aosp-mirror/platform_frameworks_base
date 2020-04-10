@@ -19,7 +19,6 @@ package com.android.server.location;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.Context;
 import android.location.Location;
 import android.location.util.identity.CallerIdentity;
@@ -136,21 +135,21 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
         // executed on binder thread
         @Override
-        public void onSetFeatureId(String featureId) {
+        public void onSetAttributionTag(String attributionTag) {
             synchronized (mLock) {
                 if (mProxy != this) {
                     return;
                 }
 
-                ComponentName service = mServiceWatcher.getBoundService().component;
-                if (service == null) {
+                String packageName = mServiceWatcher.getBoundService().getPackageName();
+                if (packageName == null) {
                     return;
                 }
 
                 // we don't need to verify the package name because we're getting it straight from
                 // the service watcher
-                CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext,
-                        service.getPackageName(), featureId);
+                CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName,
+                        attributionTag);
                 setIdentity(identity);
             }
         }
@@ -165,12 +164,11 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
                 // if no identity is set yet, set it now
                 if (getIdentity() == null) {
-                    ComponentName service = mServiceWatcher.getBoundService().component;
-                    if (service != null) {
+                    String packageName = mServiceWatcher.getBoundService().getPackageName();
+                    if (packageName != null) {
                         // we don't need to verify the package name because we're getting it
                         // straight from the service watcher
-                        setIdentity(CallerIdentity.fromBinderUnsafe(mContext,
-                                service.getPackageName(), null));
+                        setIdentity(CallerIdentity.fromBinderUnsafe(mContext, packageName, null));
                     }
                 }
 

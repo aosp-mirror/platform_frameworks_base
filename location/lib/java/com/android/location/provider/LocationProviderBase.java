@@ -79,7 +79,7 @@ public abstract class LocationProviderBase {
     public static final String FUSED_PROVIDER = LocationManager.FUSED_PROVIDER;
 
     final String mTag;
-    final String mFeatureId;
+    final String mAttributionTag;
     final IBinder mBinder;
 
     /**
@@ -116,7 +116,7 @@ public abstract class LocationProviderBase {
     public LocationProviderBase(Context context, String tag,
             ProviderPropertiesUnbundled properties) {
         mTag = tag;
-        mFeatureId = context != null ? context.getFeatureId() : null;
+        mAttributionTag = context != null ? context.getAttributionTag() : null;
         mBinder = new Service();
 
         mLocationManager = ILocationManager.Stub.asInterface(
@@ -332,8 +332,8 @@ public abstract class LocationProviderBase {
         public void setLocationProviderManager(ILocationProviderManager manager) {
             synchronized (mBinder) {
                 try {
-                    if (mFeatureId != null) {
-                        manager.onSetFeatureId(mFeatureId);
+                    if (mAttributionTag != null) {
+                        manager.onSetAttributionTag(mAttributionTag);
                     }
                     manager.onSetProperties(mProperties);
                     manager.onSetAllowed(mAllowed);

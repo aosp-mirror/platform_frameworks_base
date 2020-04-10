@@ -66,6 +66,8 @@ public class ServiceWatcher implements ServiceConnection {
     private static final String EXTRA_SERVICE_VERSION = "serviceVersion";
     private static final String EXTRA_SERVICE_IS_MULTIUSER = "serviceIsMultiuser";
 
+    private static final long RETRY_DELAY_MS = 15 * 1000;
+
     /** Function to run on binder interface. */
     public interface BinderRunner {
         /** Called to run client code with the binder. */
@@ -108,6 +110,10 @@ public class ServiceWatcher implements ServiceConnection {
             this.version = version;
             this.component = component;
             this.userId = userId;
+        }
+
+        public @Nullable String getPackageName() {
+            return component != null ? component.getPackageName() : null;
         }
 
         @Override
@@ -318,9 +324,13 @@ public class ServiceWatcher implements ServiceConnection {
         }
 
         Intent bindIntent = new Intent(mIntent).setComponent(mServiceInfo.component);
-        mContext.bindServiceAsUser(bindIntent, this,
+        if (!mContext.bindServiceAsUser(bindIntent, this,
                 BIND_AUTO_CREATE | BIND_NOT_FOREGROUND | BIND_NOT_VISIBLE,
-                mHandler, UserHandle.of(mServiceInfo.userId));
+                mHandler, UserHandle.of(mServiceInfo.userId))) {
+            mServiceInfo = ServiceInfo.NONE;
+            Log.e(TAG, getLogPrefix() + " unexpected bind failure - retrying later");
+            mHandler.postDelayed(() -> onBestServiceChanged(false), RETRY_DELAY_MS);
+        }
     }
 
     @Override
@@ -386,9 +396,7 @@ public class ServiceWatcher implements ServiceConnection {
 
     void onPackageChanged(String packageName) {
         // force a rebind if the changed package was the currently connected package
-        String currentPackageName =
-                mServiceInfo.component != null ? mServiceInfo.component.getPackageName() : null;
-        onBestServiceChanged(packageName.equals(currentPackageName));
+        onBestServiceChanged(packageName.equals(mServiceInfo.getPackageName()));
     }
 
     /**

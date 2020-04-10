@@ -18,6 +18,7 @@
 #include <log/logprint.h>
 #include <stdio.h>
 
+#include "annotations.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "matchers/matcher_util.h"
 #include "stats_event.h"
@@ -48,15 +49,9 @@ void makeIntLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t tim
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
-
     AStatsEvent_writeInt32(statsEvent, value);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 void makeFloatLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
@@ -64,15 +59,9 @@ void makeFloatLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t t
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
-
     AStatsEvent_writeFloat(statsEvent, floatValue);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 void makeStringLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
@@ -80,32 +69,20 @@ void makeStringLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t 
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
-
     AStatsEvent_writeString(statsEvent, name.c_str());
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
-void makeIntStringLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
-                           const int32_t value, const string& name) {
+void makeIntWithBoolAnnotationLogEvent(LogEvent* logEvent, const int32_t atomId,
+                                       const int32_t field, const uint8_t annotationId,
+                                       const bool annotationValue) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
-    AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
+    AStatsEvent_writeInt32(statsEvent, field);
+    AStatsEvent_addBoolAnnotation(statsEvent, annotationId, annotationValue);
 
-    AStatsEvent_writeInt32(statsEvent, value);
-    AStatsEvent_writeString(statsEvent, name.c_str());
-    AStatsEvent_build(statsEvent);
-
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 void makeAttributionLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
@@ -115,22 +92,10 @@ void makeAttributionLogEvent(LogEvent* logEvent, const int32_t atomId, const int
     AStatsEvent_setAtomId(statsEvent, atomId);
     AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
 
-    vector<const char*> cTags(attributionTags.size());
-    for (int i = 0; i < cTags.size(); i++) {
-        cTags[i] = attributionTags[i].c_str();
-    }
-
-    AStatsEvent_writeAttributionChain(statsEvent,
-                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
-                                      cTags.data(), attributionUids.size());
+    writeAttribution(statsEvent, attributionUids, attributionTags);
     AStatsEvent_writeString(statsEvent, name.c_str());
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 void makeBoolLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
@@ -141,13 +106,8 @@ void makeBoolLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t ti
 
     AStatsEvent_writeBool(statsEvent, bool1);
     AStatsEvent_writeBool(statsEvent, bool2);
-    AStatsEvent_build(statsEvent);
 
-    size_t size;
-    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
-    logEvent->parseBuffer(buf, size);
-
-    AStatsEvent_release(statsEvent);
+    parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
 }  // anonymous namespace
@@ -416,21 +376,20 @@ TEST(AtomMatcherTest, TestUidFieldMatcher) {
     simpleMatcher->add_field_value_matcher()->set_field(1);
     simpleMatcher->mutable_field_value_matcher(0)->set_eq_string("pkg0");
 
-    // Set up the event
+    // Make event without is_uid annotation.
     LogEvent event1(/*uid=*/0, /*pid=*/0);
     makeIntLogEvent(&event1, TAG_ID, 0, 1111);
-
-    LogEvent event2(/*uid=*/0, /*pid=*/0);
-    makeIntStringLogEvent(&event2, TAG_ID_2, 0, 1111, "some value");
-
-    // Tag not in kAtomsWithUidField
     EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event1));
 
-    // Tag found in kAtomsWithUidField and has matching uid
+    // Make event with is_uid annotation.
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    makeIntWithBoolAnnotationLogEvent(&event2, TAG_ID_2, 1111, ANNOTATION_ID_IS_UID, true);
+
+    // Event has is_uid annotation, so mapping from uid to package name occurs.
     simpleMatcher->set_atom_id(TAG_ID_2);
     EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event2));
 
-    // Tag found in kAtomsWithUidField but has non-matching uid
+    // Event has is_uid annotation, but uid maps to different package name.
     simpleMatcher->mutable_field_value_matcher(0)->set_eq_string("Pkg2");
     EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event2));
 }

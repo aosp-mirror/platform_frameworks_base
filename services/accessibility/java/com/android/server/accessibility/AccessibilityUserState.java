@@ -22,6 +22,7 @@ import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_K
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HIDDEN;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE_HARD_KEYBOARD;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_MASK;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
@@ -110,6 +111,8 @@ class AccessibilityUserState {
     private int mNonInteractiveUiTimeout = 0;
     private int mInteractiveUiTimeout = 0;
     private int mLastSentClientState = -1;
+    // The magnification mode of default display.
+    private int mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 
     private Context mContext;
 
@@ -159,6 +162,7 @@ class AccessibilityUserState {
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
+        mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     }
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
@@ -565,6 +569,25 @@ class AccessibilityUserState {
     public boolean isShortcutMagnificationEnabledLocked() {
         return mAccessibilityShortcutKeyTargets.contains(MAGNIFICATION_CONTROLLER_NAME)
                 || mAccessibilityButtonTargets.contains(MAGNIFICATION_CONTROLLER_NAME);
+    }
+
+    /**
+     * Gets the magnification mode of default display.
+     * @return magnification mode
+     *
+     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+     */
+    public int getMagnificationModeLocked() {
+        return mMagnificationMode;
+    }
+
+    /**
+     * Sets the magnification mode of default display.
+     * @param mode The magnification mode.
+     */
+    public void setMagnificationModeLocked(int mode) {
+        mMagnificationMode = mode;
     }
 
     /**

@@ -3219,6 +3219,10 @@ public final class PowerManagerService extends SystemService
     private void shutdownOrRebootInternal(final @HaltMode int haltMode, final boolean confirm,
             @Nullable final String reason, boolean wait) {
         if (PowerManager.REBOOT_USERSPACE.equals(reason)) {
+            if (!PowerManager.isRebootingUserspaceSupportedImpl()) {
+                throw new UnsupportedOperationException(
+                        "Attempted userspace reboot on a device that doesn't support it");
+            }
             UserspaceRebootLogger.noteUserspaceRebootWasRequested();
         }
         if (mHandler == null || !mSystemReady) {

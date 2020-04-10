@@ -1364,6 +1364,19 @@ public class AppStandbyController implements AppStandbyInternal {
                     if (DEBUG) {
                         Slog.d(TAG, "    Keeping at WORKING_SET due to min timeout");
                     }
+                } else if (newBucket == STANDBY_BUCKET_RARE
+                        && getBucketForLocked(packageName, userId, elapsedRealtime)
+                        == STANDBY_BUCKET_RESTRICTED) {
+                    // Prediction doesn't think the app will be used anytime soon and
+                    // it's been long enough that it could just time out into restricted,
+                    // so time it out there instead. Using TIMEOUT will allow prediction
+                    // to raise the bucket when it needs to.
+                    newBucket = STANDBY_BUCKET_RESTRICTED;
+                    reason = REASON_MAIN_TIMEOUT;
+                    if (DEBUG) {
+                        Slog.d(TAG,
+                                "Prediction to RARE overridden by timeout into RESTRICTED");
+                    }
                 }
             }
 

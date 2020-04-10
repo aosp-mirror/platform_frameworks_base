@@ -124,13 +124,20 @@ interface IWindowManager
      * @param type Window type to be used with this token.
      * @param options A bundle used to pass window-related options.
      * @param displayId The ID of the display where this token should be added.
-     * @param packageName The name of package to request to add window token.
+     * @param packageName The name of package to request to add window token. Could be {@code null}
+     *                    if callers holds the MANAGE_APP_TOKENS permission.
      * @return {@link WindowManagerGlobal#ADD_OKAY} if the addition was successful, an error code
      *         otherwise.
      */
     int addWindowTokenWithOptions(IBinder token, int type, int displayId, in Bundle options,
             String packageName);
     void addWindowToken(IBinder token, int type, int displayId);
+    /**
+     * Remove window token on a specific display.
+     *
+     * @param token Token to be removed
+     * @displayId The ID of the display where this token should be removed.
+     */
     void removeWindowToken(IBinder token, int displayId);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
 
@@ -735,4 +742,11 @@ interface IWindowManager
      * Called to show global actions.
      */
     void showGlobalActions();
+
+    /**
+     * Sets layer tracing flags for SurfaceFlingerTrace. 
+     *
+     * @param flags see definition in SurfaceTracing.cpp
+     */
+    void setLayerTracingFlags(int flags);
 }
