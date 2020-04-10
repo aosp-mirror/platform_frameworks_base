@@ -344,7 +344,7 @@ public class ResourcesManager {
         ApkAssets apkAssets = null;
         if (mLoadedApkAssets != null) {
             apkAssets = mLoadedApkAssets.get(newKey);
-            if (apkAssets != null) {
+            if (apkAssets != null && apkAssets.isUpToDate()) {
                 return apkAssets;
             }
         }
@@ -353,7 +353,7 @@ public class ResourcesManager {
         final WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.get(newKey);
         if (apkAssetsRef != null) {
             apkAssets = apkAssetsRef.get();
-            if (apkAssets != null) {
+            if (apkAssets != null && apkAssets.isUpToDate()) {
                 if (mLoadedApkAssets != null) {
                     mLoadedApkAssets.put(newKey, apkAssets);
                 }
