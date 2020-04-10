@@ -32,6 +32,7 @@ import android.service.dreams.IDreamManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.FeatureFlagUtils;
 import android.view.IWindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -66,7 +67,7 @@ import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper()
 public class GlobalActionsDialogTest extends SysuiTestCase {
     private GlobalActionsDialog mGlobalActionsDialog;
 
@@ -143,11 +144,60 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mUiEventLogger,
                 mRingerModeTracker
         );
+        mGlobalActionsDialog.setZeroDialogPressDelayForTesting();
     }
+
     @Test
     public void testShouldLogVisibility() {
         mGlobalActionsDialog.onShow(null);
+        mTestableLooper.processAllMessages();
+        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_POWER_MENU_OPEN);
+    }
+
+    @Test
+    public void testShouldLogBugreportPress() throws InterruptedException {
+        GlobalActionsDialog.BugReportAction bugReportAction =
+                mGlobalActionsDialog.makeBugReportActionForTesting();
+        bugReportAction.onPress();
+        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_BUGREPORT_PRESS);
+    }
+
+    @Test
+    public void testShouldLogBugreportLongPress() {
+        GlobalActionsDialog.BugReportAction bugReportAction =
+                mGlobalActionsDialog.makeBugReportActionForTesting();
+        bugReportAction.onLongPress();
+        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_BUGREPORT_LONG_PRESS);
+    }
+
+    @Test
+    public void testShouldLogEmergencyDialerPress() {
+        GlobalActionsDialog.EmergencyDialerAction emergencyDialerAction =
+                mGlobalActionsDialog.makeEmergencyDialerActionForTesting();
+        emergencyDialerAction.onPress();
+        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_EMERGENCY_DIALER_PRESS);
+    }
+
+    @Test
+    public void testShouldLogScreenshotPress() {
+        GlobalActionsDialog.ScreenshotAction screenshotAction =
+                mGlobalActionsDialog.makeScreenshotActionForTesting();
+        screenshotAction.onPress();
+        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_SCREENSHOT_PRESS);
+    }
+
+    @Test
+    public void testShouldLogScreenshotLongPress() {
+        FeatureFlagUtils.setEnabled(mContext, FeatureFlagUtils.SCREENRECORD_LONG_PRESS, true);
+        GlobalActionsDialog.ScreenshotAction screenshotAction =
+                mGlobalActionsDialog.makeScreenshotActionForTesting();
+        screenshotAction.onLongPress();
+        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_SCREENSHOT_LONG_PRESS);
+    }
+
+    private void verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent event) {
+        mTestableLooper.processAllMessages();
         verify(mUiEventLogger, times(1))
-                .log(GlobalActionsDialog.GlobalActionsEvent.GA_POWER_MENU_OPEN);
+                .log(event);
     }
 }
