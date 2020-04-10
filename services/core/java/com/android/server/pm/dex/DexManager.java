@@ -600,6 +600,23 @@ public class DexManager {
                         packageName, dexUseInfo.getOwnerUserId()) || updated;
                 continue;
             }
+
+            // Special handle system server files.
+            // We don't need an installd call because we have permissions to check if the file
+            // exists.
+            if (PLATFORM_PACKAGE_NAME.equals(packageName)) {
+                if (!Files.exists(Paths.get(dexPath))) {
+                    if (DEBUG) {
+                        Slog.w(TAG, "A dex file previously loaded by System Server does not exist "
+                                + " anymore: " + dexPath);
+                    }
+                    updated = mPackageDexUsage.removeUserPackage(
+                            packageName, dexUseInfo.getOwnerUserId()) || updated;
+                }
+                continue;
+            }
+
+            // This is a regular application.
             ApplicationInfo info = pkg.applicationInfo;
             int flags = 0;
             if (info.deviceProtectedDataDir != null &&
