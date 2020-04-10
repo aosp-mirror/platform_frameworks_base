@@ -18,12 +18,14 @@ package com.android.systemui;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.HandlerThread;
 import android.os.Trace;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.util.Size;
+import android.view.DisplayInfo;
 import android.view.SurfaceHolder;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -84,14 +86,19 @@ public class ImageWallpaper extends WallpaperService {
         private StatusBarStateController mController;
         private final Runnable mFinishRenderingTask = this::finishRendering;
         private final boolean mNeedTransition;
+        private boolean mShouldStopTransition;
+        private final boolean mIsHighEndGfx;
+        private final boolean mDisplayNeedsBlanking;
+        private final DisplayInfo mDisplayInfo = new DisplayInfo();
         private final Object mMonitor = new Object();
         private boolean mNeedRedraw;
         // This variable can only be accessed in synchronized block.
         private boolean mWaitingForRendering;
 
         GLEngine(Context context) {
-            mNeedTransition = ActivityManager.isHighEndGfx()
-                    && !DozeParameters.getInstance(context).getDisplayNeedsBlanking();
+            mIsHighEndGfx = ActivityManager.isHighEndGfx();
+            mDisplayNeedsBlanking = DozeParameters.getInstance(context).getDisplayNeedsBlanking();
+            mNeedTransition = mIsHighEndGfx && !mDisplayNeedsBlanking;
 
             // We will preserve EGL context when we are in lock screen or aod
             // to avoid janking in following transition, we need to release when back to home.
@@ -99,12 +106,14 @@ public class ImageWallpaper extends WallpaperService {
             if (mController != null) {
                 mController.addCallback(this /* StateListener */);
             }
-            mEglHelper = new EglHelper();
-            mRenderer = new ImageWallpaperRenderer(context, this /* SurfaceProxy */);
         }
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
+            mEglHelper = new EglHelper();
+            // Deferred init renderer because we need to get wallpaper by display context.
+            mRenderer = new ImageWallpaperRenderer(getDisplayContext(), this /* SurfaceProxy */);
+            getDisplayContext().getDisplay().getDisplayInfo(mDisplayInfo);
             setFixedSizeAllowed(true);
             setOffsetNotificationsEnabled(true);
             updateSurfaceSize();
@@ -118,6 +127,26 @@ public class ImageWallpaper extends WallpaperService {
             holder.setFixedSize(width, height);
         }
 
+        /**
+         * Check if necessary to stop transition with current wallpaper on this device. <br/>
+         * This should only be invoked after {@link #onSurfaceCreated(SurfaceHolder)}}
+         * is invoked since it needs display context and surface frame size.
+         *
+         * @return true if need to stop transition
+         */
+        @VisibleForTesting
+        boolean checkIfShouldStopTransition() {
+            int orientation = getDisplayContext().getResources().getConfiguration().orientation;
+            boolean portrait = orientation == Configuration.ORIENTATION_PORTRAIT;
+            Rect frame = getSurfaceHolder().getSurfaceFrame();
+            int frameWidth = frame.width();
+            int frameHeight = frame.height();
+            int displayWidth = portrait ? mDisplayInfo.logicalWidth : mDisplayInfo.logicalHeight;
+            int displayHeight = portrait ? mDisplayInfo.logicalHeight : mDisplayInfo.logicalWidth;
+            return mNeedTransition
+                    && (frameWidth < displayWidth || frameHeight < displayHeight);
+        }
+
         @Override
         public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep,
                 float yOffsetStep, int xPixelOffset, int yPixelOffset) {
@@ -128,12 +157,14 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode, long animationDuration) {
             if (mWorker == null || !mNeedTransition) return;
+            final long duration = mShouldStopTransition ? 0 : animationDuration;
             if (DEBUG) {
                 Log.d(TAG, "onAmbientModeChanged: inAmbient=" + inAmbientMode
-                        + ", duration=" + animationDuration);
+                        + ", duration=" + duration
+                        + ", mShouldStopTransition=" + mShouldStopTransition);
             }
             mWorker.getThreadHandler().post(
-                    () -> mRenderer.updateAmbientMode(inAmbientMode, animationDuration));
+                    () -> mRenderer.updateAmbientMode(inAmbientMode, duration));
             if (inAmbientMode && animationDuration == 0) {
                 // This means that we are transiting from home to aod, to avoid
                 // race condition between window visibility and transition,
@@ -169,13 +200,13 @@ public class ImageWallpaper extends WallpaperService {
                 mRenderer = null;
                 mEglHelper.finish();
                 mEglHelper = null;
-                getSurfaceHolder().getSurface().hwuiDestroy();
             });
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             if (mWorker == null) return;
+            mShouldStopTransition = checkIfShouldStopTransition();
             mWorker.getThreadHandler().post(() -> {
                 mEglHelper.init(holder);
                 mRenderer.onSurfaceCreated();
@@ -365,15 +396,13 @@ public class ImageWallpaper extends WallpaperService {
         protected void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
             super.dump(prefix, fd, out, args);
             out.print(prefix); out.print("Engine="); out.println(this);
-
-            boolean isHighEndGfx = ActivityManager.isHighEndGfx();
-            out.print(prefix); out.print("isHighEndGfx="); out.println(isHighEndGfx);
-
-            DozeParameters dozeParameters = DozeParameters.getInstance(getApplicationContext());
+            out.print(prefix); out.print("isHighEndGfx="); out.println(mIsHighEndGfx);
             out.print(prefix); out.print("displayNeedsBlanking=");
-            out.println(dozeParameters != null ? dozeParameters.getDisplayNeedsBlanking() : "null");
-
+            out.println(mDisplayNeedsBlanking);
+            out.print(prefix); out.print("displayInfo="); out.print(mDisplayInfo);
             out.print(prefix); out.print("mNeedTransition="); out.println(mNeedTransition);
+            out.print(prefix); out.print("mShouldStopTransition=");
+            out.println(mShouldStopTransition);
             out.print(prefix); out.print("StatusBarState=");
             out.println(mController != null ? mController.getState() : "null");
 

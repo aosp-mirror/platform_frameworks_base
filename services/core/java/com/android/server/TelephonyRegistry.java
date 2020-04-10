@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.telephony.Annotation;
@@ -605,7 +606,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             // register
             IBinder b = callback.asBinder();
-            Record r = add(b);
+            Record r = add(b, Binder.getCallingPid(), false);
 
             if (r == null) {
                 return;
@@ -659,7 +660,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             // register
             IBinder b = callback.asBinder();
-            Record r = add(b);
+            Record r = add(b, Binder.getCallingPid(), false);
 
             if (r == null) {
                 return;
@@ -789,7 +790,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             synchronized (mRecords) {
                 // register
                 IBinder b = callback.asBinder();
-                Record r = add(b);
+                boolean shouldEnforceListenerLimit =
+                        Binder.getCallingUid() != Process.SYSTEM_UID
+                        && Binder.getCallingUid() != Process.PHONE_UID
+                        && Binder.getCallingUid() != Process.myUid();
+                Record r = add(b, Binder.getCallingPid(), shouldEnforceListenerLimit);
 
                 if (r == null) {
                     return;
@@ -1084,18 +1089,35 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         return record.canReadCallLog() ? mCallIncomingNumber[phoneId] : "";
     }
 
-    private Record add(IBinder binder) {
+    private Record add(IBinder binder, int callingPid, boolean enforceLimit) {
         Record r;
 
         synchronized (mRecords) {
             final int N = mRecords.size();
+            // While iterating through the records, keep track of how many we have from this pid.
+            int numRecordsForPid = 0;
             for (int i = 0; i < N; i++) {
                 r = mRecords.get(i);
                 if (binder == r.binder) {
                     // Already existed.
                     return r;
                 }
+                if (r.callerPid == callingPid) {
+                    numRecordsForPid++;
+                }
             }
+            // If we've exceeded the limit for registrations, log a warning and quit.
+            if (enforceLimit && numRecordsForPid >= PhoneStateListener.PER_PID_REGISTRATION_LIMIT) {
+                String errorMsg = "Pid " + callingPid + " has exceeded the number of permissible"
+                        + "registered listeners. Ignoring request to add.";
+                loge(errorMsg);
+                throw new IllegalStateException(errorMsg);
+            } else if (enforceLimit
+                    && numRecordsForPid >= PhoneStateListener.PER_PID_REGISTRATION_LIMIT / 2) {
+                Rlog.w(TAG, "Pid " + callingPid + " has exceeded half the number of permissible"
+                        + "registered listeners. Now at " + numRecordsForPid);
+            }
+
             r = new Record();
             r.binder = binder;
             r.deathRecipient = new TelephonyRegistryDeathRecipient(binder);
