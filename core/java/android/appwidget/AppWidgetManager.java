@@ -1243,13 +1243,13 @@ public class AppWidgetManager {
 
     /**
      * Note an app widget is tapped on.
-     * @param uid App UID.
-     * @param packageName App package name.
+     *
+     * @param appWidgetId App widget id.
      * @hide
      */
-    public void noteAppWidgetTapped(int uid, @NonNull String packageName) {
+    public void noteAppWidgetTapped(int appWidgetId) {
         try {
-            mService.noteAppWidgetTapped(uid, packageName);
+            mService.noteAppWidgetTapped(mPackageName, appWidgetId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

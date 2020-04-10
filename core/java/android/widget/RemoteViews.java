@@ -29,7 +29,6 @@ import android.app.Application;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.appwidget.AppWidgetHostView;
-import android.appwidget.AppWidgetManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -4131,18 +4130,8 @@ public class RemoteViews implements Parcelable, Filter {
             // The NEW_TASK flags are applied through the activity options and not as a part of
             // the call to startIntentSender() to ensure that they are consistently applied to
             // both mutable and immutable PendingIntents.
-            final IntentSender intentSender = pendingIntent.getIntentSender();
-            final int uid = intentSender.getCreatorUid();
-            final String packageName = intentSender.getCreatorPackage();
-            if (uid != -1 && packageName != null) {
-                final AppWidgetManager appWidgetManager =
-                        context.getSystemService(AppWidgetManager.class);
-                if (appWidgetManager != null) {
-                    appWidgetManager.noteAppWidgetTapped(uid, packageName);
-                }
-            }
             context.startIntentSender(
-                    intentSender, options.first,
+                    pendingIntent.getIntentSender(), options.first,
                     0, 0, 0, options.second.toBundle());
         } catch (IntentSender.SendIntentException e) {
             Log.e(LOG_TAG, "Cannot send pending intent: ", e);

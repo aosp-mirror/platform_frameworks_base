@@ -77,6 +77,6 @@ interface IAppWidgetService {
     boolean requestPinAppWidget(String packageName, in ComponentName providerComponent,
             in Bundle extras, in IntentSender resultIntent);
     boolean isRequestPinAppWidgetSupported();
-    void noteAppWidgetTapped(int uid, String packageName);
+    oneway void noteAppWidgetTapped(in String callingPackage, in int appWidgetId);
 }
 
