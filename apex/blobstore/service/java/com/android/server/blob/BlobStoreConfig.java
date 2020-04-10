@@ -45,8 +45,9 @@ class BlobStoreConfig {
     // Added a string variant of lease description.
     public static final int XML_VERSION_ADD_STRING_DESC = 2;
     public static final int XML_VERSION_ADD_DESC_RES_NAME = 3;
+    public static final int XML_VERSION_ADD_COMMIT_TIME = 4;
 
-    public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_DESC_RES_NAME;
+    public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_COMMIT_TIME;
 
     private static final String ROOT_DIR_NAME = "blobstore";
     private static final String BLOBS_DIR_NAME = "blobs";
@@ -99,6 +100,18 @@ class BlobStoreConfig {
                 TimeUnit.HOURS.toMillis(6);
         public static long LEASE_ACQUISITION_WAIT_DURATION_MS =
                 DEFAULT_LEASE_ACQUISITION_WAIT_DURATION_MS;
+
+        /**
+         * Denotes the duration from the time a blob is committed that any new commits of the same
+         * data blob from the same committer will be treated as if they occurred at the earlier
+         * commit time.
+         */
+        public static final String KEY_COMMIT_COOL_OFF_DURATION_MS =
+                "commit_cool_off_duration_ms";
+        public static final long DEFAULT_COMMIT_COOL_OFF_DURATION_MS =
+                TimeUnit.HOURS.toMillis(48);
+        public static long COMMIT_COOL_OFF_DURATION_MS =
+                DEFAULT_COMMIT_COOL_OFF_DURATION_MS;
 
         static void refresh(Properties properties) {
             if (!NAMESPACE_BLOBSTORE.equals(properties.getNamespace())) {
@@ -160,6 +173,27 @@ class BlobStoreConfig {
      */
     public static boolean hasLeaseWaitTimeElapsed(long commitTimeMs) {
         return commitTimeMs + DeviceConfigProperties.LEASE_ACQUISITION_WAIT_DURATION_MS
+                < System.currentTimeMillis();
+    }
+
+    /**
+     * Returns an adjusted commit time depending on whether commit cool-off period has elapsed.
+     *
+     * If this is the initial commit or the earlier commit cool-off period has elapsed, then
+     * the new commit time is used. Otherwise, the earlier commit time is used.
+     */
+    public static long getAdjustedCommitTimeMs(long oldCommitTimeMs, long newCommitTimeMs) {
+        if (oldCommitTimeMs == 0 || hasCommitCoolOffPeriodElapsed(oldCommitTimeMs)) {
+            return newCommitTimeMs;
+        }
+        return oldCommitTimeMs;
+    }
+
+    /**
+     * Returns whether the commit cool-off period has elapsed.
+     */
+    private static boolean hasCommitCoolOffPeriodElapsed(long commitTimeMs) {
+        return commitTimeMs + DeviceConfigProperties.COMMIT_COOL_OFF_DURATION_MS
                 < System.currentTimeMillis();
     }
 
