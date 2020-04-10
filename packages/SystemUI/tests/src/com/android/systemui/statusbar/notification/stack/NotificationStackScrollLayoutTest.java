@@ -17,6 +17,7 @@ import static android.provider.Settings.Secure.NOTIFICATION_HISTORY_ENABLED;
 import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -44,7 +45,6 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -106,8 +106,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
     @Mock private NotificationStackScrollLayoutController mStackScrollLayoutController;
     private int mOriginalInterruptionModelSetting;
-    private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
-
 
     @Before
     @UiThreadTest
@@ -154,8 +152,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(ForegroundServiceSectionController.class),
                 mock(ForegroundServiceDismissalFeatureController.class),
                 mGroupMembershipManger,
-                mGroupExpansionManager,
-                mUiEventLoggerFake
+                mGroupExpansionManager
         );
         mStackScrollerInternal.initView(getContext(), mKeyguardBypassEnabledProvider,
                 mNotificationSwipeHelper);
@@ -380,18 +377,30 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testClearNotifications_All() {
+        final int[] numCalls = {0};
+        final int[] selected = {-1};
+        mStackScroller.setDismissListener(selectedRows -> {
+            numCalls[0]++;
+            selected[0] = selectedRows;
+        });
+
         mStackScroller.clearNotifications(ROWS_ALL, true);
-        assertEquals(1, mUiEventLoggerFake.numLogs());
-        assertEquals(NotificationStackScrollLayout.NotificationPanelEvent
-                .DISMISS_ALL_NOTIFICATIONS_PANEL.getId(), mUiEventLoggerFake.eventId(0));
+        assertEquals(1, numCalls[0]);
+        assertEquals(ROWS_ALL, selected[0]);
     }
 
     @Test
     public void testClearNotifications_Gentle() {
+        final int[] numCalls = {0};
+        final int[] selected = {-1};
+        mStackScroller.setDismissListener(selectedRows -> {
+            numCalls[0]++;
+            selected[0] = selectedRows;
+        });
+
         mStackScroller.clearNotifications(NotificationStackScrollLayout.ROWS_GENTLE, false);
-        assertEquals(1, mUiEventLoggerFake.numLogs());
-        assertEquals(NotificationStackScrollLayout.NotificationPanelEvent
-                .DISMISS_SILENT_NOTIFICATIONS_PANEL.getId(), mUiEventLoggerFake.eventId(0));
+        assertEquals(1, numCalls[0]);
+        assertEquals(ROWS_GENTLE, selected[0]);
     }
 
     @Test

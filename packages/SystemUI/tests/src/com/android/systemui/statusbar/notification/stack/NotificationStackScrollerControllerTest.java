@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -36,6 +37,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
@@ -57,6 +59,7 @@ import com.android.systemui.statusbar.notification.collection.legacy.Notificatio
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -111,6 +114,7 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private NotifCollection mNotifCollection;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private IStatusBarService mIStatusBarService;
+    @Mock private UiEventLogger mUiEventLogger;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -152,12 +156,12 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mNotifPipeline,
                 mNotifCollection,
                 mEntryManager,
-                mIStatusBarService
+                mIStatusBarService,
+                mUiEventLogger
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
     }
-
 
     @Test
     public void testAttach_viewAlreadyAttached() {
@@ -270,14 +274,11 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
     }
 
-
     @Test
-    public void testOnMenuShownLogging() { ;
-
+    public void testOnMenuShownLogging() {
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
         when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
                 MetricsProto.MetricsEvent.VIEW_UNKNOWN));
-
 
         ArgumentCaptor<OnMenuEventListener> onMenuEventListenerArgumentCaptor =
                 ArgumentCaptor.forClass(OnMenuEventListener.class);
@@ -300,7 +301,6 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
                 MetricsProto.MetricsEvent.VIEW_UNKNOWN));
 
-
         ArgumentCaptor<OnMenuEventListener> onMenuEventListenerArgumentCaptor =
                 ArgumentCaptor.forClass(OnMenuEventListener.class);
 
@@ -315,6 +315,23 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
         verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_TOUCH_GEAR,
                 MetricsProto.MetricsEvent.TYPE_ACTION));
+    }
+
+    @Test
+    public void testDismissListener() {
+        ArgumentCaptor<NotificationStackScrollLayout.DismissListener>
+                dismissListenerArgumentCaptor = ArgumentCaptor.forClass(
+                NotificationStackScrollLayout.DismissListener.class);
+
+        mController.attach(mNotificationStackScrollLayout);
+
+        verify(mNotificationStackScrollLayout).setDismissListener(
+                dismissListenerArgumentCaptor.capture());
+        NotificationStackScrollLayout.DismissListener dismissListener =
+                dismissListenerArgumentCaptor.getValue();
+
+        dismissListener.onDismiss(ROWS_ALL);
+        verify(mUiEventLogger).log(NotificationPanelEvent.fromSelection(ROWS_ALL));
     }
 
     private LogMaker logMatcher(int category, int type) {

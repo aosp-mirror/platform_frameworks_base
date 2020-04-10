@@ -47,6 +47,8 @@ import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -74,7 +76,6 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -122,6 +123,7 @@ import kotlin.Unit;
 @StatusBarComponent.StatusBarScope
 public class NotificationStackScrollLayoutController {
     private static final String TAG = "StackScrollerController";
+    private static final boolean DEBUG = false;
 
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
@@ -142,6 +144,7 @@ public class NotificationStackScrollLayoutController {
     private final NotifCollection mNotifCollection;
     private final NotificationEntryManager mNotificationEntryManager;
     private final IStatusBarService mIStatusBarService;
+    private final UiEventLogger mUiEventLogger;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -558,7 +561,8 @@ public class NotificationStackScrollLayoutController {
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
             NotificationEntryManager notificationEntryManager,
-            IStatusBarService iStatusBarService) {
+            IStatusBarService iStatusBarService,
+            UiEventLogger uiEventLogger) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -599,6 +603,7 @@ public class NotificationStackScrollLayoutController {
         mNotifCollection = notifCollection;
         mNotificationEntryManager = notificationEntryManager;
         mIStatusBarService = iStatusBarService;
+        mUiEventLogger = uiEventLogger;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -607,6 +612,8 @@ public class NotificationStackScrollLayoutController {
         mView.setTouchHandler(new TouchHandler());
         mView.setStatusBar(mStatusBar);
         mView.setDismissAllAnimationListener(this::onAnimationEnd);
+        mView.setDismissListener((selection) -> mUiEventLogger.log(
+                NotificationPanelEvent.fromSelection(selection)));
 
         mSwipeHelper = mNotificationSwipeHelperBuilder
                 .setSwipeDirection(SwipeHelper.X)
@@ -1291,6 +1298,37 @@ public class NotificationStackScrollLayoutController {
 
     public boolean isInLockedDownShade() {
         return mDynamicPrivacyController.isInLockedDownShade();
+    }
+
+    /**
+     * Enum for UiEvent logged from this class
+     */
+    enum NotificationPanelEvent implements UiEventLogger.UiEventEnum {
+        INVALID(0),
+        @UiEvent(doc = "User dismissed all notifications from notification panel.")
+        DISMISS_ALL_NOTIFICATIONS_PANEL(312),
+        @UiEvent(doc = "User dismissed all silent notifications from notification panel.")
+        DISMISS_SILENT_NOTIFICATIONS_PANEL(314);
+        private final int mId;
+        NotificationPanelEvent(int id) {
+            mId = id;
+        }
+        @Override public int getId() {
+            return mId;
+        }
+
+        public static UiEventLogger.UiEventEnum fromSelection(@SelectedRows int selection) {
+            if (selection == ROWS_ALL) {
+                return DISMISS_ALL_NOTIFICATIONS_PANEL;
+            }
+            if (selection == NotificationStackScrollLayout.ROWS_GENTLE) {
+                return DISMISS_SILENT_NOTIFICATIONS_PANEL;
+            }
+            if (NotificationStackScrollLayoutController.DEBUG) {
+                throw new IllegalArgumentException("Unexpected selection" + selection);
+            }
+            return INVALID;
+        }
     }
 
     private class NotificationListContainerImpl implements NotificationListContainer {

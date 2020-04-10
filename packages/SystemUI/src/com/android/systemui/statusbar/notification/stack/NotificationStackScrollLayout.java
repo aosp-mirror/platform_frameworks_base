@@ -74,8 +74,6 @@ import android.widget.ScrollView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEvent;
-import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
@@ -450,10 +448,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mHeadsUpInset;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final Rect mTmpRect = new Rect();
+    private DismissListener mDismissListener;
     private DismissAllAnimationListener mDismissAllAnimationListener;
     @VisibleForTesting
     protected final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-    protected final UiEventLogger mUiEventLogger;
     private final NotificationRemoteInputManager mRemoteInputManager =
             Dependency.get(NotificationRemoteInputManager.class);
 
@@ -535,8 +533,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             ForegroundServiceSectionController fgsSectionController,
             ForegroundServiceDismissalFeatureController fgsFeatureController,
             GroupMembershipManager groupMembershipManager,
-            GroupExpansionManager groupExpansionManager,
-            UiEventLogger uiEventLogger
+            GroupExpansionManager groupExpansionManager
     ) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
@@ -590,7 +587,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mGroupExpansionManager = groupExpansionManager;
         mStatusbarStateController = statusbarStateController;
         initializeForegroundServiceSection(fgsFeatureController);
-        mUiEventLogger = uiEventLogger;
     }
 
     private void initializeForegroundServiceSection(
@@ -5393,8 +5389,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
         }
 
-        // Log dismiss event even if there's nothing to dismiss
-        mUiEventLogger.log(NotificationPanelEvent.fromSelection(selection));
+        if (mDismissListener != null) {
+            mDismissListener.onDismiss(selection);
+        }
 
         if (viewsToRemove.isEmpty()) {
             if (closeShade) {
@@ -5699,6 +5696,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     boolean getCheckSnoozeLeaveBehind() {
         return mCheckForLeavebehind;
+    }
+
+    void setDismissListener (DismissListener listener) {
+        mDismissListener = listener;
     }
 
     void setDismissAllAnimationListener(DismissAllAnimationListener dismissAllAnimationListener) {
@@ -6312,39 +6313,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /** Only rows where entry.isHighPriority() is false. */
     public static final int ROWS_GENTLE = 2;
 
-    /**
-     * Enum for UiEvent logged from this class
-     */
-    enum NotificationPanelEvent implements UiEventLogger.UiEventEnum {
-        INVALID(0),
-        @UiEvent(doc = "User dismissed all notifications from notification panel.")
-        DISMISS_ALL_NOTIFICATIONS_PANEL(312),
-        @UiEvent(doc = "User dismissed all silent notifications from notification panel.")
-        DISMISS_SILENT_NOTIFICATIONS_PANEL(314);
-        private final int mId;
-        NotificationPanelEvent(int id) {
-            mId = id;
-        }
-        @Override public int getId() {
-            return mId;
-        }
-
-        public static UiEventLogger.UiEventEnum fromSelection(@SelectedRows int selection) {
-            if (selection == ROWS_ALL) {
-                return DISMISS_ALL_NOTIFICATIONS_PANEL;
-            }
-            if (selection == ROWS_GENTLE) {
-                return DISMISS_SILENT_NOTIFICATIONS_PANEL;
-            }
-            if (NotificationStackScrollLayout.DEBUG) {
-                throw new IllegalArgumentException("Unexpected selection" + selection);
-            }
-            return INVALID;
-        }
-    }
-
     interface KeyguardBypassEnabledProvider {
         boolean getBypassEnabled();
+    }
+
+    interface DismissListener {
+        void onDismiss(@SelectedRows int selectedRows);
     }
 
     interface DismissAllAnimationListener {
