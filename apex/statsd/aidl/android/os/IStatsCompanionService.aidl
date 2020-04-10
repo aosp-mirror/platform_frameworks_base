@@ -59,9 +59,6 @@ interface IStatsCompanionService {
     /** Cancel any alarm for the purpose of subscriber triggering. */
     oneway void cancelAlarmForSubscriberTriggering();
 
-    /** Tells StatsCompaionService to grab the uid map snapshot and send it to statsd. */
-    oneway void triggerUidSnapshot();
-
     /**
      * Ask StatsCompanionService if the given permission is allowed for a particular process
      * and user ID. statsd is incapable of doing this check itself because checkCallingPermission
