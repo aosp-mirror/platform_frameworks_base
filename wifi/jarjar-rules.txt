@@ -1,6 +1,13 @@
 # used by wifi-service
+# TODO (b/153596226): Find a solution for networkstack's AIDL parcelables & interfaces.
+# Parcelable class names are serialized in the wire, so renaming them
+# will result in the class not being found for any parcelable received/sent from the
+# wifi-service jar.
+
+# Note: This rule is needed to ensure the rule below does not rename a Parcelable (see TODO above).
 rule android.net.DhcpResultsParcelable* @0
 rule android.net.DhcpResults* com.android.server.x.wifi.net.DhcpResults@1
+# Note: This rule is needed to ensure the rule below does not rename a Parcelable (see TODO above).
 rule android.net.InterfaceConfigurationParcel* @0
 rule android.net.InterfaceConfiguration* com.android.server.x.wifi.net.InterfaceConfiguration@1
 rule android.net.IpMemoryStore* com.android.server.x.wifi.net.IpMemoryStore@1
@@ -12,6 +19,7 @@ rule android.net.ip.IpClientManager* com.android.server.x.wifi.net.ip.IpClientMa
 rule android.net.ip.IpClientUtil* com.android.server.x.wifi.net.ip.IpClientUtil@1
 rule android.net.ipmemorystore.OnBlobRetrievedListener* com.android.server.x.wifi.net.ipmemorystore.OnBlobRetrievedListener@1
 rule android.net.ipmemorystore.OnStatusListener* com.android.server.x.wifi.net.ipmemorystore.OnStatusListener@1
+# Note: This rule is needed to ensure the rule below does not rename a Parcelable (see TODO above).
 rule android.net.ipmemorystore.StatusParcelable* @0
 rule android.net.ipmemorystore.Status* com.android.server.x.wifi.net.ipmemorystore.Status@1
 rule android.net.networkstack.ModuleNetworkStackClient* com.android.server.x.wifi.net.networkstack.ModuleNetworkStackClient@1
@@ -62,7 +70,11 @@ rule com.android.internal.messages.SystemMessageProto* com.android.server.x.wifi
 # Use our statically linked PlatformProperties library
 rule android.sysprop.** com.android.server.x.wifi.sysprop.@1
 # Use our statically linked HIDL stubs
-rule android.hardware.** com.android.server.x.wifi.hardware.@1
+# Note: android.hardware.wifi.** is used by various wifi feature flags. This unfortunately is also the namespace
+# used by vendor HAL stubs. So, this rule is intentionally weird to try and filter the vendor HAL stubs only.
+rule android.hardware.wifi.V** com.android.server.x.wifi.hardware.wifi.V@1
+rule android.hardware.wifi.supplicant.** com.android.server.x.wifi.hardware.wifi.supplicant.@1
+rule android.hardware.wifi.hostapd.** com.android.server.x.wifi.hardware.wifi.hostapd.@1
 rule android.hidl.** com.android.server.x.wifi.hidl.@1
 # Use our statically linked ksoap2
 rule org.ksoap2.** com.android.server.x.wifi.ksoap2.@1
