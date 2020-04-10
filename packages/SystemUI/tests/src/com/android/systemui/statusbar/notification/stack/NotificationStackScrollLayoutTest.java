@@ -16,6 +16,8 @@ package com.android.systemui.statusbar.notification.stack;
 import static android.provider.Settings.Secure.NOTIFICATION_HISTORY_ENABLED;
 import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -53,7 +55,6 @@ import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
@@ -148,7 +149,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 getContext(),
                 null,
                 mNotificationRoundnessManager,
-                mock(DynamicPrivacyController.class),
                 mStatusBarStateController,
                 mNotificationSectionsManager,
                 mock(ForegroundServiceSectionController.class),
@@ -286,6 +286,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackScroller.getChildCount()).thenReturn(1);
         when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
         when(mRemoteInputController.isRemoteInputActive()).thenReturn(true);
+        when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
+                .thenReturn(true);
         when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
 
         FooterView view = mock(FooterView.class);
@@ -298,10 +300,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void testUpdateFooter_oneClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
 
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
-        when(row.canViewBeDismissed()).thenReturn(true);
-        when(mStackScroller.getChildCount()).thenReturn(1);
-        when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
+        when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
+                .thenReturn(true);
         when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
 
         FooterView view = mock(FooterView.class);
@@ -319,6 +319,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackScroller.getChildCount()).thenReturn(1);
         when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
         when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
+        when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
+                .thenReturn(false);
 
         FooterView view = mock(FooterView.class);
         mStackScroller.setFooterView(view);
@@ -378,7 +380,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testClearNotifications_All() {
-        mStackScroller.clearNotifications(NotificationStackScrollLayout.ROWS_ALL, true);
+        mStackScroller.clearNotifications(ROWS_ALL, true);
         assertEquals(1, mUiEventLoggerFake.numLogs());
         assertEquals(NotificationStackScrollLayout.NotificationPanelEvent
                 .DISMISS_ALL_NOTIFICATIONS_PANEL.getId(), mUiEventLoggerFake.eventId(0));

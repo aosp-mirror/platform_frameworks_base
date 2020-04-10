@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -1066,9 +1067,26 @@ public class NotificationStackScrollLayoutController {
         mView.setPulsing(pulsing, animatePulse);
     }
 
-    public boolean hasActiveClearableNotifications(
-            @SelectedRows int selection) {
-        return mView.hasActiveClearableNotifications(selection);
+    /**
+     * Return whether there are any clearable notifications
+     */
+    public boolean hasActiveClearableNotifications(@SelectedRows int selection) {
+        if (mDynamicPrivacyController.isInLockedDownShade()) {
+            return false;
+        }
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            if (row.canViewBeDismissed() &&
+                    NotificationStackScrollLayout.matchesSelection(row, selection)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1269,6 +1287,10 @@ public class NotificationStackScrollLayoutController {
                 }
             }
         }
+    }
+
+    public boolean isInLockedDownShade() {
+        return mDynamicPrivacyController.isInLockedDownShade();
     }
 
     private class NotificationListContainerImpl implements NotificationListContainer {

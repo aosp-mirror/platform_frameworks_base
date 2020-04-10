@@ -94,7 +94,6 @@ import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -158,7 +157,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private static final int DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX = 1;
     private KeyguardBypassEnabledProvider mKeyguardBypassEnabledProvider;
-    private final DynamicPrivacyController mDynamicPrivacyController;
     private final SysuiStatusBarStateController mStatusbarStateController;
 
     private ExpandHelper mExpandHelper;
@@ -532,7 +530,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
             NotificationRoundnessManager notificationRoundnessManager,
-            DynamicPrivacyController dynamicPrivacyController,
             SysuiStatusBarStateController statusbarStateController,
             NotificationSectionsManager notificationSectionsManager,
             ForegroundServiceSectionController fgsSectionController,
@@ -551,7 +548,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSectionsManager.initialize(this, LayoutInflater.from(context));
         mSectionsManager.setOnClearSilentNotifsClickListener(v -> {
             // Leave the shade open if there will be other notifs left over to clear
-            final boolean closeShade = !hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
+            final boolean closeShade =
+                    !mController.hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
             clearNotifications(ROWS_GENTLE, closeShade);
         });
         mSections = mSectionsManager.createSectionsForBuckets();
@@ -590,7 +588,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
         mGroupMembershipManager = groupMembershipManager;
         mGroupExpansionManager = groupExpansionManager;
-        mDynamicPrivacyController = dynamicPrivacyController;
         mStatusbarStateController = statusbarStateController;
         initializeForegroundServiceSection(fgsFeatureController);
         mUiEventLogger = uiEventLogger;
@@ -655,7 +652,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return;
         }
         // TODO: move this logic to controller, which will invoke updateFooterView directly
-        boolean showDismissView = mClearAllEnabled && hasActiveClearableNotifications(ROWS_ALL);
+        boolean showDismissView = mClearAllEnabled &&
+                mController.hasActiveClearableNotifications(ROWS_ALL);
         RemoteInputController remoteInputController = mRemoteInputManager.getController();
         boolean showFooterView = (showDismissView || mController.hasActiveNotifications())
                 && mStatusBarState != StatusBarState.KEYGUARD
@@ -670,22 +668,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Return whether there are any clearable notifications
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public boolean hasActiveClearableNotifications(@SelectedRows int selection) {
-        if (mDynamicPrivacyController.isInLockedDownShade()) {
-            return false;
-        }
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (!(child instanceof ExpandableNotificationRow)) {
-                continue;
-            }
-            final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            if (row.canViewBeDismissed() && matchesSelection(row, selection)) {
-                return true;
-            }
-        }
-        return false;
+    boolean hasActiveClearableNotifications(@SelectedRows int selection) {
+        return mController.hasActiveClearableNotifications(selection);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5803,7 +5787,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSwipeHelper.resetExposedMenuView(animate, force);
     }
 
-    private static boolean matchesSelection(
+    static boolean matchesSelection(
             ExpandableNotificationRow row,
             @SelectedRows int selection) {
         switch (selection) {
@@ -6132,7 +6116,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 }
 
                 return true;
-            } else if (mDynamicPrivacyController.isInLockedDownShade()) {
+            } else if (mController.isInLockedDownShade()) {
                 mStatusbarStateController.setLeaveOpenOnKeyguardHide(true);
                 mStatusBar.dismissKeyguardThenExecute(() -> false /* dismissAction */,
                         null /* cancelRunnable */, false /* afterKeyguardGone */);
@@ -6176,7 +6160,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (isDragDownAnywhereEnabled()) {
                 return true;
             }
-            if (mDynamicPrivacyController.isInLockedDownShade()) {
+            if (mController.isInLockedDownShade()) {
                 if (view == null) {
                     // Dragging down is allowed in general
                     return true;
