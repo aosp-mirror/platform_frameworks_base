@@ -380,10 +380,17 @@ public class PipTouchHandler {
         }
 
         // Re-calculate the expanded bounds
-        mNormalBounds = normalBounds;
+        mNormalBounds.set(normalBounds);
         Rect normalMovementBounds = new Rect();
         mSnapAlgorithm.getMovementBounds(mNormalBounds, insetBounds, normalMovementBounds,
                 bottomOffset);
+
+        if (mMovementBounds.isEmpty()) {
+            // mMovementBounds is not initialized yet and a clean movement bounds without
+            // bottom offset shall be used later in this function.
+            mSnapAlgorithm.getMovementBounds(curBounds, insetBounds, mMovementBounds,
+                    0 /* bottomOffset */);
+        }
 
         // Calculate the expanded size
         float aspectRatio = (float) normalBounds.width() / normalBounds.height();
@@ -430,8 +437,8 @@ public class PipTouchHandler {
 
         // Update the movement bounds after doing the calculations based on the old movement bounds
         // above
-        mNormalMovementBounds = normalMovementBounds;
-        mExpandedMovementBounds = expandedMovementBounds;
+        mNormalMovementBounds.set(normalMovementBounds);
+        mExpandedMovementBounds.set(expandedMovementBounds);
         mDisplayRotation = displayRotation;
         mInsetBounds.set(insetBounds);
         updateMovementBounds();
