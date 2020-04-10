@@ -56,4 +56,10 @@ oneway interface IRecentsAnimationRunner {
     void onAnimationStart(in IRecentsAnimationController controller,
             in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
             in Rect homeContentInsets, in Rect minimizedHomeBounds) = 2;
+
+    /**
+     * Called when the task of an activity that has been started while the recents animation
+     * was running becomes ready for control.
+     */
+    void onTaskAppeared(in RemoteAnimationTarget app) = 3;
 }
