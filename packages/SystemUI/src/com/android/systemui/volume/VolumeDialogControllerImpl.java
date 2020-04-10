@@ -55,6 +55,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.lifecycle.Observer;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.settingslib.volume.MediaSessions;
 import com.android.systemui.Dumpable;
@@ -64,6 +66,8 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.util.RingerModeLiveData;
+import com.android.systemui.util.RingerModeTracker;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -122,6 +126,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final NotificationManager mNoMan;
     private final SettingObserver mObserver;
     private final Receiver mReceiver = new Receiver();
+    private final RingerModeObservers mRingerModeObservers;
     private final MediaSessions mMediaSessions;
     protected C mCallbacks = new C();
     private final State mState = new State();
@@ -145,7 +150,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     @Inject
     public VolumeDialogControllerImpl(Context context, BroadcastDispatcher broadcastDispatcher,
-            Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
+            Optional<Lazy<StatusBar>> statusBarOptionalLazy, RingerModeTracker ringerModeTracker) {
         mContext = context.getApplicationContext();
         // TODO(b/150663459): remove this TV workaround once StatusBar is "unbound" on TVs
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
@@ -164,6 +169,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mAudio = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mNoMan = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mObserver = new SettingObserver(mWorker);
+        mRingerModeObservers = new RingerModeObservers(
+                (RingerModeLiveData) ringerModeTracker.getRingerMode(),
+                (RingerModeLiveData) ringerModeTracker.getRingerModeInternal()
+        );
+        mRingerModeObservers.init();
         mBroadcastDispatcher = broadcastDispatcher;
         mObserver.init();
         mReceiver.init();
@@ -246,6 +256,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mMediaSessions.destroy();
         mObserver.destroy();
         mReceiver.destroy();
+        mRingerModeObservers.destroy();
         mWorkerThread.quitSafely();
     }
 
@@ -528,7 +539,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             ss.name = STREAMS.get(stream);
             checkRoutedToBluetoothW(stream);
         }
-        updateRingerModeExternalW(mAudio.getRingerMode());
+        // We are not destroyed so this is listening and has updated information
+        updateRingerModeExternalW(mRingerModeObservers.mRingerMode.getValue());
         updateZenModeW();
         updateZenConfig();
         updateEffectsSuppressorW(mNoMan.getEffectsSuppressor());
@@ -575,7 +587,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             Events.writeEvent(Events.EVENT_MUTE_CHANGED, stream, muted);
         }
         if (muted && isRinger(stream)) {
-            updateRingerModeInternalW(mAudio.getRingerModeInternal());
+            updateRingerModeInternalW(mRingerModeObservers.mRingerModeInternal.getValue());
         }
         return true;
     }
@@ -964,6 +976,79 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         }
     }
 
+    private final class RingerModeObservers {
+
+        private final RingerModeLiveData mRingerMode;
+        private final RingerModeLiveData mRingerModeInternal;
+
+        private final Observer<Integer> mRingerModeObserver = new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                mWorker.post(() -> {
+                            final int rm = value;
+                            if (mRingerMode.getInitialSticky()) {
+                                mState.ringerModeExternal = rm;
+                            }
+                            if (D.BUG) {
+                                Log.d(TAG, "onChange ringer_mode rm="
+                                        + Util.ringerModeToString(rm));
+                            }
+                            if (updateRingerModeExternalW(rm)) {
+                                mCallbacks.onStateChanged(mState);
+                            }
+                        }
+                );
+            }
+        };
+
+        private final Observer<Integer> mRingerModeInternalObserver = new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                mWorker.post(() -> {
+                            final int rm = value;
+                            if (mRingerModeInternal.getInitialSticky()) {
+                                mState.ringerModeInternal = rm;
+                            }
+                            if (D.BUG) {
+                                Log.d(TAG, "onChange internal_ringer_mode rm="
+                                        + Util.ringerModeToString(rm));
+                            }
+                            if (updateRingerModeInternalW(rm)) {
+                                mCallbacks.onStateChanged(mState);
+                            }
+                        }
+                );
+            }
+        };
+
+        RingerModeObservers(RingerModeLiveData ringerMode,
+                RingerModeLiveData ringerModeInternal) {
+            mRingerMode = ringerMode;
+            mRingerModeInternal = ringerModeInternal;
+        }
+
+        public void init() {
+            int initialValue = mRingerMode.getValue();
+            if (initialValue != -1) {
+                // If it's not -1, set it to the initial value, if it's -1, it means that the
+                // tracker is not listening already and will obtain the sticky value.
+                mState.ringerModeExternal = initialValue;
+            }
+            mRingerMode.observeForever(mRingerModeObserver);
+            initialValue = mRingerModeInternal.getValue();
+            if (initialValue != -1) {
+                // If it's not -1, set it to the initial value, if it's -1, it means that the
+                // tracker is not listening already and will obtain the sticky value.
+                mState.ringerModeInternal = initialValue;
+            }
+            mRingerModeInternal.observeForever(mRingerModeInternalObserver);
+        }
+
+        public void destroy() {
+            mRingerMode.removeObserver(mRingerModeObserver);
+            mRingerModeInternal.removeObserver(mRingerModeInternalObserver);
+        }
+    }
 
     private final class SettingObserver extends ContentObserver {
         private final Uri ZEN_MODE_URI =
@@ -1006,8 +1091,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             final IntentFilter filter = new IntentFilter();
             filter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
             filter.addAction(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
-            filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
-            filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
             filter.addAction(AudioManager.STREAM_MUTE_CHANGED_ACTION);
             filter.addAction(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
@@ -1042,18 +1125,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                         + stream + " devices=" + devices + " oldDevices=" + oldDevices);
                 changed = checkRoutedToBluetoothW(stream);
                 changed |= onVolumeChangedW(stream, 0);
-            } else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
-                final int rm = intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1);
-                if (isInitialStickyBroadcast()) mState.ringerModeExternal = rm;
-                if (D.BUG) Log.d(TAG, "onReceive RINGER_MODE_CHANGED_ACTION rm="
-                        + Util.ringerModeToString(rm));
-                changed = updateRingerModeExternalW(rm);
-            } else if (action.equals(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION)) {
-                final int rm = intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1);
-                if (isInitialStickyBroadcast()) mState.ringerModeInternal = rm;
-                if (D.BUG) Log.d(TAG, "onReceive INTERNAL_RINGER_MODE_CHANGED_ACTION rm="
-                        + Util.ringerModeToString(rm));
-                changed = updateRingerModeInternalW(rm);
             } else if (action.equals(AudioManager.STREAM_MUTE_CHANGED_ACTION)) {
                 final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
                 final boolean muted = intent
