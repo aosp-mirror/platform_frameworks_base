@@ -239,8 +239,11 @@ class ControlsFavoritingActivity @Inject constructor(
             }
         }
 
+        val title = structureExtra
+            ?: (appName ?: resources.getText(R.string.controls_favorite_default_title))
+        setTitle(title)
         titleView = requireViewById<TextView>(R.id.title).apply {
-            text = appName ?: resources.getText(R.string.controls_favorite_default_title)
+            text = title
         }
         requireViewById<TextView>(R.id.subtitle).text =
                 resources.getText(R.string.controls_favorite_subtitle)
