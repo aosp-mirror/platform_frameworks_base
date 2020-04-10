@@ -142,6 +142,10 @@ stubs_defaults {
     installable: false,
     sdk_version: "module_current",
     filter_packages: framework_packages_to_document,
+
+    // Do not generate stubs as they are not needed
+    generate_stubs: false,
+
     check_api: {
         current: {
             api_file: "api/module-lib-current.txt",
