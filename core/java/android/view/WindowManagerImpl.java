@@ -104,7 +104,8 @@ public final class WindowManagerImpl implements WindowManager {
     @Override
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
         applyDefaultToken(params);
-        mGlobal.addView(view, params, mContext.getDisplayNoVerify(), mParentWindow);
+        mGlobal.addView(view, params, mContext.getDisplayNoVerify(), mParentWindow,
+                mContext.getUserId());
     }
 
     @Override
