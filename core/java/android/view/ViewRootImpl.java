@@ -111,6 +111,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.sysprop.DisplayProperties;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
@@ -893,6 +894,14 @@ public final class ViewRootImpl implements ViewParent,
      * We have one child
      */
     public void setView(View view, WindowManager.LayoutParams attrs, View panelParentView) {
+        setView(view, attrs, panelParentView, UserHandle.myUserId());
+    }
+
+    /**
+     * We have one child
+     */
+    public void setView(View view, WindowManager.LayoutParams attrs, View panelParentView,
+            int userId) {
         synchronized (this) {
             if (mView == null) {
                 mView = view;
@@ -1001,8 +1010,8 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mRecomputeGlobalAttributes = true;
                     collectViewAttributes();
                     adjustLayoutParamsForCompatibility(mWindowAttributes);
-                    res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
-                            getHostVisibility(), mDisplay.getDisplayId(), mTmpFrame,
+                    res = mWindowSession.addToDisplayAsUser(mWindow, mSeq, mWindowAttributes,
+                            getHostVisibility(), mDisplay.getDisplayId(), userId, mTmpFrame,
                             mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
                             mAttachInfo.mDisplayCutout, inputChannel,
                             mTempInsets, mTempControls);
@@ -1075,6 +1084,9 @@ public final class ViewRootImpl implements ViewParent,
                             throw new WindowManager.InvalidDisplayException("Unable to add window "
                                     + mWindow + " -- the specified window type "
                                     + mWindowAttributes.type + " is not valid");
+                        case WindowManagerGlobal.ADD_INVALID_USER:
+                            throw new WindowManager.BadTokenException("Unable to add Window "
+                                    + mWindow + " -- requested userId is not valid");
                     }
                     throw new RuntimeException(
                             "Unable to add window -- unknown error code " + res);

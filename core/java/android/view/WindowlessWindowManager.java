@@ -130,6 +130,20 @@ public class WindowlessWindowManager implements IWindowSession {
         return WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
     }
 
+    /**
+     * IWindowSession implementation. Currently this class doesn't need to support for multi-user.
+     */
+    @Override
+    public int addToDisplayAsUser(IWindow window, int seq, WindowManager.LayoutParams attrs,
+            int viewVisibility, int displayId, int userId, Rect outFrame,
+            Rect outContentInsets, Rect outStableInsets,
+            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
+        return addToDisplay(window, seq, attrs, viewVisibility, displayId,
+                outFrame, outContentInsets, outStableInsets, outDisplayCutout, outInputChannel,
+                outInsetsState, outActiveControls);
+    }
+
     @Override
     public int addToDisplayWithoutInputChannel(android.view.IWindow window, int seq,
             android.view.WindowManager.LayoutParams attrs, int viewVisibility, int layerStackId,
