@@ -93,7 +93,6 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.FakeShadowView;
-import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
@@ -531,7 +530,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             SysuiStatusBarStateController statusbarStateController,
             NotificationSectionsManager notificationSectionsManager,
             ForegroundServiceSectionController fgsSectionController,
-            ForegroundServiceDismissalFeatureController fgsFeatureController,
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager
     ) {
@@ -586,17 +584,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mGroupMembershipManager = groupMembershipManager;
         mGroupExpansionManager = groupExpansionManager;
         mStatusbarStateController = statusbarStateController;
-        initializeForegroundServiceSection(fgsFeatureController);
     }
 
-    private void initializeForegroundServiceSection(
-            ForegroundServiceDismissalFeatureController featureController) {
-        if (featureController.isForegroundServiceDismissalEnabled()) {
-            LayoutInflater li = LayoutInflater.from(mContext);
-            mFgsSectionView =
-                    (ForegroundServiceDungeonView) mFgsSectionController.createView(li);
-            addView(mFgsSectionView, -1);
+    void initializeForegroundServiceSection() {
+        if (mFgsSectionView != null) {
+            return;
         }
+
+        LayoutInflater li = LayoutInflater.from(mContext);
+        mFgsSectionView =
+                (ForegroundServiceDungeonView) mFgsSectionController.createView(li);
+        addView(mFgsSectionView, -1);
     }
 
     void updateDismissRtlSetting(boolean dismissRtl) {

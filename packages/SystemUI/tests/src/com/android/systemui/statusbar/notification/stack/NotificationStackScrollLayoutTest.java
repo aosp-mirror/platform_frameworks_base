@@ -150,7 +150,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mNotificationSectionsManager,
                 mock(ForegroundServiceSectionController.class),
-                mock(ForegroundServiceDismissalFeatureController.class),
                 mGroupMembershipManger,
                 mGroupExpansionManager
         );

@@ -73,6 +73,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -145,6 +146,7 @@ public class NotificationStackScrollLayoutController {
     private final NotificationEntryManager mNotificationEntryManager;
     private final IStatusBarService mIStatusBarService;
     private final UiEventLogger mUiEventLogger;
+    private final ForegroundServiceDismissalFeatureController mFgFeatureController;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -562,7 +564,8 @@ public class NotificationStackScrollLayoutController {
             NotifCollection notifCollection,
             NotificationEntryManager notificationEntryManager,
             IStatusBarService iStatusBarService,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            ForegroundServiceDismissalFeatureController fgFeatureController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -604,6 +607,7 @@ public class NotificationStackScrollLayoutController {
         mNotificationEntryManager = notificationEntryManager;
         mIStatusBarService = iStatusBarService;
         mUiEventLogger = uiEventLogger;
+        mFgFeatureController = fgFeatureController;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -614,6 +618,10 @@ public class NotificationStackScrollLayoutController {
         mView.setDismissAllAnimationListener(this::onAnimationEnd);
         mView.setDismissListener((selection) -> mUiEventLogger.log(
                 NotificationPanelEvent.fromSelection(selection)));
+
+        if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {
+            mView.initializeForegroundServiceSection();
+        }
 
         mSwipeHelper = mNotificationSwipeHelperBuilder
                 .setSwipeDirection(SwipeHelper.X)

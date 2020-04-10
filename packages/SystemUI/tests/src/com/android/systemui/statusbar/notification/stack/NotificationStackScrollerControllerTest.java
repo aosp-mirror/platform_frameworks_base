@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -115,6 +116,13 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private IStatusBarService mIStatusBarService;
     @Mock private UiEventLogger mUiEventLogger;
+    @Mock private FeatureFlags mFeatureFlags;
+    @Mock private NotifPipeline mNotifPipeline;
+    @Mock private NotifCollection mNotifCollection;
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private IStatusBarService mIStatusBarService;
+    @Mock private UiEventLogger mUiEventLogger;
+    @Mock private ForegroundServiceDismissalFeatureController mFgFeatureController;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -157,7 +165,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mNotifCollection,
                 mEntryManager,
                 mIStatusBarService,
-                mUiEventLogger
+                mUiEventLogger,
+                mFgFeatureController
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
@@ -332,6 +341,20 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
 
         dismissListener.onDismiss(ROWS_ALL);
         verify(mUiEventLogger).log(NotificationPanelEvent.fromSelection(ROWS_ALL));
+    }
+
+    @Test
+    public void testForegroundDismissaEnabled() {
+        when(mFgFeatureController.isForegroundServiceDismissalEnabled()).thenReturn(true);
+        mController.attach(mNotificationStackScrollLayout);
+        verify(mNotificationStackScrollLayout).initializeForegroundServiceSection();
+    }
+
+    @Test
+    public void testForegroundDismissaDisabled() {
+        when(mFgFeatureController.isForegroundServiceDismissalEnabled()).thenReturn(false);
+        mController.attach(mNotificationStackScrollLayout);
+        verify(mNotificationStackScrollLayout, never()).initializeForegroundServiceSection();
     }
 
     private LogMaker logMatcher(int category, int type) {
