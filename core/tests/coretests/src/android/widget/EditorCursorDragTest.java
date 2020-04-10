@@ -69,7 +69,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @RunWith(AndroidJUnit4.class)
 @MediumTest
-@Presubmit
 public class EditorCursorDragTest {
     private static final String LOG_TAG = EditorCursorDragTest.class.getSimpleName();
 
@@ -97,6 +96,7 @@ public class EditorCursorDragTest {
         mMotionEvents.clear();
     }
 
+    @Presubmit
     @Test
     public void testCursorDrag_horizontal_whenTextViewContentsFitOnScreen() throws Throwable {
         String text = "Hello world!";
