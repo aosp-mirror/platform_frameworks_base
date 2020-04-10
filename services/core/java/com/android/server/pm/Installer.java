@@ -434,16 +434,6 @@ public class Installer extends SystemService {
         }
     }
 
-    public void markBootComplete(String instructionSet) throws InstallerException {
-        assertValidInstructionSet(instructionSet);
-        if (!checkBeforeRemote()) return;
-        try {
-            mInstalld.markBootComplete(instructionSet);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
     public void freeCache(String uuid, long targetFreeBytes, long cacheReservedBytes, int flags)
             throws InstallerException {
         if (!checkBeforeRemote()) return;

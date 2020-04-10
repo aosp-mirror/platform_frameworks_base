@@ -26,7 +26,6 @@
         android:layout_weight="1"
         android:layout_height="match_parent"
         android:paddingEnd="@dimen/signal_cluster_battery_padding"
-        android:paddingTop="@dimen/status_bar_padding_top"
         android:gravity="center_vertical"
         android:orientation="horizontal"/>
 
