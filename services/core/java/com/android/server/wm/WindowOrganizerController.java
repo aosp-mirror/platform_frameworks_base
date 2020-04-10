@@ -156,7 +156,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         final PooledConsumer f = PooledLambda.obtainConsumer(
                                 ActivityRecord::ensureActivityConfiguration,
                                 PooledLambda.__(ActivityRecord.class), 0,
-                                false /* preserveWindow */);
+                                true /* preserveWindow */);
                         try {
                             for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
                                 haveConfigChanges.valueAt(i).forAllActivities(f);
