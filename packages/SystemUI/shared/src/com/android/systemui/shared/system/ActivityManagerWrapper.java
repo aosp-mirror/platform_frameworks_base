@@ -261,6 +261,11 @@ public class ActivityManagerWrapper {
                         animationHandler.onAnimationCanceled(
                                 taskSnapshot != null ? new ThumbnailData(taskSnapshot) : null);
                     }
+
+                    @Override
+                    public void onTaskAppeared(RemoteAnimationTarget app) {
+                        animationHandler.onTaskAppeared(new RemoteAnimationTargetCompat(app));
+                    }
                 };
             }
             ActivityTaskManager.getService().startRecentsActivity(intent, receiver, runner);
