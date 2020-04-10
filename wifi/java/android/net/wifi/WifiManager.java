@@ -179,6 +179,8 @@ public class WifiManager {
     /**
      * Reason code if one or more of the network suggestions added already exists in platform's
      * database.
+     * Note: this code will not be returned with Android 11 as in-place modification is allowed,
+     * please check {@link #addNetworkSuggestions(List)}.
      * @see WifiNetworkSuggestion#equals(Object)
      */
     public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE = 3;
@@ -186,6 +188,8 @@ public class WifiManager {
     /**
      * Reason code if the number of network suggestions provided by the app crosses the max
      * threshold set per app.
+     * The framework will reject all suggestions provided by {@link #addNetworkSuggestions(List)} if
+     * the total size exceeds the limit.
      * @see #getMaxNumberOfNetworkSuggestionsPerApp()
      */
     public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_EXCEEDS_MAX_PER_APP = 4;
@@ -193,21 +197,27 @@ public class WifiManager {
     /**
      * Reason code if one or more of the network suggestions removed does not exist in platform's
      * database.
+     * The framework won't remove any suggestions if one or more of suggestions provided
+     * by {@link #removeNetworkSuggestions(List)} does not exist in database.
+     * @see WifiNetworkSuggestion#equals(Object)
      */
     public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID = 5;
 
     /**
      * Reason code if one or more of the network suggestions added is not allowed.
-     *
+     * The framework will reject all suggestions provided by {@link #addNetworkSuggestions(List)}
+     * if one or more of them is not allowed.
      * This error may be caused by suggestion is using SIM-based encryption method, but calling app
      * is not carrier privileged.
      */
     public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_NOT_ALLOWED = 6;
 
     /**
-     * Reason code if one or more of the network suggestions added is invalid.
-     *
-     * Please user {@link WifiNetworkSuggestion.Builder} to create network suggestions.
+     * Reason code if one or more of the network suggestions added is invalid. Framework will reject
+     * all the suggestions in the list.
+     * The framework will reject all suggestions provided by {@link #addNetworkSuggestions(List)}
+     * if one or more of them is invalid.
+     * Please use {@link WifiNetworkSuggestion.Builder} to create network suggestions.
      */
     public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_INVALID = 7;
 
@@ -1887,7 +1897,7 @@ public class WifiManager {
      * <li> If user reset network settings, all added suggestions will be discarded. Apps can use
      * {@link #getNetworkSuggestions()} to check if their suggestions are in the device.</li>
      * <li> In-place modification of existing suggestions are allowed.
-     * <li>If the provided suggestions includes any previously provided suggestions by the app,
+     * <li> If the provided suggestions include any previously provided suggestions by the app,
      * previous suggestions will be updated.</li>
      * <li>If one of the provided suggestions marks a previously unmetered suggestion as metered and
      * the device is currently connected to that suggested network, then the device will disconnect
