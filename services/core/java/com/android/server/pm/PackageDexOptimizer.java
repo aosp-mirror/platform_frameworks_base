@@ -32,6 +32,7 @@ import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.WATCHDOG_TIMEOUT;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getReasonName;
 
@@ -115,7 +116,9 @@ public class PackageDexOptimizer {
 
     static boolean canOptimizePackage(AndroidPackage pkg) {
         // We do not dexopt a package with no code.
-        if (!pkg.isHasCode()) {
+        // Note that the system package is marked as having no code, however we can
+        // still optimize it via dexoptSystemServerPath.
+        if (!PLATFORM_PACKAGE_NAME.equals(pkg.getPackageName()) && !pkg.isHasCode()) {
             return false;
         }
 
@@ -132,6 +135,10 @@ public class PackageDexOptimizer {
     int performDexOpt(AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
+        if (PLATFORM_PACKAGE_NAME.equals(pkg.getPackageName())) {
+            throw new IllegalArgumentException("System server dexopting should be done via "
+                    + " DexManager and PackageDexOptimizer#dexoptSystemServerPath");
+        }
         if (pkg.getUid() == -1) {
             throw new IllegalArgumentException("Dexopt for " + pkg.getPackageName()
                     + " has invalid uid.");

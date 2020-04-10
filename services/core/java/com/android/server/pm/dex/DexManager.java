@@ -447,6 +447,14 @@ public class DexManager {
      *         because they don't need to be compiled)..
      */
     public boolean dexoptSecondaryDex(DexoptOptions options) {
+        if (PLATFORM_PACKAGE_NAME.equals(options.getPackageName())) {
+            // We could easily redirect to #dexoptSystemServer in this case. But there should be
+            // no-one calling this method directly for system server.
+            // As such we prefer to abort in this case.
+            Slog.wtf(TAG, "System server jars should be optimized with dexoptSystemServer");
+            return false;
+        }
+
         PackageDexOptimizer pdo = getPackageDexOptimizer(options);
         String packageName = options.getPackageName();
         PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
