@@ -33,6 +33,10 @@ class TemperatureControlBehavior : Behavior {
 
     override fun initialize(cvh: ControlViewHolder) {
         this.cvh = cvh
+
+        cvh.layout.setOnClickListener { _ ->
+            ControlActionCoordinator.touch(cvh, template.getTemplateId(), control)
+        }
     }
 
     override fun bind(cws: ControlWithState) {
