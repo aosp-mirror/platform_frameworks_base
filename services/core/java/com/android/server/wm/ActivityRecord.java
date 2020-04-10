@@ -5212,6 +5212,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         updateReportedVisibilityLocked();
     }
 
+    void onStartingWindowDrawn() {
+        if (task != null) {
+            task.setHasBeenVisible(true);
+        }
+    }
+
     /** Called when the windows associated app window container are drawn. */
     void onWindowsDrawn(boolean drawn, long timestampNs) {
         mDrawn = drawn;
