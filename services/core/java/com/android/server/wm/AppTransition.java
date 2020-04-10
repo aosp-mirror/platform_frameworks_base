@@ -403,9 +403,16 @@ public class AppTransition implements Dump {
                 mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
     }
 
-
     boolean isNextAppTransitionOpenCrossProfileApps() {
         return mNextAppTransitionType == NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS;
+    }
+
+    boolean isNextAppTransitionCustomFromRecents() {
+        final RecentTasks recentTasks = mService.mAtmService.getRecentTasks();
+        final String recentsPackageName =
+                (recentTasks != null) ? recentTasks.getRecentsComponent().getPackageName() : null;
+        return mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM
+                && mNextAppTransitionPackage.equals(recentsPackageName);
     }
 
     /**
