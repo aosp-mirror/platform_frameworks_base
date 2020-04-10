@@ -599,7 +599,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (mStackView == null) {
             mStackView = new BubbleStackView(
                     mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
-                    mSysUiState);
+                    mSysUiState, mNotificationShadeWindowController);
             ViewGroup nsv = mNotificationShadeWindowController.getNotificationShadeView();
             int bubbleScrimIndex = nsv.indexOfChild(nsv.findViewById(R.id.scrim_for_bubble));
             int stackIndex = bubbleScrimIndex + 1;  // Show stack above bubble scrim.
