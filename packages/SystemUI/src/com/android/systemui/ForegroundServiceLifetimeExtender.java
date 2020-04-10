@@ -25,6 +25,7 @@ import android.util.ArraySet;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.util.time.SystemClock;
 
 /**
  * Extends the lifetime of foreground notification services such that they show for at least
@@ -39,8 +40,10 @@ public class ForegroundServiceLifetimeExtender implements NotificationLifetimeEx
     private NotificationSafeToRemoveCallback mNotificationSafeToRemoveCallback;
     private ArraySet<NotificationEntry> mManagedEntries = new ArraySet<>();
     private Handler mHandler = new Handler(Looper.getMainLooper());
+    private final SystemClock mSystemClock;
 
-    public ForegroundServiceLifetimeExtender() {
+    public ForegroundServiceLifetimeExtender(SystemClock systemClock) {
+        mSystemClock = systemClock;
     }
 
     @Override
@@ -55,8 +58,8 @@ public class ForegroundServiceLifetimeExtender implements NotificationLifetimeEx
             return false;
         }
 
-        long currentTime = System.currentTimeMillis();
-        return currentTime - entry.getSbn().getPostTime() < MIN_FGS_TIME_MS;
+        long currentTime = mSystemClock.uptimeMillis();
+        return currentTime - entry.getCreationTime() < MIN_FGS_TIME_MS;
     }
 
     @Override
@@ -84,7 +87,7 @@ public class ForegroundServiceLifetimeExtender implements NotificationLifetimeEx
             }
         };
         long delayAmt = MIN_FGS_TIME_MS
-                - (System.currentTimeMillis() - entry.getSbn().getPostTime());
+                - (mSystemClock.uptimeMillis() - entry.getCreationTime());
         mHandler.postDelayed(r, delayAmt);
     }
 }

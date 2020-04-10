@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.Process.INVALID_UID;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -44,6 +45,7 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
@@ -106,6 +108,11 @@ class WindowToken extends WindowContainer<WindowState> {
     @VisibleForTesting
     final boolean mFromClientToken;
 
+    private DeathRecipient mDeathRecipient;
+    private boolean mBinderDied = false;
+
+    private final int mOwnerUid;
+
     /**
      * Used to fix the transform of the token to be rotated to a rotation different than it's
      * display. The window frames and surfaces corresponding to this token will be layouted and
@@ -165,6 +172,30 @@ class WindowToken extends WindowContainer<WindowState> {
         }
     }
 
+    private class DeathRecipient implements IBinder.DeathRecipient {
+        private boolean mHasUnlinkToDeath = false;
+
+        @Override
+        public void binderDied() {
+            synchronized (mWmService.mGlobalLock) {
+                mBinderDied = true;
+                removeImmediately();
+            }
+        }
+
+        void linkToDeath() throws RemoteException {
+            token.linkToDeath(DeathRecipient.this, 0);
+        }
+
+        void unlinkToDeath() {
+            if (mHasUnlinkToDeath) {
+                return;
+            }
+            token.unlinkToDeath(DeathRecipient.this, 0);
+            mHasUnlinkToDeath = true;
+        }
+    }
+
     /**
      * Compares two child window of this token and returns -1 if the first is lesser than the
      * second in terms of z-order and 1 otherwise.
@@ -193,22 +224,34 @@ class WindowToken extends WindowContainer<WindowState> {
 
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
             DisplayContent dc, boolean ownerCanManageAppTokens, boolean roundedCornerOverlay) {
-        this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens,
+        this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens, INVALID_UID,
                 roundedCornerOverlay, false /* fromClientToken */);
     }
 
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
-            DisplayContent dc, boolean ownerCanManageAppTokens, boolean roundedCornerOverlay,
-            boolean fromClientToken) {
+            DisplayContent dc, boolean ownerCanManageAppTokens, int ownerUid,
+            boolean roundedCornerOverlay, boolean fromClientToken) {
         super(service);
         token = _token;
         windowType = type;
         mPersistOnEmpty = persistOnEmpty;
         mOwnerCanManageAppTokens = ownerCanManageAppTokens;
+        mOwnerUid = ownerUid;
         mRoundedCornerOverlay = roundedCornerOverlay;
         mFromClientToken = fromClientToken;
         if (dc != null) {
             dc.addWindowToken(token, this);
+        }
+        if (shouldReportToClient()) {
+            try {
+                mDeathRecipient = new DeathRecipient();
+                mDeathRecipient.linkToDeath();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to add window token with type " + windowType + " on "
+                        + "display " + dc.getDisplayId(), e);
+                mDeathRecipient = null;
+                return;
+            }
         }
     }
 
@@ -222,7 +265,7 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     void setExiting() {
-        if (mChildren.size() == 0) {
+        if (isEmpty()) {
             super.removeImmediately();
             return;
         }
@@ -340,6 +383,21 @@ class WindowToken extends WindowContainer<WindowState> {
         // Needs to occur after the token is removed from the display above to avoid attempt at
         // duplicate removal of this window container from it's parent.
         super.removeImmediately();
+
+        reportWindowTokenRemovedToClient();
+    }
+
+    private void reportWindowTokenRemovedToClient() {
+        if (!shouldReportToClient()) {
+            return;
+        }
+        mDeathRecipient.unlinkToDeath();
+        IWindowToken windowTokenClient = IWindowToken.Stub.asInterface(token);
+        try {
+            windowTokenClient.onWindowTokenRemoved();
+        } catch (RemoteException e) {
+            ProtoLog.w(WM_ERROR, "Could not report token removal to the window token client.");
+        }
     }
 
     @Override
@@ -361,17 +419,9 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     void reportConfigToWindowTokenClient() {
-        if (asActivityRecord() != null) {
-            // Activities are updated through ATM callbacks.
+        if (!shouldReportToClient()) {
             return;
         }
-
-        // Unfortunately, this WindowToken is not from WindowContext so it cannot handle
-        // its own configuration changes.
-        if (!mFromClientToken) {
-            return;
-        }
-
         final Configuration config = getConfiguration();
         final int displayId = getDisplayContent().getDisplayId();
         if (config.equals(mLastReportedConfig) && displayId == mLastReportedDisplay) {
@@ -383,14 +433,24 @@ class WindowToken extends WindowContainer<WindowState> {
         mLastReportedDisplay = displayId;
 
         IWindowToken windowTokenClient = IWindowToken.Stub.asInterface(token);
-        if (windowTokenClient != null) {
-            try {
-                windowTokenClient.onConfigurationChanged(config, displayId);
-            } catch (RemoteException e) {
-                ProtoLog.w(WM_ERROR,
-                        "Could not report config changes to the window token client.");
-            }
+        try {
+            windowTokenClient.onConfigurationChanged(config, displayId);
+        } catch (RemoteException e) {
+            ProtoLog.w(WM_ERROR,
+                    "Could not report config changes to the window token client.");
         }
+    }
+
+    /**
+     * @return {@code true} if this {@link WindowToken} is not an {@link ActivityRecord} and
+     * registered from client side.
+     */
+    private boolean shouldReportToClient() {
+        // Only report to client for WindowToken because Activities are updated through ATM
+        // callbacks.
+        return asActivityRecord() == null
+        // Report to {@link android.view.WindowTokenClient} if this token was registered from it.
+                && mFromClientToken && !mBinderDied;
     }
 
     @Override
@@ -615,5 +675,9 @@ class WindowToken extends WindowContainer<WindowState> {
 
     int getWindowLayerFromType() {
         return mWmService.mPolicy.getWindowLayerFromTypeLw(windowType, mOwnerCanManageAppTokens);
+    }
+
+    int getOwnerUid() {
+        return mOwnerUid;
     }
 }

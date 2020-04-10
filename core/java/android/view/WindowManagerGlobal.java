@@ -102,6 +102,14 @@ public final class WindowManagerGlobal {
     public static final int RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS = 0x40;
 
     /**
+     * This flag indicates the client should not directly submit it's next frame,
+     * but instead should pass it in the postDrawTransaction of
+     * {@link WindowManagerService#finishDrawing}. This is used by the WM
+     * BLASTSyncEngine to synchronize rendering of multiple windows.
+     */
+    public static final int RELAYOUT_RES_BLAST_SYNC = 0x80;
+
+    /**
      * Flag for relayout: the client will be later giving
      * internal insets; as a result, the window will not impact other window
      * layouts until the insets are given.

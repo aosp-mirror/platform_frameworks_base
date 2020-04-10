@@ -16,7 +16,6 @@
 
 package com.android.internal.util.function.pooled;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Message;
 import android.text.TextUtils;
@@ -25,6 +24,7 @@ import android.util.Pools;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
+import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.function.DecConsumer;
 import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.DecPredicate;
@@ -580,36 +580,6 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         return r;
     }
 
-    // TODO: add unit test
-    @NonNull
-    private static String getFriendlyName(@NonNull Object function) {
-        // Full function has one of the following formats:
-        //   package-$$Lambda$class$randomId
-        //   package-$$Lambda$randomId
-        //
-        // We just want just package.class$Lambda (or package$Lambda) respectively
-
-        final String fullFunction = function.toString();
-
-        final int endPkgIdx = fullFunction.indexOf("-$$");
-        if (endPkgIdx == -1) return fullFunction;
-
-        // firstDollarIdx could be either beginning of class or beginning of the random id
-        final int firstDollarIdx = fullFunction.indexOf('$', endPkgIdx + 3);
-        if (firstDollarIdx == -1) return fullFunction;
-
-        final int endClassIdx = fullFunction.indexOf('$', firstDollarIdx + 1);
-        if (endClassIdx == -1) {
-            // Just package
-            return fullFunction.substring(0, endPkgIdx - 1) + "$Lambda";
-        }
-
-        // Package + class
-        return fullFunction.substring(0, endPkgIdx)
-                + fullFunction.substring(firstDollarIdx + 1, endClassIdx)
-                + "$Lambda";
-    }
-
     private static void setIfInBounds(Object[] array, int i, Object a) {
         if (i < ArrayUtils.size(array)) array[i] = a;
     }
@@ -651,7 +621,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
 
     @Override
     public String getTraceName() {
-        return getFriendlyName(mFunc);
+        return FunctionalUtils.getLambdaName(mFunc);
     }
 
     private boolean isRecycled() {

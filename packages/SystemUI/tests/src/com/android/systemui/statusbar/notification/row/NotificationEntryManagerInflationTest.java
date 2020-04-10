@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.row;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
+
 import static junit.framework.Assert.assertNotNull;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -139,6 +141,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     private NotificationRowBinderImpl mRowBinder;
     private Handler mHandler;
     private FakeExecutor mBgExecutor;
+    private RowContentBindStage mRowContentBindStage;
 
     @Before
     public void setUp() {
@@ -147,10 +150,13 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
 
         mHandler = Handler.createAsync(TestableLooper.get(this).getLooper());
 
+        // Add an action so heads up content views are made
+        Notification.Action action = new Notification.Action.Builder(null, null, null).build();
         Notification notification = new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle(TEST_TITLE)
                 .setContentText(TEST_TEXT)
+                .setActions(action)
                 .build();
         mSbn = new SbnBuilder()
                 .setNotification(notification)
@@ -192,11 +198,11 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 () -> mock(SmartReplyController.class),
                 mock(ConversationNotificationProcessor.class),
                 mBgExecutor);
-        RowContentBindStage stage = new RowContentBindStage(
+        mRowContentBindStage = new RowContentBindStage(
                 binder,
                 mock(NotifInflationErrorManager.class),
                 mock(RowContentBindStageLogger.class));
-        pipeline.setStage(stage);
+        pipeline.setStage(mRowContentBindStage);
 
         ArgumentCaptor<ExpandableNotificationRow> viewCaptor =
                 ArgumentCaptor.forClass(ExpandableNotificationRow.class);
@@ -232,7 +238,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                                 "FOOBAR", "FOOBAR",
                                 mKeyguardBypassController,
                                 mGroupManager,
-                                stage,
+                                mRowContentBindStage,
                                 mock(NotificationLogger.class),
                                 mHeadsUpManager,
                                 mPresenter,
@@ -256,7 +262,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 mRemoteInputManager,
                 mLockscreenUserManager,
                 pipeline,
-                stage,
+                mRowContentBindStage,
                 mNotificationInterruptionStateProvider,
                 RowInflaterTask::new,
                 mExpandableNotificationRowComponentBuilder,
@@ -363,6 +369,27 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
 
         // THEN we update the presenter
         verify(mPresenter).updateNotificationViews();
+    }
+
+    @Test
+    public void testContentViewInflationDuringRowInflationInflatesCorrectViews() {
+        // GIVEN a notification is added and the row is inflating
+        mEntryManager.addNotification(mSbn, mRankingMap);
+        ArgumentCaptor<NotificationEntry> entryCaptor = ArgumentCaptor.forClass(
+                NotificationEntry.class);
+        verify(mEntryListener).onPendingEntryAdded(entryCaptor.capture());
+        NotificationEntry entry = entryCaptor.getValue();
+
+        // WHEN we try to bind a content view
+        mRowContentBindStage.getStageParams(entry).requireContentViews(FLAG_CONTENT_VIEW_HEADS_UP);
+        mRowContentBindStage.requestRebind(entry, null);
+
+        waitForInflation();
+
+        // THEN the notification has its row and all relevant content views inflated
+        assertNotNull(entry.getRow());
+        assertNotNull(entry.getRow().getPrivateLayout().getContractedChild());
+        assertNotNull(entry.getRow().getPrivateLayout().getHeadsUpChild());
     }
 
     /**

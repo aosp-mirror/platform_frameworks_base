@@ -18,6 +18,7 @@
 #include <log/logprint.h>
 #include <stdio.h>
 
+#include "annotations.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "matchers/matcher_util.h"
 #include "stats_event.h"
@@ -73,14 +74,13 @@ void makeStringLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t 
     parseStatsEventToLogEvent(statsEvent, logEvent);
 }
 
-void makeIntStringLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
-                           const int32_t value, const string& name) {
+void makeIntWithBoolAnnotationLogEvent(LogEvent* logEvent, const int32_t atomId,
+                                       const int32_t field, const uint8_t annotationId,
+                                       const bool annotationValue) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
-    AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
-
-    AStatsEvent_writeInt32(statsEvent, value);
-    AStatsEvent_writeString(statsEvent, name.c_str());
+    AStatsEvent_writeInt32(statsEvent, field);
+    AStatsEvent_addBoolAnnotation(statsEvent, annotationId, annotationValue);
 
     parseStatsEventToLogEvent(statsEvent, logEvent);
 }
@@ -376,21 +376,20 @@ TEST(AtomMatcherTest, TestUidFieldMatcher) {
     simpleMatcher->add_field_value_matcher()->set_field(1);
     simpleMatcher->mutable_field_value_matcher(0)->set_eq_string("pkg0");
 
-    // Set up the event
+    // Make event without is_uid annotation.
     LogEvent event1(/*uid=*/0, /*pid=*/0);
     makeIntLogEvent(&event1, TAG_ID, 0, 1111);
-
-    LogEvent event2(/*uid=*/0, /*pid=*/0);
-    makeIntStringLogEvent(&event2, TAG_ID_2, 0, 1111, "some value");
-
-    // Tag not in kAtomsWithUidField
     EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event1));
 
-    // Tag found in kAtomsWithUidField and has matching uid
+    // Make event with is_uid annotation.
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    makeIntWithBoolAnnotationLogEvent(&event2, TAG_ID_2, 1111, ANNOTATION_ID_IS_UID, true);
+
+    // Event has is_uid annotation, so mapping from uid to package name occurs.
     simpleMatcher->set_atom_id(TAG_ID_2);
     EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event2));
 
-    // Tag found in kAtomsWithUidField but has non-matching uid
+    // Event has is_uid annotation, but uid maps to different package name.
     simpleMatcher->mutable_field_value_matcher(0)->set_eq_string("Pkg2");
     EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event2));
 }
