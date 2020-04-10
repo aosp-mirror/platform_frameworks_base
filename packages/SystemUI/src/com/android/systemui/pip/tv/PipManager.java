@@ -208,12 +208,13 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
 
         @Override
-        public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment) {
+        public void onMovementBoundsChanged(boolean fromImeAdjustment) {
             mHandler.post(() -> {
                 // Populate the inset / normal bounds and DisplayInfo from mPipBoundsHandler first.
+                final Rect destinationBounds = new Rect();
                 mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
-                        animatingBounds, mTmpDisplayInfo);
-                mDefaultPipBounds.set(animatingBounds);
+                        destinationBounds, mTmpDisplayInfo);
+                mDefaultPipBounds.set(destinationBounds);
             });
         }
 
