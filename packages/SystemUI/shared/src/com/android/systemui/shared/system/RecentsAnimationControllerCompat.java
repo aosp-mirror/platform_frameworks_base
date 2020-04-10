@@ -109,4 +109,16 @@ public class RecentsAnimationControllerCompat {
             Log.e(TAG, "Failed to set overview reached state", e);
         }
     }
+
+    /**
+     * @see IRecentsAnimationController#removeTask
+     */
+    public boolean removeTask(int taskId) {
+        try {
+            return mAnimationController.removeTask(taskId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to remove remote animation target", e);
+            return false;
+        }
+    }
 }
