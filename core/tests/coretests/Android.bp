@@ -72,6 +72,7 @@ android_test {
         ":BinderDeathRecipientHelperApp1",
         ":BinderDeathRecipientHelperApp2",
     ],
+    required: ["com.android.cts.helpers.aosp"],
 }
 
 // Rules to copy all the test apks to the intermediate raw resource directory
