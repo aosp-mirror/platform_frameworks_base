@@ -15,9 +15,76 @@
      limitations under the License.
 -->
 
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/controls_activity_view"
+    android:id="@+id/control_detail_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="match_parent"
+    android:layout_marginTop="@dimen/controls_activity_view_top_offset"
+    android:orientation="vertical">
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_marginBottom="10dp">
+    <ImageView
+        android:id="@+id/control_detail_close"
+        android:contentDescription="@string/accessibility_desc_close"
+        android:src="@drawable/ic_close"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:tint="@color/control_primary_text"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="12dp" />
+    <Space
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="1dp" />
+    <ImageView
+        android:id="@+id/control_detail_open_in_app"
+        android:src="@drawable/ic_open_in_new"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:tint="@color/control_primary_text"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="12dp" />
+  </LinearLayout>
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingTop="@dimen/controls_activity_view_top_padding"
+      android:paddingLeft="@dimen/controls_activity_view_side_padding"
+      android:paddingRight="@dimen/controls_activity_view_side_padding"
+      android:background="@drawable/rounded_bg_top"
+      android:orientation="vertical">
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.ControlDialog"
+        android:clickable="false"
+        android:focusable="false"
+        android:maxLines="1"
+        android:ellipsize="end" />
+    <TextView
+        android:id="@+id/subtitle"
+        android:layout_marginTop="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.ControlDialog"
+        android:clickable="false"
+        android:focusable="false"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <FrameLayout
+        android:id="@+id/controls_activity_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1" />
+
+  </LinearLayout>
+</LinearLayout>
 

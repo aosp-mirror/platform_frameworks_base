@@ -671,6 +671,19 @@
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
+    <style name="Theme.SystemUI.Dialog.Control.DetailPanel" parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
+      <item name="android:windowAnimationStyle">@style/Animation.Bottomsheet</item>
+      <item name="android:windowFullscreen">true</item>
+      <item name="android:windowIsFloating">false</item>
+      <item name="android:windowBackground">@null</item>
+      <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <style name="Animation.Bottomsheet">
+      <item name="android:windowEnterAnimation">@anim/bottomsheet_in</item>
+      <item name="android:windowExitAnimation">@anim/bottomsheet_out</item>
+    </style>
+
     <style name="Control" />
 
     <style name="Control.MenuItem">
@@ -712,6 +725,11 @@
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
         <item name="android:textSize">@dimen/control_text_size</item>
         <item name="android:textColor">@color/control_secondary_text</item>
+    </style>
+    <style name="TextAppearance.ControlDialog">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:textSize">@dimen/controls_activity_view_text_size</item>
+        <item name="android:textColor">@color/control_primary_text</item>
     </style>
     <style name="Control.ListPopupWindow" parent="@*android:style/Widget.DeviceDefault.ListPopupWindow">
         <item name="android:overlapAnchor">true</item>
