@@ -60,7 +60,8 @@ using Clock = std::chrono::steady_clock;
 using TimePoint = std::chrono::time_point<Clock>;
 using Seconds = std::chrono::seconds;
 
-using DataLoaderStatusListener = ::android::sp<::android::content::pm::IDataLoaderStatusListener>;
+using IDataLoaderStatusListener = ::android::content::pm::IDataLoaderStatusListener;
+using DataLoaderStatusListener = ::android::sp<IDataLoaderStatusListener>;
 
 class IncrementalService final {
 public:
@@ -95,7 +96,7 @@ public:
 
     void onDump(int fd);
 
-    std::optional<std::future<void>> onSystemReady();
+    void onSystemReady();
 
     StorageId createStorage(std::string_view mountPoint, DataLoaderParamsParcel&& dataLoaderParams,
                             const DataLoaderStatusListener& dataLoaderStatusListener,
@@ -134,19 +135,6 @@ public:
     bool configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
                                  std::string_view libDirRelativePath, std::string_view abi);
 
-    class IncrementalDataLoaderListener : public android::content::pm::BnDataLoaderStatusListener {
-    public:
-        IncrementalDataLoaderListener(IncrementalService& incrementalService,
-                                      DataLoaderStatusListener externalListener)
-              : incrementalService(incrementalService), externalListener(externalListener) {}
-        // Callbacks interface
-        binder::Status onStatusChanged(MountId mount, int newStatus) final;
-
-    private:
-        IncrementalService& incrementalService;
-        DataLoaderStatusListener externalListener;
-    };
-
     class AppOpsListener : public android::BnAppOpsCallback {
     public:
         AppOpsListener(IncrementalService& incrementalService, std::string packageName) : incrementalService(incrementalService), packageName(std::move(packageName)) {}
@@ -171,6 +159,45 @@ public:
 private:
     static const bool sEnablePerfLogging;
 
+    struct IncFsMount;
+
+    class DataLoaderStub : public android::content::pm::BnDataLoaderStatusListener {
+    public:
+        DataLoaderStub(IncrementalService& service, MountId id, DataLoaderParamsParcel&& params,
+                       FileSystemControlParcel&& control,
+                       const DataLoaderStatusListener* externalListener)
+              : mService(service),
+                mId(id),
+                mParams(std::move(params)),
+                mControl(std::move(control)),
+                mListener(externalListener ? *externalListener : DataLoaderStatusListener()) {}
+        ~DataLoaderStub();
+
+        bool create();
+        bool start();
+        void destroy();
+
+        // accessors
+        MountId id() const { return mId; }
+        const DataLoaderParamsParcel& params() const { return mParams; }
+        int status() const { return mStatus.load(); }
+        bool startRequested() const { return mStartRequested; }
+
+    private:
+        binder::Status onStatusChanged(MountId mount, int newStatus) final;
+
+        IncrementalService& mService;
+        MountId const mId;
+        DataLoaderParamsParcel const mParams;
+        FileSystemControlParcel const mControl;
+        DataLoaderStatusListener const mListener;
+
+        std::atomic<int> mStatus = -1;
+        bool mStartRequested = false;
+        bool mDestroyRequested = false;
+    };
+    using DataLoaderStubPtr = sp<DataLoaderStub>;
+
     struct IncFsMount {
         struct Bind {
             StorageId storage;
@@ -194,10 +221,8 @@ private:
         /*const*/ MountId mountId;
         StorageMap storages;
         BindMap bindPoints;
-        DataLoaderParamsParcel dataLoaderParams;
+        DataLoaderStubPtr dataLoaderStub;
         std::atomic<int> nextStorageDirNo{0};
-        std::atomic<int> dataLoaderStatus = -1;
-        bool dataLoaderStartRequested = false;
         const IncrementalService& incrementalService;
 
         IncFsMount(std::string root, MountId mountId, Control control,
@@ -232,8 +257,8 @@ private:
                            std::string&& source, std::string&& target, BindKind kind,
                            std::unique_lock<std::mutex>& mainLock);
 
-    bool prepareDataLoader(IncFsMount& ifs, const DataLoaderStatusListener* externalListener = nullptr);
-    bool startDataLoader(MountId mountId) const;
+    DataLoaderStubPtr prepareDataLoader(IncFsMount& ifs, DataLoaderParamsParcel&& params,
+                                        const DataLoaderStatusListener* externalListener = nullptr);
 
     BindPathMap::const_iterator findStorageLocked(std::string_view path) const;
     StorageId findStorageId(std::string_view path) const;
@@ -269,7 +294,6 @@ private:
 
     std::atomic_bool mSystemReady = false;
     StorageId mNextId = 0;
-    std::promise<void> mPrepareDataLoaders;
 };
 
 } // namespace android::incremental
