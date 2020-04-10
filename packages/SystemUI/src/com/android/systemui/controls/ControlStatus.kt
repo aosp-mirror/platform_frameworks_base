@@ -18,10 +18,34 @@ package com.android.systemui.controls
 
 import android.content.ComponentName
 import android.service.controls.Control
+import android.service.controls.DeviceTypes
+
+interface ControlInterface {
+    val favorite: Boolean
+    val component: ComponentName
+    val controlId: String
+    val title: CharSequence
+    val subtitle: CharSequence
+    val removed: Boolean
+        get() = false
+    @DeviceTypes.DeviceType val deviceType: Int
+}
 
 data class ControlStatus(
     val control: Control,
-    val component: ComponentName,
-    var favorite: Boolean,
-    val removed: Boolean = false
-)
+    override val component: ComponentName,
+    override var favorite: Boolean,
+    override val removed: Boolean = false
+) : ControlInterface {
+    override val controlId: String
+        get() = control.controlId
+
+    override val title: CharSequence
+        get() = control.title
+
+    override val subtitle: CharSequence
+        get() = control.subtitle
+
+    @DeviceTypes.DeviceType override val deviceType: Int
+        get() = control.deviceType
+}
