@@ -64,7 +64,8 @@ public class TestDrive {
             "AID_LMKD",
             "com.android.managedprovisioning",
             "AID_MEDIA",
-            "AID_NETWORK_STACK"
+            "AID_NETWORK_STACK",
+            "com.google.android.providers.media.module",
     };
     private static final String[] DEFAULT_PULL_SOURCES = {
             "AID_SYSTEM",
