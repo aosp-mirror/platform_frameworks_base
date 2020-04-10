@@ -74,6 +74,8 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerServiceImpl;
+import com.android.systemui.util.RingerModeTracker;
+import com.android.systemui.util.RingerModeTrackerImpl;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
@@ -264,4 +266,10 @@ public abstract class DependencyBinder {
     @Binds
     public abstract VolumeComponent provideVolumeComponent(
             VolumeDialogComponent volumeDialogComponent);
+
+    /**
+     */
+    @Binds
+    public abstract RingerModeTracker provideRingerModeTracker(
+            RingerModeTrackerImpl ringerModeTrackerImpl);
 }
