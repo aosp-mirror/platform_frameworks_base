@@ -49,6 +49,8 @@ import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -437,15 +439,7 @@ public class DexManager {
      *         because they don't need to be compiled)..
      */
     public boolean dexoptSecondaryDex(DexoptOptions options) {
-        // Select the dex optimizer based on the force parameter.
-        // Forced compilation is done through ForcedUpdatePackageDexOptimizer which will adjust
-        // the necessary dexopt flags to make sure that compilation is not skipped. This avoid
-        // passing the force flag through the multitude of layers.
-        // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
-        //       allocate an object here.
-        PackageDexOptimizer pdo = options.isForce()
-                ? new PackageDexOptimizer.ForcedUpdatePackageDexOptimizer(mPackageDexOptimizer)
-                : mPackageDexOptimizer;
+        PackageDexOptimizer pdo = getPackageDexOptimizer(options);
         String packageName = options.getPackageName();
         PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
         if (useInfo.getDexUseInfoMap().isEmpty()) {
@@ -483,6 +477,83 @@ public class DexManager {
             success = success && (result != PackageDexOptimizer.DEX_OPT_FAILED);
         }
         return success;
+    }
+
+    /**
+     * Performs dexopt on system server dex files.
+     *
+     * <p>Verfifies that the package name is {@link PackageManagerService#PLATFORM_PACKAGE_NAME}.
+     *
+     * @return
+     * <p>PackageDexOptimizer.DEX_OPT_SKIPPED if dexopt was skipped because no system server
+     * files were recorded or if no dexopt was needed.
+     * <p>PackageDexOptimizer.DEX_OPT_FAILED if any dexopt operation failed.
+     * <p>PackageDexOptimizer.DEX_OPT_PERFORMED if all dexopt operations succeeded.
+     */
+    public int dexoptSystemServer(DexoptOptions options) {
+        if (!PLATFORM_PACKAGE_NAME.equals(options.getPackageName())) {
+            Slog.wtf(TAG, "Non system server package used when trying to dexopt system server:"
+                    + options.getPackageName());
+            return PackageDexOptimizer.DEX_OPT_FAILED;
+        }
+
+        PackageDexOptimizer pdo = getPackageDexOptimizer(options);
+        String packageName = options.getPackageName();
+        PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
+        if (useInfo.getDexUseInfoMap().isEmpty()) {
+            if (DEBUG) {
+                Slog.d(TAG, "No dex files recorded for system server");
+            }
+            // Nothing to compile, return true.
+            return PackageDexOptimizer.DEX_OPT_SKIPPED;
+        }
+
+        boolean usageUpdated = false;
+        int result = PackageDexOptimizer.DEX_OPT_SKIPPED;
+        for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
+            String dexPath = entry.getKey();
+            DexUseInfo dexUseInfo = entry.getValue();
+            if (!Files.exists(Paths.get(dexPath))) {
+                if (DEBUG) {
+                    Slog.w(TAG, "A dex file previously loaded by System Server does not exist "
+                            + " anymore: " + dexPath);
+                }
+                usageUpdated = mPackageDexUsage.removeDexFile(
+                            packageName, dexPath, dexUseInfo.getOwnerUserId()) || usageUpdated;
+                continue;
+            }
+
+            int newResult = pdo.dexoptSystemServerPath(dexPath, dexUseInfo, options);
+
+            // The end result is:
+            //  - FAILED if any path failed,
+            //  - PERFORMED if at least one path needed compilation,
+            //  - SKIPPED when all paths are up to date
+            if ((result != PackageDexOptimizer.DEX_OPT_FAILED)
+                    && (newResult != PackageDexOptimizer.DEX_OPT_SKIPPED)) {
+                result = newResult;
+            }
+        }
+
+        if (usageUpdated) {
+            mPackageDexUsage.maybeWriteAsync();
+        }
+
+        return result;
+    }
+
+    /**
+     * Select the dex optimizer based on the force parameter.
+     * Forced compilation is done through ForcedUpdatePackageDexOptimizer which will adjust
+     * the necessary dexopt flags to make sure that compilation is not skipped. This avoid
+     * passing the force flag through the multitude of layers.
+     * Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
+     *       allocate an object here.
+     */
+    private PackageDexOptimizer getPackageDexOptimizer(DexoptOptions options) {
+        return options.isForce()
+                ? new PackageDexOptimizer.ForcedUpdatePackageDexOptimizer(mPackageDexOptimizer)
+                : mPackageDexOptimizer;
     }
 
     /**
