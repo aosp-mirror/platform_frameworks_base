@@ -28,6 +28,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
+import com.android.systemui.controls.ControlInterface
 import com.android.systemui.controls.ui.RenderInfo
 
 private typealias ModelFavoriteChanger = (String, Boolean) -> Unit
@@ -35,11 +36,10 @@ private typealias ModelFavoriteChanger = (String, Boolean) -> Unit
 /**
  * Adapter for binding [Control] information to views.
  *
- * The model for this adapter is provided by a [FavoriteModel] that is set using
+ * The model for this adapter is provided by a [ControlModel] that is set using
  * [changeFavoritesModel]. This allows for updating the model if there's a reload.
  *
- * @param layoutInflater an inflater for the views in the containing [RecyclerView]
- * @param onlyFavorites set to true to only display favorites instead of all controls
+ * @property elevation elevation of each control view
  */
 class ControlAdapter(
     private val elevation: Float
@@ -48,11 +48,12 @@ class ControlAdapter(
     companion object {
         private const val TYPE_ZONE = 0
         private const val TYPE_CONTROL = 1
+        private const val TYPE_DIVIDER = 2
     }
 
     val spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
         override fun getSpanSize(position: Int): Int {
-            return if (getItemViewType(position) == TYPE_ZONE) 2 else 1
+            return if (getItemViewType(position) != TYPE_CONTROL) 2 else 1
         }
     }
 
@@ -78,6 +79,10 @@ class ControlAdapter(
             TYPE_ZONE -> {
                 ZoneHolder(layoutInflater.inflate(R.layout.controls_zone_header, parent, false))
             }
+            TYPE_DIVIDER -> {
+                DividerHolder(layoutInflater.inflate(
+                        R.layout.controls_horizontal_divider_withEmpty, parent, false))
+            }
             else -> throw IllegalStateException("Wrong viewType: $viewType")
         }
     }
@@ -95,11 +100,26 @@ class ControlAdapter(
         }
     }
 
+    override fun onBindViewHolder(holder: Holder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            model?.let {
+                val el = it.elements[position]
+                if (el is ControlInterface) {
+                    holder.updateFavorite(el.favorite)
+                }
+            }
+        }
+    }
+
     override fun getItemViewType(position: Int): Int {
         model?.let {
             return when (it.elements.get(position)) {
                 is ZoneNameWrapper -> TYPE_ZONE
-                is ControlWrapper -> TYPE_CONTROL
+                is ControlStatusWrapper -> TYPE_CONTROL
+                is ControlInfoWrapper -> TYPE_CONTROL
+                is DividerWrapper -> TYPE_DIVIDER
             }
         } ?: throw IllegalStateException("Getting item type for null model")
     }
@@ -115,6 +135,24 @@ sealed class Holder(view: View) : RecyclerView.ViewHolder(view) {
      * Bind the data from the model into the view
      */
     abstract fun bindData(wrapper: ElementWrapper)
+
+    open fun updateFavorite(favorite: Boolean) {}
+}
+
+/**
+ * Holder for using with [DividerWrapper] to display a divider between zones.
+ *
+ * The divider can be shown or hidden. It also has a frame view the height of a control, that can
+ * be toggled visible or gone.
+ */
+private class DividerHolder(view: View) : Holder(view) {
+    private val frame: View = itemView.requireViewById(R.id.frame)
+    private val divider: View = itemView.requireViewById(R.id.divider)
+    override fun bindData(wrapper: ElementWrapper) {
+        wrapper as DividerWrapper
+        frame.visibility = if (wrapper.showNone) View.VISIBLE else View.GONE
+        divider.visibility = if (wrapper.showDivider) View.VISIBLE else View.GONE
+    }
 }
 
 /**
@@ -130,11 +168,14 @@ private class ZoneHolder(view: View) : Holder(view) {
 }
 
 /**
- * Holder for using with [ControlWrapper] to display names of zones.
+ * Holder for using with [ControlStatusWrapper] to display names of zones.
  * @param favoriteCallback this callback will be called whenever the favorite state of the
  *                         [Control] this view represents changes.
  */
-private class ControlHolder(view: View, val favoriteCallback: ModelFavoriteChanger) : Holder(view) {
+internal class ControlHolder(
+    view: View,
+    val favoriteCallback: ModelFavoriteChanger
+) : Holder(view) {
     private val icon: ImageView = itemView.requireViewById(R.id.icon)
     private val title: TextView = itemView.requireViewById(R.id.title)
     private val subtitle: TextView = itemView.requireViewById(R.id.subtitle)
@@ -144,18 +185,21 @@ private class ControlHolder(view: View, val favoriteCallback: ModelFavoriteChang
     }
 
     override fun bindData(wrapper: ElementWrapper) {
-        wrapper as ControlWrapper
-        val data = wrapper.controlStatus
-        val renderInfo = getRenderInfo(data.component, data.control.deviceType)
-        title.text = data.control.title
-        subtitle.text = data.control.subtitle
-        favorite.isChecked = data.favorite
-        removed.text = if (data.removed) "Removed" else ""
+        wrapper as ControlInterface
+        val renderInfo = getRenderInfo(wrapper.component, wrapper.deviceType)
+        title.text = wrapper.title
+        subtitle.text = wrapper.subtitle
+        favorite.isChecked = wrapper.favorite
+        removed.text = if (wrapper.removed) "Removed" else ""
         itemView.setOnClickListener {
             favorite.isChecked = !favorite.isChecked
-            favoriteCallback(data.control.controlId, favorite.isChecked)
+            favoriteCallback(wrapper.controlId, favorite.isChecked)
         }
         applyRenderInfo(renderInfo)
+    }
+
+    override fun updateFavorite(favorite: Boolean) {
+        this.favorite.isChecked = favorite
     }
 
     private fun getRenderInfo(
