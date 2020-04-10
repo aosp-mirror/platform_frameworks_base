@@ -206,7 +206,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mActivityIntentHelper,
 
                         mFeatureFlags,
-                        mock(MetricsLogger.class))
+                        mock(MetricsLogger.class),
+                        mock(StatusBarNotificationActivityStarterLogger.class))
                 .setStatusBar(mStatusBar)
                 .setNotificationPresenter(mock(NotificationPresenter.class))
                 .setNotificationPanelViewController(mock(NotificationPanelViewController.class))

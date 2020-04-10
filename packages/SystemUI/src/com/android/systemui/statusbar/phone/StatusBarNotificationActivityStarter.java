@@ -40,7 +40,6 @@ import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.EventLog;
-import android.util.Log;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
 
@@ -91,9 +90,6 @@ import dagger.Lazy;
  */
 public class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
 
-    private static final String TAG = "NotifActivityStarter";
-    protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
     private final Context mContext;
 
     private final CommandQueue mCommandQueue;
@@ -125,6 +121,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
     private final FeatureFlags mFeatureFlags;
     private final MetricsLogger mMetricsLogger;
+    private final StatusBarNotificationActivityStarterLogger mLogger;
 
     private final StatusBar mStatusBar;
     private final NotificationPresenter mPresenter;
@@ -163,6 +160,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
             FeatureFlags featureFlags,
             MetricsLogger metricsLogger,
+            StatusBarNotificationActivityStarterLogger logger,
 
             StatusBar statusBar,
             NotificationPresenter presenter,
@@ -197,6 +195,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
         mFeatureFlags = featureFlags;
         mMetricsLogger = metricsLogger;
+        mLogger = logger;
 
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mStatusBar = statusBar;
@@ -229,6 +228,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
      */
     @Override
     public void onNotificationClicked(StatusBarNotification sbn, ExpandableNotificationRow row) {
+        mLogger.logStartingActivityFromClick(sbn.getKey());
+
         RemoteInputController controller = mRemoteInputManager.getController();
         if (controller.isRemoteInputActive(row.getEntry())
                 && !TextUtils.isEmpty(row.getActiveRemoteInputText())) {
@@ -247,7 +248,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         // The only valid case is Bubble notifications. Guard against other cases
         // entering here.
         if (intent == null && !isBubble) {
-            Log.e(TAG, "onNotificationClicked called for non-clickable notification!");
+            mLogger.logNonClickableNotification(sbn.getKey());
             return;
         }
 
@@ -280,6 +281,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             boolean isActivityIntent,
             boolean wasOccluded,
             boolean showOverLockscreen) {
+        mLogger.logHandleClickAfterKeyguardDismissed(sbn.getKey());
+
         // TODO: Some of this code may be able to move to NotificationEntryManager.
         if (mHeadsUpManager != null && mHeadsUpManager.isAlerting(sbn.getKey())) {
             // Release the HUN notification to the shade.
@@ -326,6 +329,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             boolean isActivityIntent,
             boolean wasOccluded,
             NotificationEntry parentToCancelFinal) {
+        mLogger.logHandleClickAfterPanelCollapsed(sbn.getKey());
+
         String notificationKey = sbn.getKey();
         try {
             // The intent we are sending is for the application, which
@@ -365,9 +370,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     remoteInputText.toString());
         }
         if (isBubble) {
+            mLogger.logExpandingBubble(notificationKey);
             expandBubbleStackOnMainThread(notificationKey);
         } else {
-            startNotificationIntent(intent, fillInIntent, row, wasOccluded, isActivityIntent);
+            startNotificationIntent(
+                    intent, fillInIntent, entry, row, wasOccluded, isActivityIntent);
         }
         if (isActivityIntent || isBubble) {
             mAssistManagerLazy.get().hideAssist();
@@ -414,10 +421,16 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
     }
 
-    private void startNotificationIntent(PendingIntent intent, Intent fillInIntent,
-            View row, boolean wasOccluded, boolean isActivityIntent) {
+    private void startNotificationIntent(
+            PendingIntent intent,
+            Intent fillInIntent,
+            NotificationEntry entry,
+            View row,
+            boolean wasOccluded,
+            boolean isActivityIntent) {
         RemoteAnimationAdapter adapter = mActivityLaunchAnimator.getLaunchAnimation(row,
                 wasOccluded);
+        mLogger.logStartNotificationIntent(entry.getKey(), intent);
         try {
             if (adapter != null) {
                 ActivityTaskManager.getService()
@@ -430,7 +443,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         } catch (RemoteException | PendingIntent.CanceledException e) {
             // the stack trace isn't very helpful here.
             // Just log the exception message.
-            Log.w(TAG, "Sending contentIntent failed: " + e);
+            mLogger.logSendingIntentFailed(e);
             // TODO: Dismiss Keyguard.
         }
     }
@@ -460,13 +473,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private void handleFullScreenIntent(NotificationEntry entry) {
         if (mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry)) {
             if (shouldSuppressFullScreenIntent(entry)) {
-                if (DEBUG) {
-                    Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + entry.getKey());
-                }
+                mLogger.logFullScreenIntentSuppressedByDnD(entry.getKey());
             } else if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
-                if (DEBUG) {
-                    Log.d(TAG, "No Fullscreen intent: not important enough: " + entry.getKey());
-                }
+                mLogger.logFullScreenIntentNotImportantEnough(entry.getKey());
             } else {
                 // Stop screensaver if the notification has a fullscreen intent.
                 // (like an incoming phone call)
@@ -479,13 +488,13 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 });
 
                 // not immersive & a fullscreen alert should be shown
-                if (DEBUG) {
-                    Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
-                }
+                final PendingIntent fullscreenIntent =
+                        entry.getSbn().getNotification().fullScreenIntent;
+                mLogger.logSendingFullScreenIntent(entry.getKey(), fullscreenIntent);
                 try {
                     EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
                             entry.getKey());
-                    entry.getSbn().getNotification().fullScreenIntent.send();
+                    fullscreenIntent.send();
                     entry.notifyFullScreenIntentLaunched();
                     mMetricsLogger.count("note_fullscreen", 1);
                 } catch (PendingIntent.CanceledException e) {
@@ -627,6 +636,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
         private final FeatureFlags mFeatureFlags;
         private final MetricsLogger mMetricsLogger;
+        private final StatusBarNotificationActivityStarterLogger mLogger;
 
         private StatusBar mStatusBar;
         private NotificationPresenter mNotificationPresenter;
@@ -663,7 +673,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 ActivityIntentHelper activityIntentHelper,
 
                 FeatureFlags featureFlags,
-                MetricsLogger metricsLogger) {
+                MetricsLogger metricsLogger,
+                StatusBarNotificationActivityStarterLogger logger) {
 
             mContext = context;
             mCommandQueue = commandQueue;
@@ -694,6 +705,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
             mFeatureFlags = featureFlags;
             mMetricsLogger = metricsLogger;
+            mLogger = logger;
         }
 
         /** Sets the status bar to use as {@link StatusBar}. */
@@ -750,6 +762,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
                     mFeatureFlags,
                     mMetricsLogger,
+                    mLogger,
 
                     mStatusBar,
                     mNotificationPresenter,
