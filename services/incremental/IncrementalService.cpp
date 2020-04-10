@@ -20,6 +20,7 @@
 
 #include <android-base/file.h>
 #include <android-base/logging.h>
+#include <android-base/no_destructor.h>
 #include <android-base/properties.h>
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
@@ -701,8 +702,8 @@ IncrementalService::IfsMountPtr IncrementalService::getIfs(StorageId storage) co
 const IncrementalService::IfsMountPtr& IncrementalService::getIfsLocked(StorageId storage) const {
     auto it = mMounts.find(storage);
     if (it == mMounts.end()) {
-        static const IfsMountPtr kEmpty = {};
-        return kEmpty;
+        static const android::base::NoDestructor<IfsMountPtr> kEmpty{};
+        return *kEmpty;
     }
     return it->second;
 }
