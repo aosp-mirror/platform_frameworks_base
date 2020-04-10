@@ -64,6 +64,7 @@ public:
 
     virtual Status systemRunning();
     virtual Status statsCompanionReady();
+    virtual Status bootCompleted();
     virtual Status informAnomalyAlarmFired();
     virtual Status informPollAlarmFired();
     virtual Status informAlarmForSubscriberTriggeringFired();
@@ -163,6 +164,11 @@ public:
      * Binder call to get AppBreadcrumbReported atom.
      */
     virtual Status sendAppBreadcrumbAtom(int32_t label, int32_t state) override;
+
+    /**
+     * Binder call to notify statsd that all pullers from boot have been registered.
+     */
+    virtual Status allPullersFromBootRegistered();
 
     /**
      * Binder call to register a callback function for a pulled atom.
