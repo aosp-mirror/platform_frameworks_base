@@ -2214,7 +2214,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // It is possible that request to finish activity might also remove its task and
                 // stack, so we need to be careful with indexes in the loop and check child count
                 // every time.
-                for (int stackNdx = 0; stackNdx < display.getStackCount(); ++stackNdx) {
+                for (int stackNdx = 0; stackNdx < taskDisplayArea.getStackCount(); ++stackNdx) {
                     final ActivityStack stack = taskDisplayArea.getStackAt(stackNdx);
                     final Task t = stack.finishTopCrashedActivityLocked(app, reason);
                     if (stack == focusedStack || finishedTask == null) {
