@@ -2272,7 +2272,7 @@ class ActivityStack extends Task {
         ActivityOptions.abort(options);
         if (DEBUG_STATES) Slog.d(TAG_STATES,
                 "resumeNextFocusableActivityWhenStackIsEmpty: " + reason + ", go home");
-        return mRootWindowContainer.resumeHomeActivity(prev, reason, getDisplayId());
+        return mRootWindowContainer.resumeHomeActivity(prev, reason, getDisplayArea());
     }
 
     void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
