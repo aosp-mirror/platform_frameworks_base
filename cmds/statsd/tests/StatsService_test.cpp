@@ -65,7 +65,6 @@ TEST(StatsServiceTest, TestGetUidFromArgs) {
     args.push(String8("-1"));
     args.push(String8("0"));
     args.push(String8("1"));
-    args.push(String8("9999999999999999999999999999999999"));
     args.push(String8("a1"));
     args.push(String8(""));
 
@@ -85,14 +84,11 @@ TEST(StatsServiceTest, TestGetUidFromArgs) {
     EXPECT_TRUE(service->getUidFromArgs(args, 2, uid));
     EXPECT_EQ(1, uid);
 
-    // "999999999999999999"
+    // "a1"
     EXPECT_FALSE(service->getUidFromArgs(args, 3, uid));
 
-    // "a1"
-    EXPECT_FALSE(service->getUidFromArgs(args, 4, uid));
-
     // ""
-    EXPECT_FALSE(service->getUidFromArgs(args, 5, uid));
+    EXPECT_FALSE(service->getUidFromArgs(args, 4, uid));
 
     // For a non-userdebug, uid "1" cannot be impersonated.
     service->mEngBuild = false;
