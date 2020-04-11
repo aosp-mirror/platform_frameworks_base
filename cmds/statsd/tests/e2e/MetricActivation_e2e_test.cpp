@@ -391,7 +391,6 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     backfillStartEndTimestamp(&reports);
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
-    EXPECT_EQ(4, reports.reports(0).metrics(0).count_metrics().data_size());
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
@@ -699,7 +698,6 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     backfillStartEndTimestamp(&reports);
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
-    EXPECT_EQ(5, reports.reports(0).metrics(0).count_metrics().data_size());
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
@@ -1033,7 +1031,6 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     backfillStartEndTimestamp(&reports);
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
-    EXPECT_EQ(5, reports.reports(0).metrics(0).count_metrics().data_size());
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
@@ -1257,7 +1254,6 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     backfillStartEndTimestamp(&reports);
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
-    EXPECT_EQ(3, reports.reports(0).metrics(0).count_metrics().data_size());
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
@@ -1695,8 +1691,6 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     backfillStartEndTimestamp(&reports);
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(2, reports.reports(0).metrics_size());
-    EXPECT_EQ(5, reports.reports(0).metrics(0).count_metrics().data_size());
-    EXPECT_EQ(5, reports.reports(0).metrics(1).count_metrics().data_size());
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
 
