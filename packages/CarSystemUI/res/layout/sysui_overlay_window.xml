@@ -29,6 +29,11 @@
               android:layout="@layout/notification_panel_container"
               android:layout_marginBottom="@dimen/navigation_bar_height"/>
 
+    <ViewStub android:id="@+id/keyguard_stub"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout="@layout/keyguard_container" />
+
     <ViewStub android:id="@+id/fullscreen_user_switcher_stub"
               android:layout_width="match_parent"
               android:layout_height="match_parent"

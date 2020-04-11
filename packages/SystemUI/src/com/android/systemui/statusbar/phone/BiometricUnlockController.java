@@ -34,6 +34,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -145,7 +146,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final Context mContext;
     private final int mWakeUpDelay;
     private int mMode;
-    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private KeyguardViewController mKeyguardViewController;
     private DozeScrimController mDozeScrimController;
     private KeyguardViewMediator mKeyguardViewMediator;
     private ScrimController mScrimController;
@@ -204,9 +205,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         dumpManager.registerDumpable(getClass().getName(), this);
     }
 
-    public void setStatusBarKeyguardViewManager(
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
-        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+    public void setKeyguardViewController(KeyguardViewController keyguardViewController) {
+        mKeyguardViewController = keyguardViewController;
     }
 
     private final Runnable mReleaseBiometricWakeLockRunnable = new Runnable() {
@@ -328,7 +328,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             case MODE_DISMISS_BOUNCER:
             case MODE_UNLOCK_FADING:
                 Trace.beginSection("MODE_DISMISS_BOUNCER or MODE_UNLOCK_FADING");
-                mStatusBarKeyguardViewManager.notifyKeyguardAuthenticated(
+                mKeyguardViewController.notifyKeyguardAuthenticated(
                         false /* strongAuth */);
                 Trace.endSection();
                 break;
@@ -376,7 +376,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
 
     private void showBouncer() {
         if (mMode == MODE_SHOW_BOUNCER) {
-            mStatusBarKeyguardViewManager.showBouncer(false);
+            mKeyguardViewController.showBouncer(false);
         }
         mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
                 false /* delayed */, BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
@@ -431,7 +431,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         boolean deviceDreaming = mUpdateMonitor.isDreaming();
 
         if (!mUpdateMonitor.isDeviceInteractive()) {
-            if (!mStatusBarKeyguardViewManager.isShowing()) {
+            if (!mKeyguardViewController.isShowing()) {
                 return MODE_ONLY_WAKE;
             } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
                 return MODE_WAKE_AND_UNLOCK_PULSING;
@@ -444,12 +444,12 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         if (unlockingAllowed && deviceDreaming) {
             return MODE_WAKE_AND_UNLOCK_FROM_DREAM;
         }
-        if (mStatusBarKeyguardViewManager.isShowing()) {
-            if (mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing() && unlockingAllowed) {
+        if (mKeyguardViewController.isShowing()) {
+            if (mKeyguardViewController.bouncerIsOrWillBeShowing() && unlockingAllowed) {
                 return MODE_DISMISS_BOUNCER;
             } else if (unlockingAllowed) {
                 return MODE_UNLOCK_COLLAPSING;
-            } else if (!mStatusBarKeyguardViewManager.isBouncerShowing()) {
+            } else if (!mKeyguardViewController.isBouncerShowing()) {
                 return MODE_SHOW_BOUNCER;
             }
         }
@@ -463,7 +463,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         boolean bypass = mKeyguardBypassController.getBypassEnabled();
 
         if (!mUpdateMonitor.isDeviceInteractive()) {
-            if (!mStatusBarKeyguardViewManager.isShowing()) {
+            if (!mKeyguardViewController.isShowing()) {
                 return bypass ? MODE_WAKE_AND_UNLOCK : MODE_ONLY_WAKE;
             } else if (!unlockingAllowed) {
                 return bypass ? MODE_SHOW_BOUNCER : MODE_NONE;
@@ -484,8 +484,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         if (unlockingAllowed && deviceDreaming) {
             return bypass ? MODE_WAKE_AND_UNLOCK_FROM_DREAM : MODE_ONLY_WAKE;
         }
-        if (mStatusBarKeyguardViewManager.isShowing()) {
-            if (mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing() && unlockingAllowed) {
+        if (mKeyguardViewController.isShowing()) {
+            if (mKeyguardViewController.bouncerIsOrWillBeShowing() && unlockingAllowed) {
                 if (bypass && mKeyguardBypassController.canPlaySubtleWindowAnimations()) {
                     return MODE_UNLOCK_FADING;
                 } else {
