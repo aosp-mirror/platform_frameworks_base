@@ -681,11 +681,11 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"Tukar kunci skrin"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Tukar kunci skrin."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Kunci skrin"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Mengawal cara dan masa skrin dikunci."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Kawal cara dan masa skrin dikunci."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Padamkan semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Memadamkan data tablet tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Padamkan data peranti Android TV anda tanpa amaran dengan melaksanakan tetapan semula data kilang."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Memadamkan data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Padamkan data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Padam data pengguna"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Padam data pengguna ini pada tablet ini tanpa amaran."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Padamkan data pengguna ini pada peranti Android TV tanpa amaran."</string>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Perbualan"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Perbualan Kumpulan"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Peribadi"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Kerja"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Paparan peribadi"</string>

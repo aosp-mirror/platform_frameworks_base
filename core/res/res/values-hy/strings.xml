@@ -1546,7 +1546,7 @@
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Միայն այս անգամ"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Կարգավորումներ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s-ը չի աջակցում աշխատանքային պրոֆիլներ"</string>
-    <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Գրասալիկ"</string>
+    <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Պլանշետ"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Հեռուստացույց"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Հեռախոս"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Դոկ-կայանի բարձրախոսներ"</string>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>՝"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Նամակագրություն"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Խմբային նամակագրություն"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Անձնական"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Աշխատանքային"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Անձնական"</string>

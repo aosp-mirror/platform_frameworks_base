@@ -681,7 +681,7 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"更改锁屏方式"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"更改锁屏方式。"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"锁定屏幕"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"控制屏幕锁定的方式和时间。"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"控制锁屏的方式和时间。"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"清除所有数据"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"恢复出厂设置时，系统会在不发出警告的情况下清除平板电脑上的数据。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"不事先发出警告就以恢复出厂设置的方式清空 Android TV 设备中的数据。"</string>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>："</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"对话"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"群组对话"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"个人"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"工作"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"个人视图"</string>

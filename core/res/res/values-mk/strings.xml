@@ -678,14 +678,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го таблетот или избриши ги сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Го следи бројот на погрешно внесени лозинки при отклучување на екранот и го заклучува уредот Android TV или ги брише сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го телефонот или избриши ги сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"Промени го заклучувањето на екранот."</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"Промени го заклучувањето на екранот"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Промени го заклучувањето на екранот."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Заклучи го екранот"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Контролирај како и кога се заклучува екранот."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Избриши ги сите податоци"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Избриши ги податоците во таблетот без предупредување со вршење на фабричко ресетирање на податоци."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Избриши ги податоците во таблетот без предупредување со ресетирање на фабрички податоци."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Ги брише податоците на вашиот уред Android TV без предупредување, така што ќе изврши ресетирање на фабричките податоци."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Избриши ги податоците во телефонот без предупредување со вршење на фабричко ресетирање на податоци."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Избриши ги податоците во телефонот без предупредување со ресетирање на фабрички податоци."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Избриши ги податоците на корисникот"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Избриши ги податоците на овој корисник на таблетот без предупредување."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ги брише податоците на овој корисник на уредов Android TV без предупредување."</string>
@@ -699,7 +699,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Оневозможи фотоапарати"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Спречи употреба на сите камери на уредот."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Онев. функции од заклуч. екран"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Спречете користење на некои функции од заклучување на екранот."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Спречи користење на некои функции од заклучување на екранот."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Дома"</item>
     <item msgid="7740243458912727194">"Мобилен"</item>
@@ -2046,8 +2046,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Разговор"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групен разговор"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Лични"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Службени"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Личен приказ"</string>

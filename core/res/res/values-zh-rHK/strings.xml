@@ -1561,7 +1561,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"螢幕投放到裝置"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"正在搜尋裝置…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"設定"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"停止連接"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"中斷連線"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"正在掃瞄…"</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"正在連線..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"可用"</string>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>："</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"對話"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"群組對話"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"個人"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"公司"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"個人檢視模式"</string>

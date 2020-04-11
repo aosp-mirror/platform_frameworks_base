@@ -698,8 +698,8 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"مطالبہ کریں کہ اسٹور کردہ ایپ کا ڈیٹا مرموز کیا جائے۔"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"کیمروں کو غیر فعال کریں"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"سبھی آلے کے کیمروں کا استعمال روکیں۔"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"کچھ سکرین قفل خصوصیات غیر فعال کریں"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"اسکرین قفل کی کچھ خصوصیات کے استعمال کو روکیں۔"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"کچھ اسکرین لاک خصوصیات غیرفعال کریں"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"اسکرین لاک کی کچھ خصوصیات کے استعمال کو روکیں۔"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"گھر"</item>
     <item msgid="7740243458912727194">"موبائل"</item>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"گفتگو"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"گروپ گفتگو"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"+<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ذاتی"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"دفتر"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ذاتی ملاحظہ"</string>

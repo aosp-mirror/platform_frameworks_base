@@ -1309,9 +1309,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"Korrigjuesi i USB-së është i lidhur"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Trokit për të çaktivizuar korrigjimin e USB-së"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Përzgjidhe për të çaktivizuar korrigjimin e gabimeve të USB-së"</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Korrigjimi me lidhjen pa tel është lidhur"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Trokit për të çaktivizuar korrigjimin me lidhjen pa tel"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Zgjidhe për të çaktivizuar korrigjimin me lidhjen pa tel"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Korrigjimi përmes Wi-Fi është lidhur"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Trokit për të çaktivizuar korrigjimin përmes Wi-Fi"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Zgjidh për të çaktivizuar korrigjimin përmes Wi-Fi"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Modaliteti i lidhjes së testimit është aktivizuar"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Kryej një rivendosje në cilësimet e fabrikës për të çaktivizuar \"Modalitetin e lidhjes së testimit\"."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Paneli komandues i serisë është aktivizuar"</string>

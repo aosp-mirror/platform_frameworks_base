@@ -1309,9 +1309,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"ইউএছবি ডিবাগিং সংযোগ কৰা হ’ল"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"ইউএছবি ডিবাগিং বন্ধ কৰিবলৈ টিপক"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"ইউএছবি ডিবাগিং অক্ষম কৰিবলৈ বাছনি কৰক।"</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ৱায়াৰলেছ ডিবাগিং সংযোগ কৰা হৈছে"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ৱায়াৰলেছ ডিবাগিং অফ কৰিবলৈ টিপক"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ৱায়াৰলেছ ডিবাগিং অক্ষম কৰিবলৈ বাছনি কৰক।"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ৱায়াৰলেচ ডি\'বাগিং সংযোগ কৰা হৈছে"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ৱায়াৰলেচ ডি\'বাগিং অফ কৰিবলৈ টিপক"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ৱায়াৰলেচ ডি\'বাগিং অক্ষম কৰিবলৈ বাছনি কৰক।"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"টেষ্ট হাৰনেছ ম’ড সক্ষম কৰা আছে"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"টেষ্ট হাৰনেছ ম’ড অক্ষম কৰিবলৈ ফেক্টৰী ৰিছেট কৰক।"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"ক্ৰমিক কনছ’ল সক্ষম কৰা আছে"</string>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"বাৰ্তালাপ"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"গোটত কৰা বাৰ্তালাপ"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ব্যক্তিগত"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"কৰ্মস্থান"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ব্যক্তিগত ভিউ"</string>

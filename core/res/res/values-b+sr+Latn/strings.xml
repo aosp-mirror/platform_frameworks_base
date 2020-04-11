@@ -701,7 +701,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Zahteva da sačuvani podaci aplikacije budu šifrovani."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Onemogućavanje kamera"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Sprečite korišćenje svih kamera uređaja."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Onemogućava funkcije zaključavanja ekrana"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Onemogućavanje funkcija zaklj. ekrana"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Sprečava korišćenje nekih funkcija zaključavanja ekrana."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Kuća"</item>
@@ -2078,8 +2078,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Konverzacija"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Grupna konverzacija"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Lični"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Poslovni"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Lični prikaz"</string>

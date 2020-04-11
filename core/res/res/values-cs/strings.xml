@@ -1835,8 +1835,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Smazáno administrátorem"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Spořič baterie za účelem úspory energie:\n·zapne tmavý motiv,\n·vypne nebo omezí aktivitu na pozadí, některé vizuální efekty a další funkce jako „Hej Google“\n\n"<annotation id="url">"Další informace"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Spořič baterie za účelem úspory energie:\n·zapne tmavý motiv,\n·vypne nebo omezí aktivitu na pozadí, některé vizuální efekty a další funkce jako „Hej Google“"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Spořič baterie za účelem úspory energie:\n·zapne tmavý motiv,\n·vypne nebo omezí aktivitu na pozadí, některé vizuální efekty a další funkce jako „Ok Google“\n\n"<annotation id="url">"Další informace"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Spořič baterie za účelem úspory energie:\n·zapne tmavý motiv,\n·vypne nebo omezí aktivitu na pozadí, některé vizuální efekty a další funkce jako „Ok Google“"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Spořič dat z důvodu snížení využití dat některým aplikacím brání v odesílání nebo příjmu dat na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnout Spořič dat?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnout"</string>
@@ -2112,8 +2112,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Konverzace"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Skupinová konverzace"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Osobní"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Pracovní"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Osobní zobrazení"</string>
