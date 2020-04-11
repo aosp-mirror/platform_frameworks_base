@@ -135,7 +135,7 @@ static void android_server_SystemServer_spawnFdLeakCheckThread(JNIEnv*, jobject)
 
 static jlong android_server_SystemServer_startIncrementalService(JNIEnv* env, jclass klass,
                                                                  jobject self) {
-    return Incremental_IncrementalService_Start();
+    return Incremental_IncrementalService_Start(env);
 }
 
 static void android_server_SystemServer_setIncrementalServiceSystemReady(JNIEnv* env, jclass klass,
