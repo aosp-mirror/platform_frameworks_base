@@ -27,6 +27,7 @@ import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 
+import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +35,7 @@ import android.net.IDnsResolver;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkUtils;
+import android.net.ResolverOptionsParcel;
 import android.net.ResolverParamsParcel;
 import android.net.Uri;
 import android.net.shared.PrivateDnsConfig;
@@ -237,6 +239,8 @@ public class DnsManager {
     // TODO: Replace these Maps with SparseArrays.
     private final Map<Integer, PrivateDnsConfig> mPrivateDnsMap;
     private final Map<Integer, PrivateDnsValidationStatuses> mPrivateDnsValidationMap;
+    private final Map<Integer, LinkProperties> mLinkPropertiesMap;
+    private final Map<Integer, int[]> mTransportsMap;
 
     private int mNumDnsEntries;
     private int mSampleValidity;
@@ -253,6 +257,8 @@ public class DnsManager {
         mSystemProperties = sp;
         mPrivateDnsMap = new HashMap<>();
         mPrivateDnsValidationMap = new HashMap<>();
+        mLinkPropertiesMap = new HashMap<>();
+        mTransportsMap = new HashMap<>();
 
         // TODO: Create and register ContentObservers to track every setting
         // used herein, posting messages to respond to changes.
@@ -265,6 +271,8 @@ public class DnsManager {
     public void removeNetwork(Network network) {
         mPrivateDnsMap.remove(network.netId);
         mPrivateDnsValidationMap.remove(network.netId);
+        mTransportsMap.remove(network.netId);
+        mLinkPropertiesMap.remove(network.netId);
     }
 
     public PrivateDnsConfig updatePrivateDns(Network network, PrivateDnsConfig cfg) {
@@ -304,9 +312,35 @@ public class DnsManager {
         statuses.updateStatus(update);
     }
 
-    public void setDnsConfigurationForNetwork(
-            int netId, LinkProperties lp, boolean isDefaultNetwork) {
+    /**
+     * When creating a new network or transport types are changed in a specific network,
+     * transport types are always saved to a hashMap before update dns config.
+     * When destroying network, the specific network will be removed from the hashMap.
+     * The hashMap is always accessed on the same thread.
+     */
+    public void updateTransportsForNetwork(int netId, @NonNull int[] transportTypes) {
+        mTransportsMap.put(netId, transportTypes);
+        sendDnsConfigurationForNetwork(netId);
+    }
 
+    /**
+     * When {@link LinkProperties} are changed in a specific network, they are
+     * always saved to a hashMap before update dns config.
+     * When destroying network, the specific network will be removed from the hashMap.
+     * The hashMap is always accessed on the same thread.
+     */
+    public void noteDnsServersForNetwork(int netId, @NonNull LinkProperties lp) {
+        mLinkPropertiesMap.put(netId, lp);
+        sendDnsConfigurationForNetwork(netId);
+    }
+
+    /**
+     * Send dns configuration parameters to resolver for a given network.
+     */
+    public void sendDnsConfigurationForNetwork(int netId) {
+        final LinkProperties lp = mLinkPropertiesMap.get(netId);
+        final int[] transportTypes = mTransportsMap.get(netId);
+        if (lp == null || transportTypes == null) return;
         updateParametersSettings();
         final ResolverParamsParcel paramsParcel = new ResolverParamsParcel();
 
@@ -319,15 +353,16 @@ public class DnsManager {
         // networks like IMS.
         final PrivateDnsConfig privateDnsCfg = mPrivateDnsMap.getOrDefault(netId,
                 PRIVATE_DNS_OFF);
-
         final boolean useTls = privateDnsCfg.useTls;
         final boolean strictMode = privateDnsCfg.inStrictMode();
+
         paramsParcel.netId = netId;
         paramsParcel.sampleValiditySeconds = mSampleValidity;
         paramsParcel.successThreshold = mSuccessThreshold;
         paramsParcel.minSamples = mMinSamples;
         paramsParcel.maxSamples = mMaxSamples;
-        paramsParcel.servers = NetworkUtils.makeStrings(lp.getDnsServers());
+        paramsParcel.servers =
+                NetworkUtils.makeStrings(lp.getDnsServers());
         paramsParcel.domains = getDomainStrings(lp.getDomains());
         paramsParcel.tlsName = strictMode ? privateDnsCfg.hostname : "";
         paramsParcel.tlsServers =
@@ -337,6 +372,8 @@ public class DnsManager {
                               .collect(Collectors.toList()))
                 : useTls ? paramsParcel.servers  // Opportunistic
                 : new String[0];            // Off
+        paramsParcel.resolverOptions = new ResolverOptionsParcel();
+        paramsParcel.transportTypes = transportTypes;
         // Prepare to track the validation status of the DNS servers in the
         // resolver config when private DNS is in opportunistic or strict mode.
         if (useTls) {
@@ -349,7 +386,7 @@ public class DnsManager {
             mPrivateDnsValidationMap.remove(netId);
         }
 
-        Slog.d(TAG, String.format("setDnsConfigurationForNetwork(%d, %s, %s, %d, %d, %d, %d, "
+        Slog.d(TAG, String.format("sendDnsConfigurationForNetwork(%d, %s, %s, %d, %d, %d, %d, "
                 + "%d, %d, %s, %s)", paramsParcel.netId, Arrays.toString(paramsParcel.servers),
                 Arrays.toString(paramsParcel.domains), paramsParcel.sampleValiditySeconds,
                 paramsParcel.successThreshold, paramsParcel.minSamples,
@@ -363,13 +400,6 @@ public class DnsManager {
             Slog.e(TAG, "Error setting DNS configuration: " + e);
             return;
         }
-
-        // TODO: netd should listen on [::1]:53 and proxy queries to the current
-        // default network, and we should just set net.dns1 to ::1, not least
-        // because applications attempting to use net.dns resolvers will bypass
-        // the privacy protections of things like DNS-over-TLS.
-        if (isDefaultNetwork) setDefaultDnsSystemProperties(lp.getDnsServers());
-        flushVmDnsCache();
     }
 
     public void setDefaultDnsSystemProperties(Collection<InetAddress> dnses) {
@@ -384,7 +414,10 @@ public class DnsManager {
         mNumDnsEntries = last;
     }
 
-    private void flushVmDnsCache() {
+    /**
+     * Flush DNS caches and events work before boot has completed.
+     */
+    public void flushVmDnsCache() {
         /*
          * Tell the VMs to toss their DNS caches
          */
