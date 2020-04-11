@@ -1399,7 +1399,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStackScroller, mKeyguardBypassController, mFalsingManager);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
-        mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
+        mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         mRemoteInputManager.getController().addCallback(mStatusBarKeyguardViewManager);
         mDynamicPrivacyController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
 

@@ -18,7 +18,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fullscreen_user_switcher"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/car_user_switcher_background_color">
 
     <LinearLayout
         android:id="@+id/container"
