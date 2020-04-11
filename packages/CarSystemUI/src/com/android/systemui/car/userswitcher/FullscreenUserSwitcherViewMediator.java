@@ -16,20 +16,9 @@
 
 package com.android.systemui.car.userswitcher;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.res.Resources;
-import android.os.Handler;
-
-import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.car.keyguard.CarKeyguardViewController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.car.CarStatusBar;
-import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.window.OverlayViewMediator;
 
 import javax.inject.Inject;
@@ -42,47 +31,24 @@ import javax.inject.Singleton;
 public class FullscreenUserSwitcherViewMediator implements OverlayViewMediator {
     private static final String TAG = FullscreenUserSwitcherViewMediator.class.getSimpleName();
 
-    private final Context mContext;
-    private final CarStatusBarKeyguardViewManager mCarStatusBarKeyguardViewManager;
-    private final Handler mMainHandler;
     private final StatusBarStateController mStatusBarStateController;
     private final FullScreenUserSwitcherViewController mFullScreenUserSwitcherViewController;
-    private final ScreenLifecycle mScreenLifecycle;
-    private final CarStatusBar mCarStatusBar;
-    private final boolean mIsUserSwitcherEnabled;
+    private final CarKeyguardViewController mCarKeyguardViewController;
 
     @Inject
     public FullscreenUserSwitcherViewMediator(
-            Context context,
-            @Main Resources resources,
-            @Main Handler mainHandler,
-            CarStatusBarKeyguardViewManager carStatusBarKeyguardViewManager,
-            CarStatusBar carStatusBar,
             StatusBarStateController statusBarStateController,
-            FullScreenUserSwitcherViewController fullScreenUserSwitcherViewController,
-            ScreenLifecycle screenLifecycle) {
-        mContext = context;
+            CarKeyguardViewController carKeyguardViewController,
+            FullScreenUserSwitcherViewController fullScreenUserSwitcherViewController) {
 
-        mIsUserSwitcherEnabled = resources.getBoolean(R.bool.config_enableFullscreenUserSwitcher);
-
-        mMainHandler = mainHandler;
-
-        mCarStatusBarKeyguardViewManager = carStatusBarKeyguardViewManager;
-        mCarStatusBar = carStatusBar;
         mStatusBarStateController = statusBarStateController;
         mFullScreenUserSwitcherViewController = fullScreenUserSwitcherViewController;
-        mScreenLifecycle = screenLifecycle;
+        mCarKeyguardViewController = carKeyguardViewController;
     }
 
     @Override
     public void registerListeners() {
-        registerUserSwitcherShowListeners();
         registerUserSwitcherHideListeners();
-        registerHideKeyguardListeners();
-    }
-
-    private void registerUserSwitcherShowListeners() {
-        mCarStatusBarKeyguardViewManager.addOnKeyguardCancelClickedListener(this::show);
     }
 
     private void registerUserSwitcherHideListeners() {
@@ -97,37 +63,6 @@ public class FullscreenUserSwitcherViewMediator implements OverlayViewMediator {
         });
     }
 
-    private void registerHideKeyguardListeners() {
-        mStatusBarStateController.addCallback(new StatusBarStateController.StateListener() {
-            @Override
-            public void onStateChanged(int newState) {
-                if (newState != StatusBarState.FULLSCREEN_USER_SWITCHER) {
-                    return;
-                }
-                dismissKeyguardWhenUserSwitcherNotDisplayed(newState);
-            }
-        });
-
-        mScreenLifecycle.addObserver(new ScreenLifecycle.Observer() {
-            @Override
-            public void onScreenTurnedOn() {
-                dismissKeyguardWhenUserSwitcherNotDisplayed(mStatusBarStateController.getState());
-            }
-        });
-
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (!intent.getAction().equals(Intent.ACTION_USER_SWITCHED)) {
-                    return;
-                }
-
-                // Try to dismiss the keyguard after every user switch.
-                dismissKeyguardWhenUserSwitcherNotDisplayed(mStatusBarStateController.getState());
-            }
-        }, new IntentFilter(Intent.ACTION_USER_SWITCHED));
-    }
-
     @Override
     public void setupOverlayContentViewControllers() {
         mFullScreenUserSwitcherViewController.setUserGridSelectionListener(this::onUserSelected);
@@ -135,33 +70,13 @@ public class FullscreenUserSwitcherViewMediator implements OverlayViewMediator {
 
     /**
      * Every time user clicks on an item in the switcher, we hide the switcher.
-     *
-     * We dismiss the entire keyguard if user clicked on the foreground user (user we're already
-     * logged in as).
      */
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {
+        if (record.mType != UserGridRecyclerView.UserRecord.FOREGROUND_USER) {
+            mCarKeyguardViewController.hideKeyguardToPrepareBouncer();
+        }
+
         hide();
-        if (record.mType == UserGridRecyclerView.UserRecord.FOREGROUND_USER) {
-            mCarStatusBar.dismissKeyguard();
-        }
-    }
-
-    // We automatically dismiss keyguard unless user switcher is being shown above the keyguard.
-    private void dismissKeyguardWhenUserSwitcherNotDisplayed(int state) {
-        if (!mIsUserSwitcherEnabled) {
-            return; // Not using the full screen user switcher.
-        }
-
-        if (state == StatusBarState.FULLSCREEN_USER_SWITCHER
-                && !mFullScreenUserSwitcherViewController.isVisible()) {
-            // Current execution path continues to set state after this, thus we deffer the
-            // dismissal to the next execution cycle.
-
-            // Dismiss the keyguard if switcher is not visible.
-            // TODO(b/150402329): Remove once keyguard is implemented using Overlay Window
-            //  abstractions.
-            mMainHandler.post(mCarStatusBar::dismissKeyguard);
-        }
     }
 
     private void hide() {

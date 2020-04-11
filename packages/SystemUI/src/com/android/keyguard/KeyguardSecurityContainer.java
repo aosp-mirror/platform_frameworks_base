@@ -19,7 +19,9 @@ import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
+
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import static java.lang.Integer.max;
 
 import android.app.Activity;
@@ -28,7 +30,6 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Looper;
