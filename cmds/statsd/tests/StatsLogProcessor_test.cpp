@@ -1564,7 +1564,7 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
 
     // Trigger Activation 1 for Metric 1. Should activate on boot.
     // Trigger Activation 4 for Metric 2. Should activate immediately.
-    long configAddedTimeNs = metricsManager1->mLastReportTimeNs;
+    int64_t configAddedTimeNs = metricsManager1->mLastReportTimeNs;
     std::vector<int> attributionUids = {111};
     std::vector<string> attributionTags = {"App1"};
     std::unique_ptr<LogEvent> event1 = CreateAcquireWakelockEvent(
