@@ -24,6 +24,9 @@
         <option name="test-file-name" value="BinderDeathRecipientHelperApp1.apk" />
         <option name="test-file-name" value="BinderDeathRecipientHelperApp2.apk" />
     </target_preparer>
+
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.DeviceInteractionHelperInstaller" />
+
     <option name="test-tag" value="FrameworksCoreTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.coretests" />
