@@ -1165,17 +1165,23 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     }
 
     void onSplitScreenModeDismissed() {
+        onSplitScreenModeDismissed(null /* toTop */);
+    }
+
+    void onSplitScreenModeDismissed(ActivityStack toTop) {
         mAtmService.deferWindowLayout();
         try {
             mLaunchRootTask = null;
             moveSplitScreenTasksToFullScreen();
         } finally {
-            final ActivityStack topFullscreenStack =
-                    getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
+            final ActivityStack topFullscreenStack = toTop != null
+                    ? toTop : getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
             final ActivityStack homeStack = getOrCreateRootHomeTask();
-            if (topFullscreenStack != null && homeStack != null && !isTopStack(homeStack)) {
+            if (homeStack != null && ((topFullscreenStack != null && !isTopStack(homeStack))
+                    || toTop != null)) {
                 // Whenever split-screen is dismissed we want the home stack directly behind the
                 // current top fullscreen stack so it shows up when the top stack is finished.
+                // Or, if the caller specified a stack to be on top after split-screen is dismissed.
                 // TODO: Would be better to use ActivityDisplay.positionChildAt() for this, however
                 // ActivityDisplay doesn't have a direct controller to WM side yet. We can switch
                 // once we have that.
@@ -1415,8 +1421,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         ActivityStack homeTask = getRootHomeTask();
         if (homeTask == null && mDisplayContent.supportsSystemDecorations()
                 && !mDisplayContent.isUntrustedVirtualDisplay()) {
-            homeTask = createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME,
-                    false /* onTop */);
+            homeTask = createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, false /* onTop */);
         }
         return homeTask;
     }

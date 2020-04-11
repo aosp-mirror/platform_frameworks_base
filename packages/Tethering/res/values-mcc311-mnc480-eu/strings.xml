@@ -20,6 +20,6 @@
     <string name="no_upstream_notification_message" msgid="6810713595219684058">"Gailuak ezin dira konektatu Internetera"</string>
     <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Desaktibatu sare publikoa"</string>
     <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Sare publikoa aktibatuta dago"</string>
-    <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Baliteke kostu gehigarriak ordaindu behar izatea ibiltaritza moduan"</string>
+    <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Baliteke kostu gehigarriak ordaindu behar izatea ibiltaritzan"</string>
     <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Egin aurrera"</string>
 </resources>

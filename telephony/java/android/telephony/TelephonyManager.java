@@ -13104,6 +13104,7 @@ public class TelephonyManager {
                 SubscriptionManager.invalidateDefaultSubIdCaches();
                 SubscriptionManager.invalidateDefaultDataSubIdCaches();
                 SubscriptionManager.invalidateActiveDataSubIdCaches();
+                SubscriptionManager.invalidateDefaultSmsSubIdCaches();
             }
             if (sISms != null) {
                 sISms.asBinder().unlinkToDeath(sServiceDeath, 0);

@@ -442,10 +442,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // Always prepare an app transition since we rely on the transition callbacks to cleanup
             mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
             controller.setCancelOnNextTransitionStart();
-        } else {
-            // Just cancel directly to unleash from launcher when the next launching task is the
-            // current top task.
-            mWindowManager.cancelRecentsAnimation(REORDER_KEEP_IN_PLACE, "stackOrderChanged");
         }
     }
 

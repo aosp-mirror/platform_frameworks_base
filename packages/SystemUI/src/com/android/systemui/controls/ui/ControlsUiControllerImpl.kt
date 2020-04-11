@@ -30,18 +30,19 @@ import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Process
+import android.provider.Settings
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
-import android.util.TypedValue
 import android.util.Log
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.DecelerateInterpolator
+import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.MeasureSpec
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
@@ -49,23 +50,21 @@ import android.widget.LinearLayout
 import android.widget.ListPopupWindow
 import android.widget.Space
 import android.widget.TextView
+import com.android.systemui.R
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.controls.management.ControlsEditingActivity
 import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.R
-
 import dagger.Lazy
-
 import java.text.Collator
 import java.util.function.Consumer
-
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -85,6 +84,7 @@ class ControlsUiControllerImpl @Inject constructor (
         private const val PREF_COMPONENT = "controls_component"
         private const val PREF_STRUCTURE = "controls_structure"
 
+        private const val USE_PANELS = "systemui.controls_use_panel"
         private const val FADE_IN_MILLIS = 225L
 
         private val EMPTY_COMPONENT = ComponentName("", "")
@@ -210,14 +210,28 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun startFavoritingActivity(context: Context, si: StructureInfo) {
-        val i = Intent(context, ControlsFavoritingActivity::class.java).apply {
-            putExtra(ControlsFavoritingActivity.EXTRA_APP,
-                controlsListingController.get().getAppLabel(si.componentName))
-            putExtra(ControlsFavoritingActivity.EXTRA_STRUCTURE, si.structure)
-            putExtra(Intent.EXTRA_COMPONENT_NAME, si.componentName)
+        startTargetedActivity(context, si, ControlsFavoritingActivity::class.java)
+    }
+
+    private fun startEditingActivity(context: Context, si: StructureInfo) {
+        startTargetedActivity(context, si, ControlsEditingActivity::class.java)
+    }
+
+    private fun startTargetedActivity(context: Context, si: StructureInfo, klazz: Class<*>) {
+        val i = Intent(context, klazz).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
+        putIntentExtras(i, si)
         startActivity(context, i)
+    }
+
+    private fun putIntentExtras(intent: Intent, si: StructureInfo) {
+        intent.apply {
+            putExtra(ControlsFavoritingActivity.EXTRA_APP,
+                    controlsListingController.get().getAppLabel(si.componentName))
+            putExtra(ControlsFavoritingActivity.EXTRA_STRUCTURE, si.structure)
+            putExtra(Intent.EXTRA_COMPONENT_NAME, si.componentName)
+        }
     }
 
     private fun startProviderSelectorActivity(context: Context) {
@@ -253,6 +267,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun createMenu() {
         val items = arrayOf(
             context.resources.getString(R.string.controls_menu_add),
+            context.resources.getString(R.string.controls_menu_edit),
             "Reset"
         )
         var adapter = ArrayAdapter<String>(context, R.layout.controls_more_item, items)
@@ -273,8 +288,10 @@ class ControlsUiControllerImpl @Inject constructor (
                             when (pos) {
                                 // 0: Add Control
                                 0 -> startFavoritingActivity(view.context, selectedStructure)
-                                // 1: TEMPORARY for reset controls
-                                1 -> showResetConfirmation()
+                                // 1: Edit controls
+                                1 -> startEditingActivity(view.context, selectedStructure)
+                                // 2: TEMPORARY for reset controls
+                                2 -> showResetConfirmation()
                                 else -> Log.w(ControlsUiController.TAG,
                                     "Unsupported index ($pos) on 'more' menu selection")
                             }
@@ -361,7 +378,6 @@ class ControlsUiControllerImpl @Inject constructor (
                 .setTint(context.resources.getColor(R.color.control_spinner_dropdown, null))
         }
         parent.requireViewById<ImageView>(R.id.app_icon).apply {
-            setContentDescription(selectionItem.getTitle())
             setImageDrawable(selectionItem.icon)
         }
 
@@ -408,6 +424,9 @@ class ControlsUiControllerImpl @Inject constructor (
 
         val maxColumns = findMaxColumns()
 
+        // use flag only temporarily for testing
+        val usePanels = Settings.Secure.getInt(context.contentResolver, USE_PANELS, 0) == 1
+
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
         selectedStructure.controls.forEach {
@@ -421,7 +440,8 @@ class ControlsUiControllerImpl @Inject constructor (
                 baseLayout,
                 controlsController.get(),
                 uiExecutor,
-                bgExecutor
+                bgExecutor,
+                usePanels
             )
             val key = ControlKey(selectedStructure.componentName, it.controlId)
             cvh.bindData(controlsById.getValue(key))
@@ -501,6 +521,7 @@ class ControlsUiControllerImpl @Inject constructor (
         hidden = true
         popup?.dismiss()
         activeDialog?.dismiss()
+        ControlActionCoordinator.closeDialog()
 
         controlsController.get().unsubscribe()
 
@@ -586,7 +607,6 @@ private class ItemAdapter(
             setText(item.getTitle())
         }
         view.requireViewById<ImageView>(R.id.app_icon).apply {
-            setContentDescription(item.appName)
             setImageDrawable(item.icon)
         }
         return view

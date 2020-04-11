@@ -9869,6 +9869,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private int performDexOptInternalWithDependenciesLI(AndroidPackage p,
             @NonNull PackageSetting pkgSetting, DexoptOptions options) {
+        // System server gets a special path.
+        if (PLATFORM_PACKAGE_NAME.equals(p.getPackageName())) {
+            return mDexManager.dexoptSystemServer(options);
+        }
+
         // Select the dex optimizer based on the force parameter.
         // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
         //       allocate an object here.

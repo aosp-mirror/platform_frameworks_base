@@ -1968,6 +1968,38 @@ public final class InputMethodManager {
         return true;
     }
 
+    /**
+     * An empty method only to avoid crashes of apps that call this method via reflection and do not
+     * handle {@link NoSuchMethodException} in a graceful manner.
+     *
+     * @deprecated This is an empty method.  No framework method must call this method.
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage(trackingBug = 37122102, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "{@code androidx.activity.ComponentActivity}")
+    public void windowDismissed(IBinder appWindowToken) {
+        // Intentionally empty.
+        //
+        // It seems that some applications call this method via reflection to null clear the
+        // following fields that used to exist in InputMethodManager:
+        //  * InputMethodManager#mCurRootView
+        //  * InputMethodManager#mServedView
+        //  * InputMethodManager#mNextServedView
+        // so that these objects can be garbage-collected when an Activity gets dismissed.
+        //
+        // It is indeed true that older versions of InputMethodManager had issues that prevented
+        // these fields from being null-cleared when it should have been, but the understanding of
+        // the engineering team is that all known issues have already been fixed as of Android 10.
+        //
+        // For older devices, developers can work around the object leaks by using
+        // androidx.activity.ComponentActivity.
+        // See https://issuetracker.google.com/u/1/issues/37122102 for details.
+        //
+        // If you believe InputMethodManager is leaking objects in API 24 or any later version,
+        // please file a bug at https://issuetracker.google.com/issues/new?component=192705.
+    }
+
     private int getStartInputFlags(View focusedView, int startInputFlags) {
         startInputFlags |= StartInputFlags.VIEW_HAS_FOCUS;
         if (focusedView.onCheckIsTextEditor()) {

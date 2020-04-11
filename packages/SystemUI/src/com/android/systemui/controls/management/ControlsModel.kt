@@ -16,6 +16,9 @@
 
 package com.android.systemui.controls.management
 
+import android.content.ComponentName
+import androidx.recyclerview.widget.RecyclerView
+import com.android.systemui.controls.ControlInterface
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.controller.ControlInfo
 
@@ -27,12 +30,12 @@ import com.android.systemui.controls.controller.ControlInfo
 interface ControlsModel {
 
     /**
-     * List of favorites (builders) in order.
+     * List of favorites in order.
      *
      * This should be obtained prior to storing the favorites using
      * [ControlsController.replaceFavoritesForComponent].
      */
-    val favorites: List<ControlInfo.Builder>
+    val favorites: List<ControlInfo>
 
     /**
      * List of all the elements to display by the corresponding [RecyclerView].
@@ -48,6 +51,24 @@ interface ControlsModel {
      * Move an item (in elements) from one position to another.
      */
     fun onMoveItem(from: Int, to: Int) {}
+
+    /**
+     * Attach an adapter to the model.
+     *
+     * This can be used to notify the adapter of changes in the model.
+     */
+    fun attachAdapter(adapter: RecyclerView.Adapter<*>) {}
+
+    /**
+     * Callback to notify elements (other than the adapter) of relevant changes in the model.
+     */
+    interface ControlsModelCallback {
+
+        /**
+         * Use to notify that the model has changed for the first time
+         */
+        fun onFirstChange()
+    }
 }
 
 /**
@@ -55,5 +76,29 @@ interface ControlsModel {
  * [ControlAdapter].
  */
 sealed class ElementWrapper
+
 data class ZoneNameWrapper(val zoneName: CharSequence) : ElementWrapper()
-data class ControlWrapper(val controlStatus: ControlStatus) : ElementWrapper()
+
+data class ControlStatusWrapper(
+    val controlStatus: ControlStatus
+) : ElementWrapper(), ControlInterface by controlStatus
+
+data class ControlInfoWrapper(
+    override val component: ComponentName,
+    val controlInfo: ControlInfo,
+    override var favorite: Boolean
+) : ElementWrapper(), ControlInterface {
+    override val controlId: String
+        get() = controlInfo.controlId
+    override val title: CharSequence
+        get() = controlInfo.controlTitle
+    override val subtitle: CharSequence
+        get() = controlInfo.controlSubtitle
+    override val deviceType: Int
+        get() = controlInfo.deviceType
+}
+
+data class DividerWrapper(
+    var showNone: Boolean = false,
+    var showDivider: Boolean = false
+) : ElementWrapper()

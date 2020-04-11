@@ -31,6 +31,7 @@ import android.media.session.MediaSession;
 import android.os.Handler;
 import android.os.Process;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
@@ -38,7 +39,10 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.util.RingerModeLiveData;
+import com.android.systemui.util.RingerModeTracker;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +53,7 @@ import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
+@TestableLooper.RunWithLooper
 public class VolumeDialogControllerImplTest extends SysuiTestCase {
 
     TestableVolumeDialogControllerImpl mVolumeController;
@@ -56,16 +61,33 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     StatusBar mStatusBar;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private RingerModeTracker mRingerModeTracker;
+    @Mock
+    private RingerModeLiveData mRingerModeLiveData;
+    @Mock
+    private RingerModeLiveData mRingerModeInternalLiveData;
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
+        when(mRingerModeTracker.getRingerModeInternal()).thenReturn(mRingerModeInternalLiveData);
+        // Initial non-set value
+        when(mRingerModeLiveData.getValue()).thenReturn(-1);
+        when(mRingerModeInternalLiveData.getValue()).thenReturn(-1);
+
         mCallback = mock(VolumeDialogControllerImpl.C.class);
         mStatusBar = mock(StatusBar.class);
         mVolumeController = new TestableVolumeDialogControllerImpl(mContext, mCallback, mStatusBar,
-                mBroadcastDispatcher);
+                mBroadcastDispatcher, mRingerModeTracker);
         mVolumeController.setEnableDialogs(true, true);
+    }
+
+    @After
+    public void tearDown() {
+        mVolumeController.destroy();
     }
 
     @Test
@@ -109,7 +131,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         TestableVolumeDialogControllerImpl
                 nullStatusBarTestableDialog =
                 new TestableVolumeDialogControllerImpl(
-                        mContext, callback, null, mBroadcastDispatcher);
+                        mContext, callback, null, mBroadcastDispatcher, mRingerModeTracker);
         nullStatusBarTestableDialog.setEnableDialogs(true, true);
         nullStatusBarTestableDialog.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
         verify(callback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
@@ -127,12 +149,26 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mVolumeController.mMediaSessionsCallbacksW.onRemoteRemoved(token);
     }
 
+    @Test
+    public void testRingerModeLiveDataObserving() {
+        verify(mRingerModeLiveData).observeForever(any());
+        verify(mRingerModeInternalLiveData).observeForever(any());
+    }
+
+    @Test
+    public void testRingerModeOnDestroy_observersRemoved() {
+        mVolumeController.destroy();
+
+        verify(mRingerModeLiveData).removeObserver(any());
+        verify(mRingerModeInternalLiveData).removeObserver(any());
+    }
+
     static class TestableVolumeDialogControllerImpl extends VolumeDialogControllerImpl {
         TestableVolumeDialogControllerImpl(Context context, C callback, StatusBar s,
-                BroadcastDispatcher broadcastDispatcher) {
+                BroadcastDispatcher broadcastDispatcher, RingerModeTracker ringerModeTracker) {
             super(
                     context, broadcastDispatcher,
-                    s == null ? Optional.empty() : Optional.of(() -> s));
+                    s == null ? Optional.empty() : Optional.of(() -> s), ringerModeTracker);
             mCallbacks = callback;
         }
     }

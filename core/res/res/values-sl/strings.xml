@@ -567,7 +567,7 @@
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Preveč poskusov. Poskusite znova pozneje."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Preveč poskusov. Tipalo prstnih odtisov je onemogočeno."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Poskusite znova."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ni včlanjenih prstnih odtisov."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ni registriranih prstnih odtisov."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ta naprava nima tipala prstnih odtisov."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Tipalo je začasno onemogočeno."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
@@ -579,8 +579,8 @@
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"uporaba strojne opreme za odklepanje z obrazom"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Aplikaciji omogoča uporabo strojne opreme za odklepanje z obrazom za preverj. pristnosti"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Odklepanje z obrazom"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Znova prijavite obraz"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Za izboljšanje prepoznavanja znova prijavite svoj obraz"</string>
+    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Znova registrirajte obraz"</string>
+    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Za izboljšanje prepoznavanja znova registrirajte svoj obraz"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Točnih podatkov o obrazu ni bilo mogoče zajeti. Poskusite znova."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Presvetlo. Poskusite z blažjo osvetlitvijo."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Pretemno. Poskusite z močnejšo osvetlitvijo."</string>
@@ -593,7 +593,7 @@
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Glejte bolj naravnost v napravo."</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Obraz nastavite naravnost pred telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Preveč se premikate. Držite telefon pri miru."</string>
-    <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Znova prijavite svoj obraz."</string>
+    <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Znova registrirajte svoj obraz."</string>
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Obraza ni več mogoče prepoznati. Poskusite znova."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Preveč podobno, spremenite položaj."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Glejte malce bolj naravnost."</string>
@@ -1383,13 +1383,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Pregledovanje trenutne vsebine"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nova naprava za shranjevanje: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Dotaknite se, če želite nastaviti"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Za prenos fotografij in predstavnosti"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Težava z nosilcem <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Dotaknite se, da to popravite"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Nosilec <xliff:g id="NAME">%s</xliff:g> je pokvarjen. Izberite, če ga želite popraviti."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Nepodprta naprava za shran. <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Ta naprava ne podpira tega nosilca <xliff:g id="NAME">%s</xliff:g>. Dotaknite se, če želite nastaviti v podprti obliki."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Naprava ne podpira nosilca <xliff:g id="NAME">%s</xliff:g>. Izberite, če ga želite nastaviti v podprti obliki."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Ta naprava ne podpira nosilca <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Shramba <xliff:g id="NAME">%s</xliff:g> nepričak. odstranjena"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Medij izvrzite, preden ga odstranite, da se izognete izgubi vsebine"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Nosilec <xliff:g id="NAME">%s</xliff:g> je odstranjen"</string>
@@ -2110,6 +2113,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Pogovor"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Skupinski pogovor"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Osebno"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Služba"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Pogled osebnega profila"</string>
@@ -2128,8 +2132,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Nobena delovna aplikacija ne more odpreti te vsebine"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Nobena osebna aplikacija ne podpira te vsebine"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Nobena osebna aplikacija ne more odpreti te vsebine"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Snemanje ali predvajanje zvoka med telefonskimi klici"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Tej aplikaciji dovoljuje snemanje ali predvajanje zvoka med telefonskimi klici, ko je nastavljena kot privzeta aplikacija za klicanje."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Koda PIN za odklepanje omrežja kartice SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Koda PIN za odklepanje podnabora omrežja kartice SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Koda PIN za odklepanje kartice SIM za podjetje"</string>

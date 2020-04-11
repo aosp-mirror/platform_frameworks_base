@@ -394,7 +394,7 @@ public class Tuner implements AutoCloseable  {
     private native Lnb nativeOpenLnbByName(String name);
 
     private native Descrambler nativeOpenDescramblerByHandle(int handle);
-    private native Descrambler nativeOpenDemuxByhandle(int handle);
+    private native int nativeOpenDemuxByhandle(int handle);
 
     private native DvrRecorder nativeOpenDvrRecorder(long bufferSize);
     private native DvrPlayback nativeOpenDvrPlayback(long bufferSize);
@@ -985,7 +985,7 @@ public class Tuner implements AutoCloseable  {
         boolean granted = mTunerResourceManager.requestDescrambler(request, descramblerHandle);
         if (granted) {
             mDescramblerHandle = descramblerHandle[0];
-            nativeOpenDescramblerByHandle(mDescramblerHandle);
+            mDescrambler = nativeOpenDescramblerByHandle(mDescramblerHandle);
         }
         return granted;
     }

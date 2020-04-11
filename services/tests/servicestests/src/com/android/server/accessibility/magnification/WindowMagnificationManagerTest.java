@@ -245,6 +245,15 @@ public class WindowMagnificationManagerTest {
         assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
     }
 
+    @Test
+    public void isConnected_returnExpectedValue() throws RemoteException {
+        assertFalse(mWindowMagnificationManager.isConnected());
+
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+
+        assertTrue(mWindowMagnificationManager.isConnected());
+    }
+
     private MotionEvent generatePointersDownEvent(PointF[] pointersLocation) {
         final int len = pointersLocation.length;
 

@@ -19,7 +19,7 @@
     <string name="no_upstream_notification_title" msgid="6246167638178412020">"Mtandao pepe hauna intaneti"</string>
     <string name="no_upstream_notification_message" msgid="5010177541603431003">"Vifaa vimeshindwa kuunganisha kwenye intaneti"</string>
     <string name="no_upstream_notification_disable_button" msgid="2613861474440640595">"Zima mtandao pepe"</string>
-    <string name="upstream_roaming_notification_title" msgid="3633925855626231152">"Mtandaopepe umewashwa"</string>
+    <string name="upstream_roaming_notification_title" msgid="3633925855626231152">"Mtandao pepe umewashwa"</string>
     <string name="upstream_roaming_notification_message" msgid="1396837704184358258">"Huenda ukatozwa gharama za ziada ukitumia mitandao ya ng\'ambo"</string>
     <string name="upstream_roaming_notification_continue_button" msgid="5324117849715705638">"Endelea"</string>
 </resources>

@@ -3669,6 +3669,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             // Default launcher from package manager.
             final ComponentName defaultLauncher = mPackageManagerInternal
                     .getDefaultHomeActivity(UserHandle.getUserId(callingUid));
+            if (defaultLauncher == null) {
+                return;
+            }
             int defaultLauncherUid  = 0;
             try {
                 defaultLauncherUid = mPackageManager.getApplicationInfo(

@@ -16,10 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="6246167638178412020">"El hotspot no tiene Internet"</string>
+    <string name="no_upstream_notification_title" msgid="6246167638178412020">"El hotspot no tiene conexión a Internet"</string>
     <string name="no_upstream_notification_message" msgid="5010177541603431003">"Los dispositivos no pueden conectarse a Internet"</string>
     <string name="no_upstream_notification_disable_button" msgid="2613861474440640595">"Desactiva el hotspot"</string>
     <string name="upstream_roaming_notification_title" msgid="3633925855626231152">"El hotspot está activado"</string>
-    <string name="upstream_roaming_notification_message" msgid="1396837704184358258">"Es posible que apliquen cargos adicionales por roaming"</string>
+    <string name="upstream_roaming_notification_message" msgid="1396837704184358258">"Es posible que se apliquen cargos adicionales por roaming"</string>
     <string name="upstream_roaming_notification_continue_button" msgid="5324117849715705638">"Continuar"</string>
 </resources>
