@@ -2973,4 +2973,15 @@ public class WifiConfiguration implements Parcelable {
      */
     public boolean isMostRecentlyConnected = false;
 
+    /**
+     * Whether the key mgmt indicates if the WifiConfiguration needs a preSharedKey or not.
+     * @return true if preSharedKey is needed, false otherwise.
+     * @hide
+     */
+    public boolean needsPreSharedKey() {
+        return allowedKeyManagement.get(KeyMgmt.WPA_PSK)
+                || allowedKeyManagement.get(KeyMgmt.SAE)
+                || allowedKeyManagement.get(KeyMgmt.WAPI_PSK);
+    }
+
 }
