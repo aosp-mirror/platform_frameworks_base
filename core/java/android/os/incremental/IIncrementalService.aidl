@@ -109,4 +109,9 @@ interface IIncrementalService {
      * Setting up native library directories and extract native libs onto a storage.
      */
     boolean configureNativeBinaries(int storageId, in @utf8InCpp String apkFullPath, in @utf8InCpp String libDirRelativePath, in @utf8InCpp String abi);
+
+    /**
+     * Waits until all native library extraction is done for the storage
+     */
+    boolean waitForNativeBinariesExtraction(int storageId);
 }

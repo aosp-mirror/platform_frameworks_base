@@ -23,16 +23,19 @@
 #include <utils/String16.h>
 #include <utils/StrongPointer.h>
 #include <utils/Vector.h>
+#include <ziparchive/zip_archive.h>
 
 #include <atomic>
 #include <chrono>
-#include <future>
+#include <condition_variable>
+#include <functional>
 #include <limits>
 #include <map>
 #include <mutex>
 #include <span>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -132,12 +135,15 @@ public:
 
     std::vector<std::string> listFiles(StorageId storage) const;
     bool startLoading(StorageId storage) const;
+
     bool configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
                                  std::string_view libDirRelativePath, std::string_view abi);
+    bool waitForNativeBinariesExtraction(StorageId storage);
 
     class AppOpsListener : public android::BnAppOpsCallback {
     public:
-        AppOpsListener(IncrementalService& incrementalService, std::string packageName) : incrementalService(incrementalService), packageName(std::move(packageName)) {}
+        AppOpsListener(IncrementalService& incrementalService, std::string packageName)
+              : incrementalService(incrementalService), packageName(std::move(packageName)) {}
         void opChanged(int32_t op, const String16& packageName) final;
 
     private:
@@ -277,11 +283,17 @@ private:
     bool unregisterAppOpsCallback(const std::string& packageName);
     void onAppOpChanged(const std::string& packageName);
 
-    // Member variables
-    std::unique_ptr<VoldServiceWrapper> const mVold;
-    std::unique_ptr<DataLoaderManagerWrapper> const mDataLoaderManager;
-    std::unique_ptr<IncFsWrapper> const mIncFs;
-    std::unique_ptr<AppOpsManagerWrapper> const mAppOpsManager;
+    void runJobProcessing();
+    void extractZipFile(const IfsMountPtr& ifs, ZipArchiveHandle zipFile, ZipEntry& entry,
+                        const incfs::FileId& libFileId, std::string_view targetLibPath,
+                        Clock::time_point scheduledTs);
+
+private:
+    const std::unique_ptr<VoldServiceWrapper> mVold;
+    const std::unique_ptr<DataLoaderManagerWrapper> mDataLoaderManager;
+    const std::unique_ptr<IncFsWrapper> mIncFs;
+    const std::unique_ptr<AppOpsManagerWrapper> mAppOpsManager;
+    const std::unique_ptr<JniWrapper> mJni;
     const std::string mIncrementalDir;
 
     mutable std::mutex mLock;
@@ -294,6 +306,14 @@ private:
 
     std::atomic_bool mSystemReady = false;
     StorageId mNextId = 0;
+
+    using Job = std::function<void()>;
+    std::unordered_map<StorageId, std::vector<Job>> mJobQueue;
+    StorageId mPendingJobsStorage = kInvalidStorageId;
+    std::condition_variable mJobCondition;
+    std::mutex mJobMutex;
+    std::thread mJobProcessor;
+    bool mRunning = true;
 };
 
 } // namespace android::incremental
