@@ -26,6 +26,7 @@ import static com.android.internal.util.FrameworkStatsLog.USERSPACE_REBOOT_REPOR
 
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -45,7 +46,7 @@ public final class UserspaceRebootLogger {
             "sys.userspace_reboot.log.last_started";
     private static final String USERSPACE_REBOOT_LAST_FINISHED_PROPERTY =
             "sys.userspace_reboot.log.last_finished";
-    private static final String BOOT_REASON_PROPERTY = "sys.boot.reason";
+    private static final String LAST_BOOT_REASON_PROPERTY = "sys.boot.reason.last";
 
     private UserspaceRebootLogger() {}
 
@@ -111,26 +112,28 @@ public final class UserspaceRebootLogger {
         if (SystemProperties.getLong(USERSPACE_REBOOT_LAST_STARTED_PROPERTY, -1) != -1) {
             return USERSPACE_REBOOT_REPORTED__OUTCOME__SUCCESS;
         }
-        String reason = SystemProperties.get(BOOT_REASON_PROPERTY, "");
+        String reason = TextUtils.emptyIfNull(SystemProperties.get(LAST_BOOT_REASON_PROPERTY, ""));
         if (reason.startsWith("reboot,")) {
             reason = reason.substring("reboot".length());
         }
-        switch (reason) {
-            case "userspace_failed,watchdog_fork":
-                // Since fork happens before shutdown sequence, attribute it to
-                // USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_SHUTDOWN_SEQUENCE_ABORTED.
-            case "userspace_failed,shutdown_aborted":
-                return USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_SHUTDOWN_SEQUENCE_ABORTED;
-            case "userspace_failed,init_user0_failed":
-                // init_user0 will fail if userdata wasn't remounted correctly, attribute to
-                // USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_USERDATA_REMOUNT.
-            case "mount_userdata_failed":
-                return USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_USERDATA_REMOUNT;
-            case "userspace_failed,watchdog_triggered":
-                return
-                    USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_USERSPACE_REBOOT_WATCHDOG_TRIGGERED;
-            default:
-                return USERSPACE_REBOOT_REPORTED__OUTCOME__OUTCOME_UNKNOWN;
+        if (reason.startsWith("userspace_failed,watchdog_fork")) {
+            return USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_SHUTDOWN_SEQUENCE_ABORTED;
         }
+        if (reason.startsWith("userspace_failed,shutdown_aborted")) {
+            return USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_SHUTDOWN_SEQUENCE_ABORTED;
+        }
+        if (reason.startsWith("mount_userdata_failed")) {
+            return USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_USERDATA_REMOUNT;
+        }
+        if (reason.startsWith("userspace_failed,init_user0")) {
+            return USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_USERDATA_REMOUNT;
+        }
+        if (reason.startsWith("userspace_failed,enablefilecrypto")) {
+            return USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_USERDATA_REMOUNT;
+        }
+        if (reason.startsWith("userspace_failed,watchdog_triggered")) {
+            return USERSPACE_REBOOT_REPORTED__OUTCOME__FAILED_USERSPACE_REBOOT_WATCHDOG_TRIGGERED;
+        }
+        return USERSPACE_REBOOT_REPORTED__OUTCOME__OUTCOME_UNKNOWN;
     }
 }
