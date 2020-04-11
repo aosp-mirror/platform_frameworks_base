@@ -422,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"i-access ang mga dagdag na command ng provider ng lokasyon"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Nagbibigay-daan sa app na mag-access ng mga karagdagang command ng provider ng lokasyon. Maaari nitong bigyang-daan ang app na gambalain ang pagpapatakbo ng GPS o ng iba pang mga pinagmulan ng lokasyon."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"i-access lang ang tumpak na lokasyon sa foreground"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Makukuha lang ng app na ito ang iyong eksaktong lokasyon kapag nasa foreground ito. Naka-on at available dapat ang mga serbisyo ng lokasyon sa iyong device para magamit ng app ang mga ito. Posibleng lumakas ang pagkonsumo ng baterya dahil dito."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Makukuha ng app na ito ang iyong eksaktong lokasyon mula sa mga serbisyo ng lokasyon habang ginagamit ang app. Naka-on dapat ang mga serbisyo ng lokasyon para sa iyong device para makuha ng app ang lokasyon. Posibleng madagdagan ang paggamit ng baterya dahil dito."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"i-access lang ang tinatantyang lokasyon sa foreground"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Makukuha lang ng app na ito ang iyong tinatantyang lokasyon kapag nasa foreground ito. Naka-on at available dapat ang mga serbisyo ng lokasyon sa iyong device para magamit ng app ang mga ito."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Makukuha ng app na ito ang iyong tinantyang lokasyon mula sa mga serbisyo ng lokasyon habang ginagamit ang app. Naka-on dapat ang mga serbisyo ng lokasyon para sa iyong device para makuha ng app ang lokasyon."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"i-access ang lokasyon sa background"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Puwedeng i-access ng app na ito ang lokasyon habang tumatakbo sa background, bilang karagdagan sa access sa lokasyon sa foreground."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Maa-access ng app na ito ang lokasyon anumang oras, kahit habang hindi ginagamit ang app."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"baguhin ang mga setting ng iyong audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Pinapayagan ang app na baguhin ang mga pandaigdigang setting ng audio gaya ng volume at kung aling speaker ang ginagamit para sa output."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"mag-record ng audio"</string>
@@ -1342,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Sinusuri ang kasalukuyang content"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Bagong <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Mag-tap para i-set up"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Para sa paglilipat ng mga larawan at media"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Isyu sa <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Mag-tap para ayusin"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Sira ang <xliff:g id="NAME">%s</xliff:g>. Piliin upang ayusin."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Hindi sinusuportahang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Hindi sinusuportahan ng device na ito ang <xliff:g id="NAME">%s</xliff:g> na ito. I-tap upang i-set up sa isang sinusuportahang format."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Hindi sinusuportahan ng device na ito ang <xliff:g id="NAME">%s</xliff:g> na ito. Piliin upang i-set up sa isang sinusuportahang format."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Hindi sinusuportahan ng device na ito ang <xliff:g id="NAME">%s</xliff:g> na ito."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Hindi inaasahang naalis ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"I-eject ang media bago tanggalin para maiwasan ang pagkawala ng content"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Inalis ang <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -2041,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Pag-uusap"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Panggrupong Pag-uusap"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabaho"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personal na view"</string>
@@ -2059,8 +2063,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Hindi mabubuksan ng mga app para sa trabaho ang content na ito"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Hindi masusuportahan ng mga personal na app ang content na ito"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Hindi mabubuksan ng mga personal na app ang content na ito"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Mag-record o mag-play ng audio sa mga tawag sa telephony"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Papayagan ang app na ito na mag-record o mag-play ng audio sa mga tawag sa telephony kapag naitalaga bilang default na dialer application."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para sa pag-unlock ng network ng SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN para sa pag-unlock ng subset ng network ng SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN para sa pangkumpanyang pag-unlock ng SIM"</string>

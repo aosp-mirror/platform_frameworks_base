@@ -240,7 +240,7 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"ძალა"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"გადატვირთვა"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"საგანგებო სამსახურები"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"ხარვეზის შესახებ ანგარიში"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"ხარვეზის ანგარიში"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"სესიის დასრულება"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ეკრანის ანაბეჭდი"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"ხარვეზის ანგარიში"</string>
@@ -422,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"მდებარეობის პროვაიდერის დამატებით ბრძანებებზე წვდომა"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"აპს შეეძლება წვდომა ჰქონდეს მდებარეობის სერვისის დამატებით ბრძანებებზე. შესაძლოა აპმა ეს გამოიყენოს GPS-ისა და მდებარეობის სხვა წყაროების მუშაობის პროცესში ჩარევისთვის."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ზუსტ მდებარეობაზე წვდომა მხოლოდ წინა პლანზე"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"ამ აპს შეუძლია თქვენი ზუსტი მდებარეობის შესახებ ინფორმაციის მიღება მხოლოდ მაშინ, როცა გაშვებულია წინა პლანზე. თქვენს მოწყობილობაზე ჩართული და ხელმისაწვდომი უნდა იყოს მდებარეობის სერვისები, აპმა მათი გამოყენება რომ შეძლოს. ამან შეიძლება გაზარდოს ბატარეის მოხმარება."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"ამ აპს, მისი გამოყენების პროცესში, შეუძლია თქვენი ზუსტი მდებარეობის შესახებ ინფორმაციის მიღება მდებარეობის სერვისებიდან. იმისთვის, რომ აპმა მდებარეობის შესახებ ინფორმაცია მიიღოს, თქვენს მოწყობილობაზე ჩართული უნდა იყოს მდებარეობის სერვისები. ამან შეიძლება ბატარეის მოხმარება გაზარდოს."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"მიახლოებით მდებარეობაზე წვდომა მხოლოდ წინა პლანზე"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"ამ აპს შეუძლია თქვენი მიახლოებითი მდებარეობის შესახებ ინფორმაციის მიღება მხოლოდ მაშინ, როცა გაშვებულია წინა პლანზე. თქვენს მოწყობილობაზე ჩართული და ხელმისაწვდომი უნდა იყოს მდებარეობის სერვისები, აპმა მათი გამოყენება რომ შეძლოს."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"ამ აპს, მისი გამოყენების პროცესში, შეუძლია თქვენი მიახლოებითი მდებარეობის შესახებ ინფორმაციის მიღება მდებარეობის სერვისებიდან. იმისთვის, რომ აპმა მდებარეობის შესახებ ინფორმაცია მიიღოს, თქვენს მოწყობილობაზე ჩართული უნდა იყოს მდებარეობის სერვისები."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"მდებარეობაზე წვდომა ფონურ რეჟიმში"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"წინა პლანზე ყოფნისას მდებარეობაზე წვდომის გარდა, ამ აპს შეუძლია, ჰქონდეს წვდომა მდებარეობაზე ფონურ რეჟიმში მუშაობისას."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"ამ აპს შეუძლია წვდომა მდებარეობაზე ნებისმიერ დროს, მაშინაც კი, როცა არ გამოიყენება."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"თქვენი აუდიო პარამეტრების შეცვლა"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"აპს შეეძლება აუდიოს გლობალური პარამეტრების შეცვლა. მაგ.: ხმის სიმაღლე და რომელი დინამიკი გამოიყენება სიგნალის გამოსტანად."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"აუდიოს ჩაწერა"</string>
@@ -1342,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"მიმდინარეობს ამჟამინდელი კონტენტის შემოწმება"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"ახალი <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"შეეხეთ დასაყენებლად"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ფოტოებისა და მედიის გადასატანად"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"პრობლემა <xliff:g id="NAME">%s</xliff:g>-თან მიმართებით"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"შეეხეთ გამოსასწორებლად"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> დაზიანებულია. შეეხეთ გასასწორებლად."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"მხარდაუჭერელი <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ეს <xliff:g id="NAME">%s</xliff:g> მხარდაუჭერელია არ მოწყობილობაზე. შეეხეთ მხარდაჭერილ ფორმატში დასაყენებლად."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"ეს <xliff:g id="NAME">%s</xliff:g> მხარდაუჭერელია ამ მოწყობილობაზე. შეეხეთ მხარდაჭერილ ფორმატში დასაყენებლად."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"ეს <xliff:g id="NAME">%s</xliff:g> მხარდაუჭერელია ამ მოწყობილობაზე."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"მოულოდნელად მოხდა <xliff:g id="NAME">%s</xliff:g>-ის ამოღება"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"გაწყვიტეთ მედია-მოწყობილობასთან კავშირი მის ამოშლამდე, კონტენტის დაკარგვის ასაცილებლად"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g>-თან კავშირი გაწყვეტილია"</string>
@@ -2041,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"მიმოწერა"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ჯგუფური მიმოწერა"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"პირადი"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"სამსახური"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"პირადი ხედი"</string>
@@ -2059,8 +2063,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ამ კონტენტს სამსახურის აპები ვერ გახსნის"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"პერსონალურ აპებს არ აქვს ამ კონტენტის მხარდაჭერა"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"ამ კონტენტს პერსონალური აპები ვერ გახსნის"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"სატელეფონო ზარებში აუდიოს ჩაწერა ან დაკვრა"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ნაგულისხმევ დასარეკ აპლიკაციად არჩევის შემთხვევაში, ნებას რთავს აპს ჩაიწეროს ან დაუკრას აუდიო სატელეფონო ზარებში."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ქსელის განბლოკვის PIN-კოდი"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM ქსელის ქვედანაყოფის განბლოკვის PIN-კოდი"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM-ის კორპორატიული განბლოკვის PIN-კოდი"</string>

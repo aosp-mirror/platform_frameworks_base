@@ -422,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"få adgang til yderligere kommandoer for placeringsudbyder"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tillader, at appen kan få adgang til yderligere kommandoer for placeringsudbydere. Dette kan gøre det muligt for appen at forstyrre GPS-funktionen eller andre placeringskilder."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"få kun adgang til nøjagtig placering i forgrunden"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Denne app kan kun finde din nøjagtige placering, når den er i forgrunden. Placeringstjenester skal være aktiverede og tilgængelige på din telefon, før appen kan anvende dem. Dette kan øge batteriforbruget."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Denne app kan finde din nøjagtige placering via placeringstjenester, når appen er i brug. Placeringstjenester skal være aktiveret på din enhed, før appen kan finde din placering. Dette kan øge batteriforbruget."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"få kun adgang til omtrentlig placering i forgrunden"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Denne app kan kun finde din omtrentlige placering, når den er i forgrunden. Placeringstjenester skal være aktiverede og tilgængelige på din enhed, før appen kan anvende dem."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Denne app kan finde din omtrentlige placering via placeringstjenester, når appen er i brug. Placeringstjenester skal være aktiveret på din enhed, før appen kan finde din placering."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"adgang til placering i baggrunden"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Foruden adgang til placering ved kørsel i forgrunden har denne app også adgang til din placering, mens den kører i baggrunden."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Denne app kan til enhver tid få adgang til din placering, selv når den ikke er i brug."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"skifte dine lydindstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tillader, at appen kan ændre globale lydindstillinger, som f.eks. lydstyrke og hvilken højttaler der bruges til output."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"optage lyd"</string>
@@ -1342,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Tjekker aktuelt indhold"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nyt <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Tryk for at konfigurere"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Til overførsel af billeder og medier"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem med <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tryk for at løse problemet"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> er beskadiget. Vælg for at rette."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> understøttes ikke"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Denne enhed understøtter ikke dette <xliff:g id="NAME">%s</xliff:g>. Tryk for at konfigurere det til et understøttet format."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Denne enhed understøtter ikke dette <xliff:g id="NAME">%s</xliff:g>. Vælg for at konfigurere mediet i et understøttet format."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Denne enhed understøtter ikke dette <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> blev fjernet uventet"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Demonter mediet, inden du fjerner det, så du ikke mister dit indhold"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> er fjernet"</string>
@@ -2041,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Samtale"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Gruppesamtale"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personlig"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Arbejde"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Visningen Personligt"</string>
@@ -2059,8 +2063,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Dette indhold kan ikke åbnes af arbejdsapps"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Dette indhold understøttes ikke af personlige apps"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Dette indhold kan ikke åbnes af personlige apps"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Optage eller afspille lyd i telefonopkald"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Tillader, at denne app kan optage og afspille lyd i telefonopkald, når den er angivet som standardapp til opkald."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Pinkode til oplåsning af SIM-netværket"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Pinkode til oplåsning af delmængde for SIM-netværket"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Pinkode til oplåsning af virksomhedens SIM"</string>
@@ -2168,5 +2170,5 @@
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"Tjenesteudbyderens EHPLMN blev låst op."</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID blev låst op."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI blev låst op."</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"tjenesteudbyderens netværksdelmængde blev låst op."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Tjenesteudbyderens netværksdelmængde blev låst op."</string>
 </resources>

@@ -235,13 +235,13 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ရွေးချယ်စရာများ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ဖုန်းဆိုင်ရာရွေးချယ်မှုများ"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"ဖန်သားပြင် လော့ခ်ချခြင်း"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"ဖန်သားပြင် လော့ခ်ချရန်"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"ပါဝါပိတ်ရန်"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"ပါဝါ"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"ပြန်စရန်"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"အရေးပေါ်"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်း"</string>
-    <string name="global_action_logout" msgid="6093581310002476511">"သတ်မှတ်ပေးထားသည့်အချိန် ပြီးဆုံးပြီ"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"အမှားရှာပြင် မှတ်တမ်း"</string>
+    <string name="global_action_logout" msgid="6093581310002476511">"စက်ရှင် ပြီးဆုံးပြီ"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"အမှားပြင် အစီရင်ခံစာ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
@@ -422,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"တည်နေရာပံ့ပိုးမှုညွှန်ကြားချက်အပိုအား ဝင်ရောက်ကြည့်ခြင်း"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"အက်ပ်အား တည်နေရာ စီမံပေးရေး ညွှန်ကြားချက် အပိုများကို ရယူခွင့်ပြုသည်။ သို့ဖြစ်၍ အက်ပ်သည် GPS သို့မဟုတ် အခြား တည်နေရာ ရင်းမြစ်ကို သုံးကြသူတို့၏ လုပ်ငန်းများကို ဝင်စွက်ခွင့် ပြုနိုင်သည်။"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"မျက်နှာစာတွင်သာ တည်နေရာအတိအကျ အသုံးပြုခြင်း"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"မျက်နှာစာတွင် ဖွင့်ထားမှသာ ဤအက်ပ်က သင်၏ တည်နေရာအတိအကျကို ရယူနိုင်ပါသည်။ သင်၏ စက်တွင် အက်ပ်ကအသုံးပြုရန်အတွက် တည်နေရာဝန်ဆောင်မှုများကို ဖွင့်ထားပြီးမှ အသုံးပြု၍ ရပါမည်။ ၎င်းက ဘက်ထရီ ပိုကုန်နိုင်ပါသည်။"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"အက်ပ်ကို အသုံးပြုနေစဉ် ဤအက်ပ်သည် တည်နေရာဝန်ဆောင်မှုများမှနေ၍ သင့်တည်နေရာအတိအကျကို ရယူနိုင်သည်။ အက်ပ်က တည်နေရာရရှိနိုင်ရန် သင့်စက်အတွက် တည်နေရာဝန်ဆောင်မှုများကို ဖွင့်ထားရပါမည်။ ၎င်းသည် ဘက်ထရီအသုံးပြုမှု ပိုများနိုင်သည်။"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"မျက်နှာစာတွင်သာ ခန့်မှန်းခြေ တည်နေရာ အသုံးပြုခြင်း"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"မျက်နှာစာတွင် ဖွင့်ထားမှသာ ဤအက်ပ်က သင်၏ အနီးစပ်ဆုံးတည်နေရာကို ရယူနိုင်ပါသည်။ အက်ပ်က ဤတည်နေရာဝန်ဆောင်မှုများကို အသုံးပြုရန်အတွက် သင်၏စက်တွင် ၎င်းတို့ရှိနေပြီး ဖွင့်ထားရပါမည်။"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"အက်ပ်ကို အသုံးပြုနေစဉ် ဤအက်ပ်သည် တည်နေရာဝန်ဆောင်မှုများမှနေ၍ သင့်တည်နေရာခန့်မှန်းခြေကို ရယူနိုင်သည်။ အက်ပ်က တည်နေရာရရှိနိုင်ရန် သင့်စက်အတွက် တည်နေရာဝန်ဆောင်မှုများကို ဖွင့်ထားရပါမည်။"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"နောက်ခံတွင် တည်နေရာကို အသုံးပြုရန်"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"နောက်ခံတွင် လုပ်ဆောင်နေစဉ် ဤအက်ပ်က တည်နေရာကို ရယူအသုံးပြုနိုင်သည်သာမက မျက်နှာစာတည်နေရာကိုပါ အသုံးပြုနိုင်မည်။"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"အက်ပ်ကို အသုံးပြုနေခြင်းမရှိသည့်အခါတွင်ပင် ဤအက်ပ်သည် သင့်တည်နေရာကို အချိန်မရွေး အသုံးပြုနိုင်သည်။"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"သင့်အသံအပြင်အဆင်အားပြောင်းခြင်း"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"အပလီကေးရှင်းအား အသံအတိုးအကျယ်နှင့် အထွက်ကို မည်သည့်စပီကာကို သုံးရန်စသည်ဖြင့် စက်တစ်ခုလုံးနှင့်ဆိုင်သော အသံဆိုင်ရာ ဆက်တင်များ ပြင်ဆင်ခွင့် ပြုရန်"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"အသံဖမ်းခြင်း"</string>
@@ -678,9 +678,9 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက တက်ဘလက်အား သော့ချခြင်း သို့မဟုတ် တက်ဘလက်၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုလုပ်မည်။"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"မျက်နှာပြင်ကို လော့ခ်ဖွင့်သည့်အခါ စကားဝှက်မှားယွင်းစွာ ရိုက်သွင်းသည့်အကြိမ်ရေကို စောင့်ကြည့်ပြီး မှားယွင်းသည့်အကြိမ်ရေ အလွန်များလာပါက သင့် Android TV စက်ပစ္စည်းကို လော့ခ်ချခြင်း သို့မဟုတ် ဤအသုံးပြုသူဒေတာများအားလုံးကို ဖျက်ခြင်းတို့ ပြုလုပ်သွားပါမည်။"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက ဖုန်းအား သော့ချခြင်း သို့မဟုတ် ဖုန်း၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုလုပ်မည်။"</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"မျက်နှာပြင်လော့ခ်ပြောင်းခြင်း"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"မျက်နှာပြင်လော့ခ်ပြောင်းသည်။"</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"မျက်နှာပြင်အား လော့ခ်ချခြင်း"</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"ဖန်သားပြင်လော့ခ်ပြောင်းခြင်း"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"ဖန်သားပြင်လော့ခ်ပြောင်းသည်။"</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"ဖန်သားပြင်အား လော့ခ်ချခြင်း"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"ဖန်သားပြင် လော့ခ်ချချိန်၊ လော့ချနည်းကို ထိမ်းချုပ်သည်။"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"ဒေတာအားလုံးအားဖျက်ခြင်း"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"စက်ရုံထုတ် အခြေအနေအား ပြန်ပြောင်းခြင်းဖြင့် တက်ဘလက်ရှိ အချက်အလက်များအား ကြိုတင်သတိပေးမှုမရှိပဲ ဖျက်စီးရန်"</string>
@@ -1342,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"လက်ရှိ အကြောင်းအရာကို ပြန်လည်သုံးသပ်နေသည်"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> အသစ်"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"စနစ်ထည့်သွင်းရန် တို့ပါ"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ဓာတ်ပုံနှင့် မီဒီယာများ လွှဲပြောင်းရန်အတွက်"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> တွင် ပြဿနာရှိနေသည်"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ပြင်ဆင်ရန်အတွက် ထိလိုက်ပါ"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ပျက်နေပါသည်။ ပြင်ရန် ရွေးချယ်ပါ။"</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"ပံ့ပိုးထားခြင်း မရှိသော <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ဤစက်ပစ္စည်းတွင် <xliff:g id="NAME">%s</xliff:g> ကိုအသုံးပြု၍မရပါ။ အသုံးပြု၍ရသော စနစ်ပုံစံသို့သတ်မှတ်ရန် တို့ပါ။"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"ဤစက်ပစ္စည်းတွင် <xliff:g id="NAME">%s</xliff:g> ကို ပံ့ပိုးမထားပါ။ ပံ့ပိုးသည့်ပုံစံတစ်ခုအဖြစ် စနစ်ထည့်သွင်းရန် ရွေးချယ်ပါ။"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"ဤစက်သည် ဤ <xliff:g id="NAME">%s</xliff:g> ကို မပံ့ပိုးပါ။"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> မမျှော်လင့်ဘဲ ဖယ်ရှားခဲ့သည်"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"အကြောင်းအရာ မဆုံးရှုံးစေရန် မီဒီယာကို မဖယ်ရှားမီ ဦးစွာထုတ်လိုက်ပါ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> ဖယ်ရှားလိုက်ပါပြီ"</string>
@@ -1852,7 +1855,7 @@
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ခေါက်သိမ်းရန်"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"ချဲ့ခြင်းခလုတ်"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB ဘေးဘက်အပေါက်"</string>
-    <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"အန်းဒရွိုက်"</string>
+    <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"USB ဘေးရှိပို့တ်"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"နောက်ထပ် ရွေးစရာများ"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"ကိရိယာဘားအပိုအား ပိတ်ရန်"</string>
@@ -2041,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>-"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"စကားဝိုင်း"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"အဖွဲ့စကားဝိုင်း"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ကိုယ်ပိုင်"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"အလုပ်"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ပုဂ္ဂိုလ်ရေးဆိုင်ရာ မြင်ကွင်း"</string>
@@ -2059,8 +2063,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ဤအကြောင်းအရာကို အလုပ်သုံးအက်ပ်များက ဖွင့်၍မရပါ"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"ဤအကြောင်းအရာကို ကိုယ်ပိုင်အက်ပ်များက မပံ့ပိုးနိုင်ပါ"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"ဤအကြောင်းအရာကို ကိုယ်ပိုင်အက်ပ်များက ဖွင့်၍မရပါ"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ဖုန်းခေါ်ဆိုမှုများအတွင်း အသံဖမ်းခြင်း သို့မဟုတ် ဖွင့်ခြင်း"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ဤအက်ပ်အား မူလ dialer အပလီကေးရှင်းအဖြစ် သတ်မှတ်ထားစဉ် ဖုန်းခေါ်ဆိုမှုများအတွင်း အသံဖမ်းခြင်း သို့မဟုတ် ဖွင့်ခြင်း ပြုလုပ်ရန် ခွင့်ပြုပါ။"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ဆင်းမ်ကွန်ရက် လော့ခ်ဖွင့်ရန် ပင်နံပါတ်"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"ဆင်းမ်ကွန်ရက်ခွဲ လော့ခ်ဖွင့်ရန် ပင်နံပါတ်"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"ဆင်းမ်ကော်ပိုရိတ် လော့ခ်ဖွင့်ရန် ပင်နံပါတ်"</string>

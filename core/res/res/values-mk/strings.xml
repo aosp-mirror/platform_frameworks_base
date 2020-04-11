@@ -422,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"пристапи кон наредби на давателот на дополнителна локација"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Овозможува апликацијата да пристапи кон дополнителни наредби на давател на локација. Ова може да овозможи апликацијата да го попечи функционирањето на GPS или други извори на локација."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"пристап до прецизната локација само во преден план"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Апликацијава може да ја добие вашата точна локација само кога е во преден план. Услугите според локација мора да се вклучени и достапни на уредот за да може да ги користи апликацијата. Ова може да го зголеми трошењето на батеријата."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Апликацијава може да ја добие вашата прецизна локација од „Услугите според локација“ кога се користи. „Услугите според локација“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата. Ова може да го зголеми користењето на батеријата."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"пристап до приближната локација само во преден план"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Апликацијава може да ја добие вашата приближна локација само кога е во преден план. Услугите според локација мора да се вклучени и достапни на уредот за да може да ги користи апликацијата."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Апликацијава може да ја добие вашата приближна локација од „Услугите според локација“ кога се користи. „Услугите според локација“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"пристап до локацијата во заднина"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Оваа апликација, покрај тоа што може да пристапува до локацијата кога е во преден план, има пристап и кога се извршува во заднина."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Апликацијава може да пристапува до локацијата во секое време, дури и кога не се користи."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"менува аудио поставки"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Овозможува апликацијата да ги менува глобалните аудио поставки, како што се јачината на звукот и кој звучник се користи за излез."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"снимај аудио"</string>
@@ -678,14 +678,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го таблетот или избриши ги сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Го следи бројот на погрешно внесени лозинки при отклучување на екранот и го заклучува уредот Android TV или ги брише сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го телефонот или избриши ги сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"Промени го заклучувањето на екранот."</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"Промени го заклучувањето на екранот"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Промени го заклучувањето на екранот."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Заклучи го екранот"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Контролирај како и кога се заклучува екранот."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Избриши ги сите податоци"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Избриши ги податоците во таблетот без предупредување со вршење на фабричко ресетирање на податоци."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Избриши ги податоците во таблетот без предупредување со ресетирање на фабрички податоци."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Ги брише податоците на вашиот уред Android TV без предупредување, така што ќе изврши ресетирање на фабричките податоци."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Избриши ги податоците во телефонот без предупредување со вршење на фабричко ресетирање на податоци."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Избриши ги податоците во телефонот без предупредување со ресетирање на фабрички податоци."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Избриши ги податоците на корисникот"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Избриши ги податоците на овој корисник на таблетот без предупредување."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ги брише податоците на овој корисник на уредов Android TV без предупредување."</string>
@@ -699,7 +699,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Оневозможи фотоапарати"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Спречи употреба на сите камери на уредот."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Онев. функции од заклуч. екран"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Спречете користење на некои функции од заклучување на екранот."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Спречи користење на некои функции од заклучување на екранот."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Дома"</item>
     <item msgid="7740243458912727194">"Мобилен"</item>
@@ -1342,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Се прегледуваат тековните содржини"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Нова <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Допрете за поставување"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"За пренесување фотографии и медиуми"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Проблем со <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Допрете за да го поправите ова"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> е оштетена. Изберете за поправање."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Неподдржана <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Уредот не ја поддржува оваа <xliff:g id="NAME">%s</xliff:g>. Допрете за поставување во поддржан формат."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Уредов не ја поддржува оваа <xliff:g id="NAME">%s</xliff:g>. Изберете за поставување во поддржан формат."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Уредов не ја поддржува оваа <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> неочекувано е отстранета"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Исклучете  ја надворешната меморија пред да ја отстраните за да избегнете губење содржини"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> е отстранета"</string>
@@ -2043,6 +2046,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Разговор"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групен разговор"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Лични"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Службени"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Личен приказ"</string>
@@ -2061,8 +2065,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Нема работни апликации што може да ги отворат овие содржини"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Нема лични апликации што може да ги поддржат овие содржини"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Нема лични апликации што може да ги отворат овие содржини"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Снимајте или пуштајте аудио во телефонски повици"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Дозволува апликацијава да снима или да пушта аудио во телефонски повици кога е назначена како стандардна апликација за бирање."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN за отклучување на мрежата на SIM-картичката"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN за отклучување на подмножество на мрежата на SIM-картичката"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN за отклучување на корпоративната SIM-картичка"</string>
