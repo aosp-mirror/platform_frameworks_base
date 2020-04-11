@@ -98,8 +98,9 @@ TEST(DurationMetricE2eTest, TestOneBucket) {
     EXPECT_EQ(metricId, reports.reports(0).metrics(0).metric_id());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
 
-    const StatsLogReport::DurationMetricDataWrapper& durationMetrics =
-            reports.reports(0).metrics(0).duration_metrics();
+    StatsLogReport::DurationMetricDataWrapper durationMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
+                                    &durationMetrics);
     EXPECT_EQ(1, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
@@ -180,8 +181,9 @@ TEST(DurationMetricE2eTest, TestTwoBuckets) {
     EXPECT_EQ(metricId, reports.reports(0).metrics(0).metric_id());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
 
-    const StatsLogReport::DurationMetricDataWrapper& durationMetrics =
-            reports.reports(0).metrics(0).duration_metrics();
+    StatsLogReport::DurationMetricDataWrapper durationMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
+                                    &durationMetrics);
     EXPECT_EQ(1, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
@@ -350,8 +352,9 @@ TEST(DurationMetricE2eTest, TestWithActivation) {
     EXPECT_EQ(metricId, reports.reports(0).metrics(0).metric_id());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
 
-    const StatsLogReport::DurationMetricDataWrapper& durationMetrics =
-            reports.reports(0).metrics(0).duration_metrics();
+    StatsLogReport::DurationMetricDataWrapper durationMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
+                                    &durationMetrics);
     EXPECT_EQ(1, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
@@ -433,9 +436,12 @@ TEST(DurationMetricE2eTest, TestWithCondition) {
 
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
-    EXPECT_EQ(1, reports.reports(0).metrics(0).duration_metrics().data_size());
+    StatsLogReport::DurationMetricDataWrapper durationMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
+                                    &durationMetrics);
+    EXPECT_EQ(1, durationMetrics.data_size());
 
-    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    DurationMetricData data = durationMetrics.data(0);
 
     // Validate bucket info.
     EXPECT_EQ(1, data.bucket_info_size());
@@ -532,9 +538,12 @@ TEST(DurationMetricE2eTest, TestWithSlicedCondition) {
 
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
-    EXPECT_EQ(1, reports.reports(0).metrics(0).duration_metrics().data_size());
+    StatsLogReport::DurationMetricDataWrapper durationMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
+                                    &durationMetrics);
+    EXPECT_EQ(1, durationMetrics.data_size());
 
-    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    DurationMetricData data = durationMetrics.data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     util::WAKELOCK_STATE_CHANGED, appUid);
@@ -690,9 +699,12 @@ TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition) {
 
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
-    EXPECT_EQ(1, reports.reports(0).metrics(0).duration_metrics().data_size());
+    StatsLogReport::DurationMetricDataWrapper durationMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
+                                    &durationMetrics);
+    EXPECT_EQ(1, durationMetrics.data_size());
 
-    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    DurationMetricData data = durationMetrics.data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     util::WAKELOCK_STATE_CHANGED, appUid);
@@ -811,9 +823,12 @@ TEST(DurationMetricE2eTest, TestWithSlicedState) {
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
-    EXPECT_EQ(3, reports.reports(0).metrics(0).duration_metrics().data_size());
+    StatsLogReport::DurationMetricDataWrapper durationMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
+                                    &durationMetrics);
+    EXPECT_EQ(3, durationMetrics.data_size());
 
-    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    DurationMetricData data = durationMetrics.data(0);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
@@ -826,7 +841,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedState) {
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(370 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
-    data = reports.reports(0).metrics(0).duration_metrics().data(1);
+    data = durationMetrics.data(1);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
@@ -839,7 +854,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedState) {
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(370 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
-    data = reports.reports(0).metrics(0).duration_metrics().data(2);
+    data = durationMetrics.data(2);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
@@ -970,9 +985,12 @@ TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState) {
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
-    EXPECT_EQ(3, reports.reports(0).metrics(0).duration_metrics().data_size());
+    StatsLogReport::DurationMetricDataWrapper durationMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
+                                    &durationMetrics);
+    EXPECT_EQ(3, durationMetrics.data_size());
 
-    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    DurationMetricData data = durationMetrics.data(0);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
@@ -985,7 +1003,7 @@ TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState) {
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(420 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
-    data = reports.reports(0).metrics(0).duration_metrics().data(2);
+    data = durationMetrics.data(1);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
@@ -998,7 +1016,7 @@ TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState) {
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(420 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
-    data = reports.reports(0).metrics(0).duration_metrics().data(1);
+    data = durationMetrics.data(2);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
@@ -1020,7 +1038,9 @@ TEST(DurationMetricE2eTest, TestWithSlicedStateMapped) {
     auto batterySaverModePredicate = CreateBatterySaverModePredicate();
     *config.add_predicate() = batterySaverModePredicate;
 
-    auto screenStateWithMap = CreateScreenStateWithOnOffMap();
+    int64_t screenOnId = 4444;
+    int64_t screenOffId = 9876;
+    auto screenStateWithMap = CreateScreenStateWithOnOffMap(screenOnId, screenOffId);
     *config.add_state() = screenStateWithMap;
 
     // Create duration metric that slices by mapped screen state.
@@ -1123,13 +1143,16 @@ TEST(DurationMetricE2eTest, TestWithSlicedStateMapped) {
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
-    EXPECT_EQ(2, reports.reports(0).metrics(0).duration_metrics().data_size());
+    StatsLogReport::DurationMetricDataWrapper durationMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
+                                    &durationMetrics);
+    EXPECT_EQ(2, durationMetrics.data_size());
 
-    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    DurationMetricData data = durationMetrics.data(0);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-    EXPECT_EQ(StringToId("SCREEN_ON"), data.slice_by_state(0).group_id());
+    EXPECT_EQ(screenOnId, data.slice_by_state(0).group_id());
     EXPECT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(130 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -1138,11 +1161,11 @@ TEST(DurationMetricE2eTest, TestWithSlicedStateMapped) {
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(500 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
-    data = reports.reports(0).metrics(0).duration_metrics().data(1);
+    data = durationMetrics.data(1);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-    EXPECT_EQ(StringToId("SCREEN_OFF"), data.slice_by_state(0).group_id());
+    EXPECT_EQ(screenOffId, data.slice_by_state(0).group_id());
     EXPECT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(70 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -1314,47 +1337,25 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
-    EXPECT_EQ(9, reports.reports(0).metrics(0).duration_metrics().data_size());
+    StatsLogReport::DurationMetricDataWrapper durationMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
+                                    &durationMetrics);
+    EXPECT_EQ(9, durationMetrics.data_size());
 
-    DurationMetricData data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    DurationMetricData data = durationMetrics.data(0);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
-                                                  "wakelock2");
+                                                  "wakelock1");
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
               data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
-    EXPECT_EQ(35 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(40 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
 
-    data = reports.reports(0).metrics(0).duration_metrics().data(1);
-    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
-                                                  "wakelock2");
-    EXPECT_EQ(1, data.slice_by_state_size());
-    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-    EXPECT_TRUE(data.slice_by_state(0).has_value());
-    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
-              data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
-    EXPECT_EQ(140 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
-    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
-    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
-
-    data = reports.reports(0).metrics(0).duration_metrics().data(2);
-    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
-                                                  "wakelock1");
-    EXPECT_EQ(1, data.slice_by_state_size());
-    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-    EXPECT_TRUE(data.slice_by_state(0).has_value());
-    EXPECT_EQ(-1 /* StateTracker:: kStateUnknown */, data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
-    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
-    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
-    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
-
-    data = reports.reports(0).metrics(0).duration_metrics().data(3);
+    data = durationMetrics.data(1);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
                                                   "wakelock1");
     EXPECT_EQ(1, data.slice_by_state_size());
@@ -1362,7 +1363,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
               data.slice_by_state(0).value());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(240 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -1370,7 +1371,45 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(330 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
-    data = reports.reports(0).metrics(0).duration_metrics().data(4);
+    data = durationMetrics.data(2);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
+                                                  "wakelock2");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(35 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = durationMetrics.data(3);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
+                                                  "wakelock2");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(140 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = durationMetrics.data(4);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
+                                                  "wakelock1");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(-1 /* StateTracker:: kStateUnknown */, data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = durationMetrics.data(5);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
                                                   "wakelock1");
     EXPECT_EQ(1, data.slice_by_state_size());
@@ -1378,12 +1417,24 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
               data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(50 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
 
-    data = reports.reports(0).metrics(0).duration_metrics().data(5);
+    data = durationMetrics.data(6);
+    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
+                                                  "wakelock2");
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(-1 /* StateTracker:: kStateUnknown */, data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(15 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = durationMetrics.data(7);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
                                                   "wakelock2");
     EXPECT_EQ(1, data.slice_by_state_size());
@@ -1391,7 +1442,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_FOREGROUND_SERVICE,
               data.slice_by_state(0).value());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(180 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -1399,32 +1450,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(330 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
-    data = reports.reports(0).metrics(0).duration_metrics().data(6);
-    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
-                                                  "wakelock2");
-    EXPECT_EQ(1, data.slice_by_state_size());
-    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-    EXPECT_TRUE(data.slice_by_state(0).has_value());
-    EXPECT_EQ(-1 /* StateTracker:: kStateUnknown */, data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
-    EXPECT_EQ(15 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
-    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
-    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
-
-    data = reports.reports(0).metrics(0).duration_metrics().data(7);
-    ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
-                                                  "wakelock1");
-    EXPECT_EQ(1, data.slice_by_state_size());
-    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-    EXPECT_TRUE(data.slice_by_state(0).has_value());
-    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
-              data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
-    EXPECT_EQ(40 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
-    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
-    EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
-
-    data = reports.reports(0).metrics(0).duration_metrics().data(8);
+    data = durationMetrics.data(8);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
                                                   "wakelock2");
     EXPECT_EQ(1, data.slice_by_state_size());
@@ -1432,7 +1458,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
               data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(70 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
