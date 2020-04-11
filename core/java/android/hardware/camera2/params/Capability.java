@@ -16,8 +16,8 @@
 
 package android.hardware.camera2.params;
 
-import static com.android.internal.util.Preconditions.checkArgumentInRange;
 import static com.android.internal.util.Preconditions.checkArgumentNonnegative;
+import static com.android.internal.util.Preconditions.checkArgumentPositive;
 
 import android.annotation.NonNull;
 import android.hardware.camera2.CameraCharacteristics;
@@ -64,9 +64,15 @@ public final class Capability {
                 "maxStreamingWidth must be nonnegative");
         mMaxStreamingHeight = checkArgumentNonnegative(maxStreamingHeight,
                 "maxStreamingHeight must be nonnegative");
-        mMinZoomRatio = checkArgumentInRange(minZoomRatio, 0.0f, 1.0f,
-                "minZoomRatio must be between 0.0f and 1.0f");
-        mMaxZoomRatio = maxZoomRatio;
+
+        if (minZoomRatio > maxZoomRatio) {
+            throw new IllegalArgumentException("minZoomRatio " + minZoomRatio
+                    + " is greater than maxZoomRatio " + maxZoomRatio);
+        }
+        mMinZoomRatio = checkArgumentPositive(minZoomRatio,
+                "minZoomRatio must be positive");
+        mMaxZoomRatio = checkArgumentPositive(maxZoomRatio,
+                "maxZoomRatio must be positive");
     }
 
     /**

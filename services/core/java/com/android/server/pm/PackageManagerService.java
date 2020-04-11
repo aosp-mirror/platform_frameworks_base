@@ -263,6 +263,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.incremental.IncrementalManager;
+import android.os.incremental.IncrementalStorage;
 import android.os.storage.DiskInfo;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageEventListener;
@@ -16596,6 +16597,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * locks on {@link #mLock}.
      */
     private void executePostCommitSteps(CommitRequest commitRequest) {
+        final ArraySet<IncrementalStorage> incrementalStorages = new ArraySet<>();
         for (ReconciledPackage reconciledPkg : commitRequest.reconciledPackages.values()) {
             final boolean instantApp = ((reconciledPkg.scanResult.request.scanFlags
                             & PackageManagerService.SCAN_AS_INSTANT_APP) != 0);
@@ -16603,6 +16605,14 @@ public class PackageManagerService extends IPackageManager.Stub
             final String packageName = pkg.getPackageName();
             final boolean onIncremental = mIncrementalManager != null
                     && isIncrementalPath(pkg.getCodePath());
+            if (onIncremental) {
+                IncrementalStorage storage = mIncrementalManager.openStorage(pkg.getCodePath());
+                if (storage == null) {
+                    throw new IllegalArgumentException(
+                            "Install: null storage for incremental package " + packageName);
+                }
+                incrementalStorages.add(storage);
+            }
             prepareAppDataAfterInstallLIF(pkg);
             if (reconciledPkg.prepareResult.clearCodeCache) {
                 clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
@@ -16700,6 +16710,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             notifyPackageChangeObserversOnUpdate(reconciledPkg);
         }
+        NativeLibraryHelper.waitForNativeBinariesExtraction(incrementalStorages);
     }
 
     private void notifyPackageChangeObserversOnUpdate(ReconciledPackage reconciledPkg) {
