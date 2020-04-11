@@ -26,7 +26,6 @@ import static android.system.OsConstants.S_IXGRP;
 import static android.system.OsConstants.S_IXOTH;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageLite;
@@ -40,6 +39,7 @@ import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import dalvik.system.CloseGuard;
@@ -545,4 +545,18 @@ public class NativeLibraryHelper {
         }
         return false;
     }
+
+    /**
+     * Wait for all native library extraction to complete for the passed storages.
+     *
+     * @param incrementalStorages A list of the storages to wait for.
+     */
+    public static void waitForNativeBinariesExtraction(
+            ArraySet<IncrementalStorage> incrementalStorages) {
+        for (int i = 0; i < incrementalStorages.size(); ++i) {
+            IncrementalStorage storage = incrementalStorages.valueAtUnchecked(i);
+            storage.waitForNativeBinariesExtraction();
+        }
+    }
+
 }
