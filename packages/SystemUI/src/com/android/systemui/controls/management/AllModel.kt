@@ -37,23 +37,22 @@ import com.android.systemui.controls.controller.ControlInfo
  * @property controls List of controls as returned by loading
  * @property initialFavoriteIds sorted ids of favorite controls.
  * @property noZoneString text to use as header for all controls that have blank or `null` zone.
+ * @property controlsModelCallback callback to notify that favorites have changed for the first time
  */
 class AllModel(
     private val controls: List<ControlStatus>,
     initialFavoriteIds: List<String>,
-    private val emptyZoneString: CharSequence
+    private val emptyZoneString: CharSequence,
+    private val controlsModelCallback: ControlsModel.ControlsModelCallback
 ) : ControlsModel {
 
-    override val favorites: List<ControlInfo.Builder>
+    private var modified = false
+
+    override val favorites: List<ControlInfo>
         get() = favoriteIds.mapNotNull { id ->
             val control = controls.firstOrNull { it.control.controlId == id }?.control
             control?.let {
-                ControlInfo.Builder().apply {
-                    controlId = it.controlId
-                    controlTitle = it.title
-                    controlSubtitle = it.subtitle
-                    deviceType = it.deviceType
-                }
+                ControlInfo.fromControl(it)
             }
         }
 
@@ -66,13 +65,17 @@ class AllModel(
 
     override fun changeFavoriteStatus(controlId: String, favorite: Boolean) {
         val toChange = elements.firstOrNull {
-            it is ControlWrapper && it.controlStatus.control.controlId == controlId
-        } as ControlWrapper?
+            it is ControlStatusWrapper && it.controlStatus.control.controlId == controlId
+        } as ControlStatusWrapper?
         if (favorite == toChange?.controlStatus?.favorite) return
-        if (favorite) {
+        val changed: Boolean = if (favorite) {
             favoriteIds.add(controlId)
         } else {
             favoriteIds.remove(controlId)
+        }
+        if (changed && !modified) {
+            modified = true
+            controlsModelCallback.onFirstChange()
         }
         toChange?.let {
             it.controlStatus.favorite = favorite
@@ -84,9 +87,9 @@ class AllModel(
             it.control.zone ?: ""
         }
         val output = mutableListOf<ElementWrapper>()
-        var emptyZoneValues: Sequence<ControlWrapper>? = null
+        var emptyZoneValues: Sequence<ControlStatusWrapper>? = null
         for (zoneName in map.orderedKeys) {
-            val values = map.getValue(zoneName).asSequence().map { ControlWrapper(it) }
+            val values = map.getValue(zoneName).asSequence().map { ControlStatusWrapper(it) }
             if (TextUtils.isEmpty(zoneName)) {
                 emptyZoneValues = values
             } else {

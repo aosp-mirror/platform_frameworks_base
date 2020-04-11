@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_FULLSCREEN;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
@@ -160,9 +161,9 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
 
         @Override
-        public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment) {
-            mHandler.post(() -> updateMovementBounds(animatingBounds, fromImeAdjustment,
-                    false /* fromShelfAdjustment */));
+        public void onMovementBoundsChanged(boolean fromImeAdjustment) {
+            mHandler.post(() -> updateMovementBounds(null /* toBounds */,
+                    fromImeAdjustment, false /* fromShelfAdjustment */));
         }
 
         @Override
@@ -352,17 +353,19 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mMenuController.onPinnedStackAnimationEnded();
     }
 
-    private void updateMovementBounds(Rect animatingBounds, boolean fromImeAdjustment,
-            boolean fromShelfAdjustment) {
+    private void updateMovementBounds(@Nullable Rect toBounds,
+            boolean fromImeAdjustment, boolean fromShelfAdjustment) {
         // Populate inset / normal bounds and DisplayInfo from mPipBoundsHandler before
-        // passing to mTouchHandler, mTouchHandler would rely on the bounds calculated by
-        // mPipBoundsHandler with up-to-dated information
+        // passing to mTouchHandler/mPipTaskOrganizer
+        final Rect outBounds = new Rect(toBounds);
         mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
-                animatingBounds, mTmpDisplayInfo);
+                outBounds, mTmpDisplayInfo);
+        // mTouchHandler would rely on the bounds populated from mPipTaskOrganizer
+        mPipTaskOrganizer.onMovementBoundsChanged(outBounds,
+                fromImeAdjustment, fromShelfAdjustment);
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
-                animatingBounds, fromImeAdjustment, fromShelfAdjustment,
+                outBounds, fromImeAdjustment, fromShelfAdjustment,
                 mTmpDisplayInfo.rotation);
-        mPipTaskOrganizer.onMovementBoundsChanged(fromImeAdjustment, fromShelfAdjustment);
     }
 
     public void dump(PrintWriter pw) {

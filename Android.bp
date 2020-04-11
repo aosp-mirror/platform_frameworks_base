@@ -339,9 +339,7 @@ java_defaults {
             "sax/java",
             "telecomm/java",
 
-            // TODO(b/148660295): remove this
-            "apex/media/framework/java",
-
+            "apex/media/aidl/stable",
             // TODO(b/147699819): remove this
             "telephony/java",
         ],

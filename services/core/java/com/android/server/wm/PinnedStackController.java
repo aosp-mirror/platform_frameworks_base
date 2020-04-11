@@ -23,7 +23,6 @@ import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -285,13 +284,7 @@ class PinnedStackController {
                 return;
             }
             try {
-                final Rect animatingBounds = new Rect();
-                final ActivityStack pinnedStack = mDisplayContent.getDefaultTaskDisplayArea()
-                        .getRootPinnedTask();
-                if (pinnedStack != null) {
-                    pinnedStack.getAnimationOrCurrentBounds(animatingBounds);
-                }
-                mPinnedStackListener.onMovementBoundsChanged(animatingBounds, fromImeAdjustment);
+                mPinnedStackListener.onMovementBoundsChanged(fromImeAdjustment);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }

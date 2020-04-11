@@ -87,9 +87,6 @@ class ControlsControllerImplTest : SysuiTestCase() {
     private lateinit var structureInfoCaptor: ArgumentCaptor<StructureInfo>
 
     @Captor
-    private lateinit var booleanConsumer: ArgumentCaptor<Consumer<Boolean>>
-
-    @Captor
     private lateinit var controlLoadCallbackCaptor:
             ArgumentCaptor<ControlsBindingController.LoadCallback>
     @Captor
@@ -935,5 +932,34 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         verifyNoMoreInteractions(persistenceWrapper)
         verifyNoMoreInteractions(auxiliaryPersistenceWrapper)
+    }
+
+    @Test
+    fun testGetFavoritesForStructure() {
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        controller.replaceFavoritesForStructure(
+                TEST_STRUCTURE_INFO_2.copy(componentName = TEST_COMPONENT))
+        delayableExecutor.runAllReady()
+
+        assertEquals(TEST_STRUCTURE_INFO.controls,
+                controller.getFavoritesForStructure(TEST_COMPONENT, TEST_STRUCTURE))
+        assertEquals(TEST_STRUCTURE_INFO_2.controls,
+                controller.getFavoritesForStructure(TEST_COMPONENT, TEST_STRUCTURE_2))
+    }
+
+    @Test
+    fun testGetFavoritesForStructure_wrongStructure() {
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
+
+        assertTrue(controller.getFavoritesForStructure(TEST_COMPONENT, TEST_STRUCTURE_2).isEmpty())
+    }
+
+    @Test
+    fun testGetFavoritesForStructure_wrongComponent() {
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
+
+        assertTrue(controller.getFavoritesForStructure(TEST_COMPONENT_2, TEST_STRUCTURE).isEmpty())
     }
 }

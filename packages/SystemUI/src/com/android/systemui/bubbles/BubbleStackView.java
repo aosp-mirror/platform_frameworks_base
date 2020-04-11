@@ -1349,7 +1349,8 @@ public class BubbleStackView extends FrameLayout {
         if (show
                 && mShouldShowManageEducation
                 && mManageEducationView.getVisibility() != VISIBLE
-                && mIsExpanded) {
+                && mIsExpanded
+                && mExpandedBubble.getExpandedView() != null) {
             mManageEducationView.setAlpha(0);
             mManageEducationView.setVisibility(VISIBLE);
             mManageEducationView.post(() -> {
@@ -1909,7 +1910,8 @@ public class BubbleStackView extends FrameLayout {
             Log.d(TAG, "updateExpandedBubble()");
         }
         mExpandedViewContainer.removeAllViews();
-        if (mIsExpanded && mExpandedBubble != null) {
+        if (mIsExpanded && mExpandedBubble != null
+                && mExpandedBubble.getExpandedView() != null) {
             BubbleExpandedView bev = mExpandedBubble.getExpandedView();
             mExpandedViewContainer.addView(bev);
             bev.populateExpandedView();
@@ -1929,7 +1931,7 @@ public class BubbleStackView extends FrameLayout {
             if (!mExpandedViewYAnim.isRunning()) {
                 // We're not animating so set the value
                 mExpandedViewContainer.setTranslationY(y);
-                if (mExpandedBubble != null) {
+                if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
                     mExpandedBubble.getExpandedView().updateView();
                 }
             } else {
@@ -1967,7 +1969,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void updatePointerPosition() {
-        if (mExpandedBubble == null) {
+        if (mExpandedBubble == null || mExpandedBubble.getExpandedView() == null) {
             return;
         }
         int index = getBubbleIndex(mExpandedBubble);
@@ -2049,7 +2051,7 @@ public class BubbleStackView extends FrameLayout {
      * a back key down/up event pair is forwarded to the bubble Activity.
      */
     boolean performBackPressIfNeeded() {
-        if (!isExpanded() || mExpandedBubble == null) {
+        if (!isExpanded() || mExpandedBubble == null || mExpandedBubble.getExpandedView() == null) {
             return false;
         }
         return mExpandedBubble.getExpandedView().performBackPressIfNeeded();

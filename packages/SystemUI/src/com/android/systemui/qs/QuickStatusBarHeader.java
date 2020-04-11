@@ -22,10 +22,8 @@ import static com.android.systemui.util.Utils.useQsMediaPlayer;
 import android.annotation.ColorInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -49,13 +47,16 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
@@ -70,6 +71,7 @@ import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.RingerModeTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +88,7 @@ import javax.inject.Named;
  */
 public class QuickStatusBarHeader extends RelativeLayout implements
         View.OnClickListener, NextAlarmController.NextAlarmChangeCallback,
-        ZenModeController.Callback {
+        ZenModeController.Callback, LifecycleOwner {
     private static final String TAG = "QuickStatusBarHeader";
     private static final boolean DEBUG = false;
 
@@ -137,15 +139,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private DateView mDateView;
     private BatteryMeterView mBatteryRemainingIcon;
 
-    private BroadcastDispatcher mBroadcastDispatcher;
+    // Used for RingerModeTracker
+    private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
 
-    private final BroadcastReceiver mRingerReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mRingerMode = intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1);
-            updateStatusText();
-        }
-    };
     private boolean mHasTopCutout = false;
     private int mRoundedCornerPadding = 0;
 
@@ -154,7 +150,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             NextAlarmController nextAlarmController, ZenModeController zenModeController,
             StatusBarIconController statusBarIconController,
             ActivityStarter activityStarter,
-            CommandQueue commandQueue, BroadcastDispatcher broadcastDispatcher) {
+            CommandQueue commandQueue, RingerModeTracker ringerModeTracker) {
         super(context, attrs);
         mAlarmController = nextAlarmController;
         mZenController = zenModeController;
@@ -162,8 +158,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mActivityStarter = activityStarter;
         mDualToneHandler = new DualToneHandler(
                 new ContextThemeWrapper(context, R.style.QSHeaderTheme));
-        mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
+        ringerModeTracker.getRingerModeInternal().observe(this, ringer -> {
+            mRingerMode = ringer;
+            updateStatusText();
+        });
     }
 
     @Override
@@ -484,12 +483,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         if (listening) {
             mZenController.addCallback(this);
             mAlarmController.addCallback(this);
-            mBroadcastDispatcher.registerReceiver(mRingerReceiver,
-                    new IntentFilter(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
+            mLifecycle.setCurrentState(Lifecycle.State.RESUMED);
         } else {
             mZenController.removeCallback(this);
             mAlarmController.removeCallback(this);
-            mBroadcastDispatcher.unregisterReceiver(mRingerReceiver);
+            mLifecycle.setCurrentState(Lifecycle.State.DESTROYED);
         }
     }
 
@@ -585,5 +583,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             lp.leftMargin = sideMargins;
             lp.rightMargin = sideMargins;
         }
+    }
+
+    @NonNull
+    @Override
+    public Lifecycle getLifecycle() {
+        return mLifecycle;
     }
 }

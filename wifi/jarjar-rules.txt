@@ -1,6 +1,13 @@
 # used by wifi-service
+# TODO (b/153596226): Find a solution for networkstack's AIDL parcelables & interfaces.
+# Parcelable class names are serialized in the wire, so renaming them
+# will result in the class not being found for any parcelable received/sent from the
+# wifi-service jar.
+
+# Note: This rule is needed to ensure the rule below does not rename a Parcelable (see TODO above).
 rule android.net.DhcpResultsParcelable* @0
 rule android.net.DhcpResults* com.android.server.x.wifi.net.DhcpResults@1
+# Note: This rule is needed to ensure the rule below does not rename a Parcelable (see TODO above).
 rule android.net.InterfaceConfigurationParcel* @0
 rule android.net.InterfaceConfiguration* com.android.server.x.wifi.net.InterfaceConfiguration@1
 rule android.net.IpMemoryStore* com.android.server.x.wifi.net.IpMemoryStore@1
@@ -10,11 +17,18 @@ rule android.net.NetworkFactory* com.android.server.x.wifi.net.NetworkFactory@1
 rule android.net.ip.IpClientCallbacks* com.android.server.x.wifi.net.ip.IpClientCallbacks@1
 rule android.net.ip.IpClientManager* com.android.server.x.wifi.net.ip.IpClientManager@1
 rule android.net.ip.IpClientUtil* com.android.server.x.wifi.net.ip.IpClientUtil@1
+rule android.net.ipmemorystore.OnBlobRetrievedListener* com.android.server.x.wifi.net.ipmemorystore.OnBlobRetrievedListener@1
+rule android.net.ipmemorystore.OnStatusListener* com.android.server.x.wifi.net.ipmemorystore.OnStatusListener@1
+# Note: This rule is needed to ensure the rule below does not rename a Parcelable (see TODO above).
+rule android.net.ipmemorystore.StatusParcelable* @0
+rule android.net.ipmemorystore.Status* com.android.server.x.wifi.net.ipmemorystore.Status@1
+rule android.net.networkstack.ModuleNetworkStackClient* com.android.server.x.wifi.net.networkstack.ModuleNetworkStackClient@1
+rule android.net.networkstack.NetworkStackClientBase* com.android.server.x.wifi.net.networkstack.NetworkStackClientBase@1
 rule android.net.shared.InetAddressUtils* com.android.server.x.wifi.net.shared.InetAddressUtils@1
 rule android.net.shared.InitialConfiguration* com.android.server.x.wifi.net.shared.InitialConfiguration@1
 rule android.net.shared.IpConfigurationParcelableUtil* com.android.server.x.wifi.net.shared.IpConfigurationParcelableUtil@1
+rule android.net.shared.Layer2Information* com.android.server.x.wifi.net.shared.Layer2Information@1
 rule android.net.shared.LinkPropertiesParcelableUtil* com.android.server.x.wifi.net.shared.LinkPropertiesParcelableUtil@1
-rule android.net.shared.ParcelableUtil* com.android.server.x.wifi.net.shared.ParcelableUtil@1
 rule android.net.shared.NetdUtils* com.android.server.x.wifi.net.shared.NetdUtils@1
 rule android.net.shared.NetworkMonitorUtils* com.android.server.x.wifi.net.shared.NetworkMonitorUtils@1
 rule android.net.shared.ParcelableUtil* com.android.server.x.wifi.net.shared.ParcelableUtil@1
@@ -27,6 +41,8 @@ rule android.net.util.InterfaceParams* com.android.server.x.wifi.net.util.Interf
 rule android.net.util.SharedLog* com.android.server.x.wifi.net.util.SharedLog@1
 rule android.net.util.NetUtils* com.android.server.x.wifi.net.util.NetUtils@1
 rule android.net.util.IpUtils* com.android.server.x.wifi.net.util.IpUtils@1
+
+rule androidx.annotation.** com.android.server.x.wifi.androidx.annotation.@1
 
 # We don't jar-jar the entire package because, we still use some classes (like
 # AsyncChannel in com.android.internal.util) from these packages which are not
@@ -54,8 +70,16 @@ rule com.android.internal.messages.SystemMessageProto* com.android.server.x.wifi
 # Use our statically linked PlatformProperties library
 rule android.sysprop.** com.android.server.x.wifi.sysprop.@1
 # Use our statically linked HIDL stubs
-rule android.hardware.** com.android.server.x.wifi.hardware.@1
+# Note: android.hardware.wifi.** is used by various wifi feature flags. This unfortunately is also the namespace
+# used by vendor HAL stubs. So, this rule is intentionally weird to try and filter the vendor HAL stubs only.
+rule android.hardware.wifi.V** com.android.server.x.wifi.hardware.wifi.V@1
+rule android.hardware.wifi.supplicant.** com.android.server.x.wifi.hardware.wifi.supplicant.@1
+rule android.hardware.wifi.hostapd.** com.android.server.x.wifi.hardware.wifi.hostapd.@1
 rule android.hidl.** com.android.server.x.wifi.hidl.@1
+# Use our statically linked ksoap2
+rule org.ksoap2.** com.android.server.x.wifi.ksoap2.@1
+# Use our statically linked nanohttpd
+rule fi.iki.elonen.** com.android.server.x.wifi.elonen.@1
 
 # used by both framework-wifi and wifi-service
 rule android.content.pm.BaseParceledListSlice* android.x.net.wifi.util.BaseParceledListSlice@1

@@ -192,6 +192,11 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
                 Assume.assumeNoException(
                         new AssertionError("onAnimationCanceled should not be called"));
             }
+
+            @Override
+            public void onTaskAppeared(RemoteAnimationTarget app) throws RemoteException {
+                /* no-op */
+            }
         };
 
         recentsSemaphore.tryAcquire();

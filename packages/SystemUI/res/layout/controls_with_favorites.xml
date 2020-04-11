@@ -34,6 +34,7 @@
         android:orientation="horizontal"
         android:layout_width="0dp"
         android:layout_weight="1"
+        android:minHeight="48dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center">
@@ -43,6 +44,7 @@
           android:layout_gravity="center"
           android:layout_width="@dimen/controls_header_app_icon_size"
           android:layout_height="@dimen/controls_header_app_icon_size"
+          android:contentDescription="@null"
           android:layout_marginEnd="10dp" />
 
       <TextView
