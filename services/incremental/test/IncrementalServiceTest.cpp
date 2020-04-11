@@ -261,28 +261,39 @@ public:
     sp<IAppOpsCallback> mStoredCallback;
 };
 
+class MockJniWrapper : public JniWrapper {
+public:
+    MOCK_CONST_METHOD0(initializeForCurrentThread, void());
+
+    MockJniWrapper() { EXPECT_CALL(*this, initializeForCurrentThread()).Times(1); }
+};
+
 class MockServiceManager : public ServiceManagerWrapper {
 public:
     MockServiceManager(std::unique_ptr<MockVoldService> vold,
-                       std::unique_ptr<MockDataLoaderManager> manager,
+                       std::unique_ptr<MockDataLoaderManager> dataLoaderManager,
                        std::unique_ptr<MockIncFs> incfs,
-                       std::unique_ptr<MockAppOpsManager> appOpsManager)
+                       std::unique_ptr<MockAppOpsManager> appOpsManager,
+                       std::unique_ptr<MockJniWrapper> jni)
           : mVold(std::move(vold)),
-            mDataLoaderManager(std::move(manager)),
+            mDataLoaderManager(std::move(dataLoaderManager)),
             mIncFs(std::move(incfs)),
-            mAppOpsManager(std::move(appOpsManager)) {}
+            mAppOpsManager(std::move(appOpsManager)),
+            mJni(std::move(jni)) {}
     std::unique_ptr<VoldServiceWrapper> getVoldService() final { return std::move(mVold); }
     std::unique_ptr<DataLoaderManagerWrapper> getDataLoaderManager() final {
         return std::move(mDataLoaderManager);
     }
     std::unique_ptr<IncFsWrapper> getIncFs() final { return std::move(mIncFs); }
     std::unique_ptr<AppOpsManagerWrapper> getAppOpsManager() final { return std::move(mAppOpsManager); }
+    std::unique_ptr<JniWrapper> getJni() final { return std::move(mJni); }
 
 private:
     std::unique_ptr<MockVoldService> mVold;
     std::unique_ptr<MockDataLoaderManager> mDataLoaderManager;
     std::unique_ptr<MockIncFs> mIncFs;
     std::unique_ptr<MockAppOpsManager> mAppOpsManager;
+    std::unique_ptr<MockJniWrapper> mJni;
 };
 
 // --- IncrementalServiceTest ---
@@ -298,11 +309,15 @@ public:
         mIncFs = incFs.get();
         auto appOps = std::make_unique<NiceMock<MockAppOpsManager>>();
         mAppOpsManager = appOps.get();
+        auto jni = std::make_unique<NiceMock<MockJniWrapper>>();
+        mJni = jni.get();
         mIncrementalService =
                 std::make_unique<IncrementalService>(MockServiceManager(std::move(vold),
-                                                                        std::move(dataloaderManager),
+                                                                        std::move(
+                                                                                dataloaderManager),
                                                                         std::move(incFs),
-                                                                        std::move(appOps)),
+                                                                        std::move(appOps),
+                                                                        std::move(jni)),
                                                      mRootDir.path);
         mDataLoaderParcel.packageName = "com.test";
         mDataLoaderParcel.arguments = "uri";
@@ -336,6 +351,7 @@ protected:
     NiceMock<MockIncFs>* mIncFs;
     NiceMock<MockDataLoaderManager>* mDataLoaderManager;
     NiceMock<MockAppOpsManager>* mAppOpsManager;
+    NiceMock<MockJniWrapper>* mJni;
     std::unique_ptr<IncrementalService> mIncrementalService;
     TemporaryDir mRootDir;
     DataLoaderParamsParcel mDataLoaderParcel;
