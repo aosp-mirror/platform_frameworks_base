@@ -4065,7 +4065,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return r != null
                 && r.getRootTask() != null
                 && r.inPinnedWindowingMode()
-                && r.getRootTask().isInStackLocked(r) != null;
+                && r.getRootTask().isInTask(r) != null;
     }
 
     @Override

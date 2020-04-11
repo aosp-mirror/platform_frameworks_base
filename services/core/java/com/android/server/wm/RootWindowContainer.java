@@ -2422,6 +2422,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         info.userId = stack.mCurrentUser;
         info.visible = stack.shouldBeVisible(null);
         // A stack might be not attached to a display.
+        // TODO: Can be removed since no one is using it.
         info.position = taskDisplayArea != null ? taskDisplayArea.getIndexOf(stack) : 0;
         info.configuration.setTo(stack.getConfiguration());
 
