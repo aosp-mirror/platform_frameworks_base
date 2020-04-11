@@ -247,12 +247,15 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
-        public void releaseFrontend(int frontendId) {
+        public void releaseFrontend(int frontendHandle) {
             enforceTunerAccessPermission("releaseFrontend");
             enforceTrmAccessPermission("releaseFrontend");
+            int frontendId = getResourceId(
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, frontendHandle);
             if (DEBUG) {
                 Slog.d(TAG, "releaseFrontend(id=" + frontendId + ")");
             }
+            updateFrontendClientMappingOnRelease(frontendId);
         }
 
         @Override
@@ -568,6 +571,17 @@ public class TunerResourceManagerService extends SystemService {
         }
     }
 
+    private void updateFrontendClientMappingOnRelease(int frontendId) {
+        FrontendResource releasingFrontend = getFrontendResource(frontendId);
+        ClientProfile ownerProfile = getClientProfile(releasingFrontend.getOwnerClientId());
+        releasingFrontend.removeOwner();
+        ownerProfile.releaseFrontend(frontendId);
+        for (int exclusiveGroupMember : releasingFrontend.getExclusiveGroupMemberFeIds()) {
+            getFrontendResource(exclusiveGroupMember).removeOwner();
+            ownerProfile.releaseFrontend(frontendId);
+        }
+    }
+
     /**
      * Get the owner client's priority from the frontend id.
      *
@@ -649,6 +663,11 @@ public class TunerResourceManagerService extends SystemService {
         return (resourceType & 0x000000ff) << 24
                 | (resourceId << 16)
                 | (mResourceRequestCount++ & 0xffff);
+    }
+
+    private int getResourceId(
+            @TunerResourceManager.TunerResourceType int resourceType, int resourceHandle) {
+        return (resourceHandle & 0x00ff0000) >> 16;
     }
 
     private void enforceTrmAccessPermission(String apiName) {

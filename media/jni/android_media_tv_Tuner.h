@@ -172,6 +172,7 @@ struct JTuner : public RefBase {
     int disconnectCiCam();
     jobject getFrontendIds();
     jobject openFrontendById(int id);
+    jint closeFrontendById(int id);
     jobject getFrontendInfo(int id);
     int tune(const FrontendSettings& settings);
     int stopTune();
@@ -189,6 +190,7 @@ struct JTuner : public RefBase {
     jobject getDemuxCaps();
     jobject getFrontendStatus(jintArray types);
     Result openDemux();
+    jint close();
 
 protected:
     virtual ~JTuner();

@@ -833,6 +833,12 @@ JTuner::JTuner(JNIEnv *env, jobject thiz)
 }
 
 JTuner::~JTuner() {
+    if (mFe != NULL) {
+        mFe->close();
+    }
+    if (mDemux != NULL) {
+        mDemux->close();
+    }
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
     env->DeleteWeakGlobalRef(mObject);
@@ -906,6 +912,14 @@ jobject JTuner::openFrontendById(int id) {
             gFields.frontendInitID,
             mObject,
             (jint) jId);
+}
+
+jint JTuner::closeFrontendById(int id) {
+    if (mFe != NULL && mFeId == id) {
+        Result r = mFe->close();
+        return (jint) r;
+    }
+    return (jint) Result::SUCCESS;
 }
 
 jobject JTuner::getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
@@ -1269,6 +1283,23 @@ Result JTuner::openDemux() {
         }
     }
     return res;
+}
+
+jint JTuner::close() {
+    Result res = Result::SUCCESS;
+    if (mFe != NULL) {
+        res = mFe->close();
+        if (res != Result::SUCCESS) {
+            return (jint) res;
+        }
+    }
+    if (mDemux != NULL) {
+        res = mDemux->close();
+        if (res != Result::SUCCESS) {
+            return (jint) res;
+        }
+    }
+    return (jint) res;
 }
 
 jobject JTuner::getAvSyncHwId(sp<Filter> filter) {
@@ -2362,6 +2393,13 @@ static jobject android_media_tv_Tuner_open_frontend_by_handle(
     return tuner->openFrontendById(id);
 }
 
+static jint android_media_tv_Tuner_close_frontend_by_handle(
+        JNIEnv *env, jobject thiz, jint handle) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    uint32_t id = getResourceIdFromHandle(handle);
+    return tuner->closeFrontendById(id);
+}
+
 static int android_media_tv_Tuner_tune(JNIEnv *env, jobject thiz, jint type, jobject settings) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->tune(getFrontendSettings(env, type, settings));
@@ -3135,6 +3173,11 @@ static jint android_media_tv_Tuner_open_demux(JNIEnv* env, jobject thiz, jint /*
     return (jint) tuner->openDemux();
 }
 
+static jint android_media_tv_Tuner_close_tuner(JNIEnv* env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return (jint) tuner->close();
+}
+
 static jint android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<Dvr> dvrSp = getDvr(env, dvr);
     if (dvrSp == NULL) {
@@ -3424,6 +3467,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_get_frontend_ids },
     { "nativeOpenFrontendByHandle", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
             (void *)android_media_tv_Tuner_open_frontend_by_handle },
+    { "nativeCloseFrontendByHandle", "(I)I",
+            (void *)android_media_tv_Tuner_close_frontend_by_handle },
     { "nativeTune", "(ILandroid/media/tv/tuner/frontend/FrontendSettings;)I",
             (void *)android_media_tv_Tuner_tune },
     { "nativeStopTune", "()I", (void *)android_media_tv_Tuner_stop_tune },
@@ -3460,6 +3505,7 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeGetDemuxCapabilities", "()Landroid/media/tv/tuner/DemuxCapabilities;",
             (void *)android_media_tv_Tuner_get_demux_caps },
     { "nativeOpenDemuxByhandle", "(I)I", (void *)android_media_tv_Tuner_open_demux },
+    {"nativeClose", "()I", (void *)android_media_tv_Tuner_close_tuner },
 };
 
 static const JNINativeMethod gFilterMethods[] = {
