@@ -24,6 +24,7 @@ import android.content.Context;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedControllerImpl;
+import com.android.systemui.car.keyguard.CarKeyguardViewController;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
@@ -146,7 +147,7 @@ public abstract class CarSystemUIModule {
 
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(
-            CarStatusBarKeyguardViewManager keyguardViewManager);
+            CarKeyguardViewController carKeyguardViewController);
 
     @Binds
     abstract DeviceProvisionedController bindDeviceProvisionedController(

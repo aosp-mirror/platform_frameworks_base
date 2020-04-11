@@ -147,6 +147,28 @@ public interface KeyguardViewController {
      */
     ViewRootImpl getViewRootImpl();
 
+    /**
+     * Notifies that the user has authenticated by other means than using the bouncer, for example,
+     * fingerprint.
+     */
+    void notifyKeyguardAuthenticated(boolean strongAuth);
+
+    /**
+     * Shows the Bouncer.
+     *
+     */
+    void showBouncer(boolean scrimmed);
+
+    /**
+     * Returns {@code true} when the bouncer is currently showing
+     */
+    boolean isBouncerShowing();
+
+    /**
+     * When bouncer is fully visible or it is showing but animation didn't finish yet.
+     */
+    boolean bouncerIsOrWillBeShowing();
+
     // TODO: Deprecate registerStatusBar in KeyguardViewController interface. It is currently
     //  only used for testing purposes in StatusBarKeyguardViewManager, and it prevents us from
     //  achieving complete abstraction away from where the Keyguard View is mounted.
