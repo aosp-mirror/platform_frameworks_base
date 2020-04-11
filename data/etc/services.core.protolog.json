@@ -883,6 +883,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-242787066": {
+      "message": "addTaskToRecentsAnimationIfNeeded, control: %s, task: %s, transit: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
+    },
     "-198463978": {
       "message": "updateRotationUnchecked: alwaysSendConfiguration=%b forceRelayout=%b",
       "level": "VERBOSE",
@@ -900,6 +906,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
+    },
+    "-172900257": {
+      "message": "addTaskToTargets, target: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
     "-167822951": {
       "message": "Attempted to add starting window to token with already existing starting window",
@@ -1200,6 +1212,12 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
+    },
+    "315395835": {
+      "message": "Trying to add window with invalid user=%d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "342460966": {
       "message": "DRAG %s: pos=(%d,%d)",
@@ -1524,6 +1542,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
+    },
+    "854237232": {
+      "message": "addTaskToRecentsAnimationIfNeeded, control: %s, task: %s, transit: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/Task.java"
     },
     "873914452": {
       "message": "goodToGo()",

@@ -238,9 +238,6 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         assertTrue(targetActivity.mLaunchTaskBehind);
 
         anotherHomeActivity.moveFocusableActivityToTop("launchAnotherHome");
-        // The current top activity is not the recents so the animation should be canceled.
-        verify(mService.mWindowManager, times(1)).cancelRecentsAnimation(
-                eq(REORDER_KEEP_IN_PLACE), any() /* reason */);
 
         // The test uses mocked RecentsAnimationController so we have to invoke the callback
         // manually to simulate the flow.
@@ -278,10 +275,6 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         startRecentsActivity();
 
         fullscreenStack.moveToFront("Activity start");
-
-        // Ensure that the recents animation was canceled by cancelAnimationSynchronously().
-        verify(mService.mWindowManager, times(1)).cancelRecentsAnimation(
-                eq(REORDER_KEEP_IN_PLACE), any());
 
         // Assume recents animation already started, set a state that cancel recents animation
         // with screenshot.

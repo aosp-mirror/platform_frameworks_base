@@ -29,6 +29,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import android.content.res.Configuration;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
@@ -132,6 +133,30 @@ public class WindowTokenTests extends WindowTestsBase {
         assertNull(token.getParent());
         // Verify that the token windows are no longer attached to it.
         assertEquals(0, token.getWindowsCount());
+    }
+
+    @Test
+    public void testClearFixedRotationTransform() {
+        final WindowToken appToken = mAppWindow.mToken;
+        final WindowToken wallpaperToken = mWallpaperWindow.mToken;
+        final Configuration config = new Configuration(mDisplayContent.getConfiguration());
+        final int originalRotation = config.windowConfiguration.getRotation();
+        final int targetRotation = (originalRotation + 1) % 4;
+
+        config.windowConfiguration.setRotation(targetRotation);
+        appToken.applyFixedRotationTransform(mDisplayInfo, mDisplayContent.mDisplayFrames, config);
+        wallpaperToken.linkFixedRotationTransform(appToken);
+
+        // The window tokens should apply the rotation by the transformation.
+        assertEquals(targetRotation, appToken.getWindowConfiguration().getRotation());
+        assertEquals(targetRotation, wallpaperToken.getWindowConfiguration().getRotation());
+
+        // The display doesn't rotate, the transformation will be canceled.
+        mAppWindow.mToken.clearFixedRotationTransform(null /* applyDisplayRotation */);
+
+        // The window tokens should restore to the original rotation.
+        assertEquals(originalRotation, appToken.getWindowConfiguration().getRotation());
+        assertEquals(originalRotation, wallpaperToken.getWindowConfiguration().getRotation());
     }
 
     /**

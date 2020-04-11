@@ -17,6 +17,7 @@
 #include "BinderIncrementalService.h"
 
 #include <android-base/logging.h>
+#include <android-base/no_destructor.h>
 #include <binder/IResultReceiver.h>
 #include <binder/PermissionCache.h>
 #include <incfs.h>
@@ -93,8 +94,8 @@ BinderIncrementalService* BinderIncrementalService::start() {
 }
 
 status_t BinderIncrementalService::dump(int fd, const Vector<String16>&) {
-    static const String16 kDump("android.permission.DUMP");
-    if (!PermissionCache::checkCallingPermission(kDump)) {
+    static const android::base::NoDestructor<String16> kDump("android.permission.DUMP");
+    if (!PermissionCache::checkCallingPermission(*kDump)) {
         return PERMISSION_DENIED;
     }
     mImpl.onDump(fd);

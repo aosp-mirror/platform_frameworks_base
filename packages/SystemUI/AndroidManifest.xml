@@ -670,11 +670,20 @@
         </activity>
 
         <activity android:name=".controls.management.ControlsProviderSelectorActivity"
-                  android:label="Controls Providers"
+                  android:label="@string/controls_providers_title"
                   android:theme="@style/Theme.ControlsManagement"
                   android:showForAllUsers="true"
                   android:clearTaskOnLaunch="true"
                   android:excludeFromRecents="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
+        <activity android:name=".controls.management.ControlsEditingActivity"
+                  android:theme="@style/Theme.ControlsManagement"
+                  android:excludeFromRecents="true"
+                  android:showForAllUsers="true"
+                  android:finishOnTaskLaunch="true"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
         </activity>

@@ -39,16 +39,29 @@ import com.android.systemui.R
 
 import kotlin.reflect.KClass
 
-private const val UPDATE_DELAY_IN_MILLIS = 3000L
-private const val ALPHA_ENABLED = (255.0 * 0.2).toInt()
-private const val ALPHA_DISABLED = 255
-
+/**
+ * Wraps the widgets that make up the UI representation of a {@link Control}. Updates to the view
+ * are signaled via calls to {@link #bindData}. Similar to the ViewHolder concept used in
+ * RecyclerViews.
+ */
 class ControlViewHolder(
     val layout: ViewGroup,
     val controlsController: ControlsController,
     val uiExecutor: DelayableExecutor,
-    val bgExecutor: DelayableExecutor
+    val bgExecutor: DelayableExecutor,
+    val usePanels: Boolean
 ) {
+
+    companion object {
+        private const val UPDATE_DELAY_IN_MILLIS = 3000L
+        private const val ALPHA_ENABLED = (255.0 * 0.2).toInt()
+        private const val ALPHA_DISABLED = 255
+        private val FORCE_PANEL_DEVICES = setOf(
+            DeviceTypes.TYPE_THERMOSTAT,
+            DeviceTypes.TYPE_CAMERA
+        )
+    }
+
     val icon: ImageView = layout.requireViewById(R.id.icon)
     val status: TextView = layout.requireViewById(R.id.status)
     val title: TextView = layout.requireViewById(R.id.title)
@@ -59,6 +72,8 @@ class ControlViewHolder(
     var cancelUpdate: Runnable? = null
     var behavior: Behavior? = null
     var lastAction: ControlAction? = null
+    val deviceType: Int
+        get() = cws.control?.let { it.getDeviceType() } ?: cws.ci.deviceType
 
     init {
         val ld = layout.getBackground() as LayerDrawable
@@ -76,7 +91,7 @@ class ControlViewHolder(
         val (controlStatus, template) = cws.control?.let {
             title.setText(it.getTitle())
             subtitle.setText(it.getSubtitle())
-            Pair(it.getStatus(), it.getControlTemplate())
+            Pair(it.status, it.controlTemplate)
         } ?: run {
             title.setText(cws.ci.controlTitle)
             subtitle.setText(cws.ci.controlSubtitle)
@@ -91,7 +106,7 @@ class ControlViewHolder(
             })
         }
 
-        val clazz = findBehavior(controlStatus, template)
+        val clazz = findBehavior(controlStatus, template, deviceType)
         if (behavior == null || behavior!!::class != clazz) {
             // Behavior changes can signal a change in template from the app or
             // first time setup
@@ -126,9 +141,17 @@ class ControlViewHolder(
         controlsController.action(cws.componentName, cws.ci, action)
     }
 
-    private fun findBehavior(status: Int, template: ControlTemplate): KClass<out Behavior> {
+    fun usePanel(): Boolean =
+        usePanels && deviceType in ControlViewHolder.FORCE_PANEL_DEVICES
+
+    private fun findBehavior(
+        status: Int,
+        template: ControlTemplate,
+        deviceType: Int
+    ): KClass<out Behavior> {
         return when {
             status == Control.STATUS_UNKNOWN -> UnknownBehavior::class
+            deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
             template is ToggleTemplate -> ToggleBehavior::class
             template is StatelessTemplate -> TouchBehavior::class
             template is ToggleRangeTemplate -> ToggleRangeBehavior::class
@@ -140,7 +163,6 @@ class ControlViewHolder(
     internal fun applyRenderInfo(enabled: Boolean, offset: Int = 0) {
         setEnabled(enabled)
 
-        val deviceType = cws.control?.let { it.getDeviceType() } ?: cws.ci.deviceType
         val ri = RenderInfo.lookup(context, cws.componentName, deviceType, enabled, offset)
 
         val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())

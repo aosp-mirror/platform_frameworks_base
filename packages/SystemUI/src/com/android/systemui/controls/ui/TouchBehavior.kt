@@ -20,7 +20,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.View
 import android.service.controls.Control
-import android.service.controls.templates.StatelessTemplate
+import android.service.controls.templates.ControlTemplate
 
 import com.android.systemui.R
 import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
@@ -31,7 +31,7 @@ import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
  */
 class TouchBehavior : Behavior {
     lateinit var clipLayer: Drawable
-    lateinit var template: StatelessTemplate
+    lateinit var template: ControlTemplate
     lateinit var control: Control
     lateinit var cvh: ControlViewHolder
 
@@ -40,14 +40,14 @@ class TouchBehavior : Behavior {
         cvh.applyRenderInfo(false)
 
         cvh.layout.setOnClickListener(View.OnClickListener() {
-            ControlActionCoordinator.touch(cvh, template.getTemplateId())
+            ControlActionCoordinator.touch(cvh, template.getTemplateId(), control)
         })
     }
 
     override fun bind(cws: ControlWithState) {
         this.control = cws.control!!
         cvh.status.setText(control.getStatusText())
-        template = control.getControlTemplate() as StatelessTemplate
+        template = control.getControlTemplate()
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)

@@ -61,6 +61,7 @@ class ControlsFavoritingActivity @Inject constructor(
 
         // If provided, show this structure page first
         const val EXTRA_STRUCTURE = "extra_structure"
+        const val EXTRA_SINGLE_STRUCTURE = "extra_single_structure"
         private const val TOOLTIP_PREFS_KEY = Prefs.Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT
         private const val TOOLTIP_MAX_SHOWN = 2
     }
@@ -131,6 +132,12 @@ class ControlsFavoritingActivity @Inject constructor(
         currentUserTracker.startTracking()
     }
 
+    private val controlsModelCallback = object : ControlsModel.ControlsModelCallback {
+        override fun onFirstChange() {
+            doneButton.isEnabled = true
+        }
+    }
+
     private fun loadControls() {
         component?.let {
             statusText.text = resources.getText(com.android.internal.R.string.loading)
@@ -142,15 +149,20 @@ class ControlsFavoritingActivity @Inject constructor(
                 val error = data.errorOnLoad
                 val controlsByStructure = allControls.groupBy { it.control.structure ?: "" }
                 listOfStructures = controlsByStructure.map {
-                    StructureContainer(it.key, AllModel(it.value, favoriteKeys, emptyZoneString))
+                    StructureContainer(it.key, AllModel(
+                            it.value, favoriteKeys, emptyZoneString, controlsModelCallback))
                 }.sortedWith(comparator)
 
                 val structureIndex = listOfStructures.indexOfFirst {
                     sc -> sc.structureName == structureExtra
                 }.let { if (it == -1) 0 else it }
 
+                // If we were requested to show a single structure, set the list to just that one
+                if (intent.getBooleanExtra(EXTRA_SINGLE_STRUCTURE, false)) {
+                    listOfStructures = listOf(listOfStructures[structureIndex])
+                }
+
                 executor.execute {
-                    doneButton.isEnabled = true
                     structurePager.adapter = StructureAdapter(listOfStructures)
                     structurePager.setCurrentItem(structureIndex)
                     if (error) {
@@ -239,8 +251,11 @@ class ControlsFavoritingActivity @Inject constructor(
             }
         }
 
+        val title = structureExtra
+            ?: (appName ?: resources.getText(R.string.controls_favorite_default_title))
+        setTitle(title)
         titleView = requireViewById<TextView>(R.id.title).apply {
-            text = appName ?: resources.getText(R.string.controls_favorite_default_title)
+            text = title
         }
         requireViewById<TextView>(R.id.subtitle).text =
                 resources.getText(R.string.controls_favorite_subtitle)
@@ -272,7 +287,7 @@ class ControlsFavoritingActivity @Inject constructor(
             setOnClickListener {
                 if (component == null) return@setOnClickListener
                 listOfStructures.forEach {
-                    val favoritesForStorage = it.model.favorites.map { it.build() }
+                    val favoritesForStorage = it.model.favorites
                     controller.replaceFavoritesForStructure(
                         StructureInfo(component!!, it.structureName, favoritesForStorage)
                     )

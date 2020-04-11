@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 
@@ -191,8 +192,9 @@ public class ActivityStartController {
         try {
             // TODO(multi-display-area): Support starting home in a task display area
             // Make sure home stack exist on display.
+            // TODO(b/153624902): Replace with TaskDisplayArea#getOrCreateRootHomeTask()
             homeStack = display.getDefaultTaskDisplayArea().getOrCreateStack(
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+                    WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, ON_TOP);
         } finally {
             mSupervisor.endDeferResume();
         }

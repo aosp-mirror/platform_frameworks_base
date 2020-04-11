@@ -63,20 +63,23 @@ class IdmapManager {
         mIdmapDaemon = IdmapDaemon.getInstance();
     }
 
+    /**
+     * Creates the idmap for the target/overlay combination and returns whether the idmap file was
+     * modified.
+     */
     boolean createIdmap(@NonNull final PackageInfo targetPackage,
             @NonNull final PackageInfo overlayPackage, int userId) {
         if (DEBUG) {
             Slog.d(TAG, "create idmap for " + targetPackage.packageName + " and "
                     + overlayPackage.packageName);
         }
-        final int sharedGid = UserHandle.getSharedAppGid(targetPackage.applicationInfo.uid);
         final String targetPath = targetPackage.applicationInfo.getBaseCodePath();
         final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
         try {
             int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
             boolean enforce = enforceOverlayable(overlayPackage);
             if (mIdmapDaemon.verifyIdmap(targetPath, overlayPath, policies, enforce, userId)) {
-                return true;
+                return false;
             }
             return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies,
                     enforce, userId) != null;

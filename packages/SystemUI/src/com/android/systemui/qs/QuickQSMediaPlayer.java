@@ -53,7 +53,7 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
      */
     public QuickQSMediaPlayer(Context context, ViewGroup parent, NotificationMediaManager manager,
             Executor foregroundExecutor, Executor backgroundExecutor) {
-        super(context, parent, manager, R.layout.qqs_media_panel, QQS_ACTION_IDS,
+        super(context, parent, manager, null, R.layout.qqs_media_panel, QQS_ACTION_IDS,
                 foregroundExecutor, backgroundExecutor);
     }
 
@@ -84,7 +84,7 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
             return;
         }
 
-        super.setMediaSession(token, icon, iconColor, bgColor, contentIntent, null, null);
+        super.setMediaSession(token, icon, iconColor, bgColor, contentIntent, null);
 
         LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
         int i = 0;

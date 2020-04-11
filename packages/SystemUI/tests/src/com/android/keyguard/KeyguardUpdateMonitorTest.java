@@ -29,6 +29,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -50,6 +52,7 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
@@ -63,18 +66,24 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.util.RingerModeTracker;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -125,6 +134,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private Executor mBackgroundExecutor;
+    @Mock
+    private RingerModeTracker mRingerModeTracker;
+    @Mock
+    private LiveData<Integer> mRingerModeLiveData;
     private TestableLooper mTestableLooper;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
@@ -155,6 +168,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         context.addMockSystemService(UserManager.class, mUserManager);
         context.addMockSystemService(DevicePolicyManager.class, mDevicePolicyManager);
         context.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
+
+        when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
 
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
@@ -613,6 +628,29 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.getSecondaryLockscreenRequirement(user)).isNull();
     }
 
+    @Test
+    public void testRingerModeChange() {
+        ArgumentCaptor<Observer<Integer>> captor = ArgumentCaptor.forClass(Observer.class);
+        verify(mRingerModeLiveData).observeForever(captor.capture());
+        Observer<Integer> observer = captor.getValue();
+
+        KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
+
+        mKeyguardUpdateMonitor.registerCallback(callback);
+
+        observer.onChanged(AudioManager.RINGER_MODE_NORMAL);
+        observer.onChanged(AudioManager.RINGER_MODE_SILENT);
+        observer.onChanged(AudioManager.RINGER_MODE_VIBRATE);
+
+        mTestableLooper.processAllMessages();
+
+        InOrder orderVerify = inOrder(callback);
+        orderVerify.verify(callback).onRingerModeChanged(anyInt()); // Initial update on register
+        orderVerify.verify(callback).onRingerModeChanged(AudioManager.RINGER_MODE_NORMAL);
+        orderVerify.verify(callback).onRingerModeChanged(AudioManager.RINGER_MODE_SILENT);
+        orderVerify.verify(callback).onRingerModeChanged(AudioManager.RINGER_MODE_VIBRATE);
+    }
+
     private void setBroadcastReceiverPendingResult(BroadcastReceiver receiver) {
         BroadcastReceiver.PendingResult pendingResult =
                 new BroadcastReceiver.PendingResult(Activity.RESULT_OK,
@@ -643,7 +681,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         protected TestableKeyguardUpdateMonitor(Context context) {
             super(context,
                     TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
-                    mBroadcastDispatcher, mDumpManager, mBackgroundExecutor);
+                    mBroadcastDispatcher, mDumpManager,
+                    mRingerModeTracker, mBackgroundExecutor);
             mStrongAuthTracker = KeyguardUpdateMonitorTest.this.mStrongAuthTracker;
         }
 

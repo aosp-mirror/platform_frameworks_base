@@ -48,6 +48,7 @@ public final class XmlTags {
 
     // For committer
     public static final String TAG_COMMITTER = "c";
+    public static final String ATTR_COMMIT_TIME_MS = "cmt";
 
     // For leasee
     public static final String TAG_LEASEE = "l";

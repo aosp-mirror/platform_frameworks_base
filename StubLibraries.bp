@@ -256,18 +256,16 @@ droidstubs {
 /////////////////////////////////////////////////////////////////////
 
 java_defaults {
-    name: "framework-stubs-default",
+    name: "android_defaults_stubs_current",
     libs: [ "stub-annotations" ],
     static_libs: [ "private-stub-annotations-jar" ],
-    sdk_version: "core_current",
     errorprone: {
         javacflags: [
             "-XepDisableAllChecks",
         ],
     },
-    java_resources: [
-        ":notices-for-framework-stubs",
-    ],
+    java_resources: [":notices-for-framework-stubs"],
+    sdk_version: "none",
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,
@@ -276,25 +274,25 @@ java_defaults {
 java_library_static {
     name: "android_stubs_current",
     srcs: [ ":api-stubs-docs" ],
-    defaults: ["framework-stubs-default"],
+    defaults: ["android_defaults_stubs_current"],
 }
 
 java_library_static {
     name: "android_system_stubs_current",
     srcs: [ ":system-api-stubs-docs" ],
-    defaults: ["framework-stubs-default"],
+    defaults: ["android_defaults_stubs_current"],
 }
 
 java_library_static {
     name: "android_test_stubs_current",
     srcs: [ ":test-api-stubs-docs" ],
-    defaults: ["framework-stubs-default"],
+    defaults: ["android_defaults_stubs_current"],
 }
 
 java_library_static {
     name: "android_module_lib_stubs_current",
     srcs: [ ":module-lib-api-stubs-docs" ],
-    defaults: ["framework-stubs-default"],
+    defaults: ["android_defaults_stubs_current"],
     libs: ["android_system_stubs_current"],
 }
 
