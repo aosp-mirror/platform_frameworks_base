@@ -26,6 +26,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
+import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -245,6 +246,44 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         // Verify that the stack was removed.
         assertEquals(originalStackCount, defaultTaskDisplayArea.getStackCount());
+    }
+
+    /**
+     * Verifies that removal of activities with task and stack is done correctly when there are
+     * several task display areas.
+     */
+    @Test
+    public void testRemovingStackOnAppCrash_multipleDisplayAreas() {
+        final TaskDisplayArea defaultTaskDisplayArea = mRootWindowContainer
+                .getDefaultTaskDisplayArea();
+        final int originalStackCount = defaultTaskDisplayArea.getStackCount();
+        final ActivityStack stack = defaultTaskDisplayArea.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(stack).build();
+        assertEquals(originalStackCount + 1, defaultTaskDisplayArea.getStackCount());
+
+        final DisplayContent dc = defaultTaskDisplayArea.getDisplayContent();
+        doReturn(2).when(dc).getTaskDisplayAreaCount();
+        final TaskDisplayArea secondTaskDisplayArea = new TaskDisplayArea(dc,
+                mRootWindowContainer.mWmService, "SecondaryTaskDisplayArea", FEATURE_VENDOR_FIRST);
+        // Add second display area right above the default one
+        defaultTaskDisplayArea.getParent().addChild(secondTaskDisplayArea,
+                defaultTaskDisplayArea.getParent().mChildren.indexOf(defaultTaskDisplayArea) + 1);
+        doReturn(secondTaskDisplayArea).when(dc).getTaskDisplayAreaAt(1);
+        final ActivityStack secondStack = secondTaskDisplayArea.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        new ActivityBuilder(mService).setCreateTask(true).setStack(secondStack)
+                .setUseProcess(firstActivity.app).build();
+        assertEquals(1, secondTaskDisplayArea.getStackCount());
+
+        // Let's pretend that the app has crashed.
+        firstActivity.app.setThread(null);
+        mRootWindowContainer.finishTopCrashedActivities(firstActivity.app, "test");
+
+        // Verify that the stacks were removed.
+        assertEquals(originalStackCount, defaultTaskDisplayArea.getStackCount());
+        assertEquals(0, secondTaskDisplayArea.getStackCount());
     }
 
     @Test
