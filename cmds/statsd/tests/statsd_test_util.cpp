@@ -324,40 +324,29 @@ State CreateOverlayState() {
     return state;
 }
 
-State CreateScreenStateWithOnOffMap() {
+State CreateScreenStateWithOnOffMap(int64_t screenOnId, int64_t screenOffId) {
     State state;
     state.set_id(StringToId("ScreenStateOnOff"));
     state.set_atom_id(util::SCREEN_STATE_CHANGED);
 
-    auto map = CreateScreenStateOnOffMap();
+    auto map = CreateScreenStateOnOffMap(screenOnId, screenOffId);
     *state.mutable_map() = map;
 
     return state;
 }
 
-State CreateScreenStateWithInDozeMap() {
-    State state;
-    state.set_id(StringToId("ScreenStateInDoze"));
-    state.set_atom_id(util::SCREEN_STATE_CHANGED);
-
-    auto map = CreateScreenStateInDozeMap();
-    *state.mutable_map() = map;
-
-    return state;
-}
-
-StateMap_StateGroup CreateScreenStateOnGroup() {
+StateMap_StateGroup CreateScreenStateOnGroup(int64_t screenOnId) {
     StateMap_StateGroup group;
-    group.set_group_id(StringToId("SCREEN_ON"));
+    group.set_group_id(screenOnId);
     group.add_value(2);
     group.add_value(5);
     group.add_value(6);
     return group;
 }
 
-StateMap_StateGroup CreateScreenStateOffGroup() {
+StateMap_StateGroup CreateScreenStateOffGroup(int64_t screenOffId) {
     StateMap_StateGroup group;
-    group.set_group_id(StringToId("SCREEN_OFF"));
+    group.set_group_id(screenOffId);
     group.add_value(0);
     group.add_value(1);
     group.add_value(3);
@@ -365,36 +354,10 @@ StateMap_StateGroup CreateScreenStateOffGroup() {
     return group;
 }
 
-StateMap CreateScreenStateOnOffMap() {
+StateMap CreateScreenStateOnOffMap(int64_t screenOnId, int64_t screenOffId) {
     StateMap map;
-    *map.add_group() = CreateScreenStateOnGroup();
-    *map.add_group() = CreateScreenStateOffGroup();
-    return map;
-}
-
-StateMap_StateGroup CreateScreenStateInDozeGroup() {
-    StateMap_StateGroup group;
-    group.set_group_id(StringToId("SCREEN_DOZE"));
-    group.add_value(3);
-    group.add_value(4);
-    return group;
-}
-
-StateMap_StateGroup CreateScreenStateNotDozeGroup() {
-    StateMap_StateGroup group;
-    group.set_group_id(StringToId("SCREEN_NOT_DOZE"));
-    group.add_value(0);
-    group.add_value(1);
-    group.add_value(2);
-    group.add_value(5);
-    group.add_value(6);
-    return group;
-}
-
-StateMap CreateScreenStateInDozeMap() {
-    StateMap map;
-    *map.add_group() = CreateScreenStateInDozeGroup();
-    *map.add_group() = CreateScreenStateNotDozeGroup();
+    *map.add_group() = CreateScreenStateOnGroup(screenOnId);
+    *map.add_group() = CreateScreenStateOffGroup(screenOffId);
     return map;
 }
 
@@ -1038,6 +1001,27 @@ bool EqualsTo(const DimensionsValue& s1, const DimensionsValue& s2) {
     }
 }
 
+bool LessThan(const google::protobuf::RepeatedPtrField<StateValue>& s1,
+              const google::protobuf::RepeatedPtrField<StateValue>& s2) {
+    if (s1.size() != s2.size()) {
+        return s1.size() < s2.size();
+    }
+    for (int i = 0; i < s1.size(); i++) {
+        const StateValue& state1 = s1[i];
+        const StateValue& state2 = s2[i];
+        if (state1.atom_id() != state2.atom_id()) {
+            return state1.atom_id() < state2.atom_id();
+        }
+        if (state1.value() != state2.value()) {
+            return state1.value() < state2.value();
+        }
+        if (state1.group_id() != state2.group_id()) {
+            return state1.group_id() < state2.group_id();
+        }
+    }
+    return false;
+}
+
 bool LessThan(const DimensionsValue& s1, const DimensionsValue& s2) {
     if (s1.field() != s2.field()) {
         return s1.field() < s2.field();
@@ -1086,7 +1070,7 @@ bool LessThan(const DimensionsPair& s1, const DimensionsPair& s2) {
         return false;
     }
 
-    return LessThan(s1.dimInCondition, s2.dimInCondition);
+    return LessThan(s1.stateValues, s2.stateValues);
 }
 
 void backfillStringInDimension(const std::map<uint64_t, string>& str_map,

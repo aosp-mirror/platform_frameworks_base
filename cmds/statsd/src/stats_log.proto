@@ -181,11 +181,14 @@ message GaugeBucketInfo {
 message GaugeMetricData {
   optional DimensionsValue dimensions_in_what = 1;
 
-  optional DimensionsValue dimensions_in_condition = 2 [deprecated = true];
+  // Currently unsupported
+  repeated StateValue slice_by_state = 6;
 
   repeated GaugeBucketInfo bucket_info = 3;
 
   repeated DimensionsValue dimension_leaf_values_in_what = 4;
+
+  optional DimensionsValue dimensions_in_condition = 2 [deprecated = true];
 
   repeated DimensionsValue dimension_leaf_values_in_condition = 5 [deprecated = true];
 }
