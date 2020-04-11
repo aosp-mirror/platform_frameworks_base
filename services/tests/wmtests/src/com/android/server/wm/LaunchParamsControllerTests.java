@@ -23,12 +23,14 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
@@ -54,6 +56,7 @@ import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Map;
 
@@ -65,6 +68,7 @@ import java.util.Map;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class LaunchParamsControllerTests extends ActivityTestsBase {
     private LaunchParamsController mController;
     private TestLaunchParamsPersister mPersister;
@@ -276,16 +280,21 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
     @Test
     public void testLayoutTaskPreferredDisplayChange() {
         final LaunchParams params = new LaunchParams();
-        params.mPreferredDisplayId = 2;
+        final TestDisplayContent display = createNewDisplayContent();
+        final TaskDisplayArea preferredTaskDisplayArea = display.getDefaultTaskDisplayArea();
+        // TODO(b/152116619): Enable after complete switch to WindowContainerToken
+        //params.mPreferredWindowContainerToken = preferredTaskDisplayAreaToken;
+        params.mPreferredDisplayId = display.mDisplayId;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
         final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
-        doNothing().when(mService).moveStackToDisplay(anyInt(), anyInt());
+        doNothing().when(mRootWindowContainer).moveStackToTaskDisplayArea(anyInt(), any(),
+                anyBoolean());
         mController.layoutTask(task, null /* windowLayout */);
-        verify(mService, times(1)).moveStackToDisplay(eq(task.getRootTaskId()),
-                eq(params.mPreferredDisplayId));
+        verify(mRootWindowContainer, times(1)).moveStackToTaskDisplayArea(eq(task.getRootTaskId()),
+                eq(preferredTaskDisplayArea), anyBoolean());
     }
 
     /**
@@ -451,5 +460,15 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
                 params.set(paramsRecord);
             }
         }
+    }
+
+    private TestDisplayContent createNewDisplayContent() {
+        final TestDisplayContent display = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+        spyOn(display.mDisplayContent.mDisplayFrames);
+
+        // We didn't set up the overall environment for this test, so we need to mute the side
+        // effect of layout passes that loosen the stable frame.
+        doNothing().when(display.mDisplayContent.mDisplayFrames).onBeginLayout();
+        return display;
     }
 }

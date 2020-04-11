@@ -24,6 +24,7 @@ import android.content.Context;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedControllerImpl;
+import com.android.systemui.car.keyguard.CarKeyguardViewController;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
@@ -105,12 +106,11 @@ public abstract class CarSystemUIModule {
 
     @Binds
     @Singleton
-    public abstract BatteryController provideBatteryController(
-            BatteryControllerImpl controllerImpl);
+    public abstract BatteryController bindBatteryController(BatteryControllerImpl controllerImpl);
 
     @Binds
     @Singleton
-    public abstract QSFactory provideQSFactory(QSFactoryImpl qsFactoryImpl);
+    public abstract QSFactory bindQSFactory(QSFactoryImpl qsFactoryImpl);
 
     @Binds
     abstract DockManager bindDockManager(DockManagerImpl dockManager);
@@ -146,7 +146,7 @@ public abstract class CarSystemUIModule {
 
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(
-            CarStatusBarKeyguardViewManager keyguardViewManager);
+            CarKeyguardViewController carKeyguardViewController);
 
     @Binds
     abstract DeviceProvisionedController bindDeviceProvisionedController(

@@ -28,7 +28,6 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_CURRENT;
 import static android.telecom.TelecomManager.EMERGENCY_DIALER_COMPONENT;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
@@ -619,7 +618,8 @@ public class LockTaskController {
             }
         } else if (lockTaskModeState != LOCK_TASK_MODE_NONE) {
             mSupervisor.handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
-                    DEFAULT_DISPLAY, task.getStack(), true /* forceNonResizable */);
+                    mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea(),
+                    task.getStack(), true /* forceNonResizable */);
         }
     }
 
