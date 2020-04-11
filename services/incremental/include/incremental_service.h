@@ -24,7 +24,7 @@ __BEGIN_DECLS
 
 #define INCREMENTAL_LIBRARY_NAME "service.incremental.so"
 
-jlong Incremental_IncrementalService_Start();
+jlong Incremental_IncrementalService_Start(JNIEnv* env);
 void Incremental_IncrementalService_OnSystemReady(jlong self);
 void Incremental_IncrementalService_OnDump(jlong self, jint fd);
 

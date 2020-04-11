@@ -480,4 +480,18 @@ public final class IncrementalStorage {
             return false;
         }
     }
+
+    /**
+     * Waits for all native binary extraction operations to complete on the storage.
+     *
+     * @return Success of not.
+     */
+    public boolean waitForNativeBinariesExtraction() {
+        try {
+            return mService.waitForNativeBinariesExtraction(mId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
 }
