@@ -45,10 +45,10 @@ public class AutoTileManager {
     public static final String NIGHT = "night";
     public static final String CAST = "cast";
 
-    private final Context mContext;
-    private final QSTileHost mHost;
-    private final Handler mHandler;
-    private final AutoAddTracker mAutoTracker;
+    protected final Context mContext;
+    protected final QSTileHost mHost;
+    protected final Handler mHandler;
+    protected final AutoAddTracker mAutoTracker;
     private final HotspotController mHotspotController;
     private final DataSaverController mDataSaverController;
     private final ManagedProfileController mManagedProfileController;
