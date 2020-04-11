@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2020 The Android Open Source Project
   ~
@@ -15,7 +14,7 @@
   ~ limitations under the License.
   -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Flower icon overlay -->
-    <string name="icon_shape_flower_overlay" translatable="false">Flower</string>
+    <!-- Tapered rect icon overlay -->
+    <string name="icon_shape_tapered_rect_overlay" translatable="false">Tapered Rect</string>
 
 </resources>
