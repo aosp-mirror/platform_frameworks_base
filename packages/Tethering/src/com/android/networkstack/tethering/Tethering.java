@@ -2289,7 +2289,7 @@ public class Tethering {
         final TetherState tetherState = new TetherState(
                 new IpServer(iface, mLooper, interfaceType, mLog, mNetd,
                              makeControlCallback(), mConfig.enableLegacyDhcpServer,
-                             mDeps.getIpServerDependencies()));
+                             mConfig.enableBpfOffload, mDeps.getIpServerDependencies()));
         mTetherStates.put(iface, tetherState);
         tetherState.ipServer.start();
     }
