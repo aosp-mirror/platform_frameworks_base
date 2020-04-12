@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.NETWORK_STACK;
@@ -60,7 +60,7 @@ import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLED;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-import static com.android.server.connectivity.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE;
+import static com.android.networkstack.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE;
 
 import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothAdapter;

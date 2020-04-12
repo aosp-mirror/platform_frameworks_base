@@ -87,7 +87,7 @@
                         TYPE_MOBILE_HIPRI is appended.
 
          For other changes applied to this list, now and in the future, see
-         com.android.server.connectivity.tethering.TetheringConfiguration.
+         com.android.networkstack.tethering.TetheringConfiguration.
 
          Note also: the order of this is important. The first upstream type
          for which a satisfying network exists is used.
