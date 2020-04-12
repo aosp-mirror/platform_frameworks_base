@@ -622,6 +622,16 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        if (route.isSystemRoute() && !routerRecord.mHasModifyAudioRoutingPermission
+                && !TextUtils.equals(route.getId(),
+                routerRecord.mUserRecord.mHandler.mSystemProvider.getDefaultRoute().getId())) {
+            Slog.w(TAG, "MODIFY_AUDIO_ROUTING permission is required to transfer to"
+                    + route);
+            routerRecord.mUserRecord.mHandler.notifySessionCreationFailedToRouter(
+                    routerRecord, requestId);
+            return;
+        }
+
         long uniqueRequestId = toUniqueRequestId(routerRecord.mRouterId, requestId);
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::requestCreateSessionOnHandler,
@@ -1268,15 +1278,6 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 Slog.w(TAG, "Ignoring session creation request since no provider found for"
                         + " given route=" + route);
-                notifySessionCreationFailedToRouter(routerRecord,
-                        toOriginalRequestId(uniqueRequestId));
-                return;
-            }
-            if (route.isSystemRoute() && !routerRecord.mHasModifyAudioRoutingPermission
-                    && !TextUtils.equals(route.getId(),
-                            mSystemProvider.getDefaultRoute().getId())) {
-                Slog.w(TAG, "MODIFY_AUDIO_ROUTING permission is required to transfer to"
-                        + route);
                 notifySessionCreationFailedToRouter(routerRecord,
                         toOriginalRequestId(uniqueRequestId));
                 return;
