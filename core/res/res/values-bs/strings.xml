@@ -287,7 +287,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"pristupa lokaciji ovog uređaja"</string>
     <string name="permgrouprequest_location" msgid="5261379525646615507">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi lokaciji ovog uređaja?"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"Aplikacija će imati pristup lokaciji isključivo dok je koristite"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup lokaciji uređaja &lt;b&gt;sve vrijeme&lt;/b&gt;?"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupa lokaciji uređaja &lt;b&gt;sve vrijeme&lt;/b&gt;?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Aplikacija trenutno može pristupati lokaciji isključivo dok je koristite"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"pristupa vašem kalendaru"</string>
@@ -505,7 +505,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Omogućava aplikaciji uspostavljanje i prekidanje veze tableta sa WiMAX mrežama."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6876948244710106021">"Dozvoljava aplikaciji da TV poveže na WiMAX mreže ili da ga isključi s njih."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Omogućava aplikaciji uspostavljanje i prekidanje veze telefona sa WiMAX mrežama."</string>
-    <string name="permlab_bluetooth" msgid="586333280736937209">"uparivanje sa Bluetooth uređajima"</string>
+    <string name="permlab_bluetooth" msgid="586333280736937209">"uparivanje s Bluetooth uređajima"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Omogućava aplikaciji prikaz konfiguracije za Bluetooth na tabletu, kao i uspostavljanje i prihvatanje veza sa uparenim uređajima."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3546625329740068213">"Dozvoljava aplikaciji prikaz konfiguracije Bluetooth veze na TV-u te uspostavljanje i prihvatanje veza s ravnopravnim uređajima."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Omogućava aplikaciji prikaz konfiguracije za Bluetooth na telefonu, kao i uspostavljanje i prihvatanje veza sa uparenim uređajima."</string>
@@ -535,7 +535,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nije prepoznato"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentifikacija je otkazana"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nije postavljen PIN, uzorak niti lozinka"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Otkriven je djelomičan otisak prsta. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Otkriven je djelomični otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Obrada otiska prsta nije uspjela. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Senzor za otisak prsta je prljav. Očistite ga i pokušajte ponovo."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Prst je uklonjen prebrzo. Pokušajte ponovo."</string>
@@ -690,7 +690,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Isključuje kamere"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Sprečava korištenje svih kamera uređaja."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Onemog. neke funk. zak. ekrana"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Spriječava korištenje nekih funkcija za zaključavanje ekrana."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Sprečava korištenje nekih funkcija za zaključavanje ekrana."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Kuća"</item>
     <item msgid="7740243458912727194">"Mobilni"</item>
@@ -1213,7 +1213,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Uvijek prikaži"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je napravljena za verziju operativnog sistema Android koja nije kompatibilna i može se ponašati neočekivano. Ažurirana verzija aplikacije može biti dostupna."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Uvijek prikaži"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Provjeri ima li ažuriranja"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Provjeri je li dostupno ažuriranje"</string>
     <string name="smv_application" msgid="3775183542777792638">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) prekršila je vlastita StrictMode pravila."</string>
     <string name="smv_process" msgid="1398801497130695446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> prekršio je vlastita StrictMode pravila."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Ažuriranje telefona…"</string>
@@ -1590,7 +1590,7 @@
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB disk"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB pohrana"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Uredi"</string>
-    <string name="data_usage_warning_title" msgid="9034893717078325845">"Upozorenje o potrošnji podataka"</string>
+    <string name="data_usage_warning_title" msgid="9034893717078325845">"Upozorenje o prijenosu podataka"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"Potrošili ste <xliff:g id="APP">%s</xliff:g> podataka"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Dostignuto ograničenje za prijenos podataka"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Dostignut limit WiFi podataka"</string>

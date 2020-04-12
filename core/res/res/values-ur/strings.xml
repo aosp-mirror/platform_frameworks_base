@@ -686,8 +686,8 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"مطالبہ کریں کہ اسٹور کردہ ایپ کا ڈیٹا مرموز کیا جائے۔"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"کیمروں کو غیر فعال کریں"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"سبھی آلے کے کیمروں کا استعمال روکیں۔"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"کچھ سکرین قفل خصوصیات غیر فعال کریں"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"اسکرین قفل کی کچھ خصوصیات کے استعمال کو روکیں۔"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"کچھ اسکرین لاک خصوصیات غیرفعال کریں"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"اسکرین لاک کی کچھ خصوصیات کے استعمال کو روکیں۔"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"گھر"</item>
     <item msgid="7740243458912727194">"موبائل"</item>

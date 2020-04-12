@@ -294,7 +294,7 @@
     <string name="permgrouprequest_sms" msgid="3985338150822482831">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; gửi và xem tin nhắn SMS?"</string>
     <string name="permgrouplab_storage" msgid="1121695277384787841">"Bộ nhớ"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"truy cập ảnh, phương tiện và tệp trên thiết bị của bạn"</string>
-    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào ảnh, phương tiện và tệp trên thiết bị của bạn?"</string>
+    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào ảnh, nội dung nghe nhìn và tệp trên thiết bị của bạn?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrô"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ghi âm"</string>
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ghi âm?"</string>
@@ -1360,7 +1360,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Đang sạc thiết bị được kết nối qua USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Đã bật truyền tệp qua USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Đã bật chế độ PTP qua USB"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Đã bật chia sẻ kết nối qua USB"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Đã bật tính năng chia sẻ Internet qua USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Đã bật chế độ MIDI qua USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Đã kết nối phụ kiện USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Nhấn để biết thêm tùy chọn."</string>
@@ -1489,9 +1489,9 @@
     <string name="submit" msgid="862795280643405865">"Gửi"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Ứng dụng lái xe đang chạy"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Nhấn để thoát khỏi ứng dụng lái xe."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Chức năng điểm truy cập Internet hoặc điểm phát sóng đang hoạt động"</string>
+    <string name="tethered_notification_title" msgid="2700523927485687353">"Tính năng chia sẻ Internet hoặc điểm phát sóng đang hoạt động"</string>
     <string name="tethered_notification_message" msgid="6228080755828019453">"Nhấn để thiết lập."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Đã tắt tính năng chia sẻ kết nối"</string>
+    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Đã tắt tính năng chia sẻ Internet"</string>
     <string name="disable_tether_notification_message" msgid="98281313984014775">"Hãy liên hệ với quản trị viên của bạn để biết chi tiết"</string>
     <string name="back_button_label" msgid="4078224038025043387">"Quay lại"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Tiếp theo"</string>
@@ -1630,7 +1630,7 @@
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", an toàn"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Đã quên hình"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"Hình không chính xác"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"Hình mở khóa không chính xác"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Mật khẩu sai"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN sai"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">

@@ -689,7 +689,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Zahteva da sačuvani podaci aplikacije budu šifrovani."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Onemogućavanje kamera"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Sprečite korišćenje svih kamera uređaja."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Onemogućava funkcije zaključavanja ekrana"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Onemogućavanje funkcija zaklj. ekrana"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Sprečava korišćenje nekih funkcija zaključavanja ekrana."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Kuća"</item>

@@ -669,7 +669,7 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"ប្តូរការចាក់សោអេក្រង់"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ប្តូរការចាក់សោអេក្រង់។"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"ចាក់សោ​អេក្រង់"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"ពិនិត្យ​វិធី និង​ពេលវេលា​ចាក់សោ​អេក្រង់។"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"គ្រប់គ្រងវិធី និង​ពេលវេលា​ចាក់សោ​អេក្រង់។"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"លុប​ទិន្នន័យ​ទាំង​អស់"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"លុប​ទិន្នន័យ​កុំព្យូទ័រ​បន្ទះ​ដោយ​មិន​​ព្រមាន​ដោយ​អនុវត្ត​ការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
     <string name="policydesc_wipeData" product="tv" msgid="8755409895408717659">"លុបទិន្នន័យរបស់ទូរទស្សន៍ដោយមិនចាំបាច់ព្រមានដោយការប្រតិបត្តិការកំណត់ឡើងវិញទាំងស្រុង។"</string>

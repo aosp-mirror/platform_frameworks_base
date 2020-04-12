@@ -669,11 +669,11 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"Tukar kunci skrin"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Tukar kunci skrin."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Kunci skrin"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Mengawal cara dan masa skrin dikunci."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Kawal cara dan masa skrin dikunci."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Padamkan semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Memadamkan data tablet tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="tv" msgid="8755409895408717659">"Padam data TV tanpa amaran dengan melakukan tetapan semula data kilang."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Memadamkan data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Padamkan data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Padam data pengguna"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Padam data pengguna ini pada tablet ini tanpa amaran."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="7310266499158746034">"Padam data pengguna ini pada TV ini tanpa amaran."</string>

@@ -668,7 +668,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"സ്‌ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ പാസ്‌വേഡ് ടൈപ്പുചെയ്‌തെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഈ എല്ലാ ഉപയോക്തൃവിവരവും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"സ്‌ക്രീൻ ലോക്ക് മാറ്റുക"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"സ്‌ക്രീൻ ലോക്ക് മാറ്റുക."</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"സ്‌ക്രീൻ ലോക്കുചെയ്യുക"</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"സ്‌ക്രീൻ ലോക്ക് ചെയ്യുക"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"സ്‌ക്രീൻ ലോക്കുകൾ എങ്ങനെ വേണമെന്നും എപ്പോൾ വേണമെന്നും എന്നത് നിയന്ത്രിക്കുക"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"എല്ലാ ഡാറ്റയും മായ്ക്കുക"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ഒരു ഫാക്‌ടറി ഡാറ്റ പുനഃസജ്ജീകരണം നടപ്പിലാക്കുന്നതിലൂടെ ടാബ്‌ലെറ്റിന്റെ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
@@ -1305,7 +1305,7 @@
     <string name="wifi_connect_alert_title" msgid="2377999802455909057">"കണക്ഷൻ അനുവദിക്കണോ?"</string>
     <string name="wifi_connect_alert_message" msgid="169228218944976720">"അപ്ലിക്കേഷൻ %1$s Wifi നെറ്റ്‌വർക്കിലേക്ക് കണക്‌റ്റുചെയ്യാൻ താൽപ്പര്യപ്പെടുന്നു %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7577787709633050605">"ഒരു അപ്ലിക്കേഷൻ"</string>
-    <string name="wifi_p2p_dialog_title" msgid="6334579064086920198">"വൈഫൈ ഡയറക്‌ട്"</string>
+    <string name="wifi_p2p_dialog_title" msgid="6334579064086920198">"Wi-Fi ഡയറക്‌ട്"</string>
     <string name="wifi_p2p_turnon_message" msgid="804818801818052402">"വൈഫൈ ഡയറക്റ്റ് ആരംഭിക്കുക. ഇത് വൈഫൈ ക്ലയന്റ്/ഹോട്ട്‌സ്‌പോട്ട് ഓഫാക്കും."</string>
     <string name="wifi_p2p_failed_message" msgid="6296397512378755690">"വൈഫൈ ഡയറക്റ്റ് ആരംഭിക്കാനായില്ല."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="9128862563403191596">"വൈഫൈ ഡയറക്‌ട് ഓണാണ്"</string>

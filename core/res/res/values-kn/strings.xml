@@ -1630,7 +1630,7 @@
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", ಸುರಕ್ಷಿತ"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ಮರೆತಿರುವಿರಿ"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"ತಪ್ಪು ಪ್ಯಾಟರ್ನ್"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"ಪ್ಯಾಟರ್ನ್ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"ತಪ್ಪು ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"ತಪ್ಪಾದ ಪಿನ್‌"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">

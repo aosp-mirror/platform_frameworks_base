@@ -279,40 +279,40 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Mudar para o perfil de trabalho"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contactos"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"aceder aos contactos"</string>
-    <string name="permgrouprequest_contacts" msgid="7755354139254094668">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda aos seus contactos?"</string>
+    <string name="permgrouprequest_contacts" msgid="7755354139254094668">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda aos seus contactos?"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Localização"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"aceder à localização do seu dispositivo"</string>
-    <string name="permgrouprequest_location" msgid="5261379525646615507">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda à localização deste dispositivo?"</string>
+    <string name="permgrouprequest_location" msgid="5261379525646615507">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda à localização deste dispositivo?"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"A aplicação tem acesso à localização apenas enquanto a estiver a utilizar"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda &lt;b&gt;sempre&lt;/b&gt; à localização deste dispositivo?"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda &lt;b&gt;sempre&lt;/b&gt; à localização deste dispositivo?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Atualmente, a aplicação pode aceder à localização apenas enquanto estiver a ser utilizada"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendário"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"aceder ao calendário"</string>
-    <string name="permgrouprequest_calendar" msgid="2680538977344557840">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda ao calendário?"</string>
+    <string name="permgrouprequest_calendar" msgid="2680538977344557840">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda ao calendário?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar e ver mensagens SMS"</string>
-    <string name="permgrouprequest_sms" msgid="3985338150822482831">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; envie e veja mensagens SMS?"</string>
+    <string name="permgrouprequest_sms" msgid="3985338150822482831">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; envie e veja mensagens SMS?"</string>
     <string name="permgrouplab_storage" msgid="1121695277384787841">"Armazenamento"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"aceder a fotos, multimédia e ficheiros no dispositivo"</string>
-    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda a fotos, multimédia e ficheiros no dispositivo?"</string>
+    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda a fotos, multimédia e ficheiros no dispositivo?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfone"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar áudio"</string>
-    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; grave áudio?"</string>
+    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; grave áudio?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Atividade física"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"aceder à sua atividade física"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda à sua atividade física?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda à sua atividade física?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Câmara"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"tirar fotos e gravar vídeos"</string>
-    <string name="permgrouprequest_camera" msgid="2697305443703328372">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tire fotos e grave vídeo?"</string>
+    <string name="permgrouprequest_camera" msgid="2697305443703328372">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tire fotos e grave vídeo?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registos de chamadas"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ler e escrever o registo de chamadas do telemóvel"</string>
-    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda aos registos de chamadas do seu telemóvel?"</string>
+    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda aos registos de chamadas do seu telemóvel?"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telemóvel"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"fazer e gerir chamadas"</string>
-    <string name="permgrouprequest_phone" msgid="6430085454721364373">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faça e gira chamadas telefónicas?"</string>
+    <string name="permgrouprequest_phone" msgid="6430085454721364373">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faça e gira chamadas telefónicas?"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensores de corpo"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"aceder a dados do sensor acerca dos seus sinais vitais"</string>
-    <string name="permgrouprequest_sensors" msgid="2431000833343586816">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda aos dados do sensor acerca dos seus sinais vitais?"</string>
+    <string name="permgrouprequest_sensors" msgid="2431000833343586816">"Permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda aos dados do sensor acerca dos seus sinais vitais?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Obter conteúdo da janela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecionar o conteúdo de uma janela com a qual está a interagir."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Ativar Explorar Através do Toque"</string>
@@ -1191,7 +1191,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostrar sempre"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"A aplicação <xliff:g id="APP_NAME">%1$s</xliff:g> foi concebida para uma versão incompatível do SO Android e pode ter um comportamento inesperado. Pode estar disponível uma versão atualizada da aplicação."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Mostrar sempre"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Verificar se existem atualizações"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Verificar atualizações"</string>
     <string name="smv_application" msgid="3775183542777792638">"A aplicação <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) violou a política StrictMode auto-imposta."</string>
     <string name="smv_process" msgid="1398801497130695446">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> violou a política StrictMode auto-imposta."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"O telemóvel está a atualizar…"</string>
@@ -1268,7 +1268,7 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3555247614042954032">"Toque para ver todas as redes"</string>
     <string name="wifi_available_action_connect" msgid="924369499736631716">"Ligar"</string>
     <string name="wifi_available_action_all_networks" msgid="7759049005868147147">"Todas as redes"</string>
-    <string name="wifi_suggestion_title" msgid="5041459385180298879">"Pretende permitir redes Wi-Fi sugeridas?"</string>
+    <string name="wifi_suggestion_title" msgid="5041459385180298879">"Permitir redes Wi-Fi sugeridas?"</string>
     <string name="wifi_suggestion_content" msgid="477311057093517127">"Redes sugeridas por <xliff:g id="NAME">%s</xliff:g>. O dispositivo pode estabelecer ligação automaticamente."</string>
     <string name="wifi_suggestion_action_allow_app" msgid="6292456946562368121">"Permitir"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="5544497236277666556">"Não, obrigado"</string>
@@ -1901,8 +1901,8 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Sem categoria"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Definiu a importância destas notificações."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"É importante devido às pessoas envolvidas."</string>
-    <string name="user_creation_account_exists" msgid="2239146360099708035">"Pretende permitir que a aplicação <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com a conta <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um utilizador com esta conta)?"</string>
-    <string name="user_creation_adding" msgid="7305185499667958364">"Pretende permitir que a aplicação <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com a conta <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="user_creation_account_exists" msgid="2239146360099708035">"Permitir que a aplicação <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com a conta <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um utilizador com esta conta)?"</string>
+    <string name="user_creation_adding" msgid="7305185499667958364">"Permitir que a aplicação <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com a conta <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Adicionar um idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferência de região"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Intr. nome do idioma"</string>
@@ -1917,7 +1917,7 @@
     <string name="work_mode_off_message" msgid="8417484421098563803">"As aplicações de trabalho, as notificações, os dados e outras funcionalidades do perfil de trabalho serão desativados"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ativar"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Esta aplicação foi concebida para uma versão mais antiga do Android e pode não funcionar corretamente. Experimente verificar se existem atualizações ou contacte o programador."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Verificar se existem atualizações"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Verificar atualizações"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tem mensagens novas"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Abra a aplicação de SMS para ver"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Algumas funcionalidades limitadas"</string>

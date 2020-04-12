@@ -279,7 +279,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Жумуш профилине которулуу"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Байланыштар"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"байланыштарыңызды көрүүгө"</string>
-    <string name="permgrouprequest_contacts" msgid="7755354139254094668">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна байланыштарыңызды пайдаланууга уруксат берилсинби?"</string>
+    <string name="permgrouprequest_contacts" msgid="7755354139254094668">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна байланыштарыңызды пайдаланууга уруксат бересизби?"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Жайгашкан жер"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"түзмөктүн жайгашкан жерин аныктоого"</string>
     <string name="permgrouprequest_location" msgid="5261379525646615507">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосу бул түзмөктүн кайда жүргөнүн көрүп турсунбу?"</string>
@@ -288,7 +288,7 @@
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Колдонмону пайдаланып жаткан учурда гана ал жайгашкан жерди көрө алат"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Жылнаама"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"жылнаамаңызды пайдалануу"</string>
-    <string name="permgrouprequest_calendar" msgid="2680538977344557840">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна жылнаамаңызды пайдаланууга уруксат берилсинби?"</string>
+    <string name="permgrouprequest_calendar" msgid="2680538977344557840">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна жылнаамаңызды пайдаланууга уруксат бересизби?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS билдирүүлөрдү жиберүү жана көрсөтүү"</string>
     <string name="permgrouprequest_sms" msgid="3985338150822482831">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна SMS билдирүүлөрдү жөнөтүүгө жана окууга уруксат берилсинби?"</string>
@@ -297,7 +297,7 @@
     <string name="permgrouprequest_storage" msgid="1594774620878445266">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна түзмөгүңүздөгү сүрөттөрдү жана башка мультимедиа файлдарын пайдаланууга уруксат бересизби?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"аудио жаздыруу"</string>
-    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна аудио файлдарды жазганга уруксат бересизби?"</string>
+    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна аудио файлдарды жаздырганга уруксат бересизби?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Кыймыл-аракет"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"кыймыл-аракетиңизге мүмкүнчүлүк алат"</string>
     <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна кыймыл-аракетиңизге мүмкүнчүлүк бересизби?"</string>
@@ -306,7 +306,7 @@
     <string name="permgrouprequest_camera" msgid="2697305443703328372">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна сүрөттөр менен видеолорду тартканга уруксат бересизби?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Чалуулар тизмеси"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"телефондогу чалуулар тизмесин окуу жана жазуу"</string>
-    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна телефондогу чалуулар тизмесин пайдаланууга уруксат берилсинби?"</string>
+    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна телефондогу чалуулар тизмесин пайдаланууга уруксат бересизби?"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"телефон чалуу жана аларды башкаруу"</string>
     <string name="permgrouprequest_phone" msgid="6430085454721364373">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна телефон чалууга жана чалууларды башкарууга уруксат бересизби?"</string>
@@ -483,7 +483,7 @@
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"тармак туташымдуулугун өзгөртүү"</string>
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"Колдонмого тармактык туташуунун абалын өзгөртүү мүмкүнчүлүгүн берет."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"интернет бөлүшүү байланышын өзгөртүү"</string>
-    <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Колдонмого тетеринг тармактык туташуусунун абалын өзгөртүү мүмкүнчүлүгүн берет."</string>
+    <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Колдонмо модем режимин күйгүзүп, өчүрө алат."</string>
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"Wi-Fi туташууларын көрүү"</string>
     <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Колдонмого Wi-Fi жандырылгандыгы жана туташкан Wi-Fi түзмөктөрдүн аттары сыяктуу, Wi-Fi түйүндөрүнүн маалыматтарын көрүүгө уруксаты берет."</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"Wi-Fi менен туташуу жана ажыратуу"</string>
@@ -535,7 +535,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Манжа изи жарым-жартылай аныкталды. Кайталап көрүңүз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Манжа изи иштелбей койду. Кайталап көрүңүз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Манжа изинин сенсору кирдеп калган. Тазалап, кайталап көрүңүз."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Манжа өтө тез жылдырылды. Кайталап көрүңүз."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Манжаңызды өтө тез жылдырдыңыз. Кайталап көрүңүз."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Манжа өтө жай жылды. Кайталап көрүңүз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1489,9 +1489,9 @@
     <string name="submit" msgid="862795280643405865">"Тапшыруу"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Унаа айдоо колдонмосу иштеп жатат"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Унаа айдоо колдонмосунан чыгуу үчүн таптаңыз."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Жалгаштыруу же хотспот жандырылган"</string>
+    <string name="tethered_notification_title" msgid="2700523927485687353">"Модем режими күйүп турат"</string>
     <string name="tethered_notification_message" msgid="6228080755828019453">"Жөндөө үчүн таптап коюңуз."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Жалгаштыруу функциясы өчүрүлгөн"</string>
+    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Модем режими өчүк"</string>
     <string name="disable_tether_notification_message" msgid="98281313984014775">"Кеңири маалымат үчүн администраторуңузга кайрылыңыз"</string>
     <string name="back_button_label" msgid="4078224038025043387">"Артка"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Кийинки"</string>

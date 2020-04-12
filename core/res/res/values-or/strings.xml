@@ -379,7 +379,7 @@
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ଫୋର୍‌ଗ୍ରାଉଣ୍ଡ ସେବାଗୁଡ଼ିକୁ ବ୍ୟବହାର କରିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ଆପ୍‍ ଷ୍ଟୋରେଜ୍‍ ସ୍ଥାନର ମାପ କରନ୍ତୁ"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"ଆପ୍‍ର କୋଡ୍‍, ଡାଟା ଓ କ୍ୟାଶ୍‌ ଆକାର ହାସଲ କରିବା ପାଇଁ ଏହାକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"ସିଷ୍ଟମ୍‍ ସେଟିଙ୍ଗ ବଦଳାନ୍ତୁ"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"ସିଷ୍ଟମ୍‍ ସେଟିଂସ ବଦଳାନ୍ତୁ"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"ଆପ୍‍କୁ, ସିଷ୍ଟମର ସେଟିଙ୍ଗ ଡାଟା ବଦଳାଇବାକୁ ଦେଇଥାଏ। ହାନୀକାରକ ଆପ୍‍ ଦ୍ୱାରା ଆପଣଙ୍କ ସିଷ୍ଟମର କନଫିଗରେସନ୍‍ ଖରାପ ହୋଇପାରେ।"</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"ଆରମ୍ଭ ହେଲେ ଚଲାନ୍ତୁ"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"ସିଷ୍ଟମ୍‍ ବୁଟ୍ ଶେଷ ହେବା କ୍ଷଣି ଆପ୍‍ଟିକୁ ସ୍ୱତଃ ଆରମ୍ଭ ହେବାକୁ ଦେଇଥାଏ। ଏହା କାରଣରୁ ଟାବଲେଟଟ୍‌ଟି ଚାଲୁ ହେବାରେ ଅଧିକ ସମୟ ଲାଗିପାରେ ଏବଂ ଆପ୍‌ଟି ଲଗାତାର ଚାଲିବା ଦ୍ୱାରା ସମଗ୍ର ଟାବଲେଟଟ୍‌ ମନ୍ଥର ହୋଇଯାଇପାରେ।"</string>
@@ -1128,7 +1128,7 @@
     <string name="no" msgid="5122037903299899715">"କ୍ୟାନ୍ସଲ୍‍ କରନ୍ତୁ"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"ଧ୍ୟାନଦିଅନ୍ତୁ"</string>
     <string name="loading" msgid="3138021523725055037">"ଲୋଡ୍ କରାଯାଉଛି…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"ଅନ୍"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ଚାଲୁ"</string>
     <string name="capital_off" msgid="7443704171014626777">"ଅଫ୍"</string>
     <string name="whichApplication" msgid="5432266899591255759">"ବ୍ୟବହାର କରି କାର୍ଯ୍ୟ ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ବ୍ୟବହାର କରି କାର୍ଯ୍ୟ ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ"</string>
@@ -1178,7 +1178,7 @@
     <string name="anr_application_process" msgid="4978772139461676184">"<xliff:g id="APPLICATION">%1$s</xliff:g> କାମ କରୁନାହିଁ"</string>
     <string name="anr_process" msgid="1664277165911816067">"<xliff:g id="PROCESS">%1$s</xliff:g> ପ୍ରୋସେସ୍‍ କାମ କରୁନାହିଁ"</string>
     <string name="force_close" msgid="9035203496368973803">"ଠିକ୍‍ ଅଛି"</string>
-    <string name="report" msgid="2149194372340349521">"ରିପୋର୍ଟ"</string>
+    <string name="report" msgid="2149194372340349521">"ରିପୋର୍ଟ କରନ୍ତୁ"</string>
     <string name="wait" msgid="7765985809494033348">"ଅପେକ୍ଷା କରନ୍ତୁ"</string>
     <string name="webpage_unresponsive" msgid="7850879412195273433">"ଏହି ପୃଷ୍ଠାଟି ଚାଲୁନାହିଁ।\n\nଆପଣ ଏହାକୁ ବନ୍ଦ କରିବେ କି?"</string>
     <string name="launch_warning_title" msgid="6725456009564953595">"ଆପ୍‌କୁ ରିଡାଇରେକ୍ଟ କରାଗଲା"</string>
@@ -1295,7 +1295,7 @@
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"ମୋବାଇଲ୍‌ ଡାଟା"</item>
     <item msgid="5520925862115353992">"ୱାଇ-ଫାଇ"</item>
-    <item msgid="1055487873974272842">"ବ୍ଲୁଟୂଥ୍‍‌"</item>
+    <item msgid="1055487873974272842">"ବ୍ଲୁଟୁଥ"</item>
     <item msgid="1616528372438698248">"ଇଥରନେଟ୍‌"</item>
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
@@ -1802,7 +1802,7 @@
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ଦେଖାଯାଉଛି"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ବାହାରିବା ପାଇଁ, ଉପରୁ ତଳକୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ।"</string>
-    <string name="immersive_cling_positive" msgid="7047498036346489883">"ବୁଝିଲି"</string>
+    <string name="immersive_cling_positive" msgid="7047498036346489883">"ବୁଝିଗଲି"</string>
     <string name="done_label" msgid="7283767013231718521">"ହୋଇଗଲା"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ଘଣ୍ଟା ସର୍କୁଲାର୍‍ ସ୍ଲାଇଡର୍‍"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ମିନିଟ୍ସ ସର୍କୁଲାର୍‍ ସ୍ଲାଇଡର୍‍"</string>

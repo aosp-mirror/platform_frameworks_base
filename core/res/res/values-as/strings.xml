@@ -286,7 +286,7 @@
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"আপুনি এই এপ্ ব্যৱহাৰ কৰি থকাৰ সময়তহে ই আপোনাৰ অৱস্থান এক্সেছ কৰিব পাৰে"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&amp;gtক এই ডিভাইচটোৰ অৱস্থান &lt;b&gt;সকলো সময়তে&lt;/b&gt; এক্সেছ কৰিবলৈ দিবনে?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"আপুনি কোনো এপ্ ব্যৱহাৰ কৰি থকাৰ সময়তহে সেই এপ্‌টোৱে অৱস্থান এক্সেছ কৰিব পাৰিব"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"কেলেণ্ডাৰ"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপোনাৰ কেলেণ্ডাৰ ব্যৱহাৰ কৰিব পাৰে"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক আপোনাৰ কেলেণ্ডাৰ চাবলৈ অনুমতি দিবনে?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"এছএমএছ"</string>

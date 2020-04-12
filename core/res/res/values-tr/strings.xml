@@ -1272,7 +1272,7 @@
     <string name="wifi_suggestion_content" msgid="477311057093517127">"<xliff:g id="NAME">%s</xliff:g> tarafından önerilen ağlar. Cihaz otomatik olarak bağlanabilir."</string>
     <string name="wifi_suggestion_action_allow_app" msgid="6292456946562368121">"İzin ver"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="5544497236277666556">"Hayır, teşekkürler"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="2609831579583316922">"Kablosuz özelliği otomatik olarak açılacak"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="2609831579583316922">"Kablosuz ağ otomatik olarak açılacak"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="6802089127390267217">"Daha önce kaydedilmiş yüksek kaliteli bir ağın yakınında olduğunuzda"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="9093154721154555101">"Tekrar açılmasın"</string>
     <string name="wifi_wakeup_enabled_title" msgid="7983113075476310532">"Kablosuz ağ otomatik olarak açıldı"</string>

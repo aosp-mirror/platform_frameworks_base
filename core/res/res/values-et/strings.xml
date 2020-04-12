@@ -552,7 +552,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Proovige uuesti."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ühtegi sõrmejälge pole registreeritud."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Selles seadmes pole sõrmejäljeandurit."</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"Sõrm <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"Sõrmejälg <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Sõrmejälje ikoon"</string>
@@ -667,7 +667,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="1253625325967736219">"Jälgitakse ekraani avamisel sisestatud valede paroolide arvu ja lukustatakse teler või kustutatakse kõik selle kasutaja andmed, kui vale parool sisestatakse liiga palju kordi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Jälgitakse ekraani avamisel sisestatud valede paroolide arvu ja lukustatakse telefon või kustutatakse kõik selle kasutaja andmed, kui vale parool sisestatakse liiga palju kordi."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Ekraaniluku muutmine"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Muudetakse ekraanilukku."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Muutke ekraanilukku."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Ekraani lukustamine"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Määrake, kuidas ja millal ekraan lukustub."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Kõikide andmete kustutamine"</string>
@@ -1821,8 +1821,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administraator on seda värskendanud"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administraator on selle kustutanud"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Aku tööea pikendamiseks teeb akusäästja järgmist.\n·Lülitab sisse tumeda teema.\n·Lülitab välja akusäästja taustategevused, mõned visuaalsed efektid ja muud funktsioonid (nt „Hei Google”) või piirab neid.\n\n"<annotation id="url">"Lisateave"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Aku tööea pikendamiseks teeb akusäästja järgmist.\n·Lülitab sisse tumeda teema.\n·Lülitab välja akusäästja taustategevused, mõned visuaalsed efektid ja muud funktsioonid (nt „Hei Google”) või piirab neid."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Aku tööea pikendamiseks teeb akusäästja järgmist.\n·Lülitab sisse tumeda teema.\n·Lülitab välja taustategevused, mõned visuaalsed efektid ja muud funktsioonid (nt „Hei Google”) või piirab neid.\n\n"<annotation id="url">"Lisateave"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Aku tööea pikendamiseks teeb akusäästja järgmist.\n·Lülitab sisse tumeda teema.\n·Lülitab välja taustategevused, mõned visuaalsed efektid ja muud funktsioonid (nt „Hei Google”) või piirab neid."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Andmekasutuse vähendamiseks keelab andmemahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks pildid kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Lül. andmemahu säästja sisse?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Lülita sisse"</string>

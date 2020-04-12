@@ -556,7 +556,7 @@
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Preveč poskusov. Poskusite znova pozneje."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Preveč poskusov. Tipalo prstnih odtisov je onemogočeno."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Poskusite znova."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ni včlanjenih prstnih odtisov."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ni registriranih prstnih odtisov."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ta naprava nima tipala prstnih odtisov."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -567,8 +567,8 @@
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"uporaba strojne opreme za odklepanje z obrazom"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Aplikaciji omogoča uporabo strojne opreme za odklepanje z obrazom za preverj. pristnosti"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Odklepanje z obrazom"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Znova prijavite obraz"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Za izboljšanje prepoznavanja znova prijavite svoj obraz"</string>
+    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Znova registrirajte obraz"</string>
+    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Za izboljšanje prepoznavanja znova registrirajte svoj obraz"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Točnih podatkov o obrazu ni bilo mogoče zajeti. Poskusite znova."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Presvetlo. Poskusite z blažjo osvetlitvijo."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Pretemno. Poskusite z močnejšo osvetlitvijo."</string>
@@ -581,7 +581,7 @@
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Glejte bolj naravnost v napravo."</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Obraz nastavite naravnost pred telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Preveč se premikate. Držite telefon pri miru."</string>
-    <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Znova prijavite svoj obraz."</string>
+    <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Znova registrirajte svoj obraz."</string>
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Obraza ni več mogoče prepoznati. Poskusite znova."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Preveč podobno, spremenite položaj."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Glejte malce bolj naravnost."</string>
@@ -1621,7 +1621,7 @@
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Nastavljeno omejitev ste presegli za <xliff:g id="SIZE">%s</xliff:g>"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Podatki v ozadju so omejeni"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Dotaknite se za odstr. omejitve."</string>
-    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Visoka poraba mobilnih podatkov"</string>
+    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Velik prenos mobilnih podatkov"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Vaše aplikacije so porabile več podatkov kot običajno"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"Aplikacija <xliff:g id="APP">%s</xliff:g> je porabila več podatkov kot običajno"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Varnostno potrdilo"</string>
@@ -1873,7 +1873,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"V redu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Funkcija varčevanja z energijo baterije tako podaljša čas delovanja baterije:\n·Vklopi temno temo,\n·izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«.\n\n"<annotation id="url">"Več o tem"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Funkcija varčevanja z energijo baterije tako podaljša čas delovanja baterije:\n·Vklopi temno temo,\n·izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov varčevanje s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vklop varčevanja s podatki?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Vklop"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2087,7 +2087,7 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutinsko informativno obvestilo o načinu delovanja"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulator se bo morda izpraznil, preden ga običajno priključite na polnjenje"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Vklopilo se je varčevanje z energijo akumulatorja za podaljšanje časa delovanja akumulatorja"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Varčevanje z energijo akumulatorja"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Varčevanje z energijo baterije"</string>
     <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Varčevanje z energijo akumulatorja se ne bo znova aktiviralo, dokler akumulator ne bo znova skoraj prazen"</string>
     <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Akumulator je dovolj napolnjen. Varčevanje z energijo akumulatorja se ne bo znova aktiviralo, dokler akumulator ne bo znova skoraj prazen."</string>
     <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Napolnjenost telefona: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>

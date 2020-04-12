@@ -274,7 +274,7 @@
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ਬੈਟਰੀ ਅਤੇ ਡਾਟਾ ਵਰਤੋਂ ਸਬੰਧੀ ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"ਸੁਰੱਖਿਅਤ ਮੋਡ"</string>
-    <string name="android_system_label" msgid="5974767339591067210">"Android System"</string>
+    <string name="android_system_label" msgid="5974767339591067210">"Android ਸਿਸਟਮ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ ਵਰਤੋ"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਰਤੋ"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ਸੰਪਰਕ"</string>
@@ -535,7 +535,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"ਅਧੂਰਾ ਫਿੰਗਰਪ੍ਰਿਟ ਮਿਲਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਪ੍ਰਕਿਰਿਆ ਨਹੀਂ ਕਰ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਗੰਦਾ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਇਸਨੂੰ ਸਾਫ਼ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"ਉਂਗਲ ਨੂੰ ਬਹੁਤ ਤੇਜ਼ ਲੈ ਜਾਇਆ ਗਿਆ. ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"ਉਂਗਲ ਨੂੰ ਬਹੁਤ ਤੇਜ਼ ਲੈ ਜਾਇਆ ਗਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ਉਂਗਲ ਕਾਫ਼ੀ ਹੌਲੀ ਮੂਵ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1191,7 +1191,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"ਹਮੇਸ਼ਾ  ਦਿਖਾਓ"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਨੂੰ Android OS ਦਾ ਇੱਕ ਗੈਰ-ਅਨੁਕੂਲ ਵਰਜਨ ਬਣਾਇਆ ਗਿਆ ਸੀ ਅਤੇ ਅਣਕਿਆਸੇ ਤੌਰ \'ਤੇ ਵਿਹਾਰ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦਾ ਇੱਕ ਅੱਪਡੇਟ ਕੀਤਾ ਹੋਇਆ ਵਰਜਨ ਉਪਲਬਧ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"ਹਮੇਸਾਂ ਦਿਖਾਓ"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"ਅੱਪਡੇਟ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"ਅੱਪਡੇਟ ਲਈ ਜਾਂਚ ਕਰੋ"</string>
     <string name="smv_application" msgid="3775183542777792638">"ਐਪ <xliff:g id="APPLICATION">%1$s</xliff:g> (ਪ੍ਰਕਿਰਿਆ <xliff:g id="PROCESS">%2$s</xliff:g>) ਨੇ ਆਪਣੀ ਖੁਦ-ਲਾਗੂ ਕੀਤੀ ਸਟ੍ਰਿਕਟਮੋਡ ਨੀਤੀ ਦੀ ਉਲੰਘਣਾ ਕੀਤੀ ਹੈ।"</string>
     <string name="smv_process" msgid="1398801497130695446">"ਪ੍ਰਕਿਰਿਆ <xliff:g id="PROCESS">%1$s</xliff:g> ਨੇ ਆਪਣੀ ਖੁਦ-ਲਾਗੂ ਕੀਤੀ ਸਟ੍ਰਿਕਟਮੋਡ ਨੀਤੀ ਦੀ ਉਲੰਘਣਾ ਕੀਤੀ ਹੈ।"</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"ਫ਼ੋਨ ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
@@ -1630,7 +1630,7 @@
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", ਸੁਰੱਖਿਅਤ"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"ਪੈਟਰਨ ਭੁੱਲ ਗਏ"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"ਗ਼ਲਤ ਪੈਟਰਨ"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"ਗਲਤ ਪੈਟਰਨ"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"ਗਲਤ ਪਾਸਵਰਡ"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"ਗਲਤ ਪਿੰਨ"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
@@ -1821,7 +1821,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ਠੀਕ ਹੈ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ:\n ਗੂੜ੍ਹਾ ਥੀਮ ਚਾਲੂ ਕਰਦਾ ਹੈ\n ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ ਪ੍ਰਭਾਵਾਂ, ਅਤੇ \"Hey Google\" ਵਰਗੀਆਂ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਾਂ ਉਹਨਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ\n\n"<annotation id="url">"ਹੋਰ ਜਾਣੋ"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ:\n ਗੂੜ੍ਹਾ ਥੀਮ ਚਾਲੂ ਕਰਦਾ ਹੈ\n ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਅਤੇ \"Ok Google\" ਵਰਗੀਆਂ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਾਂ ਉਹਨਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ\n\n"<annotation id="url">"ਹੋਰ ਜਾਣੋ"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ:\n ਗੂੜ੍ਹਾ ਥੀਮ ਚਾਲੂ ਕਰਦਾ ਹੈ\n ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ ਪ੍ਰਭਾਵਾਂ, ਅਤੇ \"Hey Google\" ਵਰਗੀਆਂ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਾਂ ਉਹਨਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕੀਤੇ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ਕੀ ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
@@ -1917,7 +1917,7 @@
     <string name="work_mode_off_message" msgid="8417484421098563803">"ਤੁਹਾਡੀਆਂ ਕਾਰਜ-ਸਥਾਨ ਐਪਾਂ, ਸੂਚਨਾਵਾਂ, ਡਾਟਾ ਅਤੇ ਹੋਰ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚਾਲੂ ਕੀਤੀਆਂ ਜਾਣਗੀਆਂ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ਚਾਲੂ ਕਰੋ"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ਇਹ ਐਪ Android ਦੇ ਕਿਸੇ ਵਧੇਰੇ ਪੁਰਾਣੇ ਵਰਜਨ ਲਈ ਬਣਾਈ ਗਈ ਸੀ ਅਤੇ ਸ਼ਾਇਦ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ। ਅੱਪਡੇਟਾਂ ਲਈ ਜਾਂਚ ਕਰੋ ਜਾਂ ਵਿਕਾਸਕਾਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ਅੱਪਡੇਟ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ਅੱਪਡੇਟ ਲਈ ਜਾਂਚ ਕਰੋ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ਤੁਹਾਨੂੰ ਨਵੇਂ ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਹੋਏ ਹਨ"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"ਦੇਖਣ ਲਈ SMS ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"ਕੁਝ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਸੀਮਤ ਹੋ ਸਕਦੀ ਹੈ"</string>

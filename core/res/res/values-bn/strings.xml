@@ -306,7 +306,7 @@
     <string name="permgrouprequest_camera" msgid="2697305443703328372">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে ফটো তুলতে এবং ভিডিও রেকর্ড করতে দেবেন?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"কল লগ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ফোন কল লগ পড়ে এবং দেখে"</string>
-    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"আপনার ফোন কল লগ অ্যাক্সেস করার অনুমতি &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; কে দেবেন?"</string>
+    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"আপনার ফোন কল লগ অ্যাক্সেস করার অনুমতি &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে দেবেন?"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ফোন"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ফোন কলগুলি এবং পরিচালনা"</string>
     <string name="permgrouprequest_phone" msgid="6430085454721364373">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে কল করতে এবং কল পরিচালনা করতে দেবেন?"</string>
@@ -535,7 +535,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"আঙ্গুলের ছাপ আংশিক শনাক্ত করা হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"আঙ্গুলের ছাপ প্রক্রিয়া করা যায়নি৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"আঙ্গুলের ছাপ নেওয়ার সেন্সরটি অপরিস্কার৷ অনুগ্রহ করে পরিষ্কার করে আবার চেষ্টা করুন৷"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"আঙ্গুল অতি দ্রুত সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"আঙ্গুল অতি দ্রুত সরানো হয়েছে৷ আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"আঙ্গুল খুব ধীরে সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>

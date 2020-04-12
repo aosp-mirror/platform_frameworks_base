@@ -669,7 +669,7 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"更改锁屏方式"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"更改锁屏方式。"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"锁定屏幕"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"控制屏幕锁定的方式和时间。"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"控制锁屏的方式和时间。"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"清除所有数据"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"恢复出厂设置时，系统会在不发出警告的情况下清除平板电脑上的数据。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="8755409895408717659">"恢复出厂设置时，不发出警告就直接清除电视上的数据。"</string>

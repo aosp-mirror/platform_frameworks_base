@@ -535,7 +535,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"指紋を一部しか検出できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"指紋を処理できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"指紋認証センサーに汚れがあります。汚れを落としてもう一度お試しください。"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"指の動きが速すぎました。もう一度お試しください。"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"指を離すのが速すぎました。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"指の動きが遅すぎました。もう一度お試しください。"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -686,7 +686,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"保存したアプリデータが暗号化されるようにします。"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"カメラを無効にする"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"すべてのデバイスカメラを使用できないようにします。"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"画面ロックの一部の機能を無効化"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"画面ロックの一部機能を無効化"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"画面ロックの一部の機能の使用を禁止します。"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"自宅"</item>
