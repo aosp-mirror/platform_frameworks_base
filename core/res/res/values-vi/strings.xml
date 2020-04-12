@@ -1299,7 +1299,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Đang sạc thiết bị được kết nối qua USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Đã bật truyền tệp qua USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Đã bật chế độ PTP qua USB"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Đã bật chia sẻ kết nối qua USB"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Đã bật tính năng chia sẻ Internet qua USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Đã bật chế độ MIDI qua USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Đã kết nối phụ kiện USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Nhấn để biết thêm tùy chọn."</string>
@@ -1573,7 +1573,7 @@
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", an toàn"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Đã quên hình"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"Hình không chính xác"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"Hình mở khóa không chính xác"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Mật khẩu sai"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN sai"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Cuộc trò chuyện"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Cuộc trò chuyện nhóm"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Cá nhân"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Cơ quan"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Chế độ xem cá nhân"</string>

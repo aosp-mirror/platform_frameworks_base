@@ -305,8 +305,8 @@
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"құрылғыдағы фотосуреттерге, мультимедиаға және файлдарға қол жеткізу"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"аудио жазу"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физикалық әрекет"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"физикалық әрекет дерегін алу"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Іс-қимыл"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"іс-қимыл дерегін алу"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"суретке түсіріп, бейне жазу"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Қоңырау журналдары"</string>
@@ -542,7 +542,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Танылмады"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Аутентификациядан бас тартылды."</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ешқандай PIN коды, өрнек немесе құпия сөз орнатылмаған."</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Саусақ ізі ішінара анықталды. Әрекетті қайталаңыз."</string>
+    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Саусақ ізі толық анықталмады. Әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Саусақ ізін өңдеу мүмкін емес. Әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Саусақ ізі сенсоры лас. Тазалап, әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Саусағыңызды тым жылдам қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
@@ -699,7 +699,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Камераларды өшіру"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Құрылғыдағы барлық камералар қолданысын бөгеу."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Экран құлпы функцияларын өшіру"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Кейбір экранды құлыптау мүмкіндіктерін пайдалануға тыйым салынады."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Кейбір экранды құлыптау мүмкіндіктерін пайдалануға тыйым салу."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Үй"</item>
     <item msgid="7740243458912727194">"Ұялы тел."</item>
@@ -1183,7 +1183,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Үнемі көрсету"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы сіздің Android OЖ-бен үйлеспейді және дұрыс жұмыс істемеуі ықтимал. Қолданбаның жаңартылған нұсқасы қолжетімді болуы мүмкін."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Үнемі көрсету"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Жаңартуды тексеру"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Жаңа нұсқасының бар-жоғын тексеру"</string>
     <string name="smv_application" msgid="3775183542777792638">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасы (<xliff:g id="PROCESS">%2$s</xliff:g> процесі) өзі қолданған StrictMode саясатын бұзды."</string>
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> үрдісі өздігінен күшіне енген ҚатаңРежим ережесін бұзды."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Телефон жаңартылуда…"</string>
@@ -1889,7 +1889,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Қолданба қолжетімді емес"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> қазір қолжетімді емес."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Қолданба Android жүйесінің ескі нұсқасына арналған және дұрыс жұмыс істемеуі мүмкін. Жаңартылған нұсқаны тексеріңіз немесе әзірлеушіге хабарласыңыз."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Жаңартылған нұсқаны тексеру"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Жаңа нұсқасының бар-жоғын тексеру"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Сізде жаңа хабарлар бар"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Көру үшін SMS қолданбасын ашыңыз"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Кейбір функциялар істемеуі мүмкін."</string>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Чат"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Топтық чат"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Жеке"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Жұмыс"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Жеке көру"</string>

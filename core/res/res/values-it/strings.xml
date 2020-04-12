@@ -295,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Passa a profilo di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accedere ai contatti"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Geolocalizz."</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Geolocalizzazione"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"accedere alla posizione di questo dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accedere al calendario"</string>
@@ -309,7 +309,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"Consente di accedere all\'attività fisica"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotocamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"scattare foto e registrare video"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Log chiamate"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registri chiamate"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"leggere e modificare il registro chiamate del telefono"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefono"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"eseguire e gestire le telefonate"</string>
@@ -1789,8 +1789,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminato dall\'amministratore"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Per estendere la durata della batteria, Risparmio energetico:\n·Attiva il Tema scuro\n·Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\"\n\n"<annotation id="url">"Ulteriori informazioni"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Per estendere la durata della batteria, Risparmio energetico:\n·Attiva il Tema scuro\n·Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Per estendere la durata della batteria, il risparmio energetico:\n·Attiva il Tema scuro\n·Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\"\n\n"<annotation id="url">"Ulteriori informazioni"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Per estendere la durata della batteria, il risparmio energetico:\n·Attiva il Tema scuro\n·Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Attiva"</string>

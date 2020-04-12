@@ -681,7 +681,7 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"ប្តូរការចាក់សោអេក្រង់"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ប្តូរការចាក់សោអេក្រង់។"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"ចាក់សោ​អេក្រង់"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"ពិនិត្យ​វិធី និង​ពេលវេលា​ចាក់សោ​អេក្រង់។"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"គ្រប់គ្រងវិធី និង​ពេលវេលា​ចាក់សោ​អេក្រង់។"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"លុប​ទិន្នន័យ​ទាំង​អស់"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"លុប​ទិន្នន័យ​កុំព្យូទ័រ​បន្ទះ​ដោយ​មិន​​ព្រមាន​ដោយ​អនុវត្ត​ការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"លុប​ទិន្នន័យឧបករណ៍ Android TV របស់អ្នក​ដោយមិនមានការព្រមាន ដោយ​ធ្វើការកំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
@@ -2046,8 +2046,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>៖"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"ការ​សន្ទនា"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ការសន្ទនា​ជាក្រុម"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ផ្ទាល់ខ្លួន"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ការងារ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ទិដ្ឋភាពផ្ទាល់ខ្លួន"</string>

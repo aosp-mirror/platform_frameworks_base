@@ -307,7 +307,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ઑડિઓ રેકોર્ડ કરવાની"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"શારીરિક પ્રવૃત્તિ"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"તમારી શારીરિક પ્રવૃત્તિને ઍક્સેસ કરવી"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"કૅમેરો"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"કૅમેરા"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ચિત્રો લેવાની અને વીડિઓ રેકોર્ડ કરવાની"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"કૉલ લૉગ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ફોન કૉલ લૉગ વાંચો અને લખો"</string>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"વાતચીત"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ગ્રૂપ વાતચીત"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"વ્યક્તિગત"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"કાર્યાલય"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"વ્યક્તિગત વ્યૂ"</string>

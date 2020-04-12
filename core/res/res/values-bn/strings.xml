@@ -545,7 +545,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"আঙ্গুলের ছাপ আংশিক শনাক্ত করা হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"আঙ্গুলের ছাপ প্রক্রিয়া করা যায়নি৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"আঙ্গুলের ছাপ নেওয়ার সেন্সরটি অপরিস্কার৷ অনুগ্রহ করে পরিষ্কার করে আবার চেষ্টা করুন৷"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"আঙ্গুল অতি দ্রুত সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"আঙ্গুল অতি দ্রুত সরানো হয়েছে৷ আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"আঙ্গুল খুব ধীরে সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"কথোপকথন"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"গ্রুপ কথোপকথন"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ব্যক্তিগত"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"অফিস"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ব্যক্তিগত ভিউ"</string>

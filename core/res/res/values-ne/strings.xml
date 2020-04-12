@@ -678,14 +678,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा ट्याब्लेट लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप गरेको सङ्ख्या निरीक्षण गर्नुहोस्, र धेरै पटक गलत पासवर्डहरू टाइप गरिएको खण्डमा आफ्नो Android TV यन्त्र लक गर्नुहोस् वा यो प्रयोगकर्ताको सम्पूर्ण डेटा मेटाउनुहोस्।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा फोन लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"स्क्रिन लक परिवर्तन गर्नुहोस्"</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"स्क्रिन लक परिवर्तन गर्ने"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"स्क्रिन लक परिवर्तन गर्नुहोस्।"</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"स्क्रिन लक गर्नुहोस्।"</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"स्क्रिन लक गर्ने"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"कसरी र कहिले स्क्रिन लक गर्ने नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"सबै डेटा मेट्नुहोस्"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"एउटा फ्याक्ट्रि डेटा पुनःसेट गरेर चेतावनी नआउँदै ट्याबल्टको डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"फ्याक्ट्री डेटा रिसेट गरेर चेतावनी नदिइकन आफ्नो Android TV यन्त्रको डेटा मेटाउनुहोस्।"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"एउटा फ्याक्ट्रि डेटा पुनःसेट गरेर चेतावनी नआउँदै फोनको डेटा मेट्नुहोस्।"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"एउटा फ्याक्ट्रि डेटा पुनःसेट गरेर चेतावनी नदिइकन फोनको डेटा मेट्न।"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"प्रयोगकर्ता डेटा मेट्नुहोस्"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"चेतावनी बिना यो ट्याब्लेटमा यस प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"यो Android TV यन्त्रमा भएको यस प्रयोगकर्ताको डेटा चेतावनी नदिइकन मेटाउनुहोस्।"</string>
@@ -698,7 +698,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"भण्डार गरिएको डेटा इन्क्रिप्ट हुनु आवश्यक छ।"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"क्यामेरालाई असक्षम गराउनुहोस्"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"सबै उपकरण क्यामराहरूको प्रयोग रोक्नुहोस्"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"केही स्क्रिन लकका  सुविधाहरू अक्षम गर्नुहोस्"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"स्क्रिन लकका केही सुविधा असक्षम पार्ने"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"केही स्क्रिन लक  सुविधाहरूको प्रयोगमा रोक लगाउनुहोस्।"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"गृह"</item>
@@ -930,7 +930,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"यही पृष्ठमा रहनुहोस्"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nके तपाईं यो पेजबाट नेभिगेट गर्न चाहनु हुन्छ भन्ने निश्चत छ?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"निश्चित गर्नुहोस्"</string>
-    <string name="double_tap_toast" msgid="7065519579174882778">"जुक्ति: जुमलाई ठूलो र सानो पार्न दुई पटक हान्नुहोस्।"</string>
+    <string name="double_tap_toast" msgid="7065519579174882778">"जुक्ति: जुमलाई ठुलो र सानो पार्न दुई पटक हान्नुहोस्।"</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"स्वतः भर्ने"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"अटोफिल सेटअप गर्नुहोस्"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> मार्फत स्वतः भरण गर्नुहोस्‌"</string>
@@ -1315,9 +1315,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB डिबग गर्ने सुविधा सुचारू छ"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB डिबग प्रक्रिया निष्क्रिय पार्न ट्याप गर्नुहोस्‌"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB डिबगिङलाई असक्षम पार्न ट्याप गर्नुहोस्।"</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"वायरलेस डिबग प्रक्रिया जडान गरियो"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"वायरलेस डिबग प्रक्रिया निष्क्रिय पार्न ट्याप गर्नुहोस्"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"वायरलेस डिबग प्रक्रिया असक्षम पार्ने विकल्प चयन गर्नुहोस्।"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"वायरलेस डिबगिङ जोडियो"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"वायरलेस डिबगिङ निष्क्रिय पार्न ट्याप गर्नुहोस्"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"वायरलेस डिबगिङ असक्षम पार्न यो विकल्प चयन गर्नुहोस्।"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"परीक्षण प्याकेज मोड सक्षम पारियो"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"परीक्षण प्याकेज मोड असक्षम पार्न फ्याक्ट्री रिसेट गर्नुहोस्।"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"क्रमसम्बन्धी कन्सोल सक्षम पारियो"</string>
@@ -1339,7 +1339,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"भाषा र लेआउट चयन गर्न ट्याप गर्नुहोस्"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"अन्य अनुप्रयोगहरूको माथिपट्टि देखाउनुहोस्"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"अन्य अनुप्रयोगमा देखाउनुहोस्"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> अन्य अनुप्रयोगहरूमा देखिँदैछ"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> अन्य अनुप्रयोगहरूमा देखिँदैछ"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले यो विशेषता प्रयोग नगरेको चाहनुहुन्न भने सेटिङहरू खोली यसलाई निष्क्रिय पार्न ट्याप गर्नुहोस्।"</string>
@@ -1579,7 +1579,7 @@
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", सुरक्षित"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"ढाँचा बिर्सनु भयो"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"गलत ढाँचा"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"प्याटर्न मिलेन"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"गलत पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"गलत PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
@@ -1865,7 +1865,7 @@
     <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"USB पेरिफेरल पोर्ट"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"थप विकल्पहरू"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"ओभरफ्लो बन्द गर्नुहोस्"</string>
-    <string name="maximize_button_text" msgid="4258922519914732645">"ठूलो बनाउनुहोस्"</string>
+    <string name="maximize_button_text" msgid="4258922519914732645">"ठुलो बनाउनुहोस्"</string>
     <string name="close_button_text" msgid="10603510034455258">"बन्द गर्नुहोस्"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
@@ -2050,8 +2050,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"वार्तालाप"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"सामूहिक वार्तालाप"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"व्यक्तिगत"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"काम"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"व्यक्तिगत दृश्य"</string>
@@ -2135,17 +2134,17 @@
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"RUIM को कर्पोरेट लक खोलिदिन गरिएको अनुरोध असफल भयो"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"RUIM को सेवा प्रदायकसम्बन्धी लक खोलिदिन अनुरोध गर्न सकिएन।"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"RUIM अनलक गर्न गरिएको अनुरोध असफल भयो।"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK अनलक गर्न सकिएन।"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK अनलक गर्न सकिएन।"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK अनलक गर्न सकिएन।"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"PUK अनलक गर्न सकिएन।"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"PUK अनलक गर्न सकिएन।"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"PUK अनलक गर्न सकिएन।"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"PUK अनलक गर्न सकिएन।"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"PUK अनलक गर्न सकिएन।"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK अनलक गर्न सकिएन।"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK अनलक गर्न सकिएन।"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK प्रयोग गरेर अनलक गर्न सकिएन।"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"SPN अनलक गर्न गरिएको अनुरोध असफल भयो।"</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"घरमा जोडिने SP सरहको PLMN अनलक गर्न गरिएको अनुरोध असफल भयो।"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"ICCID अनलक गर्न गरिएको अनुरोध असफल भयो।"</string>
@@ -2162,17 +2161,17 @@
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM को सेवा प्रदायकसम्बन्धी लक खोलियो।"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"RUIM को कर्पोरेट लक खोलियो।"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"RUIM अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK अनलक गरियो।"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK अनलक गरियो।"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK प्रयोग गरेर अनलक गर्न सकियो।"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"SPN अनलक गरियो।"</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"घरमा जोडिने SP सरहको PLMN अनलक गरियो।"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID अनलक गरियो।"</string>

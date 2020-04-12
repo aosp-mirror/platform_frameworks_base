@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Kapcsolódási probléma vagy érvénytelen MMI-kód."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"A művelet fix hívószámokra van korlátozva."</string>
-    <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"A hívásátirányítási beállításokat barangolás közben telefonról nem lehet módosítani."</string>
+    <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"A hívásátirányítási beállításokat roaming közben telefonról nem lehet módosítani."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"A szolgáltatás engedélyezésre került."</string>
     <string name="serviceEnabledFor" msgid="1463104778656711613">"Engedélyezett szolgáltatás(ok):"</string>
     <string name="serviceDisabled" msgid="641878791205871379">"A szolgáltatás ki van kapcsolva."</string>
@@ -113,12 +113,12 @@
     <string name="roamingText2" msgid="2834048284153110598">"Barangolásjelző villog"</string>
     <string name="roamingText3" msgid="831690234035748988">"A környéken kívül"</string>
     <string name="roamingText4" msgid="2171252529065590728">"Épületen kívül"</string>
-    <string name="roamingText5" msgid="4294671587635796641">"Barangolás - preferált rendszer"</string>
-    <string name="roamingText6" msgid="5536156746637992029">"Barangolás -- elérhető rendszer"</string>
-    <string name="roamingText7" msgid="1783303085512907706">"Barangolás - szövetségi partner"</string>
-    <string name="roamingText8" msgid="7774800704373721973">"Barangolás -- Prémium partner"</string>
-    <string name="roamingText9" msgid="1933460020190244004">"Barangolás - teljes szolgáltatásműködés"</string>
-    <string name="roamingText10" msgid="7434767033595769499">"Barangolás - részleges szolgáltatásműködés"</string>
+    <string name="roamingText5" msgid="4294671587635796641">"Roaming - preferált rendszer"</string>
+    <string name="roamingText6" msgid="5536156746637992029">"Roaming - elérhető rendszer"</string>
+    <string name="roamingText7" msgid="1783303085512907706">"Roaming - szövetségi partner"</string>
+    <string name="roamingText8" msgid="7774800704373721973">"Roaming - Prémium partner"</string>
+    <string name="roamingText9" msgid="1933460020190244004">"Roaming - teljes szolgáltatásműködés"</string>
+    <string name="roamingText10" msgid="7434767033595769499">"Roaming - részleges szolgáltatásműködés"</string>
     <string name="roamingText11" msgid="5245687407203281407">"Barangolást jelző szalaghirdetés bekapcsolva"</string>
     <string name="roamingText12" msgid="673537506362152640">"Barangolást jelző szalaghirdetés kikapcsolva"</string>
     <string name="roamingTextSearching" msgid="5323235489657753486">"Szolgáltatás keresése"</string>
@@ -1309,7 +1309,7 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB-hibakereső csatlakoztatva"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Koppintson az USB-hibakeresés kikapcsolásához"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Válassza ezt az USB hibakeresés kikapcsolásához."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Vezeték nélküli hibakereső csatlakoztatva"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Vezeték nélküli hibakeresés csatlakoztatva"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Koppintson a vezeték nélküli hibakeresés kikapcsolásához"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Válassza ezt a vezeték nélküli hibakeresés letiltásához."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Tesztelési alapkörnyezet mód engedélyezve"</string>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Beszélgetés"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Csoportos beszélgetés"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Személyes"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Munka"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Személyes nézet"</string>

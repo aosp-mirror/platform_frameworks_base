@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ไอคอนลายนิ้วมือ"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"จัดการฮาร์ดแวร์ Face Unlock"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"จัดการฮาร์ดแวร์การปลดล็อกด้วยใบหน้า"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"อนุญาตให้แอปเรียกใช้วิธีเพิ่มและลบเทมเพลตใบหน้าสำหรับการใช้งาน"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ใช้ฮาร์ดแวร์ Face Unlock"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"อนุญาตให้แอปใช้ฮาร์ดแวร์ Face Unlock เพื่อตรวจสอบสิทธิ์"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ใช้ฮาร์ดแวร์การปลดล็อกด้วยใบหน้า"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"อนุญาตให้แอปใช้ฮาร์ดแวร์การปลดล็อกด้วยใบหน้าเพื่อตรวจสอบสิทธิ์"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ปลดล็อกด้วยใบหน้า"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ลงทะเบียนใบหน้าอีกครั้ง"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"โปรดลงทะเบียนใบหน้าอีกครั้งเพื่อปรับปรุงการจดจำ"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"บันทึกข้อมูลใบหน้าที่ถูกต้องไม่ได้ ลองอีกครั้ง"</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ยืนยันใบหน้าไม่ได้ ฮาร์ดแวร์ไม่พร้อมใช้งาน"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"ลองใช้ Face Unlock อีกครั้ง"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"ลองใช้การปลดล็อกด้วยใบหน้าอีกครั้ง"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"จัดเก็บข้อมูลใบหน้าใหม่ไม่ได้ ลบข้อมูลเก่าออกไปก่อน"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ยกเลิกการดำเนินการกับใบหน้าแล้ว"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ผู้ใช้ยกเลิกการใช้ Face Unlock"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"ผู้ใช้ยกเลิกการใช้การปลดล็อกด้วยใบหน้า"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ดำเนินการหลายครั้งเกินไป ลองอีกครั้งในภายหลัง"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ลองหลายครั้งเกินไป ปิดใช้ Face Unlock แล้ว"</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ลองหลายครั้งเกินไป ปิดใช้การปลดล็อกด้วยใบหน้าแล้ว"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ยืนยันใบหน้าไม่ได้ ลองอีกครั้ง"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"คุณยังไม่ได้ตั้งค่า Face Unlock"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"อุปกรณ์นี้ไม่รองรับ Face Unlock"</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"คุณยังไม่ได้ตั้งค่าการปลดล็อกด้วยใบหน้า"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"อุปกรณ์นี้ไม่รองรับการปลดล็อกด้วยใบหน้า"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ปิดใช้เซ็นเซอร์ชั่วคราวแล้ว"</string>
     <string name="face_name_template" msgid="3877037340223318119">"ใบหน้า <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ลองอีกครั้ง"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ลองอีกครั้ง"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ปลดล็อกฟีเจอร์และข้อมูลทั้งหมด"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"มีความพยายามที่จะใช้ Face Unlock เกินขีดจำกัด"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ลองใช้การปลดล็อกด้วยใบหน้าเกินจำนวนครั้งที่กำหนดแล้ว"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ไม่มีซิมการ์ด"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ไม่มีซิมการ์ดในแท็บเล็ต"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"ไม่มีซิมการ์ดในอุปกรณ์ Android TV"</string>
@@ -1789,8 +1789,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ลบโดยผู้ดูแลระบบ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ตกลง"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n·เปิดธีมมืด\n·ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น “Hey Google”\n\n"<annotation id="url">"ดูข้อมูลเพิ่มเติม"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n·เปิดธีมมืด\n·ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น “Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n·เปิดธีมมืด\n·ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น “Ok Google”\n\n"<annotation id="url">"ดูข้อมูลเพิ่มเติม"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n·เปิดธีมมืด\n·ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น “Ok Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"เปิด"</string>
@@ -2044,8 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"การสนทนา"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"บทสนทนากลุ่ม"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ส่วนตัว"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"งาน"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"มุมมองส่วนตัว"</string>
