@@ -21,6 +21,9 @@ import static android.Manifest.permission.FORCE_PERSISTABLE_URI_PERMISSIONS;
 import static android.Manifest.permission.GET_APP_GRANTED_URI_PERMISSIONS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.content.Intent.FLAG_GRANT_PREFIX_URI_PERMISSION;
+import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
+import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -53,7 +56,6 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -76,6 +78,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.IoThread;
@@ -83,10 +87,10 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 
+import libcore.io.IoUtils;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
-
-import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -114,7 +118,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     private static final boolean ENABLE_DYNAMIC_PERMISSIONS = false;
 
     private final Object mLock = new Object();
-    private final Context mContext;
     private final H mH;
     ActivityManagerInternal mAmInternal;
     PackageManagerInternal mPmInternal;
@@ -143,19 +146,30 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     private final SparseArray<ArrayMap<GrantUri, UriPermission>>
             mGrantedUriPermissions = new SparseArray<>();
 
-    private UriGrantsManagerService(Context context) {
-        mContext = context;
+    private UriGrantsManagerService() {
+        this(SystemServiceManager.ensureSystemDir());
+    }
+
+    private UriGrantsManagerService(File systemDir) {
         mH = new H(IoThread.get().getLooper());
-        final File systemDir = SystemServiceManager.ensureSystemDir();
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"), "uri-grants");
+    }
+
+    @VisibleForTesting
+    static UriGrantsManagerService createForTest(File systemDir) {
+        final UriGrantsManagerService service = new UriGrantsManagerService(systemDir);
+        service.mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+        service.mPmInternal = LocalServices.getService(PackageManagerInternal.class);
+        return service;
+    }
+
+    @VisibleForTesting
+    UriGrantsManagerInternal getLocalService() {
+        return new LocalService();
     }
 
     private void start() {
         LocalServices.addService(UriGrantsManagerInternal.class, new LocalService());
-    }
-
-    void onActivityManagerInternalAdded() {
-        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
     }
 
     public static final class Lifecycle extends SystemService {
@@ -163,7 +177,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         public Lifecycle(Context context) {
             super(context);
-            mService = new UriGrantsManagerService(context);
+            mService = new UriGrantsManagerService();
         }
 
         @Override
@@ -172,8 +186,24 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             mService.start();
         }
 
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == PHASE_SYSTEM_SERVICES_READY) {
+                mService.mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+                mService.mPmInternal = LocalServices.getService(PackageManagerInternal.class);
+            }
+        }
+
         public UriGrantsManagerService getService() {
             return mService;
+        }
+    }
+
+    private int checkUidPermission(String permission, int uid) {
+        try {
+            return AppGlobals.getPackageManager().checkUidPermission(permission, uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -207,7 +237,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 throw new IllegalArgumentException("null uri");
             }
 
-            grantUriPermission(fromUid, targetPkg, new GrantUri(sourceUserId, uri, false),
+            grantUriPermission(fromUid, targetPkg, new GrantUri(sourceUserId, uri, modeFlags),
                     modeFlags, owner, targetUserId);
         }
     }
@@ -220,16 +250,12 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
-        final IPackageManager pm = AppGlobals.getPackageManager();
-        try {
-            final int packageUid = pm.getPackageUid(packageName,
-                    MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, callingUserId);
-            if (packageUid != callingUid) {
-                throw new SecurityException(
-                        "Package " + packageName + " does not belong to calling UID " + callingUid);
-            }
-        } catch (RemoteException e) {
-            throw new SecurityException("Failed to verify package name ownership");
+        final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
+        final int packageUid = pm.getPackageUidInternal(packageName,
+                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, callingUserId);
+        if (packageUid != callingUid) {
+            throw new SecurityException(
+                    "Package " + packageName + " does not belong to calling UID " + callingUid);
         }
 
         final ArrayList<android.content.UriPermission> result = Lists.newArrayList();
@@ -303,7 +329,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (toPackage != null) {
             mAmInternal.enforceCallingPermission(FORCE_PERSISTABLE_URI_PERMISSIONS,
                     "takePersistableUriPermission");
-            uid = getPmInternal().getPackageUid(toPackage, 0, userId);
+            uid = mPmInternal.getPackageUidInternal(toPackage, 0, userId);
         } else {
             enforceNotIsolatedCaller("takePersistableUriPermission");
             uid = Binder.getCallingUid();
@@ -314,11 +340,11 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         synchronized (mLock) {
             boolean persistChanged = false;
-            GrantUri grantUri = new GrantUri(userId, uri, false);
 
-            UriPermission exactPerm = findUriPermissionLocked(uid, grantUri);
+            UriPermission exactPerm = findUriPermissionLocked(uid,
+                    new GrantUri(userId, uri, 0));
             UriPermission prefixPerm = findUriPermissionLocked(uid,
-                    new GrantUri(userId, uri, true));
+                    new GrantUri(userId, uri, FLAG_GRANT_PREFIX_URI_PERMISSION));
 
             final boolean exactValid = (exactPerm != null)
                     && ((modeFlags & exactPerm.persistableModeFlags) == modeFlags);
@@ -327,7 +353,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
             if (!(exactValid || prefixValid)) {
                 throw new SecurityException("No persistable permission grants found for UID "
-                        + uid + " and Uri " + grantUri.toSafeString());
+                        + uid + " and Uri " + uri.toSafeString());
             }
 
             if (exactValid) {
@@ -368,7 +394,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (toPackage != null) {
             mAmInternal.enforceCallingPermission(FORCE_PERSISTABLE_URI_PERMISSIONS,
                     "releasePersistableUriPermission");
-            uid = getPmInternal().getPackageUid(toPackage, 0, userId);
+            uid = mPmInternal.getPackageUidInternal(toPackage, 0, userId);
         } else {
             enforceNotIsolatedCaller("releasePersistableUriPermission");
             uid = Binder.getCallingUid();
@@ -381,9 +407,9 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             boolean persistChanged = false;
 
             UriPermission exactPerm = findUriPermissionLocked(uid,
-                    new GrantUri(userId, uri, false));
+                    new GrantUri(userId, uri, 0));
             UriPermission prefixPerm = findUriPermissionLocked(uid,
-                    new GrantUri(userId, uri, true));
+                    new GrantUri(userId, uri, FLAG_GRANT_PREFIX_URI_PERMISSION));
             if (exactPerm == null && prefixPerm == null && toPackage == null) {
                 throw new SecurityException("No permission grants found for UID " + uid
                         + " and Uri " + uri.toSafeString());
@@ -559,16 +585,12 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (contentUserHint == UserHandle.USER_CURRENT) {
             contentUserHint = UserHandle.getUserId(callingUid);
         }
-        final IPackageManager pm = AppGlobals.getPackageManager();
         int targetUid;
         if (needed != null) {
             targetUid = needed.targetUid;
         } else {
-            try {
-                targetUid = pm.getPackageUid(targetPkg, MATCH_DEBUG_TRIAGED_MISSING, targetUserId);
-            } catch (RemoteException ex) {
-                return null;
-            }
+            targetUid = mPmInternal.getPackageUidInternal(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
+                    targetUserId);
             if (targetUid < 0) {
                 if (DEBUG) Slog.v(TAG, "Can't grant URI permission no uid for: " + targetPkg
                         + " on user " + targetUserId);
@@ -576,27 +598,27 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             }
         }
         if (data != null) {
-            GrantUri grantUri = GrantUri.resolve(contentUserHint, data);
+            GrantUri grantUri = GrantUri.resolve(contentUserHint, data, mode);
             targetUid = checkGrantUriPermission(callingUid, targetPkg, grantUri, mode, targetUid);
             if (targetUid > 0) {
                 if (needed == null) {
                     needed = new NeededUriGrants(targetPkg, targetUid, mode);
                 }
-                needed.add(grantUri);
+                needed.uris.add(grantUri);
             }
         }
         if (clip != null) {
             for (int i=0; i<clip.getItemCount(); i++) {
                 Uri uri = clip.getItemAt(i).getUri();
                 if (uri != null) {
-                    GrantUri grantUri = GrantUri.resolve(contentUserHint, uri);
+                    GrantUri grantUri = GrantUri.resolve(contentUserHint, uri, mode);
                     targetUid = checkGrantUriPermission(callingUid, targetPkg,
                             grantUri, mode, targetUid);
                     if (targetUid > 0) {
                         if (needed == null) {
                             needed = new NeededUriGrants(targetPkg, targetUid, mode);
                         }
-                        needed.add(grantUri);
+                        needed.uris.add(grantUri);
                     }
                 } else {
                     Intent clipIntent = clip.getItemAt(i).getIntent();
@@ -666,16 +688,13 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                         final ProviderInfo pi = getProviderInfo(uri.getAuthority(), sourceUserId,
                                 MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE);
                         if (pi != null && sourcePkg.equals(pi.packageName)) {
-                            int targetUid = -1;
-                            try {
-                                targetUid = AppGlobals.getPackageManager().getPackageUid(
+                            int targetUid = mPmInternal.getPackageUidInternal(
                                         targetPkg, MATCH_UNINSTALLED_PACKAGES, targetUserId);
-                            } catch (RemoteException e) {
-                            }
                             if (targetUid != -1) {
+                                final GrantUri grantUri = new GrantUri(sourceUserId, uri,
+                                        prefix ? Intent.FLAG_GRANT_PREFIX_URI_PERMISSION : 0);
                                 final UriPermission perm = findOrCreateUriPermission(
-                                        sourcePkg, targetPkg, targetUid,
-                                        new GrantUri(sourceUserId, uri, prefix));
+                                        sourcePkg, targetPkg, targetUid, grantUri);
                                 perm.initPersistedModes(modeFlags, createdTime);
                             }
                         } else {
@@ -733,13 +752,10 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             return;
         }
 
-        if ((modeFlags & Intent.FLAG_GRANT_PREFIX_URI_PERMISSION) != 0) {
-            grantUri.prefix = true;
-        }
         final UriPermission perm = findOrCreateUriPermission(
                 pi.packageName, targetPkg, targetUid, grantUri);
         perm.grantModes(modeFlags, owner);
-        getPmInternal().grantImplicitAccess(UserHandle.getUserId(targetUid), null,
+        mPmInternal.grantImplicitAccess(UserHandle.getUserId(targetUid), null,
                 UserHandle.getAppId(targetUid), pi.applicationInfo.uid, false /*direct*/);
     }
 
@@ -748,10 +764,10 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (needed == null) {
             return;
         }
-        for (int i=0; i<needed.size(); i++) {
-            GrantUri grantUri = needed.get(i);
+        final int N = needed.uris.size();
+        for (int i = 0; i < N; i++) {
             grantUriPermissionUnchecked(needed.targetUid, needed.targetPkg,
-                    grantUri, needed.flags, owner);
+                    needed.uris.valueAt(i), needed.flags, owner);
         }
     }
 
@@ -760,13 +776,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (targetPkg == null) {
             throw new NullPointerException("targetPkg");
         }
-        int targetUid;
-        final IPackageManager pm = AppGlobals.getPackageManager();
-        try {
-            targetUid = pm.getPackageUid(targetPkg, MATCH_DEBUG_TRIAGED_MISSING, targetUserId);
-        } catch (RemoteException ex) {
-            return;
-        }
+        int targetUid = mPmInternal.getPackageUidInternal(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
+                targetUserId);
 
         targetUid = checkGrantUriPermission(callingUid, targetPkg, grantUri, modeFlags, targetUid);
         if (targetUid < 0) {
@@ -780,7 +791,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             final int modeFlags) {
         if (DEBUG) Slog.v(TAG, "Revoking all granted permissions to " + grantUri);
 
-        final IPackageManager pm = AppGlobals.getPackageManager();
         final String authority = grantUri.uri.getAuthority();
         final ProviderInfo pi = getProviderInfo(authority, grantUri.sourceUserId,
                 MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE);
@@ -791,7 +801,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         // Does the caller have this permission on the URI?
-        if (!checkHoldingPermissions(pm, pi, grantUri, callingUid, modeFlags)) {
+        if (!checkHoldingPermissions(pi, grantUri, callingUid, modeFlags)) {
             // If they don't have direct access to the URI, then revoke any
             // ownerless URI permissions that have been granted to them.
             final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
@@ -864,7 +874,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
      * in {@link ContentProvider}.
      */
     private boolean checkHoldingPermissions(
-            IPackageManager pm, ProviderInfo pi, GrantUri grantUri, int uid, final int modeFlags) {
+            ProviderInfo pi, GrantUri grantUri, int uid, final int modeFlags) {
         if (DEBUG) Slog.v(TAG, "checkHoldingPermissions: uri=" + grantUri + " uid=" + uid);
         if (UserHandle.getUserId(uid) != grantUri.sourceUserId) {
             if (ActivityManager.checkComponentPermission(INTERACT_ACROSS_USERS, uid, -1, true)
@@ -872,10 +882,10 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 return false;
             }
         }
-        return checkHoldingPermissionsInternal(pm, pi, grantUri, uid, modeFlags, true);
+        return checkHoldingPermissionsInternal(pi, grantUri, uid, modeFlags, true);
     }
 
-    private boolean checkHoldingPermissionsInternal(IPackageManager pm, ProviderInfo pi,
+    private boolean checkHoldingPermissionsInternal(ProviderInfo pi,
             GrantUri grantUri, int uid, final int modeFlags, boolean considerUidPermissions) {
         if (pi.applicationInfo.uid == uid) {
             return true;
@@ -885,73 +895,69 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         boolean readMet = (modeFlags & Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0;
         boolean writeMet = (modeFlags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0;
-        try {
-            // check if target holds top-level <provider> permissions
-            if (!readMet && pi.readPermission != null && considerUidPermissions
-                    && (pm.checkUidPermission(pi.readPermission, uid) == PERMISSION_GRANTED)) {
-                readMet = true;
-            }
-            if (!writeMet && pi.writePermission != null && considerUidPermissions
-                    && (pm.checkUidPermission(pi.writePermission, uid) == PERMISSION_GRANTED)) {
-                writeMet = true;
-            }
 
-            // track if unprotected read/write is allowed; any denied
-            // <path-permission> below removes this ability
-            boolean allowDefaultRead = pi.readPermission == null;
-            boolean allowDefaultWrite = pi.writePermission == null;
+        // check if target holds top-level <provider> permissions
+        if (!readMet && pi.readPermission != null && considerUidPermissions
+                && (checkUidPermission(pi.readPermission, uid) == PERMISSION_GRANTED)) {
+            readMet = true;
+        }
+        if (!writeMet && pi.writePermission != null && considerUidPermissions
+                && (checkUidPermission(pi.writePermission, uid) == PERMISSION_GRANTED)) {
+            writeMet = true;
+        }
 
-            // check if target holds any <path-permission> that match uri
-            final PathPermission[] pps = pi.pathPermissions;
-            if (pps != null) {
-                final String path = grantUri.uri.getPath();
-                int i = pps.length;
-                while (i > 0 && (!readMet || !writeMet)) {
-                    i--;
-                    PathPermission pp = pps[i];
-                    if (pp.match(path)) {
-                        if (!readMet) {
-                            final String pprperm = pp.getReadPermission();
-                            if (DEBUG) Slog.v(TAG,
-                                    "Checking read perm for " + pprperm + " for " + pp.getPath()
-                                            + ": match=" + pp.match(path)
-                                            + " check=" + pm.checkUidPermission(pprperm, uid));
-                            if (pprperm != null) {
-                                if (considerUidPermissions && pm.checkUidPermission(pprperm, uid)
-                                        == PERMISSION_GRANTED) {
-                                    readMet = true;
-                                } else {
-                                    allowDefaultRead = false;
-                                }
+        // track if unprotected read/write is allowed; any denied
+        // <path-permission> below removes this ability
+        boolean allowDefaultRead = pi.readPermission == null;
+        boolean allowDefaultWrite = pi.writePermission == null;
+
+        // check if target holds any <path-permission> that match uri
+        final PathPermission[] pps = pi.pathPermissions;
+        if (pps != null) {
+            final String path = grantUri.uri.getPath();
+            int i = pps.length;
+            while (i > 0 && (!readMet || !writeMet)) {
+                i--;
+                PathPermission pp = pps[i];
+                if (pp.match(path)) {
+                    if (!readMet) {
+                        final String pprperm = pp.getReadPermission();
+                        if (DEBUG) Slog.v(TAG,
+                                "Checking read perm for " + pprperm + " for " + pp.getPath()
+                                        + ": match=" + pp.match(path)
+                                        + " check=" + checkUidPermission(pprperm, uid));
+                        if (pprperm != null) {
+                            if (considerUidPermissions && checkUidPermission(pprperm, uid)
+                                    == PERMISSION_GRANTED) {
+                                readMet = true;
+                            } else {
+                                allowDefaultRead = false;
                             }
                         }
-                        if (!writeMet) {
-                            final String ppwperm = pp.getWritePermission();
-                            if (DEBUG) Slog.v(TAG,
-                                    "Checking write perm " + ppwperm + " for " + pp.getPath()
-                                            + ": match=" + pp.match(path)
-                                            + " check=" + pm.checkUidPermission(ppwperm, uid));
-                            if (ppwperm != null) {
-                                if (considerUidPermissions && pm.checkUidPermission(ppwperm, uid)
-                                        == PERMISSION_GRANTED) {
-                                    writeMet = true;
-                                } else {
-                                    allowDefaultWrite = false;
-                                }
+                    }
+                    if (!writeMet) {
+                        final String ppwperm = pp.getWritePermission();
+                        if (DEBUG) Slog.v(TAG,
+                                "Checking write perm " + ppwperm + " for " + pp.getPath()
+                                        + ": match=" + pp.match(path)
+                                        + " check=" + checkUidPermission(ppwperm, uid));
+                        if (ppwperm != null) {
+                            if (considerUidPermissions && checkUidPermission(ppwperm, uid)
+                                    == PERMISSION_GRANTED) {
+                                writeMet = true;
+                            } else {
+                                allowDefaultWrite = false;
                             }
                         }
                     }
                 }
             }
-
-            // grant unprotected <provider> read/write, if not blocked by
-            // <path-permission> above
-            if (allowDefaultRead) readMet = true;
-            if (allowDefaultWrite) writeMet = true;
-
-        } catch (RemoteException e) {
-            return false;
         }
+
+        // grant unprotected <provider> read/write, if not blocked by
+        // <path-permission> above
+        if (allowDefaultRead) readMet = true;
+        if (allowDefaultWrite) writeMet = true;
 
         // If this provider says that grants are always required, we need to
         // consult it directly to determine if the UID has permission
@@ -1013,14 +1019,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     }
 
     private ProviderInfo getProviderInfo(String authority, int userHandle, int pmFlags) {
-        ProviderInfo pi = null;
-        try {
-            pi = AppGlobals.getPackageManager().resolveContentProvider(
-                    authority, PackageManager.GET_URI_PERMISSION_PATTERNS | pmFlags,
-                    userHandle);
-        } catch (RemoteException ex) {
-        }
-        return pi;
+        return mPmInternal.resolveContentProvider(authority,
+                PackageManager.GET_URI_PERMISSION_PATTERNS | pmFlags, userHandle);
     }
 
     /**
@@ -1033,7 +1033,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
      * lastTargetUid else set that to -1.
      */
     int checkGrantUriPermission(int callingUid, String targetPkg, GrantUri grantUri,
-            final int modeFlags, int lastTargetUid) {
+            int modeFlags, int lastTargetUid) {
         if (!Intent.isAccessUriMode(modeFlags)) {
             return -1;
         }
@@ -1041,8 +1041,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (targetPkg != null) {
             if (DEBUG) Slog.v(TAG, "Checking grant " + targetPkg + " permission to " + grantUri);
         }
-
-        final IPackageManager pm = AppGlobals.getPackageManager();
 
         // If this is not a content: uri, we can't do anything with it.
         if (!ContentResolver.SCHEME_CONTENT.equals(grantUri.uri.getScheme())) {
@@ -1079,39 +1077,22 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         int targetUid = lastTargetUid;
         if (targetUid < 0 && targetPkg != null) {
-            try {
-                targetUid = pm.getPackageUid(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
-                        UserHandle.getUserId(callingUid));
-                if (targetUid < 0) {
-                    if (DEBUG) Slog.v(TAG, "Can't grant URI permission no uid for: " + targetPkg);
-                    return -1;
-                }
-            } catch (RemoteException ex) {
+            targetUid = mPmInternal.getPackageUidInternal(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
+                    UserHandle.getUserId(callingUid));
+            if (targetUid < 0) {
+                if (DEBUG) Slog.v(TAG, "Can't grant URI permission no uid for: " + targetPkg);
                 return -1;
             }
         }
 
-        // Figure out the value returned when access is allowed
-        final int allowedResult;
-        if ((modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0
-                || pi.forceUriPermissions) {
-            // If we're extending a persistable grant or need to force, then we need to return
-            // "targetUid" so that we always create a grant data structure to
-            // support take/release APIs
-            allowedResult = targetUid;
-        } else {
-            // Otherwise, we can return "-1" to indicate that no grant data
-            // structures need to be created
-            allowedResult = -1;
-        }
-
+        boolean targetHoldsPermission = false;
         if (targetUid >= 0) {
             // First...  does the target actually need this permission?
-            if (checkHoldingPermissions(pm, pi, grantUri, targetUid, modeFlags)) {
+            if (checkHoldingPermissions(pi, grantUri, targetUid, modeFlags)) {
                 // No need to grant the target this permission.
                 if (DEBUG) Slog.v(TAG,
                         "Target " + targetPkg + " already has full permission to " + grantUri);
-                return allowedResult;
+                targetHoldsPermission = true;
             }
         } else {
             // First...  there is no target package, so can anyone access it?
@@ -1145,9 +1126,25 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                     }
                 }
             }
-            if (allowed) {
-                return allowedResult;
+            if (pi.forceUriPermissions) {
+                // When provider requires dynamic permission checks, the only
+                // way to be safe is to issue permission grants for each item by
+                // assuming no generic access
+                allowed = false;
             }
+            if (allowed) {
+                targetHoldsPermission = true;
+            }
+        }
+
+        final boolean basicGrant = (modeFlags & ~(FLAG_GRANT_READ_URI_PERMISSION
+                | FLAG_GRANT_WRITE_URI_PERMISSION)) == 0;
+        if (basicGrant && targetHoldsPermission) {
+            // When caller holds permission, and this is a simple permission
+            // grant, we can skip generating any bookkeeping; when any advanced
+            // features have been requested, we proceed below to make sure the
+            // provider supports granting permissions
+            return -1;
         }
 
         /* There is a special cross user grant if:
@@ -1158,38 +1155,42 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
          */
         boolean specialCrossUserGrant = targetUid >= 0
                 && UserHandle.getUserId(targetUid) != grantUri.sourceUserId
-                && checkHoldingPermissionsInternal(pm, pi, grantUri, callingUid,
+                && checkHoldingPermissionsInternal(pi, grantUri, callingUid,
                 modeFlags, false /*without considering the uid permissions*/);
 
         // Second...  is the provider allowing granting of URI permissions?
-        if (!specialCrossUserGrant) {
-            if (!pi.grantUriPermissions) {
+        boolean grantAllowed = pi.grantUriPermissions;
+        if (!ArrayUtils.isEmpty(pi.uriPermissionPatterns)) {
+            final int N = pi.uriPermissionPatterns.length;
+            grantAllowed = false;
+            for (int i = 0; i < N; i++) {
+                if (pi.uriPermissionPatterns[i] != null
+                        && pi.uriPermissionPatterns[i].match(grantUri.uri.getPath())) {
+                    grantAllowed = true;
+                    break;
+                }
+            }
+        }
+        if (!grantAllowed) {
+            if (specialCrossUserGrant) {
+                // We're only okay issuing basic grant access across user
+                // boundaries; advanced flags are blocked here
+                if (!basicGrant) {
+                    throw new SecurityException("Provider " + pi.packageName
+                            + "/" + pi.name
+                            + " does not allow granting of advanced Uri permissions (uri "
+                            + grantUri + ")");
+                }
+            } else {
                 throw new SecurityException("Provider " + pi.packageName
                         + "/" + pi.name
                         + " does not allow granting of Uri permissions (uri "
                         + grantUri + ")");
             }
-            if (pi.uriPermissionPatterns != null) {
-                final int N = pi.uriPermissionPatterns.length;
-                boolean allowed = false;
-                for (int i=0; i<N; i++) {
-                    if (pi.uriPermissionPatterns[i] != null
-                            && pi.uriPermissionPatterns[i].match(grantUri.uri.getPath())) {
-                        allowed = true;
-                        break;
-                    }
-                }
-                if (!allowed) {
-                    throw new SecurityException("Provider " + pi.packageName
-                            + "/" + pi.name
-                            + " does not allow granting of permission to path of Uri "
-                            + grantUri);
-                }
-            }
         }
 
         // Third...  does the caller itself have permission to access this uri?
-        if (!checkHoldingPermissions(pm, pi, grantUri, callingUid, modeFlags)) {
+        if (!checkHoldingPermissions(pi, grantUri, callingUid, modeFlags)) {
             // Require they hold a strong enough Uri permission
             if (!checkUriPermission(grantUri, callingUid, modeFlags)) {
                 if (android.Manifest.permission.MANAGE_DOCUMENTS.equals(pi.readPermission)) {
@@ -1203,6 +1204,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 }
             }
         }
+
         return targetUid;
     }
 
@@ -1212,7 +1214,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     int checkGrantUriPermission(int callingUid, String targetPkg, Uri uri, int modeFlags,
             int userId) {
         return checkGrantUriPermission(callingUid, targetPkg,
-                new GrantUri(userId, uri, false), modeFlags, -1);
+                new GrantUri(userId, uri, modeFlags), modeFlags, -1);
     }
 
     boolean checkUriPermission(GrantUri grantUri, int uid, final int modeFlags) {
@@ -1297,14 +1299,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
     }
 
-    private PackageManagerInternal getPmInternal() {
-        // Don't need to synchonize; worst-case scenario LocalServices will be called twice.
-        if (mPmInternal == null) {
-            mPmInternal = LocalServices.getService(PackageManagerInternal.class);
-        }
-        return mPmInternal;
-    }
-
     final class H extends Handler {
         static final int PERSIST_URI_GRANTS_MSG = 1;
 
@@ -1324,7 +1318,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     }
 
     final class LocalService implements UriGrantsManagerInternal {
-
         @Override
         public void removeUriPermissionIfNeeded(UriPermission perm) {
             synchronized (mLock) {
@@ -1419,13 +1412,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         @Override
-        public void onActivityManagerInternalAdded() {
-            synchronized (mLock) {
-                UriGrantsManagerService.this.onActivityManagerInternalAdded();
-            }
-        }
-
-        @Override
         public IBinder newUriPermissionOwner(String name) {
             enforceNotIsolatedCaller("newUriPermissionOwner");
             synchronized(mLock) {
@@ -1454,8 +1440,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 if (uri == null) {
                     owner.removeUriPermissions(mode);
                 } else {
-                    final boolean prefix = (mode & Intent.FLAG_GRANT_PREFIX_URI_PERMISSION) != 0;
-                    owner.removeUriPermission(new GrantUri(userId, uri, prefix), mode);
+                    owner.removeUriPermission(new GrantUri(userId, uri, mode), mode);
                 }
             }
         }
@@ -1478,12 +1463,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                     boolean printed = false;
                     int dumpUid = -2;
                     if (dumpPackage != null) {
-                        try {
-                            dumpUid = mContext.getPackageManager().getPackageUidAsUser(dumpPackage,
-                                    MATCH_ANY_USER, 0);
-                        } catch (PackageManager.NameNotFoundException e) {
-                            dumpUid = -1;
-                        }
+                        dumpUid = mPmInternal.getPackageUidInternal(dumpPackage, MATCH_ANY_USER, 0);
                     }
                     for (int i = 0; i < mGrantedUriPermissions.size(); i++) {
                         int uid = mGrantedUriPermissions.keyAt(i);

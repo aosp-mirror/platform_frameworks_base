@@ -1,0 +1,30 @@
+{
+    "presubmit": [
+        {
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.uri."
+                }
+            ]
+        }
+    ],
+    "postsubmit": [
+        {
+            "name": "CtsAppSecurityHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
+                }
+            ]
+        },
+        {
+            "name": "CtsWindowManagerDeviceTestCases",
+            "options": [
+                {
+                    "include-filter": "android.server.wm.CrossAppDragAndDropTests"
+                }
+            ]
+        }
+    ]
+}

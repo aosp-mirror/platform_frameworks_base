@@ -30,7 +30,6 @@ import java.io.PrintWriter;
  */
 public interface UriGrantsManagerInternal {
     void onSystemReady();
-    void onActivityManagerInternalAdded();
     void removeUriPermissionIfNeeded(UriPermission perm);
     void grantUriPermission(int callingUid, String targetPkg, GrantUri grantUri,
             final int modeFlags, UriPermissionOwner owner, int targetUserId);
