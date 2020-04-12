@@ -1835,8 +1835,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizoval správca"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Odstránil správca"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Šetrič batérie predlžuje výdrž batérie:\n·zapnutím tmavého motívu;\n·vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad „Hej Google“.\n\n"<annotation id="url">"Ďalšie informácie"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Šetrič batérie predlžuje výdrž batérie:\n·zapnutím tmavého motívu;\n·vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad „Hej Google“."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Šetrič batérie predlžuje výdrž batérie:\n·zapnutím tmavého motívu;\n·vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad „Hey Google“.\n\n"<annotation id="url">"Ďalšie informácie"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Šetrič batérie predlžuje výdrž batérie:\n·zapnutím tmavého motívu;\n·vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad „Hey Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"S cieľom znížiť spotrebu dát bráni šetrič dát niektorým aplikáciám odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú práve používate, môže využívať dáta, ale možno to bude robiť menej často. Znamená to napríklad, že sa nezobrazia obrázky, kým na ne neklepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnúť šetrič dát?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnúť"</string>

@@ -194,7 +194,7 @@
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Апликациите може да пристапуваат до вашата локација"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Контактирајте со IT-администраторот за да дознаете повеќе"</string>
     <string name="country_detector" msgid="7023275114706088854">"Детектор на земја"</string>
-    <string name="location_service" msgid="2439187616018455546">"Услуги според локација"</string>
+    <string name="location_service" msgid="2439187616018455546">"Услуга за локација"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Услуга за известување од сензорот"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Услуга за самрак"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Уредот ќе се избрише"</string>
