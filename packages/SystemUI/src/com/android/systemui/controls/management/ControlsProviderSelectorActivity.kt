@@ -64,6 +64,7 @@ class ControlsProviderSelectorActivity @Inject constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.controls_management)
         requireViewById<ViewStub>(R.id.stub).apply {
             layoutResource = R.layout.controls_management_apps

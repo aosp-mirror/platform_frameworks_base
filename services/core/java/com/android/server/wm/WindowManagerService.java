@@ -25,6 +25,7 @@ import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
@@ -1359,7 +1360,8 @@ public class WindowManagerService extends IWindowManager.Stub
             LayoutParams attrs, int viewVisibility, int displayId, Rect outFrame,
             Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
-            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
+            int requestUserId) {
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
@@ -1426,6 +1428,20 @@ public class WindowManagerService extends IWindowManager.Stub
                         "Attempted to add presentation window to a non-suitable display.  "
                                 + "Aborting.");
                 return WindowManagerGlobal.ADD_INVALID_DISPLAY;
+            }
+
+            int userId = UserHandle.getUserId(session.mUid);
+            if (requestUserId != userId) {
+                try {
+                    mAmInternal.handleIncomingUser(callingPid, callingUid, requestUserId,
+                            false /*allowAll*/, ALLOW_NON_FULL, null, null);
+                } catch (Exception exp) {
+                    ProtoLog.w(WM_ERROR, "Trying to add window with invalid user=%d",
+                            requestUserId);
+                    return WindowManagerGlobal.ADD_INVALID_USER;
+                }
+                // It's fine to use this userId
+                userId = requestUserId;
             }
 
             ActivityRecord activity = null;
@@ -1516,7 +1532,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
-                    appOp[0], seq, attrs, viewVisibility, session.mUid,
+                    appOp[0], seq, attrs, viewVisibility, session.mUid, userId,
                     session.mCanAddInternalSystemWindow);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
@@ -1836,8 +1852,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if ((w.mAttrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
             return true;
         }
-        if (DevicePolicyCache.getInstance().getScreenCaptureDisabled(
-                UserHandle.getUserId(w.mOwnerUid))) {
+        if (DevicePolicyCache.getInstance().getScreenCaptureDisabled(w.mShowUserId)) {
             return true;
         }
         return false;
@@ -7407,7 +7422,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 WindowState window = mWindowMap.get(token);
                 if (window != null) {
-                    return UserHandle.getUserId(window.mOwnerUid);
+                    return window.mShowUserId;
                 }
                 return UserHandle.USER_NULL;
             }

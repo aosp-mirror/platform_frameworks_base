@@ -83,7 +83,7 @@ final class MediaRoute2ProviderWatcher {
 
             // Scan packages.
             // Also has the side-effect of restarting providers if needed.
-            mHandler.post(mScanPackagesRunnable);
+            postScanPackagesIfNeeded();
         }
     }
 
@@ -92,7 +92,7 @@ final class MediaRoute2ProviderWatcher {
             mRunning = false;
 
             mContext.unregisterReceiver(mScanPackagesReceiver);
-            mHandler.removeCallbacks(mScanPackagesRunnable);
+            mHandler.removeCallbacks(this::scanPackages);
 
             // Stop all providers.
             for (int i = mProxies.size() - 1; i >= 0; i--) {
@@ -154,20 +154,19 @@ final class MediaRoute2ProviderWatcher {
         return -1;
     }
 
+    private void postScanPackagesIfNeeded() {
+        if (!mHandler.hasCallbacks(this::scanPackages)) {
+            mHandler.post(this::scanPackages);
+        }
+    }
+
     private final BroadcastReceiver mScanPackagesReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) {
                 Slog.d(TAG, "Received package manager broadcast: " + intent);
             }
-            scanPackages();
-        }
-    };
-
-    private final Runnable mScanPackagesRunnable = new Runnable() {
-        @Override
-        public void run() {
-            scanPackages();
+            postScanPackagesIfNeeded();
         }
     };
 

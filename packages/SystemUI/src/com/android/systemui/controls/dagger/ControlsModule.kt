@@ -22,6 +22,7 @@ import com.android.systemui.controls.controller.ControlsBindingControllerImpl
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.ControlsFavoritePersistenceWrapper
+import com.android.systemui.controls.management.ControlsEditingActivity
 import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsListingControllerImpl
@@ -69,6 +70,13 @@ abstract class ControlsModule {
     @ClassKey(ControlsFavoritingActivity::class)
     abstract fun provideControlsFavoritingActivity(
         activity: ControlsFavoritingActivity
+    ): Activity
+
+    @Binds
+    @IntoMap
+    @ClassKey(ControlsEditingActivity::class)
+    abstract fun provideControlsEditingActivity(
+        activity: ControlsEditingActivity
     ): Activity
 
     @Binds

@@ -58,7 +58,6 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
@@ -86,6 +85,8 @@ import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
+import static com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.TASK;
@@ -135,6 +136,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.window.ITaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -897,7 +899,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         // TODO: Handle incorrect request to move before the actual move, not after.
         supervisor.handleNonResizableTaskIfNeeded(this, preferredStack.getWindowingMode(),
-                DEFAULT_DISPLAY, toStack);
+                mRootWindowContainer.getDefaultTaskDisplayArea(), toStack);
 
         return (preferredStack == toStack);
     }
@@ -3398,6 +3400,24 @@ class Task extends WindowContainer<WindowContainer> {
 
         if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
+        }
+    }
+
+    @Override
+    protected void applyAnimationUnchecked(WindowManager.LayoutParams lp, boolean enter,
+            int transit, boolean isVoiceInteraction,
+            @Nullable OnAnimationFinishedCallback finishedCallback) {
+        final RecentsAnimationController control = mWmService.getRecentsAnimationController();
+        if (control != null && enter
+                && getDisplayContent().mAppTransition.isNextAppTransitionCustomFromRecents()) {
+            ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
+                    "addTaskToRecentsAnimationIfNeeded, control: %s, task: %s, transit: %s",
+                    control, asTask(), AppTransition.appTransitionToString(transit));
+            // We let the transition to be controlled by RecentsAnimation, and callback task's
+            // RemoteAnimationTarget for remote runner to animate.
+            control.addTaskToTargets(getRootTask(), finishedCallback);
+        } else {
+            super.applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, finishedCallback);
         }
     }
 

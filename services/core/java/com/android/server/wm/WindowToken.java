@@ -554,13 +554,12 @@ class WindowToken extends WindowContainer<WindowState> {
         // cleared and the configuration is restored from parent.
         if (!changed) {
             clearFixedRotationTransform(null /* applyDisplayRotation */);
-            onConfigurationChanged(getParent().getConfiguration());
         }
     }
 
     /**
-     * Clears the transform and apply display rotation if the action is given. The caller needs to
-     * refresh the configuration of this container after this method call.
+     * Clears the transform and apply display rotation if the action is given. If the display will
+     * not rotate, the transformed containers are restored to their original states.
      */
     void clearFixedRotationTransform(Runnable applyDisplayRotation) {
         final FixedRotationTransformState state = mFixedRotationTransformState;
@@ -574,6 +573,12 @@ class WindowToken extends WindowContainer<WindowState> {
         state.mIsTransforming = false;
         if (applyDisplayRotation != null) {
             applyDisplayRotation.run();
+        } else {
+            // The display will not rotate to the rotation of this container, let's cancel them.
+            for (int i = state.mAssociatedTokens.size() - 1; i >= 0; i--) {
+                state.mAssociatedTokens.get(i).cancelFixedRotationTransform();
+            }
+            cancelFixedRotationTransform();
         }
         // The state is cleared at the end, because it is used to indicate that other windows can
         // use seamless rotation when applying rotation to display.
@@ -581,6 +586,16 @@ class WindowToken extends WindowContainer<WindowState> {
             state.mAssociatedTokens.get(i).mFixedRotationTransformState = null;
         }
         mFixedRotationTransformState = null;
+    }
+
+    /** Restores the changes that applies to this container. */
+    private void cancelFixedRotationTransform() {
+        final WindowContainer<?> parent = getParent();
+        if (parent == null) {
+            // The window may be detached or detaching.
+            return;
+        }
+        onConfigurationChanged(parent.getConfiguration());
     }
 
     @Override

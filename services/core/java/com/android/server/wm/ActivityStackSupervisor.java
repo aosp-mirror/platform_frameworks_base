@@ -44,7 +44,6 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
@@ -1378,8 +1377,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         if (DEBUG_STACK) Slog.d(TAG_STACK,
                 "findTaskToMoveToFront: moved to front of stack=" + currentStack);
 
-        handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED, DEFAULT_DISPLAY,
-                currentStack, forceNonResizeable);
+        handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
+                mRootWindowContainer.getDefaultTaskDisplayArea(), currentStack, forceNonResizeable);
     }
 
     private void moveHomeStackToFrontIfNeeded(int flags, TaskDisplayArea taskDisplayArea,
@@ -2134,16 +2133,29 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 WindowManagerService.WINDOW_FREEZE_TIMEOUT_DURATION);
     }
 
+    // TODO(b/152116619): Remove after complete switch to TaskDisplayArea
     void handleNonResizableTaskIfNeeded(Task task, int preferredWindowingMode,
             int preferredDisplayId, ActivityStack actualStack) {
-        handleNonResizableTaskIfNeeded(task, preferredWindowingMode, preferredDisplayId,
+        final DisplayContent preferredDisplayContent = mRootWindowContainer
+                .getDisplayContent(preferredDisplayId);
+        final TaskDisplayArea preferredDisplayArea = preferredDisplayContent != null
+                ? preferredDisplayContent.getDefaultTaskDisplayArea()
+                : null;
+        handleNonResizableTaskIfNeeded(task, preferredWindowingMode, preferredDisplayArea,
+                actualStack);
+    }
+
+    void handleNonResizableTaskIfNeeded(Task task, int preferredWindowingMode,
+            TaskDisplayArea preferredTaskDisplayArea, ActivityStack actualStack) {
+        handleNonResizableTaskIfNeeded(task, preferredWindowingMode, preferredTaskDisplayArea,
                 actualStack, false /* forceNonResizable */);
     }
 
     void handleNonResizableTaskIfNeeded(Task task, int preferredWindowingMode,
-            int preferredDisplayId, ActivityStack actualStack, boolean forceNonResizable) {
-        final boolean isSecondaryDisplayPreferred =
-                (preferredDisplayId != DEFAULT_DISPLAY && preferredDisplayId != INVALID_DISPLAY);
+            TaskDisplayArea preferredTaskDisplayArea, ActivityStack actualStack,
+            boolean forceNonResizable) {
+        final boolean isSecondaryDisplayPreferred = preferredTaskDisplayArea != null
+                && preferredTaskDisplayArea.getDisplayId() != DEFAULT_DISPLAY;
         final boolean inSplitScreenMode = actualStack != null
                 && actualStack.getDisplayArea().isSplitScreenModeActivated();
         if (((!inSplitScreenMode && preferredWindowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
@@ -2153,33 +2165,31 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         // Handle incorrect launch/move to secondary display if needed.
         if (isSecondaryDisplayPreferred) {
-            final int actualDisplayId = task.getDisplayId();
-            if (!task.canBeLaunchedOnDisplay(actualDisplayId)) {
+            if (!task.canBeLaunchedOnDisplay(task.getDisplayId())) {
                 throw new IllegalStateException("Task resolved to incompatible display");
             }
 
-            final DisplayContent preferredDisplay =
-                    mRootWindowContainer.getDisplayContent(preferredDisplayId);
+            final DisplayContent preferredDisplay = preferredTaskDisplayArea.mDisplayContent;
 
             final boolean singleTaskInstance = preferredDisplay != null
                     && preferredDisplay.isSingleTaskInstance();
 
-            if (preferredDisplayId != actualDisplayId) {
+            if (preferredDisplay != task.getDisplayContent()) {
                 // Suppress the warning toast if the preferredDisplay was set to singleTask.
                 // The singleTaskInstance displays will only contain one task and any attempt to
                 // launch new task will re-route to the default display.
                 if (singleTaskInstance) {
                     mService.getTaskChangeNotificationController()
                             .notifyActivityLaunchOnSecondaryDisplayRerouted(task.getTaskInfo(),
-                                    preferredDisplayId);
+                                    preferredDisplay.mDisplayId);
                     return;
                 }
 
-                Slog.w(TAG, "Failed to put " + task + " on display " + preferredDisplayId);
+                Slog.w(TAG, "Failed to put " + task + " on display " + preferredDisplay.mDisplayId);
                 // Display a warning toast that we failed to put a task on a secondary display.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityLaunchOnSecondaryDisplayFailed(task.getTaskInfo(),
-                                preferredDisplayId);
+                                preferredDisplay.mDisplayId);
             } else if (!forceNonResizable) {
                 handleForcedResizableTaskIfNeeded(task, FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY);
             }
@@ -2198,7 +2208,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // split-screen in split-screen.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                taskDisplayArea.onSplitScreenModeDismissed();
+                taskDisplayArea.onSplitScreenModeDismissed(task.getStack());
                 taskDisplayArea.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
                         true /* notifyClients */);
             }

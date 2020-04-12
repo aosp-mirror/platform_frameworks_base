@@ -70,7 +70,9 @@ import java.util.List;
  * {@link DisplayArea} that represents a section of a screen that contains app window containers.
  */
 final class TaskDisplayArea extends DisplayArea<ActivityStack> {
+
     DisplayContent mDisplayContent;
+
     /**
      * A control placed at the appropriate level for transitions to occur.
      */
@@ -1068,7 +1070,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     /**
      * Find task for putting the Activity in.
      */
-    void findTaskLocked(final ActivityRecord r, final boolean isPreferredDisplay,
+    void findTaskLocked(final ActivityRecord r, final boolean isPreferredDisplayArea,
             RootWindowContainer.FindTaskResult result) {
         mTmpFindTaskResult.clear();
         for (int stackNdx = getStackCount() - 1; stackNdx >= 0; --stackNdx) {
@@ -1090,7 +1092,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
                 if (mTmpFindTaskResult.mIdealMatch) {
                     result.setTo(mTmpFindTaskResult);
                     return;
-                } else if (isPreferredDisplay) {
+                } else if (isPreferredDisplayArea) {
                     // Note: since the traversing through the stacks is top down, the floating
                     // tasks should always have lower priority than any affinity-matching tasks
                     // in the fullscreen stacks
@@ -1165,17 +1167,23 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     }
 
     void onSplitScreenModeDismissed() {
+        onSplitScreenModeDismissed(null /* toTop */);
+    }
+
+    void onSplitScreenModeDismissed(ActivityStack toTop) {
         mAtmService.deferWindowLayout();
         try {
             mLaunchRootTask = null;
             moveSplitScreenTasksToFullScreen();
         } finally {
-            final ActivityStack topFullscreenStack =
-                    getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
+            final ActivityStack topFullscreenStack = toTop != null
+                    ? toTop : getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
             final ActivityStack homeStack = getOrCreateRootHomeTask();
-            if (topFullscreenStack != null && homeStack != null && !isTopStack(homeStack)) {
+            if (homeStack != null && ((topFullscreenStack != null && !isTopStack(homeStack))
+                    || toTop != null)) {
                 // Whenever split-screen is dismissed we want the home stack directly behind the
                 // current top fullscreen stack so it shows up when the top stack is finished.
+                // Or, if the caller specified a stack to be on top after split-screen is dismissed.
                 // TODO: Would be better to use ActivityDisplay.positionChildAt() for this, however
                 // ActivityDisplay doesn't have a direct controller to WM side yet. We can switch
                 // once we have that.

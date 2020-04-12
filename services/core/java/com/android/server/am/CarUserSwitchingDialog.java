@@ -36,7 +36,6 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -59,12 +58,6 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
             String switchingToSystemUserMessage) {
         super(service, context, oldUser, newUser, aboveSystem, switchingFromSystemUserMessage,
                 switchingToSystemUserMessage);
-
-        // {@link UserSwitchingDialog} uses {@link WindowManager.LayoutParams.TYPE_SYSTEM_ERROR}
-        // when trying to show dialog above system. That window type has been deprecated and since
-        // this is a system dialog, hence, it makes sense to put this in System Dialog Window.
-        // This window also automatically shows status bar.
-        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
     }
 
     @Override
