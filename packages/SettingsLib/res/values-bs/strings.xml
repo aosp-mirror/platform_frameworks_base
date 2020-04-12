@@ -482,7 +482,7 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Naprijed"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Potrebna je lozinka"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Aktivne metode unosa"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Koristite jezik sistema"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Koristi jezik sistema"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Otvaranje postavki za <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> nije uspjelo"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Ovaj način unosa može prikupiti sav tekst koji upišete, uključujući lične podatke kao što su lozinke i brojevi kreditnih kartica. Način omogućava aplikacija <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Da li želite koristiti ovaj način unosa?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Napomena: Nakon ponovnog pokretanja, ova aplikacija se neće moći pokrenuti dok ne otključate telefon"</string>
