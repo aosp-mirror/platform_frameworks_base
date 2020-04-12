@@ -422,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"akses perintah penyedia lokasi ekstra"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Tindakan ini memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"akses lokasi pasti hanya saat di latar depan"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Aplikasi ini bisa mendapatkan lokasi pasti Anda saat berada di latar depan. Fitur layanan lokasi harus diaktifkan dan tersedia di perangkat agar dapat digunakan oleh aplikasi. Fitur ini dapat meningkatkan konsumsi baterai."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aplikasi ini bisa mendapatkan lokasi pasti Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi. Ini dapat meningkatkan penggunaan baterai."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"akses perkiraan lokasi hanya saat berada di latar depan"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Aplikasi ini bisa mendapatkan perkiraan lokasi Anda hanya saat berada di latar depan. Layanan lokasi harus diaktifkan dan tersedia di perangkat agar aplikasi dapat menggunakannya."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aplikasi ini bisa mendapatkan perkiraan lokasi Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"akses lokasi di latar belakang"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Aplikasi ini dapat mengakses lokasi saat berjalan di latar belakang, selain akses lokasi latar depan."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Aplikasi ini dapat mengakses lokasi kapan saja, bahkan saat aplikasi tidak sedang digunakan."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ubah setelan audio Anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Memungkinkan aplikasi mengubah setelan audio global, misalnya volume dan pengeras suara mana yang digunakan untuk keluaran."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"rekam audio"</string>
@@ -484,8 +484,8 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh tablet. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Mengizinkan aplikasi mendapatkan daftar akun yang dikenal oleh perangkat Android TV. Ini mungkin mencakup akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh ponsel. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
-    <string name="permlab_accessNetworkState" msgid="2349126720783633918">"lihat sambungan jaringan"</string>
-    <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Memungkinkan aplikasi melihat informasi tentang sambungan jaringan, misalnya jaringan yang ada dan tersambung."</string>
+    <string name="permlab_accessNetworkState" msgid="2349126720783633918">"lihat koneksi jaringan"</string>
+    <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Memungkinkan aplikasi melihat informasi tentang koneksi jaringan, misalnya jaringan yang ada dan tersambung."</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"dapatkan akses jaringan penuh"</string>
     <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"Memungkinkan aplikasi membuat soket jaringan dan menggunakan protokol jaringan khusus. Browser dan aplikasi lain menyediakan sarana untuk mengirim data ke internet sehingga izin ini tidak diperlukan untuk mengirim data ke internet."</string>
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"ubah konektivitas jaringan"</string>
@@ -1342,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Meninjau konten saat ini"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> baru"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Ketuk untuk menyiapkan"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Untuk mentransfer foto dan media"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Masalah pada <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Ketuk untuk memperbaiki"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> rusak. Pilih untuk memperbaikinya."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> tidak didukung"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Perangkat tidak mendukung <xliff:g id="NAME">%s</xliff:g> ini. Ketuk untuk menyiapkan dalam format yang didukung."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Perangkat ini tidak mendukung <xliff:g id="NAME">%s</xliff:g> ini. Pilih untuk menyiapkan dalam format yang didukung."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Perangkat ini tidak mendukung <xliff:g id="NAME">%s</xliff:g> ini."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> tiba-tiba dicabut"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Keluarkan media sebelum mencabut agar konten tidak hilang"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> dicabut"</string>
@@ -1617,7 +1620,7 @@
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Aksesibilitas?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Aktifkan fitur aksesibilitas?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan fitur aksesibilitas. Tindakan dapat mengubah cara kerja perangkat Anda.\n\nFitur saat ini:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAnda dapat mengubah fitur yang dipilih di Setelan &gt; Aksesibilitas."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan fitur aksesibilitas. Tindakan ini dapat mengubah cara kerja perangkat Anda.\n\nFitur saat ini:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAnda dapat mengubah fitur yang dipilih di Setelan &gt; Aksesibilitas."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Aktifkan TalkBack?"</string>
     <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan TalkBack, pembaca layar yang membantu pengguna dengan gangguan penglihatan atau tunanetra. TalkBack akan mengubah cara kerja perangkat Anda sepenuhnya.\n\nAnda dapat mengubah pintasan ini ke fitur lain di Setelan &gt; Aksesibilitas."</string>
@@ -2041,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Percakapan"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Percakapan Grup"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Pribadi"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Kerja"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Tampilan pribadi"</string>
@@ -2059,8 +2063,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Tidak ada aplikasi kerja yang dapat membuka konten ini"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Tidak ada aplikasi pribadi yang dapat mendukung konten ini"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Tidak ada aplikasi pribadi yang dapat membuka konten ini"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Rekam atau putar audio dalam panggilan telepon"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Mengizinkan aplikasi ini, saat ditetapkan sebagai aplikasi telepon default, untuk merekam atau memutar audio dalam panggilan telepon."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN pembuka kunci SIM network"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN pembuka kunci SIM network subset"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN pembuka kunci SIM corporate"</string>
@@ -2088,33 +2090,33 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"PIN pembuka kunci ICCID"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"PIN pembuka kunci IMPI"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"PIN pembuka kunci Network subset service provider"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"Meminta untuk membuka SIM network …"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"Meminta untuk membuka SIM network subset …"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"Meminta untuk membuka kunci SIM network …"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"Meminta untuk membuka kunci SIM network subset …"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"Meminta untuk membuka SIM service provider …"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"Meminta untuk membuka SIM corporate …"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"Meminta untuk membuka PUK …"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"Meminta untuk membuka PUK …"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"Meminta untuk membuka PUK …"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Meminta untuk membuka PUK …"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Meminta untuk membuka PUK …"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"Meminta untuk membuka kunci SIM corporate …"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"Meminta untuk membuka kunci PUK …"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"Meminta untuk membuka kunci PUK …"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"Meminta untuk membuka kunci PUK …"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Meminta untuk membuka kunci PUK …"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Meminta untuk membuka kunci PUK …"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"Meminta untuk membuka SIM …"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Meminta untuk membuka RUIM network1 …"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Meminta untuk membuka RUIM network2 …"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"Meminta untuk membuka RUIM hrpd …"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"Meminta untuk membuka RUIM service provider …"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"Meminta untuk membuka RUIM corporate …"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Meminta untuk membuka kunci RUIM network1 …"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Meminta untuk membuka kunci RUIM network2 …"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"Meminta untuk membuka kunci RUIM hrpd …"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"Meminta untuk membuka kunci RUIM service provider …"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"Meminta untuk membuka kunci RUIM corporate …"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"Meminta untuk membuka SPN …"</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"Meminta untuk membuka SP Equivalent Home PLMN …"</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"Meminta untuk membuka ICCID …"</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"Meminta untuk membuka IMPI …"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"Meminta untuk membuka Network subset service provider …"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"Meminta untuk membuka RUIM …"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"Meminta untuk membuka PUK …"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"Meminta untuk membuka PUK …"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"Meminta untuk membuka PUK …"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"Meminta untuk membuka PUK …"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"Meminta untuk membuka PUK …"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"Meminta untuk membuka PUK …"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"Meminta untuk membuka kunci ICCID …"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"Meminta untuk membuka kunci IMPI …"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"Meminta untuk membuka kunci Network subset service provider …"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"Meminta untuk membuka kunci RUIM …"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"Meminta untuk membuka kunci PUK …"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"Meminta untuk membuka kunci PUK …"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"Meminta untuk membuka kunci PUK …"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"Meminta untuk membuka kunci PUK …"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"Meminta untuk membuka kunci PUK …"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"Meminta untuk membuka kunci PUK …"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"Permintaan buka kunci SIM Network gagal."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"Permintaan buka kunci SIM Network Subset gagal."</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"Permintaan buka kunci SIM Service Provider gagal."</string>
@@ -2126,47 +2128,47 @@
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"Permintaan buka kunci RUIM Corporate gagal."</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"Permintaan buka kunci RUIM Service Provider gagal."</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"Permintaan buka kunci RUIM gagal."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"Gagal membuka PUK."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"Gagal membuka PUK."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"Gagal membuka PUK."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"Gagal membuka PUK."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"Gagal membuka PUK."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"Gagal membuka PUK."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"Gagal membuka PUK."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"Gagal membuka PUK."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"Gagal membuka PUK."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"Gagal membuka PUK."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"Gagal membuka PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"Gagal membuka kunci PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"Gagal membuka kunci PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"Gagal membuka kunci PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"Gagal membuka kunci PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"Gagal membuka kunci PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"Gagal membuka kunci PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"Gagal membuka kunci PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"Gagal membuka kunci PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"Gagal membuka kunci PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"Gagal membuka kunci PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"Gagal membuka kunci PUK."</string>
     <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"Permintaan buka kunci SPN gagal."</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"Permintaan buka kunci SP Equivalent Home PLMN gagal."</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"Permintaan buka kunci ICCID gagal."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"Permintaan buka kunci IMPI gagal."</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"Permintaan buka kunci Network subset service provider gagal."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"SIM Network berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"SIM Network Subset berhasil dibuka."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"SIM Network berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"SIM Network Subset berhasil dibuka kuncinya."</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"SIM Service Provider berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"SIM Corporate berhasil dibuka."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"SIM Corporate berhasil dibuka kuncinya."</string>
     <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"SIM berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM Network1 berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM Network2 berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM Hrpd berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM Service Provider berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"RUIM Corporate berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"RUIM berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK berhasil dibuka."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM Network1 berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM Network2 berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM Hrpd berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM Service Provider berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"RUIM Corporate berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"RUIM berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK berhasil dibuka kuncinya."</string>
     <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"SPN berhasil dibuka."</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"SP Equivalent Home PLMN berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID berhasil dibuka."</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI berhasil dibuka."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID berhasil dibuka kuncinya."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI berhasil dibuka kuncinya."</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Network subset service provider berhasil dibuka."</string>
 </resources>

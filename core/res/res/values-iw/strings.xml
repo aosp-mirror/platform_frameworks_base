@@ -428,11 +428,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"גישה לפקודות ספק מיקום נוספות"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"‏מאפשרת לאפליקציה לגשת לפקודות נוספות של ספק המיקום. הרשאה זו עשויה לאפשר לאפליקציה לשבש את פעולת ה-GPS או מקורות מיקום אחרים."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"קבלת גישה למיקום מדויק בחזית בלבד"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"אפליקציה זו יכולה לזהות את המיקום המדויק שלך רק כאשר היא פועלת בחזית. כדי שהאפליקציה תוכל להשתמש בשירותי המיקום, עליהם להיות מופעלים וזמינים במכשיר. ייתכן שפעולה זו תגביר את צריכת הסוללה."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"האפליקציה הזו יכולה לקבל את המיקום המדויק שלך משירותי המיקום כאשר היא בשימוש. האפליקציה תקבל את המיקום רק אם הפעלת את שירותי המיקום במכשיר. פעולה זו עלולה להגביר את השימוש בסוללה."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"קבלת גישה למיקום משוער תתבצע בחזית בלבד"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"אפליקציה זו יכולה לזהות את המיקום המשוער שלך רק כאשר היא פועלת בחזית. שירותי מיקום חייבים להיות מופעלים וזמינים במכשיר שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"כאשר האפליקציה בשימוש היא יכולה לקבל משירותי המיקום את המיקום המשוער שלך. האפליקציה תקבל את המיקום רק אם הפעלת את שירותי המיקום במכשיר."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"גישה למיקום ברקע"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"האפליקציה הזו יכולה לגשת למיקום כשהיא רצה ברקע, בנוסף לקבלת גישה למיקום בחזית."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"לאפליקציה תמיד יש גישה למיקום, גם כשאינה בשימוש."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"שנה את הגדרות האודיו שלך"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"מאפשר לאפליקציה לשנות הגדרות אודיו גלובליות כמו עוצמת קול ובחירת הרמקול המשמש לפלט."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"הקלט אודיו"</string>
@@ -1382,13 +1382,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"מתבצעת בדיקה של התוכן הנוכחי"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> חדש"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"צריך להקיש כדי להגדיר"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"להעברת תמונות ומדיה"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"בעיה עם <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"יש להקיש כדי לתקן את הבעיה"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> פגום. בחר כדי לטפל בבעיה."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> לא נתמך"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"מכשיר זה אינו תומך ב-<xliff:g id="NAME">%s</xliff:g> זה. הקש כדי להגדיר בפורמט נתמך."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"<xliff:g id="NAME">%s</xliff:g> לא נתמך במכשיר הזה. בחר כדי להגדיר בפורמט שנתמך."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"במכשיר הזה אין תמיכה בהתקן <xliff:g id="NAME">%s</xliff:g> זה."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> הוסר באופן בלתי צפוי"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"יש לבחור באפשרות להוצאת מדיה לפני ההסרה, כדי לא לאבד תוכן"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> הוסר"</string>
@@ -2109,6 +2112,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"שיחה"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"שיחה קבוצתית"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"אישי"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"עבודה"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"תצוגה אישית"</string>
@@ -2127,8 +2131,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"אי אפשר לפתוח את התוכן הזה באמצעות אפליקציות לעבודה"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"אין תמיכה בתוכן הזה באפליקציות לשימוש אישי"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"אי אפשר לפתוח את התוכן הזה באמצעות אפליקציות לשימוש אישי"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"הקלטה או הפעלה של אודיו בשיחות טלפוניות"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"כאשר האפליקציה הזו מוגדרת כאפליקציית חייגן בברירת מחדל, תהיה לה הרשאה להקליט ולהפעיל אודיו בשיחות טלפוניות."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏קוד אימות לביטול הנעילה של רשת SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"‏קוד אימות לביטול הנעילה של תת-קבוצה ברשת SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"‏קוד אימות לביטול הנעילה של כרטיס SIM עסקי"</string>

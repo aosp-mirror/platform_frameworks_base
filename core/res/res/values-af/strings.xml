@@ -422,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"Kry toegang tot ekstra liggingverskaffer-bevele"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Gee die program toegang tot ekstra liggingverskaffer-bevele. Dit kan die program dalk toelaat om in te meng met die werking van die GPS of ander liggingbronne."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"kry net op die voorgrond toegang tot presiese ligging"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Hierdie program kan jou presiese ligging kry net wanneer dit op die voorgrond is. Liggingdienste moet aangeskakel wees en op jou toestel beskikbaar wees sodat die program hulle kan gebruik. Dit kan veroorsaak dat meer batterykrag gebruik word."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Hierdie program kan jou presiese ligging van liggingdienste af kry terwyl die program gebruik word. Liggingdienste vir jou toestel moet aangeskakel wees vir die program om die ligging te kry. Dit kan batterygebruik verhoog."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"kry benaderde ligging net op die voorgrond"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Hierdie program kan jou benaderde ligging net kry wanneer dit op die voorgrond is. Liggingdienste moet aangeskakel wees en op jou toestel beskikbaar wees sodat die program hulle kan gebruik."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Hierdie program kan jou benaderde ligging van liggingdienste af kry terwyl die program gebruik word. Liggingdienste vir jou toestel moet aangeskakel wees vir die program om die ligging te kry."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"kry ligging op die agtergrond"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Hierdie program het toegang tot ligging terwyl dit op die agtergrond werk, asook voorgrondtoegang tot ligging."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Hierdie program kan op enige tydstip toegang tot ligging kry, selfs wanneer die program nie gebruik word nie."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"verander jou klankinstellings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Laat die program toe om globale klankinstellings soos volume en watter luidspreker vir uitvoer gebruik word, te verander."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"neem klank op"</string>
@@ -1342,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Gaan tans huidige inhoud na"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nuwe <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Tik om op te stel"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Om foto\'s en media oor te dra"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Kwessie met <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tik om reg te stel"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> is korrup. Kies om reg te stel."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Niegesteunde <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Hierdie toestel steun nie hierdie <xliff:g id="NAME">%s</xliff:g> nie. Tik om in \'n gesteunde formaat op te stel."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Hierdie toestel steun nie hierdie <xliff:g id="NAME">%s</xliff:g> nie. Kies om in \'n gesteunde formaat op te stel."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Hierdie toestel steun nie hierdie <xliff:g id="NAME">%s</xliff:g> nie."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> is onverwags verwyder"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Maak media los voordat jy dit verwyder om te keer dat jy inhoud verloor"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> is verwyder"</string>
@@ -1620,7 +1623,7 @@
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"As jy albei volumesleutels vir \'n paar sekondes hou, skakel dit toeganklikheidkenmerke aan. Dit kan verander hoe jou toestel werk.\n\nHuidige kenmerke:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nJy kan geselekteerde kenmerke in Instellings en Toeganklikheid verander."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Skakel TalkBack aan?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"As jy albei volumesleutels vir \'n paar sekondes hou, skakel dit TalkBack – \'n nuttige skermleser vir mense wat blind is of met swak sig – aan. TalkBack verander heeltemal hoe jou toestel werk.\n\nJy kan hierdie kortpad na \'n ander kenmerk in Instellings en Toeganklikheid verander."</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"As jy albei volumesleutels vir \'n paar sekondes hou, skakel dit TalkBack aan – \'n nuttige skermleser vir mense wat blind is of met swak sig. TalkBack verander heeltemal hoe jou toestel werk.\n\nJy kan hierdie kortpad na \'n ander kenmerk in Instellings en Toeganklikheid verander."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Skakel <xliff:g id="SERVICE">%1$s</xliff:g> aan?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"As jy albei volumesleutels vir \'n paar sekondes hou, skakel dit <xliff:g id="SERVICE">%1$s</xliff:g>, \'n toeganklikheidkenmerk, aan. Dit kan verander hoe jou toestel werk.\n\nJy kan hierdie kortpad na \'n ander kenmerk in Instellings en Toeganklikheid verander."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Skakel aan"</string>
@@ -2041,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Gesprek"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Groepsgesprek"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Persoonlik"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Werk"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Persoonlike aansig"</string>
@@ -2059,8 +2063,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Geen werkprogramme kan hierdie inhoud oopmaak nie"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Geen persoonlike programme kan hierdie inhoud steun nie"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Geen persoonlike programme kan hierdie inhoud oopmaak nie"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Neem oudio in telefonie-oproepe op of speel dit"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Laat hierdie program, indien dit as die verstekbellerprogram aangewys is, toe om oudio in telefonie-oproepe op te neem of te speel."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM se netwerkontsluiting-PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM se netwerksubstelontsluiting-PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM se korporatiewe ontsluiting-PIN"</string>
