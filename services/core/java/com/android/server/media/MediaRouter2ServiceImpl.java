@@ -925,9 +925,6 @@ class MediaRouter2ServiceImpl {
 
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
-        if (routerRecord == null) {
-            return;
-        }
 
         long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
         managerRecord.mUserRecord.mHandler.sendMessage(
@@ -1405,11 +1402,11 @@ class MediaRouter2ServiceImpl {
         }
 
         private void releaseSessionOnHandler(long uniqueRequestId,
-                @NonNull RouterRecord routerRecord, @NonNull String uniqueSessionId) {
+                @Nullable RouterRecord routerRecord, @NonNull String uniqueSessionId) {
             final RouterRecord matchingRecord = mSessionToRouterMap.get(uniqueSessionId);
             if (matchingRecord != routerRecord) {
-                Slog.w(TAG, "Ignoring releasing session from non-matching router."
-                        + " packageName=" + routerRecord.mPackageName
+                Slog.w(TAG, "Ignoring releasing session from non-matching router. packageName="
+                        + (routerRecord == null ? null : routerRecord.mPackageName)
                         + " uniqueSessionId=" + uniqueSessionId);
                 return;
             }
