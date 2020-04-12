@@ -2272,7 +2272,7 @@ class ActivityStack extends Task {
         ActivityOptions.abort(options);
         if (DEBUG_STATES) Slog.d(TAG_STATES,
                 "resumeNextFocusableActivityWhenStackIsEmpty: " + reason + ", go home");
-        return mRootWindowContainer.resumeHomeActivity(prev, reason, getDisplayId());
+        return mRootWindowContainer.resumeHomeActivity(prev, reason, getDisplayArea());
     }
 
     void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
@@ -3405,18 +3405,6 @@ class ActivityStack extends Task {
      */
     void getFinalAnimationSourceHintBounds(Rect outBounds) {
         outBounds.set(mBoundsAnimationSourceHintBounds);
-    }
-
-    /**
-     * @return the final animation bounds if the task stack is currently being animated, or the
-     *         current stack bounds otherwise.
-     */
-    void getAnimationOrCurrentBounds(Rect outBounds) {
-        if ((mBoundsAnimatingRequested || mBoundsAnimating) && !mBoundsAnimationTarget.isEmpty()) {
-            getFinalAnimationBounds(outBounds);
-            return;
-        }
-        getBounds(outBounds);
     }
 
     /** Bounds of the stack with other system factors taken into consideration. */

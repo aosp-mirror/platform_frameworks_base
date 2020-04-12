@@ -58,7 +58,6 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
@@ -900,7 +899,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         // TODO: Handle incorrect request to move before the actual move, not after.
         supervisor.handleNonResizableTaskIfNeeded(this, preferredStack.getWindowingMode(),
-                DEFAULT_DISPLAY, toStack);
+                mRootWindowContainer.getDefaultTaskDisplayArea(), toStack);
 
         return (preferredStack == toStack);
     }

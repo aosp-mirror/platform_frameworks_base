@@ -138,27 +138,16 @@ State CreateUidProcessState();
 // Create State proto for overlay state atom.
 State CreateOverlayState();
 
-State CreateScreenStateWithOnOffMap();
-
-State CreateScreenStateWithInDozeMap();
+State CreateScreenStateWithOnOffMap(int64_t screenOnId, int64_t screenOffId);
 
 // Create StateGroup proto for ScreenState ON group
-StateMap_StateGroup CreateScreenStateOnGroup();
+StateMap_StateGroup CreateScreenStateOnGroup(int64_t screenOnId);
 
 // Create StateGroup proto for ScreenState OFF group
-StateMap_StateGroup CreateScreenStateOffGroup();
+StateMap_StateGroup CreateScreenStateOffGroup(int64_t screenOffId);
 
 // Create StateMap proto for ScreenState ON/OFF map
-StateMap CreateScreenStateOnOffMap();
-
-// Create StateGroup proto for ScreenState IN DOZE group
-StateMap_StateGroup CreateScreenStateInDozeGroup();
-
-// Create StateGroup proto for ScreenState NOT IN DOZE group
-StateMap_StateGroup CreateScreenStateNotDozeGroup();
-
-// Create StateMap proto for ScreenState IN DOZE map
-StateMap CreateScreenStateInDozeMap();
+StateMap CreateScreenStateOnOffMap(int64_t screenOnId, int64_t screenOffId);
 
 // Add a predicate to the predicate combination.
 void addPredicateToPredicateCombination(const Predicate& predicate, Predicate* combination);
@@ -319,12 +308,14 @@ void ValidateAttributionUidAndTagDimension(
     const DimensionsValue& value, int node_idx, int atomId, int uid, const std::string& tag);
 
 struct DimensionsPair {
-    DimensionsPair(DimensionsValue m1, DimensionsValue m2) : dimInWhat(m1), dimInCondition(m2){};
+    DimensionsPair(DimensionsValue m1, google::protobuf::RepeatedPtrField<StateValue> m2)
+        : dimInWhat(m1), stateValues(m2){};
 
     DimensionsValue dimInWhat;
-    DimensionsValue dimInCondition;
+    google::protobuf::RepeatedPtrField<StateValue> stateValues;
 };
 
+bool LessThan(const StateValue& s1, const StateValue& s2);
 bool LessThan(const DimensionsValue& s1, const DimensionsValue& s2);
 bool LessThan(const DimensionsPair& s1, const DimensionsPair& s2);
 
@@ -393,7 +384,7 @@ void sortMetricDataByDimensionsValue(const T& metricData, T* sortedMetricData) {
     for (int i = 0; i < metricData.data_size(); ++i) {
         dimensionIndexMap.insert(
                 std::make_pair(DimensionsPair(metricData.data(i).dimensions_in_what(),
-                                              metricData.data(i).dimensions_in_condition()),
+                                              metricData.data(i).slice_by_state()),
                                i));
     }
     for (const auto& itr : dimensionIndexMap) {

@@ -681,7 +681,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"സ്‌ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ പാസ്‌വേഡ് ടൈപ്പുചെയ്‌തെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഈ എല്ലാ ഉപയോക്തൃവിവരവും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"സ്‌ക്രീൻ ലോക്ക് മാറ്റുക"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"സ്‌ക്രീൻ ലോക്ക് മാറ്റുക."</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"സ്‌ക്രീൻ ലോക്കുചെയ്യുക"</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"സ്‌ക്രീൻ ലോക്ക് ചെയ്യുക"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"സ്‌ക്രീൻ ലോക്കുകൾ എങ്ങനെ വേണമെന്നും എപ്പോൾ വേണമെന്നും എന്നത് നിയന്ത്രിക്കുക"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"എല്ലാ ഡാറ്റയും മായ്ക്കുക"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ഒരു ഫാക്‌ടറി ഡാറ്റ പുനഃസജ്ജീകരണം നടപ്പിലാക്കുന്നതിലൂടെ ടാബ്‌ലെറ്റിന്റെ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
@@ -2045,8 +2045,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"സംഭാഷണം"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ഗ്രൂപ്പ് സംഭാഷണം"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"വ്യക്തിപരമായത്"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ജോലിസ്ഥലം"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"വ്യക്തിപര കാഴ്‌ച"</string>

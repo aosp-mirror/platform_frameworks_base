@@ -1308,7 +1308,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analoginen äänilaite havaittu"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Liitetty laite ei ole yhteensopiva puhelimen kanssa. Napauta, niin näet lisätietoja."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB-vianetsintä yhdistetty"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Poista USB-virheenkorjaus käytöstä napauttamalla."</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Poista USB-virheenkorjaus käytöstä napauttamalla"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Poista USB-vianetsintä käytöstä valitsemalla tämä."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Langaton virheenkorjaus yhdistetty"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Poista langaton virheenkorjaus käytöstä napauttamalla"</string>

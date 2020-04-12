@@ -83,12 +83,11 @@ public abstract class SystemUIDefaultModule {
 
     @Binds
     @Singleton
-    public abstract BatteryController provideBatteryController(
-            BatteryControllerImpl controllerImpl);
+    public abstract BatteryController bindBatteryController(BatteryControllerImpl controllerImpl);
 
     @Binds
     @Singleton
-    public abstract QSFactory provideQSFactory(QSFactoryImpl qsFactoryImpl);
+    public abstract QSFactory bindQSFactory(QSFactoryImpl qsFactoryImpl);
 
     @Binds
     abstract DockManager bindDockManager(DockManagerImpl dockManager);

@@ -560,7 +560,7 @@
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"उपयोगकर्ता ने फिंगरप्रिंट की पुष्टि की कार्रवाई रद्द कर दी है."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"बहुत ज़्यादा प्रयास कर लिए गए हैं. बाद में फिर से प्रयास करें."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"बहुत ज़्यादा कोशिशें. फ़िंगरप्रिंट सेंसर अक्षम है."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"फिर से प्रयास करें."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"फिर से कोशिश करें."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"कोई फ़िंगरप्रिंट रजिस्टर नहीं किया गया है."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"इस डिवाइस में फ़िंगरप्रिंट सेंसर नहीं है."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"सेंसर कुछ समय के लिए बंद कर दिया गया है."</string>
@@ -681,8 +681,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"स्‍क्रीनका लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार गलत पासवर्ड लिखा जाता है तो फ़ोन को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"स्‍क्रीन लॉक बदलना"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"स्‍क्रीन लॉक बदलना."</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"स्‍क्रीन लॉक करें"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"नियंत्रित करें कि स्‍क्रीन कैसे और कब लॉक हो."</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"स्‍क्रीन लॉक करना"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"इससे नियंत्रित होगा कि स्‍क्रीन कैसे और कब लॉक हो."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"सारा डेटा मिटाना"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना फ़ोन का डेटा मिटाना."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"फ़ैक्ट्री डेटा रीसेट करके अपने Android TV डिवाइस का डेटा बिना चेतावनी दिए मिटाएं."</string>
@@ -699,8 +699,8 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"संग्रहित ऐप्स डेटा को एन्क्रिप्ट किया जाना आवश्‍यक है."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"कैमरों को अक्षम करें"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"सभी डिवाइस कैमरों का उपयोग रोकें."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"स्‍क्रीन लॉक की कुछ सुविधाएं बंद करें"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"कुछ स्‍क्रीन लाॅक सुविधाओं का उपयोग रोकें."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"स्‍क्रीन लॉक की कुछ सुविधाएं बंद करना"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"यह कुछ स्‍क्रीन लाॅक सुविधाओं का इस्तेमाल रोकती है."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"घर"</item>
     <item msgid="7740243458912727194">"मोबाइल"</item>
@@ -833,8 +833,8 @@
     <string name="lockscreen_emergency_call" msgid="7500692654885445299">"आपातकाल"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"कॉल पर वापस लौटें"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"सही!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"फिर से प्रयास करें"</string>
-    <string name="lockscreen_password_wrong" msgid="8605355913868947490">"फिर से प्रयास करें"</string>
+    <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"फिर से कोशिश करें"</string>
+    <string name="lockscreen_password_wrong" msgid="8605355913868947490">"फिर से कोशिश करें"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"सभी सुविधाओं और डेटा के लिए अनलॉक करें"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"मालिक का चेहरा पहचानकर अनलॉक करने की तय सीमा खत्म हो गई"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"कोई सिम कार्ड नहीं है"</string>
@@ -1661,7 +1661,7 @@
     <string name="user_switched" msgid="7249833311585228097">"मौजूदा उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> पर स्विच किया जा रहा है…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> द्वारा प्रस्‍थान किया जा रहा है…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"स्वामी"</string>
+    <string name="owner_name" msgid="8713560351570795743">"मालिक"</string>
     <string name="error_message_title" msgid="4082495589294631966">"गड़बड़ी"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"आपका व्यवस्थापक इस बदलाव की अनुमति नहीं देता"</string>
     <string name="app_not_found" msgid="3429506115332341800">"इस कार्यवाही को प्रबंधित करने के लिए कोई ऐप्स  नहीं मिला"</string>

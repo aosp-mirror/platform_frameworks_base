@@ -682,7 +682,7 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"ປ່ຽນ​ລັອກ​ໜ້າ​ຈໍ"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ປ່ຽນ​ລັອກ​ໜ້າ​ຈໍ."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"ລັອກໜ້າຈໍ"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"ຄວບຄຸມວ່າໜ້າຈໍຄວນຈະຖືກລັອກເມື່ອໃດ ແລະແນວໃດ"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"ຄວບຄຸມວ່າໜ້າຈໍຄວນຈະຖືກລັອກເມື່ອໃດ ແລະ ແນວໃດ."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"ລຶບຂໍ້ມູນທັງໝົດ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ລຶບຂໍ້ມູນຂອງແທັບເລັດໂດຍບໍ່ມີການເຕືອນ ໂດຍການຣີເຊັດກັບຄືນໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ລຶບຂໍ້ມູນຂອງອຸປະກອນ Android TV ທ່ານໂດຍບໍ່ຕ້ອງແຈ້ງເຕືອນດ້ວຍການຣີເຊັດຂໍ້ມູນເປັນຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານ."</string>

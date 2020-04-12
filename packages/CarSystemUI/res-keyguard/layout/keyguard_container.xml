@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2020 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +13,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Flower icon overlay -->
-    <string name="icon_shape_flower_overlay" translatable="false">Flower</string>
 
-</resources>
+<!-- Car customizations
+     Car has solid black background instead of a transparent one
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/keyguard_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"/>

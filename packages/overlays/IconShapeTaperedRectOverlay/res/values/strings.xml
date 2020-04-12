@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Hexagon icon overlay -->
-    <string name="icon_shape_hexagon_overlay" translatable="false">Hexagon</string>
+    <!-- Tapered rect icon overlay -->
+    <string name="icon_shape_tapered_rect_overlay" translatable="false">Tapered Rect</string>
 
 </resources>
