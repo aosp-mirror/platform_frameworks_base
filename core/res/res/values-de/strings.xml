@@ -543,7 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nicht erkannt"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Authentifizierung abgebrochen"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Keine PIN, kein Muster und kein Passwort festgelegt"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Fingerabdruck teilweise erkannt. Bitte versuche es noch einmal."</string>
+    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Fingerabdruck nur teilweise erkannt. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Fingerabdruck konnte nicht verarbeitet werden. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Fingerabdrucksensor ist verschmutzt. Reinige ihn und versuche es noch einmal."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Du hast deinen Finger zu schnell bewegt. Bitte versuche es noch einmal."</string>
@@ -680,7 +680,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Es wird überwacht, wie oft beim Versuch, den Bildschirm zu entsperren, ein falsches Passwort eingegeben wird. Wenn es zu viele Fehlversuche gibt, wird das Android TV-Gerät gesperrt oder alle Daten dieses Nutzers werden gelöscht."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Smartphone sperren oder alle Daten dieses Nutzers löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Displaysperre ändern"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Displaysperre ändern"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ändern der Displaysperre"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bildschirm sperren"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Festlegen, wie und wann der Bildschirm gesperrt wird"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Alle Daten löschen"</string>

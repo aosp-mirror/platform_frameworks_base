@@ -294,7 +294,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android సిస్టమ్"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"వ్యక్తిగత ప్రొఫైల్‌కి మార్చు"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"కార్యాలయ ప్రొఫైల్‌కి మార్చు"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"పరిచయాలు"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"కాంటాక్ట్‌లు"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ పరిచయాలను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"స్థానం"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి"</string>
@@ -572,7 +572,7 @@
     <string name="permdesc_manageFace" msgid="6204569688492710471">"వినియోగం కోసం ముఖ టెంప్లేట్‌లను జోడించే మరియు తొలగించే పద్ధతులను అమలు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ముఖంతో అన్‌లాక్ చేయగల హార్డ్‌వేర్ వినియోగం"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ప్రమాణీకరణ కోసం ముఖంతో అన్‌లాక్ చేయగల హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ముఖంతో అన్‌లాక్"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ఫేస్ అన్‌లాక్"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"మీ ముఖాన్ని తిరిగి నమోదు చేయండి"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"గుర్తింపును మెరుగుపరచడానికి, దయచేసి మీ ముఖంను తిరిగి నమోదు చేసుకోండి"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ముఖం డేటా సరిగ్గా రాలేదు. మళ్లీ ప్రయత్నించండి."</string>
@@ -906,7 +906,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"అన్‌లాక్ ప్రాంతాన్ని విస్తరింపజేయండి."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"స్లయిడ్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ఆకృతి అన్‌లాక్."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ముఖంతో అన్‌లాక్."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ఫేస్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"పిన్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim పిన్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim Puk అన్‌లాక్."</string>
