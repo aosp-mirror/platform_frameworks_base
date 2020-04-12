@@ -306,6 +306,7 @@ import com.android.server.am.PendingIntentRecord;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
 import com.android.server.wm.ActivityStack.ActivityState;
@@ -2449,9 +2450,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
             }
             if (info.applicationInfo.uid > 0) {
-                mAtmService.mUgmInternal.grantUriPermissionFromIntent(info.applicationInfo.uid,
-                        resultTo.packageName, resultData,
-                        resultTo.getUriPermissionsLocked(), resultTo.mUserId);
+                final NeededUriGrants needed = mAtmService.mUgmInternal
+                        .checkGrantUriPermissionFromIntent(resultData, info.applicationInfo.uid,
+                                resultTo.packageName, resultTo.mUserId);
+                mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(needed,
+                        resultTo.getUriPermissionsLocked());
             }
             resultTo.addResultLocked(this, resultWho, requestCode, resultCode, resultData);
             resultTo = null;
@@ -3663,8 +3666,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void sendResult(int callingUid, String resultWho, int requestCode, int resultCode,
             Intent data) {
         if (callingUid > 0) {
-            mAtmService.mUgmInternal.grantUriPermissionFromIntent(callingUid, packageName,
-                    data, getUriPermissionsLocked(), mUserId);
+            final NeededUriGrants needed = mAtmService.mUgmInternal
+                    .checkGrantUriPermissionFromIntent(data, callingUid, packageName, mUserId);
+            mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(needed,
+                    getUriPermissionsLocked());
         }
 
         if (DEBUG_RESULTS) {
@@ -3705,8 +3710,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     final void deliverNewIntentLocked(int callingUid, Intent intent, String referrer) {
         // The activity now gets access to the data associated with this Intent.
-        mAtmService.mUgmInternal.grantUriPermissionFromIntent(callingUid, packageName,
-                intent, getUriPermissionsLocked(), mUserId);
+        final NeededUriGrants needed = mAtmService.mUgmInternal.checkGrantUriPermissionFromIntent(
+                intent, callingUid, packageName, mUserId);
+        mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(needed,
+                getUriPermissionsLocked());
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
         final boolean isTopActivityWhileSleeping = isTopRunningActivity() && isSleeping();

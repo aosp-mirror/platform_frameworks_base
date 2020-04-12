@@ -590,7 +590,7 @@ public final class ActiveServices {
         }
 
         NeededUriGrants neededGrants = mAm.mUgmInternal.checkGrantUriPermissionFromIntent(
-                callingUid, r.packageName, service, service.getFlags(), null, r.userId);
+                service, callingUid, r.packageName, r.userId);
 
         // If permissions need a review before any of the app components can run,
         // we do not start the service and launch a review activity if the calling app

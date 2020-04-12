@@ -297,6 +297,7 @@ import com.android.server.pm.RestrictionsSet;
 import com.android.server.pm.UserRestrictionsUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.storage.DeviceStorageMonitorInternal;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -8365,10 +8366,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 intent.putExtra(DeviceAdminReceiver.EXTRA_BUGREPORT_HASH, bugreportHash);
                 intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                LocalServices.getService(UriGrantsManagerInternal.class)
-                        .grantUriPermissionFromIntent(Process.SHELL_UID,
-                                mOwners.getDeviceOwnerComponent().getPackageName(),
-                                intent, mOwners.getDeviceOwnerUserId());
+                final UriGrantsManagerInternal ugm = LocalServices
+                        .getService(UriGrantsManagerInternal.class);
+                final NeededUriGrants needed = ugm.checkGrantUriPermissionFromIntent(intent,
+                        Process.SHELL_UID, mOwners.getDeviceOwnerComponent().getPackageName(),
+                        mOwners.getDeviceOwnerUserId());
+                ugm.grantUriPermissionUncheckedFromIntent(needed, null);
+
                 mContext.sendBroadcastAsUser(intent, UserHandle.of(mOwners.getDeviceOwnerUserId()));
             }
         } catch (FileNotFoundException e) {

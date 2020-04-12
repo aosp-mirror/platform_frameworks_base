@@ -118,6 +118,7 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
@@ -1625,8 +1626,10 @@ class ActivityStarter {
             }
         }
 
-        mService.mUgmInternal.grantUriPermissionFromIntent(mCallingUid, mStartActivity.packageName,
-                mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.mUserId);
+        final NeededUriGrants needed = mService.mUgmInternal.checkGrantUriPermissionFromIntent(
+                mIntent, mCallingUid, mStartActivity.packageName, mStartActivity.mUserId);
+        mService.mUgmInternal.grantUriPermissionUncheckedFromIntent(needed,
+                mStartActivity.getUriPermissionsLocked());
         if (mStartActivity.resultTo != null && mStartActivity.resultTo.info != null) {
             // we need to resolve resultTo to a uid as grantImplicitAccess deals explicitly in UIDs
             final PackageManagerInternal pmInternal =
