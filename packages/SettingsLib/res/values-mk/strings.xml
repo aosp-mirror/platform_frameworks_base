@@ -143,10 +143,10 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Отстранети апликации"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Отстранети апликации и корисници"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Ажурирања на системот"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Поврзување со USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Врзување преку USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Преносл. точка на пристап"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Поврзување со Bluetooth"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Поврзување"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Врзување преку Bluetooth"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Врзување"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Поврзување и пренослива точка на пристап"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Сите апликации за работа"</string>
     <string name="user_guest" msgid="6939192779649870792">"Гостин"</string>
