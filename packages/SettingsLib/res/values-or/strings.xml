@@ -126,7 +126,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"ଇମେଜିଙ୍ଗ"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"ହେଡ୍‌ଫୋନ୍‌"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"ଇନ୍‌ପୁଟ୍‌ ଉପକରଣ"</string>
-    <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"ବ୍ଲୁଟୂଥ୍‍‌"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"ବ୍ଲୁଟୁଥ"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"ବାମ ଶ୍ରବଣ ଯନ୍ତ୍ର ପେୟାର୍ କରାଯାଉଛି…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"ଡାହାଣ ଶ୍ରବଣ ଯନ୍ତ୍ର ପେୟାର୍ କରାଯାଉଛି…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"ବାମ - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବ୍ୟାଟେରୀ"</string>
