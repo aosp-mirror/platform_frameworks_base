@@ -2529,6 +2529,16 @@ public class CarrierConfigManager {
             "parameters_use_for_5g_nr_signal_bar_int";
 
     /**
+     * There are two signal strengths, NR and LTE signal strength, during NR (non-standalone).
+     * Boolean indicating whether to use LTE signal strength as primary during NR (non-standalone).
+     * By default this value is true.
+     *
+     * @hide
+     */
+    public static final String KEY_SIGNAL_STRENGTH_NR_NSA_USE_LTE_AS_PRIMARY_BOOL =
+            "signal_strength_nr_nsa_use_lte_as_primary_bool";
+
+    /**
      * String array of default bandwidth values per network type.
      * The entries should be of form "network_name:downstream,upstream", with values in Kbps.
      * @hide
@@ -4095,6 +4105,7 @@ public class CarrierConfigManager {
                 });
         sDefaults.putInt(KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT,
                 CellSignalStrengthNr.USE_SSRSRP);
+        sDefaults.putBoolean(KEY_SIGNAL_STRENGTH_NR_NSA_USE_LTE_AS_PRIMARY_BOOL, true);
         sDefaults.putStringArray(KEY_BANDWIDTH_STRING_ARRAY, new String[]{
                 "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
                 "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
