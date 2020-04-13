@@ -132,11 +132,11 @@ interface ITunerResourceManager {
      * before this request.
      *
      * @param request {@link TunerFrontendRequest} information of the current request.
-     * @param frontendId a one-element array to return the granted frontendId.
+     * @param frontendHandle a one-element array to return the granted frontendHandle.
      *
      * @return true if there is frontend granted.
      */
-    boolean requestFrontend(in TunerFrontendRequest request, out int[] frontendId);
+    boolean requestFrontend(in TunerFrontendRequest request, out int[] frontendHandle);
 
     /*
      * Requests to share frontend with an existing client.
@@ -240,11 +240,11 @@ interface ITunerResourceManager {
      * <p><strong>Note:</strong> {@link #setLnbInfos(int[])} must be called before this request.
      *
      * @param request {@link TunerLnbRequest} information of the current request.
-     * @param lnbId a one-element array to return the granted Lnb id.
+     * @param lnbHandle a one-element array to return the granted Lnb handle.
      *
      * @return true if there is Lnb granted.
      */
-    boolean requestLnb(in TunerLnbRequest request, out int[] lnbId);
+    boolean requestLnb(in TunerLnbRequest request, out int[] lnbHandle);
 
     /*
      * Notifies the TRM that the given frontend has been released.
@@ -254,9 +254,9 @@ interface ITunerResourceManager {
      * <p><strong>Note:</strong> {@link #setFrontendInfoList(TunerFrontendInfo[])} must be called
      * before this release.
      *
-     * @param frontendId the id of the released frontend.
+     * @param frontendHandle the handle of the released frontend.
      */
-    void releaseFrontend(in int frontendId);
+    void releaseFrontend(in int frontendHandle);
 
     /*
      * Notifies the TRM that the Demux with the given handle was released.
@@ -288,15 +288,15 @@ interface ITunerResourceManager {
     void releaseCasSession(in int sessionResourceId);
 
     /*
-     * Notifies the TRM that the Lnb with the given id was released.
+     * Notifies the TRM that the Lnb with the given handle was released.
      *
      * <p>Client must call this whenever it releases an Lnb.
      *
      * <p><strong>Note:</strong> {@link #setLnbInfos(int[])} must be called before this release.
      *
-     * @param lnbId the id of the released Tuner Lnb.
+     * @param lnbHandle the handle of the released Tuner Lnb.
      */
-    void releaseLnb(in int lnbId);
+    void releaseLnb(in int lnbHandle);
 
     /*
      * Compare two clients' priority.

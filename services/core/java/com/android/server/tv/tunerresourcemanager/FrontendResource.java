@@ -27,14 +27,7 @@ import java.util.Set;
  *
  * @hide
  */
-public final class FrontendResource {
-    public static final int INVALID_OWNER_ID = -1;
-
-    /**
-     * Id of the current frontend. Should not be changed and should be aligned with the driver level
-     * implementation.
-     */
-    private final int mId;
+public final class FrontendResource extends TunerResourceBasic {
 
     /**
      * see {@link android.media.tv.tuner.frontend.FrontendSettings.Type}
@@ -51,26 +44,10 @@ public final class FrontendResource {
      */
     private Set<Integer> mExclusiveGroupMemberFeIds = new HashSet<>();
 
-    /**
-     * If the current resource is in use. Once resources under the same exclusive group id is in use
-     * all other resources in the same group would be considered in use.
-     */
-    private boolean mIsInUse;
-
-    /**
-     * The owner client's id if this resource is occupied. Owner of the resource under the same
-     * exclusive group id would be considered as the whole group's owner.
-     */
-    private int mOwnerClientId = INVALID_OWNER_ID;
-
     private FrontendResource(Builder builder) {
-        this.mId = builder.mId;
+        super(builder);
         this.mType = builder.mType;
         this.mExclusiveGroupId = builder.mExclusiveGroupId;
-    }
-
-    public int getId() {
-        return mId;
     }
 
     public int getType() {
@@ -112,32 +89,6 @@ public final class FrontendResource {
         mExclusiveGroupMemberFeIds.remove(id);
     }
 
-    public boolean isInUse() {
-        return mIsInUse;
-    }
-
-    public int getOwnerClientId() {
-        return mOwnerClientId;
-    }
-
-    /**
-     * Set an owner client on the resource.
-     *
-     * @param ownerClientId the id of the owner client.
-     */
-    public void setOwner(int ownerClientId) {
-        mIsInUse = true;
-        mOwnerClientId = ownerClientId;
-    }
-
-    /**
-     * Remove an owner client from the resource.
-     */
-    public void removeOwner() {
-        mIsInUse = false;
-        mOwnerClientId = INVALID_OWNER_ID;
-    }
-
     @Override
     public String toString() {
         return "FrontendResource[id=" + this.mId + ", type=" + this.mType
@@ -149,13 +100,12 @@ public final class FrontendResource {
     /**
      * Builder class for {@link FrontendResource}.
      */
-    public static class Builder {
-        private final int mId;
+    public static class Builder extends TunerResourceBasic.Builder {
         @Type private int mType;
         private int mExclusiveGroupId;
 
         Builder(int id) {
-            this.mId = id;
+            super(id);
         }
 
         /**
@@ -183,6 +133,7 @@ public final class FrontendResource {
          *
          * @return {@link FrontendResource}.
          */
+        @Override
         public FrontendResource build() {
             FrontendResource frontendResource = new FrontendResource(this);
             return frontendResource;
