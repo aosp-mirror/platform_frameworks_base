@@ -126,8 +126,8 @@ public class KeyguardDisplayManager {
         final int displayId = display.getDisplayId();
         Presentation presentation = mPresentations.get(displayId);
         if (presentation == null) {
-            final Presentation newPresentation =
-                    new KeyguardPresentation(mContext, display, mInjectableInflater);
+            final Presentation newPresentation = new KeyguardPresentation(mContext, display,
+                    mInjectableInflater.injectable(LayoutInflater.from(mContext)));
             newPresentation.setOnDismissListener(dialog -> {
                 if (newPresentation.equals(mPresentations.get(displayId))) {
                     mPresentations.remove(displayId);
@@ -243,7 +243,7 @@ public class KeyguardDisplayManager {
     static final class KeyguardPresentation extends Presentation {
         private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
         private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
-        private final InjectionInflationController mInjectableInflater;
+        private final LayoutInflater mInjectableLayoutInflater;
         private View mClock;
         private int mUsableWidth;
         private int mUsableHeight;
@@ -261,9 +261,9 @@ public class KeyguardDisplayManager {
         };
 
         KeyguardPresentation(Context context, Display display,
-                InjectionInflationController injectionInflater) {
+                LayoutInflater injectionLayoutInflater) {
             super(context, display, R.style.Theme_SystemUI_KeyguardPresentation);
-            mInjectableInflater = injectionInflater;
+            mInjectableLayoutInflater = injectionLayoutInflater;
             getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             setCancelable(false);
         }
@@ -289,9 +289,7 @@ public class KeyguardDisplayManager {
             mMarginLeft = (100 - VIDEO_SAFE_REGION) * p.x / 200;
             mMarginTop = (100 - VIDEO_SAFE_REGION) * p.y / 200;
 
-            LayoutInflater inflater = mInjectableInflater.injectable(
-                    LayoutInflater.from(getContext()));
-            setContentView(inflater.inflate(R.layout.keyguard_presentation, null));
+            setContentView(mInjectableLayoutInflater.inflate(R.layout.keyguard_presentation, null));
 
             // Logic to make the lock screen fullscreen
             getWindow().getDecorView().setSystemUiVisibility(
