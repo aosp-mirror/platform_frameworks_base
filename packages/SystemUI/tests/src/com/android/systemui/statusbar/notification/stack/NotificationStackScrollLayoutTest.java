@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -73,6 +74,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.function.BiConsumer;
 
 /**
  * Tests for {@link NotificationStackScrollLayout}.
@@ -216,12 +219,20 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     @UiThreadTest
     public void testSetExpandedHeight_blockingHelperManagerReceivedCallbacks() {
-        mStackScroller.setExpandedHeight(0f);
-        verify(mBlockingHelperManager).setNotificationShadeExpanded(0f);
-        reset(mBlockingHelperManager);
+        final float expectedHeight[] = {0f};
+        final float expectedAppear[] = {0f};
 
-        mStackScroller.setExpandedHeight(100f);
-        verify(mBlockingHelperManager).setNotificationShadeExpanded(100f);
+        mStackScroller.addOnExpandedHeightChangedListener((height, appear) -> {
+            Assert.assertEquals(expectedHeight[0], height, 0);
+            Assert.assertEquals(expectedAppear[0], appear, .1);
+        });
+        expectedHeight[0] = 1f;
+        expectedAppear[0] = 1f;
+        mStackScroller.setExpandedHeight(expectedHeight[0]);
+
+        expectedHeight[0] = 100f;
+        expectedAppear[0] = 0f;
+        mStackScroller.setExpandedHeight(expectedHeight[0]);
     }
 
     @Test

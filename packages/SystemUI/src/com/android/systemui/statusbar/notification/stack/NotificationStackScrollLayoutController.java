@@ -96,6 +96,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
+import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
@@ -154,6 +155,7 @@ public class NotificationStackScrollLayoutController {
     private final LayoutInflater mLayoutInflater;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final VisualStabilityManager mVisualStabilityManager;
+    private final NotificationBlockingHelperManager mNotificationBlockingHelperManager;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -577,7 +579,8 @@ public class NotificationStackScrollLayoutController {
             ForegroundServiceSectionController fgServicesSectionController,
             LayoutInflater layoutInflater,
             NotificationRemoteInputManager remoteInputManager,
-            VisualStabilityManager visualStabilityManager) {
+            VisualStabilityManager visualStabilityManager,
+            NotificationBlockingHelperManager notificationBlockingHelperManager) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -622,6 +625,7 @@ public class NotificationStackScrollLayoutController {
         mLayoutInflater = layoutInflater;
         mRemoteInputManager = remoteInputManager;
         mVisualStabilityManager = visualStabilityManager;
+        mNotificationBlockingHelperManager = notificationBlockingHelperManager;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -682,6 +686,10 @@ public class NotificationStackScrollLayoutController {
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
 
         mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
+        // Blocking helper manager wants to know the expanded state, update as well.
+        mView.addOnExpandedHeightChangedListener((height, unused) ->
+                mNotificationBlockingHelperManager.setNotificationShadeExpanded(height)
+        );
 
         mTunerService.addTunable(
                 (key, newValue) -> {

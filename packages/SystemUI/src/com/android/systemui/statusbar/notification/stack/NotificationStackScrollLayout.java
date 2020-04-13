@@ -106,7 +106,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
-import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -550,13 +549,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mShouldDrawNotificationBackground =
                 res.getBoolean(R.bool.config_drawNotificationBackground);
         setOutlineProvider(mOutlineProvider);
-
-        // Blocking helper manager wants to know the expanded state, update as well.
-        NotificationBlockingHelperManager blockingHelperManager =
-                Dependency.get(NotificationBlockingHelperManager.class);
-        addOnExpandedHeightChangedListener((height, unused) -> {
-            blockingHelperManager.setNotificationShadeExpanded(height);
-        });
 
         boolean willDraw = mShouldDrawNotificationBackground || DEBUG;
         setWillNotDraw(!willDraw);
