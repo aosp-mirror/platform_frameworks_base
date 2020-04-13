@@ -50,6 +50,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.IRequestFinishCallback;
@@ -853,6 +854,30 @@ public class TaskOrganizerTests extends WindowTestsBase {
         final Rational ratio = o.mChangedInfo.pictureInPictureParams.getAspectRatioRational();
         assertEquals(3, ratio.getNumerator());
         assertEquals(4, ratio.getDenominator());
+    }
+
+    @Test
+    public void testChangeTaskDescription() {
+        class ChangeSavingOrganizer extends StubOrganizer {
+            RunningTaskInfo mChangedInfo;
+            @Override
+            public void onTaskInfoChanged(RunningTaskInfo info) {
+                mChangedInfo = info;
+            }
+        }
+        ChangeSavingOrganizer o = new ChangeSavingOrganizer();
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(o,
+                WINDOWING_MODE_MULTI_WINDOW);
+
+        final ActivityStack stack = createStack();
+        final Task task = createTask(stack);
+        final ActivityRecord record = WindowTestUtils.createActivityRecordInTask(
+                stack.mDisplayContent, task);
+
+        stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        record.setTaskDescription(new ActivityManager.TaskDescription("TestDescription"));
+        waitUntilHandlersIdle();
+        assertEquals("TestDescription", o.mChangedInfo.taskDescription.getLabel());
     }
 
     @Test
