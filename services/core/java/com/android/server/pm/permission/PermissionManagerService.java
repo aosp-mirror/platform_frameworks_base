@@ -2519,7 +2519,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M;
                 String upgradedActivityRecognitionPermission = null;
 
-                if (DEBUG_INSTALL) {
+                if (DEBUG_INSTALL && bp != null) {
                     Log.i(TAG, "Package " + pkg.getPackageName()
                             + " checking " + permName + ": " + bp);
                 }
@@ -3881,8 +3881,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      */
     private void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg,
             @NonNull PermissionCallback callback) {
+        // If the package is being deleted, update the permissions of all the apps
         final int flags =
-                (pkg != null ? UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG : 0);
+                (pkg == null ? UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG
+                        : UPDATE_PERMISSIONS_REPLACE_PKG);
         updatePermissions(
                 packageName, pkg, getVolumeUuidForPackage(pkg), flags, callback);
     }
@@ -4007,6 +4009,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (permissionTreesSourcePackageChanged | permissionSourcePackageChanged) {
             // Permission ownership has changed. This e.g. changes which packages can get signature
             // permissions
+            Slog.i(TAG, "Permission ownership changed. Updating all permissions.");
             flags |= UPDATE_PERMISSIONS_ALL;
         }
 
@@ -4057,8 +4060,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private boolean updatePermissionSourcePackage(@Nullable String packageName,
             @Nullable AndroidPackage pkg,
             final @Nullable PermissionCallback callback) {
-        boolean changed = false;
+        // Always need update if packageName is null
+        if (packageName == null) {
+            return true;
+        }
 
+        boolean changed = false;
         Set<BasePermission> needsUpdate = null;
         synchronized (mLock) {
             final Iterator<BasePermission> it = mSettings.mPermissions.values().iterator();
@@ -4067,54 +4074,29 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (bp.isDynamic()) {
                     bp.updateDynamicPermission(mSettings.mPermissionTrees.values());
                 }
-                if (bp.getSourcePackageSetting() != null) {
-                    if (packageName != null && packageName.equals(bp.getSourcePackageName())
-                        && (pkg == null || !hasPermission(pkg, bp.getName()))) {
-                        Slog.i(TAG, "Removing permission " + bp.getName()
-                                + " that used to be declared by " + bp.getSourcePackageName());
-                        if (bp.isRuntime()) {
-                            final int[] userIds = mUserManagerInt.getUserIds();
-                            final int numUserIds = userIds.length;
-                            for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
-                                final int userId = userIds[userIdNum];
-
-                                mPackageManagerInt.forEachPackage((AndroidPackage p) -> {
-                                    final String pName = p.getPackageName();
-                                    final ApplicationInfo appInfo =
-                                            mPackageManagerInt.getApplicationInfo(pName, 0,
-                                                    Process.SYSTEM_UID, UserHandle.USER_SYSTEM);
-                                    if (appInfo != null
-                                            && appInfo.targetSdkVersion < Build.VERSION_CODES.M) {
-                                        return;
-                                    }
-
-                                    final String permissionName = bp.getName();
-                                    if (checkPermissionImpl(permissionName, pName, userId)
-                                            == PackageManager.PERMISSION_GRANTED) {
-                                        try {
-                                            revokeRuntimePermissionInternal(
-                                                    permissionName,
-                                                    pName,
-                                                    false,
-                                                    Process.SYSTEM_UID,
-                                                    userId,
-                                                    callback);
-                                        } catch (IllegalArgumentException e) {
-                                            Slog.e(TAG,
-                                                    "Failed to revoke "
-                                                            + permissionName
-                                                            + " from "
-                                                            + pName,
-                                                    e);
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                        changed = true;
-                        it.remove();
-                    }
+                if (bp.getSourcePackageSetting() == null
+                        || !packageName.equals(bp.getSourcePackageName())) {
                     continue;
+                }
+                // The target package is the source of the current permission
+                // Set to changed for either install or uninstall
+                changed = true;
+                // If the target package is being uninstalled, we need to revoke this permission
+                // From all other packages
+                if (pkg == null || !hasPermission(pkg, bp.getName())) {
+                    Slog.i(TAG, "Removing permission " + bp.getName()
+                            + " that used to be declared by " + bp.getSourcePackageName());
+                    if (bp.isRuntime()) {
+                        final int[] userIds = mUserManagerInt.getUserIds();
+                        final int numUserIds = userIds.length;
+                        for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
+                            final int userId = userIds[userIdNum];
+                            mPackageManagerInt.forEachPackage((AndroidPackage p) ->
+                                    revokePermissionFromPackageForUser(p.getPackageName(),
+                                            bp.getName(), userId, callback));
+                        }
+                    }
+                    it.remove();
                 }
                 if (needsUpdate == null) {
                     needsUpdate = new ArraySet<>(mSettings.mPermissions.size());
@@ -4146,6 +4128,39 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     /**
+     * Revoke a runtime permission from a package for a given user ID.
+     */
+    private void revokePermissionFromPackageForUser(@NonNull String pName,
+            @NonNull String permissionName, int userId, @Nullable PermissionCallback callback) {
+        final ApplicationInfo appInfo =
+                mPackageManagerInt.getApplicationInfo(pName, 0,
+                        Process.SYSTEM_UID, UserHandle.USER_SYSTEM);
+        if (appInfo != null
+                && appInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+            return;
+        }
+
+        if (checkPermissionImpl(permissionName, pName, userId)
+                == PackageManager.PERMISSION_GRANTED) {
+            try {
+                revokeRuntimePermissionInternal(
+                        permissionName,
+                        pName,
+                        false,
+                        Process.SYSTEM_UID,
+                        userId,
+                        callback);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG,
+                        "Failed to revoke "
+                                + permissionName
+                                + " from "
+                                + pName,
+                        e);
+            }
+        }
+    }
+    /**
      * Update which app owns a permission trees.
      *
      * <p>Possible parameter combinations
@@ -4164,6 +4179,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      */
     private boolean updatePermissionTreeSourcePackage(@Nullable String packageName,
             @Nullable AndroidPackage pkg) {
+        // Always need update if packageName is null
+        if (packageName == null) {
+            return true;
+        }
         boolean changed = false;
 
         Set<BasePermission> needsUpdate = null;
@@ -4171,15 +4190,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final Iterator<BasePermission> it = mSettings.mPermissionTrees.values().iterator();
             while (it.hasNext()) {
                 final BasePermission bp = it.next();
-                if (bp.getSourcePackageSetting() != null) {
-                    if (packageName != null && packageName.equals(bp.getSourcePackageName())
-                        && (pkg == null || !hasPermission(pkg, bp.getName()))) {
-                        Slog.i(TAG, "Removing permission tree " + bp.getName()
-                                + " that used to be declared by " + bp.getSourcePackageName());
-                        changed = true;
-                        it.remove();
-                    }
+                if (bp.getSourcePackageSetting() == null
+                        || !packageName.equals(bp.getSourcePackageName())) {
                     continue;
+                }
+                // The target package is the source of the current permission tree
+                // Set to changed for either install or uninstall
+                changed = true;
+                if (pkg == null || !hasPermission(pkg, bp.getName())) {
+                    Slog.i(TAG, "Removing permission tree " + bp.getName()
+                            + " that used to be declared by " + bp.getSourcePackageName());
+                    it.remove();
                 }
                 if (needsUpdate == null) {
                     needsUpdate = new ArraySet<>(mSettings.mPermissionTrees.size());
