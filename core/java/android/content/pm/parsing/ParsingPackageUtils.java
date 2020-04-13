@@ -22,6 +22,7 @@ import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_RESOURCES_ARSC_COMPRESSED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 import static android.os.Build.VERSION_CODES.DONUT;
 import static android.os.Build.VERSION_CODES.O;
@@ -343,7 +344,20 @@ public class ParsingPackageUtils {
                                 + result.getErrorMessage());
             }
 
-            ParsingPackage pkg = result.getResult();
+            final ParsingPackage pkg = result.getResult();
+            if (pkg.getTargetSdkVersion() >= Build.VERSION_CODES.R
+                    && assets.containsAllocatedTable()) {
+                final ParseResult<?> deferResult = input.deferError(
+                        "Targeting R+ (version" + Build.VERSION_CODES.R + " and above) requires the"
+                                + " resources.arsc of installed APKs to be stored uncompressed and"
+                                + " aligned on a 4-byte boundary",
+                        DeferredError.RESOURCES_ARSC_COMPRESSED);
+                if (deferResult.isError()) {
+                    return input.error(INSTALL_PARSE_FAILED_RESOURCES_ARSC_COMPRESSED,
+                            deferResult.getErrorMessage());
+                }
+            }
+
             ApkAssets apkAssets = assets.getApkAssets()[0];
             if (apkAssets.definesOverlayable()) {
                 SparseArray<String> packageNames = assets.getAssignedPackageIdentifiers();
