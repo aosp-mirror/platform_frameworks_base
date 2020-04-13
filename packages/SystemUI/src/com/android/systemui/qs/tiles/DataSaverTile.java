@@ -70,11 +70,13 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
         dialog.setTitle(com.android.internal.R.string.data_saver_enable_title);
         dialog.setMessage(com.android.internal.R.string.data_saver_description);
         dialog.setPositiveButton(com.android.internal.R.string.data_saver_enable_button,
-                (OnClickListener) (dialogInterface, which) -> toggleDataSaver());
+                (OnClickListener) (dialogInterface, which) -> {
+                    toggleDataSaver();
+                    Prefs.putBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, true);
+                });
         dialog.setNegativeButton(com.android.internal.R.string.cancel, null);
         dialog.setShowForAllUsers(true);
         dialog.show();
-        Prefs.putBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, true);
     }
 
     private void toggleDataSaver() {

@@ -163,7 +163,6 @@ public class TelephonyManager {
      * into the ResultReceiver Bundle.
      * @hide
      */
-    @SystemApi
     public static final String MODEM_ACTIVITY_RESULT_KEY = "controller_activity";
 
     /**
@@ -317,21 +316,6 @@ public class TelephonyManager {
     };
 
     /** @hide */
-    @IntDef(prefix = {"MODEM_COUNT_"},
-            value = {
-                    MODEM_COUNT_NO_MODEM,
-                    MODEM_COUNT_SINGLE_MODEM,
-                    MODEM_COUNT_DUAL_MODEM,
-                    MODEM_COUNT_TRI_MODEM
-            })
-    public @interface ModemCount {}
-
-    public static final int MODEM_COUNT_NO_MODEM     = 0;
-    public static final int MODEM_COUNT_SINGLE_MODEM = 1;
-    public static final int MODEM_COUNT_DUAL_MODEM   = 2;
-    public static final int MODEM_COUNT_TRI_MODEM    = 3;
-
-    /** @hide */
     @UnsupportedAppUsage
     public TelephonyManager(Context context) {
       this(context, SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
@@ -439,22 +423,22 @@ public class TelephonyManager {
      * Returns 2 for Dual standby mode (Dual SIM functionality).
      * Returns 3 for Tri standby mode (Tri SIM functionality).
      */
-    public @ModemCount int getActiveModemCount() {
+    public int getActiveModemCount() {
         int modemCount = 1;
         switch (getMultiSimConfiguration()) {
             case UNKNOWN:
-                modemCount = MODEM_COUNT_SINGLE_MODEM;
+                modemCount = 1;
                 // check for voice and data support, 0 if not supported
                 if (!isVoiceCapable() && !isSmsCapable() && !isDataCapable()) {
-                    modemCount = MODEM_COUNT_NO_MODEM;
+                    modemCount = 0;
                 }
                 break;
             case DSDS:
             case DSDA:
-                modemCount = MODEM_COUNT_DUAL_MODEM;
+                modemCount = 2;
                 break;
             case TSTS:
-                modemCount = MODEM_COUNT_TRI_MODEM;
+                modemCount = 3;
                 break;
         }
         return modemCount;
@@ -467,7 +451,7 @@ public class TelephonyManager {
      * dual-SIM capable device operating in single SIM mode (only one logical modem is turned on),
      * {@link #getActiveModemCount} returns 1 while this API returns 2.
      */
-    public @ModemCount int getSupportedModemCount() {
+    public int getSupportedModemCount() {
         return TelephonyProperties.max_active_modems().orElse(getActiveModemCount());
     }
 
@@ -1432,7 +1416,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE =
             "android.telephony.extra.DEFAULT_SUBSCRIPTION_SELECT_TYPE";
 
@@ -1452,7 +1435,6 @@ public class TelephonyManager {
      * to indicate there's no need to re-select any default subscription.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_NONE = 0;
 
     /**
@@ -1460,7 +1442,6 @@ public class TelephonyManager {
      * to indicate there's a need to select default data subscription.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_DATA = 1;
 
     /**
@@ -1468,7 +1449,6 @@ public class TelephonyManager {
      * to indicate there's a need to select default voice call subscription.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_VOICE = 2;
 
     /**
@@ -1476,7 +1456,6 @@ public class TelephonyManager {
      * to indicate there's a need to select default sms subscription.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_SMS = 3;
 
     /**
@@ -1486,7 +1465,6 @@ public class TelephonyManager {
      * which subscription should be the default subscription.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL = 4;
 
     /**
@@ -1496,7 +1474,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SIM_COMBINATION_WARNING_TYPE =
             "android.telephony.extra.SIM_COMBINATION_WARNING_TYPE";
 
@@ -1513,7 +1490,6 @@ public class TelephonyManager {
      * to indicate there's no SIM combination warning.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE = 0;
 
     /**
@@ -1521,7 +1497,6 @@ public class TelephonyManager {
      * to indicate two active SIMs are both CDMA hence there might be functional limitation.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA = 1;
 
     /**
@@ -1532,7 +1507,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SIM_COMBINATION_NAMES =
             "android.telephony.extra.SIM_COMBINATION_NAMES";
 
@@ -5508,6 +5482,10 @@ public class TelephonyManager {
      * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
      * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
      * {@link SecurityException} will be thrown otherwise.
+     *
+     * This API should be used sparingly -- large numbers of listeners will cause system
+     * instability. If a process has registered too many listeners without unregistering them, it
+     * may encounter an {@link IllegalStateException} when trying to register more listeners.
      *
      * @param listener The {@link PhoneStateListener} object to register
      *                 (or unregister)
@@ -10140,7 +10118,6 @@ public class TelephonyManager {
      * {@link #MODEM_ACTIVITY_RESULT_KEY}.
      * @hide
      */
-    @SystemApi
     public void requestModemActivityInfo(@NonNull ResultReceiver result) {
         try {
             ITelephony service = getITelephony();
@@ -12230,6 +12207,9 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @IsMultiSimSupportedResult
     public int isMultiSimSupported() {
+        if (getSupportedModemCount() < 2) {
+            return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
+        }
         try {
             ITelephony service = getITelephony();
             if (service != null) {

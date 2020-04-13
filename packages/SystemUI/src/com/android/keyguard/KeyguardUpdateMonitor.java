@@ -29,7 +29,6 @@ import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
-import static android.telephony.TelephonyManager.MODEM_COUNT_DUAL_MODEM;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -527,7 +526,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     public List<SubscriptionInfo> getFilteredSubscriptionInfo(boolean forceReload) {
         List<SubscriptionInfo> subscriptions = getSubscriptionInfo(false);
-        if (subscriptions.size() == MODEM_COUNT_DUAL_MODEM) {
+        if (subscriptions.size() == 2) {
             SubscriptionInfo info1 = subscriptions.get(0);
             SubscriptionInfo info2 = subscriptions.get(1);
             if (info1.getGroupUuid() != null && info1.getGroupUuid().equals(info2.getGroupUuid())) {

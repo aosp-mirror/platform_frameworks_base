@@ -205,6 +205,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.security.KeyStore;
 import android.system.Os;
+import android.telephony.TelephonyManager;
 import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -349,6 +350,7 @@ public class ConnectivityServiceTest {
     @Mock IBinder mIBinder;
     @Mock LocationManager mLocationManager;
     @Mock AppOpsManager mAppOpsManager;
+    @Mock TelephonyManager mTelephonyManager;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
             ArgumentCaptor.forClass(ResolverParamsParcel.class);
@@ -435,6 +437,7 @@ public class ConnectivityServiceTest {
             if (Context.ALARM_SERVICE.equals(name)) return mAlarmManager;
             if (Context.LOCATION_SERVICE.equals(name)) return mLocationManager;
             if (Context.APP_OPS_SERVICE.equals(name)) return mAppOpsManager;
+            if (Context.TELEPHONY_SERVICE.equals(name)) return mTelephonyManager;
             return super.getSystemService(name);
         }
 
@@ -4901,6 +4904,29 @@ public class ConnectivityServiceTest {
         assertEquals(2, resolvrParams.servers.length);
         assertTrue(ArrayUtils.containsAll(resolvrParams.servers,
                 new String[]{"2001:db8::1", "192.0.2.1"}));
+        reset(mMockDnsResolver);
+    }
+
+    @Test
+    public void testDnsConfigurationTransTypesPushed() throws Exception {
+        // Clear any interactions that occur as a result of CS starting up.
+        reset(mMockDnsResolver);
+
+        final NetworkRequest request = new NetworkRequest.Builder()
+                .clearCapabilities().addCapability(NET_CAPABILITY_INTERNET)
+                .build();
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        verify(mMockDnsResolver, times(1)).createNetworkCache(
+                eq(mWiFiNetworkAgent.getNetwork().netId));
+        verify(mMockDnsResolver, times(2)).setResolverConfiguration(
+                mResolverParamsParcelCaptor.capture());
+        final ResolverParamsParcel resolverParams = mResolverParamsParcelCaptor.getValue();
+        assertContainsExactly(resolverParams.transportTypes, TRANSPORT_WIFI);
         reset(mMockDnsResolver);
     }
 

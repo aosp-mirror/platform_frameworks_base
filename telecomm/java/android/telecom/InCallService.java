@@ -70,6 +70,14 @@ import java.util.List;
  * app.
  * <p>
  * Further, the pre-loaded dialer will ALWAYS be used when the user places an emergency call.
+ * <h2>Becoming the Default Phone App</h2>
+ * The default dialer/phone app is one which provides the in-call user interface while the device is
+ * in a call.  A device is bundled with a system provided default dialer/phone app.  The user may
+ * choose a single app to take over this role from the system app.  An app which wishes to fulfill
+ * one this role uses the {@code android.app.role.RoleManager} to request that they fill the role.
+ * <p>
+ * An app filling the role of the default phone app provides a user interface while the device is in
+ * a call, and the device is not in car mode.
  * <p>
  * Below is an example manifest registration for an {@code InCallService}. The meta-data
  * {@link TelecomManager#METADATA_IN_CALL_SERVICE_UI} indicates that this particular

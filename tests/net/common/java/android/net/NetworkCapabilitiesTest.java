@@ -875,6 +875,11 @@ public class NetworkCapabilitiesTest {
         } catch (IllegalArgumentException e) { }
     }
 
+    private class TestTransportInfo implements TransportInfo {
+        TestTransportInfo() {
+        }
+    }
+
     @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
     public void testBuilder() {
         final int ownerUid = 1001;
@@ -882,6 +887,7 @@ public class NetworkCapabilitiesTest {
         final int requestUid = 10100;
         final int[] administratorUids = {ownerUid, 10001};
         final TelephonyNetworkSpecifier specifier = new TelephonyNetworkSpecifier(1);
+        final TestTransportInfo transportInfo = new TestTransportInfo();
         final String ssid = "TEST_SSID";
         final String packageName = "com.google.test.networkcapabilities";
         final NetworkCapabilities nc = new NetworkCapabilities.Builder()
@@ -896,7 +902,7 @@ public class NetworkCapabilitiesTest {
                 .setLinkDownstreamBandwidthKbps(512)
                 .setLinkUpstreamBandwidthKbps(128)
                 .setNetworkSpecifier(specifier)
-                .setTransportInfo(null)
+                .setTransportInfo(transportInfo)
                 .setSignalStrength(signalStrength)
                 .setSsid(ssid)
                 .setRequestorUid(requestUid)
@@ -913,7 +919,7 @@ public class NetworkCapabilitiesTest {
         assertEquals(128, nc.getLinkUpstreamBandwidthKbps());
         assertNotEquals(512, nc.getLinkUpstreamBandwidthKbps());
         assertEquals(specifier, nc.getNetworkSpecifier());
-        assertNull(nc.getTransportInfo());
+        assertEquals(transportInfo, nc.getTransportInfo());
         assertEquals(signalStrength, nc.getSignalStrength());
         assertNotEquals(-50, nc.getSignalStrength());
         assertEquals(ssid, nc.getSsid());
