@@ -1,5 +1,11 @@
 #define LOG_TAG "BitmapFactory"
 
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+
 #include "BitmapFactory.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "GraphicsJNI.h"
@@ -21,10 +27,6 @@
 #include <androidfw/ResourceTypes.h>
 #include <cutils/compiler.h>
 #include <memory>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 
 jfieldID gOptions_justBoundsFieldID;
 jfieldID gOptions_sampleSizeFieldID;
