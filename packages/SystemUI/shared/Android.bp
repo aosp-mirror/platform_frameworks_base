@@ -36,7 +36,6 @@ android_library {
 
     static_libs: [
         "PluginCoreLib",
-        "SystemUI-statsd",
     ],
 
     // Enforce that the library is built against java 7 so that there are
