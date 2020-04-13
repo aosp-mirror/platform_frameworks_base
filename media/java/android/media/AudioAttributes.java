@@ -507,6 +507,16 @@ public final class AudioAttributes implements Parcelable {
 
     /**
      * @hide
+     * Return usage, even the non-public ones.
+     * Internal use only
+     * @return one of the values that can be set in {@link Builder#setUsage(int)}
+     */
+    public int getSystemUsage() {
+        return mUsage;
+    }
+
+    /**
+     * @hide
      * Return the Bundle of data.
      * @return a copy of the Bundle for this instance, may be null.
      */
