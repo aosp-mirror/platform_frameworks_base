@@ -3001,9 +3001,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             default:
                 if (action == R.id.action_snooze) {
                     NotificationMenuRowPlugin provider = getProvider();
-                    if (provider == null && mMenuRow != null) {
-                        provider = createMenu();
-                    } else {
+                    if (provider == null) {
                         return false;
                     }
                     MenuItem snoozeMenu = provider.getSnoozeMenuItem(getContext());
