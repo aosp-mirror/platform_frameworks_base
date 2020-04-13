@@ -3061,8 +3061,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
                 r.setTaskDescription(td);
-                final Task task = r.getTask();
-                task.updateTaskDescription();
             }
         }
     }

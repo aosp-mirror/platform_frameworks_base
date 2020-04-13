@@ -16,6 +16,7 @@
 
 package android.window;
 
+import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -39,7 +40,7 @@ public class TaskOrganizer extends WindowOrganizer {
      * and receive taskVanished callbacks in the process.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void registerOrganizer(int windowingMode) {
+    public final void registerOrganizer(int windowingMode) {
         try {
             getController().registerTaskOrganizer(mInterface, windowingMode);
         } catch (RemoteException e) {
@@ -49,7 +50,7 @@ public class TaskOrganizer extends WindowOrganizer {
 
     /** Unregisters a previously registered task organizer. */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void unregisterOrganizer() {
+    public final void unregisterOrganizer() {
         try {
             getController().unregisterTaskOrganizer(mInterface);
         } catch (RemoteException e) {
@@ -57,13 +58,17 @@ public class TaskOrganizer extends WindowOrganizer {
         }
     }
 
+    @BinderThread
     public void onTaskAppeared(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
 
+    @BinderThread
     public void onTaskVanished(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
 
-    public void onTaskInfoChanged(@NonNull ActivityManager.RunningTaskInfo info) {}
+    @BinderThread
+    public void onTaskInfoChanged(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
 
-    public void onBackPressedOnTaskRoot(@NonNull ActivityManager.RunningTaskInfo info) {}
+    @BinderThread
+    public void onBackPressedOnTaskRoot(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
 
     /** Creates a persistent root task in WM for a particular windowing-mode. */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
