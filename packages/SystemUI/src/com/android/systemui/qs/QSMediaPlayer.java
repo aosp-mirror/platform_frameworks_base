@@ -171,6 +171,8 @@ public class QSMediaPlayer extends MediaControlPanel {
     public void clearControls() {
         super.clearControls();
 
+        mSeekBarViewModel.clearController();
+
         View guts = mMediaNotifView.findViewById(R.id.media_guts);
         View options = mMediaNotifView.findViewById(R.id.qs_media_controls_options);
 
