@@ -239,7 +239,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private ExpandableNotificationRow mNotificationParent;
     private OnExpandClickListener mOnExpandClickListener;
     private View.OnClickListener mOnAppOpsClickListener;
-    private boolean mIsChildInGroup;
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -830,15 +829,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mNotificationParent = isChildInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(isChildInGroup);
-        // TODO: Move inflation logic out of this call
-        if (mIsChildInGroup != isChildInGroup) {
-            mIsChildInGroup = isChildInGroup;
-            if (!isRemoved() && mIsLowPriority) {
-                RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-                params.setUseLowPriority(mIsLowPriority);
-                mRowContentBindStage.requestRebind(mEntry, null /* callback */);
-            }
-        }
+
         resetBackgroundAlpha();
         updateBackgroundForGroupState();
         updateClickAndFocus();

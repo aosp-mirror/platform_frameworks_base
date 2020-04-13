@@ -619,7 +619,8 @@ public class NotificationEntryManager implements
         entry.setSbn(notification);
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryBind(entry, notification);
-        }        mGroupManager.onEntryUpdated(entry, oldSbn);
+        }
+        mGroupManager.onEntryUpdated(entry, oldSbn);
 
         mLogger.logNotifUpdated(entry.getKey());
         for (NotificationEntryListener listener : mNotificationEntryListeners) {

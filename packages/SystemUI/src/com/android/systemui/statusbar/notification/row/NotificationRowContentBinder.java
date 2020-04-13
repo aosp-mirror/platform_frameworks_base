@@ -114,11 +114,6 @@ public interface NotificationRowContentBinder {
         public boolean isLowPriority;
 
         /**
-         * Bind child version of content views.
-         */
-        public boolean isChildInGroup;
-
-        /**
          * Use increased height when binding contracted view.
          */
         public boolean usesIncreasedHeight;

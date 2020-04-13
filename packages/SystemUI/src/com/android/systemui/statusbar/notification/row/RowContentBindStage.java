@@ -71,7 +71,6 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
 
         BindParams bindParams = new BindParams();
         bindParams.isLowPriority = params.useLowPriority();
-        bindParams.isChildInGroup = params.useChildInGroup();
         bindParams.usesIncreasedHeight = params.useIncreasedHeight();
         bindParams.usesIncreasedHeadsUpHeight = params.useIncreasedHeadsUpHeight();
         boolean forceInflate = params.needsReinflation();
