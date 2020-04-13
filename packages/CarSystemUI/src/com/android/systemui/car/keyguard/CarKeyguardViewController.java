@@ -264,6 +264,11 @@ public class CarKeyguardViewController extends OverlayViewController implements
     }
 
     @Override
+    public void setKeyguardGoingAwayState(boolean isKeyguardGoingAway) {
+        // no-op
+    }
+
+    @Override
     public void onStartedGoingToSleep() {
         // no-op
     }
