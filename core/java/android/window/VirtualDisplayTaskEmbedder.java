@@ -67,6 +67,7 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
     private VirtualDisplay mVirtualDisplay;
     private Insets mForwardedInsets;
     private DisplayMetrics mTmpDisplayMetrics;
+    private TaskStackListener mTaskStackListener;
 
     /**
      * Constructs a new TaskEmbedder.
@@ -80,11 +81,6 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
             boolean singleTaskInstance) {
         super(context, host);
         mSingleTaskInstance = singleTaskInstance;
-    }
-
-    @Override
-    public TaskStackListener createTaskStackListener() {
-        return new TaskStackListenerImpl();
     }
 
     /**
@@ -124,6 +120,9 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
                         .setDisplayToSingleTaskInstance(displayId);
             }
             setForwardedInsets(mForwardedInsets);
+
+            mTaskStackListener = new TaskStackListenerImpl();
+            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -141,6 +140,15 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
 
         // Clear tap-exclude region (if any) for this window.
         clearTapExcludeRegion();
+
+        if (mTaskStackListener != null) {
+            try {
+                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to unregister task stack listener", e);
+            }
+            mTaskStackListener = null;
+        }
 
         if (isInitialized()) {
             mVirtualDisplay.release();

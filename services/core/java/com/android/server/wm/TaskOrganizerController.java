@@ -27,6 +27,7 @@ import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_WINDO
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityManager.TaskDescription;
 import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -439,7 +440,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         boolean changed = lastInfo == null
                 || mTmpTaskInfo.topActivityType != lastInfo.topActivityType
                 || mTmpTaskInfo.isResizable() != lastInfo.isResizable()
-                || mTmpTaskInfo.pictureInPictureParams != lastInfo.pictureInPictureParams;
+                || mTmpTaskInfo.pictureInPictureParams != lastInfo.pictureInPictureParams
+                || !TaskDescription.equals(mTmpTaskInfo.taskDescription, lastInfo.taskDescription);
         if (!changed) {
             int cfgChanges = mTmpTaskInfo.configuration.diff(lastInfo.configuration);
             final int winCfgChanges = (cfgChanges & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0
