@@ -462,8 +462,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mCurrentPipBounds = mPipBounds;
                 break;
         }
-        mPipTaskOrganizer.scheduleAnimateResizePip(mCurrentPipBounds, mResizeAnimationDuration,
-                null);
+        if (mCurrentPipBounds != null) {
+            mPipTaskOrganizer.scheduleAnimateResizePip(mCurrentPipBounds, mResizeAnimationDuration,
+                    null);
+        } else {
+            mPipTaskOrganizer.dismissPip(mResizeAnimationDuration);
+        }
     }
 
     /**
