@@ -114,6 +114,11 @@ public interface KeyguardViewController {
     void keyguardGoingAway();
 
     /**
+     * Sets the system state depending on whether the keyguard is going away or not.
+     */
+    void setKeyguardGoingAwayState(boolean isKeyguardGoingAway);
+
+    /**
      * @return Whether window animation for unlock should be disabled.
      */
     boolean shouldDisableWindowAnimationsForUnlock();
