@@ -21,11 +21,11 @@ import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_N
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
-import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
-import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_HIGH_PRIORITY;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnEmptySpaceClickListener;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnOverscrollTopChangedListener;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_HIGH_PRIORITY;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.SelectedRows;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.canChildBeDismissed;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
@@ -106,6 +106,7 @@ import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -156,6 +157,7 @@ public class NotificationStackScrollLayoutController {
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final VisualStabilityManager mVisualStabilityManager;
     private final NotificationBlockingHelperManager mNotificationBlockingHelperManager;
+    private final ShadeController mShadeController;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -580,7 +582,8 @@ public class NotificationStackScrollLayoutController {
             LayoutInflater layoutInflater,
             NotificationRemoteInputManager remoteInputManager,
             VisualStabilityManager visualStabilityManager,
-            NotificationBlockingHelperManager notificationBlockingHelperManager) {
+            NotificationBlockingHelperManager notificationBlockingHelperManager,
+            ShadeController shadeController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -626,6 +629,7 @@ public class NotificationStackScrollLayoutController {
         mRemoteInputManager = remoteInputManager;
         mVisualStabilityManager = visualStabilityManager;
         mNotificationBlockingHelperManager = notificationBlockingHelperManager;
+        mShadeController = shadeController;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -639,6 +643,7 @@ public class NotificationStackScrollLayoutController {
         mView.setFooterDismissListener(() ->
                 mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES));
         mView.setRemoteInputManager(mRemoteInputManager);
+        mView.setShadeController(mShadeController);
 
         if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {
             mView.initializeForegroundServiceSection(

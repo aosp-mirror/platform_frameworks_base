@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -132,6 +133,7 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private NotificationBlockingHelperManager mNotificationBlockingHelperManager;
+    @Mock private ShadeController mShadeController;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -182,7 +184,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mLayoutInflater,
                 mRemoteInputManager,
                 mVisualStabilityManager,
-                mNotificationBlockingHelperManager
+                mNotificationBlockingHelperManager,
+                mShadeController
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);

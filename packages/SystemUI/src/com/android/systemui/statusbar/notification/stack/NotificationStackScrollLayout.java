@@ -448,6 +448,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private DismissListener mDismissListener;
     private DismissAllAnimationListener mDismissAllAnimationListener;
     private NotificationRemoteInputManager mRemoteInputManager;
+    private ShadeController mShadeController;
 
     private final DisplayMetrics mDisplayMetrics = Dependency.get(DisplayMetrics.class);
     private final LockscreenGestureLogger mLockscreenGestureLogger =
@@ -5341,9 +5342,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
 
         if (viewsToRemove.isEmpty()) {
-            if (closeShade) {
-                Dependency.get(ShadeController.class).animateCollapsePanels(
-                        CommandQueue.FLAG_EXCLUDE_NONE);
+            if (closeShade && mShadeController != null) {
+                mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             }
             return;
         }
@@ -5379,11 +5379,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         final Runnable onSlideAwayAnimationComplete = () -> {
             if (closeShade) {
-                Dependency.get(ShadeController.class).addPostCollapseAction(() -> {
+                mShadeController.addPostCollapseAction(() -> {
                     setDismissAllInProgress(false);
                     onAnimationComplete.run();
                 });
-                Dependency.get(ShadeController.class).animateCollapsePanels(
+                mShadeController.animateCollapsePanels(
                         CommandQueue.FLAG_EXCLUDE_NONE);
             } else {
                 setDismissAllInProgress(false);
@@ -5665,6 +5665,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public void setRemoteInputManager(NotificationRemoteInputManager remoteInputManager) {
         mRemoteInputManager = remoteInputManager;
+    }
+
+    void setShadeController(ShadeController shadeController) {
+        mShadeController = shadeController;
     }
 
     /**
@@ -6066,7 +6070,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
                 if (!mAmbientState.isDozing() || startingChild != null) {
                     // We have notifications, go to locked shade.
-                    Dependency.get(ShadeController.class).goToLockedShade(startingChild);
+                    mShadeController.goToLockedShade(startingChild);
                     if (startingChild instanceof ExpandableNotificationRow) {
                         ExpandableNotificationRow row = (ExpandableNotificationRow) startingChild;
                         row.onExpandedByGesture(true /* drag down is always an open */);
