@@ -30,7 +30,6 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.NavigationModeController;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.DeviceConfigProxy;
 
@@ -57,7 +56,6 @@ public class KeyguardModule {
             FalsingManager falsingManager,
             LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
-            NotificationShadeWindowController notificationShadeWindowController,
             Lazy<KeyguardViewController> statusBarKeyguardViewManagerLazy,
             DismissCallbackRegistry dismissCallbackRegistry,
             KeyguardUpdateMonitor updateMonitor,
@@ -72,7 +70,6 @@ public class KeyguardModule {
                 falsingManager,
                 lockPatternUtils,
                 broadcastDispatcher,
-                notificationShadeWindowController,
                 statusBarKeyguardViewManagerLazy,
                 dismissCallbackRegistry,
                 updateMonitor,
