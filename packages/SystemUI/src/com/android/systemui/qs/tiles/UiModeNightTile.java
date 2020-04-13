@@ -31,6 +31,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.LocationController;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -51,13 +52,15 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
             com.android.internal.R.drawable.ic_qs_ui_mode_night);
     private final UiModeManager mUiModeManager;
     private final BatteryController mBatteryController;
+    private final LocationController mLocationController;
 
     @Inject
     public UiModeNightTile(QSHost host, ConfigurationController configurationController,
-            BatteryController batteryController) {
+            BatteryController batteryController, LocationController locationController) {
         super(host);
         mBatteryController = batteryController;
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
+        mLocationController = locationController;
         configurationController.observe(getLifecycle(), this);
         batteryController.observe(getLifecycle(), this);
     }
@@ -97,7 +100,8 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         if (powerSave) {
             state.secondaryLabel = mContext.getResources().getString(
                     R.string.quick_settings_dark_mode_secondary_label_battery_saver);
-        } else if (uiMode == UiModeManager.MODE_NIGHT_AUTO) {
+        } else if (uiMode == UiModeManager.MODE_NIGHT_AUTO
+                && mLocationController.isLocationEnabled()) {
             state.secondaryLabel = mContext.getResources().getString(nightMode
                     ? R.string.quick_settings_dark_mode_secondary_label_until_sunrise
                     : R.string.quick_settings_dark_mode_secondary_label_on_at_sunset);
