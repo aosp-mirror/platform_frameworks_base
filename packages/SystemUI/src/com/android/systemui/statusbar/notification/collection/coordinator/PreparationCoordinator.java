@@ -72,7 +72,6 @@ public class PreparationCoordinator implements Coordinator {
     ) {
         mLogger = logger;
         mNotifInflater = notifInflater;
-        mNotifInflater.setInflationCallback(mInflationCallback);
         mNotifErrorManager = errorManager;
         mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
         mViewBarn = viewBarn;
@@ -218,11 +217,11 @@ public class PreparationCoordinator implements Coordinator {
 
     private void inflateEntry(NotificationEntry entry, String reason) {
         abortInflation(entry, reason);
-        mNotifInflater.inflateViews(entry);
+        mNotifInflater.inflateViews(entry, mInflationCallback);
     }
 
     private void rebind(NotificationEntry entry, String reason) {
-        mNotifInflater.rebindViews(entry);
+        mNotifInflater.rebindViews(entry, mInflationCallback);
     }
 
     private void abortInflation(NotificationEntry entry, String reason) {

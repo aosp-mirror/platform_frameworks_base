@@ -408,15 +408,6 @@ public final class NotificationEntry extends ListEntry {
         return wasBubble != isBubble();
     }
 
-    /**
-     * Resets the notification entry to be re-used.
-     */
-    public void reset() {
-        if (row != null) {
-            row.reset();
-        }
-    }
-
     @NotificationSectionsManager.PriorityBucket
     public int getBucket() {
         return mBucket;
