@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -62,7 +63,6 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     private OnBeforeFinalizeFilterListener mBeforeFilterListener;
     private NotifFilter mUninflatedFilter;
     private NotifFilter mInflationErrorFilter;
-    private NotifInflaterImpl.InflationCallback mCallback;
     private NotifInflationErrorManager mErrorManager;
     private NotificationEntry mEntry;
     private Exception mInflationError;
@@ -104,9 +104,6 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mBeforeFilterListenerCaptor.capture());
         mBeforeFilterListener = mBeforeFilterListenerCaptor.getValue();
 
-        verify(mNotifInflater).setInflationCallback(mCallbackCaptor.capture());
-        mCallback = mCallbackCaptor.getValue();
-
         mCollectionListener.onEntryInit(mEntry);
     }
 
@@ -142,7 +139,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
 
         // THEN we inflate it
-        verify(mNotifInflater).inflateViews(mEntry);
+        verify(mNotifInflater).inflateViews(eq(mEntry), any());
 
         // THEN we filter it out until it's done inflating.
         assertTrue(mUninflatedFilter.shouldFilterOut(mEntry, 0));
@@ -151,14 +148,17 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Test
     public void testRebindsInflatedNotificationsOnUpdate() {
         // GIVEN an inflated notification
-        mCallback.onInflationFinished(mEntry);
+        mCollectionListener.onEntryAdded(mEntry);
+        mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
+        verify(mNotifInflater).inflateViews(eq(mEntry), mCallbackCaptor.capture());
+        mCallbackCaptor.getValue().onInflationFinished(mEntry);
 
         // WHEN notification is updated
         mCollectionListener.onEntryUpdated(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
 
         // THEN we rebind it
-        verify(mNotifInflater).rebindViews(mEntry);
+        verify(mNotifInflater).rebindViews(eq(mEntry), any());
 
         // THEN we do not filter it because it's not the first inflation.
         assertFalse(mUninflatedFilter.shouldFilterOut(mEntry, 0));
@@ -166,8 +166,11 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
     @Test
     public void testDoesntFilterInflatedNotifs() {
-        // WHEN a notification is inflated
-        mCallback.onInflationFinished(mEntry);
+        // GIVEN an inflated notification
+        mCollectionListener.onEntryAdded(mEntry);
+        mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
+        verify(mNotifInflater).inflateViews(eq(mEntry), mCallbackCaptor.capture());
+        mCallbackCaptor.getValue().onInflationFinished(mEntry);
 
         // THEN it isn't filtered from shade list
         assertFalse(mUninflatedFilter.shouldFilterOut(mEntry, 0));
