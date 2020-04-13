@@ -43,7 +43,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.phone.NavigationModeController;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
@@ -66,7 +65,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock LockPatternUtils mLockPatternUtils;
     private @Mock KeyguardUpdateMonitor mUpdateMonitor;
     private @Mock StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private @Mock NotificationShadeWindowController mNotificationShadeWindowController;
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
     private @Mock DismissCallbackRegistry mDismissCallbackRegistry;
     private @Mock DumpManager mDumpManager;
@@ -88,7 +86,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         mViewMediator = new KeyguardViewMediator(
                 mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
-                mNotificationShadeWindowController, () -> mStatusBarKeyguardViewManager,
+                () -> mStatusBarKeyguardViewManager,
                 mDismissCallbackRegistry, mUpdateMonitor, mDumpManager, mUiBgExecutor,
                 mPowerManager, mTrustManager, mDeviceConfig, mNavigationModeController);
         mViewMediator.start();
@@ -98,18 +96,18 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     public void testOnGoingToSleep_UpdatesKeyguardGoingAway() {
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
         verify(mUpdateMonitor).setKeyguardGoingAway(false);
-        verify(mNotificationShadeWindowController, never()).setKeyguardGoingAway(anyBoolean());
+        verify(mStatusBarKeyguardViewManager, never()).setKeyguardGoingAwayState(anyBoolean());
     }
 
     @Test
     public void testRegisterDumpable() {
         verify(mDumpManager).registerDumpable(KeyguardViewMediator.class.getName(), mViewMediator);
-        verify(mNotificationShadeWindowController, never()).setKeyguardGoingAway(anyBoolean());
+        verify(mStatusBarKeyguardViewManager, never()).setKeyguardGoingAwayState(anyBoolean());
     }
 
     @Test
     public void testKeyguardGone_notGoingaway() {
         mViewMediator.mViewMediatorCallback.keyguardGone();
-        verify(mNotificationShadeWindowController).setKeyguardGoingAway(eq(false));
+        verify(mStatusBarKeyguardViewManager).setKeyguardGoingAwayState(eq(false));
     }
 }
