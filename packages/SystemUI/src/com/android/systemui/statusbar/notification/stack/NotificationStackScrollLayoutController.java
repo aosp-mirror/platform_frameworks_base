@@ -165,6 +165,7 @@ public class NotificationStackScrollLayoutController {
     private NotificationSwipeHelper mSwipeHelper;
     private boolean mShowEmptyShadeView;
     private int mBarState;
+    private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
@@ -506,29 +507,30 @@ public class NotificationStackScrollLayoutController {
 
     private final OnHeadsUpChangedListener mOnHeadsUpChangedListener =
             new OnHeadsUpChangedListener() {
-        @Override
-        public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
-            mView.setInHeadsUpPinnedMode(inPinnedMode);
-        }
+                @Override
+                public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
+                    mView.setInHeadsUpPinnedMode(inPinnedMode);
+                }
 
-        @Override
-        public void onHeadsUpPinned(NotificationEntry entry) {
+                @Override
+                public void onHeadsUpPinned(NotificationEntry entry) {
+                    mNotificationRoundnessManager.updateView(entry.getRow(), false /* animate */);
+                }
 
-        }
+                @Override
+                public void onHeadsUpUnPinned(NotificationEntry entry) {
+                    mNotificationRoundnessManager.updateView(entry.getRow(), true /* animate */);
+                }
 
-        @Override
-        public void onHeadsUpUnPinned(NotificationEntry entry) {
-
-        }
-
-        @Override
-        public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-            long numEntries = mHeadsUpManager.getAllEntries().count();
-            NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
-            mView.setNumHeadsUp(numEntries);
-            mView.setTopHeadsUpEntry(topEntry);
-        }
-    };
+                @Override
+                public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
+                    long numEntries = mHeadsUpManager.getAllEntries().count();
+                    NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
+                    mView.setNumHeadsUp(numEntries);
+                    mView.setTopHeadsUpEntry(topEntry);
+                    mNotificationRoundnessManager.updateView(entry.getRow(), false /* animate */);
+                }
+            };
 
     private final ZenModeController.Callback mZenModeControllerCallback =
             new ZenModeController.Callback() {
@@ -658,7 +660,6 @@ public class NotificationStackScrollLayoutController {
         mView.initView(mView.getContext(), mKeyguardBypassController::getBypassEnabled,
                 mSwipeHelper);
 
-        mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
@@ -732,6 +733,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void setHeadsUpAppearanceController(HeadsUpAppearanceController controller) {
+        mHeadsUpAppearanceController = controller;
         mView.setHeadsUpAppearanceController(controller);
     }
 
@@ -780,6 +782,7 @@ public class NotificationStackScrollLayoutController {
 
     public void setTrackingHeadsUp(ExpandableNotificationRow expandableNotificationRow) {
         mView.setTrackingHeadsUp(expandableNotificationRow);
+        mNotificationRoundnessManager.setTrackingHeadsUp(expandableNotificationRow);
     }
 
     public void wakeUpFromPulse() {
@@ -1464,7 +1467,10 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public void bindRow(ExpandableNotificationRow row) {
-            mView.bindRow(row);
+            row.setHeadsUpAnimatingAwayListener(animatingAway -> {
+                mNotificationRoundnessManager.updateView(row, false);
+                mHeadsUpAppearanceController.updateHeader(row.getEntry());
+            });
         }
 
         @Override

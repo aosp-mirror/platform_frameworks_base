@@ -315,7 +315,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private HashSet<ExpandableView> mClearTransientViewsWhenFinished = new HashSet<>();
     private HashSet<Pair<ExpandableNotificationRow, Boolean>> mHeadsUpChangeAnimations
             = new HashSet<>();
-    private final NotificationRoundnessManager mRoundnessManager;
     private boolean mTrackingHeadsUp;
     private boolean mForceNoOverlappingRendering;
     private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
@@ -525,7 +524,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public NotificationStackScrollLayout(
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
-            NotificationRoundnessManager notificationRoundnessManager,
             NotificationSectionsManager notificationSectionsManager,
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager,
@@ -533,7 +531,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     ) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
-        mRoundnessManager = notificationRoundnessManager;
         mSectionsManager = notificationSectionsManager;
 
         mSectionsManager.initialize(this, LayoutInflater.from(context));
@@ -3211,7 +3208,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mAnimateNextSectionBoundsChange = false;
         }
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
-        mRoundnessManager.updateRoundedChildren(mSections);
+        // TODO: Refactor SectionManager and put the RoundnessManager there.
+        mController.getNoticationRoundessManager().updateRoundedChildren(mSections);
         mAnimateBottomOnLayout = false;
         invalidate();
     }
@@ -3284,14 +3282,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     void setExpandingNotification(ExpandableNotificationRow row) {
         mAmbientState.setExpandingNotification(row);
         requestChildrenUpdate();
-    }
-
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    void bindRow(ExpandableNotificationRow row) {
-        row.setHeadsUpAnimatingAwayListener(animatingAway -> {
-            mRoundnessManager.onHeadsupAnimatingAwayChanged(row, animatingAway);
-            mHeadsUpAppearanceController.updateHeader(row.getEntry());
-        });
     }
 
     public boolean containsView(View v) {
@@ -5011,7 +5001,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void setTrackingHeadsUp(ExpandableNotificationRow row) {
         mAmbientState.setTrackedHeadsUpRow(row);
         mTrackingHeadsUp = row != null;
-        mRoundnessManager.setTrackingHeadsUp(row);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5332,7 +5321,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setHeadsUpAppearanceController(
+    void setHeadsUpAppearanceController(
             HeadsUpAppearanceController headsUpAppearanceController) {
         mHeadsUpAppearanceController = headsUpAppearanceController;
     }

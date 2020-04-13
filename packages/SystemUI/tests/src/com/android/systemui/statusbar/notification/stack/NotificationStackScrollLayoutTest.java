@@ -146,7 +146,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScrollerInternal = new NotificationStackScrollLayout(
                 getContext(),
                 null,
-                mNotificationRoundnessManager,
                 mNotificationSectionsManager,
                 mGroupMembershipManger,
                 mGroupExpansionManager,
