@@ -15,7 +15,7 @@
  */
 
 package com.android.internal.accessibility.util;
-import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityServiceFragmentType;
+import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -112,9 +112,9 @@ public final class AccessibilityUtils {
      * Gets the corresponding fragment type of a given accessibility service.
      *
      * @param accessibilityServiceInfo The accessibilityService's info.
-     * @return int from {@link AccessibilityServiceFragmentType}.
+     * @return int from {@link AccessibilityFragmentType}.
      */
-    public static @AccessibilityServiceFragmentType int getAccessibilityServiceFragmentType(
+    public static @AccessibilityFragmentType int getAccessibilityServiceFragmentType(
             AccessibilityServiceInfo accessibilityServiceInfo) {
         final int targetSdk = accessibilityServiceInfo.getResolveInfo()
                 .serviceInfo.applicationInfo.targetSdkVersion;
@@ -122,10 +122,10 @@ public final class AccessibilityUtils {
                 & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
 
         if (targetSdk <= Build.VERSION_CODES.Q) {
-            return AccessibilityServiceFragmentType.LEGACY;
+            return AccessibilityFragmentType.VOLUME_SHORTCUT_TOGGLE;
         }
         return requestA11yButton
-                ? AccessibilityServiceFragmentType.INVISIBLE
-                : AccessibilityServiceFragmentType.INTUITIVE;
+                ? AccessibilityFragmentType.INVISIBLE_TOGGLE
+                : AccessibilityFragmentType.TOGGLE;
     }
 }
