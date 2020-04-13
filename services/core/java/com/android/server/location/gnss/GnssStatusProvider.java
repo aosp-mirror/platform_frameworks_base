@@ -16,11 +16,13 @@
 
 package com.android.server.location.gnss;
 
+import static com.android.server.location.gnss.GnssManagerService.D;
+import static com.android.server.location.gnss.GnssManagerService.TAG;
+
 import android.location.GnssStatus;
 import android.location.IGnssStatusListener;
 import android.location.util.identity.CallerIdentity;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
@@ -33,7 +35,7 @@ import com.android.server.location.UserInfoHelper;
 /**
  * Implementation of a handler for {@link IGnssStatusListener}.
  */
-public class GnssStatusProvider extends GnssListenerManager<Void, IGnssStatusListener, Void> {
+public class GnssStatusProvider extends GnssListenerMultiplexer<Void, IGnssStatusListener, Void> {
 
     private final LocationUsageLogger mLogger;
 
@@ -50,22 +52,22 @@ public class GnssStatusProvider extends GnssListenerManager<Void, IGnssStatusLis
     }
 
     @Override
-    protected boolean registerService(Void ignored) {
-        if (GnssManagerService.D) {
-            Log.d(GnssManagerService.TAG, "starting gnss status");
+    protected boolean registerWithService(Void ignored) {
+        if (D) {
+            Log.d(TAG, "starting gnss status");
         }
         return true;
     }
 
     @Override
-    protected void unregisterService() {
-        if (GnssManagerService.D) {
-            Log.d(GnssManagerService.TAG, "stopping gnss status");
+    protected void unregisterWithService() {
+        if (D) {
+            Log.d(TAG, "stopping gnss status");
         }
     }
 
     @Override
-    protected void onRegistrationAdded(IBinder key, GnssRegistration registration) {
+    protected void onRegistrationAdded(IBinder key, GnssListenerRegistration registration) {
         mLogger.logLocationApiUsage(
                 LocationStatsEnums.USAGE_STARTED,
                 LocationStatsEnums.API_REGISTER_GNSS_STATUS_CALLBACK,
@@ -78,7 +80,7 @@ public class GnssStatusProvider extends GnssListenerManager<Void, IGnssStatusLis
     }
 
     @Override
-    protected void onRegistrationRemoved(IBinder key, GnssRegistration registration) {
+    protected void onRegistrationRemoved(IBinder key, GnssListenerRegistration registration) {
         mLogger.logLocationApiUsage(
                 LocationStatsEnums.USAGE_ENDED,
                 LocationStatsEnums.API_REGISTER_GNSS_STATUS_CALLBACK,
@@ -95,21 +97,9 @@ public class GnssStatusProvider extends GnssListenerManager<Void, IGnssStatusLis
      */
     public void onStatusChanged(boolean isNavigating) {
         if (isNavigating) {
-            deliverToListeners((listener) -> {
-                try {
-                    listener.onGnssStarted();
-                } catch (RemoteException e) {
-                    // ignore - the listener will get cleaned up later anyways
-                }
-            });
+            deliverToListeners(IGnssStatusListener::onGnssStarted);
         } else {
-            deliverToListeners((listener) -> {
-                try {
-                    listener.onGnssStopped();
-                } catch (RemoteException e) {
-                    // ignore - the listener will get cleaned up later anyways
-                }
-            });
+            deliverToListeners(IGnssStatusListener::onGnssStopped);
         }
     }
 
@@ -117,12 +107,8 @@ public class GnssStatusProvider extends GnssListenerManager<Void, IGnssStatusLis
      * Called by GnssLocationProvider.
      */
     public void onFirstFix(int ttff) {
-        deliverToListeners((listener) -> {
-            try {
-                listener.onFirstFix(ttff);
-            } catch (RemoteException e) {
-                // ignore - the listener will get cleaned up later anyways
-            }
+        deliverToListeners(listener -> {
+            listener.onFirstFix(ttff);
         });
     }
 
@@ -130,25 +116,25 @@ public class GnssStatusProvider extends GnssListenerManager<Void, IGnssStatusLis
      * Called by GnssLocationProvider.
      */
     public void onSvStatusChanged(GnssStatus gnssStatus) {
-        deliverToListeners((listener) -> {
-            try {
-                listener.onSvStatusChanged(gnssStatus);
-            } catch (RemoteException e) {
-                // ignore - the listener will get cleaned up later anyways
+        deliverToListeners(registration -> {
+            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity())) {
+                return listener -> listener.onSvStatusChanged(gnssStatus);
+            } else {
+                return null;
             }
-        }, registration -> mAppOpsHelper.noteLocationAccess(registration.getIdentity()));
+        });
     }
 
     /**
      * Called by GnssLocationProvider.
      */
     public void onNmeaReceived(long timestamp, String nmea) {
-        deliverToListeners((listener) -> {
-            try {
-                listener.onNmeaReceived(timestamp, nmea);
-            } catch (RemoteException e) {
-                // ignore - the listener will get cleaned up later anyways
+        deliverToListeners(registration -> {
+            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity())) {
+                return listener -> listener.onNmeaReceived(timestamp, nmea);
+            } else {
+                return null;
             }
-        }, registration -> mAppOpsHelper.noteLocationAccess(registration.getIdentity()));
+        });
     }
 }

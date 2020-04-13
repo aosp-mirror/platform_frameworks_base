@@ -224,7 +224,7 @@ public class GnssManagerService implements GnssNative.Callbacks {
     /**
      * Adds a GNSS batching callback for delivering GNSS location batch results.
      */
-    public boolean addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
+    public boolean setGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
             @Nullable String attributionTag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
 
