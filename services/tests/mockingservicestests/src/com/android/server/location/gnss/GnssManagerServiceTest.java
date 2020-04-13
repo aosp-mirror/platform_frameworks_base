@@ -349,6 +349,8 @@ public class GnssManagerServiceTest {
     private GnssMeasurementsProvider createGnssMeasurementsProvider() {
         GnssMeasurementProviderNative
                 mockGnssMeasurementProviderNative = mock(GnssMeasurementProviderNative.class);
+        when(mockGnssMeasurementProviderNative.isMeasurementSupported()).thenReturn(
+                true);
         return new GnssMeasurementsProvider(mUserInfoHelper, mSettingsHelper,
                 mAppOpsHelper, mAppForegroundHelper, new LocationUsageLogger(),
                 mockGnssMeasurementProviderNative);
@@ -357,6 +359,8 @@ public class GnssManagerServiceTest {
     private GnssNavigationMessageProvider createGnssNavigationMessageProvider() {
         GnssNavigationMessageProviderNative mockGnssNavigationMessageProviderNative = mock(
                 GnssNavigationMessageProviderNative.class);
+        when(mockGnssNavigationMessageProviderNative.isNavigationMessageSupported()).thenReturn(
+                true);
         return new GnssNavigationMessageProvider(mUserInfoHelper, mSettingsHelper, mAppOpsHelper,
                 mAppForegroundHelper, mockGnssNavigationMessageProviderNative);
     }
@@ -364,6 +368,8 @@ public class GnssManagerServiceTest {
     private GnssAntennaInfoProvider createGnssAntennaInfoProvider() {
         GnssAntennaInfoProviderNative mockGnssAntenaInfoProviderNative = mock(
                 GnssAntennaInfoProviderNative.class);
+        when(mockGnssAntenaInfoProviderNative.isAntennaInfoSupported()).thenReturn(
+                true);
         return new GnssAntennaInfoProvider(mUserInfoHelper, mSettingsHelper, mAppOpsHelper,
                 mAppForegroundHelper, mockGnssAntenaInfoProviderNative);
     }
@@ -449,7 +455,7 @@ public class GnssManagerServiceTest {
 
         disableLocationPermissions();
 
-        assertThrows(SecurityException.class, () -> mGnssManagerService.addGnssBatchingCallback(
+        assertThrows(SecurityException.class, () -> mGnssManagerService.setGnssBatchingCallback(
                 mockBatchedLocationCallback, "com.android.server", null));
 
         mGnssManagerService.onReportLocation(mockLocationList);
@@ -464,7 +470,7 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        assertThat(mGnssManagerService.addGnssBatchingCallback(
+        assertThat(mGnssManagerService.setGnssBatchingCallback(
                 mockBatchedLocationCallback, "com.android.server", null))
                 .isEqualTo(true);
 
@@ -481,10 +487,10 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        assertThat(mGnssManagerService.addGnssBatchingCallback(
+        assertThat(mGnssManagerService.setGnssBatchingCallback(
                 mockBatchedLocationCallback1, "com.android.server", null))
                 .isEqualTo(true);
-        assertThat(mGnssManagerService.addGnssBatchingCallback(
+        assertThat(mGnssManagerService.setGnssBatchingCallback(
                 mockBatchedLocationCallback2, "com.android.server", null))
                 .isEqualTo(true);
 
@@ -518,7 +524,7 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        mGnssManagerService.addGnssBatchingCallback(mockBatchedLocationCallback,
+        mGnssManagerService.setGnssBatchingCallback(mockBatchedLocationCallback,
                 "com.android.server", null);
 
         disableLocationPermissions();
@@ -539,7 +545,7 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        mGnssManagerService.addGnssBatchingCallback(mockBatchedLocationCallback,
+        mGnssManagerService.setGnssBatchingCallback(mockBatchedLocationCallback,
                 "com.android.server", null);
 
         mGnssManagerService.removeGnssBatchingCallback();

@@ -43,7 +43,6 @@ import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.util.listeners.ClientListenerManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -59,11 +58,14 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.listeners.ListenerTransportMultiplexer;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledRunnable;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
@@ -329,17 +331,19 @@ public class LocationManager {
     private final ArrayMap<LocationListener, LocationListenerTransport> mListeners =
             new ArrayMap<>();
 
-    @GuardedBy("mBatchedLocationCallbackManager")
-    private final BatchedLocationCallbackManager mBatchedLocationCallbackManager =
-            new BatchedLocationCallbackManager();
-    private final GnssStatusListenerManager
-            mGnssStatusListenerManager = new GnssStatusListenerManager();
-    private final GnssMeasurementsListenerManager mGnssMeasurementsListenerManager =
-            new GnssMeasurementsListenerManager();
-    private final GnssNavigationMessageListenerManager mGnssNavigationMessageListenerTransport =
-            new GnssNavigationMessageListenerManager();
-    private final GnssAntennaInfoListenerManager mGnssAntennaInfoListenerManager =
-            new GnssAntennaInfoListenerManager();
+    private final GnssStatusTransportMultiplexer mGnssStatusListenerManager =
+            new GnssStatusTransportMultiplexer();
+    private final GnssMeasurementsTransportMultiplexer mGnssMeasurementsListenerManager =
+            new GnssMeasurementsTransportMultiplexer();
+    private final GnssNavigationTransportMultiplexer mGnssNavigationListenerTransport =
+            new GnssNavigationTransportMultiplexer();
+    private final GnssAntennaInfoTransportMultiplexer mGnssAntennaInfoListenerManager =
+            new GnssAntennaInfoTransportMultiplexer();
+
+    private final Object mBatchedLocationCallbackLock = new Object();
+
+    @GuardedBy("mBatchLocationCallbackLock")
+    private @Nullable BatchedLocationCallbackTransport mBatchedLocationCallbackTransport;
 
     /**
      * @hide
@@ -2361,7 +2365,7 @@ public class LocationManager {
             handler = new Handler();
         }
 
-        mGnssNavigationMessageListenerTransport.addListener(callback, new HandlerExecutor(handler));
+        mGnssNavigationListenerTransport.addListener(callback, new HandlerExecutor(handler));
         return true;
     }
 
@@ -2380,7 +2384,7 @@ public class LocationManager {
     public boolean registerGnssNavigationMessageCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull GnssNavigationMessage.Callback callback) {
-        mGnssNavigationMessageListenerTransport.addListener(callback, executor);
+        mGnssNavigationListenerTransport.addListener(callback, executor);
         return true;
     }
 
@@ -2391,7 +2395,7 @@ public class LocationManager {
      */
     public void unregisterGnssNavigationMessageCallback(
             @NonNull GnssNavigationMessage.Callback callback) {
-        mGnssNavigationMessageListenerTransport.removeListener(callback);
+        mGnssNavigationListenerTransport.removeListener(callback);
     }
 
     /**
@@ -2440,11 +2444,16 @@ public class LocationManager {
             handler = new Handler();
         }
 
-        synchronized (mBatchedLocationCallbackManager) {
-            mBatchedLocationCallbackManager.addListener(callback, new HandlerExecutor(handler));
+        BatchedLocationCallbackTransport transport = new BatchedLocationCallbackTransport(callback,
+                handler);
+
+        synchronized (mBatchedLocationCallbackLock) {
             try {
+                mService.setGnssBatchingCallback(transport, mContext.getPackageName(),
+                        mContext.getAttributionTag());
+                mBatchedLocationCallbackTransport = transport;
                 mService.startGnssBatch(periodNanos, wakeOnFifoFull,
-                            mContext.getPackageName(), mContext.getFeatureId());
+                        mContext.getPackageName(), mContext.getFeatureId());
                 return true;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -2475,21 +2484,24 @@ public class LocationManager {
      *
      * @param callback the specific callback class to remove from the transport layer
      *
-     * @return True if batching was successfully started
+     * @return True always
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
     public boolean unregisterGnssBatchedLocationCallback(
             @NonNull BatchedLocationCallback callback) {
-        synchronized (mBatchedLocationCallbackManager) {
-            try {
-                mBatchedLocationCallbackManager.removeListener(callback);
-                mService.stopGnssBatch();
-                return true;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+        synchronized (mBatchedLocationCallbackLock) {
+            if (callback == mBatchedLocationCallbackTransport.getCallback()) {
+                try {
+                    mBatchedLocationCallbackTransport = null;
+                    mService.removeGnssBatchingCallback();
+                    mService.stopGnssBatch();
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
+            return true;
         }
     }
 
@@ -2858,16 +2870,15 @@ public class LocationManager {
         }
     }
 
-    private class GnssStatusListenerManager extends
-            ClientListenerManager<Void, GnssStatus.Callback> {
+    private class GnssStatusTransportMultiplexer extends
+            ListenerTransportMultiplexer<Void, GnssStatus.Callback> {
 
         private @Nullable IGnssStatusListener mListenerTransport;
 
         volatile @Nullable GnssStatus mGnssStatus;
         volatile int mTtff;
 
-        GnssStatusListenerManager() {
-        }
+        GnssStatusTransportMultiplexer() {}
 
         public GnssStatus getGnssStatus() {
             return mGnssStatus;
@@ -2887,36 +2898,31 @@ public class LocationManager {
         }
 
         @Override
-        protected boolean registerService(Void ignored) {
-            Preconditions.checkState(mListenerTransport == null);
-
-            GnssStatusListener transport = new GnssStatusListener();
-            try {
-                mService.registerGnssStatusCallback(transport, mContext.getPackageName(),
-                        mContext.getAttributionTag());
-                mListenerTransport = transport;
-                return true;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+        protected void registerWithServer(Void ignored) throws RemoteException {
+            IGnssStatusListener transport = mListenerTransport;
+            if (transport == null) {
+                transport = new GnssStatusListener();
             }
+
+            // if a remote exception is thrown the transport should not be set
+            mListenerTransport = null;
+            mService.registerGnssStatusCallback(transport, mContext.getPackageName(),
+                    mContext.getAttributionTag());
+            mListenerTransport = transport;
         }
 
         @Override
-        protected void unregisterService() {
+        protected void unregisterWithServer() throws RemoteException {
             if (mListenerTransport != null) {
-                try {
-                    IGnssStatusListener transport = mListenerTransport;
-                    mListenerTransport = null;
-                    mService.unregisterGnssStatusCallback(transport);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+                IGnssStatusListener transport = mListenerTransport;
+                mListenerTransport = null;
+                mService.unregisterGnssStatusCallback(transport);
             }
         }
 
         private class GnssStatusListener extends IGnssStatusListener.Stub {
-            GnssStatusListener() {
-            }
+
+            GnssStatusListener() {}
 
             @Override
             public void onGnssStarted() {
@@ -2951,219 +2957,186 @@ public class LocationManager {
         }
     }
 
-    private class GnssMeasurementsListenerManager extends
-            ClientListenerManager<GnssRequest, GnssMeasurementsEvent.Callback> {
+    private class GnssMeasurementsTransportMultiplexer extends
+            ListenerTransportMultiplexer<GnssRequest, GnssMeasurementsEvent.Callback> {
 
-        @Nullable
-        private IGnssMeasurementsListener mListenerTransport;
+        private @Nullable IGnssMeasurementsListener mListenerTransport;
 
-        GnssMeasurementsListenerManager() {
-        }
+        GnssMeasurementsTransportMultiplexer() {}
 
         @Override
-        protected boolean registerService(GnssRequest request) {
-            Preconditions.checkState(mListenerTransport == null);
-
-            GnssMeasurementsListener transport = new GnssMeasurementsListener();
-            try {
-                mService.addGnssMeasurementsListener(request, transport, mContext.getPackageName(),
-                        mContext.getAttributionTag());
-                mListenerTransport = transport;
-                return true;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+        protected void registerWithServer(GnssRequest request) throws RemoteException {
+            IGnssMeasurementsListener transport = mListenerTransport;
+            if (transport == null) {
+                transport = new GnssMeasurementsListener();
             }
+
+            // if a remote exception is thrown the transport should not be set
+            mListenerTransport = null;
+            mService.addGnssMeasurementsListener(request, transport, mContext.getPackageName(),
+                    mContext.getAttributionTag());
+            mListenerTransport = transport;
         }
 
         @Override
-        protected void unregisterService() {
+        protected void unregisterWithServer() throws RemoteException {
             if (mListenerTransport != null) {
-                try {
-                    IGnssMeasurementsListener transport = mListenerTransport;
-                    mListenerTransport = null;
-                    mService.removeGnssMeasurementsListener(transport);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+                IGnssMeasurementsListener transport = mListenerTransport;
+                mListenerTransport = null;
+                mService.removeGnssMeasurementsListener(transport);
             }
         }
 
         @Override
-        protected GnssRequest mergeRequests(
-                List<Registration<GnssRequest, GnssMeasurementsEvent.Callback>> registrations) {
-            for (Registration<GnssRequest, GnssMeasurementsEvent.Callback> registration :
-                    registrations) {
-                if (registration.getRequest().isFullTracking()) {
-                    return registration.getRequest();
+        protected GnssRequest mergeRequests(Collection<GnssRequest> requests) {
+            GnssRequest.Builder builder = new GnssRequest.Builder();
+            for (GnssRequest request : requests) {
+                if (request.isFullTracking()) {
+                    builder.setFullTracking(true);
+                    break;
                 }
             }
 
-            return registrations.get(0).getRequest();
+            return builder.build();
         }
 
         private class GnssMeasurementsListener extends IGnssMeasurementsListener.Stub {
-            GnssMeasurementsListener() {
-            }
+
+            GnssMeasurementsListener() {}
 
             @Override
             public void onGnssMeasurementsReceived(final GnssMeasurementsEvent event) {
-                deliverToListeners((callback) -> callback.onGnssMeasurementsReceived(event));
+                deliverToListeners(callback -> callback.onGnssMeasurementsReceived(event));
             }
 
             @Override
             public void onStatusChanged(int status) {
-                deliverToListeners((callback) -> callback.onStatusChanged(status));
+                deliverToListeners(callback -> callback.onStatusChanged(status));
             }
         }
     }
 
-    private class GnssNavigationMessageListenerManager extends
-            ClientListenerManager<Void, GnssNavigationMessage.Callback> {
+    private class GnssNavigationTransportMultiplexer extends
+            ListenerTransportMultiplexer<Void, GnssNavigationMessage.Callback> {
 
         @Nullable
         private IGnssNavigationMessageListener mListenerTransport;
 
-        GnssNavigationMessageListenerManager() {
-        }
+        GnssNavigationTransportMultiplexer() {}
 
         @Override
-        protected boolean registerService(Void ignored) {
-            Preconditions.checkState(mListenerTransport == null);
-
-            GnssNavigationMessageListener transport = new GnssNavigationMessageListener();
-            try {
-                mService.addGnssNavigationMessageListener(transport, mContext.getPackageName(),
-                        mContext.getAttributionTag());
-                mListenerTransport = transport;
-                return true;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+        protected void registerWithServer(Void ignored) throws RemoteException {
+            IGnssNavigationMessageListener transport = mListenerTransport;
+            if (transport == null) {
+                transport = new GnssNavigationMessageListener();
             }
+
+            // if a remote exception is thrown the transport should not be set
+            mListenerTransport = null;
+            mService.addGnssNavigationMessageListener(transport, mContext.getPackageName(),
+                    mContext.getAttributionTag());
+            mListenerTransport = transport;
         }
 
         @Override
-        protected void unregisterService() {
+        protected void unregisterWithServer() throws RemoteException {
             if (mListenerTransport != null) {
-                try {
-                    IGnssNavigationMessageListener transport = mListenerTransport;
-                    mListenerTransport = null;
-                    mService.removeGnssNavigationMessageListener(transport);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+                IGnssNavigationMessageListener transport = mListenerTransport;
+                mListenerTransport = null;
+                mService.removeGnssNavigationMessageListener(transport);
             }
         }
 
         private class GnssNavigationMessageListener extends IGnssNavigationMessageListener.Stub {
-            GnssNavigationMessageListener() {
-            }
+
+            GnssNavigationMessageListener() {}
 
             @Override
             public void onGnssNavigationMessageReceived(GnssNavigationMessage event) {
-                deliverToListeners((listener) -> listener.onGnssNavigationMessageReceived(event));
+                deliverToListeners(listener -> listener.onGnssNavigationMessageReceived(event));
             }
 
             @Override
             public void onStatusChanged(int status) {
-                deliverToListeners((listener) -> listener.onStatusChanged(status));
+                deliverToListeners(listener -> listener.onStatusChanged(status));
             }
         }
     }
 
-    private class GnssAntennaInfoListenerManager extends
-            ClientListenerManager<Void, GnssAntennaInfo.Listener> {
+    private class GnssAntennaInfoTransportMultiplexer extends
+            ListenerTransportMultiplexer<Void, GnssAntennaInfo.Listener> {
 
-        @Nullable
-        private IGnssAntennaInfoListener mListenerTransport;
+        private @Nullable IGnssAntennaInfoListener mListenerTransport;
 
-        GnssAntennaInfoListenerManager() {
-        }
+        GnssAntennaInfoTransportMultiplexer() {}
 
         @Override
-        protected boolean registerService(Void ignored) {
-            Preconditions.checkState(mListenerTransport == null);
-
-            GnssAntennaInfoListener transport = new GnssAntennaInfoListener();
-            try {
-                mService.addGnssAntennaInfoListener(transport, mContext.getPackageName(),
-                        mContext.getAttributionTag());
-                mListenerTransport = transport;
-                return true;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+        protected void registerWithServer(Void ignored) throws RemoteException {
+            IGnssAntennaInfoListener transport = mListenerTransport;
+            if (transport == null) {
+                transport = new GnssAntennaInfoListener();
             }
+
+            // if a remote exception is thrown the transport should not be set
+            mListenerTransport = null;
+            mService.addGnssAntennaInfoListener(transport, mContext.getPackageName(),
+                    mContext.getAttributionTag());
+            mListenerTransport = transport;
         }
 
         @Override
-        protected void unregisterService() {
+        protected void unregisterWithServer() throws RemoteException {
             if (mListenerTransport != null) {
-                try {
-                    IGnssAntennaInfoListener transport = mListenerTransport;
-                    mListenerTransport = null;
-                    mService.removeGnssAntennaInfoListener(transport);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+                IGnssAntennaInfoListener transport = mListenerTransport;
+                mListenerTransport = null;
+                mService.removeGnssAntennaInfoListener(transport);
             }
         }
 
         private class GnssAntennaInfoListener extends IGnssAntennaInfoListener.Stub {
-            GnssAntennaInfoListener() {
-            }
+
+            GnssAntennaInfoListener() {}
 
             @Override
             public void onGnssAntennaInfoReceived(List<GnssAntennaInfo> infos) {
                 deliverToListeners(callback -> callback.onGnssAntennaInfoReceived(infos));
             }
         }
-
     }
 
-    private class BatchedLocationCallbackManager extends
-            ClientListenerManager<Void, BatchedLocationCallback> {
+    private static class BatchedLocationCallbackTransport extends IBatchedLocationCallback.Stub {
+
+        private final Handler mHandler;
+        private volatile @Nullable BatchedLocationCallback mCallback;
+
+        BatchedLocationCallbackTransport(BatchedLocationCallback callback, Handler handler) {
+            mCallback = Objects.requireNonNull(callback);
+            mHandler = Objects.requireNonNull(handler);
+        }
 
         @Nullable
-        private IBatchedLocationCallback mListenerTransport;
+        public BatchedLocationCallback getCallback() {
+            return mCallback;
+        }
 
-        BatchedLocationCallbackManager() {
+        public void unregister() {
+            mCallback = null;
         }
 
         @Override
-        protected boolean registerService(Void ignored) {
-            Preconditions.checkState(mListenerTransport == null);
-
-            BatchedLocationCallback transport = new BatchedLocationCallback();
-            try {
-                mService.addGnssBatchingCallback(transport, mContext.getPackageName(),
-                        mContext.getAttributionTag());
-                mListenerTransport = transport;
-                return true;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+        public void onLocationBatch(List<Location> locations) {
+            if (mCallback == null) {
+                return;
             }
-        }
 
-        @Override
-        protected void unregisterService() {
-            if (mListenerTransport != null) {
-                try {
-                    mListenerTransport = null;
-                    mService.removeGnssBatchingCallback();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
+            mHandler.post(() -> {
+                BatchedLocationCallback callback = mCallback;
+                if (callback == null) {
+                    return;
                 }
-            }
-        }
 
-        private class BatchedLocationCallback extends IBatchedLocationCallback.Stub {
-            BatchedLocationCallback() {
-            }
-
-            @Override
-            public void onLocationBatch(List<Location> locations) {
-                deliverToListeners((listener) -> listener.onLocationBatch(locations));
-            }
-
+                callback.onLocationBatch(locations);
+            });
         }
     }
 

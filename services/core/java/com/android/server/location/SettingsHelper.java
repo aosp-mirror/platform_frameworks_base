@@ -223,6 +223,25 @@ public class SettingsHelper {
     }
 
     /**
+     * Add a listener for changes to the location package blacklist. Callbacks occur on an
+     * unspecified thread.
+     */
+    public void addOnLocationPackageBlacklistChangedListener(
+            UserSettingChangedListener listener) {
+        mLocationPackageBlacklist.addListener(listener);
+        mLocationPackageWhitelist.addListener(listener);
+    }
+
+    /**
+     * Remove a listener for changes to the location package blacklist.
+     */
+    public void removeOnLocationPackageBlacklistChangedListener(
+            UserSettingChangedListener listener) {
+        mLocationPackageBlacklist.removeListener(listener);
+        mLocationPackageWhitelist.removeListener(listener);
+    }
+
+    /**
      * Retrieve the background throttle package whitelist.
      */
     public Set<String> getBackgroundThrottlePackageWhitelist() {
