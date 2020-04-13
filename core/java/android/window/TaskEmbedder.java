@@ -26,7 +26,6 @@ import android.app.ActivityTaskManager;
 import android.app.ActivityView;
 import android.app.IActivityTaskManager;
 import android.app.PendingIntent;
-import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -129,7 +128,6 @@ public abstract class TaskEmbedder {
 
     protected SurfaceControl.Transaction mTransaction;
     protected SurfaceControl mSurfaceControl;
-    protected TaskStackListener mTaskStackListener;
     protected Listener mListener;
     protected boolean mOpened; // Protected by mGuard.
 
@@ -170,13 +168,6 @@ public abstract class TaskEmbedder {
         if (!onInitialize()) {
             return false;
         }
-
-        mTaskStackListener = createTaskStackListener();
-        try {
-            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to register task stack listener", e);
-        }
         if (mListener != null && isInitialized()) {
             mListener.onInitialized();
         }
@@ -185,11 +176,6 @@ public abstract class TaskEmbedder {
         mTransaction.show(getSurfaceControl()).apply();
         return true;
     }
-
-    /**
-     * @return the task stack listener for this embedder
-     */
-    public abstract TaskStackListener createTaskStackListener();
 
     /**
      * Whether this container has been initialized.
@@ -420,16 +406,6 @@ public abstract class TaskEmbedder {
         mSurfaceControl.release();
 
         boolean reportReleased = onRelease();
-
-        if (mTaskStackListener != null) {
-            try {
-                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to unregister task stack listener", e);
-            }
-            mTaskStackListener = null;
-        }
-
         if (mListener != null && reportReleased) {
             mListener.onReleased();
         }
