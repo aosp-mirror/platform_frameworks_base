@@ -23,7 +23,6 @@ import static com.android.systemui.statusbar.notification.row.NotificationRowCon
 import static junit.framework.Assert.assertNotNull;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -216,9 +215,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 .onDismissRunnable(any()))
                 .thenReturn(mExpandableNotificationRowComponentBuilder);
         when(mExpandableNotificationRowComponentBuilder
-                .inflationCallback(any()))
-                .thenReturn(mExpandableNotificationRowComponentBuilder);
-        when(mExpandableNotificationRowComponentBuilder
                 .rowContentBindStage(any()))
                 .thenReturn(mExpandableNotificationRowComponentBuilder);
         when(mExpandableNotificationRowComponentBuilder
@@ -243,7 +239,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                                 mHeadsUpManager,
                                 mPresenter,
                                 mStatusBarStateController,
-                                mEntryManager,
                                 mGutsManager,
                                 true,
                                 null,
@@ -275,7 +270,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         mEntryManager.addNotificationEntryListener(mEntryListener);
 
         mRowBinder.setUpWithPresenter(mPresenter, mListContainer, mBindCallback);
-        mRowBinder.setInflationCallback(mEntryManager);
         mRowBinder.setNotificationClicker(mock(NotificationClicker.class));
 
         Ranking ranking = new Ranking();
@@ -330,7 +324,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         assertNotNull(entry.getRow().getPrivateLayout().getContractedChild());
 
         // THEN inflation callbacks are called
-        verify(mBindCallback).onBindRow(eq(entry), any(), eq(mSbn), any());
+        verify(mBindCallback).onBindRow(entry.getRow());
         verify(mEntryListener, never()).onInflationError(any(), any());
         verify(mEntryListener).onEntryInflated(entry);
         verify(mEntryListener).onNotificationAdded(entry);
