@@ -22,7 +22,7 @@ import static android.view.accessibility.AccessibilityManager.ShortcutType;
 import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
-import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityServiceFragmentType;
+import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import static com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
 import static com.android.internal.accessibility.common.ShortcutConstants.TargetType;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
@@ -97,21 +97,21 @@ public class AccessibilityButtonChooserActivity extends Activity {
                     COLOR_INVERSION_COMPONENT_NAME.flattenToString(),
                     String.valueOf(R.string.color_inversion_feature_name),
                     String.valueOf(R.drawable.ic_accessibility_color_inversion),
-                    String.valueOf(AccessibilityServiceFragmentType.INTUITIVE),
+                    String.valueOf(AccessibilityFragmentType.TOGGLE),
                     Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
             },
             {
                     DALTONIZER_COMPONENT_NAME.flattenToString(),
                     String.valueOf(R.string.color_correction_feature_name),
                     String.valueOf(R.drawable.ic_accessibility_color_correction),
-                    String.valueOf(AccessibilityServiceFragmentType.INTUITIVE),
+                    String.valueOf(AccessibilityFragmentType.TOGGLE),
                     Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
             },
             {
                     MAGNIFICATION_CONTROLLER_NAME,
                     String.valueOf(R.string.accessibility_magnification_chooser_text),
                     String.valueOf(R.drawable.ic_accessibility_magnification),
-                    String.valueOf(AccessibilityServiceFragmentType.INVISIBLE),
+                    String.valueOf(AccessibilityFragmentType.INVISIBLE_TOGGLE),
                     Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
             },
     };
@@ -381,25 +381,25 @@ public class AccessibilityButtonChooserActivity extends Activity {
                 @NonNull ViewHolder holder, AccessibilityButtonTarget target) {
 
             switch (target.getFragmentType()) {
-                case AccessibilityServiceFragmentType.LEGACY:
-                    updateLegacyActionItemVisibility(holder, target);
+                case AccessibilityFragmentType.VOLUME_SHORTCUT_TOGGLE:
+                    updateVolumeShortcutToggleTargetActionItemVisibility(holder, target);
                     break;
-                case AccessibilityServiceFragmentType.INVISIBLE:
-                    updateInvisibleActionItemVisibility(holder, target);
+                case AccessibilityFragmentType.INVISIBLE_TOGGLE:
+                    updateInvisibleToggleTargetActionItemVisibility(holder, target);
                     break;
-                case AccessibilityServiceFragmentType.INTUITIVE:
-                    updateIntuitiveActionItemVisibility(context, holder, target);
+                case AccessibilityFragmentType.TOGGLE:
+                    updateToggleTargetActionItemVisibility(context, holder, target);
                     break;
-                case AccessibilityServiceFragmentType.BOUNCE:
-                    updateBounceActionItemVisibility(holder, target);
+                case AccessibilityFragmentType.LAUNCH_ACTIVITY:
+                    updateLaunchActivityTargetActionItemVisibility(holder, target);
                     break;
                 default:
                     throw new IllegalStateException("Unexpected fragment type");
             }
         }
 
-        private void updateLegacyActionItemVisibility(@NonNull ViewHolder holder,
-                AccessibilityButtonTarget target) {
+        private void updateVolumeShortcutToggleTargetActionItemVisibility(
+                @NonNull ViewHolder holder, AccessibilityButtonTarget target) {
             final boolean isLaunchMenuMode = (mShortcutMenuMode == ShortcutMenuMode.LAUNCH);
 
             holder.mCheckBox.setChecked(!isLaunchMenuMode && target.isChecked());
@@ -409,7 +409,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             holder.mSwitchItem.setVisibility(View.GONE);
         }
 
-        private void updateInvisibleActionItemVisibility(@NonNull ViewHolder holder,
+        private void updateInvisibleToggleTargetActionItemVisibility(@NonNull ViewHolder holder,
                 AccessibilityButtonTarget target) {
             final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
 
@@ -420,7 +420,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             holder.mSwitchItem.setVisibility(View.GONE);
         }
 
-        private void updateIntuitiveActionItemVisibility(@NonNull Context context,
+        private void updateToggleTargetActionItemVisibility(@NonNull Context context,
                 @NonNull ViewHolder holder, AccessibilityButtonTarget target) {
             final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
             final boolean isServiceEnabled = isWhiteListingService(target.getId())
@@ -435,7 +435,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             holder.mSwitchItem.setChecked(!isEditMenuMode && isServiceEnabled);
         }
 
-        private void updateBounceActionItemVisibility(@NonNull ViewHolder holder,
+        private void updateLaunchActivityTargetActionItemVisibility(@NonNull ViewHolder holder,
                 AccessibilityButtonTarget target) {
             final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
 
@@ -454,7 +454,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
         private boolean mChecked;
         private CharSequence mLabel;
         private Drawable mDrawable;
-        @AccessibilityServiceFragmentType
+        @AccessibilityFragmentType
         private int mFragmentType;
 
         AccessibilityButtonTarget(@NonNull Context context,
@@ -474,11 +474,11 @@ public class AccessibilityButtonChooserActivity extends Activity {
             this.mChecked = isTargetShortcutUsed(context, mId);
             this.mLabel = shortcutInfo.getActivityInfo().loadLabel(context.getPackageManager());
             this.mDrawable = shortcutInfo.getActivityInfo().loadIcon(context.getPackageManager());
-            this.mFragmentType = AccessibilityServiceFragmentType.BOUNCE;
+            this.mFragmentType = AccessibilityFragmentType.LAUNCH_ACTIVITY;
         }
 
         AccessibilityButtonTarget(Context context, @NonNull String id, int labelResId,
-                int iconRes, @AccessibilityServiceFragmentType int fragmentType) {
+                int iconRes, @AccessibilityFragmentType int fragmentType) {
             this.mId = id;
             this.mType = TargetType.WHITE_LISTING;
             this.mChecked = isTargetShortcutUsed(context, mId);
@@ -535,17 +535,17 @@ public class AccessibilityButtonChooserActivity extends Activity {
     private void onTargetSelected(AdapterView<?> parent, View view, int position, long id) {
         final AccessibilityButtonTarget target = mTargets.get(position);
         switch (target.getFragmentType()) {
-            case AccessibilityServiceFragmentType.LEGACY:
-                onLegacyTargetSelected(target);
+            case AccessibilityFragmentType.VOLUME_SHORTCUT_TOGGLE:
+                onVolumeShortcutToggleTargetSelected(target);
                 break;
-            case AccessibilityServiceFragmentType.INVISIBLE:
-                onInvisibleTargetSelected(target);
+            case AccessibilityFragmentType.INVISIBLE_TOGGLE:
+                onInvisibleToggleTargetSelected(target);
                 break;
-            case AccessibilityServiceFragmentType.INTUITIVE:
-                onIntuitiveTargetSelected(target);
+            case AccessibilityFragmentType.TOGGLE:
+                onToggleTargetSelected(target);
                 break;
-            case AccessibilityServiceFragmentType.BOUNCE:
-                onBounceTargetSelected(target);
+            case AccessibilityFragmentType.LAUNCH_ACTIVITY:
+                onLaunchActivityTargetSelected(target);
                 break;
             default:
                 throw new IllegalStateException("Unexpected fragment type");
@@ -554,7 +554,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
         mAlertDialog.dismiss();
     }
 
-    private void onLegacyTargetSelected(AccessibilityButtonTarget target) {
+    private void onVolumeShortcutToggleTargetSelected(AccessibilityButtonTarget target) {
         if (sShortcutType == ACCESSIBILITY_BUTTON) {
             final AccessibilityManager ams = getSystemService(AccessibilityManager.class);
             ams.notifyAccessibilityButtonClicked(getDisplayId(), target.getId());
@@ -563,7 +563,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
         }
     }
 
-    private void onInvisibleTargetSelected(AccessibilityButtonTarget target) {
+    private void onInvisibleToggleTargetSelected(AccessibilityButtonTarget target) {
         final AccessibilityManager ams = getSystemService(AccessibilityManager.class);
         if (sShortcutType == ACCESSIBILITY_BUTTON) {
             ams.notifyAccessibilityButtonClicked(getDisplayId(), target.getId());
@@ -572,11 +572,11 @@ public class AccessibilityButtonChooserActivity extends Activity {
         }
     }
 
-    private void onIntuitiveTargetSelected(AccessibilityButtonTarget target) {
+    private void onToggleTargetSelected(AccessibilityButtonTarget target) {
         switchServiceState(target);
     }
 
-    private void onBounceTargetSelected(AccessibilityButtonTarget target) {
+    private void onLaunchActivityTargetSelected(AccessibilityButtonTarget target) {
         final AccessibilityManager ams = getSystemService(AccessibilityManager.class);
         if (sShortcutType == ACCESSIBILITY_BUTTON) {
             ams.notifyAccessibilityButtonClicked(getDisplayId(), target.getId());
@@ -620,24 +620,24 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
     private void onTargetChecked(AccessibilityButtonTarget target, boolean checked) {
         switch (target.getFragmentType()) {
-            case AccessibilityServiceFragmentType.LEGACY:
-                onLegacyTargetChecked(checked);
+            case AccessibilityFragmentType.VOLUME_SHORTCUT_TOGGLE:
+                onVolumeShortcutToggleTargetChecked(checked);
                 break;
-            case AccessibilityServiceFragmentType.INVISIBLE:
-                onInvisibleTargetChecked(checked);
+            case AccessibilityFragmentType.INVISIBLE_TOGGLE:
+                onInvisibleToggleTargetChecked(checked);
                 break;
-            case AccessibilityServiceFragmentType.INTUITIVE:
-                onIntuitiveTargetChecked(checked);
+            case AccessibilityFragmentType.TOGGLE:
+                onToggleTargetChecked(checked);
                 break;
-            case AccessibilityServiceFragmentType.BOUNCE:
-                onBounceTargetChecked(checked);
+            case AccessibilityFragmentType.LAUNCH_ACTIVITY:
+                onLaunchActivityTargetChecked(checked);
                 break;
             default:
                 throw new IllegalStateException("Unexpected fragment type");
         }
     }
 
-    private void onLegacyTargetChecked(boolean checked) {
+    private void onVolumeShortcutToggleTargetChecked(boolean checked) {
         if (sShortcutType == ACCESSIBILITY_BUTTON) {
             setServiceEnabled(mCurrentCheckedTarget.getId(), checked);
             if (!checked) {
@@ -657,7 +657,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
         mTargetAdapter.notifyDataSetChanged();
     }
 
-    private void onInvisibleTargetChecked(boolean checked) {
+    private void onInvisibleToggleTargetChecked(boolean checked) {
         final int shortcutTypes = UserShortcutType.SOFTWARE | HARDWARE;
         if (!hasValuesInSettings(this, shortcutTypes, mCurrentCheckedTarget.getId())) {
             setServiceEnabled(mCurrentCheckedTarget.getId(), checked);
@@ -668,13 +668,13 @@ public class AccessibilityButtonChooserActivity extends Activity {
         mTargetAdapter.notifyDataSetChanged();
     }
 
-    private void onIntuitiveTargetChecked(boolean checked) {
+    private void onToggleTargetChecked(boolean checked) {
         updateValueToSettings(mCurrentCheckedTarget.getId(), checked);
         mCurrentCheckedTarget.setChecked(checked);
         mTargetAdapter.notifyDataSetChanged();
     }
 
-    private void onBounceTargetChecked(boolean checked) {
+    private void onLaunchActivityTargetChecked(boolean checked) {
         updateValueToSettings(mCurrentCheckedTarget.getId(), checked);
         mCurrentCheckedTarget.setChecked(checked);
         mTargetAdapter.notifyDataSetChanged();
@@ -740,7 +740,8 @@ public class AccessibilityButtonChooserActivity extends Activity {
     }
 
     private void onPermissionAllowButtonClicked(View view) {
-        if (mCurrentCheckedTarget.getFragmentType() != AccessibilityServiceFragmentType.LEGACY) {
+        if (mCurrentCheckedTarget.getFragmentType()
+                != AccessibilityFragmentType.VOLUME_SHORTCUT_TOGGLE) {
             updateValueToSettings(mCurrentCheckedTarget.getId(), /* checked= */ true);
         }
         onTargetChecked(mCurrentCheckedTarget, /* checked= */ true);
