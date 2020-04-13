@@ -186,8 +186,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 && Objects.equals(mOverrideConfig, other.mOverrideConfig)
                 && Objects.equals(mCompatInfo, other.mCompatInfo)
                 && Objects.equals(mReferrer, other.mReferrer)
-                && mProcState == other.mProcState && areBundlesEqual(mState, other.mState)
-                && areBundlesEqual(mPersistentState, other.mPersistentState)
+                && mProcState == other.mProcState && areBundlesEqualRoughly(mState, other.mState)
+                && areBundlesEqualRoughly(mPersistentState, other.mPersistentState)
                 && Objects.equals(mPendingResults, other.mPendingResults)
                 && Objects.equals(mPendingNewIntents, other.mPendingNewIntents)
                 && mIsForward == other.mIsForward
@@ -205,8 +205,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
         result = 31 * result + Objects.hashCode(mCompatInfo);
         result = 31 * result + Objects.hashCode(mReferrer);
         result = 31 * result + Objects.hashCode(mProcState);
-        result = 31 * result + (mState != null ? mState.size() : 0);
-        result = 31 * result + (mPersistentState != null ? mPersistentState.size() : 0);
+        result = 31 * result + getRoughBundleHashCode(mState);
+        result = 31 * result + getRoughBundleHashCode(mPersistentState);
         result = 31 * result + Objects.hashCode(mPendingResults);
         result = 31 * result + Objects.hashCode(mPendingNewIntents);
         result = 31 * result + (mIsForward ? 1 : 0);
@@ -225,25 +225,19 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 && Objects.equals(mInfo.getComponentName(), other.getComponentName());
     }
 
-    private static boolean areBundlesEqual(BaseBundle extras, BaseBundle newExtras) {
-        if (extras == null || newExtras == null) {
-            return extras == newExtras;
-        }
+    /**
+     * This method may be used to compare a parceled item with another unparceled item, and the
+     * parceled bundle may contain customized class that will raise BadParcelableException when
+     * unparceling if a customized class loader is not set to the bundle. So the hash code is
+     * simply determined by the bundle is empty or not.
+     */
+    private static int getRoughBundleHashCode(BaseBundle bundle) {
+        return (bundle == null || bundle.isDefinitelyEmpty()) ? 0 : 1;
+    }
 
-        if (extras.size() != newExtras.size()) {
-            return false;
-        }
-
-        for (String key : extras.keySet()) {
-            if (key != null) {
-                final Object value = extras.get(key);
-                final Object newValue = newExtras.get(key);
-                if (!Objects.equals(value, newValue)) {
-                    return false;
-                }
-            }
-        }
-        return true;
+    /** Compares the bundles without unparceling them (avoid BadParcelableException). */
+    private static boolean areBundlesEqualRoughly(BaseBundle a, BaseBundle b) {
+        return getRoughBundleHashCode(a) == getRoughBundleHashCode(b);
     }
 
     @Override
