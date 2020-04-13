@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.notifcollection
 
 import android.service.notification.NotificationListenerService.RankingMap
+import android.service.notification.StatusBarNotification
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 
@@ -35,6 +36,15 @@ sealed class NotifEvent {
     }
 
     abstract fun dispatchToListener(listener: NotifCollectionListener)
+}
+
+data class BindEntryEvent(
+    val entry: NotificationEntry,
+    val sbn: StatusBarNotification
+) : NotifEvent() {
+    override fun dispatchToListener(listener: NotifCollectionListener) {
+        listener.onEntryBind(entry, sbn)
+    }
 }
 
 data class InitEntryEvent(
