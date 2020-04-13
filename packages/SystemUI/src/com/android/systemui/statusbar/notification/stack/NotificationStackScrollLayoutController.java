@@ -68,6 +68,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -151,6 +152,7 @@ public class NotificationStackScrollLayoutController {
     private final ForegroundServiceDismissalFeatureController mFgFeatureController;
     private final ForegroundServiceSectionController mFgServicesSectionController;
     private final LayoutInflater mLayoutInflater;
+    private final NotificationRemoteInputManager mRemoteInputManager;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -573,7 +575,8 @@ public class NotificationStackScrollLayoutController {
             UiEventLogger uiEventLogger,
             ForegroundServiceDismissalFeatureController fgFeatureController,
             ForegroundServiceSectionController fgServicesSectionController,
-            LayoutInflater layoutInflater) {
+            LayoutInflater layoutInflater,
+            NotificationRemoteInputManager remoteInputManager) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -618,6 +621,7 @@ public class NotificationStackScrollLayoutController {
         mFgFeatureController = fgFeatureController;
         mFgServicesSectionController = fgServicesSectionController;
         mLayoutInflater = layoutInflater;
+        mRemoteInputManager = remoteInputManager;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -630,6 +634,7 @@ public class NotificationStackScrollLayoutController {
                 NotificationPanelEvent.fromSelection(selection)));
         mView.setFooterDismissListener(() ->
                 mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES));
+        mView.setRemoteInputManager(mRemoteInputManager);
 
         if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {
             mView.initializeForegroundServiceSection(

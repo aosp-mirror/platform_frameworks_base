@@ -51,6 +51,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
@@ -122,6 +124,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private ForegroundServiceSectionController mFgServicesSectionController;
     @Mock private ForegroundServiceDungeonView mForegroundServiceDungeonView;
     @Mock private LayoutInflater mLayoutInflater;
+    @Mock private NotificationRemoteInputManager mRemoteInputManager;
+    @Mock private RemoteInputController mRemoteInputController;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -136,6 +140,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
         when(mFgServicesSectionController.createView(mLayoutInflater))
                 .thenReturn(mForegroundServiceDungeonView);
+        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
+
         mController = new NotificationStackScrollLayoutController(
                 true,
                 mNotificationGutsManager,
@@ -168,7 +174,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mUiEventLogger,
                 mFgFeatureController,
                 mFgServicesSectionController,
-                mLayoutInflater
+                mLayoutInflater,
+                mRemoteInputManager
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);

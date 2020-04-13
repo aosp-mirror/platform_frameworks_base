@@ -448,8 +448,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final Rect mTmpRect = new Rect();
     private DismissListener mDismissListener;
     private DismissAllAnimationListener mDismissAllAnimationListener;
-    private final NotificationRemoteInputManager mRemoteInputManager =
-            Dependency.get(NotificationRemoteInputManager.class);
+    private NotificationRemoteInputManager mRemoteInputManager;
 
     private final DisplayMetrics mDisplayMetrics = Dependency.get(DisplayMetrics.class);
     private final LockscreenGestureLogger mLockscreenGestureLogger =
@@ -5692,6 +5691,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     void setFooterDismissListener(FooterDismissListener listener) {
         mFooterDismissListener = listener;
+    }
+
+    public void setRemoteInputManager(NotificationRemoteInputManager remoteInputManager) {
+        mRemoteInputManager = remoteInputManager;
     }
 
     /**

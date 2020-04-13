@@ -44,7 +44,6 @@ import android.testing.TestableLooper;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -62,7 +61,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.KeyguardBypassEnabledProvider;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -124,10 +122,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 NotificationBlockingHelperManager.class,
                 mBlockingHelperManager);
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
-        mDependency.injectTestDependency(NotificationRemoteInputManager.class,
-                mRemoteInputManager);
         mDependency.injectMockDependency(ShadeController.class);
-        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
+
         NotificationShelfController notificationShelfController =
                 mock(NotificationShelfController.class);
         NotificationShelf notificationShelf = mock(NotificationShelf.class);
@@ -136,6 +132,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 new NotificationSection[]{
                         mNotificationSection
                 });
+        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
+
         // The actual class under test.  You may need to work with this class directly when
         // testing anonymous class members of mStackScroller, like mMenuEventListener,
         // which refer to members of NotificationStackScrollLayout. The spy
@@ -158,7 +156,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackScrollLayoutController.getNoticationRoundessManager())
                 .thenReturn(mNotificationRoundnessManager);
         mStackScroller.setController(mStackScrollLayoutController);
-        
+        mStackScroller.setRemoteInputManager(mRemoteInputManager);
+
         // Stub out functionality that isn't necessary to test.
         doNothing().when(mBar)
                 .executeRunnableDismissingKeyguard(any(Runnable.class),
