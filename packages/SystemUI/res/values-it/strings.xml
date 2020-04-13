@@ -362,7 +362,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Verticale"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Orizzontale"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Metodo di immissione"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"Geolocalizz."</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"Geolocalizzazione"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Geolocalizz. non attiva"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositivo multimediale"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controlli"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Seleziona i controlli a cui accedere dal menu di accensione"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Tieni premuto un controllo e trascinalo per spostarlo"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossibile caricare l\'elenco di tutti i controlli."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altro"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Aggiungi ai controlli del dispositivo"</string>

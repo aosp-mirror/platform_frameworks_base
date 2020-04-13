@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"ਸਿਸਟਮ UI"</string>
-    <string name="status_bar_clear_all_button" msgid="2491321682873657397">"ਹਟਾਓ"</string>
+    <string name="status_bar_clear_all_button" msgid="2491321682873657397">"ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"ਕੋਈ ਸੂਚਨਾਵਾਂ ਨਹੀਂ"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"ਜਾਰੀ"</string>
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"ਸੂਚਨਾਵਾਂ"</string>
@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ਕੰਟਰੋਲ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ਪਹੁੰਚ ਕਰਨ ਲਈ ਪਾਵਰ ਮੀਨੂ ਤੋਂ ਕੰਟਰੋਲ ਚੁਣੋ"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ਕਿਸੇ ਕੰਟਰੋਲ ਨੂੰ ਇੱਕ ਥਾਂ ਤੋਂ ਦੂਜੀ ਥਾਂ \'ਤੇ ਲਿਜਾਣ ਲਈ ਫੜ੍ਹ ਕੇ ਰੱਖੋ ਅਤੇ ਘਸੀਟੋ"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ਸਾਰੇ ਕੰਟਰੋਲਾਂ ਦੀ ਸੂਚੀ ਨੂੰ ਲੋਡ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ਹੋਰ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ਡੀਵਾਈਸ ਕੰਟਰੋਲਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>

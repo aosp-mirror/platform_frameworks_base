@@ -34,7 +34,7 @@
     <string name="invalid_charger_text" msgid="2339310107232691577">"استخدم الشاحن المرفق بجهازك."</string>
     <string name="battery_low_why" msgid="2056750982959359863">"الإعدادات"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"هل تريد تفعيل ميزة توفير شحن البطارية؟"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"لمحة عامة عن ميزة \"توفير شحن البطارية\""</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"لمحة عن ميزة \"توفير شحن البطارية\""</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"تفعيل"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"هل تريد تفعيل ميزة توفير شحن البطارية؟"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"الإعدادات"</string>
@@ -257,10 +257,10 @@
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"تم تجاهل الإشعار."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"مركز الإشعارات."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"الإعدادات السريعة."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"شاشة التأمين."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"شاشة القفل."</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"الإعدادات"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"النظرة عامة."</string>
-    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"شاشة تأمين بيانات العمل"</string>
+    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"شاشة قفل بيانات العمل"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"إغلاق"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"‏تم إيقاف Wifi."</string>
@@ -335,8 +335,8 @@
     <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"إعدادات الإشعارات"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"إعدادات <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="3880436123632448930">"سيتم تدوير الشاشة تلقائيًا."</string>
-    <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"تم تأمين الشاشة في الاتجاه الأفقي."</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"تم تأمين الشاشة في الاتجاه العمودي."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"تم قفل الشاشة في الاتجاه الأفقي."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"تم قفل الشاشة في الاتجاه العمودي."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="5772498370935088261">"سيتم الآن تدوير الشاشة تلقائيًا."</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"تم قفل الشاشة الآن في الاتجاه الأفقي."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"تم قفل الشاشة الآن في الاتجاه الرأسي."</string>
@@ -693,7 +693,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"عناصر التحكم في إشعارات التشغيل"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"تشغيل"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"إيقاف"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"باستخدام عناصر التحكم في إشعار التشغيل، يمكنك تعيين مستوى الأهمية من 0 إلى 5 لإشعارات التطبيق. \n\n"<b>"المستوى 5"</b>" \n- العرض أعلى قائمة الإشعارات \n- يسمح بمقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 4"</b>" \n- منع مقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 3"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n\n"<b>"المستوى 2"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات واهتزاز \n\n"<b>"المستوى 1"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات أو اهتزاز أبدًا \n- الإخفاء من شاشة التأمين وشريط الحالة \n- العرض أسفل قائمة الإشعارات \n\n"<b>"المستوى 0"</b>" \n- حظر جميع الإشعارات من التطبيق"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"باستخدام عناصر التحكم في إشعار التشغيل، يمكنك تعيين مستوى الأهمية من 0 إلى 5 لإشعارات التطبيق. \n\n"<b>"المستوى 5"</b>" \n- العرض أعلى قائمة الإشعارات \n- يسمح بمقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 4"</b>" \n- منع مقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 3"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n\n"<b>"المستوى 2"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات واهتزاز \n\n"<b>"المستوى 1"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات أو اهتزاز أبدًا \n- الإخفاء من شاشة القفل وشريط الحالة \n- العرض أسفل قائمة الإشعارات \n\n"<b>"المستوى 0"</b>" \n- حظر جميع الإشعارات من التطبيق"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"الإشعارات"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"لن تتلقى هذه الإشعارات بعد الآن."</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"سيتم تصغير هذه الإشعارات."</string>
@@ -1039,7 +1039,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"عناصر التحكّم"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"اختيار عناصر التحكّم التي تريد الوصول إليها من قائمة التشغيل"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"اضغط مع الاستمرار على عنصر تحكّم واسحبه لتحريكه."</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"تعذّر تحميل قائمة كل عناصر التحكّم."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"غير ذلك"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"إضافة إلى عناصر التحكم في الأجهزة"</string>

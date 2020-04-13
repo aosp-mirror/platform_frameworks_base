@@ -1015,7 +1015,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Vidhibiti"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Chagua vidhibiti vya kufikia ukitumia menyu ya kuwasha/kuzima"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Shikilia na uburute kidhibiti ili ukisogeze"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Shikilia na uburute ili upange upya vidhibiti"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Umeondoa vidhibiti vyote"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Imeshindwa kupakia orodha ya vidhibiti vyote."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Nyingine"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Weka kwenye vidhibiti vya kifaa"</string>

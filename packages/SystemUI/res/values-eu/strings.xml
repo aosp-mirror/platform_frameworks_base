@@ -1014,8 +1014,11 @@
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kontrol-aukera gehitu da.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrolatzeko aukerak"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Aukeratu pizteko menutik atzitu nahi dituzun kontrolatzeko aukerak"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Kontrolatzeko aukera bat mugitzeko, eduki ezazu sakatuta, eta arrastatu"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Aukeratu itzaltzeko menutik atzitu nahi dituzun kontrolatzeko aukerak"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ezin izan da kargatu kontrol guztien zerrenda."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Beste bat"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Gehitu gailua kontrolatzeko aukeretan"</string>
