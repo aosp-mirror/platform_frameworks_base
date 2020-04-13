@@ -12,7 +12,7 @@ java_library_static {
         ":services.net-sources",
     ],
     static_libs: [
-        "dnsresolver_aidl_interface-V2-java",
+        "dnsresolver_aidl_interface-V4-java",
         "netd_aidl_interface-V3-java",
         "netlink-client",
         "networkstack-client",
