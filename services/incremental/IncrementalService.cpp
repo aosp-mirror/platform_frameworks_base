@@ -353,10 +353,14 @@ void IncrementalService::onSystemReady() {
         }
     }
 
-    /* TODO(b/151241369): restore data loaders on reboot.
+    if (mounts.empty()) {
+        return;
+    }
+
     std::thread([this, mounts = std::move(mounts)]() {
+        mJni->initializeForCurrentThread();
         for (auto&& ifs : mounts) {
-            if (prepareDataLoader(*ifs)) {
+            if (ifs->dataLoaderStub->create()) {
                 LOG(INFO) << "Successfully started data loader for mount " << ifs->mountId;
             } else {
                 // TODO(b/133435829): handle data loader start failures
@@ -364,7 +368,6 @@ void IncrementalService::onSystemReady() {
             }
         }
     }).detach();
-    */
 }
 
 auto IncrementalService::getStorageSlotLocked() -> MountMap::iterator {
@@ -1067,6 +1070,9 @@ bool IncrementalService::mountExistingImage(std::string_view root) {
         dataLoaderParams.className = loader.class_name();
         dataLoaderParams.arguments = loader.arguments();
     }
+
+    prepareDataLoader(*ifs, std::move(dataLoaderParams), nullptr);
+    CHECK(ifs->dataLoaderStub);
 
     std::vector<std::pair<std::string, metadata::BindPoint>> bindPoints;
     auto d = openDir(path::c_str(mountTarget));
