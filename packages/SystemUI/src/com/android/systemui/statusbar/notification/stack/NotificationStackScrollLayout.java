@@ -73,7 +73,6 @@ import android.widget.ScrollView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
@@ -261,6 +260,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     protected EmptyShadeView mEmptyShadeView;
     private boolean mDismissAllInProgress;
     private boolean mFadeNotificationsOnDismiss;
+    private FooterDismissListener mFooterDismissListener;
 
     /**
      * Was the scroller scrolled to the top when the down motion was observed?
@@ -448,8 +448,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final Rect mTmpRect = new Rect();
     private DismissListener mDismissListener;
     private DismissAllAnimationListener mDismissAllAnimationListener;
-    @VisibleForTesting
-    protected final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final NotificationRemoteInputManager mRemoteInputManager =
             Dependency.get(NotificationRemoteInputManager.class);
 
@@ -5328,9 +5326,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     @VisibleForTesting
-    void clearNotifications(
-            @SelectedRows int selection,
-            boolean closeShade) {
+    void clearNotifications(@SelectedRows int selection, boolean closeShade) {
         // animate-swipe all dismissable notifications, then animate the shade closed
         int numChildren = getChildCount();
 
@@ -5463,7 +5459,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         FooterView footerView = (FooterView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_notification_footer, this, false);
         footerView.setDismissButtonClickListener(v -> {
-            mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES);
+            if (mFooterDismissListener != null) {
+                mFooterDismissListener.onDismiss();
+            }
             clearNotifications(ROWS_ALL, true /* closeShade */);
         });
         footerView.setManageButtonClickListener(v -> {
@@ -5690,6 +5688,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public void setHighPriorityBeforeSpeedBump(boolean highPriorityBeforeSpeedBump) {
         mHighPriorityBeforeSpeedBump = highPriorityBeforeSpeedBump;
+    }
+
+    void setFooterDismissListener(FooterDismissListener listener) {
+        mFooterDismissListener = listener;
     }
 
     /**
@@ -6301,6 +6303,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     interface DismissListener {
         void onDismiss(@SelectedRows int selectedRows);
+    }
+
+    interface FooterDismissListener {
+        void onDismiss();
     }
 
     interface DismissAllAnimationListener {

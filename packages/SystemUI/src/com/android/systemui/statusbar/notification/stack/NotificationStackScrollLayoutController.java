@@ -628,6 +628,8 @@ public class NotificationStackScrollLayoutController {
         mView.setDismissAllAnimationListener(this::onAnimationEnd);
         mView.setDismissListener((selection) -> mUiEventLogger.log(
                 NotificationPanelEvent.fromSelection(selection)));
+        mView.setFooterDismissListener(() ->
+                mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES));
 
         if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {
             mView.initializeForegroundServiceSection(
