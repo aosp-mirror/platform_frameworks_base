@@ -3594,20 +3594,42 @@ public class Notification implements Parcelable
         }
 
         /**
-         * If this notification is duplicative of a Launcher shortcut, sets the
-         * {@link ShortcutInfo#getId() id} of the shortcut, in case the Launcher wants to hide
-         * the shortcut.
+         * From Android 11, messaging notifications (those that use {@link MessagingStyle}) that
+         * use this method to link to a published long-lived sharing shortcut may appear in a
+         * dedicated Conversation section of the shade and may show configuration options that
+         * are unique to conversations. This behavior should be reserved for person to person(s)
+         * conversations where there is a likely social obligation for an individual to respond.
+         * <p>
+         * For example, the following are some examples of notifications that belong in the
+         * conversation space:
+         * <ul>
+         * <li>1:1 conversations between two individuals</li>
+         * <li>Group conversations between individuals where everyone can contribute</li>
+         * </ul>
+         * And the following are some examples of notifications that do not belong in the
+         * conversation space:
+         * <ul>
+         * <li>Advertisements from a bot (even if personal and contextualized)</li>
+         * <li>Engagement notifications from a bot</li>
+         * <li>Directional conversations where there is an active speaker and many passive
+         * individuals</li>
+         * <li>Stream / posting updates from other individuals</li>
+         * </ul>
+         * </p>
          *
-         * This field will be ignored by Launchers that don't support badging, don't show
-         * notification content, or don't show {@link android.content.pm.ShortcutManager shortcuts}.
-         *
+         * <p>
+         * Additionally, this method can be used for all types of notifications to mark this
+         * notification as duplicative of a Launcher shortcut. Launchers that show badges or
+         * notification content may then suppress the shortcut in favor of the content of this
+         * notification.
+         * <p>
          * If this notification has {@link BubbleMetadata} attached that was created with
          * a shortcutId a check will be performed to ensure the shortcutId supplied to bubble
          * metadata matches the shortcutId set here, if one was set. If the shortcutId's were
          * specified but do not match, an exception is thrown.
          *
          * @param shortcutId the {@link ShortcutInfo#getId() id} of the shortcut this notification
-         *                   supersedes
+         *                   is linked to
          *
          * @see Notification.BubbleMetadata.Builder#Builder(String)
          */
