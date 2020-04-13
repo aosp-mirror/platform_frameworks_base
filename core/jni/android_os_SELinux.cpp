@@ -15,6 +15,10 @@
  */
 
 #define LOG_TAG "SELinuxJNI"
+
+#include <errno.h>
+#include <fcntl.h>
+
 #include <utils/Log.h>
 
 #include <nativehelper/JNIHelp.h>
@@ -22,7 +26,6 @@
 #include "core_jni_helpers.h"
 #include "selinux/selinux.h"
 #include "selinux/android.h"
-#include <errno.h>
 #include <memory>
 #include <atomic>
 #include <nativehelper/ScopedLocalRef.h>
