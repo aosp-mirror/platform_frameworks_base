@@ -503,6 +503,11 @@ package android.app {
     method public boolean isStatusBarExpansionDisabled();
   }
 
+  public class TaskInfo {
+    method @NonNull public android.content.res.Configuration getConfiguration();
+    method @NonNull public android.window.WindowContainerToken getToken();
+  }
+
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {
     method public android.widget.TimePicker getTimePicker();
   }

@@ -4318,19 +4318,20 @@ class Task extends WindowContainer<WindowContainer> {
         // Let the old organizer know it has lost control.
         sendTaskVanished();
         mTaskOrganizer = organizer;
-        sendTaskAppeared();
-        onTaskOrganizerChanged();
-        return true;
-    }
 
-    void taskOrganizerUnregistered() {
-        mTaskOrganizer = null;
-        mTaskAppearedSent = false;
-        mLastTaskOrganizerWindowingMode = -1;
-        onTaskOrganizerChanged();
-        if (mCreatedByOrganizer) {
-            removeImmediately();
+        if (mTaskOrganizer != null) {
+            sendTaskAppeared();
+        } else {
+            // No longer managed by any organizer.
+            mTaskAppearedSent = false;
+            mLastTaskOrganizerWindowingMode = -1;
+            setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
+            if (mCreatedByOrganizer) {
+                removeImmediately();
+            }
         }
+
+        return true;
     }
 
     /**
@@ -4365,14 +4366,6 @@ class Task extends WindowContainer<WindowContainer> {
         final boolean result = setTaskOrganizer(org);
         mLastTaskOrganizerWindowingMode = windowingMode;
         return result;
-    }
-
-    private void onTaskOrganizerChanged() {
-        if (mTaskOrganizer == null) {
-            // If this task is no longer controlled by a task organizer, then reset the force hidden
-            // state
-            setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
-        }
     }
 
     @Override

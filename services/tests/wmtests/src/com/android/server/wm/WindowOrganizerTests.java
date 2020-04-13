@@ -82,7 +82,7 @@ import java.util.List;
  * Test class for {@link ITaskOrganizer} and {@link android.window.ITaskOrganizerController}.
  *
  * Build/Install/Run:
- *  atest WmTests:TaskOrganizerTests
+ *  atest WmTests:WindowOrganizerTests
  */
 @SmallTest
 @Presubmit
@@ -265,15 +265,22 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // newly entering the windowing mode.
         final ITaskOrganizer organizer2 = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
         stack2.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer2).onTaskAppeared(any());
+        // One each for task and task2
+        verify(organizer2, times(2)).onTaskAppeared(any());
+        verify(organizer2, times(0)).onTaskVanished(any());
+        // One for task
+        verify(organizer).onTaskVanished(any());
         assertTrue(stack2.isOrganized());
 
         // Now we unregister the second one, the first one should automatically be reregistered
         // so we verify that it's now seeing changes.
         mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer2);
+        verify(organizer, times(3)).onTaskAppeared(any());
+        verify(organizer2, times(2)).onTaskVanished(any());
 
         stack3.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer, times(2)).onTaskAppeared(any());
+        verify(organizer, times(4)).onTaskAppeared(any());
+        verify(organizer2, times(2)).onTaskVanished(any());
         assertTrue(stack3.isOrganized());
     }
 
@@ -905,12 +912,13 @@ public class WindowOrganizerTests extends WindowTestsBase {
         task.setHasBeenVisible(true);
         verify(organizer, times(1)).onTaskAppeared(any());
 
-        task.taskOrganizerUnregistered();
+        task.setTaskOrganizer(null);
+        verify(organizer, times(1)).onTaskVanished(any());
         task.setTaskOrganizer(organizer);
         verify(organizer, times(2)).onTaskAppeared(any());
 
         task.removeImmediately();
-        verify(organizer).onTaskVanished(any());
+        verify(organizer, times(2)).onTaskVanished(any());
     }
 
     @Test
