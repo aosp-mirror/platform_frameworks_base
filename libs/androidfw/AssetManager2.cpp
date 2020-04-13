@@ -331,6 +331,11 @@ bool AssetManager2::GetOverlayablesToString(const android::StringPiece& package_
   return true;
 }
 
+bool AssetManager2::ContainsAllocatedTable() const {
+  return std::find_if(apk_assets_.begin(), apk_assets_.end(),
+                      std::mem_fn(&ApkAssets::IsTableAllocated)) != apk_assets_.end();
+}
+
 void AssetManager2::SetConfiguration(const ResTable_config& configuration) {
   const int diff = configuration_.diff(configuration);
   configuration_ = configuration;
