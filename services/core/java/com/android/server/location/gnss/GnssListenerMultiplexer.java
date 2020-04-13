@@ -19,22 +19,20 @@ package com.android.server.location.gnss;
 import android.annotation.Nullable;
 import android.location.LocationManagerInternal;
 import android.location.util.identity.CallerIdentity;
-import android.location.util.listeners.AbstractListenerManager;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Process;
-import android.os.RemoteException;
 import android.util.ArraySet;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.location.AppForegroundHelper;
 import com.android.server.location.AppOpsHelper;
 import com.android.server.location.SettingsHelper;
 import com.android.server.location.UserInfoHelper;
-import com.android.server.location.util.listeners.IdentifiedRegistration;
+import com.android.server.location.listeners.BinderListenerRegistration;
+import com.android.server.location.listeners.ListenerMultiplexer;
 
+import java.io.PrintWriter;
 import java.util.Objects;
 
 /**
@@ -48,121 +46,55 @@ import java.util.Objects;
  * @param <TListener>      listener type
  * @param <TMergedRequest> merged request type
  */
-public abstract class GnssListenerManager<TRequest, TListener extends IInterface, TMergedRequest>
-        extends AbstractListenerManager<IBinder, TRequest, TListener, GnssListenerManager<TRequest,
-        TListener, TMergedRequest>.GnssRegistration, TMergedRequest> {
+public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInterface,
+        TMergedRequest> extends
+        ListenerMultiplexer<IBinder, TRequest, TListener, GnssListenerMultiplexer<TRequest,
+                        TListener, TMergedRequest>.GnssListenerRegistration, TMergedRequest> {
 
     /**
      * Registration object for GNSS listeners.
      */
-    protected class GnssRegistration extends
-            IdentifiedRegistration<TRequest, TListener> implements Binder.DeathRecipient {
+    protected final class GnssListenerRegistration extends
+            BinderListenerRegistration<TRequest, TListener> {
 
-        @Nullable private volatile IBinder mKey;
-
-        @GuardedBy("this")
+        // we store these values because we don't trust the listeners not to give us dupes, not to
+        // spam us, and because checking the values may be more expensive
+        private boolean mForeground;
         private boolean mAppOpsAllowed;
 
-        @GuardedBy("this")
-        private boolean mForeground;
-
-        @GuardedBy("this")
-        private boolean mActive;
-
-        protected GnssRegistration(@Nullable TRequest request, CallerIdentity callerIdentity,
-                TListener listener) {
+        protected GnssListenerRegistration(@Nullable TRequest request,
+                CallerIdentity callerIdentity, TListener listener) {
             super(request, callerIdentity, listener);
-            mKey = listener.asBinder();
+        }
+
+        @Override
+        protected void remove(Object key) {
+            removeRegistration(key, this);
         }
 
         /**
          * Returns true if this registration is currently in the foreground.
          */
-        public synchronized boolean isForeground() {
+        public boolean isForeground() {
             return mForeground;
         }
 
-        synchronized boolean isActive() {
-            return mActive;
+        boolean isAppOpsAllowed() {
+            return mAppOpsAllowed;
         }
 
         @Override
-        protected final boolean onRegister() {
-            try {
-                Objects.requireNonNull(mKey).linkToDeath(this, 0);
-            } catch (RemoteException e) {
-                mKey = null;
-                return false;
-            }
-
+        protected boolean onBinderRegister(IBinder key) {
             mAppOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity());
             mForeground = mAppForegroundHelper.isAppForeground(getIdentity().uid);
-            onActiveChanged();
-
             return true;
-        }
-
-        @Override
-        protected void onUnregister() {
-            IBinder key = mKey;
-            if (key != null) {
-                mKey = null;
-                key.unlinkToDeath(this, 0);
-            }
-        }
-
-        boolean onUserChanged(int userId) {
-            return getIdentity().userId == userId;
-        }
-
-        boolean onLocationEnabledChanged(int userId) {
-            if (userId == getIdentity().userId) {
-                return onActiveChanged();
-            }
-
-            return false;
-        }
-
-        boolean onBackgroundThrottlePackageWhitelistChanged() {
-            return onActiveChanged();
         }
 
         boolean onAppOpsChanged(String packageName) {
             if (getIdentity().packageName.equals(packageName)) {
                 boolean appOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity());
-                synchronized (this) {
-                    if (appOpsAllowed != mAppOpsAllowed) {
-                        mAppOpsAllowed = appOpsAllowed;
-                        return onActiveChanged();
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        boolean onForegroundChanged(int uid, boolean foreground) {
-            if (getIdentity().uid == uid) {
-                synchronized (this) {
-                    if (foreground != mForeground) {
-                        mForeground = foreground;
-                        return onActiveChanged();
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private boolean onActiveChanged() {
-            synchronized (this) {
-                // TODO: we should be checking if the gps provider is enabled, not location
-                boolean active = mAppOpsAllowed
-                        && (mForeground || isBackgroundRestrictionExempt(getIdentity()))
-                        && mUserInfoHelper.isCurrentUserId(getIdentity().userId)
-                        && mSettingsHelper.isLocationEnabled(getIdentity().userId);
-                if (active != mActive) {
-                    mActive = active;
+                if (appOpsAllowed != mAppOpsAllowed) {
+                    mAppOpsAllowed = appOpsAllowed;
                     return true;
                 }
             }
@@ -170,25 +102,13 @@ public abstract class GnssListenerManager<TRequest, TListener extends IInterface
             return false;
         }
 
-        private boolean isBackgroundRestrictionExempt(CallerIdentity identity) {
-            if (identity.uid == Process.SYSTEM_UID) {
+        boolean onForegroundChanged(int uid, boolean foreground) {
+            if (getIdentity().uid == uid && foreground != mForeground) {
+                mForeground = foreground;
                 return true;
             }
 
-            if (mSettingsHelper.getBackgroundThrottlePackageWhitelist().contains(
-                    identity.packageName)) {
-                return true;
-            }
-
-            return mLocationManagerInternal.isProvider(null, identity);
-        }
-
-        @Override
-        public void binderDied() {
-            IBinder key = mKey;
-            if (key != null) {
-                removeListener(key, this);
-            }
+            return false;
         }
 
         @Override
@@ -226,11 +146,14 @@ public abstract class GnssListenerManager<TRequest, TListener extends IInterface
     private final SettingsHelper.GlobalSettingChangedListener
             mBackgroundThrottlePackageWhitelistChangedListener =
             this::onBackgroundThrottlePackageWhitelistChanged;
+    private final SettingsHelper.UserSettingChangedListener
+            mLocationPackageBlacklistChangedListener =
+            this::onLocationPackageBlacklistChanged;
     private final AppOpsHelper.LocationAppOpListener mAppOpsChangedListener = this::onAppOpsChanged;
     private final AppForegroundHelper.AppForegroundListener mAppForegroundChangedListener =
             this::onAppForegroundChanged;
 
-    protected GnssListenerManager(UserInfoHelper userInfoHelper, SettingsHelper settingsHelper,
+    protected GnssListenerMultiplexer(UserInfoHelper userInfoHelper, SettingsHelper settingsHelper,
             AppOpsHelper appOpsHelper, AppForegroundHelper appForegroundHelper) {
         mUserInfoHelper = userInfoHelper;
         mSettingsHelper = settingsHelper;
@@ -238,6 +161,16 @@ public abstract class GnssListenerManager<TRequest, TListener extends IInterface
         mAppForegroundHelper = appForegroundHelper;
         mLocationManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(LocationManagerInternal.class));
+    }
+
+    /**
+     * May be overridden by subclasses to return whether the service is supported or not. This value
+     * should never change for the lifetime of the multiplexer. If the service is unsupported, all
+     * registrations will be treated as inactive and the backing service will never be registered.
+     *
+     */
+    protected boolean isServiceSupported() {
+        return true;
     }
 
     /**
@@ -251,7 +184,8 @@ public abstract class GnssListenerManager<TRequest, TListener extends IInterface
      * Adds a listener with the given identity and request.
      */
     protected void addListener(TRequest request, CallerIdentity identity, TListener listener) {
-        addRegistration(listener.asBinder(), new GnssRegistration(request, identity, listener));
+        addRegistration(listener.asBinder(),
+                new GnssListenerRegistration(request, identity, listener));
     }
 
     /**
@@ -261,49 +195,84 @@ public abstract class GnssListenerManager<TRequest, TListener extends IInterface
         removeRegistration(listener.asBinder());
     }
 
-    void removeListener(IBinder key, GnssRegistration registration) {
-        removeRegistration(key, registration);
+    @Override
+    protected boolean isActive(GnssListenerRegistration registration) {
+        if (!isServiceSupported()) {
+            return false;
+        }
+
+        CallerIdentity identity = registration.getIdentity();
+        // TODO: this should be checking if the gps provider is enabled, not if location is enabled,
+        //  but this is the same for now.
+        return registration.isAppOpsAllowed()
+                && (registration.isForeground() || isBackgroundRestrictionExempt(identity))
+                && mUserInfoHelper.isCurrentUserId(identity.userId)
+                && mSettingsHelper.isLocationEnabled(identity.userId)
+                && !mSettingsHelper.isLocationPackageBlacklisted(identity.userId,
+                identity.packageName);
     }
 
-    @Override
-    protected boolean isActive(GnssRegistration registration) {
-        // we don't have an easy listener for provider enabled status changes available, so we
-        // check it every time, which should be pretty cheap
-        return registration.isActive();
+    private boolean isBackgroundRestrictionExempt(CallerIdentity identity) {
+        if (identity.uid == Process.SYSTEM_UID) {
+            return true;
+        }
+
+        if (mSettingsHelper.getBackgroundThrottlePackageWhitelist().contains(
+                identity.packageName)) {
+            return true;
+        }
+
+        return mLocationManagerInternal.isProvider(null, identity);
     }
 
     @Override
     protected void onRegister() {
+        if (!isServiceSupported()) {
+            return;
+        }
+
         mUserInfoHelper.addListener(mUserChangedListener);
         mSettingsHelper.addOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
         mSettingsHelper.addOnBackgroundThrottlePackageWhitelistChangedListener(
                 mBackgroundThrottlePackageWhitelistChangedListener);
+        mSettingsHelper.addOnLocationPackageBlacklistChangedListener(
+                mLocationPackageBlacklistChangedListener);
         mAppOpsHelper.addListener(mAppOpsChangedListener);
         mAppForegroundHelper.addListener(mAppForegroundChangedListener);
     }
 
     @Override
     protected void onUnregister() {
+        if (!isServiceSupported()) {
+            return;
+        }
+
         mUserInfoHelper.removeListener(mUserChangedListener);
         mSettingsHelper.removeOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
         mSettingsHelper.removeOnBackgroundThrottlePackageWhitelistChangedListener(
                 mBackgroundThrottlePackageWhitelistChangedListener);
+        mSettingsHelper.removeOnLocationPackageBlacklistChangedListener(
+                mLocationPackageBlacklistChangedListener);
         mAppOpsHelper.removeListener(mAppOpsChangedListener);
         mAppForegroundHelper.removeListener(mAppForegroundChangedListener);
     }
 
     private void onUserChanged(int userId, int change) {
         if (change == UserInfoHelper.UserListener.USER_SWITCHED) {
-            updateRegistrations(registration -> registration.onUserChanged(userId));
+            updateRegistrations(registration -> registration.getIdentity().userId == userId);
         }
     }
 
     private void onLocationEnabledChanged(int userId) {
-        updateRegistrations(registration -> registration.onLocationEnabledChanged(userId));
+        updateRegistrations(registration -> registration.getIdentity().userId == userId);
     }
 
     private void onBackgroundThrottlePackageWhitelistChanged() {
-        updateRegistrations(GnssRegistration::onBackgroundThrottlePackageWhitelistChanged);
+        updateRegistrations(registration -> true);
+    }
+
+    private void onLocationPackageBlacklistChanged(int userId) {
+        updateRegistrations(registration -> registration.getIdentity().userId == userId);
     }
 
     private void onAppOpsChanged(String packageName) {
@@ -314,19 +283,12 @@ public abstract class GnssListenerManager<TRequest, TListener extends IInterface
         updateRegistrations(registration -> registration.onForegroundChanged(uid, foreground));
     }
 
-    /**
-     * May be overridden by subclasses to provide extra debug information.
-     */
-    protected boolean isServiceSupported() {
-        return true;
-    }
-
     @Override
-    protected String serviceStateToString() {
+    protected void dumpServiceState(PrintWriter pw) {
         if (!isServiceSupported()) {
-            return "unsupported";
+            pw.print("unsupported");
+        } else {
+            super.dumpServiceState(pw);
         }
-
-        return super.serviceStateToString();
     }
 }

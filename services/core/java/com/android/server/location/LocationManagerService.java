@@ -1342,10 +1342,10 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
+    public void setGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
             String attributionTag) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.addGnssBatchingCallback(callback, packageName, attributionTag);
+            mGnssManagerService.setGnssBatchingCallback(callback, packageName, attributionTag);
         }
     }
 

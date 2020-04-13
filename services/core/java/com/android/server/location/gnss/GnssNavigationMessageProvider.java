@@ -16,13 +16,16 @@
 
 package com.android.server.location.gnss;
 
+import static com.android.server.location.gnss.GnssManagerService.D;
+import static com.android.server.location.gnss.GnssManagerService.TAG;
+
 import android.location.GnssNavigationMessage;
 import android.location.IGnssNavigationMessageListener;
 import android.location.util.identity.CallerIdentity;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.server.location.AppForegroundHelper;
 import com.android.server.location.AppOpsHelper;
 import com.android.server.location.SettingsHelper;
@@ -36,7 +39,7 @@ import com.android.server.location.UserInfoHelper;
  * @hide
  */
 public class GnssNavigationMessageProvider extends
-        GnssListenerManager<Void, IGnssNavigationMessageListener, Void> {
+        GnssListenerMultiplexer<Void, IGnssNavigationMessageListener, Void> {
 
     private final GnssNavigationMessageProviderNative mNative;
 
@@ -61,29 +64,29 @@ public class GnssNavigationMessageProvider extends
     }
 
     @Override
-    protected boolean registerService(Void ignored) {
-        if (mNative.isNavigationMessageSupported()) {
-            if (mNative.startNavigationMessageCollection()) {
-                if (GnssManagerService.D) {
-                    Log.d(GnssManagerService.TAG, "starting gnss navigation messages");
-                }
-                return true;
-            }
+    protected boolean registerWithService(Void ignored) {
+        Preconditions.checkState(mNative.isNavigationMessageSupported());
 
-            Log.e(GnssManagerService.TAG, "error starting gnss navigation messages");
+        if (mNative.startNavigationMessageCollection()) {
+            if (D) {
+                Log.d(TAG, "starting gnss navigation messages");
+            }
+            return true;
+        } else {
+            Log.e(TAG, "error starting gnss navigation messages");
+            return false;
         }
-        return false;
     }
 
     @Override
-    protected void unregisterService() {
+    protected void unregisterWithService() {
         if (mNative.isNavigationMessageSupported()) {
             if (mNative.stopNavigationMessageCollection()) {
-                if (GnssManagerService.D) {
-                    Log.d(GnssManagerService.TAG, "stopping gnss navigation messages");
+                if (D) {
+                    Log.d(TAG, "stopping gnss navigation messages");
                 }
             } else {
-                Log.e(GnssManagerService.TAG, "error stopping gnss navigation messages");
+                Log.e(TAG, "error stopping gnss navigation messages");
             }
         }
     }
@@ -92,13 +95,13 @@ public class GnssNavigationMessageProvider extends
      * Called by GnssLocationProvider.
      */
     public void onNavigationMessageAvailable(GnssNavigationMessage event) {
-        deliverToListeners((listener) -> {
-            try {
-                listener.onGnssNavigationMessageReceived(event);
-            } catch (RemoteException e) {
-                // ignore - the listener will get cleaned up later anyways
+        deliverToListeners(registration -> {
+            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity())) {
+                return listener -> listener.onGnssNavigationMessageReceived(event);
+            } else {
+                return null;
             }
-        }, registration -> mAppOpsHelper.noteLocationAccess(registration.getIdentity()));
+        });
     }
 
     @Override
