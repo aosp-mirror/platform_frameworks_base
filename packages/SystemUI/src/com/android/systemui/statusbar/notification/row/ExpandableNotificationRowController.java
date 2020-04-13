@@ -60,7 +60,6 @@ public class ExpandableNotificationRowController {
     private final HeadsUpManager mHeadsUpManager;
     private final ExpandableNotificationRow.OnExpandClickListener mOnExpandClickListener;
     private final StatusBarStateController mStatusBarStateController;
-    private final NotificationRowContentBinder.InflationCallback mInflationCallback;
 
     private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
             this::logNotificationExpansion;
@@ -82,7 +81,6 @@ public class ExpandableNotificationRowController {
             NotificationLogger notificationLogger, HeadsUpManager headsUpManager,
             ExpandableNotificationRow.OnExpandClickListener onExpandClickListener,
             StatusBarStateController statusBarStateController,
-            NotificationRowContentBinder.InflationCallback inflationCallback,
             NotificationGutsManager notificationGutsManager,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             @DismissRunnable Runnable onDismissRunnable, FalsingManager falsingManager,
@@ -101,7 +99,6 @@ public class ExpandableNotificationRowController {
         mHeadsUpManager = headsUpManager;
         mOnExpandClickListener = onExpandClickListener;
         mStatusBarStateController = statusBarStateController;
-        mInflationCallback = inflationCallback;
         mNotificationGutsManager = notificationGutsManager;
         mOnDismissRunnable = onDismissRunnable;
         mOnAppOpsClickListener = mNotificationGutsManager::openGuts;
