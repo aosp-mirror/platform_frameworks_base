@@ -68,7 +68,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Onartu beti sare honetan"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Baimendu"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Ez da onartzen hari gabeko arazketa"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Gailu honetan saioa hasita daukan erabiltzaileak ezin du aktibatu hari gabeko bidezko arazketa. Eginbide hori erabiltzeko, aldatu erabiltzaile nagusira."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Gailu honetan saioa hasita daukan erabiltzaileak ezin du aktibatu hari gabeko arazketa. Eginbide hori erabiltzeko, aldatu erabiltzaile nagusira."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Desgaitu egin da USB ataka"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"USB ataka desgaitu egin da gailua likido edo zikinkeriengandik babesteko, eta ez du hautemango osagarririk.\n\nJakinarazpen bat jasoko duzu USB ataka berriz erabiltzeko moduan dagoenean."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB ataka gaitu da kargagailuak eta osagarriak hautemateko"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Lupa-leiho gainjarria"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Lupa-leihoa"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Lupa-leihoaren aukerak"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Kontrolatzeko aukera bizkorrak"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Gailua kontrolatzeko aukerak"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Gehitu kontrolatzeko aukerak konektatutako gailuetan"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Konfiguratu kontrolatzeko aukera bizkorrak"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfiguratu gailua kontrolatzeko aukerak"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Kontrol-aukerak atzitzeko, eduki sakatuta etengailua"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Aukeratu aplikazio bat kontrolatzeko aukerak gehitzeko"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1015,11 +1015,14 @@
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kontrol-aukera gehitu da.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrolatzeko aukerak"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Aukeratu pizteko menutik atzitu nahi dituzun kontrolatzeko aukerak"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Kontrolatzeko aukera bat mugitzeko, eduki ezazu sakatuta, eta arrastatu"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Aukeratu itzaltzeko menutik atzitu nahi dituzun kontrolatzeko aukerak"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ezin izan da kargatu kontrol guztien zerrenda."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Beste bat"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Gehitu kontrolatzeko aukera bizkorretan"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Gehitu gailua kontrolatzeko aukeretan"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Gehitu gogokoetan"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> aplikazioak aukera hau gogokoetan gehitzea iradoki du."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Eguneratu dira kontrolatzeko aukerak"</string>

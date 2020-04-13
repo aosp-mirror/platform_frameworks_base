@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Ruxsat berish"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB orqali nosozliklarni tuzatishga ruxsat berilmagan"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Ayni paytda ushbu qurilmaga o‘z hisobi bilan kirgan foydalanuvchi USB orqali nosozliklarni aniqlash funksiyasini yoqa olmaydi. Bu funksiyadan foydalanish uchun asosiy foydalanuvchi profiliga o‘ting."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Bu tarmoqdagi nosozliklar aniqlanishiga ruxsat berilsinmi?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Bu tarmoqda Wi-Fi orqali debagging uchun ruxsat berilsinmi?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Tarmoq nomi (SSID):\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi Manzil (BSSID):\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Bu tarmoqda doim ruxsat etilsin"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Ruxsat"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Simsiz tarmoqdagi nosozliklar aniqlanishiga ruxsat berilmagan"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Ayni paytda ushbu qurilmaga oʻz hisobi bilan kirgan foydalanuvchi simsiz tarmoqdagi nosozliklarni aniqlanish funksiyasini yoqa olmaydi. Bu funksiyadan foydalanish uchun asosiy foydalanuvchi profiliga oʻting."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Wi-Fi orqali debagging taqiqlandi"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Ayni paytda ushbu qurilmaga oʻz hisobi bilan kirgan foydalanuvchi Wi-Fi orqali debagging funksiyasini yoqa olmaydi. Bu funksiyadan foydalanish uchun asosiy foydalanuvchi profiliga oʻting."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB port faolsizlashtirildi"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Qurilmangizni suyuqlik va turli parchalardan himoya qilish uchun USB port faolsizlashtiriladi va hech qanday aksessuarni aniqlay olmaydi.\n\nUSB portdan xavfsiz foydalanish mumkin boʻlganda, sizga xabar beriladi."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Quvvatlash moslamalari va aksessuarlarni aniqlash uchun USB port yoqildi"</string>
@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ilova yoki tashkilotingiz skrinshot olishni taqiqlagan"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Skrinshotni yopish"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Skrinshotni ochish"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Ekranni yozib olish vositasi"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Ekrandan yozib olish"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Yozib olish boshlansinmi?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Yozib olishda Android tizimi ekraningizda koʻringan yoki qurilmangizda ijro etilgan maxfiy axborotni ham yozib olishi mumkin. Bunga parollar, toʻlovga oid axborot, suratlar, xabarlar va audio kiradi."</string>
@@ -712,7 +712,7 @@
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Barcha <xliff:g id="APP_NAME_0">%1$s</xliff:g> xabarlari bulutcha shaklida chiqadi. Sozlamalarni <xliff:g id="APP_NAME_1">%2$s</xliff:g> orqali oʻzgartirish mumkin."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Sozlamalar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Muhimligi"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Avvalgi pufakchalar topilmadi"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Avvalgi bulutchalar topilmadi"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bu yerda oxirgi va yopilgan bulutcha shaklidagi bildirishnomalar chiqadi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ushbu bildirishnomalar guruhi bu yerda sozlanmaydi"</string>
@@ -983,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"Qurilma xizmatlari"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Nomsiz"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Bu ilovani qaytadan ishga tushirish va butun ekranga ochish uchun bosing."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> pufakchalari uchun sozlamalar"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> bulutchalari uchun sozlamalar"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Boshqarish"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> ilovasidan <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> va yana <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> ta bildirishnoma"</string>
@@ -994,7 +994,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Quyi oʻngga surish"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Yopish"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Suhbatlar bulutchalar shaklida chiqmasin"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Bulutcha shaklidagi bildirishnomalar yordamida subhatlashish"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Bulutchalar yordamida subhatlashish"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Yangi xabarlar qalqib chiquvchi belgilar yoki bulutchalar kabi chiqadi. Xabarni ochish uchun bildirishnoma ustiga bosing. Xabarni qayta joylash uchun bildirishnomani suring."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Bulutcha shaklidagi bildirishnomalarni sozlash"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Bu ilova bulutchalarini faolsizlantirish uchun Boshqarish tugmasini bosing"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Kattalashtirish oynasining ustidan ochilishi"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Kattalashtirish oynasi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kattalashtirish oynasi sozlamalari"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Tezkor sozlamalar"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Qurilma boshqaruv elementlari"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ulangan qurilmalarga boshqaruv elementlarini kiriting"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Tezkor sozlamalarni sozlash"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Qurilma boshqaruv elementlarini sozlash"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Boshqaruv elementlariga kirish uchun oʻchirib-yoqish tugmasini bosib turing"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Boshqaruv elementlarini kiritish uchun ilovani tanlang"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,11 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Boshqaruv elementlari"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Quvvat tugmasi menyusida chiqadigan boshqaruv elementlarini tanlang"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Elementni surish uchun uni bosib turib, kerakli joyga suring"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Boshqaruv elementlarini qayta tartiblash uchun ushlab torting"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Barcha boshqaruv elementlari olib tashlandi"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Boshqaruv elementlarining barchasi yuklanmadi."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Boshqa"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Tezkor sozlamalarga kiriting"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Qurilma boshqaruv elementlariga kiritish"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Saralanganlarga kiritish"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ilovasi bu sozlamani saralanganlarga kiritishni taklif qildi."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Boshqaruv elementlari yangilandi"</string>

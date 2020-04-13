@@ -1012,9 +1012,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Preklopni prozor za uvećavanje"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Prozor za uvećavanje"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrole prozora za uvećavanje"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Brze kontrole"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Kontrole uređaja"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodavanje kontrola za povezane uređaje"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Postavite brze kontrole"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Postavite kontrole uređaja"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Držite dugme za uključivanje da pristupite kontrolama"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Odaberite aplikaciju da dodate kontrole"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1024,10 +1024,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izaberite kontrole za pristup iz menija napajanja"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Zadržite i prevucite kontrolu da je premjestite"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Učitavanje liste svih kontrola nije uspjelo."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Dodajte u brze kontrole"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajte u kontrole uređaja"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Dodajte u omiljeno"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"Aplikacija <xliff:g id="APP">%s</xliff:g> je predložila da se ova kontrola doda u omiljeno."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Kontrole su ažurirane"</string>

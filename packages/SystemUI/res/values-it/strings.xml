@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'acquisizione di screenshot non è consentita dall\'app o dall\'organizzazione"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Ignora screenshot"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Apri screenshot"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Screen Recorder"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Registrazione dello schermo"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifica costante per una sessione di registrazione dello schermo"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Avviare la registrazione?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Durante la registrazione, il sistema Android può catturare dati sensibili visibili sullo schermo o riprodotti sul tuo dispositivo. Sono incluse password, dati di pagamento, foto, messaggi e audio."</string>
@@ -362,7 +362,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Verticale"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Orizzontale"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Metodo di immissione"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"Geolocalizz."</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"Geolocalizzazione"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Geolocalizz. non attiva"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositivo multimediale"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
@@ -741,7 +741,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"Silenziata"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Avvisi"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Mostra fumetto"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Rimuovi fumetti"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Rimuovi bolle"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Aggiungi a schermata Home"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"gestione delle notifiche"</string>
@@ -983,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"Servizi del dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Senza titolo"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Tocca per riavviare l\'app e passare a schermo intero."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Impostazioni per fumetti <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Impostazioni per bolle <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Gestisci"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> da <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> da <xliff:g id="APP_NAME">%2$s</xliff:g> e altre <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Finestra overlay ingrandimento"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Finestra ingrandimento"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Finestra controlli di ingrandimento"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Controlli rapidi"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Controlli del dispositivo"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Aggiungi controlli per i dispositivi connessi"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Configura controlli rapidi"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configura i controlli del dispositivo"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Tieni premuto il tasto di accensione per accedere ai controlli"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Scegli un\'app per aggiungere controlli"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controlli"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Seleziona i controlli a cui accedere dal menu di accensione"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Tieni premuto un controllo e trascinalo per spostarlo"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossibile caricare l\'elenco di tutti i controlli."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altro"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Aggiungi ai controlli rapidi"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Aggiungi ai controlli del dispositivo"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Aggiungi ai preferiti"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ha suggerito di aggiungere questo controllo ai preferiti."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Controlli aggiornati"</string>
