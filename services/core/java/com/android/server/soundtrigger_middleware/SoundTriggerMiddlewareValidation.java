@@ -149,13 +149,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     e.getMessage());
         }
 
-        /* Throwing an exception is not enough in this case. When the HAL behaves unexpectedly, the
-           system service and the HAL must be reset and the client must be notified. Without a full
-           reset in this catastrophic case, the state of the HAL and the system service cannot be
-           guaranteed to the client.
-         */
-        Log.wtf(TAG, "Crashing system server due to unrecoverable exception", e);
-        Process.killProcess(Process.myPid());
+        Log.wtf(TAG, "Unexpected exception", e);
         throw new InternalServerError(e);
     }
 
