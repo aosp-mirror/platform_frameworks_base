@@ -22,7 +22,6 @@ import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
-import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -117,18 +116,10 @@ final class HdmiCecController {
 
     private final NativeWrapper mNativeWrapperImpl;
 
-    /** List of logical addresses that should not be assigned to the current device.
-     *
-     * <p>Parsed from {@link Constants#PROPERTY_HDMI_CEC_NEVER_ASSIGN_LOGICAL_ADDRESSES}
-     */
-    private final List<Integer> mNeverAssignLogicalAddresses;
-
     // Private constructor.  Use HdmiCecController.create().
     private HdmiCecController(HdmiControlService service, NativeWrapper nativeWrapper) {
         mService = service;
         mNativeWrapperImpl = nativeWrapper;
-        mNeverAssignLogicalAddresses = mService.getIntList(SystemProperties.get(
-            Constants.PROPERTY_HDMI_CEC_NEVER_ASSIGN_LOGICAL_ADDRESSES));
     }
 
     /**
@@ -221,8 +212,7 @@ final class HdmiCecController {
         for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
             int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
             if (curAddress != Constants.ADDR_UNREGISTERED
-                    && deviceType == HdmiUtils.getTypeFromAddress(curAddress)
-                    && !mNeverAssignLogicalAddresses.contains(curAddress)) {
+                    && deviceType == HdmiUtils.getTypeFromAddress(curAddress)) {
                 boolean acked = false;
                 for (int j = 0; j < HdmiConfig.ADDRESS_ALLOCATION_RETRY; ++j) {
                     if (sendPollMessage(curAddress, curAddress, 1)) {
