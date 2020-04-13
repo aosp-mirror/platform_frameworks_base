@@ -16,6 +16,9 @@
 
 #include <jni.h>
 
+#include <fcntl.h>
+#include <unistd.h>
+
 #include <android/sharedmem.h>
 #include <android/sharedmem_jni.h>
 #include <cutils/ashmem.h>
@@ -23,7 +26,6 @@
 #include <utils/Errors.h>
 
 #include <mutex>
-#include <unistd.h>
 
 static struct {
     jclass clazz;
