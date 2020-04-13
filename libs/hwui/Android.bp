@@ -603,6 +603,11 @@ cc_library {
         "android_graphics_jni",
     ],
     export_header_lib_headers: ["android_graphics_apex_headers"],
+    target: {
+        android: {
+            version_script: "libhwui.map.txt",
+        }
+    },
 }
 
 cc_library_static {
