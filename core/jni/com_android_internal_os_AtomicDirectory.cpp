@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <fcntl.h>
+
 #include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
 
