@@ -55,26 +55,27 @@ public final class ShortcutConstants {
     }
 
     /**
-     * Annotation for different accessibilityService fragment UI type.
+     * Annotation for the different accessibility fragment type.
      *
-     * {@code LEGACY} for displaying appearance aligned with sdk version Q accessibility service
-     * page, but only hardware shortcut allowed and under service in version Q or early.
-     * {@code INVISIBLE} for displaying appearance without switch bar.
-     * {@code INTUITIVE} for displaying appearance with version R accessibility design.
-     * {@code BOUNCE} for displaying appearance with pop-up action.
+     * {@code VOLUME_SHORTCUT_TOGGLE} for displaying appearance with switch bar and only one
+     * shortcut option that is volume key shortcut.
+     * {@code INVISIBLE_TOGGLE} for displaying appearance without switch bar.
+     * {@code TOGGLE} for displaying appearance with switch bar.
+     * {@code LAUNCH_ACTIVITY} for displaying appearance with pop-up action that is for launch
+     * activity.
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-            AccessibilityServiceFragmentType.LEGACY,
-            AccessibilityServiceFragmentType.INVISIBLE,
-            AccessibilityServiceFragmentType.INTUITIVE,
-            AccessibilityServiceFragmentType.BOUNCE,
+            AccessibilityFragmentType.VOLUME_SHORTCUT_TOGGLE,
+            AccessibilityFragmentType.INVISIBLE_TOGGLE,
+            AccessibilityFragmentType.TOGGLE,
+            AccessibilityFragmentType.LAUNCH_ACTIVITY,
     })
-    public @interface AccessibilityServiceFragmentType {
-        int LEGACY = 0;
-        int INVISIBLE = 1;
-        int INTUITIVE = 2;
-        int BOUNCE = 3;
+    public @interface AccessibilityFragmentType {
+        int VOLUME_SHORTCUT_TOGGLE = 0;
+        int INVISIBLE_TOGGLE = 1;
+        int TOGGLE = 2;
+        int LAUNCH_ACTIVITY = 3;
     }
 
     /**
