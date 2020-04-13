@@ -165,7 +165,7 @@ public class AttentionManagerService extends SystemService {
      * Returns {@code true} if attention service is supported on this device.
      */
     private boolean isAttentionServiceSupported() {
-        return isServiceEnabled() && isServiceAvailable();
+        return isServiceEnabled() && isServiceConfigured(mContext);
     }
 
     @VisibleForTesting
@@ -207,6 +207,11 @@ public class AttentionManagerService extends SystemService {
 
         if (!isAttentionServiceSupported()) {
             Slog.w(LOG_TAG, "Trying to call checkAttention() on an unsupported device.");
+            return false;
+        }
+
+        if (!isServiceAvailable()) {
+            Slog.w(LOG_TAG, "Service is not available at this moment.");
             return false;
         }
 
