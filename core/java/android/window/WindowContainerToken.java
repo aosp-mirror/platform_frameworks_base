@@ -84,4 +84,17 @@ public final class WindowContainerToken implements Parcelable {
     public int describeContents() {
         return 0;
     }
+
+    @Override
+    public int hashCode() {
+        return mRealToken.asBinder().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof WindowContainerToken)) {
+            return false;
+        }
+        return mRealToken.asBinder() == ((WindowContainerToken) obj).asBinder();
+    }
 }
