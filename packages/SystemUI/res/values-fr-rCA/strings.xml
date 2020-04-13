@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Mot de passe incorrect"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Trop de tentatives incorrectes. \nRéessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Réessayez. Tentative <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> sur <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Vos données seront supprimées"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Si vous entrez un schéma incorrect à la prochaine tentative, les données de cet appareil seront supprimées."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Si vous entrez un NIP incorrect à la prochaine tentative, les données de cet appareil seront supprimées."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Si vous entrez un mot de passe incorrect à la prochaine tentative, les données de cet appareil seront supprimées."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Si vous entrez un schéma incorrect à la prochaine tentative, cet utilisateur sera supprimé."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Si vous entrez un NIP incorrect à la prochaine tentative, cet utilisateur sera supprimé."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Si vous entrez un mot de passe incorrect à la prochaine tentative, cet utilisateur sera supprimé."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Si vous entrez un schéma incorrect à la prochaine tentative suivante, votre profil professionnel et ses données seront supprimés."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Si vous entrez un NIP incorrect à la prochaine tentative, votre profil professionnel et ses données seront supprimés."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Si vous entrez un mot de passe incorrect à la prochaine tentative suivante, votre profil professionnel et ses données seront supprimés."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Trop de tentatives incorrectes. Les données de cet appareil seront supprimées."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Trop de tentatives incorrectes. Cet utilisateur sera supprimé."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Trop de tentatives incorrectes. Ce profil professionnel et ses données seront supprimés."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Afficher le profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Ajouter un utilisateur"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nouvel utilisateur"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Invité"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Ajouter un invité"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Supprimer l\'invité"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Supprimer l\'invité?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Toutes les applications et les données de cette session seront supprimées."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Supprimer"</string>
@@ -493,7 +500,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Réduire les performances et de fond"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Désactiver la fonction Économie d\'énergie"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toute l\'information visible sur votre écran ou qui joue sur votre appareil durant l\'enregistrement ou la diffusion. Cela comprend des renseignements comme les mots de passe, les détails du paiement, les photos, les messages et l\'audio que vous faites jouer."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Le service offrant cette fonction aura accès à toute l\'information visible sur votre écran ou qui joue sur votre appareil durant l\'enregistrement ou la diffusion. Cela comprend des renseignements comme les mots de passe, les détails du paiement, les photos, les messages et l\'audio que vous faites jouer."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Le service offrant cette fonction aura accès à toute l\'information qui est visible sur votre écran ou sur ce qui joue sur votre appareil durant l\'enregistrement ou la diffusion. Cela comprend des renseignements comme les mots de passe, les détails du paiement, les photos, les messages et le contenu audio que vous faites jouer."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Commencer à enregistrer ou à diffuser?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Commencer à enregistrer ou à diffuser avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ne plus afficher"</string>
@@ -840,7 +847,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Code de touche droit"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icône à gauche"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icône droite"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Maint. doigt sur écran, puis glissez-le pour ajouter tuiles"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Sélectionnez et faites glisser les tuiles pour les ajouter"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Maint. doigt sur l\'écran, puis glissez-le pour réorg. tuiles"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les tuiles ici pour les supprimer"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Vous avez besoin d\'au moins <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tuiles"</string>
@@ -998,25 +1005,22 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Fenêtre d\'agrandissement superposée"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Commandes pour la fenêtre d\'agrandissement"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Commandes de l\'appareil"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ajoutez des commandes pour vos appareils connectés"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurer les commandes de l\'appareil"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Maintenez l\'interrupteur enfoncé pour accéder à vos commandes"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'application pour laquelle ajouter des commandes"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> commande ajoutée.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Sélectionnez les commandes auxquelles vous souhaitez accéder à partir du menu de l\'interrupteur"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Maintenez le doigt sur une commande et faites-la glisser pour la déplacer"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Maintenez le doigt sur l\'écran, puis glissez-le pour réorganiser les commandes"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Toutes les commandes ont été supprimées"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossible de charger la liste des commandes."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Ajouter aux commandes rapides"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes de l\'appareil"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Ajouter aux favoris"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"L\'application <xliff:g id="APP">%s</xliff:g> a suggéré d\'ajouter cette commande à vos favoris."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Commandes mises à jour"</string>

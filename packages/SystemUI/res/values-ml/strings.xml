@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"അനുവദിക്കുക"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB ഡീബഗ്ഗിംഗ് അനുവദനീയമല്ല"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"ഉപകരണത്തിൽ ഇപ്പോൾ സൈൻ ഇൻ ചെയ്‌തിരിക്കുന്ന ഉപയോക്താവിന് USB ഡീബഗ്ഗിംഗ് ഓണാക്കാനാകില്ല. ഈ ഫീച്ചർ ഉപയോഗിക്കാൻ പ്രാഥമിക ഉപയോക്താവിലേക്ക് മാറുക."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"ഈ നെറ്റ്‌വർക്കിൽ വയർലെസ് ഡീബഗ്ഗ് ചെയ്യൽ അനുവദിക്കണോ?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"ഈ നെറ്റ്‌വർക്കിൽ വയർലെസ് ഡീബഗ്ഗിംഗ് അനുവദിക്കണോ?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"നെറ്റ്‌വർക്കിന്റെ പേര് (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nവൈഫൈ വിലാസം (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"ഈ നെറ്റ്‌വർക്കിൽ എപ്പോഴും അനുവദിക്കുക"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"അനുവദിക്കൂ"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"വയർലെസ് ഡീബഗ്ഗ് ചെയ്യൽ അനുവദനീയമല്ല"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"ഉപകരണത്തിൽ ഇപ്പോൾ സൈൻ ഇൻ ചെയ്‌തിരിക്കുന്ന ഉപയോക്താവിന് വയർലെസ് ഡീബഗ്ഗ് ചെയ്യൽ ഓണാക്കാനാകില്ല. ഈ ഫീച്ചർ ഉപയോഗിക്കാൻ പ്രാഥമിക ഉപയോക്താവിലേക്ക് മാറുക."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"വയർലെസ് ഡീബഗ്ഗിംഗ് അനുവദനീയമല്ല"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"ഉപകരണത്തിൽ ഇപ്പോൾ സൈൻ ഇൻ ചെയ്‌തിരിക്കുന്ന ഉപയോക്താവിന് വയർലെസ് ഡീബഗ്ഗിംഗ് ഓണാക്കാനാകില്ല. ഈ ഫീച്ചർ ഉപയോഗിക്കാൻ പ്രാഥമിക ഉപയോക്താവിലേക്ക് മാറുക."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB പോർട്ട് പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"ദ്രാവകത്തിൽ നിന്നോ പൊടിയിൽ നിന്നോ നിങ്ങളുടെ ഉപകരണത്തെ പരിരക്ഷിക്കാനായി USB പോർട്ട് പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നതിനാൽ അത് ആക്‌സസറികളൊന്നും തിരിച്ചറിയില്ല.\n\n USB പോർട്ട് വീണ്ടും ഉപയോഗിക്കാനാകുമ്പോൾ നിങ്ങളെ അറിയിക്കും."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ആക്‌സസറികളും ചാർജറുകളും കണ്ടെത്താൻ USB പോർട്ട് പ്രവർത്തനക്ഷമമാക്കുക"</string>
@@ -154,16 +154,21 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"പാറ്റേൺ തെറ്റാണ്"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"പാസ്‌വേഡ് തെറ്റാണ്"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"നിരവധി തെറ്റായ ശ്രമങ്ങൾ. \n<xliff:g id="NUMBER">%d</xliff:g> സെക്കൻഡിൽ വീണ്ടും ശ്രമിക്കുക."</string>
-    <!-- no translation found for biometric_dialog_credential_attempts_before_wipe (6751859711975516999) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_device (6585503524026243042) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_user (7015008539146949115) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_failed_attempts_now_wiping_profile (5239378521440749682) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_now_wiping_dialog_dismiss (7189432882125106154) -->
-    <skip />
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"വീണ്ടും ശ്രമിക്കുക. <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> ശ്രമങ്ങളിൽ <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> ശ്രമം."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"നിങ്ങളുടെ ഡാറ്റ ഇല്ലാതാക്കപ്പെടും"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"അടുത്ത തവണയും നിങ്ങൾ തെറ്റായ പാറ്റേൺ നൽകിയാൽ, ഈ ഉപകരണത്തിലെ ഡാറ്റ ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"അടുത്ത തവണയും നിങ്ങൾ തെറ്റായ പിൻ നൽകിയാൽ, ഈ ഉപകരണത്തിലെ ഡാറ്റ ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"അടുത്ത തവണയും നിങ്ങൾ തെറ്റായ പാസ്‌വേഡ് നൽകിയാൽ, ഈ ഉപകരണത്തിലെ ഡാറ്റ ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"അടുത്ത തവണയും നിങ്ങൾ തെറ്റായ പാറ്റേൺ നൽകിയാൽ, ഈ ഉപയോക്താവ് ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"അടുത്ത തവണയും നിങ്ങൾ തെറ്റായ പിൻ നൽകിയാൽ, ഈ ഉപയോക്താവ് ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"അടുത്ത തവണയും നിങ്ങൾ തെറ്റായ പാസ്‌വേഡ് നൽകിയാൽ, ഈ ഉപയോക്താവ് ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"അടുത്ത തവണയും നിങ്ങൾ തെറ്റായ പാറ്റേൺ നൽകിയാൽ, നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും അതിന്റെ ഡാറ്റയും ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"അടുത്ത തവണയും നിങ്ങൾ തെറ്റായ പിൻ നൽകിയാൽ, നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും അതിന്റെ ഡാറ്റയും ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"അടുത്ത തവണയും നിങ്ങൾ തെറ്റായ പാസ്‌വേഡ് നൽകിയാൽ, നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും അതിന്റെ ഡാറ്റയും ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഉപകരണത്തിലെ ഡാറ്റ ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഉപയോക്താവ് ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഔദ്യോഗിക പ്രൊഫൈലും അതിന്റെ ഡാറ്റയും ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ഡിസ്മിസ് ചെയ്യുക"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ഫിംഗർപ്രിന്റ് സെൻസർ സ്‌പർശിക്കുക"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"നിങ്ങൾക്കായി തിരയുന്നു…"</string>
@@ -468,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"പ്രൊഫൈൽ കാണിക്കുക"</string>
     <string name="user_add_user" msgid="4336657383006913022">"ഉപയോക്താവിനെ ചേര്‍ക്കുക"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"പുതിയ ഉപയോക്താവ്"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"അതിഥി"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"അതിഥിയെ ചേർക്കുക"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"അതിഥിയെ നീക്കംചെയ്യുക"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"അതിഥിയെ നീക്കംചെയ്യണോ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ഈ സെഷനിലെ എല്ലാ അപ്ലിക്കേഷനുകളും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"നീക്കംചെയ്യുക"</string>
@@ -706,17 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ശബ്‌ദമോ വൈബ്രേഷനോ ഇല്ലാതെ ശ്രദ്ധ കേന്ദ്രീകരിക്കാൻ നിങ്ങളെ സഹായിക്കുന്നു."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ശബ്‌ദമോ വെെബ്രേഷനോ ഉപയോഗിച്ച് നിങ്ങളുടെ ശ്രദ്ധ ക്ഷണിക്കുന്നു."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ഈ ഉള്ളടക്കത്തിലേക്ക് ഒരു ഫ്ലോട്ടിംഗ് കുറുക്കുവഴി ഉപയോഗിച്ച് നിങ്ങളുടെ ശ്രദ്ധ നിലനിർത്തുന്നു."</string>
-    <!-- no translation found for notification_channel_summary_priority (7415770044553264622) -->
-    <skip />
-    <!-- no translation found for notification_conversation_channel_all_bubble (5389290797101635297) -->
-    <skip />
-    <!-- no translation found for notification_conversation_channel_settings (2409977688430606835) -->
-    <skip />
-    <!-- no translation found for notification_priority_title (2079708866333537093) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"സംഭാഷണ വിഭാഗത്തിന് മുകളിൽ ബബിളായി ദൃശ്യമാവുന്നു."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> എന്നതിൽ നിന്നുള്ള എല്ലാ സംഭാഷണങ്ങളും ഡിഫോൾട്ടായി ബബിളാവുന്നു. <xliff:g id="APP_NAME_1">%2$s</xliff:g> എന്നതിൽ മാനേജ് ചെയ്യുക."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ക്രമീകരണം"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"മുൻഗണന"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"അടുത്തിടെയുള്ള ബബിളുകൾ ഒന്നുമില്ല"</string>
-    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
-    <skip />
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"അടുത്തിടെയുള്ള ബബിളുകൾ, ഡിസ്മിസ് ചെയ്ത ബബിളുകൾ എന്നിവ ഇവിടെ ദൃശ്യമാവും"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ഈ അറിയിപ്പുകൾ പരിഷ്ക്കരിക്കാനാവില്ല."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"അറിയിപ്പുകളുടെ ഈ ഗ്രൂപ്പ് ഇവിടെ കോണ്‍ഫിഗര്‍ ചെയ്യാൻ കഴിയില്ല"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"പ്രോക്‌സി അറിയിപ്പ്"</string>
@@ -806,7 +803,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS:"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"സംഗീതം"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"കലണ്ടർ"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"വോളിയം നിയന്ത്രണങ്ങളോടൊപ്പം കാണിക്കുക"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"വോളിയം ബട്ടൺ കുറുക്കുവഴി"</string>
@@ -986,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"ഉപകരണ സേവനങ്ങള്‍"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"പേരില്ല"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്യാനും പൂർണ്ണ സ്‌ക്രീനാവാനും ടാപ്പ് ചെയ്യുക."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനുള്ള ബബിളുകളുടെ ക്രമീകരണം"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> ബബിളുകളുടെ ക്രമീകരണം"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"മാനേജ് ചെയ്യുക"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g>-ൽ നിന്നുള്ള <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> എന്നതിൽ നിന്നുള്ള <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> കൂടുതലും"</string>
@@ -996,77 +993,53 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ചുവടെ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ചുവടെ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
-    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
-    <skip />
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ഈ ആപ്പിൽ നിന്നുള്ള ബബിളുകൾ ഓഫാക്കാൻ \'മാനേജ് ചെയ്യുക\' ടാപ്പ് ചെയ്യുക"</string>
-    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
-    <skip />
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"സംഭാഷണം ബബിൾ ചെയ്യരുത്"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"ബബിളുകൾ ഉപയോഗിച്ച് ചാറ്റ് ചെയ്യുക"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"പുതിയ സംഭാഷണങ്ങൾ ഫ്ലോട്ടിംഗ് ഐക്കണുകളോ ബബിളുകളോ ആയി ദൃശ്യമാവുന്നു. ബബിൾ തുറക്കാൻ ടാപ്പ് ചെയ്യു. ഇത് നീക്കാൻ വലിച്ചിടുക."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ബബിളുകൾ ഏതുസമയത്തും നിയന്ത്രിക്കുക"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ഈ ആപ്പിൽ നിന്നുള്ള ബബിളുകൾ ഓഫാക്കാൻ മാനേജ് ചെയ്യുക ടാപ്പ് ചെയ്യുക"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ലഭിച്ചു"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്‌തു. മാറ്റങ്ങൾ വരുത്താൻ ക്രമീകരണത്തിലേക്ക് പോവുക."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്യാൻ ക്രമീകരണത്തിലേക്ക് പോവുക"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"സ്‌റ്റാൻഡ്‌ബൈ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"മാഗ്നിഫിക്കേഷൻ ഓവർലേ വിൻഡോ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ നിയന്ത്രണങ്ങൾ"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
-    <!-- no translation found for quick_controls_subtitle (1667408093326318053) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"ഉപകരണ നിയന്ത്രണങ്ങൾ"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"നിങ്ങളുടെ കണക്റ്റ് ചെയ്ത ഉപകരണങ്ങൾക്ക് നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"ഉപകരണ നിയന്ത്രണങ്ങൾ സജ്ജീകരിക്കുക"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"നിങ്ങളുടെ നിയന്ത്രണങ്ങൾ ആക്‌സസ് ചെയ്യാൻ പവർ ബട്ടണിൽ പിടിക്കുക"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"നിയന്ത്രണങ്ങൾ ചേർക്കാൻ ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> നിയന്ത്രണങ്ങൾ ചേർത്തു.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> നിയന്ത്രണം ചേർത്തു.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"നിയന്ത്രണങ്ങൾ"</string>
-    <!-- no translation found for controls_favorite_subtitle (6604402232298443956) -->
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"പവർ മെനുവിൽ നിന്ന് ആക്സസ് ചെയ്യേണ്ട നിയന്ത്രണങ്ങൾ തിരഞ്ഞെടുക്കുക"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
     <skip />
-    <!-- no translation found for controls_favorite_rearrange (7364147066539766260) -->
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
     <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"എല്ലാ നിയന്ത്രണങ്ങളുടെയും ലിസ്റ്റ് ലോഡ് ചെയ്യാനായില്ല."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"മറ്റുള്ളവ"</string>
-    <!-- no translation found for controls_dialog_title (3475025327938684220) -->
-    <skip />
+    <string name="controls_dialog_title" msgid="2343565267424406202">"ഉപകരണ നിയന്ത്രണങ്ങളിലേക്ക് ചേർക്കുക"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"പ്രിയപ്പെട്ടവയിലേക്ക് ചേർക്കുക"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"ഈ നിയന്ത്രണത്തെ നിങ്ങളുടെ പ്രിയപ്പെട്ടവയിലേക്ക് ചേർക്കാൻ <xliff:g id="APP">%s</xliff:g> ശുപാർശ ചെയ്‌തു."</string>
-    <!-- no translation found for controls_dialog_confirmation (586517302736263447) -->
-    <skip />
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"നിയന്ത്രണങ്ങൾ അപ്ഡേറ്റ് ചെയ്തു"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"പിന്നിൽ അക്ഷരങ്ങളോ ചിഹ്നങ്ങളോ അടങ്ങിയിരിക്കുന്നു"</string>
-    <!-- no translation found for controls_pin_verify (3452778292918877662) -->
-    <skip />
-    <!-- no translation found for controls_pin_verifying (3755045989392131746) -->
-    <skip />
+    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> പരിശോധിച്ചുറപ്പിക്കുക"</string>
+    <string name="controls_pin_verifying" msgid="3755045989392131746">"പരിശോധിച്ചുറപ്പിക്കുന്നു…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"പിൻ നൽകുക"</string>
-    <!-- no translation found for controls_pin_instructions_retry (1566667581012131046) -->
-    <skip />
-    <!-- no translation found for controls_confirmation_confirming (2596071302617310665) -->
-    <skip />
-    <!-- no translation found for controls_confirmation_message (7744104992609594859) -->
-    <skip />
-    <!-- no translation found for controls_structure_tooltip (4355922222944447867) -->
-    <skip />
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"മറ്റൊരു പിൻ പരീക്ഷിക്കുക"</string>
+    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"സ്ഥിരീകരിക്കുന്നു…"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> എന്നതിനുള്ള മാറ്റം സ്ഥിരീകരിക്കുക"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"കൂടുതൽ കാണാൻ സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"നിർദ്ദേശങ്ങൾ ലോഡ് ചെയ്യുന്നു"</string>
-    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
-    <skip />
-    <!-- no translation found for controls_error_timeout (794197289772728958) -->
-    <skip />
-    <!-- no translation found for controls_error_failed (960228639198558525) -->
-    <skip />
-    <!-- no translation found for controls_in_progress (4421080500238215939) -->
-    <skip />
-    <!-- no translation found for controls_added_tooltip (4842812921719153085) -->
-    <skip />
-    <!-- no translation found for controls_menu_add (4447246119229920050) -->
-    <skip />
-    <!-- no translation found for controls_menu_edit (890623986951347062) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="9023534788828414585">"ഈ മീഡിയ സെഷൻ അടയ്ക്കുക"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"നിഷ്‌ക്രിയം, ആപ്പ് പരിശോധിക്കൂ"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"പിശക്, വീണ്ടും ശ്രമിക്കുക"</string>
+    <string name="controls_in_progress" msgid="4421080500238215939">"പുരോഗതിയിലാണ്"</string>
+    <string name="controls_added_tooltip" msgid="4842812921719153085">"പുതിയ നിയന്ത്രണങ്ങൾ കാണാൻ പവർ ബട്ടൺ പിടിക്കുക"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"നിയന്ത്രണങ്ങൾ എഡിറ്റ് ചെയ്യുക"</string>
 </resources>

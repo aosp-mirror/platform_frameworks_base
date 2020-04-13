@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Nie możesz wykonać zrzutu ekranu, bo nie zezwala na to aplikacja lub Twoja organizacja."</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zamknij zrzut ekranu"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Otwórz zrzut ekranu"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Rejestrator ekranu"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Nagrywanie ekranu"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Rozpocząć rejestrowanie?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Podczas nagrywania system Android może rejestrować wszelkie informacji poufne wyświetlane na ekranie lub odtwarzane na urządzeniu. Dotyczy to m.in. haseł, szczegółów płatności, zdjęć, wiadomości i odtwarzanych dźwięków."</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Nieprawidłowe hasło"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Zbyt wiele nieudanych prób.\n Spróbuj ponownie za <xliff:g id="NUMBER">%d</xliff:g> s."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Spróbuj ponownie. Próba <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> z <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Dane zostaną usunięte"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Jeśli następnym razem podasz nieprawidłowy wzór, dane na urządzeniu zostaną usunięte."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Jeśli następnym razem podasz nieprawidłowy kod PIN, dane na urządzeniu zostaną usunięte."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Jeśli następnym razem podasz nieprawidłowe hasło, dane na urządzeniu zostaną usunięte."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Jeśli następnym razem podasz nieprawidłowy wzór, użytkownik zostanie usunięty."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Jeśli następnym razem podasz nieprawidłowy kod PIN, użytkownik zostanie usunięty."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Jeśli następnym razem podasz nieprawidłowe hasło, użytkownik zostanie usunięty."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jeśli następnym razem podasz nieprawidłowy wzór, profil służbowy oraz powiązane z nim dane zostaną usunięte."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jeśli następnym razem podasz nieprawidłowy kod PIN, profil służbowy oraz powiązane z nim dane zostaną usunięte."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Jeśli następnym razem podasz nieprawidłowe hasło, profil służbowy oraz powiązane z nim dane zostaną usunięte."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Zbyt wiele nieudanych prób. Dane na urządzeniu zostaną usunięte."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Zbyt wiele nieudanych prób. Użytkownik zostanie usunięty."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Zbyt wiele nieudanych prób. Profil do pracy i powiązane z nim dane zostaną usunięte."</string>
@@ -467,9 +477,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Pokaż profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Dodaj użytkownika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nowy użytkownik"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Gość"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Dodaj gościa"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Usuń gościa"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Usunąć gościa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Wszystkie aplikacje i dane w tej sesji zostaną usunięte."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Usuń"</string>
@@ -559,7 +566,7 @@
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">"  "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Otwórz ustawienia VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
-    <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Otwórz zaufane dane logowania"</string>
+    <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Otwórz zaufane certyfikaty"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Aplikacja otrzymała od Ciebie uprawnienia do konfigurowania połączenia VPN.\n\nMoże ona monitorować Twoją aktywność na urządzeniu i w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Twoim profilem do pracy zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem.\n\nŁączysz się też z siecią VPN, która może monitorować Twoją aktywność w sieci."</string>
@@ -707,8 +714,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Pomaga Ci się skupić, nie sygnalizując niczego dźwiękiem ani wibracjami."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Przyciąga uwagę dźwiękiem lub wibracjami."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Przyciąga uwagę dzięki pływającym skrótom do treści."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Wyświetla się u góry sekcji wątków i ma postać dymku."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Wszystkie wątki z aplikacji <xliff:g id="APP_NAME_0">%1$s</xliff:g> są domyślnie wyświetlane jako dymki. Zarządzaj w aplikacji <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Wyświetla się u góry sekcji rozmów i ma postać dymku."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Wszystkie rozmowy z aplikacji <xliff:g id="APP_NAME_0">%1$s</xliff:g> są domyślnie wyświetlane jako dymki. Zarządzaj w aplikacji <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ustawienia"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytet"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Brak ostatnich dymków"</string>
@@ -734,7 +741,7 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Dostosuj"</string>
     <string name="notification_done" msgid="6215117625922713976">"Gotowe"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Cofnij"</string>
-    <string name="demote" msgid="6225813324237153980">"Nie oznaczaj tego powiadomienia jako wątku"</string>
+    <string name="demote" msgid="6225813324237153980">"Nie oznaczaj tego powiadomienia jako rozmowy"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"Ważne rozmowy"</string>
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Rozmowa nieoznaczona jako ważna"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"Wyciszone"</string>
@@ -996,9 +1003,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Przenieś w lewy dolny róg"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Przenieś w prawy dolny róg"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Zamknij"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nie wyświetlaj wątków jako dymków."</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nie wyświetlaj rozmowy jako dymku"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Czatuj, korzystając z dymków"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nowe wątki będą wyświetlane jako pływające ikony lub dymki. Kliknij, by otworzyć dymek. Przeciągnij, by go przenieść."</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nowe rozmowy będą wyświetlane jako pływające ikony lub dymki. Kliknij, by otworzyć dymek. Przeciągnij, by go przenieść."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Zarządzaj dymkami w dowolnym momencie"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Kliknij Zarządzaj, aby wyłączyć dymki z tej aplikacji"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
@@ -1008,15 +1015,11 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Okno nakładki powiększenia"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno powiększenia"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Elementy sterujące okna powiększenia"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Sterowanie urządzeniem"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodaj elementy sterujące do połączonych urządzeń"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurowanie sterowania urządzeniem"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Przytrzymaj przycisk zasilania, aby uzyskać dostęp do elementów sterujących"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Wybierz aplikację, do której chcesz dodać elementy sterujące"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="few">Dodano <xliff:g id="NUMBER_1">%s</xliff:g> elementy sterujące</item>
       <item quantity="many">Dodano <xliff:g id="NUMBER_1">%s</xliff:g> elementów sterujących</item>
@@ -1025,10 +1028,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Elementy sterujące"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Wybierz elementy sterujące dostępne w menu zasilania"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Przytrzymaj i przeciągnij element sterujący, by go przenieść"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nie udało się wczytać listy elementów sterujących."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Inne"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Dodaj do Szybkiego sterowania"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Dodaj do sterowania urządzeniem"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Dodaj do ulubionych"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"Aplikacja <xliff:g id="APP">%s</xliff:g> zaproponowała dodanie tego elementu sterującego do ulubionych."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Zaktualizowano elementy sterujące"</string>

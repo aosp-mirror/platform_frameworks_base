@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Правенето на екранни снимки не е разрешено от приложението или организацията ви"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Отхвърляне на екранната снимка"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Отваряне на екранната снимка"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Записване на екрана"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Запис на екрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущо известие за сесия за записване на екрана"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Да се стартира ли записът?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"По време на записване системата Android може да прихване поверителна информация, която е показана на екрана или възпроизвеждана на устройството ви. Това включва пароли, данни за плащане, снимки, съобщения и аудио."</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Грешна парола"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Твърде много неправилни опити.\nОпитайте отново след <xliff:g id="NUMBER">%d</xliff:g> секунди."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Опитайте отново. Опит <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> от <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Данните ви ще бъдат изтрити"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Ако въведете неправилна фигура при следващия опит, данните от това устройство ще бъдат изтрити."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Ако въведете неправилен ПИН код при следващия опит, данните от това устройство ще бъдат изтрити."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Ако въведете неправилна парола при следващия опит, данните от това устройство ще бъдат изтрити."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Ако въведете неправилна фигура при следващия опит, този потребител ще бъде изтрит."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Ако въведете неправилен ПИН код при следващия опит, този потребител ще бъде изтрит."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Ако въведете неправилна парола при следващия опит, този потребител ще бъде изтрит."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ако въведете неправилна фигура при следващия опит, служебният ви потребителски профил и данните в него ще бъдат изтрити."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ако въведете неправилен ПИН код при следващия опит, служебният ви потребителски профил и данните в него ще бъдат изтрити."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ако въведете неправилна парола при следващия опит, служебният ви потребителски профил и данните в него ще бъдат изтрити."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Твърде много неправилни опити. Данните от това устройство ще бъдат изтрити."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Твърде много неправилни опити. Този потребител ще бъде изтрит."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Твърде много неправилни опити. Този служебен потребителски профил и данните в него ще бъдат изтрити."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Показване на потребителския профил"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Добавяне на потребител"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Нов потребител"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Гост"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Добавяне на гост"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Премахване на госта"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Да се премахне ли гостът?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Всички приложения и данни в тази сесия ще бъдат изтрити."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Премахване"</string>
@@ -998,25 +1005,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Прозорец с наслагване за ниво на мащаба"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за ниво на мащаба"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли за прозореца за ниво на мащаба"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Контроли за устройството"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Добавяне на контроли за свързаните ви устройства"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Настройване на контролите за устройството"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Задръжте бутона за захранване, за да осъществите достъп до контролите"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Изберете приложение, за да добавите контроли"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">Добавени са <xliff:g id="NUMBER_1">%s</xliff:g> контроли.</item>
       <item quantity="one">Добавена е <xliff:g id="NUMBER_0">%s</xliff:g> контрола.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроли"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Избиране на контроли, които да са достъпни в менюто за захранване"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Задръжте и плъзнете дадена контрола, за да я преместите"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Списъкът с всички контроли не бе зареден."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друго"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Добавяне към бързите контроли"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Добавяне към контролите за устройството"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Добавяне в любимите"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> предложи тази контрола да се добави към любимите ви."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Контролите са актуализирани"</string>

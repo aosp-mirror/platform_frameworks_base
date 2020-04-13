@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"अनुमति दें"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB डीबगिंग की अनुमति नहीं है"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन किया है, वो USB डीबगिंग चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, प्राथमिक उपयोगकर्ता में बदलें."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"क्या आप इस नेटवर्क पर वायरलेस तरीके से डीबग करने की सुविधा के इस्तेमाल की अनुमति देना चाहते हैं?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"क्या आप इस नेटवर्क पर वॉयरलेस डीबगिंग की सुविधा के इस्तेमाल की अनुमति देना चाहते हैं?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्क का नाम (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nवाई-फ़ाई का पता (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"इस नेटवर्क पर हमेशा अनुमति दें"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"अनुमति दें"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"वायरलेस तरीके से डीबग करने की सुविधा चालू करने की अनुमति नहीं है"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन कर रखा है वह वायरलेस तरीके से डीबग करने की सुविधा चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, मुख्य उपयोगकर्ता के तौर पर साइन इन करें."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"वॉयरलेस डीबगिंग की सुविधा चालू करने की अनुमति नहीं है"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन कर रखा है वह वॉयरलेस डीबगिंग की सुविधा चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, मुख्य उपयोगकर्ता के तौर पर साइन इन करें."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"यूएसबी पोर्ट बंद है"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"तरल चीज़ या कचरे से आपके डिवाइस की सुरक्षा करने के लिए, यूएसबी पोर्ट को बंद कर दिया गया है. साथ ही, इससे किसी भी एक्सेसरी की पहचान नहीं की जा सकेगी.\n\nयूएसबी पोर्ट का दोबारा इस्तेमाल करना सुरक्षित होने पर आपको सूचित किया जाएगा."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"चार्जर और एक्सेसरी पहचानने के लिए यूएसबी पोर्ट को चालू कर दिया गया है"</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"गलत पासवर्ड"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"आपकी कोशिशें बहुत बार गलत हुई हैं.\nआप <xliff:g id="NUMBER">%d</xliff:g> सेकंड में फिर से कोशिश कर सकते हैं."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"फिर से कोशिश करें. आप <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> में से <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> बार कोशिश कर चुके हैं."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"आपका डेटा मिटा दिया जाएगा"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"अगर आप फिर से गलत पैटर्न डालते हैं, तो इस डिवाइस का डेटा मिटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"अगर आप फिर से गलत पिन डालते हैं, तो इस डिवाइस का डेटा मिटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"अगर आप फिर से गलत पासवर्ड डालते हैं, तो इस डिवाइस का डेटा मिटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"अगर आप फिर से गलत पैटर्न डालते हैं, तो इस उपयोगकर्ता को हटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"अगर आप फिर से गलत पिन डालते हैं, तो इस उपयोगकर्ता को हटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"अगर आप फिर से गलत पासवर्ड डालते हैं, तो इस उपयोगकर्ता को हटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"अगर आप फिर से गलत पैटर्न डालते हैं, तो आपकी वर्क प्रोफ़ाइल और उसका डेटा मिटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"अगर आप फिर से गलत पिन डालते हैं, तो आपकी वर्क प्रोफ़ाइल और उसका डेटा मिटा दिया जाएगा."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"अगर आप फिर से गलत पासवर्ड डालते हैं, तो आपकी वर्क प्रोफ़ाइल और उसका डेटा मिटा दिया जाएगा."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"कई बार गलत कोशिशें की गई हैं. इस डिवाइस का डेटा मिटा दिया जाएगा."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"कई बार गलत कोशिशें की गई हैं. इस उपयोगकर्ता की जानकारी मिटा दी जाएगी."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"कई बार गलत कोशिशें की गई हैं. यह वर्क प्रोफ़ाइल और इसका डेटा मिटा दिया जाएगा."</string>
@@ -465,9 +475,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"प्रोफ़ाइल दिखाएं"</string>
     <string name="user_add_user" msgid="4336657383006913022">"उपयोगकर्ता जोड़ें"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नया उपयोगकर्ता"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"मेहमान"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"मेहमान जोड़ें"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"अतिथि को निकालें"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथि को निकालें?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सत्र के सभी ऐप्स और डेटा को हटा दिया जाएगा."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"निकालें"</string>
@@ -736,7 +743,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"आवाज़ और वाइब्रेशन बंद किया गया"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"आवाज़ या वाइब्रेशन चालू करें"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"बबल दिखाएं"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"बबल हटाएं"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"बबल्स हटाएं"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"होम स्क्रीन पर जोड़ें"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"सूचना नियंत्रण"</string>
@@ -978,7 +985,7 @@
     <string name="device_services" msgid="1549944177856658705">"डिवाइस सेवाएं"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"कोई शीर्षक नहीं"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"इस ऐप्लिकेशन को रीस्टार्ट करने और फ़ुल स्क्रीन चालू करने के लिए टैप करें."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल की सेटिंग"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल्स की सेटिंग"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"प्रबंधित करें"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> से <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> और <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> अन्य ऐप्लिकेशन से <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -1000,25 +1007,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Magnification Overlay Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"स्क्रीन को बड़ा करके दिखाने वाली विंडो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"स्क्रीन को बड़ा करके दिखाने वाली विंडो के नियंत्रण"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"डिवाइस के कंट्रोल"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"कनेक्ट किए गए डिवाइस के लिए कंट्रोल जोड़ें"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिवाइस के कंट्रोल सेट अप करें"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"कंट्रोल ऐक्सेस करने के लिए पावर बटन को दबाकर रखें"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"कंट्रोल जोड़ने के लिए ऐप्लिकेशन चुनें"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> कंट्रोल जोड़ा गया.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> कंट्रोल जोड़े गए.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"कंट्राेल"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पावर मेन्यू से ऐक्सेस करने के लिए कंट्रोल चुनें"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"किसी कंट्रोल को एक जगह से दूसरी जगह ले जाने के लिए, इसे दबाकर खींचें और छोड़ें"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सभी कंट्रोल की सूची लोड नहीं हो सकी."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"\'फटाफट कंट्रोल\' में जोड़ें"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"डिवाइस के कंट्रोल में जोड़ें"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"पसंदीदा में जोड़ें"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> आपको इस कंट्रोल को अपनी पसंदीदा में जोड़ने का सुझाव देता है."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"कंट्रोल अपडेट किए गए"</string>

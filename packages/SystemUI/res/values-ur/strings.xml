@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ایپ یا آپ کی تنظیم کی جانب سے اسکرین شاٹس لینے کی اجازت نہیں ہے"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"اسکرین شاٹ برخاست کریں"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"اسکرین شاٹ کھولیں"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"اسکرین ریکارڈر"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"سکرین ریکارڈر"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اسکرین ریکارڈ سیشن کیلئے جاری اطلاع"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ریکارڈنگ شروع کریں؟"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"‏ریکارڈ کرنے کے دوران، Android سسٹم آپ کی اسکرین پر نظر آنے والی یا آپ کے آلہ پر چلنے والی کسی بھی حساس معلومات کو کیپچر کر سکتا ہے۔ اس میں پاس ورڈز، ادائیگی کی معلومات، تصاویر، پیغامات اور آڈیو شامل ہیں۔"</string>
@@ -155,10 +155,20 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"غلط پاس ورڈ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"کافی زیادہ غلط کوششیں کی گئیں۔\n <xliff:g id="NUMBER">%d</xliff:g> سیکنڈ بعد دوبارہ کوشش کریں۔"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"دوبارہ کوشش کریں۔ کوشش <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> از <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>۔"</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"آپ کا ڈیٹا حذف کر دیا جائے گا"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"اگر آپ نے اگلی کوشش میں غلط پیٹرن درج کیا تو اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"‏اگر آپ نے اگلی کوشش میں غلط PIN درج کیا تو اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"اگر آپ نے اگلی کوشش میں غلط پاس ورڈ درج کیا تو اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"اگر آپ نے اگلی کوشش میں غلط پیٹرن درج کیا تو اس صارف کو حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"‏اگر آپ نے اگلی کوشش میں غلط PIN درج کیا تو اس صارف کو حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"اگر آپ نے اگلی کوشش میں غلط پاس ورڈ درج کیا تو اس صارف کو حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"اگر آپ نے اگلی کوشش میں غلط پیٹرن درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"‏اگر آپ نے اگلی کوشش میں غلط PIN درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"اگر آپ نے اگلی کوشش میں غلط پاس ورڈ درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"بہت زیادہ غلط کوششیں۔ اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"بہت زیادہ غلط کوششیں۔ اس صارف کو حذف کر دیا جائے گا۔"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"بہت زیادہ غلط کوششیں۔ یہ دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"مسترد کریں"</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"برخاست کریں"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"فنگر پرنٹ سینسر پر ٹچ کریں"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"فنگر پرنٹ آئیکن"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"آپ کے لیے تلاش کیا جا رہا ہے…"</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"پروفائل دکھائیں"</string>
     <string name="user_add_user" msgid="4336657383006913022">"صارف کو شامل کریں"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"نیا صارف"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"مہمان"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"مہمان کو شامل کریں"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"مہمان کو ہٹائیں"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"مہمان کو ہٹائیں؟"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"اس سیشن میں موجود سبھی ایپس اور ڈیٹا کو حذف کر دیا جائے گا۔"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ہٹائیں"</string>
@@ -988,35 +995,34 @@
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"برخاست کریں"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"بلبلہ گفتگو نہ کریں"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"بلبلے کے ذریعے چیٹ کریں"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"نئی گفتگو فلوٹنگ آئیکن یا بلبلے کے بطور ظاہو ہوں گی۔ بلبلہ کھولنے کے لیے تھپتھپائیں۔ اسے منتقل کرنے کے لیے گھسیٹیں۔"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"نئی گفتگوئیں فلوٹنگ آئیکن یا بلبلے کے طور پر ظاہر ہوں گی۔ بلبلہ کھولنے کے لیے تھپتھپائیں۔ اسے منتقل کرنے کے لیے گھسیٹیں۔"</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"کسی بھی وقت بلبلے کو کنٹرول کریں"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"اس ایپ سے بلبلوں کو آف کرنے کے لیے نظم کریں پر تھپتھپائیں"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ٹھیک ہے"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"سمجھ آ گئی"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"سسٹم نیویگیشن اپ ڈیٹ کیا گیا۔ تبدیلیاں کرنے کے لیے، ترتیبات پر جائیں۔"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"سسٹم نیویگیشن اپ ڈیٹ کرنے کے لیے ترتیبات پر جائیں"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"اسٹینڈ بائی"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"میگنیفیکیشن اوورلے ونڈو"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"میگنیفکیشن ونڈو"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"میگنیفکیشن ونڈو کنٹرولز"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"آلہ کے کنٹرولز"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"اپنے منسلک آلات کے لیے کنٹرولز شامل کریں"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"آلہ کے کنٹرولز سیٹ اپ کریں"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"اپنے کنٹرول تک رسائی حاصل کرنے کے ليے پاور بٹن کو دبائیں رکھیں"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"کنٹرولز شامل کرنے کے لیے ایپ منتخب کریں"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> کنٹرولز شامل کر دیے گئے۔</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> کنٹرول شامل کر دیا گیا۔</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"کنٹرولز"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"پاور مینو سے رسائی حاصل کرنے کے لیے کنٹرولز کو منتخب کریں"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"اسے منتقل کرنے کے لیے کنٹرول کو پکڑیں اور گھسیٹیں"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"تمام کنٹرولز کی فہرست لوڈ نہیں کی جا سکی۔"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"دیگر"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"فوری کنٹرولز میں شامل کریں"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"آلہ کے کنٹرولز میں شامل کریں"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"پسندیدگیوں میں شامل کریں"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> نے آپ کی پسندیدگیوں میں شامل کرنے کے ليے یہ کنٹرول تجویز کیا۔"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"کنٹرولز اپ ڈیٹ کیے گئے"</string>

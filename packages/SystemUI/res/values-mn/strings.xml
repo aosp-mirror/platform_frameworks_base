@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Зөвшөөрөх"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB алдаа засалт хийх боломжгүй"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Энэ төхөөрөмжид нэвтэрсэн хэрэглэгч USB дебаг хийх онцлогийг асаах боломжгүй байна. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Энэ сүлжээн дээр утасгүй дебагийг зөвшөөрөх үү?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Энэ сүлжээн дээр wireless debugging-г зөвшөөрөх үү?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Сүлжээний нэр (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi хаяг (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Энэ сүлжээн дээр үргэлж зөвшөөрөх"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Зөвшөөрөх"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Утасгүй дебагийг зөвшөөрөөгүй байна"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Энэ төхөөрөмжид одоогоор нэвтэрсэн байгаа хэрэглэгч утасгүй дебагийг асаах боломжгүй. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Wireless debugging-г зөвшөөрөөгүй байна"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Энэ төхөөрөмжид одоогоор нэвтэрсэн байгаа хэрэглэгч wireless debugging-г асаах боломжгүй. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB портыг идэвхгүй болгосон"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Таны төхөөрөмжийг шингэн зүйл эсвэл бохирдлоос хамгаалахын тулд USB портыг идэвхгүй болгосон бөгөөд энэ нь ямар ч дагалдах хэрэгслийг илрүүлэхгүй.\n\nТанд USB портыг дахин ашиглахад аюулгүй болох үед мэдэгдэх болно."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Цэнэглэгч болон нэмэлт хэрэгслийг илрүүлэхийн тулд USB портыг идэвхжүүлсэн"</string>
@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Таны апп, байгууллагад дэлгэцийн зураг авахыг зөвшөөрдөггүй"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Дэлгэцийн агшныг хаах"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Дэлгэцийн агшныг нээх"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Дэлгэцийн бичигч"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Дэлгэцийн үйлдэл бичигч"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Дэлгэц бичих горимын үргэлжилж буй мэдэгдэл"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Бичлэгийг эхлүүлэх үү?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Бичих үед Андройд систем нь таны дэлгэц дээр харагдах эсвэл төхөөрөмж дээрээ тоглуулсан аливаа эмзэг мэдээллийг авах боломжтой. Үүнд нууц үг, төлбөрийн мэдээлэл, зураг, зурвас болон аудио багтана."</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Нууц үг буруу байна"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Хэт олон удаа буруу оруулсан байна.\n<xliff:g id="NUMBER">%d</xliff:g> секундийн дараа дахин оролдоно уу."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Дахин оролдоно уу. <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>-с <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> оролдлого үлдлээ."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Таны өгөгдлийг устгах болно"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Та дараагийн оролдлогоор буруу хээ оруулбал энэ төхөөрөмжийн өгөгдлийг устгах болно."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Та дараагийн оролдлогоор буруу ПИН оруулбал энэ төхөөрөмжийн өгөгдлийг устгах болно."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Та дараагийн оролдлогоор буруу нууц үг оруулбал энэ төхөөрөмжийн өгөгдлийг устгах болно."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Та дараагийн оролдлогоор буруу хээ оруулбал энэ хэрэглэгчийг устгах болно."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Та дараагийн оролдлогоор буруу ПИН оруулбал энэ хэрэглэгчийг устгах болно."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Та дараагийн оролдлогоор буруу нууц үг оруулбал энэ хэрэглэгчийг устгах болно."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Та дараагийн оролдлогоор буруу хээ оруулбал таны ажлын профайлыг өгөгдөлтэй нь цуг устгах болно."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Та дараагийн оролдлогоор буруу ПИН оруулбал таны ажлын профайлыг өгөгдөлтэй нь цуг устгах болно."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Та дараагийн оролдлогоор буруу нууц үг оруулбал таны ажлын профайлыг өгөгдөлтэй нь цуг устгах болно."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Түгжээг хэт олон удаа буруу оруулсан тул энэ төхөөрөмжийн өгөгдлийг устгах болно."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Түгжээг хэт олон удаа буруу оруулсан тул энэ хэрэглэгчийг устгах болно."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Түгжээг хэт олон удаа буруу оруулсан тул энэ ажлын профайл, түүний өгөгдлийн устгах болно."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Профайлыг харуулах"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Хэрэглэгч нэмэх"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Шинэ хэрэглэгч"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Зочин"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Зочин нэмэх"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Зочныг хасах"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Зочныг хасах уу?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Энэ сешний бүх апп болон дата устах болно."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Хасах"</string>
@@ -734,7 +741,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"Дуугүй болгосон"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Сэрэмжлүүлж байна"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Хөөсийг харуулах"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Хөөсийг хасах"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Бөмбөлгүүдийг хасах"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Үндсэн нүүрэнд нэмэх"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"мэдэгдлийн удирдлага"</string>
@@ -976,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"Төхөөрөмжийн үйлчилгээ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Гарчиггүй"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Энэ аппыг дахин эхлүүлж, бүтэн дэлгэцэд орохын тулд товшино уу."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н хөөсний тохиргоо"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н бөмбөлгүүдийн тохиргоо"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Удирдах"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g>-н <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g>-н <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> болон бусад <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -998,25 +1005,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Томруулалтыг давхарласан цонх"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Томруулалтын цонх"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Томруулалтын цонхны хяналт"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Төхөөрөмжийн хяналт"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Холбогдсон төхөөрөмжүүд дээрээ хяналт нэмэх"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Төхөөрөмжийн хяналтыг тохируулах"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Хяналтууддаа хандахын тулд Асаах товчийг удаан дарна уу"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Хяналтууд нэмэхийн тулд аппыг сонгоно уу"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> хяналтыг нэмлээ.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> хяналтыг нэмлээ.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Хяналт"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Тэжээлийн цэсээс хандах хяналтуудыг сонгоно уу"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Хяналтыг зөөхийн тулд дараад чирнэ үү"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Бүх хяналтын жагсаалтыг ачаалж чадсангүй."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Бусад"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Шуурхай хяналтад нэмэх"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Төхөөрөмжийн хяналт руу нэмэх"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Дуртайд нэмэх"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> нь энэ хяналтыг дуртайдаа нэмэхийг санал болгосон."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Хяналтуудыг шинэчиллээ"</string>
@@ -1035,5 +1041,5 @@
     <string name="controls_in_progress" msgid="4421080500238215939">"Үргэлжилж байна"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Шинэ хяналтыг харахын тулд асаах товчийг удаан дарна уу"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Хяналт нэмэх"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Edit controls"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Хяналтыг өөрчлөх"</string>
 </resources>

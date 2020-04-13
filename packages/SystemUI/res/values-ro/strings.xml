@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permiteți"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Remedierea erorilor prin USB nu este permisă"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Utilizatorul conectat momentan pe acest dispozitiv nu poate activa remedierea erorilor prin USB. Pentru a folosi această funcție, comutați la utilizatorul principal."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Permiteți remedierea erorilor prin wireless în această rețea?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Permiteți remedierea erorilor wireless în această rețea?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Numele rețelei (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Permiteți întotdeauna în această rețea"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Permiteți"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Remedierea erorilor prin wireless nu este permisă"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Utilizatorul conectat momentan pe acest dispozitiv nu poate activa remedierea erorilor prin wireless. Pentru a folosi această funcție, comutați la utilizatorul principal."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Remedierea erorilor wireless nu este permisă"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Utilizatorul conectat momentan pe acest dispozitiv nu poate activa remedierea erorilor wireless. Pentru a folosi această funcție, comutați la utilizatorul principal."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Portul USB a fost dezactivat"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Pentru a vă proteja dispozitivul de lichide sau reziduuri, portul USB este dezactivat și nu va detecta niciun accesoriu.\n\nVeți primi o notificare când puteți folosi din nou portul USB."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Portul USB a fost activat pentru a detecta încărcătoarele și accesoriile"</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Parolă greșită"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Prea multe încercări incorecte.\nÎncercați din nou peste <xliff:g id="NUMBER">%d</xliff:g> secunde."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Încercați din nou. Încercarea <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> din <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Datele dvs. vor fi șterse"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Dacă la următoarea încercare introduceți un model incorect, datele de pe acest dispozitiv vor fi șterse."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Dacă la următoarea încercare introduceți un cod PIN incorect, datele de pe acest dispozitiv vor fi șterse."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Dacă la următoarea încercare introduceți o parolă incorectă, datele de pe acest dispozitiv vor fi șterse."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Dacă la următoarea încercare introduceți un model incorect, acest utilizator va fi șters."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Dacă la următoarea încercare introduceți un cod PIN incorect, acest utilizator va fi șters."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Dacă la următoarea încercare introduceți o parolă incorectă, acest utilizator va fi șters."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Dacă la următoarea încercare introduceți un model incorect, profilul de serviciu și datele sale vor fi șterse."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Dacă la următoarea încercare introduceți un cod PIN incorect, profilul de serviciu și datele sale vor fi șterse."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Dacă la următoarea încercare introduceți o parolă incorectă, profilul de serviciu și datele sale vor fi șterse."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Prea multe încercări incorecte. Datele de pe acest dispozitiv vor fi șterse."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Prea multe încercări incorecte. Acest utilizator va fi șters."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Prea multe încercări incorecte. Acest profil de serviciu și datele sale vor fi șterse."</string>
@@ -465,9 +475,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Afișați profilul"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Adăugați un utilizator"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Utilizator nou"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Invitat"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Adăugați un invitat"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Eliminați invitatul"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ștergeți invitatul?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Toate aplicațiile și datele din această sesiune vor fi șterse."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ștergeți"</string>
@@ -1003,15 +1010,11 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Fereastra de suprapunere pentru mărire"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fereastra de mărire"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Comenzi pentru fereastra de mărire"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Comenzile dispozitivului"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Adăugați comenzi pentru dispozitivele conectate"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurați comenzile dispozitivului"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Apăsați butonul de pornire pentru a accesa comenzile"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Alegeți aplicația pentru a adăuga comenzi"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="few">S-au adăugat <xliff:g id="NUMBER_1">%s</xliff:g> comenzi.</item>
       <item quantity="other">S-au adăugat <xliff:g id="NUMBER_1">%s</xliff:g> de comenzi.</item>
@@ -1019,10 +1022,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Comenzi"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Alegeți comenzile de accesat din meniul de alimentare"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Țineți apăsat și trageți o comandă pentru a o muta"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Lista cu toate comenzile nu a putut fi încărcată."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altul"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Adăugați la comenzi rapide"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Adăugați la comenzile dispozitivului"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Adăugați la preferate"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> a sugerat adăugarea acestei comenzi la preferate."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"S-au actualizat comenzile"</string>

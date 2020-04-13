@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Погрешна лозинка"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Превише нетачних покушаја.\n Пробајте поново за <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Пробајте поново. <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>. покушај од <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Подаци ће се избрисати"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Ако унесете нетачан шаблон при следећем покушају, избрисаћемо податке са овог уређаја."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Ако унесете нетачан PIN при следећем покушају, избрисаћемо податке са овог уређаја."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Ако унесете нетачну лозинку при следећем покушају, избрисаћемо податке са овог уређаја."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Ако унесете нетачан шаблон при следећем покушају, избрисаћемо овог корисника."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Ако унесете нетачан PIN при следећем покушају, избрисаћемо овог корисника."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Ако унесете нетачну лозинку при следећем покушају, избрисаћемо овог корисника."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ако унесете нетачан шаблон при следећем покушају, избрисаћемо профил за Work и његове податке."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ако унесете нетачан PIN при следећем покушају, избрисаћемо профил за Work и његове податке."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ако унесете нетачну лозинку при следећем покушају, избрисаћемо профил за Work и његове податке."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Превише нетачних покушаја. Избрисаћемо податке са овог уређаја."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Превише нетачних покушаја. Избрисаћемо овог корисника."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Превише нетачних покушаја. Избрисаћемо овај профил за Work и његове податке."</string>
@@ -465,9 +475,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Прикажи профил"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Додај корисника"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Нови корисник"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Гост"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Додај госта"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Уклони госта"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Желите ли да уклоните госта?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Све апликације и подаци у овој сесији ће бити избрисани."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Уклони"</string>
@@ -1003,29 +1010,28 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Преклопни прозор за увећање"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозор за увећање"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Контроле прозора за увећање"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Контроле уређаја"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Додајте контроле за повезане уређаје"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Подесите контроле уређаја"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Задржите дугме за укључивање да бисте приступили контролама"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Одаберите апликацију за додавање контрола"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> контрола је додата.</item>
       <item quantity="few"><xliff:g id="NUMBER_1">%s</xliff:g> контроле су додате.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> контрола је додато.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроле"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Одаберите контроле за приступ из менија напајања"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Задржите и превуците контролу да бисте је преместили"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Одаберите контроле којима ћете приступати из менија напајања"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Учитавање листе свих контрола није успело."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друго"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Додајте у брзе контроле"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте у контроле уређаја"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Додајте у омиљене"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> предлаже да додате ову контролу у омиљене."</string>
-    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Конторле су ажуриране"</string>
+    <string name="controls_dialog_confirmation" msgid="586517302736263447">"Контроле су ажуриране"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN садржи слова или симболе"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Верификујте: <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Верификује се…"</string>

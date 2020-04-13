@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"האפליקציה או הארגון שלך אינם מתירים ליצור צילומי מסך"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"סגירת צילום מסך"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"פתיחת צילום מסך"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"מקליט מסך"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"מקליט המסך"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"התראה מתמשכת לסשן הקלטת מסך"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"להתחיל את ההקלטה?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"‏בזמן ההקלטה, מערכת Android יכולה לתעד מידע רגיש שגלוי במסך או מופעל במכשיר שלך. מידע זה כולל סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו."</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"סיסמה שגויה"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"יותר מדי ניסיונות שגויים.\nיש לנסות שוב בעוד <xliff:g id="NUMBER">%d</xliff:g> שניות."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"יש לנסות שוב. ניסיון <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> מתוך <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"הנתונים שלך יימחקו"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"הזנת קו ביטול נעילה שגוי בניסיון הבא תגרום למחיקת הנתונים במכשיר."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"הזנת קוד גישה שגוי בניסיון הבא תגרום למחיקת הנתונים במכשיר."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"הזנת סיסמה שגויה בניסיון הבא תגרום למחיקת הנתונים במכשיר."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"הזנת קו ביטול נעילה שגוי בניסיון הבא תגרום למחיקת המשתמש הזה."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"הזנת קוד גישה שגוי בניסיון הבא תגרום למחיקת המשתמש הזה."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"הזנת סיסמה שגויה בניסיון הבא תגרום למחיקת המשתמש הזה."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"הזנת קו ביטול נעילה שגוי בניסיון הבא תגרום למחיקת פרופיל העבודה והנתונים המשויכים אליו."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"הזנת קוד גישה שגוי בניסיון הבא תגרום למחיקת פרופיל העבודה והנתונים המשויכים אליו."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"הזנת סיסמה שגויה בניסיון הבא תגרום למחיקת פרופיל העבודה והנתונים המשויכים אליו."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"נעשו יותר מדי ניסיונות שגויים. הנתונים במכשיר יימחקו."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"נעשו יותר מדי ניסיונות שגויים. המשתמש הזה יימחק."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"נעשו יותר מדי ניסיונות שגויים. פרופיל העבודה הזה והנתונים המשויכים אליו יימחקו."</string>
@@ -467,9 +477,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"הצג פרופיל"</string>
     <string name="user_add_user" msgid="4336657383006913022">"הוספת משתמש"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"משתמש חדש"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"אורח"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"הוספת אורח"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"הסר אורח"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"להסיר אורח?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בפעילות זו באתר יימחקו."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"הסר"</string>
@@ -1008,15 +1015,11 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"חלון ליצירת שכבת-על להגדלה"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"חלון הגדלה"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"בקרות של חלון ההגדלה"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"פקדי המכשיר"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"יש להוסיף פקדים למכשירים המחוברים"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"הגדרה של פקדי המכשיר"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"יש ללחוץ לחיצה ארוכה על לחצן ההפעלה כדי לגשת לבקרים"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"יש לבחור אפליקציה כדי להוסיף פקדים"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="two">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
       <item quantity="many">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
@@ -1025,10 +1028,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"פקדים"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"יש לבחור פקדים לגישה מתפריט ההפעלה"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"כדי להזיז פקד, יש ללחוץ עליו ולגרור אותו"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"לא ניתן היה לטעון את הרשימה של כל הפקדים."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"אחר"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"הוספה לפקדים מהירים"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"הוספה לפקדי המכשיר"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"הוספה למועדפים"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"בקרה זו הוצעה על ידי <xliff:g id="APP">%s</xliff:g> להוספה למועדפים."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"הפקדים עודכנו"</string>
