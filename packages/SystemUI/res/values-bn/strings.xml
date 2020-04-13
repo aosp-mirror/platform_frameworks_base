@@ -993,7 +993,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"নিচে বাঁদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"নিচে ডান দিকে সরান"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"খারিজ করুন"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"কথোপকথন বাবল হিসেবে দেখাবেন না"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"কথোপকথন বাবল হিসেবে দেখাবে না"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"বাবল ব্যবহার করে চ্যাট করুন"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"নতুন কথোপকথন ভেসে থাকা আইকন বা বাবল হিসেবে দেখানো হয়। বাবল খুলতে ট্যাপ করুন। সেটি সরাতে ধরে টেনে আনুন।"</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"যেকোনও সময় বাবল নিয়ন্ত্রণ করুন"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ওভারলে উইন্ডো বড় করে দেখা"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"উইন্ডো বড় করে দেখা"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"উইন্ডো কন্ট্রোল বড় করে দেখা"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"দ্রুত কন্ট্রোল"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"ডিভাইস কন্ট্রোল"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"আপনার কানেক্ট করা ডিভাইসের জন্য কন্ট্রোল যোগ করুন"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"দ্রুত কন্ট্রোল সেট-আপ করুন"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"ডিভাইস কন্ট্রোল সেট-আপ করুন"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"আপনার কন্ট্রোল অ্যাক্সেস করতে পাওয়ার বোতাম ধরে থাকুন"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"কন্ট্রোল যোগ করতে অ্যাপ বেছে নিন"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্রণ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"যেসব কন্ট্রোল অ্যাক্সেস করতে চান সেগুলি পাওয়ার মেনু থেকে বেছে নিন"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"কন্ট্রোল সরাতে সেটি ধরে টেনে আনুন"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"সব কন্ট্রোলের তালিকা লোড করা যায়নি।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"অন্য"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"কুইক কন্ট্রোলে যোগ করুন"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"ডিভাইস কন্ট্রোলে যোগ করুন"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"পছন্দসইতে যোগ করুন"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"আপনার পছন্দসইতে যোগ করতে <xliff:g id="APP">%s</xliff:g> এই কন্ট্রোল সাজেস্ট করেছে।"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"কন্ট্রোল আপডেট করা হয়েছে"</string>

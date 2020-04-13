@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"විශාලන උඩැතිරි කවුළුව"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"විශාලන කවුළුව"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"විශාලනය කිරීමේ කවුළු පාලන"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"ඉක්මන් පාලන"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"උපාංග පාලන"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ඔබේ සම්බන්ධිත උපාංග සඳහා පාලන එක් කරන්න"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"ඉක්මන් පාලන පිහිටුවන්න"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"උපාංග පාලන පිහිටුවන්න"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ඔබේ පාලන වෙත ප්‍රවේශ වීමට බල බොත්තම අල්ලාගෙන සිටින්න"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"පාලන එක් කිරීමට යෙදුම තෝරා ගන්න"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"පාලන"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"බල මෙනුවෙන් ප්‍රවේශ වීමට පාලන තෝරා ගන්න"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"පාලනයක් එය ගෙන යාමට අල්ලා අදින්න"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"සියලු පාලනවල ලැයිස්තුව පූරණය කළ නොහැකි විය."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"වෙනත්"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"ඉක්මන් පාලන වෙත එක් කරන්න"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"උපාංග පාලන වෙත එක් කරන්න"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"ප්‍රියතම වෙත එක් කරන්න"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ඔබේ ප්‍රියතම වෙත එක් කිරීමට මෙම පාලනය යෝජනා කරන ලදී."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"පාලන යාවත්කාලීනයි"</string>

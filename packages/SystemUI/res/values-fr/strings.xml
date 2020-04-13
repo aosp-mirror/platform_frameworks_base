@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Autoriser"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Débogage USB non autorisé"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"L\'utilisateur actuellement connecté sur cet appareil ne peut pas activer le débogage USB. Pour utiliser cette fonctionnalité, l\'utilisateur principal doit se connecter."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Autoriser le débogage via Wi-Fi sur ce réseau ?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Autoriser le débogage sans fil sur ce réseau ?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Nom du réseau (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresse Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Toujours autoriser sur ce réseau"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Autoriser"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Débogage via Wi-Fi non autorisé"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"L\'utilisateur actuellement connecté sur cet appareil ne peut pas activer le débogage via Wi-Fi. Pour que cette fonctionnalité soit disponible, l\'utilisateur principal doit se connecter."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Débogage sans fil non autorisé"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"L\'utilisateur actuellement connecté sur cet appareil ne peut pas activer le débogage sans fil. Pour que cette fonctionnalité soit disponible, l\'utilisateur principal doit se connecter."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Port USB désactivé"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Pour protéger votre appareil des liquides et des saletés, le port USB est désactivé et ne détecte plus les accessoires.\n\nVous recevrez une notification lorsque vous pourrez de nouveau utiliser le port USB."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Port USB activé pour détecter les chargeurs et les accessoires"</string>
@@ -500,7 +500,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Limite les performances et les données en arrière-plan."</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Désactiver l\'économiseur de batterie"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toutes les informations visibles sur votre écran ou lues depuis votre appareil lors d\'un enregistrement ou d\'une diffusion de contenu. Par exemple, vos mots de passe, vos données de paiement, vos photos, vos messages ou encore vos contenus audio lus."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Le service fournissant cette fonctionnalité aura accès à toutes les informations visibles sur votre écran ou lues depuis votre appareil lors d\'un enregistrement ou d\'une diffusion de contenu. Par exemple, vos mots de passe, vos données de paiement, vos photos, vos messages ou encore vos contenus audio lus."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Le service qui fournit cette fonction aura accès à toutes les informations visibles sur votre écran ou lues depuis votre appareil lors d\'un enregistrement ou d\'une diffusion de contenu. Cela comprend, entre autres, vos mots de passe, vos données de paiement, vos photos, vos messages ou encore les contenus audio que vous lisez."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Démarrer l\'enregistrement ou la diffusion ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Démarrer l\'enregistrement ou la diffusion avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ne plus afficher"</string>
@@ -708,12 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Sans sons ni vibrations, vous aide à vous concentrer."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Attire votre attention à l\'aide de sons ou de vibrations."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Attire votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"S\'affiche en haut de la section des conversations sous forme de bulle."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Par défaut, toutes les conversations <xliff:g id="APP_NAME_0">%1$s</xliff:g> s\'affichent sous forme de bulles. Gérer dans <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"S\'affiche en haut de la section des conversations et apparaît sous forme de bulle."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Par défaut, toutes les conversations <xliff:g id="APP_NAME_0">%1$s</xliff:g> s\'affichent sous forme de bulles. Vous pouvez gérer cela dans <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bulles récentes et fermées s\'afficheront ici"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bulles récentes et ignorées s\'afficheront ici"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Impossible de modifier ces notifications."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Vous ne pouvez pas configurer ce groupe de notifications ici"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notification de proxy"</string>
@@ -741,7 +741,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"En silencieux"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Réactiver le son"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Afficher sous forme de bulle"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Désactiver l\'affichage sous forme de bulle"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Désactiver l\'affichage sous forme de bulles"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Ajouter à l\'écran d\'accueil"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> : <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"paramètres des notifications"</string>
@@ -993,11 +993,11 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Déplacer en bas à gauche"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Déplacer en bas à droite"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ignorer"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ne pas afficher les conversations dans des bulles"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ne pas afficher la conversations dans des bulles"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatter en utilisant des bulles"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Les nouvelles conversations s\'affichent sous forme d\'icônes flottantes ou bulles. Appuyez sur la bulle pour l\'ouvrir. Faites-la glisser pour la déplacer."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Contrôler les paramètres des bulles"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Appuyez sur \"Gérer\" pour désactiver les bulles pour cette application"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Appuyez sur \"Gérer\" pour désactiver les bulles de cette application"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigation système mise à jour. Pour apporter des modifications, accédez aux paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez aux paramètres pour mettre à jour la navigation système"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Fenêtre de superposition de l\'agrandissement"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Fenêtre des commandes d\'agrandissement"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Commandes rapides"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Commandes de l\'appareil"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ajouter des commandes pour vos appareils connectés"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Configurez des commandes rapides"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurer les commandes de l\'appareil"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Appuyez de manière prolongée sur le bouton Marche/Arrêt pour accéder aux commandes"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'appli pour laquelle ajouter des commandes"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Sélectionnez les commandes auxquelles vous souhaitez accéder depuis le menu de démarrage"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Appuyez de manière prolongée sur une commande pour la déplacer"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossible de charger toutes les commandes."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Ajouter aux commandes rapides"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes de l\'appareil"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Ajouter aux favoris"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> a suggéré d\'ajouter cette commande aux favoris."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Commandes mises à jour"</string>

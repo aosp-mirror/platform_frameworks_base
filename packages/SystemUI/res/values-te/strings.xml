@@ -712,8 +712,8 @@
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> నుండి అన్ని సంభాషణలు డిఫాల్ట్‌గా బబుల్‌గా ఉంటాయి. <xliff:g id="APP_NAME_1">%2$s</xliff:g>లో మేనేజ్ చేయండి"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"సెట్టింగ్‌లు"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ప్రాధాన్యత"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ఇటీవల బబుల్‌లు ఏవీ లేవు"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ఇటీవలి బబుల్‌లు, తీసివేసిన బబుల్‌లు ఇక్కడ కనిపిస్తాయి"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ఇటీవలి బబుల్స్ ఏవీ లేవు"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ఇటీవలి బబుల్స్, తీసివేసిన బబుల్స్ ఇక్కడ కనిపిస్తాయి"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ఈ నోటిఫికేషన్‌ల సమూహాన్ని ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
@@ -741,7 +741,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"నిశ్శబ్దం చేయబడింది"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"అలర్ట్ చేయడం"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"బబుల్‌ను చూపించు"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"బబుల్‌ను తీసివేయి"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"బబుల్స్ తీసివేయి"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"హోమ్ స్క్రీన్‌కు జోడించు"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"నోటిఫికేషన్ నియంత్రణలు"</string>
@@ -798,7 +798,7 @@
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"అప్లికేషన్‌లు"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"సహాయకం"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"బ్రౌజర్"</string>
-    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"పరిచయాలు"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"కాంటాక్ట్‌లు"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ఇమెయిల్"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"సంగీతం"</string>
@@ -983,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"పరికర సేవలు"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"శీర్షిక లేదు"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ఈ యాప్‌ను పునఃప్రారంభించేలా నొక్కి, ఆపై పూర్తి స్క్రీన్‌‍లోకి వెళ్లండి."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> బబుల్‌ల సెట్టింగ్‌లు"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> బబుల్స్ సెట్టింగ్‌లు"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"నిర్వహించండి"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> నుండి <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> నుండి <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> మరియు మరో <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -994,10 +994,10 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"దిగవు కుడివైపునకు జరుపు"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"విస్మరించు"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"సంభాషణను బబుల్ చేయవద్దు"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"బబుల్‌లను ఉపయోగించి చాట్ చేయండి"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"కొత్త సంభాషణలు తేలియాడే చిహ్నాలుగా లేదా బబుల్‌లు లాగా కనిపిస్తాయి. బబుల్‌ని తెరవడానికి నొక్కండి. తరలించడానికి లాగండి."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"బబుల్‌లను ఎప్పుడైనా నియంత్రించండి"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ఈ యాప్ నుండి వచ్చే బబుల్‌లను ఆఫ్ చేయడానికి మేనేజ్ బటన్‌ను ట్యాప్ చేయండి"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"బబుల్స్‌ను ఉపయోగించి చాట్ చేయండి"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"కొత్త సంభాషణలు తేలియాడే చిహ్నాలుగా లేదా బబుల్స్ లాగా కనిపిస్తాయి. బబుల్‌ని తెరవడానికి నొక్కండి. తరలించడానికి లాగండి."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"బబుల్స్‌ను ఎప్పుడైనా నియంత్రించండి"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ఈ యాప్ నుండి వచ్చే బబుల్స్‌ను ఆఫ్ చేయడానికి మేనేజ్ బటన్‌ను ట్యాప్ చేయండి"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"అర్థమైంది"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"సిస్టమ్ నావిగేషన్ అప్‌డేట్ చేయబడింది. మార్పులు చేయడానికి, సెట్టింగ్‌లకు వెళ్లండి."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"సిస్టమ్ నావిగేషన్‌ను అప్‌డేట్ చేయడానికి సెట్టింగ్‌లకు వెళ్లండి"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"మాగ్నిఫికేషన్ ఓవర్‌లే విండో"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"మాగ్నిఫికేషన్ విండో"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"మాగ్నిఫికేషన్ నియంత్రణల విండో"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"త్వరిత నియంత్రణలు"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"పరికర నియంత్రణలు"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"మీ కనెక్ట్ అయిన పరికరాలకు నియంత్రణలను జోడించండి"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"త్వరిత నియంత్రణలను సెటప్ చేయండి"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"పరికర నియంత్రణలను సెటప్ చేయడం"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"మీ నియంత్రణలను యాక్సెస్ చేయడానికి పవర్ బటన్‌ను నొక్కి పట్టుకోండి"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"నియంత్రణలను యాడ్ చేయడానికి యాప్‌ను ఎంచుకోండి"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"నియంత్రణలు"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"పవర్ మెనూ నుండి యాక్సెస్ చేయడానికి నియంత్రణలను ఎంచుకోండి"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"తరలించడానికి నియంత్రణను పట్టుకొని, లాగండి"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"అన్ని నియంత్రణలు గల జాబితాను లోడ్ చేయలేకపోయాము."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ఇతరం"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"త్వరిత నియంత్రణలకు జోడించండి"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"పరికర నియంత్రణలకు జోడించడం"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"ఇష్టమైనవాటికి జోడించు"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"మీ ఇష్టమైనవాటికి జోడించడానికి <xliff:g id="APP">%s</xliff:g> ఈ కంట్రోల్‌ను సూచించింది."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"నియంత్రణలు అప్‌డేట్ అయ్యాయి"</string>

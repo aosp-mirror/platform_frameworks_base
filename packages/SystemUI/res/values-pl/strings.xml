@@ -566,7 +566,7 @@
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">"  "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Otwórz ustawienia VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
-    <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Otwórz zaufane dane logowania"</string>
+    <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Otwórz zaufane certyfikaty"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Aplikacja otrzymała od Ciebie uprawnienia do konfigurowania połączenia VPN.\n\nMoże ona monitorować Twoją aktywność na urządzeniu i w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Twoim profilem do pracy zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem.\n\nŁączysz się też z siecią VPN, która może monitorować Twoją aktywność w sieci."</string>
@@ -1015,9 +1015,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Okno nakładki powiększenia"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno powiększenia"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Elementy sterujące okna powiększenia"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Szybkie sterowanie"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Sterowanie urządzeniem"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodaj elementy sterujące do połączonych urządzeń"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Skonfiguruj szybkie sterowanie"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurowanie sterowania urządzeniem"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Przytrzymaj przycisk zasilania, aby uzyskać dostęp do elementów sterujących"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Wybierz aplikację, do której chcesz dodać elementy sterujące"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1028,10 +1028,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Elementy sterujące"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Wybierz elementy sterujące dostępne w menu zasilania"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Przytrzymaj i przeciągnij element sterujący, by go przenieść"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nie udało się wczytać listy elementów sterujących."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Inne"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Dodaj do Szybkiego sterowania"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Dodaj do sterowania urządzeniem"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Dodaj do ulubionych"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"Aplikacja <xliff:g id="APP">%s</xliff:g> zaproponowała dodanie tego elementu sterującego do ulubionych."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Zaktualizowano elementy sterujące"</string>

@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ແອັບ ຫຼື ອົງກອນຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ຖ່າຍຮູບໜ້າຈໍ"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ປິດຮູບໜ້າຈໍ"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"ເປີດຮູບໜ້າຈໍ"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"ຕົວບັນທຶກໜ້າຈໍ"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"ໂປຣແກຣມບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ການແຈ້ງເຕືອນສຳລັບເຊດຊັນການບັນທຶກໜ້າຈໍໃດໜຶ່ງ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ເລີ່ມການບັນທຶກບໍ?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"ໃນລະຫວ່າງການບັນທຶກ, ລະບົບ Android ຈະສາມາດບັນທຶກຂໍ້ມູນທີ່ລະອຽດອ່ອນໃດກໍຕາມທີ່ສະແດງຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນທ່ານ. ນີ້ຮວມເຖິງລະຫັດຜ່ານ, ຂໍ້ມູນການຈ່າຍເງິນ, ຮູບ, ຂໍ້ຄວາມ ແລະ ສຽງນຳ."</string>
@@ -708,12 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ຊ່ວຍທ່ານມີສະມາທິໂດຍບໍ່ໃຊ້ສຽງ ຫຼື ການສັ່ນເຕືອນ."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ດຶງຄວາມສົນໃຈຂອງທ່ານດ້ວຍສຽງ ຫຼື ການສັ່ນເຕືອນ."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ເອົາໃຈໃສ່ທາງລັດແບບລອຍໄປຫາເນື້ອຫານີ້."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"ສະແດງຢູ່ເທິງສຸດຂອງພາກສ່ວນການສົນທະນາ ແລະ ປາກົດເປັນ bubble."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"ການສົນທະນາທັງໝົດຈາກ bubble ຂອງ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ຕາມຄ່າເລີ່ມຕົ້ນ. ຈັດການໃນ <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"ສະແດງຢູ່ເທິງສຸດຂອງພາກສ່ວນການສົນທະນາ ແລະ ສະແດງເປັນຟອງ."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"ການສົນທະນາທັງໝົດຈາກ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ທີ່ສະແດງເປັນຟອງຕາມຄ່າເລີ່ມຕົ້ນ. ຈັດການໃນ <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ຕັ້ງຄ່າ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ຄວາມສຳຄັນ"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ບໍ່ມີ bubble ຫຼ້າສຸດ"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bubbles ຫຼ້າສຸດ ແລະ Bubbles ທີ່ປິດໄປຈະປາກົດຢູ່ບ່ອນນີ້"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ບໍ່ມີຟອງຫຼ້າສຸດ"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ຟອງຫຼ້າສຸດ ແລະ ຟອງທີ່ປິດໄປຈະປາກົດຢູ່ບ່ອນນີ້"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ບໍ່ສາມາດແກ້ໄຂການແຈ້ງເຕືອນເຫຼົ່ານີ້ໄດ້."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ບໍ່ສາມາດຕັ້ງຄ່າກຸ່ມການແຈ້ງເຕືອນນີ້ຢູ່ບ່ອນນີ້ໄດ້"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ການແຈ້ງເຕືອນແບບພຣັອກຊີ"</string>
@@ -741,7 +741,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"ປິດສຽງແລ້ວ"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"ການເຕືອນ"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"ສະແດງຟອງນ້ຳ"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"ລຶບຟອງນ້ຳອອກ"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"ລຶບຟອງອອກ"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"ເພີ່ມໃສ່ໜ້າຈໍຫຼັກ"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"ການຄວບຄຸມການແຈ້ງເຕືອນ"</string>
@@ -983,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"ບໍລິການອຸປະກອນ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ບໍ່ມີຊື່"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ແຕະເພື່ອຣີສະຕາດແອັບນີ້ ແລະ ໃຊ້ແບບເຕັມຈໍ."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"ການຕັ້ງຄ່າສຳລັບ bubble <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"ການຕັ້ງຄ່າສຳລັບຟອງ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"ຈັດການ"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ຈາກ <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ຈາກ <xliff:g id="APP_NAME">%2$s</xliff:g> ແລະ ອີກ <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -993,11 +993,11 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ຍ້າຍຊ້າຍລຸ່ມ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ຍ້າຍຂວາລຸ່ມ"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"ປິດໄວ້"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ຢ່າ bubble ການສົນທະນາ"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"ສົນທະນາໂດຍໃຊ້ bubbles"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"ການສົນທະນາໃໝ່ຈະປາກົດເປັນໄອຄອນ ຫຼື bubbles ແບບລອຍ. ແຕະເພື່ອເປີດ bubble. ລາກເພື່ອຍ້າຍມັນ."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ຄວບຄຸມ bubbles ຕອນໃດກໍໄດ້"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ແຕະຈັດການເພື່ອປິດ bubble ຈາກແອັບນີ້"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ຢ່າໃຊ້ຟອງໃນການສົນທະນາ"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"ສົນທະນາໂດຍໃຊ້ຟອງ"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"ການສົນທະນາໃໝ່ຈະປາກົດເປັນໄອຄອນ ຫຼື ຟອງແບບລອຍ. ແຕະເພື່ອເປີດຟອງ. ລາກເພື່ອຍ້າຍມັນ."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ຄວບຄຸມຟອງຕອນໃດກໍໄດ້"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ແຕະຈັດການ ເພື່ອປິດຟອງຈາກແອັບນີ້"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ອັບເດດການນຳທາງລະບົບແລ້ວ. ເພື່ອປ່ຽນແປງ, ກະລຸນາໄປທີ່ການຕັ້ງຄ່າ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ໄປທີ່ການຕັ້ງຄ່າເພື່ອອັບເດດການນຳທາງລະບົບ"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ໜ້າຈໍວາງທັບການຂະຫຍາຍ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ໜ້າຈໍການຂະຫຍາຍ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ການຄວບຄຸມໜ້າຈໍການຂະຫຍາຍ"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"ການຄວບຄຸມດ່ວນ"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"ການຄວບຄຸມອຸປະກອນ"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ເພີ່ມການຄວບຄຸມສຳລັບອຸປະກອນທີ່ເຊື່ອມຕໍ່ແລ້ວຂອງທ່ານ"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"ຕັ້ງຄ່າການຄວບຄຸມດ່ວນ"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"ຕັ້ງຄ່າການຄວບຄຸມອຸປະກອນ"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ກົດປຸ່ມເປີດປິດຄ້າງໄວ້ເພື່ອເຂົ້າເຖິງການຄວບຄຸມຂອງທ່ານ"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"ເລືອກແອັບເພື່ອເພີ່ມການຄວບຄຸມ"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ການຄວບຄຸມ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ເລືອກການຄວບຄຸມເພື່ອເຂົ້າເຖິງຈາກເມນູເປີດປິດ"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ກົດຄ້າງໄວ້ແລ້ວລາກການຄວບຄຸມເພື່ອຍ້າຍມັນ"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ບໍ່ສາມາດໂຫຼດລາຍຊື່ການຄວບຄຸມທັງໝົດໄດ້."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ອື່ນໆ"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"ເພີ່ມໃສ່ການຄວບຄຸມດ່ວນ"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"ເພີ່ມໃສ່ການຄວບຄຸມອຸປະກອນ"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"ເພີ່ມໃສ່ລາຍການທີ່ມັກ"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ແນະນຳການຄວບຄຸມນີ້ເພື່ອເພີ່ມໃສ່ລາຍການທີ່ທ່ານມັກ."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"ອັບເດດການຄວບຄຸມແລ້ວ"</string>

@@ -712,7 +712,7 @@
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Kaikki sovelluksen <xliff:g id="APP_NAME_0">%1$s</xliff:g> keskustelut näytetään oletuksena kuplina. Muuta asetuksia sovelluksessa <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Asetukset"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Tärkeä"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ei viimeaikaisia ohjekuplia"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ei viimeaikaisia kuplia"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Viimeaikaiset ja äskettäin ohitetut kuplat näkyvät täällä"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Näitä ilmoituksia ei voi muokata"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tätä ilmoitusryhmää ei voi määrittää tässä"</string>
@@ -741,7 +741,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"Mykistetty"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Hälyttää"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Näytä ohjekuplana"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Poista ohjekuplat"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Poista kuplat"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Lisää aloitusnäytölle"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"Ilmoitusten hallinta"</string>
@@ -997,7 +997,7 @@
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chattaile kuplien avulla"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Uudet keskustelut näkyvät kelluvina kuvakkeina tai kuplina. Avaa kupla napauttamalla. Siirrä sitä vetämällä."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Muuta kuplien asetuksia milloin tahansa"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Valitse Hallinnoi, jos haluat poistaa ohjekuplat käytöstä tästä sovelluksesta"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Valitse Hallinnoi, jos haluat poistaa kuplat käytöstä tästä sovelluksesta"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Selvä"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Järjestelmän navigointitapa vaihdettu. Voit muuttaa sitä asetuksista."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Vaihda järjestelmän navigointitapaa asetuksista"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Suurennuksen peittoikkuna"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Suurennusikkuna"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Suurennusikkunan ohjaimet"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Pikasäätimet"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Laitteen säätimet"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lisää säätimiä yhdistettyihin laitteisiisi"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Ota pikasäätimet käyttöön"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Laitteen säätimien käyttöönotto"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Voit käyttää säätimiä painamalla virtapainiketta"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Valitse sovellus lisätäksesi säätimiä"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Säätimet"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Valitse säätimet, joita käytetään virtavalikosta"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Siirrä säädintä painamalla sitä pitkään ja vetämällä"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Kaikkien säätimien luetteloa ei voitu ladata."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Muu"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Lisää pikasäätimiin"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Lisää laitteen säätimiin"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Lisää suosikkeihin"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ehdotti tämän säätimen lisäämistä suosikkeihisi."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Säätimet päivitetty"</string>

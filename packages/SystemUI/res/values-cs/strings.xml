@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Aplikace nebo organizace zakazuje pořizování snímků obrazovky"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zavřít snímek obrazovky"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Otevřít snímek obrazovky"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Nahrávání obrazovky"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Trvalé oznámení o relaci nahrávání"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Spustit nahrávání?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Při nahrávání může systém Android zaznamenávat citlivé údaje, které jsou viditelné na obrazovce nebo které jsou přehrávány na zařízení. Týká se to hesel, údajů o platbě, fotek, zpráv a zvuků."</string>
@@ -1015,9 +1015,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Překryvné zvětšovací okno"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Zvětšovací okno"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ovládací prvky zvětšovacího okna"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Rychlé ovládací prvky"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Ovládací prvky zařízení"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Přidejte ovládací prvky pro připojená zařízení"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Nastavení rychlých ovládacích prvků"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Nastavení ovládacích prvků zařízení"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Podržením vypínače zobrazíte ovládací prvky"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Vyberte aplikaci, pro kterou chcete přidat ovládací prvky"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1028,10 +1028,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládací prvky"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Vyberte ovládací prvky, které budou zobrazeny v nabídce vypínače"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Ovládací prvek přesunete přetáhnutím"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Načtení seznamu všech ovládacích prvků se nezdařilo."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Jiné"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Přidat do rychlých ovládacích prvků"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Přidání ovládacích prvků zařízení"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Přidat k oblíbeným"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"Aplikace <xliff:g id="APP">%s</xliff:g> navrhuje přidat tento ovládací prvek do oblíbených."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Ovládací prvky aktualizovány"</string>
