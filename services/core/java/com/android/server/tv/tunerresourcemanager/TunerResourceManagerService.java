@@ -243,19 +243,21 @@ public class TunerResourceManagerService extends SystemService {
             if (DEBUG) {
                 Slog.d(TAG, "requestLnb(request=" + request + ")");
             }
+
             return true;
         }
 
         @Override
-        public void releaseFrontend(int frontendHandle) {
+        public void releaseFrontend(int frontendHandle) throws RemoteException {
             enforceTunerAccessPermission("releaseFrontend");
             enforceTrmAccessPermission("releaseFrontend");
-            int frontendId = getResourceId(
-                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, frontendHandle);
-            if (DEBUG) {
-                Slog.d(TAG, "releaseFrontend(id=" + frontendId + ")");
+            if (!validateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND,
+                    frontendHandle)) {
+                throw new RemoteException("frontendHandle can't be invalid");
             }
-            updateFrontendClientMappingOnRelease(frontendId);
+            synchronized (mLock) {
+                releaseFrontendInternal(getResourceIdFromHandle(frontendHandle));
+            }
         }
 
         @Override
@@ -396,7 +398,6 @@ public class TunerResourceManagerService extends SystemService {
             }
         }
 
-        // TODO check if the removing resource is in use or not. Handle the conflict.
         for (int removingId : updatingFrontendIds) {
             // update the exclusive group id member list
             removeFrontendResource(removingId);
@@ -464,6 +465,14 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         return false;
+    }
+
+    @VisibleForTesting
+    void releaseFrontendInternal(int frontendId) {
+        if (DEBUG) {
+            Slog.d(TAG, "releaseFrontend(id=" + frontendId + ")");
+        }
+        updateFrontendClientMappingOnRelease(frontendId);
     }
 
     @VisibleForTesting
@@ -578,7 +587,7 @@ public class TunerResourceManagerService extends SystemService {
         ownerProfile.releaseFrontend(frontendId);
         for (int exclusiveGroupMember : releasingFrontend.getExclusiveGroupMemberFeIds()) {
             getFrontendResource(exclusiveGroupMember).removeOwner();
-            ownerProfile.releaseFrontend(frontendId);
+            ownerProfile.releaseFrontend(exclusiveGroupMember);
         }
     }
 
@@ -623,6 +632,9 @@ public class TunerResourceManagerService extends SystemService {
 
     private void removeFrontendResource(int removingId) {
         FrontendResource fe = getFrontendResource(removingId);
+        if (fe.isInUse()) {
+            releaseFrontendInternal(removingId);
+        }
         for (int excGroupmemberFeId : fe.getExclusiveGroupMemberFeIds()) {
             getFrontendResource(excGroupmemberFeId)
                     .removeExclusiveGroupMemberFeId(fe.getId());
@@ -665,9 +677,20 @@ public class TunerResourceManagerService extends SystemService {
                 | (mResourceRequestCount++ & 0xffff);
     }
 
-    private int getResourceId(
-            @TunerResourceManager.TunerResourceType int resourceType, int resourceHandle) {
+    @VisibleForTesting
+    protected int getResourceIdFromHandle(int resourceHandle) {
+        if (resourceHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
+            return resourceHandle;
+        }
         return (resourceHandle & 0x00ff0000) >> 16;
+    }
+
+    private boolean validateResourceHandle(int resourceType, int resourceHandle) {
+        if (resourceHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE
+                || ((resourceHandle & 0xff000000) >> 24) != resourceType) {
+            return false;
+        }
+        return true;
     }
 
     private void enforceTrmAccessPermission(String apiName) {
