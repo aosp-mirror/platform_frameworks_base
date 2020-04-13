@@ -117,7 +117,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 1, UserHandle.USER_CURRENT);
 
         // Inject dependencies before initializing the layout
-        mDependency.injectMockDependency(VisualStabilityManager.class);
         mDependency.injectTestDependency(
                 NotificationBlockingHelperManager.class,
                 mBlockingHelperManager);

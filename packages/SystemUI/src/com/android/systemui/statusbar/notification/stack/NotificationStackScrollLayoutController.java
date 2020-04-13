@@ -85,6 +85,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.NotificationGroup;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.OnGroupChangeListener;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
@@ -139,7 +140,6 @@ public class NotificationStackScrollLayoutController {
     private final ZenModeController mZenModeController;
     private final MetricsLogger mMetricsLogger;
     private final FalsingManager mFalsingManager;
-    private final NotificationSectionsManager mNotificationSectionsManager;
     private final Resources mResources;
     private final NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     private final ScrimController mScrimController;
@@ -153,6 +153,7 @@ public class NotificationStackScrollLayoutController {
     private final ForegroundServiceSectionController mFgServicesSectionController;
     private final LayoutInflater mLayoutInflater;
     private final NotificationRemoteInputManager mRemoteInputManager;
+    private final VisualStabilityManager mVisualStabilityManager;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -559,7 +560,6 @@ public class NotificationStackScrollLayoutController {
             NotificationLockscreenUserManager lockscreenUserManager,
             MetricsLogger metricsLogger,
             FalsingManager falsingManager,
-            NotificationSectionsManager notificationSectionsManager,
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
             StatusBar statusBar,
@@ -576,7 +576,8 @@ public class NotificationStackScrollLayoutController {
             ForegroundServiceDismissalFeatureController fgFeatureController,
             ForegroundServiceSectionController fgServicesSectionController,
             LayoutInflater layoutInflater,
-            NotificationRemoteInputManager remoteInputManager) {
+            NotificationRemoteInputManager remoteInputManager,
+            VisualStabilityManager visualStabilityManager) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -592,14 +593,12 @@ public class NotificationStackScrollLayoutController {
         mLockscreenUserManager = lockscreenUserManager;
         mMetricsLogger = metricsLogger;
         mFalsingManager = falsingManager;
-        mNotificationSectionsManager = notificationSectionsManager;
         mResources = resources;
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
         mStatusBar = statusBar;
         mScrimController = scrimController;
-        groupManager.registerGroupExpansionChangeListener((changedRow, expanded) -> {
-            mView.onGroupExpandChanged(changedRow, expanded);
-        });
+        groupManager.registerGroupExpansionChangeListener(
+                (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
         legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
             @Override
             public void onGroupCreatedFromChildren(NotificationGroup group) {
@@ -622,6 +621,7 @@ public class NotificationStackScrollLayoutController {
         mFgServicesSectionController = fgServicesSectionController;
         mLayoutInflater = layoutInflater;
         mRemoteInputManager = remoteInputManager;
+        mVisualStabilityManager = visualStabilityManager;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -681,6 +681,8 @@ public class NotificationStackScrollLayoutController {
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
 
+        mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
+
         mTunerService.addTunable(
                 (key, newValue) -> {
                     switch (key) {
@@ -721,6 +723,22 @@ public class NotificationStackScrollLayoutController {
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
         mSilentHeaderController.setOnClearAllClickListener(v -> clearSilentNotifications());
+    }
+
+    private boolean isInVisibleLocation(NotificationEntry entry) {
+        ExpandableNotificationRow row = entry.getRow();
+        ExpandableViewState childViewState = row.getViewState();
+
+        if (childViewState == null) {
+            return false;
+        }
+        if ((childViewState.location & ExpandableViewState.VISIBLE_LOCATIONS) == 0) {
+            return false;
+        }
+        if (row.getVisibility() != View.VISIBLE) {
+            return false;
+        }
+        return true;
     }
 
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
@@ -1459,7 +1477,7 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public boolean isInVisibleLocation(NotificationEntry entry) {
-            return mView.isInVisibleLocation(entry);
+            return NotificationStackScrollLayoutController.this.isInVisibleLocation(entry);
         }
 
         @Override

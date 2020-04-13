@@ -453,8 +453,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final DisplayMetrics mDisplayMetrics = Dependency.get(DisplayMetrics.class);
     private final LockscreenGestureLogger mLockscreenGestureLogger =
             Dependency.get(LockscreenGestureLogger.class);
-    private final VisualStabilityManager mVisualStabilityManager =
-            Dependency.get(VisualStabilityManager.class);
     protected boolean mClearAllEnabled;
 
     private Interpolator mHideXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
@@ -580,9 +578,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mFgsSectionView != null) {
             return;
         }
-
         mFgsSectionView = fgsSectionView;
-
         addView(mFgsSectionView, -1);
     }
 
@@ -603,7 +599,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         inflateEmptyShadeView();
         inflateFooterView();
-        mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
     }
 
     /**
@@ -1018,23 +1013,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public void setScrollAnchorView(View scrollAnchorView) {
         mScrollAnchorView = scrollAnchorView;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
-    public boolean isInVisibleLocation(NotificationEntry entry) {
-        ExpandableNotificationRow row = entry.getRow();
-        ExpandableViewState childViewState = row.getViewState();
-
-        if (childViewState == null) {
-            return false;
-        }
-        if ((childViewState.location & ExpandableViewState.VISIBLE_LOCATIONS) == 0) {
-            return false;
-        }
-        if (row.getVisibility() != View.VISIBLE) {
-            return false;
-        }
-        return true;
     }
 
     @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)

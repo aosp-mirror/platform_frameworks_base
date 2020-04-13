@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
@@ -105,7 +106,6 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private FalsingManager mFalsingManager;
-    @Mock private NotificationSectionsManager mNotificationSectionsManager;
     @Mock private Resources mResources;
     @Mock(answer = Answers.RETURNS_SELF)
     private NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
@@ -126,6 +126,7 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private LayoutInflater mLayoutInflater;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
+    @Mock private VisualStabilityManager mVisualStabilityManager;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -158,7 +159,6 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mNotificationLockscreenUserManager,
                 mMetricsLogger,
                 mFalsingManager,
-                mNotificationSectionsManager,
                 mResources,
                 mNotificationSwipeHelperBuilder,
                 mStatusBar,
@@ -175,7 +175,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mFgFeatureController,
                 mFgServicesSectionController,
                 mLayoutInflater,
-                mRemoteInputManager
+                mRemoteInputManager,
+                mVisualStabilityManager
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
