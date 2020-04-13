@@ -2436,7 +2436,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Sets the result for activity that started this one, clears the references to activities
      * started for result from this one, and clears new intents.
      */
-    private void finishActivityResults(int resultCode, Intent resultData) {
+    private void finishActivityResults(int resultCode, Intent resultData,
+            NeededUriGrants resultGrants) {
         // Send the result if needed
         if (resultTo != null) {
             if (DEBUG_RESULTS) {
@@ -2450,10 +2451,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
             }
             if (info.applicationInfo.uid > 0) {
-                final NeededUriGrants needed = mAtmService.mUgmInternal
-                        .checkGrantUriPermissionFromIntent(resultData, info.applicationInfo.uid,
-                                resultTo.packageName, resultTo.mUserId);
-                mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(needed,
+                mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(resultGrants,
                         resultTo.getUriPermissionsLocked());
             }
             resultTo.addResultLocked(this, resultWho, requestCode, resultCode, resultData);
@@ -2490,7 +2488,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * See {@link #finishIfPossible(int, Intent, String, boolean)}
      */
     @FinishRequest int finishIfPossible(String reason, boolean oomAdj) {
-        return finishIfPossible(Activity.RESULT_CANCELED, null /* resultData */, reason, oomAdj);
+        return finishIfPossible(Activity.RESULT_CANCELED,
+                null /* resultData */, null /* resultGrants */, reason, oomAdj);
     }
 
     /**
@@ -2504,8 +2503,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * {@link #FINISH_RESULT_CANCELLED} if activity is already finishing or in invalid state and the
      * request to finish it was not ignored.
      */
-    @FinishRequest int finishIfPossible(int resultCode, Intent resultData, String reason,
-            boolean oomAdj) {
+    @FinishRequest int finishIfPossible(int resultCode, Intent resultData,
+            NeededUriGrants resultGrants, String reason, boolean oomAdj) {
         if (DEBUG_RESULTS || DEBUG_STATES) {
             Slog.v(TAG_STATES, "Finishing activity r=" + this + ", result=" + resultCode
                     + ", data=" + resultData + ", reason=" + reason);
@@ -2557,7 +2556,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         shouldAdjustGlobalFocus);
             }
 
-            finishActivityResults(resultCode, resultData);
+            finishActivityResults(resultCode, resultData, resultGrants);
 
             final boolean endTask = task.getActivityBelow(this) == null
                     && !task.isClearingToReuseTask();
@@ -2915,7 +2914,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /** Note: call {@link #cleanUp(boolean, boolean)} before this method. */
     void removeFromHistory(String reason) {
-        finishActivityResults(Activity.RESULT_CANCELED, null /* resultData */);
+        finishActivityResults(Activity.RESULT_CANCELED,
+                null /* resultData */, null /* resultGrants */);
         makeFinishingLocked();
         if (ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE) {
             Slog.i(TAG_ADD_REMOVE, "Removing activity " + this + " from stack callers="
@@ -3664,11 +3664,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void sendResult(int callingUid, String resultWho, int requestCode, int resultCode,
-            Intent data) {
+            Intent data, NeededUriGrants dataGrants) {
         if (callingUid > 0) {
-            final NeededUriGrants needed = mAtmService.mUgmInternal
-                    .checkGrantUriPermissionFromIntent(data, callingUid, packageName, mUserId);
-            mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(needed,
+            mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(dataGrants,
                     getUriPermissionsLocked());
         }
 
@@ -3708,11 +3706,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Deliver a new Intent to an existing activity, so that its onNewIntent()
      * method will be called at the proper time.
      */
-    final void deliverNewIntentLocked(int callingUid, Intent intent, String referrer) {
+    final void deliverNewIntentLocked(int callingUid, Intent intent, NeededUriGrants intentGrants,
+            String referrer) {
         // The activity now gets access to the data associated with this Intent.
-        final NeededUriGrants needed = mAtmService.mUgmInternal.checkGrantUriPermissionFromIntent(
-                intent, callingUid, packageName, mUserId);
-        mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(needed,
+        mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(intentGrants,
                 getUriPermissionsLocked());
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;

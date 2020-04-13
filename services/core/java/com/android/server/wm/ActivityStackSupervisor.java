@@ -139,6 +139,7 @@ import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.UserState;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 
 import java.io.FileDescriptor;
@@ -379,14 +380,17 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final int startFlags;
         final ActivityStack stack;
         final WindowProcessController callerApp;
+        final NeededUriGrants intentGrants;
 
-        PendingActivityLaunch(ActivityRecord _r, ActivityRecord _sourceRecord,
-                int _startFlags, ActivityStack _stack, WindowProcessController app) {
-            r = _r;
-            sourceRecord = _sourceRecord;
-            startFlags = _startFlags;
-            stack = _stack;
-            callerApp = app;
+        PendingActivityLaunch(ActivityRecord r, ActivityRecord sourceRecord,
+                int startFlags, ActivityStack stack, WindowProcessController callerApp,
+                NeededUriGrants intentGrants) {
+            this.r = r;
+            this.sourceRecord = sourceRecord;
+            this.startFlags = startFlags;
+            this.stack = stack;
+            this.callerApp = callerApp;
+            this.intentGrants = intentGrants;
         }
 
         void sendErrorResult(String message) {
@@ -1003,7 +1007,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 || actionRestriction == ACTIVITY_RESTRICTION_PERMISSION) {
             if (resultRecord != null) {
                 resultRecord.sendResult(INVALID_UID, resultWho, requestCode,
-                        Activity.RESULT_CANCELED, null /* data */);
+                        Activity.RESULT_CANCELED, null /* data */, null /* dataGrants */);
             }
             final String msg;
             if (actionRestriction == ACTIVITY_RESTRICTION_PERMISSION) {
