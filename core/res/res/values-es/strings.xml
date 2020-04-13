@@ -237,8 +237,8 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opciones del teléfono"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Bloqueo de pantalla"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Apagar"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Luz"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Renovar"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Encender o apagar"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Reiniciar"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Emergencia"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Informe de error"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Finalizar sesión"</string>
@@ -310,7 +310,7 @@
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"hacer fotos y grabar vídeos"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registros de llamadas"</string>
-    <string name="permgroupdesc_calllog" msgid="2026996642917801803">"leer y editar el registro de llamadas del teléfono"</string>
+    <string name="permgroupdesc_calllog" msgid="2026996642917801803">"leer y escribir en el registro de llamadas del teléfono"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Teléfono"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"hacer y administrar llamadas telefónicas"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensores corporales"</string>
@@ -422,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"acceder a comandos de proveedor de ubicación adicional"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permite que la aplicación acceda a otros comandos del proveedor de ubicación. De esta forma, la aplicación podrá interferir en el funcionamiento del GPS o de otras fuentes de ubicación."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acceder a la ubicación exacta solo en primer plano"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Esta aplicación solo puede obtener tu ubicación exacta cuando está en primer plano. Los servicios de ubicación deben estar activados y disponibles en tu dispositivo para que la aplicación pueda utilizarlos. Es posible que aumente el consumo de batería."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Mientras la utilizas, esta aplicación puede obtener tu ubicación exacta mediante servicios de ubicación, siempre que el dispositivo los tenga activados. Es posible que esto aumente el consumo de batería."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"acceder a la ubicación aproximada solo al estar en primer plano"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Esta aplicación puede obtener tu ubicación aproximada solo cuando está en primer plano. Para que la aplicación pueda utilizar los servicios de ubicación, deben estar activados y disponibles en tu dispositivo."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Mientras la utilizas, esta aplicación puede obtener tu ubicación aproximada mediante servicios de ubicación, siempre que el dispositivo los tenga activados."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acceder a la ubicación en segundo plano"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Esta aplicación puede acceder a la ubicación tanto cuando se ejecuta en segundo plano como cuando está en primer plano."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Esta aplicación puede acceder a la ubicación en cualquier momento, aunque no la estés utilizando."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"cambiar la configuración de audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite que la aplicación modifique la configuración de audio global (por ejemplo, el volumen y el altavoz de salida)."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"grabar sonido"</string>
@@ -438,7 +438,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"realizar fotografías y vídeos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Esta aplicación puede hacer fotografías y grabar vídeos con la cámara en cualquier momento."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Permitir que una aplicación o servicio acceda a las cámaras del sistema para hacer fotos y vídeos"</string>
-    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Esta aplicación del sistema tiene permiso para hacer fotos y grabar vídeos en cualquier momento con una cámara del sistema, aunque debe tener también el permiso android.permission.CAMERA para hacerlo"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Esta aplicación del sistema o con privilegios puede hacer fotos y grabar vídeos en cualquier momento con una cámara del sistema, aunque debe tener también el permiso android.permission.CAMERA para hacerlo"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que una aplicación o servicio reciba retrollamadas cada vez que se abra o cierre una cámara."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esta aplicación puede recibir retrollamadas cuando se abre o se cierra la cámara con cualquier aplicación."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
@@ -698,7 +698,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Exige que se cifren los datos de la aplicación almacenados."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Inhabilitar cámaras"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Evita el uso de las cámaras del dispositivo"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Inhabilitar algunas funciones del bloqueo de pantalla"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Desactivar algunas funciones del bloqueo de pantalla"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Evitar el uso de algunas funciones del bloqueo de pantalla"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Casa"</item>
@@ -1262,7 +1262,7 @@
     <string name="decline" msgid="6490507610282145874">"Rechazar"</string>
     <string name="select_character" msgid="3352797107930786979">"Insertar carácter"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"Enviando mensajes SMS..."</string>
-    <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; está enviando un gran número de mensajes SMS. ¿Quieres permitir que está aplicación siga enviando mensajes?"</string>
+    <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; está enviando un gran número de mensajes SMS. ¿Permitir que está aplicación siga enviando mensajes?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"Permitir"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Denegar"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; quiere enviar un mensaje a &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
@@ -1307,7 +1307,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se ha detectado un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Toca para obtener más información."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración USB habilitada"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Tocar para desactivar depuración USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca aquí para desactivar la depuración USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para inhabilitar la depuración USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Depuración inalámbrica conectada"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca para desactivar la depuración inalámbrica"</string>
@@ -1327,7 +1327,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECHAZAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Selecciona un método de entrada"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Mantener en la pantalla mientras el teclado físico está activo"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Lo mantiene en pantalla mientras el teclado físico está activo"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Configura el teclado físico"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Toca para seleccionar el idioma y el diseño"</string>
@@ -1342,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Revisando el contenido actual"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nueva unidad: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Toca para configurar"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Para transferir fotos y multimedia"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problema con <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Toca para solucionar el problema"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> está dañada. Selecciónala para arreglarla."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Medio externo (<xliff:g id="NAME">%s</xliff:g>) no admitido"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"El dispositivo no admite este medio externo (<xliff:g id="NAME">%s</xliff:g>). Toca para configurarlo con un formato admitido."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"El dispositivo no admite esta <xliff:g id="NAME">%s</xliff:g>. Selecciónala para configurarla en un formato admitido."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"El dispositivo no admite este medio externo (<xliff:g id="NAME">%s</xliff:g>)."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Extracción inesperada de <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Extrae el dispositivo de forma segura antes de sacarlo para evitar perder contenido"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> se ha extraído"</string>
@@ -1617,15 +1620,15 @@
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"¿Utilizar acceso directo de accesibilidad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Si el acceso directo está activado, pulsa los dos botones de volumen durante 3 segundos para iniciar una función de accesibilidad."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"¿Quieres activar las funciones de accesibilidad?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Al mantener pulsadas ambas teclas de volumen durante unos segundos, se activan las funciones de accesibilidad, que pueden cambiar el funcionamiento del dispositivo.\n\nFunciones seleccionadas:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuedes cambiar las funciones seleccionadas en Ajustes &gt; Accesibilidad."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Al mantener pulsadas ambas teclas de volumen durante unos segundos, se activan las funciones de accesibilidad, que pueden cambiar el funcionamiento del dispositivo.\n\nFunciones actuales:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuedes cambiar las funciones seleccionadas en Ajustes &gt; Accesibilidad."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"¿Quieres activar TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Al mantener pulsadas ambas teclas de volumen durante unos segundos se activa TalkBack, un lector de pantalla que ayuda a las personas invidentes o con visión reducida. TalkBack modifica completamente el funcionamiento del dispositivo.\n\nPuedes asignar esta combinación de teclas a otra función en Ajustes &gt; Accesibilidad."</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Al mantener pulsadas ambas teclas de volumen durante unos segundos se activa TalkBack, un lector de pantalla que ayuda a las personas invidentes o con visión reducida. TalkBack modifica completamente el funcionamiento del dispositivo.\n\nPuedes asignar este acceso directo a otra función en Ajustes &gt; Accesibilidad."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"¿Quieres activar <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Al mantener pulsadas ambas teclas de volumen durante unos segundos se activa <xliff:g id="SERVICE">%1$s</xliff:g>, una función de accesibilidad. Esta función puede modificar el funcionamiento del dispositivo.\n\nPuedes asignar esta combinación de teclas a otra función en Ajustes &gt; Accesibilidad."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Al mantener pulsadas ambas teclas de volumen durante unos segundos se activa <xliff:g id="SERVICE">%1$s</xliff:g>, una función de accesibilidad. Esta función puede modificar el funcionamiento del dispositivo.\n\nPuedes asignar este acceso directo a otra función en Ajustes &gt; Accesibilidad."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activar"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"No activar"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"¿Quieres permitir que <xliff:g id="SERVICE">%1$s</xliff:g> pueda controlar totalmente tu dispositivo?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"¿Permitir que <xliff:g id="SERVICE">%1$s</xliff:g> pueda controlar totalmente tu dispositivo?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si activas <xliff:g id="SERVICE">%1$s</xliff:g>, el dispositivo no utilizará el bloqueo de pantalla para mejorar el cifrado de datos."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"El control total es adecuado para las aplicaciones de accesibilidad, pero no para la mayoría de las aplicaciones."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver y controlar la pantalla"</string>
@@ -1636,7 +1639,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denegar"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toca una función para empezar a usarla:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Seleccionar qué funciones usar con el botón Accesibilidad"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Seleccionar qué funciones usar con la combinación de teclas de volumen"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Seleccionar qué funciones usar con la tecla de volumen"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Se ha desactivado <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar accesos directos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Listo"</string>
@@ -1786,9 +1789,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado por el administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para que la batería dure más, Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Para que la batería dure más, Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\""</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se mostrarán hasta que las toques."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para que la batería dure más, el modo Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Para que la batería dure más, el modo Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\""</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que es posible que, por ejemplo, algunas imágenes no se muestren hasta que las toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2041,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversación"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversación de grupo"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"+ <xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabajo"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Ver contenido personal"</string>
@@ -2059,8 +2063,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Ninguna aplicación de trabajo puede abrir este contenido"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Ninguna aplicación personal es compatible con este contenido"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Ninguna aplicación personal puede abrir este contenido"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Grabar o reproducir audio en llamadas telefónicas"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Permite que la aplicación grabe o reproduzca audio en las llamadas telefónicas si está asignada como aplicación Teléfono predeterminada."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueo de red de tarjeta SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN de desbloqueo de subconjunto de red SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN de desbloqueo corporativo de SIM"</string>
@@ -2092,11 +2094,11 @@
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"Solicitando desbloqueo de subconjunto de red SIM…"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"Solicitando desbloqueo del proveedor de servicios de SIM…"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"Solicitando desbloqueo corporativo de SIM…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"Solicitando desbloqueo mediante código PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"Solicitando desbloqueo mediante código PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"Solicitando desbloqueo mediante código PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Solicitando desbloqueo mediante código PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Solicitando desbloqueo mediante código PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"Solicitando desbloqueo mediante PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"Solicitando desbloqueo mediante PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"Solicitando desbloqueo mediante PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Solicitando desbloqueo mediante PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Solicitando desbloqueo mediante PUK…"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"Solicitando desbloqueo de SIM…"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Solicitando desbloqueo de red1 de RUIM…"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Solicitando desbloqueo de red2 de RUIM…"</string>
@@ -2109,64 +2111,64 @@
     <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"Solicitando desbloqueo de IMPI…"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"Solicitando desbloqueo del proveedor de servicios de subconjunto de red…"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"Solicitando desbloqueo de RUIM…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"Solicitando desbloqueo mediante código PUK…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"Solicitando desbloqueo mediante código PUK…"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"Solicitando desbloqueo mediante código PUK…"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"Solicitando desbloqueo mediante código PUK…"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"Solicitando desbloqueo mediante código PUK…"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"Solicitando desbloqueo mediante código PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"La solicitud de desbloqueo de red SIM no se ha realizado correctamente."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"Solicitando desbloqueo mediante PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"Solicitando desbloqueo mediante PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"Solicitando desbloqueo mediante PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"Solicitando desbloqueo mediante PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"Solicitando desbloqueo mediante PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"Solicitando desbloqueo mediante PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"No se ha podido realizar el desbloqueo de red SIM."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"La solicitud de desbloqueo de subconjunto de red SIM no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"La solicitud de desbloqueo del proveedor de servicios de SIM no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"La solicitud de desbloqueo corporativo de SIM no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"La solicitud de desbloqueo de SIM no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"La solicitud de desbloqueo de red1 de RUIM no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"La solicitud de desbloqueo de red2 de RUIM no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"La solicitud de desbloqueo HRPD de RUIM no se ha realizado correctamente."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"No se ha podido desbloquear el proveedor de servicios de SIM."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"No se ha podido realizar el desbloqueo corporativo de SIM."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"No se ha podido desbloquear la SIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"No se ha podido desbloquear la red1 de RUIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"No se ha podido desbloquear la red2 de RUIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"No se ha podido realizar el desbloqueo HRPD de RUIM."</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"La solicitud de desbloqueo corporativo de RUIM no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"La solicitud de desbloqueo del proveedor de servicios de RUIM no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"La solicitud de desbloqueo de RUIM no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"El desbloqueo mediante código PUK no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"La solicitud de desbloqueo del SPN no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"La solicitud de desbloqueo de EHPLMN del SP no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"La solicitud de desbloqueo de ICCID no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"La solicitud de desbloqueo de IMPI no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"La solicitud de desbloqueo del proveedor de servicios de subconjunto de red no se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"El desbloqueo de red SIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"El desbloqueo de subconjunto de red SIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"El desbloqueo del proveedor de servicios de SIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"El desbloqueo corporativo de SIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"El desbloqueo de SIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"El desbloqueo de red1 de RUIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"El desbloqueo de red2 de RUIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"El desbloqueo HRPD de RUIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"El desbloqueo del proveedor de servicios de RUIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"El desbloqueo corporativo de RUIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"El desbloqueo de RUIM se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"El desbloqueo mediante código PUK se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"El desbloqueo del SPN se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"El desbloqueo de EHPLMN del SP se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"El desbloqueo de ICCID se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"El desbloqueo de IMPI se ha realizado correctamente."</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"El desbloqueo del proveedor de servicios de subconjunto de red se ha realizado correctamente."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"No se ha podido desbloquear el proveedor de servicios de RUIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"No se ha podido realizar el desbloqueo de RUIM."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"No se ha podido desbloquear con el PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"No se ha podido desbloquear el SPN."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"No se ha podido desbloquear el EHPLMN del SP."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"No se ha podido realizar el desbloqueo de ICCID."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"No se ha podido realizar el desbloqueo de IMPI."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"No se ha podido desbloquear el proveedor de servicios de subconjunto de red."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"Desbloqueo de red SIM correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"Desbloqueo de subconjunto de red SIM correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"Desbloqueo del proveedor de servicios de SIM correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"Desbloqueo corporativo de SIM correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"Desbloqueo de SIM correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"Desbloqueo de red1 de RUIM correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"Desbloqueo de red2 de RUIM correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"Desbloqueo HRPD de RUIM correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"Desbloqueo correcto del proveedor de servicios de RUIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"Desbloqueo corporativo de RUIM correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"Desbloqueo de RUIM correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"Desbloqueo con PUK correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"Desbloqueo del SPN correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"Desbloqueo de EHPLMN del SP correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"Desbloqueo de ICCID correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"Desbloqueo de IMPI correcto."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Desbloqueo del proveedor de servicios de subconjunto de red correcto."</string>
 </resources>

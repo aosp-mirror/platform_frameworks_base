@@ -202,7 +202,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ha desactivat la impressió."</string>
     <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Desbloqueja les apps personals"</string>
     <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Les apps es bloquejaran demà"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"L\'administrador de TI no permet posar en pausa el teu perfil de treball durant més de <xliff:g id="DAYS">%1$d</xliff:g> dies"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"L\'administrador de TI no permet posar en pausa el teu perfil de treball durant més de: <xliff:g id="DAYS">%1$d</xliff:g> dies"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Activa el perfil de treball"</string>
     <string name="me" msgid="6207584824693813140">"Mi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcions de la tauleta"</string>
@@ -422,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"accedir a ordres del proveïdor d\'ubicació addicionals"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permet que l\'aplicació accedeixi a ordres addicionals del proveïdor d\'ubicacions; per tant, és possible que l\'aplicació pugui interferir en el funcionament del GPS o d\'altres fonts d\'ubicacions."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"accedeix a la ubicació exacta només en primer pla"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Aquesta aplicació pot obtenir la teva ubicació exacta només quan està en primer pla. Els serveis d\'ubicació han d\'estar activats i disponibles al dispositiu perquè l\'aplicació els pugui utilitzar, i això pot fer que el consum de bateria augmenti."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aquesta aplicació pot obtenir la teva ubicació exacta a través dels serveis d\'ubicació mentre s\'està utilitzant. Els serveis d\'ubicació del dispositiu han d\'estar activats perquè l\'aplicació pugui obtenir la ubicació, i això pot fer que l\'ús de la bateria augmenti."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"accedeix a la ubicació aproximada només en primer pla"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Aquesta aplicació pot obtenir la teva ubicació aproximada només quan està en primer pla. Els serveis d\'ubicació han d\'estar activats i disponibles al dispositiu perquè l\'aplicació els pugui utilitzar."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aquesta aplicació pot obtenir la teva ubicació aproximada a través dels serveis d\'ubicació mentre s\'està utilitzant. Els serveis d\'ubicació del dispositiu han d\'estar activats perquè l\'aplicació pugui obtenir la ubicació."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"accedir a la ubicació en segon pla"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Aquesta aplicació pot accedir a la ubicació mentre s\'executa en segon pla, a més de poder fer-ho en primer pla."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Aquesta aplicació pot accedir a la ubicació en qualsevol moment, encara que no s\'estigui utilitzant."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"canviar la configuració d\'àudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permet que l\'aplicació modifiqui la configuració d\'àudio general, com ara el volum i l\'altaveu de sortida que es fa servir."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"gravar àudio"</string>
@@ -438,9 +438,9 @@
     <string name="permlab_camera" msgid="6320282492904119413">"fer fotos i vídeos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Aquesta aplicació pot fer fotos i gravar vídeos amb la càmera en qualsevol moment."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Permet que una aplicació o un servei tinguin accés a les càmeres del sistema per fer fotos i vídeos"</string>
-    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Aquesta aplicació amb privilegis o del sistema pot fer fotos i gravar vídeos amb una càmera del sistema en qualsevol moment. L\'aplicació també ha de tenir el permís android.permission.CAMERA per accedir-hi."</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Aquesta aplicació del sistema amb privilegis pot fer fotos i gravar vídeos amb una càmera del sistema en qualsevol moment. L\'aplicació també ha de tenir el permís android.permission.CAMERA per accedir-hi."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permet que una aplicació o un servei pugui rebre crides de retorn sobre els dispositius de càmera que s\'obren o es tanquen."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Aquesta aplicació pot rebre crides de retorn quan s\'obre o es tanca un dispositiu de càmera (segons l\'aplicació)."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Aquesta aplicació pot rebre crides de retorn quan s\'obre o es tanca un dispositiu de càmera mitjançant l\'aplicació en qüestió."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibració"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet que l\'aplicació controli el vibrador."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet que l\'aplicació accedeixi a l\'estat de vibració."</string>
@@ -1342,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"S\'està revisant el contingut actual"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Suport extern nou (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Toca per configurar"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Per transferir fotos i fitxers multimèdia"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problema amb el suport (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Toca per solucionar el problema"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"La unitat següent està malmesa: <xliff:g id="NAME">%s</xliff:g>. Selecciona-la per solucionar-ho."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> no és compatible"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"El dispositiu no admet la unitat <xliff:g id="NAME">%s</xliff:g>. Toca per configurar-la amb un format compatible."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Aquest dispositiu no admet la unitat següent: <xliff:g id="NAME">%s</xliff:g>. Selecciona-la per configurar-la en un format compatible."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"El dispositiu no admet <xliff:g id="NAME">%s</xliff:g>. Toca per configurar-la en un format compatible."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Aquest dispositiu no admet <xliff:g id="NAME">%s</xliff:g>. Selecciona-la per configurar-la en un format compatible."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"El dispositiu no admet <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"S\'ha extret <xliff:g id="NAME">%s</xliff:g> de manera inesperada"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Expulsa el suport extern abans d\'extreure\'l per evitar perdre\'n el contingut"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"S\'ha suprimit el suport (<xliff:g id="NAME">%s</xliff:g>)"</string>
@@ -1589,7 +1592,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Escriu un PIN que tingui de 4 a 8 números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"El codi PUK ha de tenir 8 números."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Torna a introduir el codi PUK correcte. Els intents repetits faran que es desactivi la SIM permanentment."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"Els codis PIN no coincideixen"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"Els PIN no coincideixen"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Massa intents incorrectes"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"Per desbloquejar el telèfon, inicia la sessió amb el compte de Google."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nom d\'usuari (correu electrònic)"</string>
@@ -2041,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversa"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversa de grup"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Feina"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Visualització personal"</string>
@@ -2059,8 +2063,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"No hi ha cap aplicació de treball que pugui obrir aquest contingut"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"No hi ha cap aplicació personal compatible amb aquest contingut"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"No hi ha cap aplicació personal que pugui obrir aquest contingut"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Gravar o reproduir àudio en trucades"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Permet que l\'aplicació gravi o reprodueixi àudio en trucades si està assignada com a aplicació de marcador predeterminada."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueig de la xarxa SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN de desbloqueig de subconjunt de la xarxa SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN de desbloqueig de la SIM corporativa"</string>

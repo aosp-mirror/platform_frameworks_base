@@ -422,11 +422,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"få åtkomst till extra kommandon för platsleverantör"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tillåter att appen får åtkomst till extra kommandon för platsleverantör. Detta kan innebära att appen tillåts störa funktionen för GPS eller andra platskällor."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"endast åtkomst till exakt plats i förgrunden"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Den här appen kan endast få information om din exakta plats när den körs i förgrunden. Platstjänsterna måste ha aktiverats och vara tillgängliga på enheten om appen ska kunna använda dem. Detta kan leda till ökad batteriförbrukning."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Den här appen kan få åtkomst till din exakta plats från platstjänster när appen används. Platstjänster för enheten måste vara aktiverat för att appen ska få åtkomst till plats. Detta kan öka batteriförbrukningen."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"endast åtkomst till ungefärlig plats i förgrunden"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Den här appen kan endast få information om din ungefärliga plats när den körs i förgrunden. Platstjänsterna måste ha aktiverats och vara tillgängliga på enheten om appen ska kunna använda dem."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Den här appen kan få åtkomst till din ungefärliga plats från platstjänster när appen används. Platstjänster för enheten måste vara aktiverat för att appen ska få åtkomst till plats."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"få åtkomst till platsinformation i bakgrunden"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Appen får åtkomst till platsinformation när appen körs i bakgrunden, förutom att den har åtkomst när den körs i förgrunden."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Den här appen har platsåtkomst hela tiden, även när appen inte används."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ändra dina ljudinställningar"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tillåter att appen ändrar globala ljudinställningar som volym och vilken högtalarutgång som används."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"spela in ljud"</string>
@@ -1342,13 +1342,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Granskar nuvarande innehåll"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nytt <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Tryck för att konfigurera"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"För överföring av foton och media"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem med <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tryck och åtgärda"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> har skadats. Välj för att åtgärda."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> stöds inte"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Enheten har inte stöd för <xliff:g id="NAME">%s</xliff:g>. Tryck här om du vill konfigurera i ett format som stöds."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Enheten stöder inte detta <xliff:g id="NAME">%s</xliff:g>. Välj för att konfigurera i ett format som stöds."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Enheten har inte stöd för detta <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> togs bort oväntat"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Mata ut media innan du tar bort den för att inte förlora innehåll"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> har tagits bort"</string>
@@ -2041,6 +2044,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Konversation"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Gruppkonversation"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Privat"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Jobb"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personlig vy"</string>
@@ -2059,8 +2063,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Det går inte att öppna innehållet med några jobbappar"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Inga privata appar har stöd för det här innehållet"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Det går inte att öppna innehållet med några privata appar"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Spela in och spela upp ljud i telefonsamtal"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Tillåter appen att spela in och spela upp ljud i telefonsamtal när den har angetts som standardapp för uppringningsfunktionen."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Pinkod för upplåsning av nätverk för SIM-kort"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Pinkod för upplåsning av delnätverk för SIM-kort"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Pinkod för upplåsning av företag för SIM-kort"</string>

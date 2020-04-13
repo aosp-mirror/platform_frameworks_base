@@ -425,11 +425,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"pristup dodatnim naredbama davatelja lokacije"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Omogućuje aplikaciji pristup dodatnim naredbama davatelja usluga lokacije. To može omogućiti aplikaciji ometanje rada GPS-a ili drugih izvora lokacije."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"pristupiti preciznoj lokaciji samo u prednjem planu"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Aplikacija može dobiti vašu točnu lokaciju samo kad je u prednjem planu. Usluge lokacije moraju biti uključene i dostupne na uređaju da bi ih aplikacija mogla upotrebljavati. To može pojačati potrošnju baterije."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aplikacija može dobiti vašu točnu lokaciju od Usluga lokacije dok se aplikacija koristi. Morate uključiti Usluge lokacije za svoj uređaj da bi aplikacija dohvatila lokaciju. Ovo može povećati potrošnju baterije."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"pristupiti približnoj lokaciji samo u prednjem planu"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Aplikacija može dobiti vašu približnu lokaciju samo kad je u prednjem planu. Usluge lokacije moraju biti uključene i dostupne na uređaju da bi ih aplikacija mogla upotrebljavati."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aplikacija može dobiti vašu približnu lokaciju od Usluga lokacije dok se aplikacija ne koristi. Morate uključiti Usluge lokacije za svoj uređaj da bi aplikacija dohvatila lokaciju."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"pristup lokaciji u pozadini"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Ta aplikacija može pristupiti lokaciji dok se izvodi u pozadini, uz pristup lokaciji u prednjem planu."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Aplikacija može uvijek pristupiti lokaciji, čak i dok se aplikacija ne koristi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"promjena postavki zvuka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Aplikaciji omogućuje izmjenu globalnih postavki zvuka, primjerice glasnoće i zvučnika koji se upotrebljava za izlaz."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"snimanje zvuka"</string>
@@ -1362,13 +1362,16 @@
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Pregled trenutačnog sadržaja"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Novi medij <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Dodirnite za postavljanje"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Za prijenos fotografija i medija"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Poteškoća s medijem <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Dodirnite za popravak"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Medij je oštećen (<xliff:g id="NAME">%s</xliff:g>). Odaberite da biste ispravili pogrešku."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Nepodržani medij za pohranu <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Uređaj ne podržava ovaj medij (<xliff:g id="NAME">%s</xliff:g>). Dodirnite da biste ga postavili u podržanom formatu."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Ovaj uređaj ne podržava taj medij (<xliff:g id="NAME">%s</xliff:g>). Odaberite da biste postavili u podržanom formatu."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Ovaj uređaj ne podržava ovaj medij (<xliff:g id="NAME">%s</xliff:g>)."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Uređaj <xliff:g id="NAME">%s</xliff:g> iznenada je uklonjen"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Izbacite medij prije uklanjanja kako ne biste izgubili sadržaj"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Medij <xliff:g id="NAME">%s</xliff:g> uklonjen je"</string>
@@ -2075,6 +2078,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Razgovor"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Grupni razgovor"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Osobno"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Posao"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Osobni prikaz"</string>
@@ -2093,8 +2097,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Nijedna poslovna aplikacija ne može otvoriti taj sadržaj"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Nijedna osobna aplikacija ne može podržati taj sadržaj"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Nijedna osobna aplikacija ne može otvoriti taj sadržaj"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Snimanje ili reprodukcija zvuka u telefonskim pozivima"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Kad je ova aplikacija postavljena kao zadana aplikacija za biranje, omogućuje joj snimanje ili reprodukciju zvuka u telefonskim pozivima."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN za otključavanje SIM mreže."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN za otključavanje podskupa SIM mreže"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN za otključavanje poslovnog SIM-a"</string>
@@ -2105,8 +2107,8 @@
     <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"Unesite PUK"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"Unesite PUK"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"Unesite PUK"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"PIN za otključavanje RUIM mreže1"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"PIN za otključavanje RUIM mreže2"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"PIN za otključavanje RUIM mreže 1"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"PIN za otključavanje RUIM mreže 2"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"PIN za otključavanje RUIM hrpd-a"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"PIN za otključavanje poslovnog RUIM-a"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"PIN za otključavanje RUIM davatelja usluga"</string>
@@ -2132,8 +2134,8 @@
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Upućivanje zahtjeva za otključavanje PUK-om…"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Upućivanje zahtjeva za otključavanje PUK-om…"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"Upućivanje zahtjeva za otključavanje SIM-a…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Upućivanje zahtjeva za otključavanje RUIM mreže1…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Upućivanje zahtjeva za otključavanje RUIM mreže2…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Upućivanje zahtjeva za otključavanje RUIM mreže 1…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Upućivanje zahtjeva za otključavanje RUIM mreže 2…"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"Upućivanje zahtjeva za otključavanje RUIM hrpd-a…"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"Upućivanje zahtjeva za otključavanje RUIM davatelja usluga…"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"Upućivanje zahtjeva za otključavanje poslovnog RUIM-a…"</string>
@@ -2154,8 +2156,8 @@
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"Neuspješan zahtjev za otključavanje davatelja usluge SIM-a."</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"Neuspješan zahtjev za otključavanje poslovnog PIN-a."</string>
     <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"Neuspješan zahtjev za otključavanje SIM-a."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"Neuspješan zahtjev za otključavanje RUIM mreže1."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"Neuspješan zahtjev za otključavanje RUIM mreže2."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"Neuspješan zahtjev za otključavanje RUIM mreže 1."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"Neuspješan zahtjev za otključavanje RUIM mreže 2."</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"Neuspješan zahtjev za otključavanje RUIM Hrpd-a."</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"Neuspješan zahtjev za otključavanje poslovnog RUIM-a."</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"Neuspješan zahtjev za otključavanje RUIM davatelja usluga."</string>
@@ -2181,8 +2183,8 @@
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"Davatelj usluge SIM-a je otključan."</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"Poslovni SIM je otključan."</string>
     <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"SIM je otključan."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM mreža1 je otključana."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM mreža2 je otključana."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM mreža 1 je otključana."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM mreža 2 je otključana."</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM Hrpd je otključan."</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM davatelj usluga je otključan."</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"Poslovni RUIM je otključan."</string>
