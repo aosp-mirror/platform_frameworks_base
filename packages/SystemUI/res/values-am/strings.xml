@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"ፍቀድ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"የዩኤስቢ እርማት አይፈቀድም"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"አሁን ወደዚህ መሣሪያ የገባው ተጠቃሚ የዩኤስቢ እርማትን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም ወደ ዋና ተጠቃሚ ይቀይሩ።"</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"በዚህ አውታረ መረብ ላይ ገመድ-አልባ ማረም ይፈቀድ?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"በዚህ አውታረ መረብ ላይ ገመድ-አልባ debugging ይፈቀድ?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"የአውታረ መረብ ስም (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nየWi‑Fi አድራሻ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"ሁልጊዜ በዚህ አውታረ መረብ ላይ ፍቀድ"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"ፍቀድ"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"ገመድ-አልባ ማረም አይፈቀድም"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"በአሁኑ ጊዜ በመለያ ወደዚህ መሣሪያ የገባው ተጠቃሚ የገመድ-አልባ ማረምን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም ወደ ዋና ተጠቃሚ ይቀይሩ።"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"ገመድ-አልባ debugging አይፈቀድም"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"በአሁኑ ጊዜ በመለያ ወደዚህ መሣሪያ የገባው ተጠቃሚ የገመድ-አልባ debuggingን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም ወደ ዋና ተጠቃሚ ይቀይሩ።"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"የዩኤስቢ ወደብ ተሰናክሏል"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"መሣሪያዎን ከፈሳሽ ወይም ፍርስራሽ ለመጠበቅ ሲባል የዩኤስቢ ወደቡ ተሰናክሏል፣ እና ማናቸውም ተቀጥላዎችን አያገኝም።\n\nየዩኤስቢ ወደቡን እንደገና መጠቀም ችግር በማይኖረው ጊዜ ማሳወቂያ ይደርሰዎታል።"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ኃይል መሙያዎችን እና ተጨማሪ መሣሪያዎችን ፈልጎ ለማግኘት የነቃ የዩኤስቢ ወደብ"</string>
@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ቅጽበታዊ ገጽ እይታዎችን ማንሳት በመተግበሪያው ወይም በእርስዎ ድርጅት አይፈቀድም"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ቅጽበታዊ ገጽ እይታን አሰናብት"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"ቅጽበታዊ ገጽ እይታን ክፈት"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"ማያ መቅረጫ"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"የማያ መቅጃ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ለአንድ የማያ ገጽ ቀረጻ ክፍለ-ጊዜ በመካሄድ ያለ ማሳወቂያ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"መቅረጽ ይጀመር?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"እየቀረጹ ሳለ የAndroid ስርዓት በማያ ገጽዎ ላይ የሚታይ ወይም በመሣሪያዎ ላይ የሚጫወት ማንኛውም ሚስጥራዊነት ያለው መረጃን መያዝ ይችላል። ይህ የይለፍ ቃላትን፣ የክፍያ መረጃን፣ ፎቶዎችን፣ መልዕክቶችን እና ኦዲዮን ያካትታል።"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"የማጉያ ንብርብር መስኮት"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"የማጉያ መስኮት"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"የማጉያ መስኮት መቆጣጠሪያዎች"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"ፈጣን መቆጣጠሪያዎች"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"የመሣሪያ መቆጣጠሪያዎች"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ለእርስዎ የተገናኙ መሣሪያዎች መቆጣጠሪያዎችን ያክሉ"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"ፈጣን መቆጣጠሪያዎችን ያቀናብሩ"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"የመሣሪያ መቆጣጠሪያዎችን ያቀናብሩ"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"የእርስዎን መቆጣጠሪያዎች ለመድረስ የኃይል አዝራሩን ይያዙ"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"መቆጣጠሪያዎችን ለማከል መተግበሪያ ይምረጡ"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"መቆጣጠሪያዎች"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ከኃይል ምናሌ ላይ ለመድረስ መቆጣጠሪያዎችን ይምረጡ"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ለማንቀሳቀስ መቆጣጠሪያውን ይያዙት እና ይጎትቱት"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"የሁሉም መቆጣጠሪያዎች ዝርዝር ሊጫን አልተቻለም።"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ሌላ"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"ወደ ፈጣን መቆጣጠሪያዎች ያክሉ"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"ወደ የመሣሪያ መቆጣጠሪያዎች ያክሉ"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"ወደ ተወዳጆች አክል"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ይህን ቁጥጥር ወደ ተወዳጆችዎ እንዲታከል ሐሳብ ጠቁሟል።"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"መቆጣጠሪያዎች ተዘምነዋል"</string>

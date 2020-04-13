@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Апликацијата или вашата организација не дозволува снимање слики од екранот"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Отфрлете ја сликата од екранот"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Отворете ја сликата од екранот"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Снимач на екранот"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Снимач на екран"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Да се започне со снимање?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"При снимањето, системот на Android може да ги сними сите чувствителни податоци што се видливи на вашиот екран или пуштени на уредот. Ова вклучува лозинки, податоци за плаќање, фотографии, пораки и аудио."</string>
@@ -394,7 +394,7 @@
     <string name="quick_settings_connected" msgid="3873605509184830379">"Поврзано"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Поврзан, ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Се поврзува..."</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Поврзување"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Врзување"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Точка на пристап"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Се вклучува…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Вклучен штедач"</string>
@@ -983,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"Услуги за уредот"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без наслов"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Допрете за да ја рестартирате апликацијава и да ја отворите на цел екран."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Поставки за баланчињата на <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Поставки за балончињата за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Управување"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> од <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> од <xliff:g id="APP_NAME">%2$s</xliff:g> и уште <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -993,7 +993,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Премести долу лево"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Премести долу десно"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Отфрли"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Разговор без балончиња"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Не прикажувај го разговорот во балончиња"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Разговор во балончиња"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Новите разговори ќе се појавуваат како лебдечки икони или балончиња. Допрете за отворање на балончето. Повлечете за да го преместите."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Контролирајте ги балончињата во секое време"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Прозорец за преклопување на зголемувањето"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за зголемување"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли на прозорец за зголемување"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Брзи контроли"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Контроли за уредите"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Додајте контроли за поврзаните уреди"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Поставете брзи контроли"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Поставете ги контролите за уредите"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Задржете го копчето за вклучување за да пристапите до контролите"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Изберете апликација во која ќе додадате контроли"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроли"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Изберете ги контролите до кои ќе пристапувате од менито за вклучување"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Задржете и влечете ја контролата за да ја преместите"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не можеше да се вчита списокот со сите контроли."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друга"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Додајте во брзите контроли"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте во контроли за уредите"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Додај во омилени"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> предложи да ја додадете контролава во вашите омилени."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Контролите се ажурирани"</string>

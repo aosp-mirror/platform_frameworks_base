@@ -582,7 +582,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"声音设置"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"展开"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"收起"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"自动字幕媒体"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"自动生成媒体字幕"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"关闭字幕提示"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"字幕重叠显示"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"启用"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"放大叠加窗口"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"放大窗口"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大窗口控件"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"快捷控件"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"设备控件"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"为您所连接的设备添加控件"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"设置快捷控件"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"设置设备控件"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"按住电源按钮即可访问您的控件"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"选择应用以添加控件"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控件"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"选择要从电源菜单访问的控件"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"按住并拖动即可移动控件"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"无法加载所有控件的列表。"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"添加到快捷控件"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"添加到设备控件"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"添加到收藏夹"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g>建议将此控件添加到您的收藏夹。"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"控件已更新"</string>

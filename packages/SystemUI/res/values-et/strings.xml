@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Rakendus või teie organisatsioon ei luba ekraanipilte jäädvustada"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Sule ekraanipilt"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Ava ekraanipilt"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Ekraanikuva salvesti"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Ekraanisalvesti"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pooleli märguanne ekraanikuva salvestamise seansi puhul"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Kas alustada salvestamist?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Heli salvestamise ajal võib Androidi süsteem jäädvustada tundlikku teavet, mis on ekraanikuval nähtav või mida seadmes esitatakse. See hõlmab paroole, makseteavet, fotosid, sõnumeid ja heli."</string>
@@ -962,7 +962,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Rakendusi käitatakse taustal"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Aku ja andmekasutuse üksikasjade nägemiseks puudutage"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Kas lülitada mobiilne andmeside välja?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Teil ei ole operaatori <xliff:g id="CARRIER">%s</xliff:g> kaudu juurdepääsu andmesidele ega Internetile. Internet on saadaval ainult WiFi kaudu."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Pärast seda pole teil operaatori <xliff:g id="CARRIER">%s</xliff:g> kaudu juurdepääsu andmesidele ega internetile. Internet on saadaval ainult WiFi kaudu."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"teie operaator"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Seaded ei saa teie vastust kinnitada, sest rakendus varjab loataotlust."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Kas lubada rakendusel <xliff:g id="APP_0">%1$s</xliff:g> näidata rakenduse <xliff:g id="APP_2">%2$s</xliff:g> lõike?"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Suurendamisakna ülekate"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Suurendamisaken"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Suurendamisakna juhtelemendid"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Kiirnupud"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Seadme juhtelemendid"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lisage juhtelemendid ühendatud seadmete jaoks"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Kiirnuppude seadistamine"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Seadme juhtelementide seadistamine"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Juhtelementidele juurdepääsemiseks hoidke all toitenuppu"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Valige juhtelementide lisamiseks rakendus"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Juhtnupud"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Valige toitemenüüs saadaolevad juhtelemendid"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Hoidke ja lohistage juhtelementi, et seda liigutada"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Kõikide juhtelementide loendit ei saanud laadida."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Muu"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Lisa kiirnuppude hulka"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Seadme juhtelementide hulka lisamine"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Lisa lemmikutesse"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> soovitas selle juhtnupu teie lemmikutesse lisada."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Juhtelemente värskendati"</string>

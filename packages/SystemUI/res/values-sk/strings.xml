@@ -1015,9 +1015,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Okno prekrytia priblíženia"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno priblíženia"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ovládacie prvky okna priblíženia"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Rýchle ovládacie prvky"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Ovládacie prvky zariadenia"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Pridajte ovládacie prvky pre svoje pripojené zariadenia"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Nastavenie rýchlych ovládacích prvkov"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Nastavenie ovládacích prvkov zariadenia"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Pridržaním vypínača získate prístup k ovládacím prvkom"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Výberom aplikácie pridajte ovládacie prvky"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1028,10 +1028,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládacie prvky"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Vyberte si ovládacie prvky, ku ktorým chcete mať prístup v ponuke vypínača"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Ovládací prvok premiestnite pridržaním a presunutím"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Zoznam všetkých ovl. prvkov sa nepodarilo načítať."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Iné"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Pridanie do rýchleho ovládania"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Pridanie do ovládacích prvkov zariadenia"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Pridať do obľúbených"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"Aplikácia <xliff:g id="APP">%s</xliff:g> vám odporučila pridať tento ovládací prvok do obľúbených."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Ovládanie bolo aktualizované"</string>
