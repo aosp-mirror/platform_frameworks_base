@@ -5232,14 +5232,14 @@ package android.window {
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static java.util.List<android.app.ActivityManager.RunningTaskInfo> getChildTasks(@NonNull android.window.WindowContainerToken, @NonNull int[]);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static android.window.WindowContainerToken getImeTarget(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static java.util.List<android.app.ActivityManager.RunningTaskInfo> getRootTasks(int, @NonNull int[]);
-    method public void onBackPressedOnTaskRoot(@NonNull android.app.ActivityManager.RunningTaskInfo);
-    method public void onTaskAppeared(@NonNull android.app.ActivityManager.RunningTaskInfo);
-    method public void onTaskInfoChanged(@NonNull android.app.ActivityManager.RunningTaskInfo);
-    method public void onTaskVanished(@NonNull android.app.ActivityManager.RunningTaskInfo);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void registerOrganizer(int);
+    method @BinderThread public void onBackPressedOnTaskRoot(@NonNull android.app.ActivityManager.RunningTaskInfo);
+    method @BinderThread public void onTaskAppeared(@NonNull android.app.ActivityManager.RunningTaskInfo);
+    method @BinderThread public void onTaskInfoChanged(@NonNull android.app.ActivityManager.RunningTaskInfo);
+    method @BinderThread public void onTaskVanished(@NonNull android.app.ActivityManager.RunningTaskInfo);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public final void registerOrganizer(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setInterceptBackPressedOnTaskRoot(boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static void setLaunchRoot(int, @NonNull android.window.WindowContainerToken);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void unregisterOrganizer();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public final void unregisterOrganizer();
   }
 
   public final class WindowContainerToken implements android.os.Parcelable {
