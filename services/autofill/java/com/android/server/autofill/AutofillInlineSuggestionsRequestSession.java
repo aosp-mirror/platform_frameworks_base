@@ -39,6 +39,7 @@ import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -205,12 +206,9 @@ final class AutofillInlineSuggestionsRequestSession {
             // Although the inline suggestions should disappear when IME hides which removes them
             // from the view hierarchy, but we still send an empty response to be extra safe.
 
-            // TODO(b/149945531): clear the existing suggestions when IME is hide, once the bug is
-            //  fixed.
-            //if (sDebug) Log.d(TAG, "Send empty inline response");
-            //updateResponseToImeUncheckLocked(new InlineSuggestionsResponse(Collections
-            // .EMPTY_LIST));
-            //mPreviousResponseIsNotEmpty = false;
+            if (sDebug) Log.d(TAG, "Send empty inline response");
+            updateResponseToImeUncheckLocked(new InlineSuggestionsResponse(Collections.EMPTY_LIST));
+            mPreviousResponseIsNotEmpty = false;
         } else if (mImeInputViewStarted && mInlineSuggestionsResponse != null && match(mAutofillId,
                 mImeCurrentFieldId)) {
             // 2. if IME is visible, and response is not null, send the response
@@ -224,9 +222,6 @@ final class AutofillInlineSuggestionsRequestSession {
                         + mInlineSuggestionsResponse.getInlineSuggestions().size());
             }
             updateResponseToImeUncheckLocked(mInlineSuggestionsResponse);
-            // TODO(b/149945531): don't set the response to null so it's cached, once the bug is
-            //  fixed.
-            mInlineSuggestionsResponse = null;
             mPreviousResponseIsNotEmpty = !isEmptyResponse;
         }
     }
