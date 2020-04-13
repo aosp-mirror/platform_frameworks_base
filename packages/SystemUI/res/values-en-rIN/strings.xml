@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Taking screenshots isn\'t allowed by the app or your organisation"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Dismiss screenshot"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Open screenshot"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Screen recorder"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Screen Recorder"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ongoing notification for a screen record session"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Start recording?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"While recording, Android system can capture any sensitive information that’s visible on your screen or played on your device. This includes passwords, payment info, photos, messages and audio."</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Wrong password"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Too many incorrect attempts.\nTry again in <xliff:g id="NUMBER">%d</xliff:g> seconds."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Try again. Attempt <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> of <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Your data will be deleted"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"If you enter an incorrect pattern on the next attempt, this device’s data will be deleted."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"If you enter an incorrect PIN on the next attempt, this device’s data will be deleted."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"If you enter an incorrect password on the next attempt, this device’s data will be deleted."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"If you enter an incorrect pattern on the next attempt, this user will be deleted."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"If you enter an incorrect PIN on the next attempt, this user will be deleted."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"If you enter an incorrect password on the next attempt, this user will be deleted."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"If you enter an incorrect pattern on the next attempt, your work profile and its data will be deleted."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"If you enter an incorrect PIN on the next attempt, your work profile and its data will be deleted."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"If you enter an incorrect password on the next attempt, your work profile and its data will be deleted."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Too many incorrect attempts. This device’s data will be deleted."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Too many incorrect attempts. This user will be deleted."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Too many incorrect attempts. This work profile and its data will be deleted."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Show profile"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Add user"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"New user"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Guest"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Add guest"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Remove guest"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remove guest?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"All apps and data in this session will be deleted."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remove"</string>
@@ -706,7 +713,7 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Settings"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priority"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No recent bubbles"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Recent Bubbles and dismissed Bubbles will appear here"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Recent bubbles and dismissed bubbles will appear here"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"These notifications can\'t be modified."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"This group of notifications cannot be configured here"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Proxied notification"</string>
@@ -987,9 +994,9 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Move bottom right"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Dismiss"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Don’t bubble conversation"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chat using Bubbles"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"New conversations appear as floating icons, or Bubbles. Tap to open bubble. Drag to move it."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Control Bubbles at any time"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chat using bubbles"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"New conversations appear as floating icons, or bubbles. Tap to open bubble. Drag to move it."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Control bubbles at any time"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tap Manage to turn off bubbles from this app"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"System navigation updated. To make changes, go to Settings."</string>
@@ -998,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Magnification overlay window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Magnification window"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Magnification window controls"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Quick controls"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Device controls"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Add controls for your connected devices"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Set up quick controls"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Set up device controls"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Hold the Power button to access your controls"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Choose app to add controls"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1009,10 +1016,11 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controls"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Choose controls to access from the power menu"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Hold and drag a control to move it"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Hold and drag to rearrange controls"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"All controls removed"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"The list of all controls could not be loaded."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Other"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Add to quick controls"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Add to device controls"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Add to favourites"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> suggested this control to add to your favourites."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Controls updated"</string>

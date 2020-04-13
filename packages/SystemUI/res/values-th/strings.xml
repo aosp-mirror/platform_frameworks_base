@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"แอปหรือองค์กรของคุณไม่อนุญาตให้จับภาพหน้าจอ"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ปิดภาพหน้าจอ"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"เปิดภาพหน้าจอ"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมบันทึกหน้าจอ"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"เริ่มบันทึกเลยไหม"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"ขณะบันทึก ระบบ Android จะบันทึกข้อมูลที่ละเอียดอ่อนที่ปรากฏบนหน้าจอหรือเล่นในอุปกรณ์ได้ ซึ่งรวมถึงรหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ ข้อความ และเสียง"</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"รหัสผ่านไม่ถูกต้อง"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"ดำเนินการไม่ถูกต้องหลายครั้งเกินไป\nลองอีกครั้งใน <xliff:g id="NUMBER">%d</xliff:g> วินาที"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"ลองอีกครั้ง ความพยายามครั้งที่ <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> จาก <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>"</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"ระบบจะลบข้อมูลของคุณ"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"หากคุณป้อนรูปแบบไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบข้อมูลในอุปกรณ์เครื่องนี้"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"หากคุณป้อน PIN ไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบข้อมูลในอุปกรณ์เครื่องนี้"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"หากคุณป้อนรหัสผ่านไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบข้อมูลในอุปกรณ์เครื่องนี้"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"หากคุณป้อนรูปแบบไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบผู้ใช้รายนี้"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"หากคุณป้อน PIN ไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบผู้ใช้รายนี้"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"หากคุณป้อนรหัสผ่านไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบผู้ใช้รายนี้"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"หากคุณป้อนรูปแบบไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"หากคุณป้อน PIN ไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"หากคุณป้อนรหัสผ่านไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"ใช้ความพยายามหลายครั้งเกินไป ระบบจะลบข้อมูลในอุปกรณ์เครื่องนี้"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"ใช้ความพยายามหลายครั้งเกินไป ระบบจะลบผู้ใช้รายนี้"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"ใช้ความพยายามหลายครั้งเกินไป ระบบจะลบโปรไฟล์งานนี้และข้อมูลในโปรไฟล์"</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"แสดงโปรไฟล์"</string>
     <string name="user_add_user" msgid="4336657383006913022">"เพิ่มผู้ใช้"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ผู้ใช้ใหม่"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"ผู้เข้าร่วม"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"เพิ่มผู้เข้าร่วม"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"นำผู้เข้าร่วมออก"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้เข้าร่วมออกไหม"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"นำออก"</string>
@@ -704,7 +711,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"แสดงที่ด้านบนของส่วนการสนทนาและปรากฏเป็นบับเบิล"</string>
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"การสนทนาทั้งหมดจากบับเบิล <xliff:g id="APP_NAME_0">%1$s</xliff:g> โดยค่าเริ่มต้น จัดการใน<xliff:g id="APP_NAME_1">%2$s</xliff:g>"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"การตั้งค่า"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"สำคัญ"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"ลำดับความสำคัญ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ไม่มีบับเบิลเมื่อเร็วๆ นี้"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"บับเบิลที่แสดงและที่ปิดไปเมื่อเร็วๆ นี้จะปรากฏที่นี่"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"แก้ไขการแจ้งเตือนเหล่านี้ไม่ได้"</string>
@@ -954,7 +961,7 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"แทนที่"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"แอปที่กำลังทำงานในเบื้องหลัง"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"แตะเพื่อดูรายละเอียดเกี่ยวกับแบตเตอรี่และปริมาณการใช้อินเทอร์เน็ต"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"ปิดเน็ตมือถือไหม"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"ปิดอินเทอร์เน็ตมือถือไหม"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"คุณจะใช้เน็ตมือถือหรืออินเทอร์เน็ตผ่าน <xliff:g id="CARRIER">%s</xliff:g> ไม่ได้ แต่จะใช้ผ่าน Wi-Fi ได้เท่านั้น"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ผู้ให้บริการของคุณ"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"เนื่องจากแอปหนึ่งได้บดบังคำขอสิทธิ์ ระบบจึงไม่สามารถยืนยันคำตอบของคุณสำหรับการตั้งค่าได้"</string>
@@ -976,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"บริการของอุปกรณ์"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ไม่มีชื่อ"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"แตะเพื่อรีสตาร์ทแอปนี้และแสดงแบบเต็มหน้าจอ"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"การตั้งค่าลูกโป่ง <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"การตั้งค่าบับเบิล <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"จัดการ"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> จาก <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> จาก <xliff:g id="APP_NAME">%2$s</xliff:g> และอีก <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> รายการ"</string>
@@ -998,25 +1005,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"หน้าต่างการขยายที่วางซ้อน"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"หน้าต่างการขยาย"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"การควบคุมหน้าต่างการขยาย"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"การควบคุมอุปกรณ์"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"เพิ่มตัวควบคุมของอุปกรณ์ที่เชื่อมต่อ"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"ตั้งค่าการควบคุมอุปกรณ์"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"กดปุ่มเปิด/ปิดค้างไว้เพื่อเข้าถึงการควบคุม"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"เลือกแอปเพื่อเพิ่มตัวควบคุม"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">เพิ่มตัวควบคุม <xliff:g id="NUMBER_1">%s</xliff:g> ตัวแล้ว</item>
       <item quantity="one">เพิ่มตัวควบคุม <xliff:g id="NUMBER_0">%s</xliff:g> ตัวแล้ว</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"การควบคุม"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"เลือกตัวควบคุมที่ต้องการให้เข้าถึงได้จากเมนูเปิด/ปิด"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"กดตัวควบคุมค้างไว้แล้วลากเพื่อย้ายที่"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"โหลดรายการตัวควบคุมทั้งหมดไม่ได้"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"อื่นๆ"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"เพิ่มไปยังตัวควบคุมด่วน"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"เพิ่มไปยังการควบคุมอุปกรณ์"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"เพิ่มในรายการโปรด"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> แนะนำให้เพิ่มการควบคุมนี้ในรายการโปรด"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"อัปเดตตัวควบคุมแล้ว"</string>
@@ -1026,7 +1032,7 @@
     <string name="controls_pin_instructions" msgid="6363309783822475238">"ป้อน PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"ลองใช้ PIN อื่น"</string>
     <string name="controls_confirmation_confirming" msgid="2596071302617310665">"กำลังยืนยัน…"</string>
-    <string name="controls_confirmation_message" msgid="7744104992609594859">"ยืนยันการเปลี่ยนแปลง<xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"ยืนยันการเปลี่ยนแปลงสำหรับ<xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"เลื่อนเพื่อดูเพิ่มเติม"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"กำลังโหลดคำแนะนำ"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"ปิดเซสชันสื่อนี้"</string>

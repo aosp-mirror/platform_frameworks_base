@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Feil passord"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"For mange ugyldige forsøk.\nPrøv på nytt om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Prøv på nytt. Forsøk <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> av <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Dataene dine blir slettet"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Hvis du oppgir feil mønster på neste forsøk, slettes dataene på denne enheten."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Hvis du skriver inn feil PIN-kode på neste forsøk, slettes dataene på denne enheten."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Hvis du skriver inn feil passord på neste forsøk, slettes dataene på denne enheten."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Hvis du oppgir feil mønster på neste forsøk, slettes denne brukeren."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Hvis du skriver inn feil PIN-kode på neste forsøk, slettes denne brukeren."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Hvis du skriver inn feil passord på neste forsøk, slettes denne brukeren."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Hvis du oppgir feil mønster på neste forsøk, slettes jobbprofilen din og tilknyttede data."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Hvis du skriver inn feil PIN-kode på neste forsøk, slettes jobbprofilen din og tilknyttede data."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Hvis du skriver inn feil passord på neste forsøk, slettes jobbprofilen din og tilknyttede data."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"For mange mislykkede forsøk. Dataene på denne enheten blir slettet."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"For mange mislykkede forsøk. Denne brukeren blir slettet."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"For mange mislykkede forsøk. Denne jobbprofilen og tilknyttede data blir slettet."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Vis profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Legg til brukere"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Ny bruker"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Gjest"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Legg til gjest"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Fjern gjesten"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vil du fjerne gjesten?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle appene og all informasjon i denne økten slettes."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Fjern"</string>
@@ -702,7 +709,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Får oppmerksomheten din med lyd eller vibrering."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Holder deg oppmerksom med en svevende snarvei til dette innholdet."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Vises øverst i en samtaledel og vises som en boble."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Alle samtaler fra <xliff:g id="APP_NAME_0">%1$s</xliff:g> legges til i bobler som standard. Administrer i <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Alle samtaler fra <xliff:g id="APP_NAME_0">%1$s</xliff:g> vises i bobler som standard. Administrer i <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Innstillinger"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ingen nylige bobler"</string>
@@ -986,7 +993,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Flytt til nederst til venstre"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Flytt til nederst til høyre"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Avvis"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ikke lag bobler for samtaler"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ikke vis samtaler i bobler"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chat med bobler"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nye samtaler vises som flytende ikoner, eller bobler. Trykk for å åpne bobler. Dra for å flytte dem."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Kontrollér bobler når som helst"</string>
@@ -998,25 +1005,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Overleggsvindu for forstørring"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Forstørringsvindu"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontroller for forstørringsvindu"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Enhetskontroller"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Legg til kontroller for de tilkoblede enhetene dine"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurer enhetskontroller"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Hold inne av/på-knappen for å få tilgang til kontrollene"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Velg en app for å legge til kontroller"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontroller er lagt til.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kontroll er lagt til.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Velg kontroller som er tilgjengelige fra av/på-menyen"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Hold og dra en kontroll for å flytte den"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Listen over alle kontroller kunne ikke lastes inn."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Annet"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Legg til i hurtigkontroller"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Legg til i enhetskontroller"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Legg til som favoritt"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> har foreslått at du legger denne kontrollen til i favorittene dine."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Kontrollene er oppdatert"</string>

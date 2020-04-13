@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Contrasenya incorrecta"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Has superat el nombre d\'intents incorrectes permesos.\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER">%d</xliff:g> segons."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Torna-ho a provar. Intent <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> de <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Se suprimiran les teves dades"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Si tornes a introduir un patró incorrecte, se suprimiran les dades del dispositiu."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Si tornes a introduir un PIN incorrecte, se suprimiran les dades del dispositiu."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Si tornes a introduir una contrasenya incorrecta, se suprimiran les dades del dispositiu."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Si tornes a introduir un patró incorrecte, se suprimirà l\'usuari."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Si tornes a introduir un PIN incorrecte, se suprimirà l\'usuari."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Si tornes a introduir una contrasenya incorrecta, se suprimirà l\'usuari."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Si tornes a introduir un patró incorrecte, se suprimirà el perfil de treball i les dades que contingui."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Si tornes a introduir un PIN incorrecte, se suprimirà el perfil de treball i les dades que contingui."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Si tornes a introduir una contrasenya incorrecta, se suprimirà el perfil de treball i les dades que contingui."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Has superat el nombre d\'intents incorrectes permesos. Se suprimiran les dades del dispositiu."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Has superat el nombre d\'intents incorrectes permesos. Se suprimirà l\'usuari."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Has superat el nombre d\'intents incorrectes permesos. Se suprimirà el perfil de treball i les dades que contingui."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostra el perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Afegeix un usuari"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Usuari nou"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Convidat"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Afegeix un convidat"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Suprimeix el convidat"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vols suprimir el convidat?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Totes les aplicacions i les dades d\'aquesta sessió se suprimiran."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Suprimeix"</string>
@@ -493,7 +500,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Redueix el rendiment i l\'ús de les dades en segon pla."</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desactiva l\'estalvi de bateria"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tindrà accés a tota la informació que es veu en pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servei que ofereix aquesta funció tindrà accés a tota la informació que es veu en pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servei que ofereix aquesta funció tindrà accés a tota la informació visible a la teva pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio que reprodueixis."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vols començar a gravar o emetre contingut?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Vols començar a gravar o emetre contingut amb <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"No ho tornis a mostrar"</string>
@@ -998,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Finestra superposada d\'ampliació"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Finestra d\'ampliació"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Finestra de controls d\'ampliació"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Controls ràpids"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Controls del dispositiu"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Afegeix controls per als teus dispositius connectats"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Configura els controls ràpids"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configura els controls del dispositiu"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Mantén el botó d\'engegada premut per accedir als teus controls"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Selecciona l\'aplicació per afegir controls"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1009,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controls"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Selecciona els controls per accedir-hi des del menú d\'engegada"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Mantén premut i arrossega un control per moure\'l"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"No s\'ha pogut carregar la llista completa de controls."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altres"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Afegeix als controls ràpids"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Afegeix als controls del dispositiu"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Afegeix als preferits"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ha suggerit aquest control perquè l\'afegeixis als preferits."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"S\'han actualitzat els controls"</string>

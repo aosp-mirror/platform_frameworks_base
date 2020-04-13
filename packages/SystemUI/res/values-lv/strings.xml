@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Nepareiza parole"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Pārāk daudz neveiksmīgu mēģinājumu.\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER">%d</xliff:g> sekundēm."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Mēģiniet vēlreiz (<xliff:g id="ATTEMPTS_0">%1$d</xliff:g>. mēģinājums no <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>)."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Jūsu dati tiks dzēsti"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Ja nākamajā mēģinājumā ievadīsiet nepareizu kombināciju, dati šajā ierīcē tiks dzēsti."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Ja nākamajā mēģinājumā ievadīsiet nepareizu PIN, dati šajā ierīcē tiks dzēsti."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Ja nākamajā mēģinājumā ievadīsiet nepareizu paroli, dati šajā ierīcē tiks dzēsti."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Ja nākamajā mēģinājumā ievadīsiet nepareizu kombināciju, šis lietotājs tiks dzēsts."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Ja nākamajā mēģinājumā ievadīsiet nepareizu PIN, šis lietotājs tiks dzēsts."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Ja nākamajā mēģinājumā ievadīsiet nepareizu paroli, šis lietotājs tiks dzēsts."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ja nākamajā mēģinājumā ievadīsiet nepareizu kombināciju, jūsu darba profils un ar to saistītie dati tiks dzēsti."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ja nākamajā mēģinājumā ievadīsiet nepareizu PIN, jūsu darba profils un ar to saistītie dati tiks dzēsti."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ja nākamajā mēģinājumā ievadīsiet nepareizu paroli, jūsu darba profils un ar to saistītie dati tiks dzēsti."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Pārāk daudz neveiksmīgu mēģinājumu. Dati šajā ierīcē tiks dzēsti."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Pārāk daudz neveiksmīgu mēģinājumu. Šis lietotājs tiks dzēsts."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Pārāk daudz neveiksmīgu mēģinājumu. Šis darba profils un ar to saistītie dati tiks dzēsti."</string>
@@ -465,9 +475,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Parādīt profilu"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Lietotāja pievienošana"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Jauns lietotājs"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Viesis"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Pievienot viesi"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Noņemt viesi"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vai noņemt viesi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tiks dzēstas visas šīs sesijas lietotnes un dati."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Noņemt"</string>
@@ -1003,15 +1010,11 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Palielināšanas pārklājuma logs"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Palielināšanas logs"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Palielināšanas loga vadīklas"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Ierīces vadīklas"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Pievienojiet vadīklas pievienotajām ierīcēm"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Ierīces vadīklu iestatīšana"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Turiet nospiestu barošanas pogu, lai piekļūtu vadīklām."</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Izvēlieties lietotni, lai pievienotu vadīklas"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="zero">Pievienotas <xliff:g id="NUMBER_1">%s</xliff:g> vadīklas.</item>
       <item quantity="one">Pievienota <xliff:g id="NUMBER_1">%s</xliff:g> vadīkla.</item>
@@ -1019,10 +1022,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Vadīklas"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izvēlieties vadīklas, kurām piekļūt no barošanas izvēlnes"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Lai pārvietotu lietotni, turiet un velciet to"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nevarēja ielādēt sarakstu ar visām vadīklām."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Cita"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Pievienošana ātrajām vadīklām"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Pievienošana ierīces vadīklām"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Pievienot izlasei"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ieteica pievienot šo vadīklu izlasei."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Vadīklas atjauninātas"</string>

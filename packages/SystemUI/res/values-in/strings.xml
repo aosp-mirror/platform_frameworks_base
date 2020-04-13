@@ -154,10 +154,20 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Pola salah"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Sandi salah"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Terlalu banyak kesalahan pola.\nCoba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> detik."</string>
-    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Coba lagi. Mencoba <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> kali dari <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> kali."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Terlalu sering mencoba dengan salah. Data perangkat ini akan dihapus."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Terlalu sering mencoba dengan salah. Pengguna ini akan dihapus."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Terlalu sering mencoba dengan salah. Profil kerja ini dan datanya akan dihapus."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Coba lagi. Percobaan <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> dari <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Data akan dihapus"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Jika Anda memasukkan pola yang salah saat mencoba lagi, data perangkat ini akan dihapus."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Jika Anda memasukkan PIN yang salah saat mencoba lagi, data perangkat ini akan dihapus."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Jika Anda memasukkan sandi yang salah saat mencoba lagi, data perangkat ini akan dihapus."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Jika Anda memasukkan pola yang salah saat mencoba lagi, pengguna ini akan dihapus."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Jika Anda memasukkan PIN yang salah saat mencoba lagi, pengguna ini akan dihapus."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Jika Anda memasukkan sandi yang salah saat mencoba lagi, pengguna ini akan dihapus."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jika Anda memasukkan pola yang salah saat mencoba lagi, profil kerja dan datanya akan dihapus."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jika Anda memasukkan PIN yang salah saat mencoba lagi, profil kerja dan datanya akan dihapus."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Jika Anda memasukkan sandi yang salah saat mencoba lagi, profil kerja dan datanya akan dihapus."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Terlalu banyak percobaan yang salah. Data perangkat ini akan dihapus."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Terlalu banyak percobaan yang salah. Pengguna ini akan dihapus."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Terlalu banyak percobaan yang salah. Profil kerja ini dan datanya akan dihapus."</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Tutup"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sentuh sensor sidik jari"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon sidik jari"</string>
@@ -396,7 +406,7 @@
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampu Senter"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera sedang digunakan"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Data seluler"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Penggunaan kuota"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Penggunaan data"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Data tersisa"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Melebihi batas"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> digunakan"</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Tampilkan profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Tambahkan pengguna"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Pengguna baru"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Tamu"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Tambahkan tamu"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Buang tamu"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Hapus tamu?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua aplikasi dan data di sesi ini akan dihapus."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Hapus"</string>
@@ -706,7 +713,7 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Setelan"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Tidak ada balon baru-baru ini"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Balon baru-baru ini dan balon yang ditutup akan muncul di sini"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Balon yang baru dipakai dan balon yang telah ditutup akan muncul di sini"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Notifikasi ini tidak dapat diubah."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Grup notifikasi ini tidak dapat dikonfigurasi di sini"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notifikasi proxy"</string>
@@ -998,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Jendela Overlay Pembesaran"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Jendela Pembesaran"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrol Jendela Pembesaran"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Kontrol cepat"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Kontrol perangkat"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Tambahkan kontrol untuk perangkat terhubung"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Siapkan kontrol cepat"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Siapkan kontrol perangkat"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Tahan tombol Daya untuk mengakses kontrol"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Pilih aplikasi untuk menambahkan kontrol"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1009,20 +1016,23 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrol"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Pilih kontrol yang akan diakses dari menu daya"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Tahan dan tarik kontrol untuk memindahkannya"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Daftar semua kontrol tidak dapat dimuat."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Lainnya"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Tambahkan ke kontrol cepat"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Tambahkan ke kontrol perangkat"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Tambahkan ke favorit"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> menyarankan kontrol ini ditambahkan ke favorit."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Kontrol diperbarui"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN berisi huruf atau simbol"</string>
-    <string name="controls_pin_verify" msgid="3452778292918877662">"Verifikasikan <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Verifikasi <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Memverifikasi …"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Masukkan PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Coba PIN lain"</string>
     <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Mengonfirmasi…"</string>
-    <string name="controls_confirmation_message" msgid="7744104992609594859">"Konfirmasikan perubahan untuk <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_confirmation_message" msgid="7744104992609594859">"Konfirmasi perubahan untuk <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Geser untuk melihat selengkapnya"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Memuat rekomendasi"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Tutup sesi media ini"</string>

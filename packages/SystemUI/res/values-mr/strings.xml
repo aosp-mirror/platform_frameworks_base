@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"चुकीचा पासवर्ड"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"बरेच चुकीचे प्रयत्न. \n <xliff:g id="NUMBER">%d</xliff:g> सेकंदांमध्‍ये पुन्हा प्रयत्न करा."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"पुन्हा प्रयत्न करा. <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> पैकी <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> प्रयत्न."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"तुमचा डेटा हटवला जाईल"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पॅटर्न एंटर केल्यास, या डिव्‍हाइसचा डेटा हटवला जाईल."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पिन एंटर केल्यास, या डिव्‍हाइसचा डेटा हटवला जाईल."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पासवर्ड एंटर केल्यास, या डिव्‍हाइसचा डेटा हटवला जाईल."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पॅटर्न एंटर केल्यास, हा वापरकर्ता हटवला जाईल."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पिन एंटर केल्यास, हा वापरकर्ता हटवला जाईल."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पासवर्ड एंटर केल्यास, हा वापरकर्ता हटवला जाईल."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पॅटर्न एंटर केल्यास, तुमची कार्य प्रोफाइल आणि तिचा डेटा हटवला जाईल."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पिन एंटर केल्यास, तुमची कार्य प्रोफाइल आणि तिचा डेटा हटवला जाईल."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पासवर्ड एंटर केल्यास, तुमची कार्य प्रोफाइल आणि तिचा डेटा हटवला जाईल."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"बरेच चुकीचे प्रयत्‍न. या डिव्‍हाइसचा डेटा हटवला जाईल."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"बरेच चुकीचे प्रयत्‍न. हा वापरकर्ता हटवला जाईल."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"बरेच चुकीचे प्रयत्‍न. ही कार्य प्रोफाइल आणि त्यामधील डेटा हटवला जाईल."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"प्रोफाईल दर्शवा"</string>
     <string name="user_add_user" msgid="4336657383006913022">"वापरकर्ता जोडा"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नवीन वापरकर्ता"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"अतिथी"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"अतिथी जोडा"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"अतिथी काढा"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथी काढायचे?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"या सत्रातील सर्व अ‍ॅप्स आणि डेटा हटवला जाईल."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"काढा"</string>
@@ -796,7 +803,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"संगीत"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"कॅलेंडर"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"आवाज नियंत्रणांसह दर्शवा"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"व्यत्यय आणू नका"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"आवाजाच्या बटणांचा शार्टकट"</string>
@@ -990,7 +997,7 @@
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"बबल वापरून चॅट करा"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"नवीन संभाषणे फ्लोटिंग आयकन किंवा बबल म्हणून दिसतात. बबल उघडण्यासाठी टॅप करा. हे हलवण्यासाठी ड्रॅग करा."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"बबल कधीही नियंत्रित करा"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"या अ‍ॅपमधून बुडबुडे बंद करण्यासाठी व्यवस्थापित करा वर टॅप करा"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"या अ‍ॅपमधून बबल बंद करण्यासाठी व्यवस्थापित करा वर टॅप करा"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"समजले"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेव्हिगेशन अपडेट केले. बदल करण्यासाठी, सेटिंग्जवर जा."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेव्हिगेशन अपडेट करण्यासाठी सेटिंग्जवर जा"</string>
@@ -998,25 +1005,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"मॅग्निफिकेशन ओव्हरले विंडो"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"मॅग्निफिकेशन विंडो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"मॅग्निफिकेशन विंडो नियंत्रणे"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"डिव्हाइस नियंत्रणे"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"तुमच्या कनेक्ट केलेल्या डिव्हाइससाठी नियंत्रणे जोडा"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिव्हाइस नियंत्रणे सेट करा"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"तुमची नियंत्रणे अ‍ॅक्सेस करण्यासाठी पॉवर बटण दाबून ठेवा"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"नियंत्रणे जोडण्यासाठी ॲप निवडा"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> नियंत्रणे जोडली.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> नियंत्रण जोडले.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"नियंत्रणे"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पॉवर मेनूमधून अ‍ॅक्सेस करण्यासाठी नियंत्रणे निवडा"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"हे हलवण्यासाठी नियंत्रण धरून ठेवा आणि ड्रॅग करा"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सर्व नियंत्रणांची सूची लोड करता आली नाही."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"इतर"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"क्विक नियंत्रणांमध्ये जोडा"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"डिव्हाइस नियंत्रणांमध्ये जोडा"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"आवडीचे यामध्ये जोडा"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ने तुमच्या आवडीचे मध्ये जोडण्यासाठी या नियंत्रणाची शिफारस केली आहे."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"नियंत्रणे अपडेट केली आहेत"</string>

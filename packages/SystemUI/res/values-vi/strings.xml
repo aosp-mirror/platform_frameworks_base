@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Cho phép"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Không cho phép chế độ gỡ lỗi qua USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi USB. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Cho phép gỡ lỗi không dây trên mạng này?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Cho phép gỡ lỗi qua Wi-Fi trên mạng này?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Tên mạng (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nĐịa chỉ Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Luôn cho phép trên mạng này"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Cho phép"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Không cho phép gỡ lỗi không dây"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi không dây. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Không cho phép gỡ lỗi qua Wi-Fi"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi qua Wi-Fi. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Đã tắt cổng USB"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Để bảo vệ thiết bị của bạn khỏi chất lỏng hay mảnh vỡ, cổng USB sẽ tắt và không phát hiện được bất kỳ phụ kiện nào.\n\nBạn sẽ nhận được thông báo khi có thể sử dụng lại cổng USB."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Đã bật cổng USB để phát hiện bộ sạc và phụ kiện"</string>
@@ -151,10 +151,20 @@
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Dùng hình mở khóa"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Dùng mật khẩu"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Mã PIN sai"</string>
-    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Hình mở khóa sai"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Hình mở khóa không chính xác"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Mật khẩu sai"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Bạn đã nhập sai quá nhiều lần.\nHãy thử lại sau <xliff:g id="NUMBER">%d</xliff:g> giây."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Thử lại. Lần thử <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Dữ liệu của bạn sẽ bị xóa"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Nếu bạn nhập hình mở khóa không chính xác vào lần thử tiếp theo, thì dữ liệu trên thiết bị này sẽ bị xóa."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Nếu bạn nhập mã PIN không chính xác vào lần thử tiếp theo, thì dữ liệu trên thiết bị này sẽ bị xóa."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Nếu bạn nhập mật khẩu không chính xác vào lần thử tiếp theo, thì dữ liệu trên thiết bị này sẽ bị xóa."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Nếu bạn nhập hình mở khóa không chính xác vào lần thử tiếp theo, thì người dùng này sẽ bị xóa."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Nếu bạn nhập mã PIN không chính xác vào lần thử tiếp theo, thì người dùng này sẽ bị xóa."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Nếu bạn nhập mật khẩu không chính xác vào lần thử tiếp theo, thì người dùng này sẽ bị xóa."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Nếu bạn nhập hình mở khóa không chính xác vào lần thử tiếp theo, thì hồ sơ công việc của bạn và dữ liệu của hồ sơ công việc sẽ bị xóa."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Nếu bạn nhập mã PIN không chính xác vào lần thử tiếp theo, thì hồ sơ công việc của bạn và dữ liệu của hồ sơ công việc sẽ bị xóa."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Nếu bạn nhập mật khẩu không chính xác vào lần thử tiếp theo, thì hồ sơ công việc của bạn và dữ liệu của hồ sơ công việc sẽ bị xóa."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Dữ liệu trên thiết bị này sẽ bị xóa do có quá nhiều lần nhập sai khóa thiết bị."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Người dùng này sẽ bị xóa do có quá nhiều lần nhập sai khóa người dùng."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Hồ sơ công việc này và dữ liệu của hồ sơ công việc sẽ bị xóa do có quá nhiều lần nhập sai khóa công việc."</string>
@@ -222,7 +232,7 @@
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Đã tắt dữ liệu di động"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Chưa được đặt để sử dụng dữ liệu"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Tắt"</string>
-    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Chia sẻ kết nối Internet qua Bluetooth"</string>
+    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Chia sẻ Internet qua Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Chế độ trên máy bay."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN đang bật."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"Không có thẻ SIM nào."</string>
@@ -384,7 +394,7 @@
     <string name="quick_settings_connected" msgid="3873605509184830379">"Đã kết nối"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Đã kết nối, mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Đang kết nối..."</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Đang dùng làm điểm truy cập Internet"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Chia sẻ Internet"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Điểm phát sóng"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Đang bật…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Trình tiết kiệm dữ liệu đang bật"</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Hiển thị hồ sơ"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Thêm người dùng"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Người dùng mới"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Khách"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Thêm khách"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Xóa phiên khách"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Xóa phiên khách?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tất cả ứng dụng và dữ liệu trong phiên này sẽ bị xóa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Xóa"</string>
@@ -705,8 +712,8 @@
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Theo mặc định, tất cả các cuộc trò chuyện từ ứng dụng <xliff:g id="APP_NAME_0">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng. Quản lý trong phần <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cài đặt"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Không có bong bóng nào gần đây"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bong bóng đã đóng và bong bóng gần đây sẽ xuất hiện ở đây"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Không có bong bóng trò chuyện nào gần đây"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bong bóng trò chuyện đã đóng và bong bóng trò chuyện gần đây sẽ xuất hiện ở đây"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Không thể sửa đổi các thông báo này."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Không thể định cấu hình nhóm thông báo này tại đây"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Thông báo đã xử lý qua máy chủ proxy"</string>
@@ -734,7 +741,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"Bị tắt tiếng"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Thông báo"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Hiển thị bong bóng"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Xóa bong bóng"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Xóa bong bóng trò chuyện"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Thêm vào màn hình chính"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"điều khiển thông báo"</string>
@@ -976,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"Dịch vụ cho thiết bị"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Không có tiêu đề"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Nhấn để khởi động lại ứng dụng này và xem ở chế độ toàn màn hình."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Tùy chọn cài đặt cho bong bóng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Tùy chọn cài đặt cho bong bóng trò chuyện <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Quản lý"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> của <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> từ <xliff:g id="APP_NAME">%2$s</xliff:g> và <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> bong bóng khác"</string>
@@ -987,10 +994,10 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Chuyển tới dưới cùng bên phải"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Loại bỏ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Dừng trò chuyện bằng bong bóng"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Trò chuyện bằng bong bóng"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Các cuộc trò chuyện mới hiển thị dưới dạng biểu tượng nổi hoặc bong bóng. Nhấn để mở bong bóng. Kéo để di chuyển bong bóng."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Kiểm soát các tùy chọn cài đặt bong bóng bất cứ lúc nào"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Nhấn vào nút Quản lý để tắt bong bóng từ ứng dụng này"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Trò chuyện bằng bong bóng trò chuyện"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Các cuộc trò chuyện mới hiển thị dưới dạng biểu tượng nổi hoặc bong bóng trò chuyện. Nhấn để mở bong bóng trò chuyện. Kéo để di chuyển bong bóng trò chuyện."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Kiểm soát tùy chọn cài đặt bong bóng trò chuyện bất mọi lúc"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Nhấn vào nút Quản lý để tắt bong bóng trò chuyện từ ứng dụng này"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Đã cập nhật chế độ di chuyển trên hệ thống. Để thay đổi, hãy chuyển đến phần Cài đặt."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Chuyển đến phần Cài đặt để cập nhật chế độ di chuyển trên hệ thống"</string>
@@ -998,25 +1005,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Cửa sổ lớp phủ phóng to"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Cửa sổ phóng to"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Các tùy chọn điều khiển cửa sổ phóng to"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Điều khiển thiết bị"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Thêm các tùy chọn điều khiển cho các thiết bị đã kết nối của bạn"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Thiết lập các tùy chọn điều khiển thiết bị"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Giữ nút Nguồn để truy cập vào các tùy chọn điều khiển"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Chọn ứng dụng để thêm các tùy chọn điều khiển"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">Đã thêm <xliff:g id="NUMBER_1">%s</xliff:g> tùy chọn điều khiển.</item>
       <item quantity="one">Đã thêm <xliff:g id="NUMBER_0">%s</xliff:g> tùy chọn điều khiển.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Các tùy chọn điều khiển"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Chọn các tùy chọn điều khiển để truy cập từ trình đơn nguồn"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Giữ và kéo một tùy chọn điều khiển để di chuyển tùy chọn đó"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Không thể tải danh sách tất cả tùy chọn điều khiển."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Khác"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Thêm vào mục điều khiển nhanh"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Thêm vào mục điều khiển thiết bị"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Thêm vào mục yêu thích"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> đã đề xuất thêm tùy chọn điều khiển này vào mục yêu thích của bạn."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Đã cập nhật các tùy chọn điều khiển"</string>

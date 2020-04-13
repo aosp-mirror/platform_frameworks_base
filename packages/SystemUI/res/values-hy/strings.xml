@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Գաղտնաբառը սխալ է"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Չափից շատ սխալ փորձ է կատարվել:\nՆորից փորձեք <xliff:g id="NUMBER">%d</xliff:g> վայրկյանից:"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Փորձեք նորից։ Փորձ <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>՝ <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>-ից։"</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Ձեր տվյալները կջնջվեն"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Հաջորդ փորձի ժամանակ սխալ նախշ մուտքագրելու դեպքում սարքի տվյալները կջնջվեն։"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Հաջորդ փորձի ժամանակ սխալ PIN կոդ մուտքագրելու դեպքում սարքի տվյալները կջնջվեն։"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Հաջորդ փորձի ժամանակ սխալ գաղտնաբառ մուտքագրելու դեպքում սարքի տվյալները կջնջվեն։"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Հաջորդ փորձի ժամանակ սխալ նախշ մուտքագրելու դեպքում օգտատիրոջ պրոֆիլը կջնջվի։"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Հաջորդ փորձի ժամանակ սխալ PIN կոդ մուտքագրելու դեպքում օգտատիրոջ պրոֆիլը կջնջվի։"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Հաջորդ փորձի ժամանակ սխալ գաղտնաբառ մուտքագրելու դեպքում այս օգտատիրոջ պրոֆիլը կջնջվի։"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Հաջորդ փորձի ժամանակ սխալ նախշ մուտքագրելու դեպքում ձեր աշխատանքային պրոֆիլը և դրա տվյալները կջնջվեն։"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Հաջորդ փորձի ժամանակ սխալ PIN կոդ մուտքագրելու դեպքում աշխատանքային պրոֆիլը և դրա տվյալները կջնջվեն։"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Հաջորդ փորձի ժամանակ սխալ գաղտնաբառ մուտքագրելու դեպքում աշխատանքային պրոֆիլը և դրա տվյալները կջնջվեն։"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Չափից շատ սխալ փորձեր են արվել։ Այս սարքի տվյալները կջնջվեն։"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Չափից շատ սխալ փորձեր են արվել։ Oգտատիրոջ պրոֆիլը կջնջվի։"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Չափից շատ սխալ փորձեր են արվել։ Աշխատանքային պրոֆիլը և դրա տվյալները կջնջվեն։"</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Ցույց տալ դիտարկումը"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Ավելացնել օգտատեր"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Նոր օգտատեր"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Հյուր"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Ավելացնել հյուր"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Հեռացնել հյուրին"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Հեռացնե՞լ հյուրին:"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր ծրագրերն ու տվյալները կջնջվեն:"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Հեռացնել"</string>
@@ -998,25 +1005,22 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Խոշորացման պատուհանի վրադրում"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Խոշորացման պատուհան"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Խոշորացման պատուհանի կառավարման տարրեր"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Սարքի կառավարման տարրեր"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ավելացրեք կառավարման տարրեր ձեր միացված սարքերի համար"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Սարքի կառավարման տարրերի կարգավորում"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Սեղմած պահեք սնուցման կոճակը՝ կառավարման տարրերը բացելու համար"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Ընտրեք հավելված` կառավարման տարրեր ավելացնելու համար"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one">Ավելացվեց կառավարման <xliff:g id="NUMBER_1">%s</xliff:g> տարր։</item>
       <item quantity="other">Ավելացվեց կառավարման <xliff:g id="NUMBER_1">%s</xliff:g> տարր։</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Կառավարման տարրեր"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Ընտրեք կառավարման տարրերը՝ դրանք սնուցման ընտրացանկից բացելու համար"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Կառավարման տարրը տեղափոխելու համար պահեք և քաշեք այն"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Պահեք և քաշեք՝ կառավարման տարրերը վերադասավորելու համար"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Կառավարման բոլոր տարրերը հեռացվեցին"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Չհաջողվեց բեռնել բոլոր կառավարների ցանկը։"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Այլ"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Ավելացրեք արագ կառավարման տարրերում"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Ավելացրեք սարքի կառավարման տարրերում"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Ավելացնել ընտրանիում"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> հավելվածն առաջարկում է ավելացնել այս կառավարը ձեր ընտրանիում։"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Կառավարման տարրերը թարմացվեցին"</string>

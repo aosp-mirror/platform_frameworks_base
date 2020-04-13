@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Nenosiri si sahihi"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Majaribio mengi mno yasiyo sahihi.\nJaribu tena baada ya sekunde <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Jaribu tena. Jaribio la <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> kati ya <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Data yako itafutwa"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Ukiweka mchoro usio sahihi utakapojaribu tena, data iliyo kwenye kifaa hiki itafutwa."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Ukiweka PIN isiyo sahihi utakapojaribu tena, data iliyo kwenye kifaa hiki itafutwa."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Ukiweka nenosiri lisilo sahihi utakapojaribu tena, data iliyo kwenye kifaa hiki itafutwa."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Ukiweka mchoro usio sahihi utakapojaribu tena, maelezo ya mtumiaji huyu yatafutwa."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Ukiweka PIN isiyo sahihi utakapojaribu tena, maelezo ya mtumiaji huyu yatafutwa."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Ukiweka nenosiri lisilo sahihi utakapojaribu tena, maelezo ya mtumiaji huyu yatafutwa."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ukiweka mchoro usio sahihi utakapojaribu tena, wasifu wako wa kazini utafutwa pamoja na data yake."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ukiweka PIN isiyo sahihi utakapojaribu tena, wasifu wako wa kazini utafutwa pamoja na data yake."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ukiweka nenosiri lisilo sahihi utakapojaribu tena, wasifu wako wa kazini utafutwa pamoja na data yake."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Umejaribu kufungua mara nyingi mno kwa njia isiyo sahihi. Data iliyo kwenye kifaa hiki itafutwa."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Umejaribu kufungua mara nyingi mno kwa njia isiyo sahihi. Maelezo ya mtumiaji huyu yatafutwa."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Umejaribu kufungua mara nyingi mno kwa njia isiyo sahihi. Wasifu huu wa kazini utafutwa pamoja na data yake."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Onyesha wasifu"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Ongeza mtumiaji"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Mtumiaji mpya"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Mgeni"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Ongeza mgeni"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Ondoa mgeni"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ungependa kumwondoa mgeni?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Data na programu zote katika kipindi hiki zitafutwa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ondoa"</string>
@@ -706,7 +713,7 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Mipangilio"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Kipaumbele"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Hakuna viputo vya hivi majuzi"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Viputo vya hivi karibuni na viputo vilivyoondolewa vitaonekana hapa"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Viputo vya hivi karibuni na vile vilivyoondolewa vitaonekana hapa"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Arifa hizi haziwezi kubadilishwa."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Kikundi hiki cha arifa hakiwezi kuwekewa mipangilio hapa"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Arifa wakilishi"</string>
@@ -998,25 +1005,22 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Dirisha la Kuwekelea Linalokuza"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Dirisha la Ukuzaji"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Vidhibiti vya Dirisha la Ukuzaji"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Vidhibiti vya kifaa"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Weka vidhibiti vya vifaa vyako vilivyounganishwa"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Weka mipangilio ya vidhibiti vya kifaa"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Shikilia Kitufe cha kuwasha/kuzima ili ufikie vidhibiti vyako"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Chagua programu ili uweke vidhibiti"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">Umeweka vidhibiti <xliff:g id="NUMBER_1">%s</xliff:g>.</item>
       <item quantity="one">Umeweka kidhibiti <xliff:g id="NUMBER_0">%s</xliff:g>.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Vidhibiti"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Chagua vidhibiti ili ufikie ukitumia menyu ya kuwasha/kuzima"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Shikilia na uburute kidhibiti ili ukisogeze"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Chagua vidhibiti vya kufikia ukitumia menyu ya kuwasha/kuzima"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Shikilia na uburute ili upange upya vidhibiti"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Umeondoa vidhibiti vyote"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Imeshindwa kupakia orodha ya vidhibiti vyote."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Nyingine"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Weka kwenye vidhibiti vya haraka"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Weka kwenye vidhibiti vya kifaa"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Ongeza kwenye vipendwa"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> imependekeza kidhibiti hiki ili ukiongeze kwenye vipendwa vyako."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Umesasisha vidhibiti"</string>

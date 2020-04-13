@@ -68,7 +68,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Bu ağda her zaman izin ver"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"İzin ver"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Kablosuz hata ayıklamaya izin verilmiyor"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Bu cihazda geçerli olarak oturum açmış olan kullanıcı, kablosuz hata ayıklama özelliğini açamaz. Bu özelliği kullanmak için birincil kullanıcıya geçin."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Bu cihazda şu anda oturum açmış olan kullanıcı, kablosuz hata ayıklama özelliğini açamaz. Bu özelliği kullanmak için birincil kullanıcıya geçin."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB bağlantı noktası devre dışı bırakıldı"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Cihazınızı sıvılardan veya tozlardan korumak için USB bağlantı noktası devre dışı bırakıldı ve aksesuarları algılamayacak.\n\nUSB bağlantı noktasını tekrar sorunsuz kullanabileceğiniz zaman bilgilendirileceksiniz."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB bağlantı noktası, şarj cihazlarını ve aksesuarları algılamak üzere etkinleştirildi"</string>
@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Uygulama veya kuruluşunuz, ekran görüntüsü alınmasına izin vermiyor."</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Ekran görüntüsünü kapat"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Ekran görüntüsünü aç"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Ekran Kaydedici"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Ekran Kaydedicisi"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Kayıt Başlatılsın mı?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Kayıt sırasında Android Sistemi, ekranınızda görünen veya cihazınızda oynatılan hassas bilgileri yakalayabilir. Buna şifreler, ödeme bilgileri, fotoğraflar, mesajlar ve sesler dahildir."</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Yanlış şifre"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Çok fazla yanlış giriş yapıldı.\n<xliff:g id="NUMBER">%d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Tekrar deneyin. Deneme sayısı: <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Verileriniz silinecek"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Bir sonraki denemenizde yanlış desen girerseniz bu cihazın verileri silinir."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Bir sonraki denemenizde yanlış PIN girerseniz bu cihazın verileri silinir."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Bir sonraki denemenizde yanlış şifre girerseniz bu cihazın verileri silinir."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Bir sonraki denemenizde yanlış desen girerseniz bu kullanıcı silinir."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Bir sonraki denemenizde yanlış PIN girerseniz bu kullanıcı silinir."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Bir sonraki denemenizde yanlış şifre girerseniz bu kullanıcı silinir."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Bir sonraki denemenizde yanlış desen girerseniz iş profiliniz ve verileri silinir."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Bir sonraki denemenizde yanlış PIN girerseniz iş profiliniz ve verileri silinir."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Bir sonraki denemenizde yanlış şifre girerseniz iş profiliniz ve verileri silinir."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Çok fazla sayıda hatalı deneme yapıldı. Bu cihazın verileri silinecek."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Çok fazla sayıda hatalı deneme yapıldı. Bu kullanıcı silinecek."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Çok fazla sayıda hatalı denemede yapıldı. İş profiliniz ve verileri silinecek."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Profili göster"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Kullanıcı ekle"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Yeni kullanıcı"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Misafir"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Misafir ekle"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Misafir oturumunu kaldır"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Misafir oturumu kaldırılsın mı?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Bu oturumdaki tüm uygulamalar ve veriler silinecek."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Kaldır"</string>
@@ -734,7 +741,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"Sesi kapatıldı"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Uyarı"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Balon olarak göster"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Balonları kaldır"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Baloncukları kaldır"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Ana ekrana ekle"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"Bildirim kontrolleri"</string>
@@ -990,7 +997,7 @@
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Baloncukları kullanarak sohbet edin"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Yeni görüşmeler kayan simgeler veya baloncuk olarak görünür. Açmak için baloncuğa dokunun. Baloncuğu taşımak için sürükleyin."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Baloncukları istediğiniz zaman kontrol edin"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Bu uygulamanın balonlarını kapatmak için Yönet\'e dokunun"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Bu uygulamanın baloncuklarını kapatmak için Yönet\'e dokunun"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Anladım"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistemde gezinme yöntemi güncellendi. Değişiklik yapmak için Ayarlar\'a gidin."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Sistemde gezinme yöntemini güncellemek için Ayarlar\'a gidin"</string>
@@ -998,25 +1005,22 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Yer Paylaşımlı Büyütme Penceresi"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Büyütme Penceresi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Büyütme Penceresi Kontrolleri"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Cihaz kontrolleri"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Bağlı cihazlarınız için denetimler ekleyin"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Cihaz kontrollerini kur"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Denetimlerinize erişmek için Güç düğmesini basılı tutun"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Denetim eklemek için uygulama seçin"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontrol eklendi.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kontrol eklendi.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Güç menüsünden erişmek için denetimleri seçin"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Bir denetimi taşımak için basılı tutup sürükleyin"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolleri yeniden düzenlemek için basılı tutup sürükleyin"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Tüm kontroller kaldırıldı"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Tüm kontrollerin listesi yüklenemedi."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Diğer"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Hızlı denetimlere ekle"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Cihaz kontrollerine ekle"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Favorilere ekle"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g>, bu kontrolü favorilerinize eklemenizi önerdi."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Denetimler güncellendi"</string>
@@ -1030,7 +1034,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Diğer öğeleri görmek için hızlıca kaydırın"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Öneriler yükleniyor"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Bu medya oturumunu kapat"</string>
-    <string name="controls_error_timeout" msgid="794197289772728958">"Devre dışı, uygulamayı kontrol edin"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Devre dışı, uygulamaya bakın"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Hata, yeniden deneyin"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Devam ediyor"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Yeni kontrolleri görmek için Güç düğmesini basılı tutun"</string>
