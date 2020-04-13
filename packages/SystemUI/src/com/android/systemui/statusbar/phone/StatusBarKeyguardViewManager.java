@@ -916,6 +916,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     @Override
+    public void setKeyguardGoingAwayState(boolean isKeyguardGoingAway) {
+        mNotificationShadeWindowController.setKeyguardGoingAway(isKeyguardGoingAway);
+    }
+
+    @Override
     public void onCancelClicked() {
         // No-op
     }
