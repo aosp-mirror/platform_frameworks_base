@@ -20,13 +20,13 @@ cc_defaults {
     ],
     proto: {
         type: "lite",
+        static: true,
     },
     sdk_version: "current",
     stl: "c++_static",
     shared_libs: [ "liblog" ],
     static_libs: [
         "libbase_ndk",
-        "libprotobuf-cpp-lite-ndk",
     ],
 }
 
@@ -45,7 +45,8 @@ cc_binary {
     compile_multilib: "prefer32",
     stem: "derive_sdk",
     apex_available: [ "test_com.android.sdkext" ],
-    visibility: [ "//frameworks/base/apex/sdkextensions/testing" ]
+    visibility: [ "//frameworks/base/apex/sdkextensions/testing" ],
+    installable: false,
 }
 
 prebuilt_etc {
