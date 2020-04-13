@@ -54,6 +54,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
@@ -129,9 +130,7 @@ public class PipMenuActivity extends Activity {
                 }
             };
 
-    private Handler mHandler = new Handler();
-    private Messenger mToControllerMessenger;
-    private Messenger mMessenger = new Messenger(new Handler() {
+    private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -174,7 +173,9 @@ public class PipMenuActivity extends Activity {
                 }
             }
         }
-    });
+    };
+    private Messenger mToControllerMessenger;
+    private Messenger mMessenger = new Messenger(mHandler);
 
     private final Runnable mFinishRunnable = new Runnable() {
         @Override
