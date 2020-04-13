@@ -78,9 +78,14 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
     }
 
     @Test
-    public void installedIsStaticOverlayIsMutable() throws Exception {
-        installPackage("OverlayHostTests_PlatformSignatureStaticOverlay.apk");
-        assertTrue(isOverlayMutable(SIG_OVERLAY_PACKAGE_NAME));
+    public void failToInstallPlatformSignedStaticOverlay() throws Exception {
+        try {
+            installPackage("OverlayHostTests_PlatformSignatureStaticOverlay.apk");
+            fail("installed a static overlay");
+        } catch (Exception e) {
+            // Expected.
+        }
+        assertFalse(overlayManagerContainsPackage(SIG_OVERLAY_PACKAGE_NAME));
     }
 
     @Test
@@ -222,10 +227,6 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
 
     private boolean overlayManagerContainsPackage(String pkg) throws Exception {
         return shell("cmd overlay list").contains(pkg);
-    }
-
-    private boolean isOverlayMutable(String pkg) throws Exception {
-        return shell("cmd overlay dump ismutable " + pkg).contains("true");
     }
 
     private String shell(final String cmd) throws Exception {
