@@ -30,7 +30,6 @@ import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_SWITCHES_CANCELED;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -64,10 +63,8 @@ import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
-import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -82,8 +79,6 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.Gravity;
-import android.window.ITaskOrganizer;
-import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
@@ -1004,62 +999,4 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         verify(recentTasks, times(1)).add(any());
     }
-
-    static class TestSplitOrganizer extends ITaskOrganizer.Stub {
-        final ActivityTaskManagerService mService;
-        Task mPrimary;
-        Task mSecondary;
-        boolean mInSplit = false;
-        int mDisplayId;
-        TestSplitOrganizer(ActivityTaskManagerService service, int displayId) {
-            mService = service;
-            mDisplayId = displayId;
-            mService.mTaskOrganizerController.registerTaskOrganizer(this,
-                    WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-            mService.mTaskOrganizerController.registerTaskOrganizer(this,
-                    WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-            WindowContainerToken primary = mService.mTaskOrganizerController.createRootTask(
-                    displayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).token;
-            mPrimary = WindowContainer.fromBinder(primary.asBinder()).asTask();
-            WindowContainerToken secondary = mService.mTaskOrganizerController.createRootTask(
-                    displayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).token;
-            mSecondary = WindowContainer.fromBinder(secondary.asBinder()).asTask();
-        }
-        @Override
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo info) {
-        }
-        @Override
-        public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
-        }
-        @Override
-        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
-            if (mInSplit) {
-                return;
-            }
-            if (info.topActivityType != ACTIVITY_TYPE_UNDEFINED) {
-                if (info.configuration.windowConfiguration.getWindowingMode()
-                        == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                    mInSplit = true;
-                    mService.mTaskOrganizerController.setLaunchRoot(mDisplayId,
-                            mSecondary.mRemoteToken.toWindowContainerToken());
-                    // move everything to secondary because test expects this but usually sysui
-                    // does it.
-                    DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
-                    for (int tdaNdx = dc.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
-                        final TaskDisplayArea taskDisplayArea = dc.getTaskDisplayAreaAt(tdaNdx);
-                        for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                            final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
-                            if (!WindowConfiguration.isSplitScreenWindowingMode(
-                                    stack.getWindowingMode())) {
-                                stack.reparent(mSecondary, POSITION_BOTTOM);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        @Override
-        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
-        }
-    };
 }
