@@ -39,6 +39,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -92,6 +93,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
@@ -147,6 +149,8 @@ public class NotificationStackScrollLayoutController {
     private final IStatusBarService mIStatusBarService;
     private final UiEventLogger mUiEventLogger;
     private final ForegroundServiceDismissalFeatureController mFgFeatureController;
+    private final ForegroundServiceSectionController mFgServicesSectionController;
+    private final LayoutInflater mLayoutInflater;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -565,7 +569,9 @@ public class NotificationStackScrollLayoutController {
             NotificationEntryManager notificationEntryManager,
             IStatusBarService iStatusBarService,
             UiEventLogger uiEventLogger,
-            ForegroundServiceDismissalFeatureController fgFeatureController) {
+            ForegroundServiceDismissalFeatureController fgFeatureController,
+            ForegroundServiceSectionController fgServicesSectionController,
+            LayoutInflater layoutInflater) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -608,6 +614,8 @@ public class NotificationStackScrollLayoutController {
         mIStatusBarService = iStatusBarService;
         mUiEventLogger = uiEventLogger;
         mFgFeatureController = fgFeatureController;
+        mFgServicesSectionController = fgServicesSectionController;
+        mLayoutInflater = layoutInflater;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -620,7 +628,9 @@ public class NotificationStackScrollLayoutController {
                 NotificationPanelEvent.fromSelection(selection)));
 
         if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {
-            mView.initializeForegroundServiceSection();
+            mView.initializeForegroundServiceSection(
+                    (ForegroundServiceDungeonView) mFgServicesSectionController.createView(
+                            mLayoutInflater));
         }
 
         mSwipeHelper = mNotificationSwipeHelperBuilder

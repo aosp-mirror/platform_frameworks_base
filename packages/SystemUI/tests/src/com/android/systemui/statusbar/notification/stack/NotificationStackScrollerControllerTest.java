@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.metrics.LogMaker;
 import android.testing.AndroidTestingRunner;
+import android.view.LayoutInflater;
 
 import androidx.test.filters.SmallTest;
 
@@ -59,6 +60,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -116,13 +118,10 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private IStatusBarService mIStatusBarService;
     @Mock private UiEventLogger mUiEventLogger;
-    @Mock private FeatureFlags mFeatureFlags;
-    @Mock private NotifPipeline mNotifPipeline;
-    @Mock private NotifCollection mNotifCollection;
-    @Mock private NotificationEntryManager mEntryManager;
-    @Mock private IStatusBarService mIStatusBarService;
-    @Mock private UiEventLogger mUiEventLogger;
     @Mock private ForegroundServiceDismissalFeatureController mFgFeatureController;
+    @Mock private ForegroundServiceSectionController mFgServicesSectionController;
+    @Mock private ForegroundServiceDungeonView mForegroundServiceDungeonView;
+    @Mock private LayoutInflater mLayoutInflater;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -135,7 +134,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
-
+        when(mFgServicesSectionController.createView(mLayoutInflater))
+                .thenReturn(mForegroundServiceDungeonView);
         mController = new NotificationStackScrollLayoutController(
                 true,
                 mNotificationGutsManager,
@@ -166,7 +166,9 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mEntryManager,
                 mIStatusBarService,
                 mUiEventLogger,
-                mFgFeatureController
+                mFgFeatureController,
+                mFgServicesSectionController,
+                mLayoutInflater
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
@@ -344,17 +346,19 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testForegroundDismissaEnabled() {
+    public void testForegroundDismissEnabled() {
         when(mFgFeatureController.isForegroundServiceDismissalEnabled()).thenReturn(true);
         mController.attach(mNotificationStackScrollLayout);
-        verify(mNotificationStackScrollLayout).initializeForegroundServiceSection();
+        verify(mNotificationStackScrollLayout).initializeForegroundServiceSection(
+                mForegroundServiceDungeonView);
     }
 
     @Test
     public void testForegroundDismissaDisabled() {
         when(mFgFeatureController.isForegroundServiceDismissalEnabled()).thenReturn(false);
         mController.attach(mNotificationStackScrollLayout);
-        verify(mNotificationStackScrollLayout, never()).initializeForegroundServiceSection();
+        verify(mNotificationStackScrollLayout, never()).initializeForegroundServiceSection(
+                any(ForegroundServiceDungeonView.class));
     }
 
     private LogMaker logMatcher(int category, int type) {

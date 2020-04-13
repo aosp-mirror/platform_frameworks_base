@@ -465,7 +465,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationPanelViewController mNotificationPanelController;
 
     private final NotificationSectionsManager mSectionsManager;
-    private final ForegroundServiceSectionController mFgsSectionController;
     private ForegroundServiceDungeonView mFgsSectionView;
     private boolean mAnimateBottomOnLayout;
     private float mLastSentAppear;
@@ -527,19 +526,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
             NotificationRoundnessManager notificationRoundnessManager,
-            SysuiStatusBarStateController statusbarStateController,
             NotificationSectionsManager notificationSectionsManager,
-            ForegroundServiceSectionController fgsSectionController,
             GroupMembershipManager groupMembershipManager,
-            GroupExpansionManager groupExpansionManager
+            GroupExpansionManager groupExpansionManager,
+            SysuiStatusBarStateController statusbarStateController
     ) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
-
         mRoundnessManager = notificationRoundnessManager;
-        mFgsSectionController = fgsSectionController;
-
         mSectionsManager = notificationSectionsManager;
+
         mSectionsManager.initialize(this, LayoutInflater.from(context));
         mSectionsManager.setOnClearSilentNotifsClickListener(v -> {
             // Leave the shade open if there will be other notifs left over to clear
@@ -586,14 +582,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mStatusbarStateController = statusbarStateController;
     }
 
-    void initializeForegroundServiceSection() {
+    void initializeForegroundServiceSection(ForegroundServiceDungeonView fgsSectionView) {
         if (mFgsSectionView != null) {
             return;
         }
 
-        LayoutInflater li = LayoutInflater.from(mContext);
-        mFgsSectionView =
-                (ForegroundServiceDungeonView) mFgsSectionController.createView(li);
+        mFgsSectionView = fgsSectionView;
+
         addView(mFgsSectionView, -1);
     }
 
