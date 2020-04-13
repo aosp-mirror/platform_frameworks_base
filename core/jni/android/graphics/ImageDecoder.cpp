@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#include <fcntl.h>
+#include <sys/stat.h>
+
 #include "Bitmap.h"
 #include "BitmapFactory.h"
 #include "ByteBufferStreamAdaptor.h"
@@ -33,7 +36,6 @@
 
 #include <androidfw/Asset.h>
 #include <jni.h>
-#include <sys/stat.h>
 
 using namespace android;
 
