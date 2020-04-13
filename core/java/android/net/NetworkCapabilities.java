@@ -669,11 +669,13 @@ public final class NetworkCapabilities implements Parcelable {
     public void restrictCapabilitesForTestNetwork() {
         final long originalCapabilities = mNetworkCapabilities;
         final NetworkSpecifier originalSpecifier = mNetworkSpecifier;
+        final int originalSignalStrength = mSignalStrength;
         clearAll();
         // Reset the transports to only contain TRANSPORT_TEST.
         mTransportTypes = (1 << TRANSPORT_TEST);
         mNetworkCapabilities = originalCapabilities & TEST_NETWORKS_ALLOWED_CAPABILITIES;
         mNetworkSpecifier = originalSpecifier;
+        mSignalStrength = originalSignalStrength;
     }
 
     /**
