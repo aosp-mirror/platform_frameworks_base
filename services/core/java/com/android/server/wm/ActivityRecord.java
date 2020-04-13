@@ -5592,6 +5592,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             _taskDescription.setIconFilename(iconFilePath);
         }
         taskDescription = _taskDescription;
+        getTask().updateTaskDescription();
     }
 
     void setVoiceSessionLocked(IVoiceInteractionSession session) {
