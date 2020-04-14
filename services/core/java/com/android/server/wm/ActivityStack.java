@@ -783,6 +783,11 @@ class ActivityStack extends Task {
         if (currentMode == WINDOWING_MODE_PINNED) {
             mAtmService.getTaskChangeNotificationController().notifyActivityUnpinned();
         }
+        if (likelyResolvedMode == WINDOWING_MODE_PINNED
+                && taskDisplayArea.getRootPinnedTask() != null) {
+            // Can only have 1 pip at a time, so replace an existing pip
+            taskDisplayArea.getRootPinnedTask().dismissPip();
+        }
         if (likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
                 && topActivity != null && !topActivity.noDisplay
                 && topActivity.isNonResizableOrForcedResizable(likelyResolvedMode)) {
