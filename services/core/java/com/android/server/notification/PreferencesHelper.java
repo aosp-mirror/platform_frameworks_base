@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
@@ -117,9 +118,13 @@ public class PreferencesHelper implements RankingConfig {
     @VisibleForTesting
     static final boolean DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
-    static final boolean DEFAULT_ALLOW_BUBBLE = true;
+
     private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
     private static final boolean DEFAULT_APP_LOCKED_IMPORTANCE  = false;
+
+    static final boolean DEFAULT_GLOBAL_ALLOW_BUBBLE = true;
+    @VisibleForTesting
+    static final int DEFAULT_BUBBLE_PREFERENCE = BUBBLE_PREFERENCE_NONE;
 
     /**
      * Default value for what fields are user locked. See {@link LockableAppFields} for all lockable
@@ -148,7 +153,7 @@ public class PreferencesHelper implements RankingConfig {
     private final NotificationChannelLogger mNotificationChannelLogger;
 
     private SparseBooleanArray mBadgingEnabled;
-    private boolean mBubblesEnabled = DEFAULT_ALLOW_BUBBLE;
+    private boolean mBubblesEnabledGlobally = DEFAULT_GLOBAL_ALLOW_BUBBLE;
     private boolean mAreChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
 
@@ -226,8 +231,8 @@ public class PreferencesHelper implements RankingConfig {
                                             parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
                                     XmlUtils.readBooleanAttribute(
                                             parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE),
-                                    XmlUtils.readBooleanAttribute(
-                                            parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
+                                    XmlUtils.readIntAttribute(
+                                            parser, ATT_ALLOW_BUBBLE, DEFAULT_BUBBLE_PREFERENCE));
                             r.importance = XmlUtils.readIntAttribute(
                                     parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
                             r.priority = XmlUtils.readIntAttribute(
@@ -339,19 +344,19 @@ public class PreferencesHelper implements RankingConfig {
             int uid) {
         return getOrCreatePackagePreferencesLocked(pkg, UserHandle.getUserId(uid), uid,
                 DEFAULT_IMPORTANCE, DEFAULT_PRIORITY, DEFAULT_VISIBILITY, DEFAULT_SHOW_BADGE,
-                DEFAULT_ALLOW_BUBBLE);
+                DEFAULT_BUBBLE_PREFERENCE);
     }
 
     private PackagePreferences getOrCreatePackagePreferencesLocked(String pkg,
             @UserIdInt int userId, int uid) {
         return getOrCreatePackagePreferencesLocked(pkg, userId, uid,
                 DEFAULT_IMPORTANCE, DEFAULT_PRIORITY, DEFAULT_VISIBILITY, DEFAULT_SHOW_BADGE,
-                DEFAULT_ALLOW_BUBBLE);
+                DEFAULT_BUBBLE_PREFERENCE);
     }
 
     private PackagePreferences getOrCreatePackagePreferencesLocked(String pkg,
             @UserIdInt int userId, int uid, int importance, int priority, int visibility,
-            boolean showBadge, boolean allowBubble) {
+            boolean showBadge, int bubblePreference) {
         final String key = packagePreferencesKey(pkg, uid);
         PackagePreferences
                 r = (uid == UNKNOWN_UID)
@@ -365,7 +370,7 @@ public class PreferencesHelper implements RankingConfig {
             r.priority = priority;
             r.visibility = visibility;
             r.showBadge = showBadge;
-            r.allowBubble = allowBubble;
+            r.bubblePreference = bubblePreference;
 
             try {
                 createDefaultChannelIfNeededLocked(r);
@@ -479,7 +484,7 @@ public class PreferencesHelper implements RankingConfig {
                                 || r.channels.size() > 0
                                 || r.groups.size() > 0
                                 || r.delegate != null
-                                || r.allowBubble != DEFAULT_ALLOW_BUBBLE;
+                                || r.bubblePreference != DEFAULT_BUBBLE_PREFERENCE;
                 if (hasNonDefaultSettings) {
                     out.startTag(null, TAG_PACKAGE);
                     out.attribute(null, ATT_NAME, r.pkg);
@@ -492,8 +497,8 @@ public class PreferencesHelper implements RankingConfig {
                     if (r.visibility != DEFAULT_VISIBILITY) {
                         out.attribute(null, ATT_VISIBILITY, Integer.toString(r.visibility));
                     }
-                    if (r.allowBubble != DEFAULT_ALLOW_BUBBLE) {
-                        out.attribute(null, ATT_ALLOW_BUBBLE, Boolean.toString(r.allowBubble));
+                    if (r.bubblePreference != DEFAULT_BUBBLE_PREFERENCE) {
+                        out.attribute(null, ATT_ALLOW_BUBBLE, Integer.toString(r.bubblePreference));
                     }
                     out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(r.showBadge));
                     out.attribute(null, ATT_APP_USER_LOCKED_FIELDS,
@@ -544,14 +549,14 @@ public class PreferencesHelper implements RankingConfig {
      *
      * @param pkg the package to allow or not allow bubbles for.
      * @param uid the uid to allow or not allow bubbles for.
-     * @param allowed whether bubbles are allowed.
+     * @param bubblePreference whether bubbles are allowed.
      */
-    public void setBubblesAllowed(String pkg, int uid, boolean allowed) {
+    public void setBubblesAllowed(String pkg, int uid, int bubblePreference) {
         boolean changed = false;
         synchronized (mPackagePreferences) {
             PackagePreferences p = getOrCreatePackagePreferencesLocked(pkg, uid);
-            changed = p.allowBubble != allowed;
-            p.allowBubble = allowed;
+            changed = p.bubblePreference != bubblePreference;
+            p.bubblePreference = bubblePreference;
             p.lockedAppFields = p.lockedAppFields | LockableAppFields.USER_LOCKED_BUBBLE;
         }
         if (changed) {
@@ -567,9 +572,9 @@ public class PreferencesHelper implements RankingConfig {
      * @return whether bubbles are allowed.
      */
     @Override
-    public boolean areBubblesAllowed(String pkg, int uid) {
+    public int getBubblePreference(String pkg, int uid) {
         synchronized (mPackagePreferences) {
-            return getOrCreatePackagePreferencesLocked(pkg, uid).allowBubble;
+            return getOrCreatePackagePreferencesLocked(pkg, uid).bubblePreference;
         }
     }
 
@@ -788,6 +793,7 @@ public class PreferencesHelper implements RankingConfig {
             }
             if (fromTargetApp) {
                 channel.setLockscreenVisibility(r.visibility);
+                channel.setAllowBubbles(existing != null && existing.canBubble());
             }
             clearLockedFieldsLocked(channel);
             channel.setImportanceLockedByOEM(r.oemLockedImportance);
@@ -2125,7 +2131,7 @@ public class PreferencesHelper implements RankingConfig {
                 p.groups = new ArrayMap<>();
                 p.delegate = null;
                 p.lockedAppFields = DEFAULT_LOCKED_APP_FIELDS;
-                p.allowBubble = DEFAULT_ALLOW_BUBBLE;
+                p.bubblePreference = DEFAULT_BUBBLE_PREFERENCE;
                 p.importance = DEFAULT_IMPORTANCE;
                 p.priority = DEFAULT_PRIORITY;
                 p.visibility = DEFAULT_VISIBILITY;
@@ -2165,15 +2171,15 @@ public class PreferencesHelper implements RankingConfig {
     public void updateBubblesEnabled() {
         final boolean newValue = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.NOTIFICATION_BUBBLES,
-                DEFAULT_ALLOW_BUBBLE ? 1 : 0) == 1;
-        if (newValue != mBubblesEnabled) {
-            mBubblesEnabled = newValue;
+                DEFAULT_GLOBAL_ALLOW_BUBBLE ? 1 : 0) == 1;
+        if (newValue != mBubblesEnabledGlobally) {
+            mBubblesEnabledGlobally = newValue;
             updateConfig();
         }
     }
 
     public boolean bubblesEnabled() {
-        return mBubblesEnabled;
+        return mBubblesEnabledGlobally;
     }
 
     public void updateBadgingEnabled() {
@@ -2229,7 +2235,7 @@ public class PreferencesHelper implements RankingConfig {
         int priority = DEFAULT_PRIORITY;
         int visibility = DEFAULT_VISIBILITY;
         boolean showBadge = DEFAULT_SHOW_BADGE;
-        boolean allowBubble = DEFAULT_ALLOW_BUBBLE;
+        int bubblePreference = DEFAULT_BUBBLE_PREFERENCE;
         int lockedAppFields = DEFAULT_LOCKED_APP_FIELDS;
         // these fields are loaded on boot from a different source of truth and so are not
         // written to notification policy xml
