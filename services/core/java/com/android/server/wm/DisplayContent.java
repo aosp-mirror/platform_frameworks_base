@@ -3472,11 +3472,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void updateImeParent() {
-        // Force attaching IME to the display when magnifying, or it would be magnified with
-        // target app together.
-        final boolean shouldAttachToDisplay = (mMagnificationSpec != null);
-        final SurfaceControl newParent =
-                shouldAttachToDisplay ? mWindowContainers.getSurfaceControl() : computeImeParent();
+        final SurfaceControl newParent = computeImeParent();
         if (newParent != null) {
             getPendingTransaction().reparent(mImeWindowsContainers.mSurfaceControl, newParent);
             scheduleAnimation();
@@ -3488,16 +3484,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     @VisibleForTesting
     SurfaceControl computeImeParent() {
+        // Force attaching IME to the display when magnifying, or it would be magnified with
+        // target app together.
+        final boolean allowAttachToApp = (mMagnificationSpec == null);
 
         // Attach it to app if the target is part of an app and such app is covering the entire
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
-        if (isImeAttachedToApp()) {
+        if (allowAttachToApp && isImeAttachedToApp()) {
             return mInputMethodTarget.mActivityRecord.getSurfaceControl();
         }
 
-        // Otherwise, we just attach it to the display.
-        return mWindowContainers.getSurfaceControl();
+        // Otherwise, we just attach it to where the display area policy put it.
+        return mImeWindowsContainers.getParent().getSurfaceControl();
     }
 
     void setLayoutNeeded() {
@@ -4730,6 +4729,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @VisibleForTesting
     SurfaceControl getWindowingLayer() {
         return mWindowContainers.getSurfaceControl();
+    }
+
+    @VisibleForTesting
+    WindowContainer<?> getImeContainer() {
+        return mImeWindowsContainers;
     }
 
     SurfaceControl getOverlayLayer() {
