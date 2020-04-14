@@ -122,6 +122,8 @@ public class IpServer extends StateMachine {
     // TODO: have this configurable
     private static final int DHCP_LEASE_TIME_SECS = 3600;
 
+    private static final MacAddress NULL_MAC_ADDRESS = MacAddress.fromString("00:00:00:00:00:00");
+
     private static final String TAG = "IpServer";
     private static final boolean DBG = false;
     private static final boolean VDBG = false;
@@ -902,9 +904,12 @@ public class IpServer extends StateMachine {
             return;
         }
 
+        // When deleting rules, we still need to pass a non-null MAC, even though it's ignored.
+        // Do this here instead of in the Ipv6ForwardingRule constructor to ensure that we never
+        // add rules with a null MAC, only delete them.
+        MacAddress dstMac = e.isValid() ? e.macAddr : NULL_MAC_ADDRESS;
         Ipv6ForwardingRule rule = new Ipv6ForwardingRule(upstreamIfindex,
-                mInterfaceParams.index, (Inet6Address) e.ip, mInterfaceParams.macAddr,
-                e.macAddr);
+                mInterfaceParams.index, (Inet6Address) e.ip, mInterfaceParams.macAddr, dstMac);
         if (e.isValid()) {
             addIpv6ForwardingRule(rule);
         } else {
