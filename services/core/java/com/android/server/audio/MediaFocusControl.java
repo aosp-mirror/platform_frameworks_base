@@ -30,6 +30,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -80,6 +81,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     private final Context mContext;
     private final AppOpsManager mAppOps;
     private PlayerFocusEnforcer mFocusEnforcer; // never null
+    private boolean mMultiAudioFocusEnabled = false;
 
     private boolean mRingOrCallActive = false;
 
@@ -91,6 +93,8 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         mContext = cntxt;
         mAppOps = (AppOpsManager)mContext.getSystemService(Context.APP_OPS_SERVICE);
         mFocusEnforcer = pfe;
+        mMultiAudioFocusEnabled = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.MULTI_AUDIO_FOCUS_ENABLED, 0) != 0;
     }
 
     protected void dump(PrintWriter pw) {
@@ -100,6 +104,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         pw.println("\n");
         // log
         mEventLogger.dump(pw);
+        dumpMultiAudioFocus(pw);
     }
 
     //=================================================================
@@ -194,6 +199,14 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 mFocusStack.peek().handleFocusGain(AudioManager.AUDIOFOCUS_GAIN);
             }
         }
+
+        if (mMultiAudioFocusEnabled && !mMultiAudioFocusList.isEmpty()) {
+            for (FocusRequester multifr : mMultiAudioFocusList) {
+                if (isLockedFocusOwner(multifr)) {
+                    multifr.handleFocusGain(AudioManager.AUDIOFOCUS_GAIN);
+                }
+            }
+        }
     }
 
     /**
@@ -203,17 +216,30 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      */
     @GuardedBy("mAudioFocusLock")
     private void propagateFocusLossFromGain_syncAf(int focusGain, final FocusRequester fr,
-            boolean forceDuck) {
+                                                   boolean forceDuck) {
         final List<String> clientsToRemove = new LinkedList<String>();
         // going through the audio focus stack to signal new focus, traversing order doesn't
         // matter as all entries respond to the same external focus gain
-        for (FocusRequester focusLoser : mFocusStack) {
-            final boolean isDefinitiveLoss =
-                    focusLoser.handleFocusLossFromGain(focusGain, fr, forceDuck);
-            if (isDefinitiveLoss) {
-                clientsToRemove.add(focusLoser.getClientId());
+        if (!mFocusStack.empty()) {
+            for (FocusRequester focusLoser : mFocusStack) {
+                final boolean isDefinitiveLoss =
+                        focusLoser.handleFocusLossFromGain(focusGain, fr, forceDuck);
+                if (isDefinitiveLoss) {
+                    clientsToRemove.add(focusLoser.getClientId());
+                }
             }
         }
+
+        if (mMultiAudioFocusEnabled && !mMultiAudioFocusList.isEmpty()) {
+            for (FocusRequester multifocusLoser : mMultiAudioFocusList) {
+                final boolean isDefinitiveLoss =
+                        multifocusLoser.handleFocusLossFromGain(focusGain, fr, forceDuck);
+                if (isDefinitiveLoss) {
+                    clientsToRemove.add(multifocusLoser.getClientId());
+                }
+            }
+        }
+
         for (String clientToRemove : clientsToRemove) {
             removeFocusStackEntry(clientToRemove, false /*signal*/,
                     true /*notifyFocusFollowers*/);
@@ -221,6 +247,8 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     }
 
     private final Stack<FocusRequester> mFocusStack = new Stack<FocusRequester>();
+
+    ArrayList<FocusRequester> mMultiAudioFocusList = new ArrayList<FocusRequester>();
 
     /**
      * Helper function:
@@ -285,6 +313,22 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                     // stack entry not used anymore, clear references
                     fr.release();
                 }
+            }
+        }
+
+        if (mMultiAudioFocusEnabled && !mMultiAudioFocusList.isEmpty()) {
+            Iterator<FocusRequester> listIterator = mMultiAudioFocusList.iterator();
+            while (listIterator.hasNext()) {
+                FocusRequester fr = listIterator.next();
+                if (fr.hasSameClient(clientToRemove)) {
+                    listIterator.remove();
+                    fr.release();
+                }
+            }
+
+            if (signal) {
+                // notify the new top of the stack it gained focus
+                notifyTopOfAudioFocusStack();
             }
         }
     }
@@ -410,6 +454,16 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                     removeFocusEntryForExtPolicy(mCb);
                 } else {
                     removeFocusStackEntryOnDeath(mCb);
+                    if (mMultiAudioFocusEnabled && !mMultiAudioFocusList.isEmpty()) {
+                        Iterator<FocusRequester> listIterator = mMultiAudioFocusList.iterator();
+                        while (listIterator.hasNext()) {
+                            FocusRequester fr = listIterator.next();
+                            if (fr.hasSameBinder(mCb)) {
+                                listIterator.remove();
+                                fr.release();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -867,6 +921,35 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
 
             final FocusRequester nfr = new FocusRequester(aa, focusChangeHint, flags, fd, cb,
                     clientId, afdh, callingPackageName, Binder.getCallingUid(), this, sdk);
+
+            if (mMultiAudioFocusEnabled
+                    && (focusChangeHint == AudioManager.AUDIOFOCUS_GAIN)) {
+                if (enteringRingOrCall) {
+                    if (!mMultiAudioFocusList.isEmpty()) {
+                        for (FocusRequester multifr : mMultiAudioFocusList) {
+                            multifr.handleFocusLossFromGain(focusChangeHint, nfr, forceDuck);
+                        }
+                    }
+                } else {
+                    boolean needAdd = true;
+                    if (!mMultiAudioFocusList.isEmpty()) {
+                        for (FocusRequester multifr : mMultiAudioFocusList) {
+                            if (multifr.getClientUid() == Binder.getCallingUid()) {
+                                needAdd = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (needAdd) {
+                        mMultiAudioFocusList.add(nfr);
+                    }
+                    nfr.handleFocusGainFromRequest(AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+                    notifyExtPolicyFocusGrant_syncAf(nfr.toAudioFocusInfo(),
+                            AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+                    return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+                }
+            }
+
             if (focusGrantDelayed) {
                 // focusGrantDelayed being true implies we can't reassign focus right now
                 // which implies the focus stack is not empty.
@@ -877,9 +960,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 return requestResult;
             } else {
                 // propagate the focus change through the stack
-                if (!mFocusStack.empty()) {
-                    propagateFocusLossFromGain_syncAf(focusChangeHint, nfr, forceDuck);
-                }
+                propagateFocusLossFromGain_syncAf(focusChangeHint, nfr, forceDuck);
 
                 // push focus requester at the top of the audio focus stack
                 mFocusStack.push(nfr);
@@ -969,5 +1050,40 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 }
             }
         }.start();
+    }
+
+    public void updateMultiAudioFocus(boolean enabled) {
+        Log.d(TAG, "updateMultiAudioFocus( " + enabled + " )");
+        mMultiAudioFocusEnabled = enabled;
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.MULTI_AUDIO_FOCUS_ENABLED, enabled ? 1 : 0);
+        if (!mFocusStack.isEmpty()) {
+            final FocusRequester fr = mFocusStack.peek();
+            fr.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS, null, false);
+        }
+        if (!enabled) {
+            if (!mMultiAudioFocusList.isEmpty()) {
+                for (FocusRequester multifr : mMultiAudioFocusList) {
+                    multifr.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS, null, false);
+                }
+                mMultiAudioFocusList.clear();
+            }
+        }
+    }
+
+    public boolean getMultiAudioFocusEnabled() {
+        return mMultiAudioFocusEnabled;
+    }
+
+    private void dumpMultiAudioFocus(PrintWriter pw) {
+        pw.println("Multi Audio Focus enabled :" + mMultiAudioFocusEnabled);
+        if (!mMultiAudioFocusList.isEmpty()) {
+            pw.println("Multi Audio Focus List:");
+            pw.println("------------------------------");
+            for (FocusRequester multifr : mMultiAudioFocusList) {
+                multifr.dump(pw);
+            }
+            pw.println("------------------------------");
+        }
     }
 }
