@@ -28,6 +28,7 @@
     android:paddingRight="@dimen/global_actions_grid_item_side_margin"
     android:layout_marginRight="@dimen/control_base_item_margin"
     android:layout_marginLeft="@dimen/control_base_item_margin"
+    android:stateListAnimator="@anim/control_state_list_animator"
     android:background="@drawable/control_background">
     <LinearLayout
         android:layout_width="@dimen/global_actions_grid_item_width"
