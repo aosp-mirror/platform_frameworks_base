@@ -134,6 +134,7 @@ class PhysicsAnimatorTest : SysuiTestCase() {
 
     @Test
     @Throws(InterruptedException::class)
+    @Ignore("Increasingly flaky")
     fun testEndListenersAndActions() {
         PhysicsAnimatorTestUtils.setAllAnimationsBlock(false)
         animator
