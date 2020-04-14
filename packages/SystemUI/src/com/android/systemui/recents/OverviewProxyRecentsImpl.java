@@ -71,12 +71,13 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
         public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                 boolean homeTaskVisible, boolean clearedTask) {
             if (task.configuration.windowConfiguration.getWindowingMode()
-                    != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                    != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY || !mDividerOptional.isPresent()) {
                 return;
             }
 
-            if (homeTaskVisible) {
-                showRecentApps(false /* triggeredFromAltTab */);
+            final Divider divider = mDividerOptional.get();
+            if (divider.isMinimized()) {
+                divider.onUndockingTask();
             }
         }
     };
