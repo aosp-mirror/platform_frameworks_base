@@ -19,6 +19,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.Access
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
@@ -115,7 +116,7 @@ public final class AccessibilityUtils {
      * @return int from {@link AccessibilityFragmentType}.
      */
     public static @AccessibilityFragmentType int getAccessibilityServiceFragmentType(
-            AccessibilityServiceInfo accessibilityServiceInfo) {
+            @NonNull AccessibilityServiceInfo accessibilityServiceInfo) {
         final int targetSdk = accessibilityServiceInfo.getResolveInfo()
                 .serviceInfo.applicationInfo.targetSdkVersion;
         final boolean requestA11yButton = (accessibilityServiceInfo.flags
