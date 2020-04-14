@@ -49,7 +49,7 @@ import java.util.function.Consumer;
  *
  * Use {@link ImsManager#getImsRcsManager(int)} to create an instance of this manager.
  */
-public class ImsRcsManager implements RegistrationManager {
+public class ImsRcsManager {
     private static final String TAG = "ImsRcsManager";
 
     /**
@@ -173,11 +173,11 @@ public class ImsRcsManager implements RegistrationManager {
     /**
      * @hide
      */
-    @Override
+    // @Override add back to RegistrationManager interface once public.
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerImsRegistrationCallback(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull RegistrationCallback c)
+            @NonNull RegistrationManager.RegistrationCallback c)
             throws ImsException {
         if (c == null) {
             throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
@@ -204,7 +204,7 @@ public class ImsRcsManager implements RegistrationManager {
     /**
      * @hide
      */
-    @Override
+    // @Override add back to RegistrationManager interface once public.
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterImsRegistrationCallback(
             @NonNull RegistrationManager.RegistrationCallback c) {
@@ -228,10 +228,10 @@ public class ImsRcsManager implements RegistrationManager {
     /**
      * @hide
      */
-    @Override
+    // @Override add back to RegistrationManager interface once public.
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getRegistrationState(@NonNull @CallbackExecutor Executor executor,
-            @NonNull @ImsRegistrationState Consumer<Integer> stateCallback) {
+            @NonNull @RegistrationManager.ImsRegistrationState Consumer<Integer> stateCallback) {
         if (stateCallback == null) {
             throw new IllegalArgumentException("Must include a non-null stateCallback.");
         }
@@ -260,7 +260,6 @@ public class ImsRcsManager implements RegistrationManager {
     /**
      * @hide
      */
-    @Override
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getRegistrationTransportType(@NonNull @CallbackExecutor Executor executor,
             @NonNull @AccessNetworkConstants.TransportType
@@ -347,8 +346,7 @@ public class ImsRcsManager implements RegistrationManager {
      * inactive subscription, it will result in a no-op.
      * @param c The RCS {@link AvailabilityCallback} to be removed.
      * @see #registerRcsAvailabilityCallback(Executor, AvailabilityCallback)
-     * @throws ImsException if the IMS service is not available when calling this method
-     * {@link ImsRcsController#unregisterRcsAvailabilityCallback()}.
+     * @throws ImsException if the IMS service is not available when calling this method.
      * See {@link ImsException#getCode()} for more information on the error codes.
      * @hide
      */
@@ -390,8 +388,7 @@ public class ImsRcsManager implements RegistrationManager {
      * rather the subscription is capable of this service over IMS.
      * @see #isAvailable(int)
      * @see android.telephony.CarrierConfigManager#KEY_USE_RCS_PRESENCE_BOOL
-     * @throws ImsException if the IMS service is not available when calling this method
-     * {@link ImsRcsController#isCapable(int, int)}.
+     * @throws ImsException if the IMS service is not available when calling this method.
      * See {@link ImsException#getCode()} for more information on the error codes.
      * @hide
      */
@@ -424,9 +421,8 @@ public class ImsRcsManager implements RegistrationManager {
      * @return true if the RCS capability is currently available for the associated subscription,
      * false otherwise. If the capability is available, IMS is registered and the service is
      * currently available over IMS.
-     * @see #isCapable(int)
-     * @throws ImsException if the IMS service is not available when calling this method
-     * {@link ImsRcsController#isAvailable(int, int)}.
+     * @see #isCapable(int, int)
+     * @throws ImsException if the IMS service is not available when calling this method.
      * See {@link ImsException#getCode()} for more information on the error codes.
      * @hide
      */
