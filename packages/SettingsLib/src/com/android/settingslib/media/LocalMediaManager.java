@@ -401,6 +401,11 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         private List<MediaDevice> buildDisconnectedBluetoothDevice() {
+            if (mBluetoothAdapter == null) {
+                Log.w(TAG, "buildDisconnectedBluetoothDevice() BluetoothAdapter is null");
+                return new ArrayList<>();
+            }
+
             final List<BluetoothDevice> bluetoothDevices =
                     mBluetoothAdapter.getMostRecentlyConnectedDevices();
             final CachedBluetoothDeviceManager cachedDeviceManager =
