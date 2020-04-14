@@ -826,7 +826,7 @@ public class DisplayContentTests extends WindowTestsBase {
             dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "app");
             dc.mInputMethodTarget.setWindowingMode(
                     WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-            assertEquals(dc.getWindowingLayer(), dc.computeImeParent());
+            assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
         }
     }
 
@@ -836,7 +836,8 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(false).when(mAppWindow.mActivityRecord).matchParentBounds();
         mDisplayContent.mInputMethodTarget = mAppWindow;
         // The surface parent of IME should be the display instead of app window.
-        assertEquals(mDisplayContent.getWindowingLayer(), mDisplayContent.computeImeParent());
+        assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
+                mDisplayContent.computeImeParent());
     }
 
     @Test
@@ -845,7 +846,7 @@ public class DisplayContentTests extends WindowTestsBase {
                      new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_IME)) {
             final DisplayContent dc = createNewDisplay();
             dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "statusBar");
-            assertEquals(dc.getWindowingLayer(), dc.computeImeParent());
+            assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
         }
     }
 
