@@ -38,7 +38,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Process;
@@ -47,8 +46,6 @@ import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
-
-import com.android.internal.util.FunctionalUtils;
 
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
@@ -72,7 +69,11 @@ public class NotificationShellCmd extends ShellCommand {
             + "  unsuspend_package PACKAGE\n"
             + "  reset_assistant_user_set [user_id (current user if not specified)]\n"
             + "  get_approved_assistant [user_id (current user if not specified)]\n"
-            + "  post [--help | flags] TAG TEXT";
+            + "  post [--help | flags] TAG TEXT\n"
+            + "  set_bubbles PACKAGE PREFERENCE (0=none 1=all 2=selected) "
+                    + "[user_id (current user if not specified)]\n"
+            + "  set_bubbles_channel PACKAGE CHANNEL_ID ALLOW "
+                    + "[user_id (current user if not specified)]\n";
 
     private static final String NOTIFY_USAGE =
               "usage: cmd notification post [flags] <tag> <text>\n\n"
@@ -109,6 +110,7 @@ public class NotificationShellCmd extends ShellCommand {
     private final NotificationManagerService mDirectService;
     private final INotificationManager mBinderService;
     private final PackageManager mPm;
+    private NotificationChannel mChannel;
 
     public NotificationShellCmd(NotificationManagerService service) {
         mDirectService = service;
@@ -274,6 +276,40 @@ public class NotificationShellCmd extends ShellCommand {
                     } else {
                         pw.println(approvedAssistant.flattenToString());
                     }
+                    break;
+                }
+                case "set_bubbles": {
+                    // only use for testing
+                    String packageName = getNextArgRequired();
+                    int preference = Integer.parseInt(getNextArgRequired());
+                    if (preference > 3 || preference < 0) {
+                        pw.println("Invalid preference - must be between 0-3 "
+                                + "(0=none 1=all 2=selected)");
+                        return -1;
+                    }
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
+                    }
+                    int appUid = UserHandle.getUid(userId, mPm.getPackageUid(packageName, 0));
+                    mBinderService.setBubblesAllowed(packageName, appUid, preference);
+                    break;
+                }
+                case "set_bubbles_channel": {
+                    // only use for testing
+                    String packageName = getNextArgRequired();
+                    String channelId = getNextArgRequired();
+                    boolean allow = Boolean.parseBoolean(getNextArgRequired());
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
+                    }
+                    NotificationChannel channel = mBinderService.getNotificationChannel(
+                            callingPackage, userId, packageName, channelId);
+                    channel.setAllowBubbles(allow);
+                    int appUid = UserHandle.getUid(userId, mPm.getPackageUid(packageName, 0));
+                    mBinderService.updateNotificationChannelForPackage(packageName, appUid,
+                            channel);
                     break;
                 }
                 case "post":
