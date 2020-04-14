@@ -2574,8 +2574,12 @@ class DatabaseHelper extends SQLiteOpenHelper {
             // value defined in system property
             StringBuilder val = new StringBuilder();
             List<Integer> defaultNetworks = TelephonyProperties.default_network();
-            for (int phoneId = 0;
-                    phoneId < TelephonyManager.getDefault().getPhoneCount(); phoneId++) {
+            int phoneCount = 1;
+            TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
+            if (telephonyManager != null) {
+                phoneCount = telephonyManager.getSupportedModemCount();
+            }
+            for (int phoneId = 0; phoneId < phoneCount; phoneId++) {
                 int mode = defaultNetworks.size() <= phoneId
                         || defaultNetworks.get(phoneId) == null
                         ? RILConstants.PREFERRED_NETWORK_MODE : defaultNetworks.get(phoneId);
