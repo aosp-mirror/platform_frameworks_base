@@ -110,7 +110,7 @@ public class AuthContainerView extends LinearLayout
         boolean mRequireConfirmation;
         int mUserId;
         String mOpPackageName;
-        int mModalityMask;
+        @BiometricAuthenticator.Modality int mModalityMask;
         boolean mSkipIntro;
         long mOperationId;
     }
@@ -158,7 +158,7 @@ public class AuthContainerView extends LinearLayout
             return this;
         }
 
-        public AuthContainerView build(int modalityMask) {
+        public AuthContainerView build(@BiometricAuthenticator.Modality int modalityMask) {
             mConfig.mModalityMask = modalityMask;
             return new AuthContainerView(mConfig, new Injector());
         }
@@ -268,18 +268,24 @@ public class AuthContainerView extends LinearLayout
 
         // Inflate biometric view only if necessary.
         if (Utils.isBiometricAllowed(mConfig.mBiometricPromptBundle)) {
-            if (config.mModalityMask == BiometricAuthenticator.TYPE_FINGERPRINT) {
-                mBiometricView = (AuthBiometricFingerprintView)
-                        factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
-            } else if (config.mModalityMask == BiometricAuthenticator.TYPE_FACE) {
-                mBiometricView = (AuthBiometricFaceView)
-                        factory.inflate(R.layout.auth_biometric_face_view, null, false);
-            } else {
-                Log.e(TAG, "Unsupported biometric modality: " + config.mModalityMask);
-                mBiometricView = null;
-                mBackgroundView = null;
-                mBiometricScrollView = null;
-                return;
+            final @BiometricAuthenticator.Modality int biometricModality =
+                    config.mModalityMask & ~BiometricAuthenticator.TYPE_CREDENTIAL;
+
+            switch (biometricModality) {
+                case BiometricAuthenticator.TYPE_FINGERPRINT:
+                    mBiometricView = (AuthBiometricFingerprintView)
+                            factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
+                    break;
+                case BiometricAuthenticator.TYPE_FACE:
+                    mBiometricView = (AuthBiometricFaceView)
+                            factory.inflate(R.layout.auth_biometric_face_view, null, false);
+                    break;
+                default:
+                    Log.e(TAG, "Unsupported biometric modality: " + biometricModality);
+                    mBiometricView = null;
+                    mBackgroundView = null;
+                    mBiometricScrollView = null;
+                    return;
             }
         }
 
