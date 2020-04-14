@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
+import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.res.Resources;
@@ -250,7 +251,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mFeatureFlagsNewPipeline,
                 mDumpManager,
                 mFloatingContentCoordinator,
-                mSysUiState);
+                mSysUiState,
+                mock(INotificationManager.class));
         mBubbleController.addNotifCallback(mNotifCallback);
         mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
         mBubbleController.setExpandListener(mBubbleExpandListener);
