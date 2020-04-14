@@ -181,11 +181,17 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
     }
 
     @Test
+    public void testCalculateSnapshotCrop_waterfall() {
+        setupSurface(100, 100, new Rect(5, 10, 5, 10), 0, 0, new Rect(0, 0, 100, 100));
+        assertEquals(new Rect(5, 0, 95, 90), mSurface.calculateSnapshotCrop());
+    }
+
+    @Test
     public void testCalculateSnapshotFrame() {
         setupSurface(100, 100);
         final Rect insets = new Rect(0, 10, 0, 10);
         mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
-        assertEquals(new Rect(0, -10, 100, 70),
+        assertEquals(new Rect(0, 0, 100, 80),
                 mSurface.calculateSnapshotFrame(new Rect(0, 10, 100, 90)));
     }
 
@@ -194,8 +200,17 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         setupSurface(100, 100);
         final Rect insets = new Rect(10, 10, 0, 0);
         mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
-        assertEquals(new Rect(0, -10, 90, 80),
+        assertEquals(new Rect(10, 0, 100, 90),
                 mSurface.calculateSnapshotFrame(new Rect(10, 10, 100, 100)));
+    }
+
+    @Test
+    public void testCalculateSnapshotFrame_waterfall() {
+        setupSurface(100, 100, new Rect(5, 10, 5, 10), 0, 0, new Rect(0, 0, 100, 100));
+        final Rect insets = new Rect(0, 10, 0, 10);
+        mSurface.setFrames(new Rect(5, 0, 95, 100), insets, insets);
+        assertEquals(new Rect(0, 0, 90, 90),
+                mSurface.calculateSnapshotFrame(new Rect(5, 0, 95, 90)));
     }
 
     @Test
