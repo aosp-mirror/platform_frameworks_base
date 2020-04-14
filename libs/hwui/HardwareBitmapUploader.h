@@ -20,7 +20,7 @@
 
 namespace android::uirenderer {
 
-class ANDROID_API HardwareBitmapUploader {
+class HardwareBitmapUploader {
 public:
     static void initialize();
     static void terminate();

@@ -56,7 +56,7 @@ class PixelStorage;
 
 typedef void (*FreeFunc)(void* addr, void* context);
 
-class ANDROID_API Bitmap : public SkPixelRef {
+class Bitmap : public SkPixelRef {
 public:
     /* The allocate factories not only construct the Bitmap object but also allocate the
      * backing store whose type is determined by the specific method that is called.

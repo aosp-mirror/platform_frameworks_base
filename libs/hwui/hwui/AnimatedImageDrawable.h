@@ -44,7 +44,7 @@ public:
  * This class can be drawn into Canvas.h and maintains the state needed to drive
  * the animation from the RenderThread.
  */
-class ANDROID_API AnimatedImageDrawable : public SkDrawable {
+class AnimatedImageDrawable : public SkDrawable {
 public:
     // bytesUsed includes the approximate sizes of the SkAnimatedImage and the SkPictures in the
     // Snapshots.

@@ -28,7 +28,7 @@ namespace uirenderer {
  * When a fraction in [0f, 1f] is provided, the holder will calculate an interpolated value based
  * on its start and end value, and set the new value on the VectorDrawble's corresponding property.
  */
-class ANDROID_API PropertyValuesHolder {
+class PropertyValuesHolder {
 public:
     virtual void setFraction(float fraction) = 0;
     virtual ~PropertyValuesHolder() {}
@@ -49,19 +49,19 @@ public:
     }
 };
 
-class ANDROID_API ColorEvaluator : public Evaluator<SkColor> {
+class ColorEvaluator : public Evaluator<SkColor> {
 public:
     virtual void evaluate(SkColor* outColor, const SkColor& from, const SkColor& to,
                           float fraction) const override;
 };
 
-class ANDROID_API PathEvaluator : public Evaluator<PathData> {
+class PathEvaluator : public Evaluator<PathData> {
     virtual void evaluate(PathData* out, const PathData& from, const PathData& to,
                           float fraction) const override;
 };
 
 template <typename T>
-class ANDROID_API PropertyValuesHolderImpl : public PropertyValuesHolder {
+class PropertyValuesHolderImpl : public PropertyValuesHolder {
 public:
     PropertyValuesHolderImpl(const T& startValue, const T& endValue)
             : mStartValue(startValue), mEndValue(endValue) {}
@@ -85,7 +85,7 @@ protected:
     T mEndValue;
 };
 
-class ANDROID_API GroupPropertyValuesHolder : public PropertyValuesHolderImpl<float> {
+class GroupPropertyValuesHolder : public PropertyValuesHolderImpl<float> {
 public:
     GroupPropertyValuesHolder(VectorDrawable::Group* ptr, int propertyId, float startValue,
                               float endValue)
@@ -99,7 +99,7 @@ private:
     int mPropertyId;
 };
 
-class ANDROID_API FullPathColorPropertyValuesHolder : public PropertyValuesHolderImpl<SkColor> {
+class FullPathColorPropertyValuesHolder : public PropertyValuesHolderImpl<SkColor> {
 public:
     FullPathColorPropertyValuesHolder(VectorDrawable::FullPath* ptr, int propertyId,
                                       SkColor startValue, SkColor endValue)
@@ -116,7 +116,7 @@ private:
     int mPropertyId;
 };
 
-class ANDROID_API FullPathPropertyValuesHolder : public PropertyValuesHolderImpl<float> {
+class FullPathPropertyValuesHolder : public PropertyValuesHolderImpl<float> {
 public:
     FullPathPropertyValuesHolder(VectorDrawable::FullPath* ptr, int propertyId, float startValue,
                                  float endValue)
@@ -132,7 +132,7 @@ private:
     int mPropertyId;
 };
 
-class ANDROID_API PathDataPropertyValuesHolder : public PropertyValuesHolderImpl<PathData> {
+class PathDataPropertyValuesHolder : public PropertyValuesHolderImpl<PathData> {
 public:
     PathDataPropertyValuesHolder(VectorDrawable::Path* ptr, PathData* startValue,
                                  PathData* endValue)
@@ -146,7 +146,7 @@ private:
     PathData mPathData;
 };
 
-class ANDROID_API RootAlphaPropertyValuesHolder : public PropertyValuesHolderImpl<float> {
+class RootAlphaPropertyValuesHolder : public PropertyValuesHolderImpl<float> {
 public:
     RootAlphaPropertyValuesHolder(VectorDrawable::Tree* tree, float startValue, float endValue)
             : PropertyValuesHolderImpl(startValue, endValue), mTree(tree) {

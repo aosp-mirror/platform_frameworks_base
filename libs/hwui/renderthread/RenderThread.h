@@ -88,7 +88,7 @@ class RenderThread : private ThreadBase {
 
 public:
     // Sets a callback that fires before any RenderThread setup has occurred.
-    ANDROID_API static void setOnStartHook(JVMAttachHook onStartHook);
+    static void setOnStartHook(JVMAttachHook onStartHook);
     static JVMAttachHook getOnStartHook();
 
     WorkQueue& queue() { return ThreadBase::queue(); }
