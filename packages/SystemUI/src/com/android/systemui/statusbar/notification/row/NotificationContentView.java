@@ -16,13 +16,18 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+
+import static android.provider.Settings.Global.NOTIFICATION_BUBBLES;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -47,6 +52,7 @@ import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationCustomViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -118,6 +124,7 @@ public class NotificationContentView extends FrameLayout {
     private NotificationGroupManager mGroupManager;
     private RemoteInputController mRemoteInputController;
     private Runnable mExpandedVisibleListener;
+    private PeopleNotificationIdentifier mPeopleIdentifier;
     /**
      * List of listeners for when content views become inactive (i.e. not the showing view).
      */
@@ -454,6 +461,9 @@ public class NotificationContentView extends FrameLayout {
         mExpandedChild = child;
         mExpandedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
+        if (mContainingNotification != null) {
+            applyBubbleAction(mExpandedChild, mContainingNotification.getEntry());
+        }
     }
 
     /**
@@ -493,6 +503,9 @@ public class NotificationContentView extends FrameLayout {
         mHeadsUpChild = child;
         mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
+        if (mContainingNotification != null) {
+            applyBubbleAction(mHeadsUpChild, mContainingNotification.getEntry());
+        }
     }
 
     @Override
@@ -1138,6 +1151,8 @@ public class NotificationContentView extends FrameLayout {
         mForceSelectNextLayout = true;
         mPreviousExpandedRemoteInputIntent = null;
         mPreviousHeadsUpRemoteInputIntent = null;
+        applyBubbleAction(mExpandedChild, entry);
+        applyBubbleAction(mHeadsUpChild, entry);
     }
 
     private void updateAllSingleLineViews() {
@@ -1306,6 +1321,58 @@ public class NotificationContentView extends FrameLayout {
             return existing;
         }
         return null;
+    }
+
+    /**
+     * Call to update state of the bubble button (i.e. does it show bubble or unbubble or no
+     * icon at all).
+     *
+     * @param entry the new entry to use.
+     */
+    public void updateBubbleButton(NotificationEntry entry) {
+        applyBubbleAction(mExpandedChild, entry);
+    }
+
+    private boolean isBubblesEnabled() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                NOTIFICATION_BUBBLES, 0) == 1;
+    }
+
+    private void applyBubbleAction(View layout, NotificationEntry entry) {
+        if (layout == null || mContainingNotification == null || mPeopleIdentifier == null) {
+            return;
+        }
+        ImageView bubbleButton = layout.findViewById(com.android.internal.R.id.bubble_button);
+        View actionContainer = layout.findViewById(com.android.internal.R.id.actions_container);
+        if (bubbleButton == null || actionContainer == null) {
+            return;
+        }
+        boolean isPerson =
+                mPeopleIdentifier.getPeopleNotificationType(entry.getSbn(), entry.getRanking())
+                        != PeopleNotificationIdentifier.TYPE_NON_PERSON;
+        boolean showButton = isBubblesEnabled()
+                && isPerson
+                && entry.getBubbleMetadata() != null;
+        if (showButton) {
+            Drawable d = mContext.getResources().getDrawable(entry.isBubble()
+                    ? R.drawable.ic_stop_bubble
+                    : R.drawable.ic_create_bubble);
+            mContainingNotification.updateNotificationColor();
+            final int tint = mContainingNotification.getNotificationColor();
+            d.setTint(tint);
+
+            String contentDescription = mContext.getResources().getString(entry.isBubble()
+                    ? R.string.notification_conversation_unbubble
+                    : R.string.notification_conversation_bubble);
+
+            bubbleButton.setContentDescription(contentDescription);
+            bubbleButton.setImageDrawable(d);
+            bubbleButton.setOnClickListener(mContainingNotification.getBubbleClickListener());
+            bubbleButton.setVisibility(VISIBLE);
+            actionContainer.setVisibility(VISIBLE);
+        } else  {
+            bubbleButton.setVisibility(GONE);
+        }
     }
 
     private void applySmartReplyView(
@@ -1510,6 +1577,10 @@ public class NotificationContentView extends FrameLayout {
 
     public void setContainingNotification(ExpandableNotificationRow containingNotification) {
         mContainingNotification = containingNotification;
+    }
+
+    public void setPeopleNotificationIdentifier(PeopleNotificationIdentifier peopleIdentifier) {
+        mPeopleIdentifier = peopleIdentifier;
     }
 
     public void requestSelectLayout(boolean needsAnimation) {
