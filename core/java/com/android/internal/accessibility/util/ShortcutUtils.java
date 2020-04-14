@@ -39,21 +39,21 @@ public final class ShortcutUtils {
             new TextUtils.SimpleStringSplitter(SERVICES_SEPARATOR);
 
     /**
-     * Opts in component name into colon-separated {@link UserShortcutType}
-     * key's string in Settings.
+     * Opts in component id into colon-separated {@link UserShortcutType}
+     * key's string from Settings.
      *
      * @param context The current context.
      * @param shortcutType The preferred shortcut type user selected.
-     * @param componentId The component id that need to be opted out from Settings.
+     * @param componentId The component id that need to be opted in Settings.
      */
     public static void optInValueToSettings(Context context, @UserShortcutType int shortcutType,
-            String componentId) {
+            @NonNull String componentId) {
         final StringJoiner joiner = new StringJoiner(String.valueOf(SERVICES_SEPARATOR));
         final String targetKey = convertToKey(shortcutType);
         final String targetString = Settings.Secure.getString(context.getContentResolver(),
                 targetKey);
 
-        if (hasValueInSettings(context, shortcutType, componentId)) {
+        if (isComponentIdExistingInSettings(context, shortcutType, componentId)) {
             return;
         }
 
@@ -66,14 +66,15 @@ public final class ShortcutUtils {
     }
 
     /**
-     * Opts out component name into colon-separated {@code shortcutType} key's string in Settings.
+     * Opts out of component id into colon-separated {@link UserShortcutType} key's string from
+     * Settings.
      *
      * @param context The current context.
      * @param shortcutType The preferred shortcut type user selected.
-     * @param componentId The component id that need to be opted out from Settings.
+     * @param componentId The component id that need to be opted out of Settings.
      */
     public static void optOutValueFromSettings(
-            Context context, @UserShortcutType int shortcutType, String componentId) {
+            Context context, @UserShortcutType int shortcutType, @NonNull String componentId) {
         final StringJoiner joiner = new StringJoiner(String.valueOf(SERVICES_SEPARATOR));
         final String targetsKey = convertToKey(shortcutType);
         final String targetsValue = Settings.Secure.getString(context.getContentResolver(),
@@ -96,36 +97,38 @@ public final class ShortcutUtils {
     }
 
     /**
-     * Returns if component name existed in one of {@code shortcutTypes} string in Settings.
+     * Returns if component id existed in one of {@link UserShortcutType} string from Settings.
      *
      * @param context The current context.
      * @param shortcutTypes A combination of {@link UserShortcutType}.
-     * @param componentId The component name that need to be checked existed in Settings.
-     * @return {@code true} if componentName existed in Settings.
+     * @param componentId The component id that need to be checked existed in Settings.
+     * @return {@code true} if component id existed in Settings.
      */
-    public static boolean hasValuesInSettings(Context context, int shortcutTypes,
+    public static boolean hasValuesInSettings(Context context, @UserShortcutType int shortcutTypes,
             @NonNull String componentId) {
         boolean exist = false;
         if ((shortcutTypes & UserShortcutType.SOFTWARE) == UserShortcutType.SOFTWARE) {
-            exist = hasValueInSettings(context, UserShortcutType.SOFTWARE, componentId);
+            exist = isComponentIdExistingInSettings(context, UserShortcutType.SOFTWARE,
+                    componentId);
         }
         if (((shortcutTypes & UserShortcutType.HARDWARE) == UserShortcutType.HARDWARE)) {
-            exist |= hasValueInSettings(context, UserShortcutType.HARDWARE, componentId);
+            exist |= isComponentIdExistingInSettings(context, UserShortcutType.HARDWARE,
+                    componentId);
         }
         return exist;
     }
 
 
     /**
-     * Returns if component name existed in Settings.
+     * Returns if component id existed in Settings.
      *
      * @param context The current context.
      * @param shortcutType The preferred shortcut type user selected.
      * @param componentId The component id that need to be checked existed in Settings.
-     * @return {@code true} if componentName existed in Settings.
+     * @return {@code true} if component id existed in Settings.
      */
-    public static boolean hasValueInSettings(Context context, @UserShortcutType int shortcutType,
-            @NonNull String componentId) {
+    public static boolean isComponentIdExistingInSettings(Context context,
+            @UserShortcutType int shortcutType, @NonNull String componentId) {
         final String targetKey = convertToKey(shortcutType);
         final String targetString = Settings.Secure.getString(context.getContentResolver(),
                 targetKey);
@@ -146,7 +149,7 @@ public final class ShortcutUtils {
     }
 
     /**
-     * Converts {@link UserShortcutType} to key in Settings.
+     * Converts {@link UserShortcutType} to {@link Settings.Secure} key.
      *
      * @param type The shortcut type.
      * @return Mapping key in Settings.
@@ -169,7 +172,7 @@ public final class ShortcutUtils {
      * Converts {@link ShortcutType} to {@link UserShortcutType}.
      *
      * @param type The shortcut type.
-     * @return {@link UserShortcutType}.
+     * @return Mapping type from {@link UserShortcutType}.
      */
     public static @UserShortcutType int convertToUserType(@ShortcutType int type) {
         switch (type) {
