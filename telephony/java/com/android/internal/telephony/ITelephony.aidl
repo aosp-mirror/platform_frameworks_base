@@ -2268,4 +2268,9 @@ interface ITelephony {
      * @return operatorinfo on success
      */
     String getManualNetworkSelectionPlmn(int subId);
+
+    /**
+     * Whether device can connect to 5G network when two SIMs are active.
+     */
+    boolean canConnectTo5GInDsdsMode();
 }
