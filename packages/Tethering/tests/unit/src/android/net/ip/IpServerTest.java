@@ -587,6 +587,7 @@ public class IpServerTest {
         final InetAddress neighB = InetAddresses.parseNumericAddress("2001:db8::2");
         final InetAddress neighLL = InetAddresses.parseNumericAddress("fe80::1");
         final InetAddress neighMC = InetAddresses.parseNumericAddress("ff02::1234");
+        final MacAddress macNull = MacAddress.fromString("00:00:00:00:00:00");
         final MacAddress macA = MacAddress.fromString("00:00:00:00:00:0a");
         final MacAddress macB = MacAddress.fromString("11:22:33:00:00:0b");
 
@@ -612,13 +613,14 @@ public class IpServerTest {
         verifyNoMoreInteractions(mNetd);
 
         // A neighbor that is no longer valid causes the rule to be removed.
-        recvNewNeigh(myIfindex, neighA, NUD_FAILED, macA);
-        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighA, macA));
+        // NUD_FAILED events do not have a MAC address.
+        recvNewNeigh(myIfindex, neighA, NUD_FAILED, null);
+        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighA, macNull));
         reset(mNetd);
 
         // A neighbor that is deleted causes the rule to be removed.
         recvDelNeigh(myIfindex, neighB, NUD_STALE, macB);
-        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighB, macB));
+        verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighB, macNull));
         reset(mNetd);
 
         // Upstream changes result in deleting and re-adding the rules.
