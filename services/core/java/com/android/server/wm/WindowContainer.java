@@ -2058,7 +2058,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     // TODO: Remove this and use #getBounds() instead once we set an app transition animation
     // on TaskStack.
     Rect getAnimationBounds(int appStackClipMode) {
-        return getDisplayedBounds();
+        return getBounds();
     }
 
     /**
@@ -2120,7 +2120,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Separate position and size for use in animators.
         mTmpRect.set(getAnimationBounds(appStackClipMode));
         if (sHierarchicalAnimations) {
-            getRelativeDisplayedPosition(mTmpPoint);
+            getRelativePosition(mTmpPoint);
         } else {
             mTmpPoint.set(mTmpRect.left, mTmpRect.top);
         }
@@ -2391,7 +2391,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return;
         }
 
-        getRelativeDisplayedPosition(mTmpPos);
+        getRelativePosition(mTmpPos);
         if (mTmpPos.equals(mLastSurfacePosition)) {
             return;
         }
@@ -2403,16 +2403,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @VisibleForTesting
     Point getLastSurfacePosition() {
         return mLastSurfacePosition;
-    }
-
-    /**
-     * Displayed bounds specify where to display this container at. It differs from bounds during
-     * certain operations (like animation or interactive dragging).
-     *
-     * @return the bounds to display this container at.
-     */
-    Rect getDisplayedBounds() {
-        return getBounds();
     }
 
     /**
@@ -2435,7 +2425,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         outSurfaceInsets.setEmpty();
     }
 
-    void getRelativeDisplayedPosition(Point outPos) {
+    void getRelativePosition(Point outPos) {
         // In addition to updateSurfacePosition, we keep other code that sets
         // position from fighting with the organizer
         if (isOrganized()) {
@@ -2443,11 +2433,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return;
         }
 
-        final Rect dispBounds = getDisplayedBounds();
+        final Rect dispBounds = getBounds();
         outPos.set(dispBounds.left, dispBounds.top);
         final WindowContainer parent = getParent();
         if (parent != null) {
-            final Rect parentBounds = parent.getDisplayedBounds();
+            final Rect parentBounds = parent.getBounds();
             outPos.offset(-parentBounds.left, -parentBounds.top);
         }
     }

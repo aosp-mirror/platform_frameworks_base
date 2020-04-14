@@ -312,7 +312,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             final ActivityStack stack = (ActivityStack) container;
             if (stack.inPinnedWindowingMode()) {
                 stack.resize(config.windowConfiguration.getBounds(),
-                        null /* configBounds */, PRESERVE_WINDOWS, true /* deferResume */);
+                        PRESERVE_WINDOWS, true /* deferResume */);
             }
         }
     }
