@@ -172,7 +172,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         assertGetOrCreateStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, type, candidateTask,
                 false /* reuseCandidate */);
         assertGetOrCreateStack(WINDOWING_MODE_PINNED, type, candidateTask,
-                false /* reuseCandidate */);
+                true /* reuseCandidate */);
 
         final int windowingMode = WINDOWING_MODE_FULLSCREEN;
         assertGetOrCreateStack(windowingMode, ACTIVITY_TYPE_HOME, candidateTask,
