@@ -375,7 +375,6 @@ public final class ActivityThread extends ClientTransactionHandler {
     String mInstrumentedLibDir = null;
     boolean mSystemThread = false;
     boolean mSomeActivitiesChanged = false;
-    boolean mUpdatingSystemConfig = false;
     /* package */ boolean mHiddenApiWarningShown = false;
 
     // These can be accessed by multiple threads; mResourcesManager is the lock.
@@ -587,8 +586,11 @@ public final class ActivityThread extends ClientTransactionHandler {
                     throw new IllegalStateException(
                             "Received config update for non-existing activity");
                 }
+                // Given alwaysReportChange=false because the configuration is from view root, the
+                // activity may not be able to handle the changes. In that case the activity will be
+                // relaunched immediately, then Activity#onConfigurationChanged shouldn't be called.
                 activity.mMainThread.handleActivityConfigurationChanged(token, overrideConfig,
-                        newDisplayId);
+                        newDisplayId, false /* alwaysReportChange */);
             };
         }
 
@@ -2029,12 +2031,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     break;
                 }
                 case APPLICATION_INFO_CHANGED:
-                    mUpdatingSystemConfig = true;
-                    try {
-                        handleApplicationInfoChanged((ApplicationInfo) msg.obj);
-                    } finally {
-                        mUpdatingSystemConfig = false;
-                    }
+                    handleApplicationInfoChanged((ApplicationInfo) msg.obj);
                     break;
                 case RUN_ISOLATED_ENTRY_POINT:
                     handleRunIsolatedEntryPoint((String) ((SomeArgs) msg.obj).arg1,
@@ -4467,7 +4464,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         // simply finishing, and we are not starting another activity.
         if (!r.activity.mFinished && willBeVisible && r.activity.mDecor != null && !r.hideForNow) {
             if (r.newConfig != null) {
-                performConfigurationChangedForActivity(r, r.newConfig);
+                performConfigurationChangedForActivity(r, r.newConfig,
+                        false /* alwaysReportChange */);
                 if (DEBUG_CONFIGURATION) {
                     Slog.v(TAG, "Resuming activity " + r.activityInfo.name + " with newConfig "
                             + r.activity.mCurrentConfig);
@@ -4787,7 +4785,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                     }
                 }
                 if (r.newConfig != null) {
-                    performConfigurationChangedForActivity(r, r.newConfig);
+                    performConfigurationChangedForActivity(r, r.newConfig,
+                            false /* alwaysReportChange */);
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Updating activity vis "
                             + r.activityInfo.name + " with new config "
                             + r.activity.mCurrentConfig);
@@ -5447,11 +5446,12 @@ public final class ActivityThread extends ClientTransactionHandler {
      * @param r ActivityClientRecord representing the Activity.
      * @param newBaseConfig The new configuration to use. This may be augmented with
      *                      {@link ActivityClientRecord#overrideConfig}.
+     * @param alwaysReportChange If the configuration is changed, always report to activity.
      */
     private void performConfigurationChangedForActivity(ActivityClientRecord r,
-            Configuration newBaseConfig) {
-        performConfigurationChangedForActivity(r, newBaseConfig,
-                r.activity.getDisplayId(), false /* movedToDifferentDisplay */);
+            Configuration newBaseConfig, boolean alwaysReportChange) {
+        performConfigurationChangedForActivity(r, newBaseConfig, r.activity.getDisplayId(),
+                false /* movedToDifferentDisplay */, alwaysReportChange);
     }
 
     /**
@@ -5464,16 +5464,19 @@ public final class ActivityThread extends ClientTransactionHandler {
      *                      {@link ActivityClientRecord#overrideConfig}.
      * @param displayId The id of the display where the Activity currently resides.
      * @param movedToDifferentDisplay Indicates if the activity was moved to different display.
+     * @param alwaysReportChange If the configuration is changed, always report to activity.
      * @return {@link Configuration} instance sent to client, null if not sent.
      */
     private Configuration performConfigurationChangedForActivity(ActivityClientRecord r,
-            Configuration newBaseConfig, int displayId, boolean movedToDifferentDisplay) {
+            Configuration newBaseConfig, int displayId, boolean movedToDifferentDisplay,
+            boolean alwaysReportChange) {
         r.tmpConfig.setTo(newBaseConfig);
         if (r.overrideConfig != null) {
             r.tmpConfig.updateFrom(r.overrideConfig);
         }
         final Configuration reportedConfig = performActivityConfigurationChanged(r.activity,
-                r.tmpConfig, r.overrideConfig, displayId, movedToDifferentDisplay);
+                r.tmpConfig, r.overrideConfig, displayId, movedToDifferentDisplay,
+                alwaysReportChange);
         freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.tmpConfig));
         return reportedConfig;
     }
@@ -5529,11 +5532,12 @@ public final class ActivityThread extends ClientTransactionHandler {
      *                         ActivityManager.
      * @param displayId Id of the display where activity currently resides.
      * @param movedToDifferentDisplay Indicates if the activity was moved to different display.
+     * @param alwaysReportChange If the configuration is changed, always report to activity.
      * @return Configuration sent to client, null if no changes and not moved to different display.
      */
     private Configuration performActivityConfigurationChanged(Activity activity,
             Configuration newConfig, Configuration amOverrideConfig, int displayId,
-            boolean movedToDifferentDisplay) {
+            boolean movedToDifferentDisplay, boolean alwaysReportChange) {
         if (activity == null) {
             throw new IllegalArgumentException("No activity provided.");
         }
@@ -5556,7 +5560,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 // Always send the task-level config changes. For system-level configuration, if
                 // this activity doesn't handle any of the config changes, then don't bother
                 // calling onConfigurationChanged as we're going to destroy it.
-                if (!mUpdatingSystemConfig
+                if (alwaysReportChange
                         || (~activity.mActivityInfo.getRealConfigChanged() & diff) == 0
                         || !REPORT_TO_ACTIVITY) {
                     shouldChangeConfig = true;
@@ -5638,12 +5642,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     public void handleConfigurationChanged(Configuration config) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "configChanged");
         mCurDefaultDisplayDpi = config.densityDpi;
-        mUpdatingSystemConfig = true;
-        try {
-            handleConfigurationChanged(config, null /* compat */);
-        } finally {
-            mUpdatingSystemConfig = false;
-        }
+        handleConfigurationChanged(config, null /* compat */);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -5725,7 +5724,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     // config and avoid onConfigurationChanged if it hasn't changed.
                     Activity a = (Activity) cb;
                     performConfigurationChangedForActivity(mActivities.get(a.getActivityToken()),
-                            config);
+                            config, false /* alwaysReportChange */);
                 } else if (!equivalent) {
                     performConfigurationChanged(cb, config);
                 } else {
@@ -5832,16 +5831,28 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @Override
+    public void handleActivityConfigurationChanged(IBinder activityToken,
+            Configuration overrideConfig, int displayId) {
+        handleActivityConfigurationChanged(activityToken, overrideConfig, displayId,
+                // This is the only place that uses alwaysReportChange=true. The entry point should
+                // be from ActivityConfigurationChangeItem or MoveToDisplayItem, so the server side
+                // has confirmed the activity should handle the configuration instead of relaunch.
+                // If Activity#onConfigurationChanged is called unexpectedly, then we can know it is
+                // something wrong from server side.
+                true /* alwaysReportChange */);
+    }
+
     /**
      * Handle new activity configuration and/or move to a different display.
      * @param activityToken Target activity token.
      * @param overrideConfig Activity override config.
      * @param displayId Id of the display where activity was moved to, -1 if there was no move and
      *                  value didn't change.
+     * @param alwaysReportChange If the configuration is changed, always report to activity.
      */
-    @Override
-    public void handleActivityConfigurationChanged(IBinder activityToken,
-            Configuration overrideConfig, int displayId) {
+    void handleActivityConfigurationChanged(IBinder activityToken, Configuration overrideConfig,
+            int displayId, boolean alwaysReportChange) {
         ActivityClientRecord r = mActivities.get(activityToken);
         // Check input params.
         if (r == null || r.activity == null) {
@@ -5880,14 +5891,15 @@ public final class ActivityThread extends ClientTransactionHandler {
                     + ", config=" + overrideConfig);
 
             final Configuration reportedConfig = performConfigurationChangedForActivity(r,
-                    mCompatConfiguration, displayId, true /* movedToDifferentDisplay */);
+                    mCompatConfiguration, displayId, true /* movedToDifferentDisplay */,
+                    alwaysReportChange);
             if (viewRoot != null) {
                 viewRoot.onMovedToDisplay(displayId, reportedConfig);
             }
         } else {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
                     + r.activityInfo.name + ", config=" + overrideConfig);
-            performConfigurationChangedForActivity(r, mCompatConfiguration);
+            performConfigurationChangedForActivity(r, mCompatConfiguration, alwaysReportChange);
         }
         // Notify the ViewRootImpl instance about configuration changes. It may have initiated this
         // update to make sure that resources are updated before updating itself.
