@@ -17,6 +17,8 @@
 package com.android.systemui.bubbles;
 
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
@@ -30,7 +32,6 @@ import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
-import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_EXPERIMENTS;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
@@ -43,6 +44,9 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.INotificationManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -83,6 +87,7 @@ import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
+import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
@@ -169,6 +174,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final ZenModeController mZenModeController;
     private StatusBarStateListener mStatusBarStateListener;
+    private INotificationManager mINotificationManager;
 
     // Callback that updates BubbleOverflowActivity on data change.
     @Nullable private Runnable mOverflowCallback = null;
@@ -293,11 +299,13 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             FeatureFlags featureFlags,
             DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator,
-            SysUiState sysUiState) {
+            SysUiState sysUiState,
+            INotificationManager notificationManager) {
         this(context, notificationShadeWindowController, statusBarStateController, shadeController,
                 data, null /* synchronizer */, configurationController, interruptionStateProvider,
                 zenModeController, notifUserManager, groupManager, entryManager,
-                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator, sysUiState);
+                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator, sysUiState,
+                notificationManager);
     }
 
     /**
@@ -319,7 +327,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             FeatureFlags featureFlags,
             DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator,
-            SysUiState sysUiState) {
+            SysUiState sysUiState,
+            INotificationManager notificationManager) {
         dumpManager.registerDumpable(TAG, this);
         mContext = context;
         mShadeController = shadeController;
@@ -327,6 +336,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mNotifUserManager = notifUserManager;
         mZenModeController = zenModeController;
         mFloatingContentCoordinator = floatingContentCoordinator;
+        mINotificationManager = notificationManager;
         mZenModeController.addCallback(new ZenModeController.Callback() {
             @Override
             public void onZenChanged(int zen) {
@@ -809,37 +819,43 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * This method will collapse the shade, create the bubble without a flyout or dot, and suppress
      * the notification from appearing in the shade.
      *
-     * @param entry the notification to show as a bubble.
+     * @param entry the notification to change bubble state for.
+     * @param shouldBubble whether the notification should show as a bubble or not.
      */
-    public void onUserCreatedBubbleFromNotification(NotificationEntry entry) {
-        if (DEBUG_EXPERIMENTS || DEBUG_BUBBLE_CONTROLLER) {
-            Log.d(TAG, "onUserCreatedBubble: " + entry.getKey());
+    public void onUserChangedBubble(NotificationEntry entry, boolean shouldBubble) {
+        NotificationChannel channel = entry.getChannel();
+        final String appPkg = entry.getSbn().getPackageName();
+        final int appUid = entry.getSbn().getUid();
+        if (channel == null || appPkg == null) {
+            return;
         }
-        mShadeController.collapsePanel(true);
-        entry.setFlagBubble(true);
-        updateBubble(entry, true /* suppressFlyout */, false /* showInShade */);
-        mUserCreatedBubbles.add(entry.getKey());
-        mUserBlockedBubbles.remove(entry.getKey());
-    }
 
-    /**
-     * Called when a user has indicated that an active notification appearing as a bubble should
-     * no longer be shown as a bubble.
-     *
-     * @param entry the notification to no longer show as a bubble.
-     */
-    public void onUserDemotedBubbleFromNotification(NotificationEntry entry) {
-        if (DEBUG_EXPERIMENTS || DEBUG_BUBBLE_CONTROLLER) {
-            Log.d(TAG, "onUserDemotedBubble: " + entry.getKey());
+        // Update the state in NotificationManagerService
+        try {
+            int flags = Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+            mBarService.onNotificationBubbleChanged(entry.getKey(), shouldBubble, flags);
+        } catch (RemoteException e) {
         }
-        entry.setFlagBubble(false);
-        removeBubble(entry, DISMISS_BLOCKED);
-        mUserCreatedBubbles.remove(entry.getKey());
-        if (BubbleExperimentConfig.isPackageWhitelistedToAutoBubble(
-                mContext, entry.getSbn().getPackageName())) {
-            // This package is whitelist but user demoted the bubble, let's save it so we don't
-            // auto-bubble for the whitelist again.
-            mUserBlockedBubbles.add(entry.getKey());
+
+        // Change the settings
+        channel = NotificationChannelHelper.createConversationChannelIfNeeded(mContext,
+                mINotificationManager, entry, channel);
+        channel.setAllowBubbles(shouldBubble);
+        try {
+            int currentPref = mINotificationManager.getBubblePreferenceForPackage(appPkg, appUid);
+            if (shouldBubble && currentPref == BUBBLE_PREFERENCE_NONE) {
+                mINotificationManager.setBubblesAllowed(appPkg, appUid, BUBBLE_PREFERENCE_SELECTED);
+            }
+            mINotificationManager.updateNotificationChannelForPackage(appPkg, appUid, channel);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        if (shouldBubble) {
+            mShadeController.collapsePanel(true);
+            if (entry.getRow() != null) {
+                entry.getRow().updateBubbleButton();
+            }
         }
     }
 
@@ -987,14 +1003,15 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     } else {
                         // Update the flag for SysUI
                         bubble.getEntry().getSbn().getNotification().flags &= ~FLAG_BUBBLE;
+                        if (bubble.getEntry().getRow() != null) {
+                            bubble.getEntry().getRow().updateBubbleButton();
+                        }
 
-                        // Make sure NoMan knows it's not a bubble anymore so anyone querying it
-                        // will get right result back
+                        // Update the state in NotificationManagerService
                         try {
                             mBarService.onNotificationBubbleChanged(bubble.getKey(),
-                                    false /* isBubble */);
+                                    false /* isBubble */, 0 /* flags */);
                         } catch (RemoteException e) {
-                            // Bad things have happened
                         }
                     }
 
