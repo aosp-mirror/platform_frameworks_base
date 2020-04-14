@@ -166,13 +166,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     private static void informAllUids(Context context) {
-        UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
-        PackageManager pm = context.getPackageManager();
-        final List<UserHandle> users = um.getUserHandles(true);
-        if (DEBUG) {
-            Log.d(TAG, "Iterating over " + users.size() + " userHandles.");
-        }
-
         ParcelFileDescriptor[] fds;
         try {
             fds = ParcelFileDescriptor.createPipe();
@@ -185,6 +178,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         backgroundThread.start();
         Handler handler = new Handler(backgroundThread.getLooper());
         handler.post(() -> {
+            UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
+            PackageManager pm = context.getPackageManager();
+            final List<UserHandle> users = um.getUserHandles(true);
+            if (DEBUG) {
+                Log.d(TAG, "Iterating over " + users.size() + " userHandles.");
+            }
             IStatsd statsd = getStatsdNonblocking();
             if (statsd == null) {
                 return;
@@ -699,8 +698,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             deathRecipient.addRegisteredBroadcastReceivers(
                     List.of(appUpdateReceiver, userUpdateReceiver, shutdownEventReceiver));
 
-            final long token = Binder.clearCallingIdentity();
-
             // Used so we can call statsd.bootComplete() outside of the lock.
             boolean shouldSendBootComplete = false;
             synchronized (sStatsdLock) {
@@ -713,13 +710,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 statsd.bootCompleted();
             }
 
-            try {
-                // Pull the latest state of UID->app name, version mapping when
-                // statsd starts.
-                informAllUids(mContext);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            // Pull the latest state of UID->app name, version mapping when
+            // statsd starts.
+            informAllUids(mContext);
+
             Log.i(TAG, "Told statsd that StatsCompanionService is alive.");
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
