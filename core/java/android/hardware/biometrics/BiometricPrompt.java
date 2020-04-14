@@ -934,7 +934,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mCryptoObject = crypto;
             mExecutor = executor;
             mAuthenticationCallback = callback;
-            final long sessionId = crypto != null ? crypto.getOpId() : 0;
+            final long operationId = crypto != null ? crypto.getOpId() : 0;
 
             final Bundle bundle;
             if (crypto != null) {
@@ -950,7 +950,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 bundle = mBundle;
             }
 
-            mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
+            mService.authenticate(mToken, operationId, userId, mBiometricServiceReceiver,
                     mContext.getOpPackageName(), bundle);
 
         } catch (RemoteException e) {

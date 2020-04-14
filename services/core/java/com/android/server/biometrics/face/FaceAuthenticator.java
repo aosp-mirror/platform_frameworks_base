@@ -34,10 +34,10 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
 
     @Override
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
-            long sessionId, int userId, IBiometricServiceReceiverInternal wrapperReceiver,
+            long operationId, int userId, IBiometricServiceReceiverInternal wrapperReceiver,
             String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
-        mFaceService.prepareForAuthentication(requireConfirmation, token, sessionId, userId,
+        mFaceService.prepareForAuthentication(requireConfirmation, token, operationId, userId,
                 wrapperReceiver, opPackageName, cookie, callingUid, callingPid, callingUserId);
     }
 

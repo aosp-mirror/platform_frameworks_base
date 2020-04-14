@@ -89,7 +89,7 @@ final class AuthSession {
     // The following variables are passed to authenticateInternal, which initiates the
     // appropriate <Biometric>Services.
     final IBinder mToken;
-    final long mSessionId;
+    final long mOperationId;
     final int mUserId;
     // Original receiver from BiometricPrompt.
     final IBiometricServiceReceiver mClientReceiver;
@@ -118,13 +118,13 @@ final class AuthSession {
     // Timestamp when hardware authentication occurred
     long mAuthenticatedTimeMs;
 
-    AuthSession(HashMap<Integer, Integer> modalities, IBinder token, long sessionId,
+    AuthSession(HashMap<Integer, Integer> modalities, IBinder token, long operationId,
             int userId, IBiometricServiceReceiver receiver, String opPackageName,
             Bundle bundle, int callingUid, int callingPid, int callingUserId,
             int modality, boolean requireConfirmation) {
         mModalitiesWaiting = modalities;
         mToken = token;
-        mSessionId = sessionId;
+        mOperationId = operationId;
         mUserId = userId;
         mClientReceiver = receiver;
         mOpPackageName = opPackageName;
@@ -137,7 +137,7 @@ final class AuthSession {
     }
 
     boolean isCrypto() {
-        return mSessionId != 0;
+        return mOperationId != 0;
     }
 
     boolean containsCookie(int cookie) {

@@ -206,7 +206,7 @@ public class BiometricService extends SystemService {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleAuthenticate(
                             (IBinder) args.arg1 /* token */,
-                            (long) args.arg2 /* sessionId */,
+                            (long) args.arg2 /* operationId */,
                             args.argi1 /* userid */,
                             (IBiometricServiceReceiver) args.arg3 /* receiver */,
                             (String) args.arg4 /* opPackageName */,
@@ -491,7 +491,7 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public void authenticate(IBinder token, long sessionId, int userId,
+        public void authenticate(IBinder token, long operationId, int userId,
                 IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
                 int callingUid, int callingPid, int callingUserId) {
             checkInternalPermission();
@@ -517,7 +517,7 @@ public class BiometricService extends SystemService {
 
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = token;
-            args.arg2 = sessionId;
+            args.arg2 = operationId;
             args.argi1 = userId;
             args.arg3 = receiver;
             args.arg4 = opPackageName;
@@ -1283,7 +1283,7 @@ public class BiometricService extends SystemService {
                                 false /* requireConfirmation */,
                                 mCurrentAuthSession.mUserId,
                                 mCurrentAuthSession.mOpPackageName,
-                                mCurrentAuthSession.mSessionId);
+                                mCurrentAuthSession.mOperationId);
                     } else {
                         mPendingAuthSession.mClientReceiver.onError(modality, error, vendorCode);
                         mPendingAuthSession = null;
@@ -1389,7 +1389,7 @@ public class BiometricService extends SystemService {
         // No need to check permission, since it can only be invoked by SystemUI
         // (or system server itself).
         authenticateInternal(mCurrentAuthSession.mToken,
-                mCurrentAuthSession.mSessionId,
+                mCurrentAuthSession.mOperationId,
                 mCurrentAuthSession.mUserId,
                 mCurrentAuthSession.mClientReceiver,
                 mCurrentAuthSession.mOpPackageName,
@@ -1500,7 +1500,7 @@ public class BiometricService extends SystemService {
                     mStatusBarService.showAuthenticationDialog(mCurrentAuthSession.mBundle,
                             mInternalReceiver, modality, requireConfirmation, userId,
                             mCurrentAuthSession.mOpPackageName,
-                            mCurrentAuthSession.mSessionId);
+                            mCurrentAuthSession.mOperationId);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);
                 }
@@ -1508,7 +1508,7 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleAuthenticate(IBinder token, long sessionId, int userId,
+    private void handleAuthenticate(IBinder token, long operationId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
             int callingUid, int callingPid, int callingUserId) {
 
@@ -1522,7 +1522,7 @@ public class BiometricService extends SystemService {
                 final int result = pair.second;
 
                 if (result == BiometricConstants.BIOMETRIC_SUCCESS) {
-                    authenticateInternal(token, sessionId, userId, receiver, opPackageName,
+                    authenticateInternal(token, operationId, userId, receiver, opPackageName,
                             bundle, callingUid, callingPid, callingUserId, modality);
                 } else {
                     receiver.onError(modality, result, 0 /* vendorCode */);
@@ -1542,7 +1542,7 @@ public class BiometricService extends SystemService {
      * 2) Preparing <Biometric>Services for authentication when BiometricPrompt is already shown
      * and the user has pressed "try again"
      */
-    private void authenticateInternal(IBinder token, long sessionId, int userId,
+    private void authenticateInternal(IBinder token, long operationId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
             int callingUid, int callingPid, int callingUserId, int modality) {
         boolean requireConfirmation = bundle.getBoolean(
@@ -1569,7 +1569,7 @@ public class BiometricService extends SystemService {
         if ((authenticators & ~Authenticators.DEVICE_CREDENTIAL) != 0) {
             modalities.put(modality, cookie);
         }
-        mPendingAuthSession = new AuthSession(modalities, token, sessionId, userId,
+        mPendingAuthSession = new AuthSession(modalities, token, operationId, userId,
                 receiver, opPackageName, bundle, callingUid, callingPid, callingUserId,
                 modality, requireConfirmation);
 
@@ -1586,14 +1586,14 @@ public class BiometricService extends SystemService {
                         false /* requireConfirmation */,
                         mCurrentAuthSession.mUserId,
                         mCurrentAuthSession.mOpPackageName,
-                        sessionId);
+                        operationId);
             } else {
                 mPendingAuthSession.mState = AuthSession.STATE_AUTH_CALLED;
                 for (BiometricSensor sensor : mSensors) {
                     // TODO(b/141025588): use ids instead of modalities to avoid ambiguity.
                     if (sensor.modality == modality) {
                         sensor.impl.prepareForAuthentication(requireConfirmation, token,
-                                sessionId, userId, mInternalReceiver, opPackageName, cookie,
+                                operationId, userId, mInternalReceiver, opPackageName, cookie,
                                 callingUid, callingPid, callingUserId);
                         break;
                     }
