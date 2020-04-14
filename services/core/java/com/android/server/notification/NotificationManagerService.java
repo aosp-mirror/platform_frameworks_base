@@ -1196,14 +1196,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationBubbleChanged(String key, boolean isBubble) {
-            String pkg;
-            synchronized (mNotificationLock) {
-                NotificationRecord r = mNotificationsByKey.get(key);
-                pkg = r != null && r.getSbn() != null ? r.getSbn().getPackageName() : null;
-            }
-            boolean isAppForeground = pkg != null
-                    && mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
+        public void onNotificationBubbleChanged(String key, boolean isBubble, int flags) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
@@ -1220,8 +1213,13 @@ public class NotificationManagerService extends SystemService {
                         // be applied there.
                         r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
                         r.setFlagBubbleRemoved(false);
+                        if (r.getNotification().getBubbleMetadata() != null) {
+                            r.getNotification().getBubbleMetadata().setFlags(flags);
+                        }
+                        // Force isAppForeground true here, because for sysui's purposes we
+                        // want to adjust the flag behaviour.
                         mHandler.post(new EnqueueNotificationRunnable(r.getUser().getIdentifier(),
-                                r, isAppForeground));
+                                r, true /* isAppForeground*/));
                     }
                 }
             }
