@@ -900,10 +900,11 @@ public class DreamService extends Service implements Window.Callback {
     public final void finish() {
         if (mDebug) Slog.v(TAG, "finish(): mFinished=" + mFinished);
 
-        if (mActivity != null) {
-            if (!mActivity.isFinishing()) {
+        Activity activity = mActivity;
+        if (activity != null) {
+            if (!activity.isFinishing()) {
                 // In case the activity is not finished yet, do it now.
-                mActivity.finishAndRemoveTask();
+                activity.finishAndRemoveTask();
             }
             return;
         }
@@ -1106,6 +1107,7 @@ public class DreamService extends Service implements Window.Callback {
 
                     @Override
                     public void onViewDetachedFromWindow(View v) {
+                        mActivity = null;
                         finish();
                     }
                 });
