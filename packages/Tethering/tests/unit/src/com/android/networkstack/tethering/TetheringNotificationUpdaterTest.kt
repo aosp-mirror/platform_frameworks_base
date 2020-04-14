@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering
+package com.android.networkstack.tethering
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -29,8 +29,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.internal.util.test.BroadcastInterceptingContext
-import com.android.networkstack.tethering.R
-import com.android.server.connectivity.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE
+import com.android.networkstack.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
