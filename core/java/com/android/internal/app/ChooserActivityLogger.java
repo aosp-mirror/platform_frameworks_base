@@ -182,7 +182,8 @@ public interface ChooserActivityLogger {
                 return FrameworkStatsLog.SHARESHEET_STARTED__PREVIEW_TYPE__CONTENT_PREVIEW_FILE;
             case ChooserActivity.CONTENT_PREVIEW_TEXT:
             default:
-                return FrameworkStatsLog.SHARESHEET_STARTED__PREVIEW_TYPE__CONTENT_PREVIEW_TEXT;
+                return FrameworkStatsLog
+                        .SHARESHEET_STARTED__PREVIEW_TYPE__CONTENT_PREVIEW_TYPE_UNKNOWN;
         }
     }
 
