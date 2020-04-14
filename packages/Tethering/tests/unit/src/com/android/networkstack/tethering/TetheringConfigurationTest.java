@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
@@ -44,7 +44,6 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
-import com.android.networkstack.tethering.R;
 
 import org.junit.After;
 import org.junit.Before;
