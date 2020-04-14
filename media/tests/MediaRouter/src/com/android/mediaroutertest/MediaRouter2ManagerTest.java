@@ -47,6 +47,7 @@ import android.media.MediaRouter2Manager;
 import android.media.MediaRouter2Utils;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
+import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -73,6 +74,8 @@ public class MediaRouter2ManagerTest {
     private static final String TAG = "MediaRouter2ManagerTest";
     private static final int WAIT_TIME_MS = 2000;
     private static final int TIMEOUT_MS = 5000;
+    private static final String TEST_KEY = "test_key";
+    private static final String TEST_VALUE = "test_value";
 
     private Context mContext;
     private MediaRouter2Manager mManager;
@@ -463,6 +466,56 @@ public class MediaRouter2ManagerTest {
         assertEquals(PLAYBACK_VOLUME_FIXED, fixedVolumeRoute.getVolumeHandling());
         assertEquals(PLAYBACK_VOLUME_VARIABLE, variableVolumeRoute.getVolumeHandling());
         assertEquals(VOLUME_MAX, variableVolumeRoute.getVolumeMax());
+    }
+
+    @Test
+    public void testRouter2SetOnGetControllerHintsListener() throws Exception {
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        addRouterCallback(new RouteCallback() {});
+
+        MediaRoute2Info route = routes.get(ROUTE_ID1);
+        assertNotNull(route);
+
+        final Bundle controllerHints = new Bundle();
+        controllerHints.putString(TEST_KEY, TEST_VALUE);
+        final CountDownLatch hintLatch = new CountDownLatch(1);
+        final MediaRouter2.OnGetControllerHintsListener listener =
+                route1 -> {
+                    hintLatch.countDown();
+                    return controllerHints;
+                };
+
+        final CountDownLatch successLatch = new CountDownLatch(1);
+        final CountDownLatch failureLatch = new CountDownLatch(1);
+
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onTransferred(RoutingSessionInfo oldSession,
+                    RoutingSessionInfo newSession) {
+                assertTrue(newSession.getSelectedRoutes().contains(route.getId()));
+                // The StubMediaRoute2ProviderService is supposed to set control hints
+                // with the given controllerHints.
+                Bundle controlHints = newSession.getControlHints();
+                assertNotNull(controlHints);
+                assertTrue(controlHints.containsKey(TEST_KEY));
+                assertEquals(TEST_VALUE, controlHints.getString(TEST_KEY));
+
+                successLatch.countDown();
+            }
+
+            @Override
+            public void onTransferFailed(RoutingSessionInfo session,
+                    MediaRoute2Info requestedRoute) {
+                failureLatch.countDown();
+            }
+        });
+
+        mRouter2.setOnGetControllerHintsListener(listener);
+        mManager.selectRoute(mPackageName, route);
+        assertTrue(hintLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertTrue(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        assertFalse(failureLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
     }
 
     Map<String, MediaRoute2Info> waitAndGetRoutesWithManager(List<String> routeFeatures)

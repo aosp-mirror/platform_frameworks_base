@@ -690,6 +690,31 @@ public final class MediaRouter2 {
         matchingController.releaseInternal(/* shouldReleaseSession= */ false);
     }
 
+    void onGetControllerHintsForCreatingSessionOnHandler(long uniqueRequestId,
+            MediaRoute2Info route) {
+        OnGetControllerHintsListener listener = mOnGetControllerHintsListener;
+        Bundle controllerHints = null;
+        if (listener != null) {
+            controllerHints = listener.onGetControllerHints(route);
+            if (controllerHints != null) {
+                controllerHints = new Bundle(controllerHints);
+            }
+        }
+
+        MediaRouter2Stub stub;
+        synchronized (sRouterLock) {
+            stub = mStub;
+        }
+        if (stub != null) {
+            try {
+                mMediaRouterService.notifySessionHintsForCreatingSession(
+                        stub, uniqueRequestId, route, controllerHints);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "getSessionHintsOnHandler: Unable to request.", ex);
+            }
+        }
+    }
+
     private List<MediaRoute2Info> filterRoutes(List<MediaRoute2Info> routes,
             RouteDiscoveryPreference discoveryRequest) {
         return routes.stream()
@@ -820,13 +845,14 @@ public final class MediaRouter2 {
      */
     public interface OnGetControllerHintsListener {
         /**
-         * Called when the {@link MediaRouter2} is about to request
-         * the media route provider service to create a controller with the given route.
+         * Called when the {@link MediaRouter2} or the system is about to request
+         * a media route provider service to create a controller with the given route.
          * The {@link Bundle} returned here will be sent to media route provider service as a hint.
          * <p>
-         * To send hints when creating the controller, set the listener before calling
-         * {@link #transferTo(MediaRoute2Info)}. The method will be called
-         * on the same thread which calls {@link #transferTo(MediaRoute2Info)}.
+         * Since controller creation can be requested by the {@link MediaRouter2} and the system,
+         * set the listener as soon as possible after acquiring {@link MediaRouter2} instance.
+         * The method will be called on the same thread that calls
+         * {@link #transferTo(MediaRoute2Info)} or the main thread if it is requested by the system.
          *
          * @param route The route to create controller with
          * @return An optional bundle of app-specific arguments to send to the provider,
@@ -1378,9 +1404,6 @@ public final class MediaRouter2 {
 
     class MediaRouter2Stub extends IMediaRouter2.Stub {
         @Override
-        public void notifyRestoreRoute() throws RemoteException {}
-
-        @Override
         public void notifyRoutesAdded(List<MediaRoute2Info> routes) {
             mHandler.sendMessage(obtainMessage(MediaRouter2::addRoutesOnHandler,
                     MediaRouter2.this, routes));
@@ -1414,6 +1437,14 @@ public final class MediaRouter2 {
         public void notifySessionReleased(RoutingSessionInfo sessionInfo) {
             mHandler.sendMessage(obtainMessage(MediaRouter2::releaseControllerOnHandler,
                     MediaRouter2.this, sessionInfo));
+        }
+
+        @Override
+        public void getSessionHintsForCreatingSession(long uniqueRequestId,
+                @NonNull MediaRoute2Info route) {
+            mHandler.sendMessage(obtainMessage(
+                    MediaRouter2::onGetControllerHintsForCreatingSessionOnHandler,
+                    MediaRouter2.this, uniqueRequestId, route));
         }
     }
 }
