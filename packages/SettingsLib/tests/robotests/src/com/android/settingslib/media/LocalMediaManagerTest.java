@@ -691,4 +691,28 @@ public class LocalMediaManagerTest {
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(7);
         verify(mCallback).onDeviceListUpdate(any());
     }
+
+    @Test
+    public void onDeviceListAdded_bluetoothAdapterIsNull_noDisconnectedDeviceAdded() {
+        final List<MediaDevice> devices = new ArrayList<>();
+        final MediaDevice device1 = mock(MediaDevice.class);
+        final MediaDevice device2 = mock(MediaDevice.class);
+        final MediaDevice device3 = mock(MediaDevice.class);
+        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
+        devices.add(device1);
+        devices.add(device2);
+        mLocalMediaManager.mMediaDevices.add(device3);
+        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
+
+        mShadowBluetoothAdapter = null;
+
+        when(mLocalMediaManager.mPhoneDevice.getId()).thenReturn("test_phone_id");
+
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
+
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
+        verify(mCallback).onDeviceListUpdate(any());
+    }
 }
