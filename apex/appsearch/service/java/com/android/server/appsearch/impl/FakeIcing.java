@@ -131,18 +131,21 @@ public class FakeIcing {
      * Deletes a document by its URI.
      *
      * @param uri The URI of the document to be deleted.
+     * @return Whether deletion was successful.
      */
-    public void delete(@NonNull String uri) {
+    public boolean delete(@NonNull String uri) {
         // Update mDocIdMap
         Integer docId = mUriToDocIdMap.get(uri);
         if (docId != null) {
             // Delete the old doc
             mDocStore.remove(docId);
             mUriToDocIdMap.remove(uri);
+            return true;
         }
+        return false;
     }
 
-    /** Deletes all documents belonging to the given namespace. */
+    /** Deletes all documents having the given namespace. */
     public void deleteByNamespace(@NonNull String namespace) {
         for (int i = 0; i < mDocStore.size(); i++) {
             DocumentProto document = mDocStore.valueAt(i);

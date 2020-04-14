@@ -333,6 +333,27 @@ public class AppSearchManager {
         return AppSearchResult.newSuccessfulResult(new SearchResults(searchResultProto));
     }
 
+    /**
+     * Deletes {@link AppSearchDocument}s by URI.
+     *
+     * <p>You should not call this method directly; instead, use the {@code AppSearch#delete()} API
+     * provided by JetPack.
+     *
+     * @param uris URIs of the documents to delete
+     * @return An {@link AppSearchBatchResult} mapping each URI to a {@code null} success if
+     *     deletion was successful, to a {@code null} failure if the document did not exist, or to a
+     *     {@code throwable} failure if deletion failed for another reason.
+     */
+    public AppSearchBatchResult<String, Void> delete(@NonNull List<String> uris) {
+        AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
+        try {
+            mService.delete(uris, future);
+        } catch (RemoteException e) {
+            future.completeExceptionally(e);
+        }
+        return getFutureOrThrow(future);
+    }
+
     /** Deletes all documents owned by the calling app. */
     public AppSearchResult<Void> deleteAll() {
         AndroidFuture<AppSearchResult> future = new AndroidFuture<>();

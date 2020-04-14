@@ -182,6 +182,38 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
+        public void delete(List<String> uris, AndroidFuture<AppSearchBatchResult> callback) {
+            Preconditions.checkNotNull(uris);
+            Preconditions.checkNotNull(callback);
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                AppSearchBatchResult.Builder<String, Void> resultBuilder =
+                        new AppSearchBatchResult.Builder<>();
+                for (int i = 0; i < uris.size(); i++) {
+                    String uri = uris.get(i);
+                    try {
+                        if (!impl.delete(callingUid, uri)) {
+                            resultBuilder.setFailure(
+                                    uri, AppSearchResult.RESULT_NOT_FOUND, /*errorMessage=*/ null);
+                        } else {
+                            resultBuilder.setSuccess(uri, /*value= */null);
+                        }
+                    } catch (Throwable t) {
+                        resultBuilder.setResult(uri, throwableToFailedResult(t));
+                    }
+                }
+                callback.complete(resultBuilder.build());
+            } catch (Throwable t) {
+                callback.completeExceptionally(t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
         public void deleteAll(@NonNull AndroidFuture<AppSearchResult> callback) {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
