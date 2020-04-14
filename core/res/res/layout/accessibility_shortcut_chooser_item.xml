@@ -24,7 +24,7 @@
     android:padding="16dp">
 
     <CheckBox
-        android:id="@+id/accessibility_button_target_checkbox"
+        android:id="@+id/accessibility_shortcut_target_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="16dp"
@@ -34,13 +34,13 @@
         android:visibility="gone"/>
 
     <ImageView
-        android:id="@+id/accessibility_button_target_icon"
+        android:id="@+id/accessibility_shortcut_target_icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:scaleType="fitCenter"/>
 
     <TextView
-        android:id="@+id/accessibility_button_target_label"
+        android:id="@+id/accessibility_shortcut_target_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -50,7 +50,7 @@
         android:fontFamily="sans-serif-medium"/>
 
     <Switch
-        android:id="@+id/accessibility_button_target_switch_item"
+        android:id="@+id/accessibility_shortcut_target_switch_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@null"
