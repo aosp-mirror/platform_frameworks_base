@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
 import static android.net.TetheringManager.TETHERING_USB;
@@ -41,7 +41,6 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.networkstack.tethering.R;
 
 /**
  * A class to display tethering-related notifications.
