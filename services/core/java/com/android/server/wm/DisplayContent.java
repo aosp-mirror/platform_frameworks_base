@@ -495,6 +495,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * The launching activity which is using fixed rotation transformation.
      *
      * @see #handleTopActivityLaunchingInDifferentOrientation
+     * @see DisplayRotation#shouldRotateSeamlessly
      */
     ActivityRecord mFixedRotationLaunchingApp;
 
@@ -1238,7 +1239,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (configChanged) {
             mWaitingForConfig = true;
-            mWmService.startFreezingDisplayLocked(0 /* exitAnim */, 0 /* enterAnim */, this);
+            mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
             sendNewConfiguration();
         }
 
@@ -1476,6 +1477,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             sendNewConfiguration();
             return true;
         }
+        // The display won't rotate (e.g. the orientation from sensor has updated again before
+        // applying rotation to display), so clear it to stop using seamless rotation.
+        mFixedRotationLaunchingApp = null;
         return false;
     }
 
