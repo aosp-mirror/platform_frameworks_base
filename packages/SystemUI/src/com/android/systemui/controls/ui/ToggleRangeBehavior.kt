@@ -256,6 +256,9 @@ class ToggleRangeBehavior : Behavior {
             xDiff: Float,
             yDiff: Float
         ): Boolean {
+            if (!template.isChecked) {
+                return false
+            }
             if (!isDragging) {
                 v.getParent().requestDisallowInterceptTouchEvent(true)
                 this@ToggleRangeBehavior.beginUpdateRange()
