@@ -1470,6 +1470,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
+        if (dc != null && mDisplayContent != null
+                && mDisplayContent.mInputMethodInputTarget == this) {
+            dc.setInputMethodInputTarget(mDisplayContent.mInputMethodInputTarget);
+            mDisplayContent.mInputMethodInputTarget = null;
+        }
         super.onDisplayChanged(dc);
         // Window was not laid out for this display yet, so make sure mLayoutSeq does not match.
         if (dc != null && mInputWindowHandle.displayId != dc.getDisplayId()) {
