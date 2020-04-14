@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import static android.net.TetheringManager.TETHERING_WIFI;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
@@ -37,7 +37,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.rule.ServiceTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.connectivity.tethering.MockTetheringService.MockTetheringConnector;
+import com.android.networkstack.tethering.MockTetheringService.MockTetheringConnector;
 
 import org.junit.After;
 import org.junit.Before;
