@@ -55,4 +55,6 @@ interface IPackageInstaller {
             in IntentSender statusReceiver, int userId, in List<String> whiteListedPermissions);
 
     void setPermissionsResult(int sessionId, boolean accepted);
+
+    void bypassNextStagedInstallerCheck(boolean value);
 }
