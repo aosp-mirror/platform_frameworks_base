@@ -30,7 +30,7 @@ import java.util.List;
  */
 interface IFillCallback {
     void onCancellable(in ICancellationSignal cancellation);
-    void onSuccess(in @nullable List<Dataset> inlineSuggestionsData);
+    void onSuccess(in @nullable List<Dataset> inlineSuggestionsData, in @nullable Bundle clientState);
     boolean isCompleted();
     void cancel();
 }

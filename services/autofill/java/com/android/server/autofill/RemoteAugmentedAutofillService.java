@@ -168,12 +168,12 @@ final class RemoteAugmentedAutofillService
                             focusedId, focusedValue, requestTime, inlineSuggestionsRequest,
                             new IFillCallback.Stub() {
                                 @Override
-                                public void onSuccess(
-                                        @Nullable List<Dataset> inlineSuggestionsData) {
+                                public void onSuccess(@Nullable List<Dataset> inlineSuggestionsData,
+                                        @Nullable Bundle clientState) {
                                     mCallbacks.resetLastResponse();
                                     maybeRequestShowInlineSuggestions(sessionId,
                                             inlineSuggestionsRequest, inlineSuggestionsData,
-                                            focusedId, inlineSuggestionsCallback,
+                                            clientState, focusedId, inlineSuggestionsCallback,
                                             client, onErrorCallback, remoteRenderService);
                                     requestAutofill.complete(null);
                                 }
@@ -238,7 +238,8 @@ final class RemoteAugmentedAutofillService
 
     private void maybeRequestShowInlineSuggestions(int sessionId,
             @Nullable InlineSuggestionsRequest request,
-            @Nullable List<Dataset> inlineSuggestionsData, @NonNull AutofillId focusedId,
+            @Nullable List<Dataset> inlineSuggestionsData, @Nullable Bundle clientState,
+            @NonNull AutofillId focusedId,
             @Nullable Function<InlineSuggestionsResponse, Boolean> inlineSuggestionsCallback,
             @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
@@ -256,7 +257,7 @@ final class RemoteAugmentedAutofillService
                             @Override
                             public void autofill(Dataset dataset) {
                                 mCallbacks.logAugmentedAutofillSelected(sessionId,
-                                        dataset.getId());
+                                        dataset.getId(), clientState);
                                 try {
                                     final ArrayList<AutofillId> fieldIds = dataset.getFieldIds();
                                     final int size = fieldIds.size();
@@ -287,7 +288,7 @@ final class RemoteAugmentedAutofillService
             return;
         }
         if (inlineSuggestionsCallback.apply(inlineSuggestionsResponse)) {
-            mCallbacks.logAugmentedAutofillShown(sessionId);
+            mCallbacks.logAugmentedAutofillShown(sessionId, clientState);
         }
     }
 
@@ -310,8 +311,9 @@ final class RemoteAugmentedAutofillService
 
         void setLastResponse(int sessionId);
 
-        void logAugmentedAutofillShown(int sessionId);
+        void logAugmentedAutofillShown(int sessionId, @Nullable Bundle clientState);
 
-        void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId);
+        void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId,
+                @Nullable Bundle clientState);
     }
 }
