@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="no_upstream_notification_title" msgid="6246167638178412020">"Точка доступа не подключена к Интернету"</string>
-    <string name="no_upstream_notification_message" msgid="5010177541603431003">"Не удается подключить устройства к Интернету"</string>
+    <string name="no_upstream_notification_message" msgid="5010177541603431003">"Устройства не могут подключаться к Интернету"</string>
     <string name="no_upstream_notification_disable_button" msgid="2613861474440640595">"Отключить точку доступа"</string>
     <string name="upstream_roaming_notification_title" msgid="3633925855626231152">"Точка доступа включена"</string>
     <string name="upstream_roaming_notification_message" msgid="1396837704184358258">"За использование услуг связи в роуминге может взиматься дополнительная плата."</string>
