@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.RouteInfo.RTN_UNICAST;

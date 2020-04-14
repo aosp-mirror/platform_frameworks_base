@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.METERED_NO;
@@ -26,9 +26,9 @@ import static android.net.NetworkStats.UID_TETHERING;
 import static android.net.RouteInfo.RTN_UNICAST;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
-import static com.android.server.connectivity.tethering.OffloadController.StatsType.STATS_PER_IFACE;
-import static com.android.server.connectivity.tethering.OffloadController.StatsType.STATS_PER_UID;
-import static com.android.server.connectivity.tethering.OffloadHardwareInterface.ForwardedStats;
+import static com.android.networkstack.tethering.OffloadController.StatsType.STATS_PER_IFACE;
+import static com.android.networkstack.tethering.OffloadController.StatsType.STATS_PER_UID;
+import static com.android.networkstack.tethering.OffloadHardwareInterface.ForwardedStats;
 import static com.android.testutils.MiscAssertsKt.assertContainsAll;
 import static com.android.testutils.MiscAssertsKt.assertThrows;
 import static com.android.testutils.NetworkStatsUtilsKt.orderInsensitiveEquals;
