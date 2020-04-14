@@ -2582,7 +2582,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
             for (int phoneId = 0; phoneId < phoneCount; phoneId++) {
                 int mode = defaultNetworks.size() <= phoneId
                         || defaultNetworks.get(phoneId) == null
-                        ? RILConstants.PREFERRED_NETWORK_MODE : defaultNetworks.get(phoneId);
+                        ? TelephonyManager.DEFAULT_PREFERRED_NETWORK_MODE
+                        : defaultNetworks.get(phoneId);
                 if (phoneId > 0) val.append(',');
                 val.append(mode);
             }
