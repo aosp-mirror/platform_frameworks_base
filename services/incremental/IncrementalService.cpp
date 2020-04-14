@@ -258,10 +258,6 @@ IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_v
     mountExistingImages();
 }
 
-FileId IncrementalService::idFromMetadata(std::span<const uint8_t> metadata) {
-    return IncFs_FileIdFromMetadata({(const char*)metadata.data(), metadata.size()});
-}
-
 IncrementalService::~IncrementalService() {
     {
         std::lock_guard lock(mJobMutex);
@@ -1016,7 +1012,7 @@ bool IncrementalService::startLoading(StorageId storage) const {
             return false;
         }
     }
-    return dataLoaderStub->start();
+    return dataLoaderStub->requestStart();
 }
 
 void IncrementalService::mountExistingImages() {
@@ -1475,12 +1471,15 @@ void IncrementalService::onAppOpChanged(const std::string& packageName) {
 }
 
 IncrementalService::DataLoaderStub::~DataLoaderStub() {
-    CHECK(mStatus == -1 || mStatus == IDataLoaderStatusListener::DATA_LOADER_DESTROYED)
-            << "Dataloader has to be destroyed prior to destructor: " << mId
-            << ", status: " << mStatus;
+    waitForDestroy();
 }
 
 bool IncrementalService::DataLoaderStub::create() {
+    {
+        std::unique_lock lock(mStatusMutex);
+        mStartRequested = false;
+        mDestroyRequested = false;
+    }
     bool created = false;
     auto status = mService.mDataLoaderManager->initializeDataLoader(mId, mParams, mControl, this,
                                                                     &created);
@@ -1491,12 +1490,18 @@ bool IncrementalService::DataLoaderStub::create() {
     return true;
 }
 
-bool IncrementalService::DataLoaderStub::start() {
-    if (mStatus != IDataLoaderStatusListener::DATA_LOADER_CREATED) {
+bool IncrementalService::DataLoaderStub::requestStart() {
+    {
+        std::unique_lock lock(mStatusMutex);
         mStartRequested = true;
-        return true;
+        if (mStatus != IDataLoaderStatusListener::DATA_LOADER_CREATED) {
+            return true;
+        }
     }
+    return start();
+}
 
+bool IncrementalService::DataLoaderStub::start() {
     sp<IDataLoader> dataloader;
     auto status = mService.mDataLoaderManager->getDataLoader(mId, &dataloader);
     if (!status.isOk()) {
@@ -1513,8 +1518,21 @@ bool IncrementalService::DataLoaderStub::start() {
 }
 
 void IncrementalService::DataLoaderStub::destroy() {
-    mDestroyRequested = true;
+    {
+        std::unique_lock lock(mStatusMutex);
+        mDestroyRequested = true;
+    }
     mService.mDataLoaderManager->destroyDataLoader(mId);
+
+    waitForDestroy();
+}
+
+bool IncrementalService::DataLoaderStub::waitForDestroy() {
+    auto now = std::chrono::steady_clock::now();
+    std::unique_lock lock(mStatusMutex);
+    return mStatusCondition.wait_until(lock, now + 60s, [this] {
+        return mStatus == IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
+    });
 }
 
 binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mountId, int newStatus) {
@@ -1523,34 +1541,36 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
     }
 
     if (mListener) {
-        // Give an external listener a chance to act before we destroy something.
         mListener->onStatusChanged(mountId, newStatus);
     }
 
+    bool startRequested;
+    bool destroyRequested;
     {
-        std::unique_lock l(mService.mLock);
-        const auto& ifs = mService.getIfsLocked(mountId);
-        if (!ifs) {
-            LOG(WARNING) << "Received data loader status " << int(newStatus)
-                         << " for unknown mount " << mountId;
+        std::unique_lock lock(mStatusMutex);
+        if (mStatus == newStatus) {
             return binder::Status::ok();
         }
-        mStatus = newStatus;
 
-        if (!mDestroyRequested && newStatus == IDataLoaderStatusListener::DATA_LOADER_DESTROYED) {
-            mService.deleteStorageLocked(*ifs, std::move(l));
-            return binder::Status::ok();
-        }
+        startRequested = mStartRequested;
+        destroyRequested = mDestroyRequested;
+
+        mStatus = newStatus;
     }
 
     switch (newStatus) {
         case IDataLoaderStatusListener::DATA_LOADER_CREATED: {
-            if (mStartRequested) {
+            if (startRequested) {
+                LOG(WARNING) << "Start was requested, triggering, for mount: " << mountId;
                 start();
             }
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_DESTROYED: {
+            if (!destroyRequested) {
+                LOG(WARNING) << "DataLoader destroyed, reconnecting, for mount: " << mountId;
+                create();
+            }
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_STARTED: {
@@ -1587,6 +1607,10 @@ binder::Status IncrementalService::IncrementalServiceConnector::setStorageParams
         bool enableReadLogs, int32_t* _aidl_return) {
     *_aidl_return = incrementalService.setStorageParams(storage, enableReadLogs);
     return binder::Status::ok();
+}
+
+FileId IncrementalService::idFromMetadata(std::span<const uint8_t> metadata) {
+    return IncFs_FileIdFromMetadata({(const char*)metadata.data(), metadata.size()});
 }
 
 } // namespace android::incremental

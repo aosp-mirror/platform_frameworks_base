@@ -204,6 +204,12 @@ public class DataLoaderManagerService extends SystemService {
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
+            if (mListener != null) {
+                try {
+                    mListener.onStatusChanged(mId, IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
+                } catch (RemoteException ignored) {
+                }
+            }
             remove();
         }
 
