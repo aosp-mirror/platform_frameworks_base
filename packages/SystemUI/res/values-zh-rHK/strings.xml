@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"密碼錯誤"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"輸入錯誤的次數太多，\n請於 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試。"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"請再試一次。您已嘗試 <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> 次，最多可試 <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> 次。"</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"您的資料將會刪除"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"如果您下次畫出錯誤的上鎖圖案，系統將會刪除此裝置上的資料。"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"如果您下次輸入錯誤的 PIN，系統將會刪除此裝置上的資料。"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"如果您下次輸入錯誤的密碼，系統將會刪除此裝置上的資料。"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"如果您下次畫出錯誤的上鎖圖案，系統將會刪除此使用者。"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"如果您下次輸入錯誤的 PIN，系統將會刪除此使用者。"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"如果您下次輸入錯誤的密碼，系統將會刪除此使用者。"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"如果您下次畫出錯誤的上鎖圖案，系統將會刪除工作設定檔和相關資料。"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"如果您下次輸入錯誤的 PIN，系統將會刪除工作設定檔和相關資料。"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"如果您下次輸入錯誤的密碼，系統將會刪除工作設定檔和相關資料。"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"錯誤次數太多，系統將會刪除此裝置上的資料。"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"錯誤次數太多，系統將會刪除此使用者。"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"錯誤次數太多，系統將會刪除此工作設定檔和相關資料。"</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"顯示個人檔案"</string>
     <string name="user_add_user" msgid="4336657383006913022">"新增使用者"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新使用者"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"訪客"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"新增訪客"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"移除訪客"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"移除訪客？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會被刪除。"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"移除"</string>
@@ -998,25 +1005,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"放大重疊視窗"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"放大視窗"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大視窗控制項"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"裝置控制項"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"為已連接的裝置新增控制項"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"設定裝置控制項"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"按住「開關」按鈕便可存取控制項"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"選擇應用程式以新增控制項"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">已新增 <xliff:g id="NUMBER_1">%s</xliff:g> 個控制項。</item>
       <item quantity="one">已新增 <xliff:g id="NUMBER_0">%s</xliff:g> 個控制項。</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控制項"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"從電源選單選擇要存取的控制項"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"按住並拖曳控制項即可移動"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"無法載入完整控制項清單。"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"加入至快速控制介面"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"加到裝置控制項"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"加入至常用項目"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"「<xliff:g id="APP">%s</xliff:g>」建議將此控制項加入至常用項目。"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"已更新控制項"</string>

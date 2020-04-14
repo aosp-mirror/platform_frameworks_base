@@ -19,7 +19,7 @@
     <string name="no_upstream_notification_title" msgid="5026912695053828030">"El punto de acceso no tiene conexión a Internet"</string>
     <string name="no_upstream_notification_message" msgid="6810713595219684058">"Los dispositivos no se pueden conectar a Internet"</string>
     <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Desactivar punto de acceso"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Zona Wi-Fi activada"</string>
+    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Punto de acceso activado"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Puede que se apliquen cargos adicionales en itinerancia"</string>
     <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Continuar"</string>
 </resources>

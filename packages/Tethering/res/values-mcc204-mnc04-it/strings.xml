@@ -20,6 +20,6 @@
     <string name="no_upstream_notification_message" msgid="5010177541603431003">"I dispositivi non possono connettersi a Internet"</string>
     <string name="no_upstream_notification_disable_button" msgid="2613861474440640595">"Disattiva l\'hotspot"</string>
     <string name="upstream_roaming_notification_title" msgid="3633925855626231152">"Hotspot attivo"</string>
-    <string name="upstream_roaming_notification_message" msgid="1396837704184358258">"Potrebbero essere addebitati costi aggiuntivi durante il roaming"</string>
+    <string name="upstream_roaming_notification_message" msgid="1396837704184358258">"Potrebbero essere applicati costi aggiuntivi durante il roaming"</string>
     <string name="upstream_roaming_notification_continue_button" msgid="5324117849715705638">"Continua"</string>
 </resources>

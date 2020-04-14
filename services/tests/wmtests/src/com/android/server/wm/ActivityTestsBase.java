@@ -17,7 +17,10 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -30,9 +33,12 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +49,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
+import android.window.ITaskOrganizer;
+import android.window.WindowContainerToken;
 
 import com.android.server.AttributeCache;
 
@@ -505,4 +513,74 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         }
 
     }
+
+    static class TestSplitOrganizer extends ITaskOrganizer.Stub {
+        final ActivityTaskManagerService mService;
+        Task mPrimary;
+        Task mSecondary;
+        boolean mInSplit = false;
+        // moves everything to secondary. Most tests expect this since sysui usually does it.
+        boolean mMoveToSecondaryOnEnter = true;
+        int mDisplayId;
+        TestSplitOrganizer(ActivityTaskManagerService service, int displayId) {
+            mService = service;
+            mDisplayId = displayId;
+            mService.mTaskOrganizerController.registerTaskOrganizer(this,
+                    WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+            mService.mTaskOrganizerController.registerTaskOrganizer(this,
+                    WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+            WindowContainerToken primary = mService.mTaskOrganizerController.createRootTask(
+                    displayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).token;
+            mPrimary = WindowContainer.fromBinder(primary.asBinder()).asTask();
+            WindowContainerToken secondary = mService.mTaskOrganizerController.createRootTask(
+                    displayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).token;
+            mSecondary = WindowContainer.fromBinder(secondary.asBinder()).asTask();
+        }
+        TestSplitOrganizer(ActivityTaskManagerService service) {
+            this(service,
+                    service.mStackSupervisor.mRootWindowContainer.getDefaultDisplay().mDisplayId);
+        }
+        public void setMoveToSecondaryOnEnter(boolean move) {
+            mMoveToSecondaryOnEnter = move;
+        }
+        @Override
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo info) {
+        }
+        @Override
+        public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
+        }
+        @Override
+        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
+            if (mInSplit) {
+                return;
+            }
+            if (info.topActivityType == ACTIVITY_TYPE_UNDEFINED) {
+                // Not populated
+                return;
+            }
+            if (info.configuration.windowConfiguration.getWindowingMode()
+                    != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                return;
+            }
+            mInSplit = true;
+            if (!mMoveToSecondaryOnEnter) {
+                return;
+            }
+            mService.mTaskOrganizerController.setLaunchRoot(mDisplayId,
+                    mSecondary.mRemoteToken.toWindowContainerToken());
+            DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
+            for (int tdaNdx = dc.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
+                final TaskDisplayArea taskDisplayArea = dc.getTaskDisplayAreaAt(tdaNdx);
+                for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
+                    final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
+                    if (!WindowConfiguration.isSplitScreenWindowingMode(stack.getWindowingMode())) {
+                        stack.reparent(mSecondary, POSITION_BOTTOM);
+                    }
+                }
+            }
+        }
+        @Override
+        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
+        }
+    };
 }

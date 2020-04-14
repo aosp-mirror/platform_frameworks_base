@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Fel lösenord"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"För många felaktiga försök.\nFörsök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Försök igen. Försök <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> av <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Din data raderas."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Enhetens data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Enhetens data raderas om du anger fel pinkod vid nästa försök."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Enhetens data raderas om du anger fel lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Användaren raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Användaren raderas om du anger fel pinkod vid nästa försök."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Den här användaren raderas om du anger fel lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jobbprofilen och dess data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jobbprofilen och dess data raderas om du anger fel pinkod vid nästa försök."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Din jobbprofil och dess data raderas om du anger fel lösenord vid nästa försök."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"För många felaktiga försök. Enhetens data raderas."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"För många felaktiga försök. Den här användaren raderas."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"För många felaktiga försök. Den här jobbprofilen och dess data raderas."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Visa profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Lägg till användare"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Ny användare"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Gäst"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Lägg till gäst"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Ta bort gäst"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vill du ta bort gästen?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alla appar och data i denna session kommer att raderas."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ta bort"</string>
@@ -705,7 +712,7 @@
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Alla konversationer från <xliff:g id="APP_NAME_0">%1$s</xliff:g> visas i bubblor som standard. Hantera detta i <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Inga senaste bubblor"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Inga nya bubblor"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"De senaste bubblorna och ignorerade bubblor visas här"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Det går inte att ändra de här aviseringarna."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Den här aviseringsgruppen kan inte konfigureras här"</string>
@@ -998,25 +1005,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Överlagrat förstoringsfönster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Förstoringsfönster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Inställningar för förstoringsfönster"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Enhetsinställningar"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lägg till snabbkontroller för anslutna enheter"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurera enhetsinställningar"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Håll strömbrytaren nedtryckt för att få åtkomst till snabbkontrollerna"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Välj en app om du vill lägga till snabbkontroller"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontroller har lagts till.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kontroll har lagts till.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Välj snabbkontroller som ska visas i strömbrytarmenyn"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Dra en snabbkontroll om du vill flytta den"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Listan med alla kontroller kunde inte läsas in."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Övrigt"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Lägg till snabbkontroll"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Lägg till i enhetsinställningar"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Lägg till i Favoriter"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> föreslår att du lägger till kontrollen i dina favoriter."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Snabbkontroller uppdaterade"</string>

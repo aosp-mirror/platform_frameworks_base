@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Vytváranie snímok obrazovky je zakázané aplikáciou alebo vašou organizáciou"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zavrieť snímku obrazovky"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Otvoriť snímku obrazovky"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Nahrávanie obrazovky"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Zobrazuje sa upozornenie týkajúce sa relácie záznamu obrazovky"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Chcete spustiť nahrávanie?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Počas nahrávania zaznamená systém Android všetky citlivé údaje, ktoré sa zobrazia na obrazovke alebo prehrajú v zariadení. Zahrnuje to heslá, platobné údaje, fotky, správy a zvuky."</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Nesprávne heslo"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Príliš veľa nesprávnych pokusov. \nSkúste to znova o <xliff:g id="NUMBER">%d</xliff:g> s."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Skúste to znova. <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>. z <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> pokusov."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Vaše dáta budú odstránené"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Ak pri ďalšom pokuse zadáte nesprávny vzor, dáta tohto zariadenia budú odstránené."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Ak pri ďalšom pokuse zadáte nesprávny kód PIN, dáta tohto zariadenia budú odstránené."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Ak pri ďalšom pokuse zadáte nesprávne heslo, dáta tohto zariadenia budú odstránené."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Ak pri ďalšom pokuse zadáte nesprávny vzor, tento používateľ bude odstránený."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Ak pri ďalšom pokuse zadáte nesprávny kód PIN, tento používateľ bude odstránený."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Ak pri ďalšom pokuse zadáte nesprávne heslo, tento používateľ bude odstránený."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ak pri ďalšom pokuse zadáte nesprávny vzor, váš pracovný profil a jeho dáta budú odstránené."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ak pri ďalšom pokuse zadáte nesprávny kód PIN, váš pracovný profil a jeho dáta budú odstránené."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ak pri ďalšom pokuse zadáte nesprávne heslo, váš pracovný profil a jeho dáta budú odstránené."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Príliš veľa chybných pokusov. Dáta tohto zariadenia budú odstránené."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Príliš veľa chybných pokusov. Tento používateľ bude odstránený."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Príliš veľa chybných pokusov. Tento pracovný profil a jeho dáta budú odstránené."</string>
@@ -467,9 +477,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Zobraziť profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Pridať používateľa"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nový používateľ"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Hosť"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Pridať hosťa"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Odstrániť hosťa"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Odstrániť hosťa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Všetky aplikácie a údaje v tejto relácii budú odstránené."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Odstrániť"</string>
@@ -708,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Upúta vás zvukom alebo vibráciami."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Upúta vás plávajúcim odkazom na tento obsah."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Zobrazuje sa v hornej časti konverzácie ako bublina."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Predvolene zahrnúť všetky konverzácie z bubliny <xliff:g id="APP_NAME_0">%1$s</xliff:g>. Spravujte v aplikácii <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Predvolene zobrazovať všetky konverzácie z aplikácie <xliff:g id="APP_NAME_0">%1$s</xliff:g> ako bubliny. Spravujte v aplikácii <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavenia"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Žiadne nedávne bubliny"</string>
@@ -1008,15 +1015,11 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Okno prekrytia priblíženia"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno priblíženia"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ovládacie prvky okna priblíženia"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Ovládacie prvky zariadenia"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Pridajte ovládacie prvky pre svoje pripojené zariadenia"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Nastavenie ovládacích prvkov zariadenia"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Pridržaním vypínača získate prístup k ovládacím prvkom"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Výberom aplikácie pridajte ovládacie prvky"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="few">Boli pridané <xliff:g id="NUMBER_1">%s</xliff:g> ovládacie prvky.</item>
       <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
@@ -1025,10 +1028,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládacie prvky"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Vyberte si ovládacie prvky, ku ktorým chcete mať prístup v ponuke vypínača"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Ovládací prvok premiestnite pridržaním a presunutím"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Zoznam všetkých ovl. prvkov sa nepodarilo načítať."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Iné"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Pridanie do rýchleho ovládania"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Pridanie do ovládacích prvkov zariadenia"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Pridať do obľúbených"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"Aplikácia <xliff:g id="APP">%s</xliff:g> vám odporučila pridať tento ovládací prvok do obľúbených."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Ovládanie bolo aktualizované"</string>

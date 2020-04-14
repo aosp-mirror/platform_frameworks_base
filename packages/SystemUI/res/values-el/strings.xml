@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Να επιτρέπεται"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Δεν επιτρέπεται ο εντοπισμός σφαλμάτων USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Ο χρήστης που είναι συνδεδεμένος αυτήν τη στιγμή σε αυτήν τη συσκευή δεν μπορεί να ενεργοποιήσει τον εντοπισμό σφαλμάτων USB. Για να χρησιμοποιήσετε αυτήν τη λειτουργία, κάντε εναλλαγή στον κύριο χρήστη."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Να επιτρέπεται ο εντοπισμός σφαλμάτων μέσω ασύρματης σύνδεσης σε αυτό το δίκτυο;"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Να επιτρέπεται ο ασύρματος εντοπισμός σφαλμάτων σε αυτό το δίκτυο;"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Όνομα δικτύου (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nΔιεύθυνση Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Να επιτρέπεται πάντα σε αυτό το δίκτυο"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Να επιτρέπεται"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Ο εντοπισμός σφαλμάτων μέσω ασύρματης σύνδεσης δεν επιτρέπεται"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Ο χρήστης που είναι συνδεδεμένος αυτήν τη στιγμή στη συγκεκριμένη συσκευή δεν μπορεί να ενεργοποιήσει τον εντοπισμό σφαλμάτων μέσω ασύρματης σύνδεσης. Για να χρησιμοποιήσετε αυτήν τη λειτουργία, κάντε εναλλαγή στον κύριο χρήστη."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Ο ασύρματος εντοπισμός σφαλμάτων δεν επιτρέπεται"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Ο χρήστης που είναι συνδεδεμένος αυτήν τη στιγμή στη συγκεκριμένη συσκευή δεν μπορεί να ενεργοποιήσει τον ασύρματο εντοπισμό σφαλμάτων. Για να χρησιμοποιήσετε αυτήν τη λειτουργία, κάντε εναλλαγή στον κύριο χρήστη."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Η θύρα USB απενεργοποιήθηκε"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Για την προστασία της συσκευής σας από υγρασία ή ακαθαρσίες, η θύρα USB έχει απενεργοποιηθεί και δεν θα εντοπίζει τυχόν αξεσουάρ.\n\nΘα ειδοποιηθείτε όταν θα μπορείτε να χρησιμοποιήσετε ξανά τη θύρα USB."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Η θύρα USB ενεργοποιήθηκε για τον εντοπισμό φορτιστών και αξεσουάρ"</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Εσφαλμένος κωδικός πρόσβασης"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Πάρα πολλές αποτυχημένες προσπάθειες.\nΔοκιμάστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Προσπαθήστε ξανά. Προσπάθεια <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> από <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Τα δεδομένα σας θα διαγραφούν"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Εάν εισαγάγετε εσφαλμένο μοτίβο στην επόμενη προσπάθεια, τα δεδομένα αυτής της συσκευής θα διαγραφούν."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Εάν εισαγάγετε εσφαλμένο PIN στην επόμενη προσπάθεια, τα δεδομένα αυτής της συσκευής θα διαγραφούν."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Εάν εισαγάγετε εσφαλμένο κωδικό πρόσβασης στην επόμενη προσπάθεια, τα δεδομένα αυτής της συσκευής θα διαγραφούν."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Εάν εισαγάγετε εσφαλμένο μοτίβο στην επόμενη προσπάθεια, αυτός ο χρήστης θα διαγραφεί."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Εάν εισαγάγετε εσφαλμένο PIN στην επόμενη προσπάθεια, αυτός ο χρήστης θα διαγραφεί."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Εάν εισαγάγετε εσφαλμένο κωδικό πρόσβασης στην επόμενη προσπάθεια, αυτός ο χρήστης θα διαγραφεί."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Εάν εισαγάγετε εσφαλμένο μοτίβο στην επόμενη προσπάθεια, το προφίλ εργασίας σας και τα δεδομένα του θα διαγραφούν."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Εάν εισαγάγετε εσφαλμένο PIN στην επόμενη προσπάθεια, το προφίλ εργασίας σας και τα δεδομένα του θα διαγραφούν."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Εάν εισαγάγετε εσφαλμένο κωδικό πρόσβασης στην επόμενη προσπάθεια, το προφίλ εργασίας σας και τα δεδομένα του θα διαγραφούν."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Πάρα πολλές ανεπιτυχείς προσπάθειες. Τα δεδομένα αυτής της συσκευής θα διαγραφούν."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Πάρα πολλές ανεπιτυχείς προσπάθειες. Αυτός ο χρήστης θα διαγραφεί."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Πάρα πολλές ανεπιτυχείς προσπάθειες. Αυτό το προφίλ εργασίας και τα δεδομένα του θα διαγραφούν."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Εμφάνιση προφίλ"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Προσθήκη χρήστη"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Νέος χρήστης"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Επισκέπτης"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Προσθήκη επισκέπτη"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Κατάργηση επισκέπτη"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Κατάργηση επισκέπτη;"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Όλες οι εφαρμογές και τα δεδομένα αυτής της περιόδου σύνδεσης θα διαγραφούν."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Κατάργηση"</string>
@@ -502,7 +509,7 @@
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Ιστορικό"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Ειδοποιήσεις σε σίγαση"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Ειδοποιήσεις"</string>
-    <string name="notification_section_header_conversations" msgid="821834744538345661">"Συνομιλίες"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Συζητήσεις"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Διαγραφή όλων των ειδοποιήσεων σε σίγαση"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Οι ειδοποιήσεις τέθηκαν σε παύση από τη λειτουργία \"Μην ενοχλείτε\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Έναρξη τώρα"</string>
@@ -701,12 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Σας βοηθά να συγκεντρωθείτε χωρίς ήχο και δόνηση."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Τραβά την προσοχή σας με ήχο ή δόνηση."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Κρατάει την προσοχή σας με μια κινούμενη συντόμευση προς αυτό το περιεχόμενο."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Εμφανίζεται στο επάνω μέρος της ενότητας συνομιλίας ως φούσκα."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Όλες οι συνομιλίες από την εφαρμογή <xliff:g id="APP_NAME_0">%1$s</xliff:g> εμφανίζονται από προεπιλογή ως φούσκες. Διαχείριση στην εφαρμογή <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Εμφανίζεται στο επάνω μέρος της ενότητας συζήτησης ως συννεφάκι."</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Όλες οι συζητήσεις από την εφαρμογή <xliff:g id="APP_NAME_0">%1$s</xliff:g> εμφανίζονται από προεπιλογή ως συννεφάκια. Διαχείριση στην εφαρμογή <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ρυθμίσεις"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Προτεραιότητα"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Δεν υπάρχουν πρόσφατες φούσκες"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Οι πρόσφατες φούσκες και οι φούσκες που παραβλέψατε θα εμφανίζονται εδώ."</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Δεν υπάρχουν πρόσφατα συννεφάκια"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Τα πρόσφατα συννεφάκια και τα συννεφάκια που παραβλέψατε θα εμφανίζονται εδώ."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Δεν είναι δυνατή η τροποποίηση αυτών των ειδοποιήσεων"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Δεν είναι δυνατή η διαμόρφωση αυτής της ομάδας ειδοποιήσεων εδώ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Ειδοποίηση μέσω διακομιστή μεσολάβησης"</string>
@@ -986,10 +993,10 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Μετακίνηση κάτω αριστερά"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Μετακίνηση κάτω δεξιά"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Παράβλεψη"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Να μη γίνει προβολή της συνομιλίας σε φούσκες."</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Συζητήστε χρησιμοποιώντας φούσκες."</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Οι νέες συνομιλίες εμφανίζονται ως κινούμενα εικονίδια ή φούσκες. Πατήστε για να ανοίξετε τη φούσκα. Σύρετε για να το μετακινήσετε."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Ελέγξτε τις φούσκες ανά πάσα στιγμή."</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Να μην γίνει προβολή της συζήτησης σε συννεφάκια."</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Συζητήστε χρησιμοποιώντας συννεφάκια."</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Οι νέες συζητήσεις εμφανίζονται ως κινούμενα εικονίδια ή φούσκες. Πατήστε για να ανοίξετε τη φούσκα. Σύρετε για να το μετακινήσετε."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Ελέγξτε τα συννεφάκια ανά πάσα στιγμή."</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Πατήστε Διαχείριση για να απενεργοποιήσετε τα συννεφάκια από αυτήν την εφαρμογή."</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Το κατάλαβα."</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Η πλοήγηση συστήματος ενημερώθηκε. Για να κάνετε αλλαγές, μεταβείτε στις Ρυθμίσεις."</string>
@@ -998,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Παράθυρο επικάλυψης μεγέθυνσης"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Παράθυρο μεγέθυνσης"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Στοιχεία ελέγχου παραθύρου μεγέθυνσης"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Στοιχεία γρήγορου ελέγχου"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Στοιχεία ελέγχου συσκευής"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Προσθήκη στοιχείων ελέγχου για τις συνδεδεμένες συσκευές σας."</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Ρύθμιση στοιχείων γρήγορου ελέγχου"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Ρύθμιση στοιχείων ελέγχου συσκευής"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Κρατήστε πατημένο το κουμπί λειτουργίας, για να αποκτήσετε πρόσβαση στα στοιχεία ελέγχου"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Επιλογή εφαρμογής για προσθήκη στοιχείων ελέγχου"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1009,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Στοιχεία ελέγχου"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Επιλέξτε τα στοιχεία ελέγχου στα οποία θα έχετε πρόσβαση από το μενού λειτουργίας."</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Πατήστε παρατεταμένα και σύρετε ένα στοιχείο ελέγχου, για να το μετακινήσετε."</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ανεπιτυχής φόρτωση λίστας όλων των στοιχ. ελέγχου."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Άλλο"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Προσθ. σε Στοιχ. γρήγ. ελέγχου"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Προσθήκη στα στοιχεία ελέγχου συσκευής"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Προσθήκη στα αγαπημένα"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"Η εφαρμογή <xliff:g id="APP">%s</xliff:g> πρότεινε αυτό το στοιχείο ελέγχου για προσθήκη στα αγαπημένα."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Ενημέρωση στοιχείων ελέγχου"</string>

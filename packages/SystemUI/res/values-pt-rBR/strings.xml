@@ -63,12 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Depuração USB não permitida"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"O usuário conectado a este dispositivo não pode ativar a depuração USB. Para usar esse recurso, mude para o usuário principal \"NAME\"."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Permitir a depuração sem fio nesta rede?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Permitir a depuração por Wi-Fi nesta rede?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Nome da rede (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nEndereço do Wi-Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Sempre permitir nesta rede"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Permitir"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Depuração sem fio não permitida"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"O usuário conectado a este dispositivo não pode ativar a depuração sem fio. Para usar esse recurso, conecte-se como o usuário principal."</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Depuração por Wi-Fi não permitida"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"O usuário conectado a este dispositivo não pode ativar a depuração por Wi-Fi. Para usar esse recurso, conecte-se como o usuário principal."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Porta USB desativada"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Para proteger seu dispositivo de líquidos e detritos, a porta USB está desativada e não detectará nenhum acessório.\n\nVocê receberá uma notificação quando for seguro usar a porta USB novamente."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Porta USB ativada para detectar carregadores e acessórios"</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Senha incorreta"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Excesso de tentativas incorretas.\nTente novamente em <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Tente novamente. Tentativa <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> de <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Seus dados serão excluídos"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Se você informar um padrão incorreto na próxima tentativa, os dados deste dispositivo serão excluídos."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Se você informar um PIN incorreto na próxima tentativa, os dados deste dispositivo serão excluídos."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Se você informar uma senha incorreta na próxima tentativa, os dados deste dispositivo serão excluídos."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Se você informar um padrão incorreto na próxima tentativa, este usuário será excluído."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Se você informar um PIN incorreto na próxima tentativa, este usuário será excluído."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Se você informar uma senha incorreta na próxima tentativa, este usuário será excluído."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Se você informar um padrão incorreto na próxima tentativa, seu perfil de trabalho e os dados dele serão excluídos."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Se você informar um PIN incorreto na próxima tentativa, seu perfil de trabalho e os dados dele serão excluídos."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Se você informar uma senha incorreta na próxima tentativa, seu perfil de trabalho e os dados dele serão excluídos."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Excesso de tentativas incorretas. Os dados deste dispositivo serão excluídos."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Excesso de tentativas incorretas. O usuário será excluído."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Excesso de tentativas incorretas. Este perfil de trabalho e os dados dele serão excluídos."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostrar perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Adicionar usuário"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novo usuário"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Convidado"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Adicionar convidado"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Remover convidado"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover convidado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todos os apps e dados nesta sessão serão excluídos."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remover"</string>
@@ -493,7 +500,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduz o desempenho e os dados em segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desativar a Economia de bateria"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"O app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> terá acesso a todas as informações visíveis na tela ou tocadas no dispositivo, como gravação ou transmissão Isso inclui informações como senhas, detalhes de pagamento, fotos, mensagens e áudio que você toca."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"O serviço que oferece essa função terá acesso a todas as informações visíveis na tela ou tocadas no dispositivo durante uma gravação ou transmissão. Isso inclui informações como senhas, detalhes de pagamento, fotos, mensagens e áudio que você toca."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"O serviço que oferece essa função terá acesso a todas as informações visíveis na tela ou reproduzidas durante uma gravação ou transmissão. Isso inclui senhas, detalhes de pagamento, fotos, mensagens e áudio."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Iniciar gravação ou transmissão?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Iniciar gravação ou transmissão com o app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Não mostrar novamente"</string>
@@ -998,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Janela de sobreposição de ampliação"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Janela de ampliação"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controles da janela de ampliação"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Controles rápidos"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Controles do dispositivo"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Adiciona controles para os dispositivos conectados"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Configurar controles rápidos"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurar controles do dispositivo"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Toque no botão liga/desliga e mantenha-o pressionado para acessar seus controles"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolha um app para adicionar controles"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1009,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Escolha os controles para acessar pelo menu do botão liga/desliga"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Segure e arraste um controle para movê-lo"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Não foi possível carregar a lista de controles."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outro"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Adic. aos controles rápidos"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Adicionar aos controles do dispositivo"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Adicionar aos favoritos"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> sugeriu a adição desse controle aos seus favoritos."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Controles atualizados"</string>

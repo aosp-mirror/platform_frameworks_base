@@ -108,8 +108,6 @@ class NotificationsControllerImpl @Inject constructor(
         if (featureFlags.isNewNotifPipelineRenderingEnabled) {
             // TODO
         } else {
-            notificationRowBinder.setInflationCallback(entryManager)
-
             remoteInputUriController.attach(entryManager)
             groupAlertTransferHelper.bind(entryManager, groupManager)
             headsUpManager.addListener(groupManager)

@@ -45,6 +45,7 @@ android_library {
         "WindowManager-Shell",
         "SystemUIPluginLib",
         "SystemUISharedLib",
+	"SystemUI-statsd",
         "SettingsLib",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
@@ -81,6 +82,8 @@ filegroup {
         "tests/src/com/android/systemui/statusbar/notification/collection/NotificationEntryBuilder.java",
         "tests/src/com/android/systemui/statusbar/RankingBuilder.java",
         "tests/src/com/android/systemui/statusbar/SbnBuilder.java",
+        "tests/src/com/android/systemui/util/concurrency/FakeExecutor.java",
+        "tests/src/com/android/systemui/util/time/FakeSystemClock.java",
     ],
     path: "tests/src",
 }
@@ -106,6 +109,7 @@ android_library {
     static_libs: [
         "SystemUIPluginLib",
         "SystemUISharedLib",
+        "SystemUI-statsd",
         "SettingsLib",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",

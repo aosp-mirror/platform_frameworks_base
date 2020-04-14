@@ -81,7 +81,7 @@ class ControlAdapter(
             }
             TYPE_DIVIDER -> {
                 DividerHolder(layoutInflater.inflate(
-                        R.layout.controls_horizontal_divider_withEmpty, parent, false))
+                        R.layout.controls_horizontal_divider_with_empty, parent, false))
             }
             else -> throw IllegalStateException("Wrong viewType: $viewType")
         }

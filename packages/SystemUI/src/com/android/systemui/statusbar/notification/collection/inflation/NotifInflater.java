@@ -24,22 +24,20 @@ import com.android.systemui.statusbar.notification.collection.coordinator.Prepar
  * main thread. When the inflation is finished, NotifInflater will trigger its InflationCallback.
  */
 public interface NotifInflater {
-
-    /**
-     * Callback used when inflation is finished.
-     */
-    void setInflationCallback(InflationCallback callback);
-
     /**
      * Called to rebind the entry's views.
+     *
+     * @param callback callback called after inflation finishes
      */
-    void rebindViews(NotificationEntry entry);
+    void rebindViews(NotificationEntry entry, InflationCallback callback);
 
     /**
      * Called to inflate the views of an entry.  Views are not considered inflated until all of its
      * views are bound. Once all views are inflated, the InflationCallback is triggered.
+     *
+     * @param callback callback called after inflation finishes
      */
-    void inflateViews(NotificationEntry entry);
+    void inflateViews(NotificationEntry entry, InflationCallback callback);
 
     /**
      * Request to stop the inflation of an entry.  For example, called when a notification is

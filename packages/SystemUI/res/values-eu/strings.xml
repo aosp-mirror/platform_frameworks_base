@@ -68,7 +68,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Onartu beti sare honetan"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Baimendu"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Ez da onartzen hari gabeko arazketa"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Gailu honetan saioa hasita daukan erabiltzaileak ezin du aktibatu hari gabeko bidezko arazketa. Eginbide hori erabiltzeko, aldatu erabiltzaile nagusira."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Gailu honetan saioa hasita daukan erabiltzaileak ezin du aktibatu hari gabeko arazketa. Eginbide hori erabiltzeko, aldatu erabiltzaile nagusira."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Desgaitu egin da USB ataka"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"USB ataka desgaitu egin da gailua likido edo zikinkeriengandik babesteko, eta ez du hautemango osagarririk.\n\nJakinarazpen bat jasoko duzu USB ataka berriz erabiltzeko moduan dagoenean."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB ataka gaitu da kargagailuak eta osagarriak hautemateko"</string>
@@ -155,7 +155,17 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Pasahitza ez da zuzena"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Saiakera oker gehiegi egin dituzu.\nSaiatu berriro <xliff:g id="NUMBER">%d</xliff:g> segundo barru."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Saiatu berriro. <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> saiakera."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Saiakera oker gehiegi egin dituzu. Gailu honetako datuak ezabatu egingo dira."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Datuak ezabatuko dira"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Hurrengo saiakeran eredua oker marrazten baduzu, gailuko datuak ezabatuko dira."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Hurrengo saiakeran PIN kodea oker idazten baduzu, gailuko datuak ezabatuko dira."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Hurrengo saiakeran pasahitza oker idazten baduzu, gailuko datuak ezabatuko dira."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Hurrengo saiakeran eredua oker marrazten baduzu, erabiltzailea ezabatuko da."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Hurrengo saiakeran PIN kodea oker idazten baduzu, erabiltzailea ezabatuko da."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Hurrengo saiakeran pasahitza oker idazten baduzu, erabiltzailea ezabatuko da."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Hurrengo saiakeran eredua oker marrazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Hurrengo saiakeran PIN kodea oker idazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Hurrengo saiakeran pasahitza oker idazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Saiakera oker gehiegi egin dituzu. Gailuko datuak ezabatu egingo dira."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Saiakera oker gehiegi egin dituzu. Erabiltzailea ezabatu egingo da."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Saiakera oker gehiegi egin dituzu. Laneko profila eta bertako datuak ezabatu egingo dira."</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Baztertu"</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Erakutsi profila"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Gehitu erabiltzailea"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Erabiltzaile berria"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Gonbidatua"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Gehitu gonbidatua"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Kendu gonbidatua"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Gonbidatua kendu nahi duzu?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Saioko aplikazio eta datu guztiak ezabatuko dira."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Kendu"</string>
@@ -773,8 +780,8 @@
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Aurrekoa"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Atzeratu"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"Aurreratu"</string>
-    <string name="keyboard_key_page_up" msgid="173914303254199845">"Orria gora"</string>
-    <string name="keyboard_key_page_down" msgid="9035902490071829731">"Orria behera"</string>
+    <string name="keyboard_key_page_up" msgid="173914303254199845">"Orrian gora"</string>
+    <string name="keyboard_key_page_down" msgid="9035902490071829731">"Orrian behera"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Ezabatu"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Hasiera"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Amaitu"</string>
@@ -988,7 +995,7 @@
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Baztertu"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ez erakutsi elkarrizketak burbuila gisa"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Txateatu burbuilen bidez"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Elkarrizketa berriak ikono gainerakor edo burbuila gisa agertzen dira. Sakatu burbuila irekitzeko. Arrastatu mugitzeko."</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Elkarrizketa berriak ikono gainerakor edo burbuila gisa agertzen dira. Sakatu burbuila irekitzeko. Arrasta ezazu mugitzeko."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Kontrolatu burbuilak edonoiz"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Aplikazioaren burbuilak desaktibatzeko, sakatu Kudeatu"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Ados"</string>
@@ -998,25 +1005,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Lupa-leiho gainjarria"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Lupa-leihoa"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Lupa-leihoaren aukerak"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Gailua kontrolatzeko aukerak"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Gehitu kontrolatzeko aukerak konektatutako gailuetan"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfiguratu gailua kontrolatzeko aukerak"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Kontrol-aukerak atzitzeko, eduki sakatuta etengailua"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Aukeratu aplikazio bat kontrolatzeko aukerak gehitzeko"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontrol-aukera gehitu dira.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kontrol-aukera gehitu da.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrolatzeko aukerak"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Aukeratu energiaren menutik atzitu nahi dituzun kontrolatzeko aukerak"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Kontrolatzeko aukera bat mugitzeko, eduki sakatuta eta arrastatu"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Aukeratu itzaltzeko menutik atzitu nahi dituzun kontrolatzeko aukerak"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ezin izan da kargatu kontrol guztien zerrenda."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Beste bat"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Gehitu kontrolatzeko aukera bizkorretan"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Gehitu gailua kontrolatzeko aukeretan"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Gehitu gogokoetan"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> aplikazioak aukera hau gogokoetan gehitzea iradoki du."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Eguneratu dira kontrolatzeko aukerak"</string>

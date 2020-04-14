@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -494,6 +495,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * The launching activity which is using fixed rotation transformation.
      *
      * @see #handleTopActivityLaunchingInDifferentOrientation
+     * @see DisplayRotation#shouldRotateSeamlessly
      */
     ActivityRecord mFixedRotationLaunchingApp;
 
@@ -1237,7 +1239,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (configChanged) {
             mWaitingForConfig = true;
-            mWmService.startFreezingDisplayLocked(0 /* exitAnim */, 0 /* enterAnim */, this);
+            mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
             sendNewConfiguration();
         }
 
@@ -1475,6 +1477,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             sendNewConfiguration();
             return true;
         }
+        // The display won't rotate (e.g. the orientation from sensor has updated again before
+        // applying rotation to display), so clear it to stop using seamless rotation.
+        mFixedRotationLaunchingApp = null;
         return false;
     }
 
@@ -5028,6 +5033,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return activityType == ACTIVITY_TYPE_STANDARD
                 && (windowingMode == WINDOWING_MODE_FULLSCREEN
                 || windowingMode == WINDOWING_MODE_FREEFORM
+                || windowingMode == WINDOWING_MODE_PINNED
                 || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                 || windowingMode == WINDOWING_MODE_MULTI_WINDOW);
     }

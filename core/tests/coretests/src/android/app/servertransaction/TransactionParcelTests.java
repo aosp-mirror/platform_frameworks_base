@@ -63,7 +63,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -213,6 +212,7 @@ public class TransactionParcelTests {
         int procState = 4;
         Bundle bundle = new Bundle();
         bundle.putString("key", "value");
+        bundle.putParcelable("data", new ParcelableData(1));
         PersistableBundle persistableBundle = new PersistableBundle();
         persistableBundle.putInt("k", 4);
 
@@ -372,6 +372,47 @@ public class TransactionParcelTests {
     private void writeAndPrepareForReading(Parcelable parcelable) {
         parcelable.writeToParcel(mParcel, 0 /* flags */);
         mParcel.setDataPosition(0);
+    }
+
+    /**
+     * The parcelable class to make sure that when comparing the {@link LaunchActivityItem} or
+     * getting its hash code, the bundle is not unparceled. System shouldn't touch the data from
+     * application, otherwise it will cause exception as:
+     *   android.os.BadParcelableException: ClassNotFoundException when unmarshalling:
+     *   android.app.servertransaction.TransactionParcelTests$ParcelableData".
+     */
+    public static class ParcelableData implements Parcelable {
+        int mValue;
+
+        ParcelableData() {}
+
+        ParcelableData(int value) {
+            mValue = value;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mValue);
+        }
+
+        public static final Creator<ParcelableData> CREATOR = new Creator<ParcelableData>() {
+            @Override
+            public ParcelableData createFromParcel(Parcel source) {
+                final ParcelableData data = new ParcelableData();
+                data.mValue = source.readInt();
+                return data;
+            }
+
+            @Override
+            public ParcelableData[] newArray(int size) {
+                return new ParcelableData[size];
+            }
+        };
     }
 
     /** Stub implementation of IApplicationThread that can be presented as {@link Binder}. */

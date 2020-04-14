@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Forritið eða fyrirtækið þitt leyfir ekki skjámyndatöku"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Loka skjámynd"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"Opna skjámynd"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Upptökutæki á skjá"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Skjáupptaka"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Áframhaldandi tilkynning fyrir skjáupptökulotu"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Hefja upptöku?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Á meðan tekið er upp getur Android kerfið fangað viðkvæmar upplýsingar sem sjást á skjánum eða spilast í tækinu. Þar á meðal eru upplýsingar á borð við aðgangsorð, greiðsluupplýsingar, myndir, skilaboð og hljóð."</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Rangt aðgangsorð"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Of margar misheppnaðar tilraunir.\nReyndu aftur eftir <xliff:g id="NUMBER">%d</xliff:g> sekúndur."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Reyndu aftur. Tilraun <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> af <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Gögnunum þínum verður eytt"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Ef þú slærð inn rangt mynstur í næstu tilraun verður gögnum tækisins eytt."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Ef þú slærð inn rangt PIN-númer í næstu tilraun verður gögnum tækisins eytt."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Ef þú slærð inn rangt aðgangsorð í næstu tilraun verður gögnum tækisins eytt."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Ef þú slærð inn rangt mynstur í næstu tilraun verður þessum notanda eytt."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Ef þú slærð inn rangt PIN-númer í næstu tilraun verður þessum notanda eytt."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Ef þú slærð inn rangt aðgangsorð í næstu tilraun verður þessum notanda eytt."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ef þú slærð inn rangt mynstur í næstu tilraun verður vinnusniðinu þínu og gögnum þess eytt."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ef þú slærð inn rangt PIN-númer í næstu tilraun verður vinnusniðinu þínu og gögnum þess eytt."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ef þú slærð inn rangt aðgangsorð í næstu tilraun verður vinnusniðinu þínu og gögnum þess eytt."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Of margar rangar tilraunir. Gögnum tækisins verður eytt."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Of margar rangar tilraunir. Þessum notanda verður eytt."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Of margar rangar tilraunir. Þessu vinnusniði og gögnum þess verður eytt."</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Sýna snið"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Bæta notanda við"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nýr notandi"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Gestur"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Bæta gesti við"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Fjarlægja gest"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Fjarlægja gest?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Öllum forritum og gögnum í þessari lotu verður eytt."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Fjarlægja"</string>
@@ -986,9 +993,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Færa neðst til vinstri"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Færðu neðst til hægri"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Hunsa"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ekki setja samtöl í blöðrur"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ekki setja samtal í blöðru"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Spjalla með blöðrum"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Ný samtöl birtast sem fljótandi tákn, eða blöðrur. Ýttu til að opna blöðru. Dragðu hana til að færa."</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Ný samtöl birtast sem fljótandi tákn eða blöðrur. Ýttu til að opna blöðru. Dragðu hana til að færa."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Hægt er að stjórna blöðrum hvenær sem er"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Ýttu á „Stjórna“ til að slökkva á blöðrum frá þessu forriti"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Ég skil"</string>
@@ -998,25 +1005,24 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Stækkun yfirglugga"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Stækkunargluggi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Stækkunarstillingar glugga"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"Tækjastýringar"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Bæta við stýringum fyrir tengd tæki"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Setja upp tækjastýringar"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Haltu inni aflrofanum til að sjá stýringarnar þínar"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Veldu forrit til að bæta við stýringum"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> stýringu bætt við.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> stýringum bætt við.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Stýringar"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Veldu hvaða stýringar birtast í aflrofavalmyndinni"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Haltu og dragðu stýringu til að færa hana"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ekki tókst að hlaða lista yfir allar stýringar."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Annað"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Bæta við flýtistýringar"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Bæta við tækjastýringar"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Bæta við uppáhald"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> stakk upp á að bæta þessari stýringu við uppáhald."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Stýringar uppfærðar"</string>

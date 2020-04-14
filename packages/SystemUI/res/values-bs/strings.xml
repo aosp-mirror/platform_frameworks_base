@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Pogrešna lozinka"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Previše pogrešnih pokušaja.\n Pokušajte ponovo za <xliff:g id="NUMBER">%d</xliff:g> s."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Pokušajte ponovo. <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>. pokušaj od <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Vaši podaci će se izbrisati"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Ako u sljedećem pokušaju unesete neispravan uzorak, podaci ovog uređaja će se izbrisati."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Ako u sljedećem pokušaju unesete neispravan PIN, podaci ovog uređaja će se izbrisati."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Ako u sljedećem pokušaju unesete neispravnu lozinku, podaci ovog uređaja će se izbrisati."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Ako u sljedećem pokušaju unesete neispravan uzorak, ovaj korisnik će se izbrisati."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Ako u sljedećem pokušaju unesete neispravan PIN, ovaj korisnik će se izbrisati."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Ako u sljedećem pokušaju unesete neispravnu lozinku, ovaj korisnik će se izbrisati."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ako u sljedećem pokušaju unesete neispravan uzorak, vaš radni profil i njegovi podaci će se izbrisati."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ako u sljedećem pokušaju unesete neispravan PIN, vaš radni profil i njegovi podaci će se izbrisati."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ako u sljedećem pokušaju unesete neispravnu lozinku, vaš radni profil i njegovi podaci će se izbrisati."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Previše je neispravnih pokušaja. Podaci ovog uređaja će se izbrisati."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Previše je neispravnih pokušaja. Ovaj korisnik će se izbrisati."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Previše je neispravnih pokušaja. Ovaj radni profil i njegovi podaci će se izbrisati."</string>
@@ -465,9 +475,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Pokaži profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Dodaj korisnika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novi korisnik"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"Gost"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"Dodaj gosta"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"Ukloni gosta"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Želite li ukloniti gosta?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i svi podaci iz ove sesije bit će izbrisani."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ukloni"</string>
@@ -711,7 +718,7 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Postavke"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nema nedavnih oblačića"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Nedavni i odbačeni oblačići pojavit će se ovdje"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Nedavni i odbačeni oblačići će se pojaviti ovdje"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ta obavještenja se ne mogu izmijeniti."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ovdje nije moguće konfigurirati ovu grupu obavještenja"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Obavještenje preko proksi servera"</string>
@@ -1005,11 +1012,11 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Preklopni prozor za uvećavanje"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Prozor za uvećavanje"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrole prozora za uvećavanje"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Brze kontrole"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Kontrole uređaja"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodavanje kontrola za povezane uređaje"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Postavljanje brzih kontrola"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Dulje pritisnite tipku za uključivanje/isključivanje da biste pristupili kontrolama"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"Odabir aplikacije za dodavanje kontrola"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Postavite kontrole uređaja"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Držite dugme za uključivanje da pristupite kontrolama"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Odaberite aplikaciju da dodate kontrole"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one">Dodana je <xliff:g id="NUMBER_1">%s</xliff:g> kontrola.</item>
       <item quantity="few">Dodane su <xliff:g id="NUMBER_1">%s</xliff:g> kontrole.</item>
@@ -1017,10 +1024,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izaberite kontrole za pristup iz menija napajanja"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Zadržite i prevucite kontrolu da je premjestite"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Učitavanje liste svih kontrola nije uspjelo."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Dodajte u brze kontrole"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajte u kontrole uređaja"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Dodajte u omiljeno"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"Aplikacija <xliff:g id="APP">%s</xliff:g> je predložila da se ova kontrola doda u omiljeno."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Kontrole su ažurirane"</string>
@@ -1034,7 +1044,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Prevucite da vidite više"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Učitavanje preporuka"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Zatvori ovu medijsku sesiju"</string>
-    <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, provjerite aplikac."</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, vidite aplikaciju"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Greška, pokušajte ponovo"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"U toku"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Zadržite dugme za uključivanje da vidite nove kontrole"</string>

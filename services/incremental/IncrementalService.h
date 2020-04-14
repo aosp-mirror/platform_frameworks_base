@@ -308,8 +308,8 @@ private:
     StorageId mNextId = 0;
 
     using Job = std::function<void()>;
-    std::unordered_map<StorageId, std::vector<Job>> mJobQueue;
-    StorageId mPendingJobsStorage = kInvalidStorageId;
+    std::unordered_map<MountId, std::vector<Job>> mJobQueue;
+    MountId mPendingJobsMount = kInvalidStorageId;
     std::condition_variable mJobCondition;
     std::mutex mJobMutex;
     std::thread mJobProcessor;

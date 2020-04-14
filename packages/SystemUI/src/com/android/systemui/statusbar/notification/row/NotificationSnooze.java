@@ -79,6 +79,7 @@ public class NotificationSnooze extends LinearLayout
     private NotificationSwipeActionHelper mSnoozeListener;
     private StatusBarNotification mSbn;
 
+    private View mSnoozeView;
     private TextView mSelectedOptionText;
     private TextView mUndoButton;
     private ImageView mExpandButton;
@@ -122,7 +123,8 @@ public class NotificationSnooze extends LinearLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
         mCollapsedHeight = getResources().getDimensionPixelSize(R.dimen.snooze_snackbar_min_height);
-        findViewById(R.id.notification_snooze).setOnClickListener(this);
+        mSnoozeView = findViewById(R.id.notification_snooze);
+        mSnoozeView.setOnClickListener(this);
         mSelectedOptionText = (TextView) findViewById(R.id.snooze_option_default);
         mUndoButton = (TextView) findViewById(R.id.undo);
         mUndoButton.setOnClickListener(this);
@@ -144,16 +146,6 @@ public class NotificationSnooze extends LinearLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         logOptionSelection(MetricsEvent.NOTIFICATION_SNOOZE_CLICKED, mDefaultOption);
-    }
-
-    @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        if (mGutsContainer != null && mGutsContainer.isExposed()) {
-            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                event.getText().add(mSelectedOptionText.getText());
-            }
-        }
     }
 
     @Override
@@ -341,9 +333,19 @@ public class NotificationSnooze extends LinearLayout
         mSelectedOptionText.setText(option.getConfirmation());
         showSnoozeOptions(false);
         hideSelectedOption();
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         if (userAction) {
+            mSnoozeView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
             logOptionSelection(MetricsEvent.NOTIFICATION_SELECT_SNOOZE, option);
+        }
+    }
+
+    @Override
+    public boolean requestAccessibilityFocus() {
+        if (mExpanded) {
+            return super.requestAccessibilityFocus();
+        } else {
+            mSnoozeView.requestAccessibilityFocus();
+            return false;
         }
     }
 

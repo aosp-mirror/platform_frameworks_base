@@ -134,6 +134,9 @@ class AssetManager2 {
   const std::unordered_map<std::string, std::string>*
     GetOverlayableMapForPackage(uint32_t package_id) const;
 
+  // Returns whether the resources.arsc of any loaded apk assets is allocated in RAM (not mmapped).
+  bool ContainsAllocatedTable() const;
+
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
   void SetConfiguration(const ResTable_config& configuration);

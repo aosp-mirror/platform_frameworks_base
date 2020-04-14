@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"スクリーンショットの作成はアプリまたは組織で許可されていません"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"スクリーンショットを閉じます"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"スクリーンショットを開きます"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"画面レコーダー"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"スクリーン レコーダー"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"録画を開始しますか？"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"録画中に機密情報が画面に表示されたりデバイスで再生されたりした場合、Android システムでキャプチャされることがあります。これには、パスワード、お支払い情報、写真、メッセージ、音声などが含まれます。"</string>
@@ -155,6 +155,16 @@
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"パスワードが正しくありません"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"間違えた回数が上限を超えました。\n<xliff:g id="NUMBER">%d</xliff:g> 秒後にもう一度お試しください。"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"もう一度お試しください。入力回数: <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> 回"</string>
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"データが削除されます"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"パターンをあと 1 回間違えると、このデバイスのデータが削除されます。"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"PIN をあと 1 回間違えると、このデバイスのデータが削除されます。"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"パスワードをあと 1 回間違えると、このデバイスのデータが削除されます。"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"パターンをあと 1 回間違えると、このユーザーが削除されます。"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"PIN をあと 1 回間違えると、このユーザーが削除されます。"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"パスワードをあと 1 回間違えると、このユーザーが削除されます。"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"パターンをあと 1 回間違えると、仕事用プロファイルと関連データが削除されます。"</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"PIN をあと 1 回間違えると、仕事用プロファイルと関連データが削除されます。"</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"パスワードをあと 1 回間違えると、仕事用プロファイルと関連データが削除されます。"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"間違えた回数が上限を超えました。このデバイスのデータが削除されます。"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"間違えた回数が上限を超えました。このユーザーが削除されます。"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"間違えた回数が上限を超えました。この仕事用プロファイルと関連データが削除されます。"</string>
@@ -463,9 +473,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"プロファイルを表示"</string>
     <string name="user_add_user" msgid="4336657383006913022">"ユーザーを追加"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新しいユーザー"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"ゲスト"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"ゲストを追加"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"ゲストを削除"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ゲストを削除しますか？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"このセッションでのアプリとデータはすべて削除されます。"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"削除"</string>
@@ -701,12 +708,12 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"音やバイブレーションが作動しないため、通知に煩わされずに済みます。"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"音やバイブレーションで通知をお知らせします。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"このコンテンツのフローティング ショートカットで通知をお知らせします。"</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"会話セクションの一番上にふきだしとして表示されます。"</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"デフォルトでは <xliff:g id="APP_NAME_0">%1$s</xliff:g> からのすべての会話がふきだしで表示されます。[<xliff:g id="APP_NAME_1">%2$s</xliff:g>] で管理します。"</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"会話セクションの一番上にバブルとして表示されます。"</string>
+    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"デフォルトでは <xliff:g id="APP_NAME_0">%1$s</xliff:g> からのすべての会話がバブルで表示されます。[<xliff:g id="APP_NAME_1">%2$s</xliff:g>] で管理します。"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先度"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近閉じたふきだしはありません"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"最近表示されたふきだしや閉じたふきだしが、ここに表示されます"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近閉じたバブルはありません"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"最近表示されたバブルや閉じたバブルが、ここに表示されます"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"このグループの通知はここでは設定できません"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
@@ -733,8 +740,8 @@
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"重要でない会話"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"マナーモード"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"アラートを受け取る"</string>
-    <string name="notification_conversation_bubble" msgid="2242180995373949022">"ふきだしを表示"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"ふきだしを削除"</string>
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"バブルを表示"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"バブルを削除"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"ホーム画面に追加"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"通知管理"</string>
@@ -976,7 +983,7 @@
     <string name="device_services" msgid="1549944177856658705">"デバイス サービス"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"タイトルなし"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"タップしてこのアプリを再起動すると、全画面表示になります。"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> のふきだしの設定"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> のバブルの設定"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"管理"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>（<xliff:g id="APP_NAME">%2$s</xliff:g>）"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>（<xliff:g id="APP_NAME">%2$s</xliff:g>）、他 <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> 件"</string>
@@ -986,10 +993,10 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"左下に移動"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"右下に移動"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"閉じる"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"会話をふきだしにしない"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"チャットでのふきだしの使用"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"新しい会話はフローティング アイコン（ふきだし）として表示されます。タップするとふきだしが開きます。ドラッグしてふきだしを移動できます。"</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"いつでもふきだしを管理"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"会話をバブルにしない"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"チャットでのバブルの使用"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"新しい会話はフローティング アイコン（バブル）として表示されます。タップするとバブルが開きます。ドラッグしてバブルを移動できます。"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"いつでもバブルを管理"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"このアプリからのバブルをオフにするには、[管理] をタップしてください"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"システム ナビゲーションを更新しました。変更するには [設定] に移動してください。"</string>
@@ -998,25 +1005,22 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"拡大オーバーレイ ウィンドウ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"拡大ウィンドウ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"拡大ウィンドウ コントロール"</string>
-    <!-- no translation found for quick_controls_title (1686913115679255053) -->
-    <skip />
+    <string name="quick_controls_title" msgid="6839108006171302273">"デバイス コントロール"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"接続済みデバイスのコントロールを追加します"</string>
-    <!-- no translation found for quick_controls_setup_title (9079435969373471268) -->
-    <skip />
-    <!-- no translation found for quick_controls_setup_subtitle (1681506617879773824) -->
-    <skip />
-    <!-- no translation found for controls_providers_title (6879775889857085056) -->
-    <skip />
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"デバイス コントロールの設定"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"コントロールにアクセスするには、電源ボタンを長押しします"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"コントロールを追加するアプリの選択"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> 件のコントロールを追加しました。</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> 件のコントロールを追加しました。</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源メニューからアクセスするコントロールを選択する"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"コントロールを移動するには、長押してドラッグします"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"全コントロールの一覧を読み込めませんでした。"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"その他"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"クイック コントロールへの追加"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"デバイス コントロールに追加"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"お気に入りに追加"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g>が、お気に入りに追加のためにこのコントロールを提案しました。"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"コントロールを更新しました"</string>
