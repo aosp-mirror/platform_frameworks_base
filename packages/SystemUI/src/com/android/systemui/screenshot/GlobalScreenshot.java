@@ -422,6 +422,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mDismissButton.setVisibility(View.GONE);
         mScreenshotView.setVisibility(View.GONE);
         mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, null);
+        mScreenshotView.setContentDescription(
+                mContext.getResources().getString(R.string.screenshot_preview_description));
     }
 
     /**
@@ -606,6 +608,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                         Log.e(TAG, "Intent cancelled", e);
                     }
                 });
+                mScreenshotView.setContentDescription(action.title);
             }
             mActionsView.addView(actionChip);
         }
