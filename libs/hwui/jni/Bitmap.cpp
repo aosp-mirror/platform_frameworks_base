@@ -718,7 +718,7 @@ static binder_status_t writeBlobFromFd(AParcel* parcel, int32_t size, int fd) {
     return STATUS_OK;
 }
 
-static binder_status_t writeBlob(AParcel* parcel, const int32_t size, const void* data) {
+static binder_status_t writeBlob(AParcel* parcel, const int32_t size, const void* data, bool immutable) {
     if (size <= 0 || data == nullptr) {
         return STATUS_NOT_ENOUGH_DATA;
     }
@@ -739,7 +739,7 @@ static binder_status_t writeBlob(AParcel* parcel, const int32_t size, const void
             munmap(dest, size);
         }
 
-        if (ashmem_set_prot_region(fd.get(), PROT_READ) < 0) {
+        if (immutable && ashmem_set_prot_region(fd.get(), PROT_READ) < 0) {
             return STATUS_UNKNOWN_ERROR;
         }
         // Workaround b/149851140 in AParcel_writeParcelFileDescriptor
@@ -783,6 +783,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     ScopedParcel p(env, parcel);
 
+    const bool isMutable = p.readInt32();
     const SkColorType colorType = static_cast<SkColorType>(p.readInt32());
     const SkAlphaType alphaType = static_cast<SkAlphaType>(p.readInt32());
     sk_sp<SkColorSpace> colorSpace;
@@ -836,12 +837,18 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
             },
             // Ashmem callback
             [&](android::base::unique_fd fd, int32_t size) {
-                void* addr = mmap(nullptr, size, PROT_READ, MAP_SHARED, fd.get(), 0);
+                int flags = PROT_READ;
+                if (isMutable) {
+                    flags |= PROT_WRITE;
+                }
+                void* addr = mmap(nullptr, size, flags, MAP_SHARED, fd.get(), 0);
                 if (addr == MAP_FAILED) {
+                    const int err = errno;
+                    ALOGW("mmap failed, error %d (%s)", err, strerror(err));
                     return;
                 }
                 nativeBitmap =
-                        Bitmap::createFrom(imageInfo, rowBytes, fd.release(), addr, size, true);
+                        Bitmap::createFrom(imageInfo, rowBytes, fd.release(), addr, size, !isMutable);
             });
     if (error != STATUS_OK) {
         // TODO: Stringify the error, see signalExceptionForError in android_util_Binder.cpp
@@ -853,7 +860,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         return nullptr;
     }
 
-    return createBitmap(env, nativeBitmap.release(), getPremulBitmapCreateFlags(false), nullptr,
+    return createBitmap(env, nativeBitmap.release(), getPremulBitmapCreateFlags(isMutable), nullptr,
                         nullptr, density);
 #else
     jniThrowRuntimeException(env, "Cannot use parcels outside of Android");
@@ -875,6 +882,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     auto bitmapWrapper = reinterpret_cast<BitmapWrapper*>(bitmapHandle);
     bitmapWrapper->getSkBitmap(&bitmap);
 
+    p.writeInt32(!bitmap.isImmutable());
     p.writeInt32(bitmap.colorType());
     p.writeInt32(bitmap.alphaType());
     SkColorSpace* colorSpace = bitmap.colorSpace();
@@ -891,7 +899,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     // Transfer the underlying ashmem region if we have one and it's immutable.
     binder_status_t status;
     int fd = bitmapWrapper->bitmap().getAshmemFd();
-    if (fd >= 0 && p.allowFds()) {
+    if (fd >= 0 && p.allowFds() && bitmap.isImmutable()) {
 #if DEBUG_PARCEL
         ALOGD("Bitmap.writeToParcel: transferring immutable bitmap's ashmem fd as "
               "immutable blob (fds %s)",
@@ -913,7 +921,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
 #endif
 
     size_t size = bitmap.computeByteSize();
-    status = writeBlob(p.get(), size, bitmap.getPixels());
+    status = writeBlob(p.get(), size, bitmap.getPixels(), bitmap.isImmutable());
     if (status) {
         doThrowRE(env, "Could not copy bitmap to parcel blob.");
         return JNI_FALSE;

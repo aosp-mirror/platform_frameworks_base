@@ -69,7 +69,6 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
-import com.android.systemui.statusbar.notification.TestableNotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -138,7 +137,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private FeatureFlags mFeatureFlags;
     private UserChangedListener mUserChangedListener;
-    private TestableNotificationEntryManager mEntryManager;
+    private NotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
 
@@ -167,7 +166,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         ArgumentCaptor<UserChangedListener> userChangedCaptor = ArgumentCaptor
                 .forClass(UserChangedListener.class);
-        mEntryManager = new TestableNotificationEntryManager(
+        mEntryManager = new NotificationEntryManager(
                 mock(NotificationEntryManagerLogger.class),
                 mock(NotificationGroupManager.class),
                 new NotificationRankingManager(
@@ -187,7 +186,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(LeakDetector.class),
                 mock(ForegroundServiceDismissalFeatureController.class)
         );
-        mEntryManager.setUpForTest(mock(NotificationPresenter.class));
+        mEntryManager.setUpWithPresenter(mock(NotificationPresenter.class));
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
         NotificationShelf notificationShelf = mock(NotificationShelf.class);

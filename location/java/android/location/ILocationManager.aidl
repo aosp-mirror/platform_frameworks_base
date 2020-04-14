@@ -85,7 +85,7 @@ interface ILocationManager
     void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections, String packageName);
 
     int getGnssBatchSize(String packageName);
-    void addGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName, String attributionTag);
+    void setGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName, String attributionTag);
     void removeGnssBatchingCallback();
     void startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName, String attributionTag);
     void flushGnssBatch(String packageName);

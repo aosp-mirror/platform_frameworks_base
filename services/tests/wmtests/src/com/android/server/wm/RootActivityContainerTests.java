@@ -58,7 +58,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
-import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
@@ -126,9 +125,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         ensureStackPlacement(mFullscreenStack, firstActivity, secondActivity);
 
         // Move first activity to pinned stack.
-        final Rect sourceBounds = new Rect();
-        mRootWindowContainer.moveActivityToPinnedStack(firstActivity, sourceBounds,
-                0f /*aspectRatio*/, "initialMove");
+        mRootWindowContainer.moveActivityToPinnedStack(firstActivity, "initialMove");
 
         final TaskDisplayArea taskDisplayArea = mFullscreenStack.getDisplayArea();
         ActivityStack pinnedStack = taskDisplayArea.getRootPinnedTask();
@@ -137,8 +134,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         ensureStackPlacement(mFullscreenStack, secondActivity);
 
         // Move second activity to pinned stack.
-        mRootWindowContainer.moveActivityToPinnedStack(secondActivity, sourceBounds,
-                0f /*aspectRatio*/, "secondMove");
+        mRootWindowContainer.moveActivityToPinnedStack(secondActivity, "secondMove");
 
         // Need to get stacks again as a new instance might have been created.
         pinnedStack = taskDisplayArea.getRootPinnedTask();

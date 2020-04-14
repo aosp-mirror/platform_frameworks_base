@@ -2151,7 +2151,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private boolean checkNetworkSignalStrengthWakeupPermission(int pid, int uid) {
         return checkAnyPermissionOf(pid, uid,
                 android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP,
-                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+                android.Manifest.permission.NETWORK_SETTINGS);
     }
 
     private void enforceConnectivityRestrictedNetworksPermission() {

@@ -47,7 +47,6 @@ public class NotifInflaterImpl implements NotifInflater {
     private final NotifPipeline mNotifPipeline;
 
     private NotificationRowBinderImpl mNotificationRowBinder;
-    private InflationCallback mExternalInflationCallback;
 
     @Inject
     public NotifInflaterImpl(
@@ -66,17 +65,11 @@ public class NotifInflaterImpl implements NotifInflater {
      */
     public void setRowBinder(NotificationRowBinderImpl rowBinder) {
         mNotificationRowBinder = rowBinder;
-        mNotificationRowBinder.setInflationCallback(mInflationCallback);
     }
 
     @Override
-    public void setInflationCallback(InflationCallback callback) {
-        mExternalInflationCallback = callback;
-    }
-
-    @Override
-    public void rebindViews(NotificationEntry entry) {
-        inflateViews(entry);
+    public void rebindViews(NotificationEntry entry, InflationCallback callback) {
+        inflateViews(entry, callback);
     }
 
     /**
@@ -84,11 +77,14 @@ public class NotifInflaterImpl implements NotifInflater {
      * views are bound.
      */
     @Override
-    public void inflateViews(NotificationEntry entry) {
+    public void inflateViews(NotificationEntry entry, InflationCallback callback) {
         try {
-            requireBinder().inflateViews(entry, getDismissCallback(entry));
+            requireBinder().inflateViews(
+                    entry,
+                    getDismissCallback(entry),
+                    wrapInflationCallback(callback));
         } catch (InflationException e) {
-            // logged in mInflationCallback.handleInflationException
+            mNotifErrorManager.setInflationError(entry, e);
         }
     }
 
@@ -121,6 +117,26 @@ public class NotifInflaterImpl implements NotifInflater {
         };
     }
 
+    private NotificationContentInflater.InflationCallback wrapInflationCallback(
+            InflationCallback callback) {
+        return new NotificationContentInflater.InflationCallback() {
+            @Override
+            public void handleInflationException(
+                    NotificationEntry entry,
+                    Exception e) {
+                mNotifErrorManager.setInflationError(entry, e);
+            }
+
+            @Override
+            public void onAsyncInflationFinished(NotificationEntry entry) {
+                mNotifErrorManager.clearInflationError(entry);
+                if (callback != null) {
+                    callback.onInflationFinished(entry);
+                }
+            }
+        };
+    }
+
     private NotificationRowBinderImpl requireBinder() {
         if (mNotificationRowBinder == null) {
             throw new RuntimeException("NotificationRowBinder must be attached before using "
@@ -128,22 +144,4 @@ public class NotifInflaterImpl implements NotifInflater {
         }
         return mNotificationRowBinder;
     }
-
-    private final NotificationContentInflater.InflationCallback mInflationCallback =
-            new NotificationContentInflater.InflationCallback() {
-                @Override
-                public void handleInflationException(
-                        NotificationEntry entry,
-                        Exception e) {
-                    mNotifErrorManager.setInflationError(entry, e);
-                }
-
-                @Override
-                public void onAsyncInflationFinished(NotificationEntry entry) {
-                    mNotifErrorManager.clearInflationError(entry);
-                    if (mExternalInflationCallback != null) {
-                        mExternalInflationCallback.onInflationFinished(entry);
-                    }
-                }
-            };
 }
