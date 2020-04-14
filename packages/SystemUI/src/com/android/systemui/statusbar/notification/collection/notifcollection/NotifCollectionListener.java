@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.notifcollection;
 
 import android.service.notification.NotificationListenerService;
+import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -25,6 +26,15 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
  * Listener interface for {@link NotificationEntry} events.
  */
 public interface NotifCollectionListener {
+
+    /**
+     * Called when the entry is having a new status bar notification bound to it. This should
+     * be used to initialize any derivative state on the entry that needs to update when the
+     * notification is updated.
+     */
+    default void onEntryBind(NotificationEntry entry, StatusBarNotification sbn) {
+    }
+
     /**
      * Called whenever a new {@link NotificationEntry} is initialized. This should be used for
      * initializing any decorated state tied to the notification.

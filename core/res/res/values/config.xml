@@ -3397,7 +3397,7 @@
 
     <!-- Inactivity threshold (in milliseconds) used in JobScheduler. JobScheduler will consider
          the device to be "idle" after being inactive for this long. -->
-    <integer name="config_jobSchedulerInactivityIdleThreshold">4260000</integer>
+    <integer name="config_jobSchedulerInactivityIdleThreshold">1860000</integer>
     <!-- The alarm window (in milliseconds) that JobScheduler uses to enter the idle state -->
     <integer name="config_jobSchedulerIdleWindowSlop">300000</integer>
 

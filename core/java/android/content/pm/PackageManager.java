@@ -1550,6 +1550,16 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED = -123;
 
+    /**
+     * Installation failed return code: the {@code resources.arsc} of one of the APKs being
+     * installed is compressed or not aligned on a 4-byte boundary. Resource tables that cannot be
+     * memory mapped exert excess memory pressure on the system and drastically slow down
+     * construction of {@link Resources} objects.
+     *
+     * @hide
+     */
+    public static final int INSTALL_PARSE_FAILED_RESOURCES_ARSC_COMPRESSED = -124;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,

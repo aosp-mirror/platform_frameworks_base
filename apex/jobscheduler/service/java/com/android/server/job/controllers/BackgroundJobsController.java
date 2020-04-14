@@ -184,7 +184,6 @@ public final class BackgroundJobsController extends StateController {
     }
 
     boolean updateSingleJobRestrictionLocked(JobStatus jobStatus, int activeState) {
-
         final int uid = jobStatus.getSourceUid();
         final String packageName = jobStatus.getSourcePackageName();
 
@@ -199,7 +198,7 @@ public final class BackgroundJobsController extends StateController {
             isActive = (activeState == KNOWN_ACTIVE);
         }
         if (isActive && jobStatus.getStandbyBucket() == NEVER_INDEX) {
-            Slog.wtf(TAG, "App became active but still in NEVER bucket");
+            Slog.wtf(TAG, "App " + packageName + " became active but still in NEVER bucket");
         }
         boolean didChange = jobStatus.setBackgroundNotRestrictedConstraintSatisfied(canRun);
         didChange |= jobStatus.setUidActive(isActive);

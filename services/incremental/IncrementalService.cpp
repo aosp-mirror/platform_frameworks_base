@@ -353,10 +353,14 @@ void IncrementalService::onSystemReady() {
         }
     }
 
-    /* TODO(b/151241369): restore data loaders on reboot.
+    if (mounts.empty()) {
+        return;
+    }
+
     std::thread([this, mounts = std::move(mounts)]() {
+        mJni->initializeForCurrentThread();
         for (auto&& ifs : mounts) {
-            if (prepareDataLoader(*ifs)) {
+            if (ifs->dataLoaderStub->create()) {
                 LOG(INFO) << "Successfully started data loader for mount " << ifs->mountId;
             } else {
                 // TODO(b/133435829): handle data loader start failures
@@ -364,7 +368,6 @@ void IncrementalService::onSystemReady() {
             }
         }
     }).detach();
-    */
 }
 
 auto IncrementalService::getStorageSlotLocked() -> MountMap::iterator {
@@ -1068,6 +1071,9 @@ bool IncrementalService::mountExistingImage(std::string_view root) {
         dataLoaderParams.arguments = loader.arguments();
     }
 
+    prepareDataLoader(*ifs, std::move(dataLoaderParams), nullptr);
+    CHECK(ifs->dataLoaderStub);
+
     std::vector<std::pair<std::string, metadata::BindPoint>> bindPoints;
     auto d = openDir(path::c_str(mountTarget));
     while (auto e = ::readdir(d.get())) {
@@ -1273,7 +1279,7 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
         {
             std::lock_guard lock(mJobMutex);
             if (mRunning) {
-                auto& existingJobs = mJobQueue[storage];
+                auto& existingJobs = mJobQueue[ifs->mountId];
                 if (existingJobs.empty()) {
                     existingJobs = std::move(jobQueue);
                 } else {
@@ -1363,12 +1369,32 @@ void IncrementalService::extractZipFile(const IfsMountPtr& ifs, ZipArchiveHandle
 }
 
 bool IncrementalService::waitForNativeBinariesExtraction(StorageId storage) {
+    struct WaitPrinter {
+        const Clock::time_point startTs = Clock::now();
+        ~WaitPrinter() noexcept {
+            if (sEnablePerfLogging) {
+                const auto endTs = Clock::now();
+                LOG(INFO) << "incfs: waitForNativeBinariesExtraction() complete in "
+                          << elapsedMcs(startTs, endTs) << "mcs";
+            }
+        }
+    } waitPrinter;
+
+    MountId mount;
+    {
+        auto ifs = getIfs(storage);
+        if (!ifs) {
+            return true;
+        }
+        mount = ifs->mountId;
+    }
+
     std::unique_lock lock(mJobMutex);
-    mJobCondition.wait(lock, [this, storage] {
+    mJobCondition.wait(lock, [this, mount] {
         return !mRunning ||
-                (mPendingJobsStorage != storage && mJobQueue.find(storage) == mJobQueue.end());
+                (mPendingJobsMount != mount && mJobQueue.find(mount) == mJobQueue.end());
     });
-    return mPendingJobsStorage != storage && mJobQueue.find(storage) == mJobQueue.end();
+    return mRunning;
 }
 
 void IncrementalService::runJobProcessing() {
@@ -1380,7 +1406,7 @@ void IncrementalService::runJobProcessing() {
         }
 
         auto it = mJobQueue.begin();
-        mPendingJobsStorage = it->first;
+        mPendingJobsMount = it->first;
         auto queue = std::move(it->second);
         mJobQueue.erase(it);
         lock.unlock();
@@ -1390,7 +1416,7 @@ void IncrementalService::runJobProcessing() {
         }
 
         lock.lock();
-        mPendingJobsStorage = kInvalidStorageId;
+        mPendingJobsMount = kInvalidStorageId;
         lock.unlock();
         mJobCondition.notify_all();
     }
