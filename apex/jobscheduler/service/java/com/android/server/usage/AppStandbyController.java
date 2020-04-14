@@ -172,8 +172,7 @@ public class AppStandbyController implements AppStandbyInternal {
             COMPRESS_TIME ?  1 * ONE_MINUTE : 12 * ONE_HOUR,
             COMPRESS_TIME ?  4 * ONE_MINUTE : 24 * ONE_HOUR,
             COMPRESS_TIME ? 16 * ONE_MINUTE : 48 * ONE_HOUR,
-            // TODO(149050681): increase timeout to 30+ days
-            COMPRESS_TIME ? 32 * ONE_MINUTE : 4 * ONE_DAY
+            COMPRESS_TIME ? 32 * ONE_MINUTE : 30 * ONE_DAY
     };
 
     /** The minimum allowed values for each index in {@link #ELAPSED_TIME_THRESHOLDS}. */
