@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
@@ -24,7 +24,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
-import static com.android.server.connectivity.tethering.UpstreamNetworkMonitor.TYPE_NONE;
+import static com.android.networkstack.tethering.UpstreamNetworkMonitor.TYPE_NONE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

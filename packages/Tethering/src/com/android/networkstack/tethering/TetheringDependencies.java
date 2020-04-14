@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import static android.net.TetheringConstants.EXTRA_ADD_TETHER_TYPE;
 import static android.net.TetheringConstants.EXTRA_PROVISION_CALLBACK;
@@ -52,7 +52,6 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.StateMachine;
-import com.android.networkstack.tethering.R;
 
 import java.io.PrintWriter;
 
@@ -71,7 +70,7 @@ public class EntitlementManager {
     @VisibleForTesting
     protected static final String DISABLE_PROVISIONING_SYSPROP_KEY = "net.tethering.noprovisioning";
     private static final String ACTION_PROVISIONING_ALARM =
-            "com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM";
+            "com.android.networkstack.tethering.PROVISIONING_RECHECK_ALARM";
     private static final String EXTRA_SUBID = "subId";
 
     private final ComponentName mSilentProvisioningService;
