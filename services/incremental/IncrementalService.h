@@ -180,17 +180,20 @@ private:
         ~DataLoaderStub();
 
         bool create();
-        bool start();
+        bool requestStart();
         void destroy();
 
         // accessors
         MountId id() const { return mId; }
         const DataLoaderParamsParcel& params() const { return mParams; }
-        int status() const { return mStatus.load(); }
+        int status() const { return mStatus; }
         bool startRequested() const { return mStartRequested; }
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
+
+        bool start();
+        bool waitForDestroy();
 
         IncrementalService& mService;
         MountId const mId;
@@ -198,9 +201,11 @@ private:
         FileSystemControlParcel const mControl;
         DataLoaderStatusListener const mListener;
 
-        std::atomic<int> mStatus = -1;
+        std::mutex mStatusMutex;
+        std::condition_variable mStatusCondition;
+        int mStatus = IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         bool mStartRequested = false;
-        bool mDestroyRequested = false;
+        bool mDestroyRequested = true;
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
 
