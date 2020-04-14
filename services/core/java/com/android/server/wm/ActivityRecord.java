@@ -2669,6 +2669,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return this;
         }
 
+        // Ensure activity visibilities and update lockscreen occluded/dismiss state when
+        // finishing the top activity that occluded keyguard. So that, the
+        // ActivityStack#mTopActivityOccludesKeyguard can be updated and the activity below won't
+        // be resumed.
+        if (isState(PAUSED)
+                && mStackSupervisor.getKeyguardController().isKeyguardLocked()
+                && getStack().topActivityOccludesKeyguard()) {
+            getStack().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                    false /* preserveWindows */, false /* notifyClients */);
+        }
+
         boolean activityRemoved = false;
 
         // If this activity is currently visible, and the resumed activity is not yet visible, then
