@@ -22,6 +22,7 @@ import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 
 /**
  * Used by the {@link NotificationEntryManager}. When notifications are added or updated, the binder
@@ -37,7 +38,8 @@ public interface NotificationRowBinder {
      */
     void inflateViews(
             NotificationEntry entry,
-            Runnable onDismissRunnable)
+            Runnable onDismissRunnable,
+            NotificationRowContentBinder.InflationCallback callback)
             throws InflationException;
 
     /**

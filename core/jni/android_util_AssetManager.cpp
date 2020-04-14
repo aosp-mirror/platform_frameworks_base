@@ -481,6 +481,11 @@ static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/
   return sparse_array;
 }
 
+static jboolean ContainsAllocatedTable(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  return assetmanager->ContainsAllocatedTable();
+}
+
 static jobjectArray NativeList(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring path) {
   ScopedUtfChars path_utf8(env, path);
   if (path_utf8.c_str() == nullptr) {
@@ -1495,6 +1500,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
      (void*)NativeGetAssignedPackageIdentifiers},
 
     // AssetManager file methods.
+    {"nativeContainsAllocatedTable", "(J)Z", (void*)ContainsAllocatedTable},
     {"nativeList", "(JLjava/lang/String;)[Ljava/lang/String;", (void*)NativeList},
     {"nativeOpenAsset", "(JLjava/lang/String;I)J", (void*)NativeOpenAsset},
     {"nativeOpenAssetFd", "(JLjava/lang/String;[J)Landroid/os/ParcelFileDescriptor;",

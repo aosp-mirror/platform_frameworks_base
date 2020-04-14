@@ -712,7 +712,7 @@
     <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Alla konversationer från <xliff:g id="APP_NAME_0">%1$s</xliff:g> visas i bubblor som standard. Hantera detta i <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Inga senaste bubblor"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Inga nya bubblor"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"De senaste bubblorna och ignorerade bubblor visas här"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Det går inte att ändra de här aviseringarna."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Den här aviseringsgruppen kan inte konfigureras här"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Överlagrat förstoringsfönster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Förstoringsfönster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Inställningar för förstoringsfönster"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Snabbinställningar"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Enhetsinställningar"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lägg till snabbkontroller för anslutna enheter"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Konfigurera snabbinställningar"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurera enhetsinställningar"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Håll strömbrytaren nedtryckt för att få åtkomst till snabbkontrollerna"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Välj en app om du vill lägga till snabbkontroller"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Välj snabbkontroller som ska visas i strömbrytarmenyn"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Dra en snabbkontroll om du vill flytta den"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Listan med alla kontroller kunde inte läsas in."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Övrigt"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Lägg till snabbkontroll"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Lägg till i enhetsinställningar"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Lägg till i Favoriter"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> föreslår att du lägger till kontrollen i dina favoriter."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Snabbkontroller uppdaterade"</string>

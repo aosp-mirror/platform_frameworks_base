@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"האפליקציה או הארגון שלך אינם מתירים ליצור צילומי מסך"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"סגירת צילום מסך"</string>
     <string name="screenshot_preview_description" msgid="669177537416980449">"פתיחת צילום מסך"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"מקליט מסך"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"מקליט המסך"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"התראה מתמשכת לסשן הקלטת מסך"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"להתחיל את ההקלטה?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"‏בזמן ההקלטה, מערכת Android יכולה לתעד מידע רגיש שגלוי במסך או מופעל במכשיר שלך. מידע זה כולל סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו."</string>
@@ -1015,9 +1015,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"חלון ליצירת שכבת-על להגדלה"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"חלון הגדלה"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"בקרות של חלון ההגדלה"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"פקדים מהירים"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"פקדי המכשיר"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"יש להוסיף פקדים למכשירים המחוברים"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"הגדרה של פקדים מהירים"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"הגדרה של פקדי המכשיר"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"יש ללחוץ לחיצה ארוכה על לחצן ההפעלה כדי לגשת לבקרים"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"יש לבחור אפליקציה כדי להוסיף פקדים"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1028,10 +1028,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"פקדים"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"יש לבחור פקדים לגישה מתפריט ההפעלה"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"כדי להזיז פקד, יש ללחוץ עליו ולגרור אותו"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"לא ניתן היה לטעון את הרשימה של כל הפקדים."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"אחר"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"הוספה לפקדים מהירים"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"הוספה לפקדי המכשיר"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"הוספה למועדפים"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"בקרה זו הוצעה על ידי <xliff:g id="APP">%s</xliff:g> להוספה למועדפים."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"הפקדים עודכנו"</string>

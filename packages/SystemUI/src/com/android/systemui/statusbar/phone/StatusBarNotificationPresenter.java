@@ -22,7 +22,6 @@ import static com.android.systemui.statusbar.phone.StatusBar.SPEW;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.notification.StatusBarNotification;
@@ -355,8 +354,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     @Override
-    public void onBindRow(NotificationEntry entry, PackageManager pmUser,
-            StatusBarNotification sbn, ExpandableNotificationRow row) {
+    public void onBindRow(ExpandableNotificationRow row) {
         row.setAboveShelfChangedListener(mAboveShelfObserver);
         row.setSecureStateProvider(mKeyguardStateController::canDismissLockScreen);
     }

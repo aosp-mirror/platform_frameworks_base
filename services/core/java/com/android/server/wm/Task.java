@@ -1769,6 +1769,10 @@ class Task extends WindowContainer<WindowContainer> {
                 t.updateTaskDescription();
             }
         }
+
+        if (isOrganized()) {
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, true /* force */);
+        }
     }
 
     private static boolean setTaskDescriptionFromActivityAboveRoot(
@@ -1964,7 +1968,7 @@ class Task extends WindowContainer<WindowContainer> {
         final boolean taskOrgChanged = updateTaskOrganizerState(false /* forceUpdate */);
         // If the task organizer has changed, then it will already be receiving taskAppeared with
         // the latest task-info thus the task-info won't have changed.
-        if (!taskOrgChanged && mTaskOrganizer != null) {
+        if (!taskOrgChanged && isOrganized()) {
             mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, false /* force */);
         }
     }
@@ -3068,6 +3072,7 @@ class Task extends WindowContainer<WindowContainer> {
         mForceShowForAllUsers = forceShowForAllUsers;
     }
 
+    @Override
     public boolean isAttached() {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
         return taskDisplayArea != null && !taskDisplayArea.isRemoved();
@@ -4173,8 +4178,6 @@ class Task extends WindowContainer<WindowContainer> {
         // Let the old organizer know it has lost control.
         sendTaskVanished();
         mTaskOrganizer = organizer;
-
-
         sendTaskAppeared();
         onTaskOrganizerChanged();
         return true;
@@ -4311,8 +4314,9 @@ class Task extends WindowContainer<WindowContainer> {
 
     void setPictureInPictureParams(PictureInPictureParams p) {
         mPictureInPictureParams.copyOnlySet(p);
-        mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
-                this, true /* force */);
+        if (isOrganized()) {
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, true /* force */);
+        }
     }
 
     /**

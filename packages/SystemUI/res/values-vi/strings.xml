@@ -151,7 +151,7 @@
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Dùng hình mở khóa"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Dùng mật khẩu"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Mã PIN sai"</string>
-    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Hình mở khóa sai"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Hình mở khóa không chính xác"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Mật khẩu sai"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Bạn đã nhập sai quá nhiều lần.\nHãy thử lại sau <xliff:g id="NUMBER">%d</xliff:g> giây."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Thử lại. Lần thử <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
@@ -232,7 +232,7 @@
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Đã tắt dữ liệu di động"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Chưa được đặt để sử dụng dữ liệu"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Tắt"</string>
-    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Chia sẻ kết nối Internet qua Bluetooth"</string>
+    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Chia sẻ Internet qua Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Chế độ trên máy bay."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN đang bật."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"Không có thẻ SIM nào."</string>
@@ -394,7 +394,7 @@
     <string name="quick_settings_connected" msgid="3873605509184830379">"Đã kết nối"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Đã kết nối, mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Đang kết nối..."</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Đang dùng làm điểm truy cập Internet"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Chia sẻ Internet"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Điểm phát sóng"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Đang bật…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Trình tiết kiệm dữ liệu đang bật"</string>
@@ -1005,9 +1005,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Cửa sổ lớp phủ phóng to"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Cửa sổ phóng to"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Các tùy chọn điều khiển cửa sổ phóng to"</string>
-    <string name="quick_controls_title" msgid="1686913115679255053">"Tùy chọn điều khiển nhanh"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Điều khiển thiết bị"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Thêm các tùy chọn điều khiển cho các thiết bị đã kết nối của bạn"</string>
-    <string name="quick_controls_setup_title" msgid="9079435969373471268">"Thiết lập các tùy chọn điều khiển nhanh"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Thiết lập các tùy chọn điều khiển thiết bị"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Giữ nút Nguồn để truy cập vào các tùy chọn điều khiển"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Chọn ứng dụng để thêm các tùy chọn điều khiển"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,10 +1016,13 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Các tùy chọn điều khiển"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Chọn các tùy chọn điều khiển để truy cập từ trình đơn nguồn"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Giữ và kéo một tùy chọn điều khiển để di chuyển tùy chọn đó"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Không thể tải danh sách tất cả tùy chọn điều khiển."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Khác"</string>
-    <string name="controls_dialog_title" msgid="3475025327938684220">"Thêm vào mục điều khiển nhanh"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Thêm vào mục điều khiển thiết bị"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Thêm vào mục yêu thích"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> đã đề xuất thêm tùy chọn điều khiển này vào mục yêu thích của bạn."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Đã cập nhật các tùy chọn điều khiển"</string>

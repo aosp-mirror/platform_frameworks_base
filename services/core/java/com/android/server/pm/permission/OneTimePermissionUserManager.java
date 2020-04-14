@@ -21,9 +21,14 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHE
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.permission.PermissionControllerManager;
+import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -36,7 +41,10 @@ public class OneTimePermissionUserManager {
 
     private static final String LOG_TAG = OneTimePermissionUserManager.class.getSimpleName();
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
+    private static final long DEFAULT_KILLED_DELAY_MILLIS = 5000;
+    public static final String PROPERTY_KILLED_DELAY_CONFIG_KEY =
+            "one_time_permissions_killed_delay_millis";
 
     private final @NonNull Context mContext;
     private final @NonNull ActivityManager mActivityManager;
@@ -45,15 +53,37 @@ public class OneTimePermissionUserManager {
 
     private final Object mLock = new Object();
 
+    private final BroadcastReceiver mUninstallListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_UID_REMOVED.equals(intent.getAction())) {
+                int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                PackageInactivityListener listener = mListeners.get(uid);
+                if (listener != null) {
+                    if (DEBUG) {
+                        Log.d(LOG_TAG, "Removing  the inactivity listener for " + uid);
+                    }
+                    listener.cancel();
+                    mListeners.remove(uid);
+                }
+            }
+        }
+    };
+
     /** Maps the uid to the PackageInactivityListener */
     @GuardedBy("mLock")
     private final SparseArray<PackageInactivityListener> mListeners = new SparseArray<>();
+    private final Handler mHandler;
 
     OneTimePermissionUserManager(@NonNull Context context) {
         mContext = context;
         mActivityManager = context.getSystemService(ActivityManager.class);
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mPermissionControllerManager = context.getSystemService(PermissionControllerManager.class);
+        mHandler = context.getMainThreadHandler();
+
+        // Listen for tracked uid being uninstalled
+        context.registerReceiver(mUninstallListener, new IntentFilter(Intent.ACTION_UID_REMOVED));
     }
 
     /**
@@ -132,6 +162,15 @@ public class OneTimePermissionUserManager {
     }
 
     /**
+     * The delay to wait before revoking on the event an app is terminated. Recommended to be long
+     * enough so that apps don't lose permission on an immediate restart
+     */
+    private static long getKilledDelayMillis() {
+        return DeviceConfig.getLong(DeviceConfig.NAMESPACE_PERMISSIONS,
+                PROPERTY_KILLED_DELAY_CONFIG_KEY, DEFAULT_KILLED_DELAY_MILLIS);
+    }
+
+    /**
      * A class which watches a package for inactivity and notifies the permission controller when
      * the package becomes inactive
      */
@@ -155,16 +194,15 @@ public class OneTimePermissionUserManager {
         private final ActivityManager.OnUidImportanceListener mGoneListener;
 
         private final Object mInnerLock = new Object();
+        private final Object mToken = new Object();
 
         private PackageInactivityListener(int uid, @NonNull String packageName, long timeout,
                 int importanceToResetTimer, int importanceToKeepSessionAlive) {
 
-            if (DEBUG) {
-                Log.d(LOG_TAG,
-                        "Start tracking " + packageName + ". uid=" + uid + " timeout=" + timeout
-                                + " importanceToResetTimer=" + importanceToResetTimer
-                                + " importanceToKeepSessionAlive=" + importanceToKeepSessionAlive);
-            }
+            Log.i(LOG_TAG,
+                    "Start tracking " + packageName + ". uid=" + uid + " timeout=" + timeout
+                            + " importanceToResetTimer=" + importanceToResetTimer
+                            + " importanceToKeepSessionAlive=" + importanceToKeepSessionAlive);
 
             mUid = uid;
             mPackageName = packageName;
@@ -193,18 +231,34 @@ public class OneTimePermissionUserManager {
                 return;
             }
 
-
-            if (DEBUG) {
-                Log.d(LOG_TAG, "Importance changed for " + mPackageName + " (" + mUid + ")."
-                        + " importance=" + importance);
-            }
+            Log.v(LOG_TAG, "Importance changed for " + mPackageName + " (" + mUid + ")."
+                    + " importance=" + importance);
             synchronized (mInnerLock) {
+                // Remove any pending inactivity callback
+                mHandler.removeCallbacksAndMessages(mToken);
+
                 if (importance > IMPORTANCE_CACHED) {
-                    onPackageInactiveLocked();
+                    // Delay revocation in case app is restarting
+                    mHandler.postDelayed(() -> {
+                        int imp = mActivityManager.getUidImportance(mUid);
+                        if (imp > IMPORTANCE_CACHED) {
+                            onPackageInactiveLocked();
+                        } else {
+                            if (DEBUG) {
+                                Log.d(LOG_TAG, "No longer gone after delayed revocation. "
+                                        + "Rechecking for " + mPackageName + " (" + mUid + ").");
+                            }
+                            onImportanceChanged(mUid, imp);
+                        }
+                    }, mToken, getKilledDelayMillis());
                     return;
                 }
                 if (importance > mImportanceToResetTimer) {
                     if (mTimerStart == TIMER_INACTIVE) {
+                        if (DEBUG) {
+                            Log.d(LOG_TAG, "Start the timer for "
+                                    + mPackageName + " (" + mUid + ").");
+                        }
                         mTimerStart = System.currentTimeMillis();
                     }
                 } else {
@@ -240,10 +294,13 @@ public class OneTimePermissionUserManager {
                 return;
             }
 
+            if (DEBUG) {
+                Log.d(LOG_TAG, "Scheduling alarm for " + mPackageName + " (" + mUid + ").");
+            }
             long revokeTime = mTimerStart + mTimeout;
             if (revokeTime > System.currentTimeMillis()) {
                 mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, revokeTime, LOG_TAG, this,
-                        mContext.getMainThreadHandler());
+                        mHandler);
                 mIsAlarmSet = true;
             } else {
                 mIsAlarmSet = true;
@@ -257,6 +314,9 @@ public class OneTimePermissionUserManager {
         @GuardedBy("mInnerLock")
         private void cancelAlarmLocked() {
             if (mIsAlarmSet) {
+                if (DEBUG) {
+                    Log.d(LOG_TAG, "Canceling alarm for " + mPackageName + " (" + mUid + ").");
+                }
                 mAlarmManager.cancel(this);
                 mIsAlarmSet = false;
             }
@@ -270,14 +330,16 @@ public class OneTimePermissionUserManager {
             if (mIsFinished) {
                 return;
             }
+            if (DEBUG) {
+                Log.d(LOG_TAG, "onPackageInactiveLocked stack trace for "
+                        + mPackageName + " (" + mUid + ").", new RuntimeException());
+            }
             mIsFinished = true;
             cancelAlarmLocked();
-            mContext.getMainThreadHandler().post(
+            mHandler.post(
                     () -> {
-                        if (DEBUG) {
-                            Log.d(LOG_TAG, "One time session expired for "
-                                    + mPackageName + " (" + mUid + ").");
-                        }
+                        Log.i(LOG_TAG, "One time session expired for "
+                                + mPackageName + " (" + mUid + ").");
 
                         mPermissionControllerManager.notifyOneTimePermissionSessionTimeout(
                                 mPackageName);
@@ -292,6 +354,9 @@ public class OneTimePermissionUserManager {
 
         @Override
         public void onAlarm() {
+            if (DEBUG) {
+                Log.d(LOG_TAG, "Alarm received for " + mPackageName + " (" + mUid + ").");
+            }
             synchronized (mInnerLock) {
                 if (!mIsAlarmSet) {
                     return;

@@ -172,18 +172,6 @@ class IconManager @Inject constructor(
         }
     }
 
-    /**
-     * Updates tags on the icon views to match the posting app's target SDK level
-     *
-     * Note that this method MUST be called after both [createIcons] and [updateIcons].
-     */
-    fun updateIconTags(entry: NotificationEntry, targetSdk: Int) {
-        setTagOnIconViews(
-                entry.icons,
-                R.id.icon_is_pre_L,
-                targetSdk < Build.VERSION_CODES.LOLLIPOP)
-    }
-
     private fun updateIconsSafe(entry: NotificationEntry) {
         try {
             updateIcons(entry)
@@ -259,6 +247,7 @@ class IconManager @Inject constructor(
         iconView: StatusBarIconView
     ) {
         iconView.setShowsConversation(showsConversation(entry, iconView, iconDescriptor))
+        iconView.setTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP)
         if (!iconView.set(iconDescriptor)) {
             throw InflationException("Couldn't create icon $iconDescriptor")
         }
@@ -326,19 +315,12 @@ class IconManager @Inject constructor(
         val usedInSensitiveContext =
                 iconView === entry.icons.shelfIcon || iconView === entry.icons.aodIcon
         val isSmallIcon = iconDescriptor.icon.equals(entry.sbn.notification.smallIcon)
-        return isImportantConversation(entry) && !isSmallIcon
-                && (!usedInSensitiveContext || !entry.isSensitive)
+        return isImportantConversation(entry) && !isSmallIcon &&
+                (!usedInSensitiveContext || !entry.isSensitive)
     }
 
     private fun isImportantConversation(entry: NotificationEntry): Boolean {
         return entry.ranking.channel != null && entry.ranking.channel.isImportantConversation
-    }
-
-    private fun setTagOnIconViews(icons: IconPack, key: Int, tag: Any) {
-        icons.statusBarIcon?.setTag(key, tag)
-        icons.shelfIcon?.setTag(key, tag)
-        icons.aodIcon?.setTag(key, tag)
-        icons.centeredIcon?.setTag(key, tag)
     }
 }
 

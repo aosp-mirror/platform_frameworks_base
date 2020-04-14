@@ -120,6 +120,7 @@ public class BubbleData {
     /** Bubbles that are being loaded but haven't been added to the stack just yet. */
     private final List<Bubble> mPendingBubbles;
     private Bubble mSelectedBubble;
+    private boolean mShowingOverflow;
     private boolean mExpanded;
     private final int mMaxBubbles;
     private final int mMaxOverflowBubbles;
@@ -213,6 +214,10 @@ public class BubbleData {
                 },
                 mContext, stack, factory);
         dispatchPendingChanges();
+    }
+
+    void setShowingOverflow(boolean showingOverflow) {
+        mShowingOverflow = showingOverflow;
     }
 
     private void moveOverflowBubbleToPending(Bubble b) {
@@ -513,9 +518,11 @@ public class BubbleData {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setSelectedBubbleInternal: " + bubble);
         }
-        if (Objects.equals(bubble, mSelectedBubble)) {
+        if (!mShowingOverflow && Objects.equals(bubble, mSelectedBubble)) {
             return;
         }
+        // Otherwise, if we are showing the overflow menu, return to the previously selected bubble.
+
         if (bubble != null && !mBubbles.contains(bubble) && !mOverflowBubbles.contains(bubble)) {
             Log.e(TAG, "Cannot select bubble which doesn't exist!"
                     + " (" + bubble + ") bubbles=" + mBubbles);
@@ -559,6 +566,10 @@ public class BubbleData {
             mStateChange.orderChanged |= repackAll();
             // Save the state which should be returned to when expanded (with no other changes)
 
+            if (mShowingOverflow) {
+                // Show previously selected bubble instead of overflow menu on next expansion.
+                setSelectedBubbleInternal(mSelectedBubble);
+            }
             if (mBubbles.indexOf(mSelectedBubble) > 0) {
                 // Move the selected bubble to the top while collapsed.
                 if (!mSelectedBubble.isOngoing() && mBubbles.get(0).isOngoing()) {

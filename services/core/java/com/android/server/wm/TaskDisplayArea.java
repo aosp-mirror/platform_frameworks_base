@@ -879,6 +879,11 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
                     + windowingMode);
         }
 
+        if (windowingMode == WINDOWING_MODE_PINNED && getRootPinnedTask() != null) {
+            // Only 1 stack can be PINNED at a time, so dismiss the existing one
+            getRootPinnedTask().dismissPip();
+        }
+
         final int stackId = getNextStackId();
         return createStackUnchecked(windowingMode, activityType, stackId, onTop, info, intent,
                 createdByOrganizer);

@@ -27,12 +27,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint.Style;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.text.TextPaint;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -68,15 +70,37 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
 
     @Mock
     TextClock mClockView;
+    View mMockKeyguardSliceView;
     @InjectMocks
     KeyguardClockSwitch mKeyguardClockSwitch;
 
     @Before
     public void setUp() {
+        mMockKeyguardSliceView = mock(KeyguardSliceView.class);
+        when(mMockKeyguardSliceView.getContext()).thenReturn(mContext);
+        when(mMockKeyguardSliceView.findViewById(R.id.keyguard_status_area))
+                .thenReturn(mMockKeyguardSliceView);
+
         InjectionInflationController inflationController = new InjectionInflationController(
                 SystemUIFactory.getInstance().getRootComponent());
         LayoutInflater layoutInflater = inflationController
                 .injectable(LayoutInflater.from(getContext()));
+        layoutInflater.setPrivateFactory(new LayoutInflater.Factory2() {
+
+            @Override
+            public View onCreateView(View parent, String name, Context context,
+                    AttributeSet attrs) {
+                return onCreateView(name, context, attrs);
+            }
+
+            @Override
+            public View onCreateView(String name, Context context, AttributeSet attrs) {
+                if ("com.android.keyguard.KeyguardSliceView".equals(name)) {
+                    return mMockKeyguardSliceView;
+                }
+                return null;
+            }
+        });
         mKeyguardClockSwitch =
                 (KeyguardClockSwitch) layoutInflater.inflate(R.layout.keyguard_clock_switch, null);
         mClockContainer = mKeyguardClockSwitch.findViewById(R.id.clock_view);
