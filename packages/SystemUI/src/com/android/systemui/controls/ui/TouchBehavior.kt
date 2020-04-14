@@ -37,7 +37,7 @@ class TouchBehavior : Behavior {
 
     override fun initialize(cvh: ControlViewHolder) {
         this.cvh = cvh
-        cvh.applyRenderInfo(false)
+        cvh.applyRenderInfo(false /* enabled */, 0 /* offset */, false /* animated */)
 
         cvh.layout.setOnClickListener(View.OnClickListener() {
             ControlActionCoordinator.touch(cvh, template.getTemplateId(), control)
