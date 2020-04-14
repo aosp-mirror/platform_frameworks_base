@@ -97,8 +97,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         final boolean changed = mPipBoundsHandler.onDisplayRotationChanged(mTmpNormalBounds,
                 displayId, fromRotation, toRotation, t);
         if (changed) {
-            updateMovementBounds(mTmpNormalBounds, false /* fromImeAdjustment */,
-                    false /* fromShelfAdjustment */);
+            updateMovementBounds(mTmpNormalBounds, true /* fromRotation */,
+                    false /* fromImeAdjustment */, false /* fromShelfAdjustment */);
         }
     };
 
@@ -163,7 +163,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         @Override
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
             mHandler.post(() -> updateMovementBounds(null /* toBounds */,
-                    fromImeAdjustment, false /* fromShelfAdjustment */));
+                    false /* fromRotation */, fromImeAdjustment, false /* fromShelfAdjustment */));
         }
 
         @Override
@@ -294,7 +294,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             if (changed) {
                 mTouchHandler.onShelfVisibilityChanged(visible, height);
                 updateMovementBounds(mPipBoundsHandler.getLastDestinationBounds(),
-                        false /* fromImeAdjustment */, true /* fromShelfAdjustment */);
+                        false /* fromRotation */, false /* fromImeAdjustment */,
+                        true /* fromShelfAdjustment */);
             }
         });
     }
@@ -353,7 +354,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mMenuController.onPinnedStackAnimationEnded();
     }
 
-    private void updateMovementBounds(@Nullable Rect toBounds,
+    private void updateMovementBounds(@Nullable Rect toBounds, boolean fromRotation,
             boolean fromImeAdjustment, boolean fromShelfAdjustment) {
         // Populate inset / normal bounds and DisplayInfo from mPipBoundsHandler before
         // passing to mTouchHandler/mPipTaskOrganizer
@@ -361,7 +362,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 outBounds, mTmpDisplayInfo);
         // mTouchHandler would rely on the bounds populated from mPipTaskOrganizer
-        mPipTaskOrganizer.onMovementBoundsChanged(outBounds,
+        mPipTaskOrganizer.onMovementBoundsChanged(outBounds, fromRotation,
                 fromImeAdjustment, fromShelfAdjustment);
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 outBounds, fromImeAdjustment, fromShelfAdjustment,
