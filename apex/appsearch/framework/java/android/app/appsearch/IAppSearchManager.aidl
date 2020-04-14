@@ -88,6 +88,21 @@ interface IAppSearchManager {
     void delete(in List<String> uris, in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
+     * Deletes documents by schema type.
+     *
+     * @param schemaTypes The schema types of the documents to delete
+     * @param callback
+     *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;&gt;.
+     *     If the call fails to start, {@code callback} will be completed exceptionally. Otherwise,
+     *     {@code callback} will be completed with an
+     *     {@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;
+     *     where the keys are schema types. If a schema type doesn't exist, it will be reported as a
+     *     failure where the {@code throwable} is {@code null}.
+     */
+    void deleteByTypes(
+        in List<String> schemaTypes, in AndroidFuture<AppSearchBatchResult> callback);
+
+    /**
      * Deletes all documents belonging to the calling app.
      *
      * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link Void}&gt;&gt;.
