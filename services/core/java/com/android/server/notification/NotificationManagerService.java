@@ -32,6 +32,7 @@ import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_ID;
 import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_STATUS;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
@@ -3079,13 +3080,17 @@ public class NotificationManagerService extends SystemService {
             return mPreferencesHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
         }
 
+        /**
+         * @return true if and only if "all" bubbles are allowed from the provided package.
+         */
         @Override
         public boolean areBubblesAllowed(String pkg) {
-            return areBubblesAllowedForPackage(pkg, Binder.getCallingUid());
+            return getBubblePreferenceForPackage(pkg, Binder.getCallingUid())
+                    == BUBBLE_PREFERENCE_ALL;
         }
 
         @Override
-        public boolean areBubblesAllowedForPackage(String pkg, int uid) {
+        public int getBubblePreferenceForPackage(String pkg, int uid) {
             enforceSystemOrSystemUIOrSamePackage(pkg,
                     "Caller not system or systemui or same package");
 
@@ -3095,21 +3100,14 @@ public class NotificationManagerService extends SystemService {
                         "canNotifyAsPackage for uid " + uid);
             }
 
-            return mPreferencesHelper.areBubblesAllowed(pkg, uid);
+            return mPreferencesHelper.getBubblePreference(pkg, uid);
         }
 
         @Override
-        public void setBubblesAllowed(String pkg, int uid, boolean allowed) {
+        public void setBubblesAllowed(String pkg, int uid, int bubblePreference) {
             enforceSystemOrSystemUI("Caller not system or systemui");
-            mPreferencesHelper.setBubblesAllowed(pkg, uid, allowed);
+            mPreferencesHelper.setBubblesAllowed(pkg, uid, bubblePreference);
             handleSavePolicyFile();
-        }
-
-        @Override
-        public boolean hasUserApprovedBubblesForPackage(String pkg, int uid) {
-            enforceSystemOrSystemUI("Caller not system or systemui");
-            int lockedFields = mPreferencesHelper.getAppLockedFields(pkg, uid);
-            return (lockedFields & PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE) != 0;
         }
 
         @Override
@@ -7210,7 +7208,10 @@ public class NotificationManagerService extends SystemService {
             boolean interruptiveChanged =
                     record.canBubble() && (interruptiveBefore != record.isInterruptive());
 
-            changed = indexChanged || interceptChanged || visibilityChanged || interruptiveChanged;
+            changed = indexChanged
+                    || interceptChanged
+                    || visibilityChanged
+                    || interruptiveChanged;
             if (interceptBefore && !record.isIntercepted()
                     && record.isNewEnoughForAlerting(System.currentTimeMillis())) {
                 buzzBeepBlinkLocked(record);
