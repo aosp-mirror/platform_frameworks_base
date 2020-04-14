@@ -16,6 +16,9 @@
 
 package com.android.systemui.controls.ui
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.GradientDrawable
@@ -32,11 +35,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-
+import com.android.internal.graphics.ColorUtils
+import com.android.systemui.Interpolators
+import com.android.systemui.R
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.R
-
 import kotlin.reflect.KClass
 
 /**
@@ -53,15 +56,17 @@ class ControlViewHolder(
 ) {
 
     companion object {
+        const val STATE_ANIMATION_DURATION = 700L
         private const val UPDATE_DELAY_IN_MILLIS = 3000L
         private const val ALPHA_ENABLED = (255.0 * 0.2).toInt()
-        private const val ALPHA_DISABLED = 255
+        private const val ALPHA_DISABLED = 0
         private val FORCE_PANEL_DEVICES = setOf(
             DeviceTypes.TYPE_THERMOSTAT,
             DeviceTypes.TYPE_CAMERA
         )
     }
 
+    private var stateAnimator: ValueAnimator? = null
     val icon: ImageView = layout.requireViewById(R.id.icon)
     val status: TextView = layout.requireViewById(R.id.status)
     val title: TextView = layout.requireViewById(R.id.title)
@@ -79,6 +84,7 @@ class ControlViewHolder(
         val ld = layout.getBackground() as LayerDrawable
         ld.mutate()
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer) as ClipDrawable
+        clipLayer.alpha = ALPHA_DISABLED
         // needed for marquee to start
         status.setSelected(true)
     }
@@ -160,30 +166,49 @@ class ControlViewHolder(
         }
     }
 
-    internal fun applyRenderInfo(enabled: Boolean, offset: Int = 0) {
+    internal fun applyRenderInfo(enabled: Boolean, offset: Int = 0, animated: Boolean = true) {
         setEnabled(enabled)
 
         val ri = RenderInfo.lookup(context, cws.componentName, deviceType, enabled, offset)
 
         val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
-        val (bg, alpha) = if (enabled) {
+        val (bg, newAlpha) = if (enabled) {
             Pair(ri.enabledBackground, ALPHA_ENABLED)
         } else {
             Pair(R.color.control_default_background, ALPHA_DISABLED)
         }
 
         status.setTextColor(fg)
-
         icon.setImageDrawable(ri.icon)
 
         // do not color app icons
         if (deviceType != DeviceTypes.TYPE_ROUTINE) {
-            icon.setImageTintList(fg)
+            icon.imageTintList = fg
         }
 
         (clipLayer.getDrawable() as GradientDrawable).apply {
-            setColor(context.getResources().getColor(bg, context.getTheme()))
-            setAlpha(alpha)
+            val newColor = context.resources.getColor(bg, context.theme)
+            stateAnimator?.cancel()
+            if (animated) {
+                val oldColor = color?.defaultColor ?: newColor
+                stateAnimator = ValueAnimator.ofInt(clipLayer.alpha, newAlpha).apply {
+                    addUpdateListener {
+                        alpha = it.animatedValue as Int
+                        setColor(ColorUtils.blendARGB(oldColor, newColor, it.animatedFraction))
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            stateAnimator = null
+                        }
+                    })
+                    duration = STATE_ANIMATION_DURATION
+                    interpolator = Interpolators.CONTROL_STATE
+                    start()
+                }
+            } else {
+                alpha = newAlpha
+                setColor(newColor)
+            }
         }
     }
 
