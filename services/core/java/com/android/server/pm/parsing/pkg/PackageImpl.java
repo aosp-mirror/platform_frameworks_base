@@ -455,7 +455,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
 
     @Override
     public ApplicationInfo toAppInfoWithoutState() {
-        ApplicationInfo appInfo = super.toAppInfoWithoutState();
+        ApplicationInfo appInfo = super.toAppInfoWithoutStateWithoutFlags();
         appInfo.flags = PackageInfoUtils.appInfoFlags(this, null);
         appInfo.privateFlags = PackageInfoUtils.appInfoPrivateFlags(this, null);
         appInfo.nativeLibraryDir = nativeLibraryDir;
