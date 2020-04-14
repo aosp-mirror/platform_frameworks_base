@@ -3098,7 +3098,7 @@ public class NotificationManagerService extends SystemService {
             if (UserHandle.getCallingUserId() != UserHandle.getUserId(uid)) {
                 getContext().enforceCallingPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
-                        "canNotifyAsPackage for uid " + uid);
+                        "getBubblePreferenceForPackage for uid " + uid);
             }
 
             return mPreferencesHelper.getBubblePreference(pkg, uid);
@@ -3106,7 +3106,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void setBubblesAllowed(String pkg, int uid, int bubblePreference) {
-            enforceSystemOrSystemUI("Caller not system or systemui");
+            checkCallerIsSystemOrSystemUiOrShell("Caller not system or sysui or shell");
             mPreferencesHelper.setBubblesAllowed(pkg, uid, bubblePreference);
             handleSavePolicyFile();
         }
@@ -3307,7 +3307,7 @@ public class NotificationManagerService extends SystemService {
                 String targetPkg, String channelId, boolean returnParentIfNoConversationChannel,
                 String conversationId) {
             if (canNotifyAsPackage(callingPkg, targetPkg, userId)
-                    || isCallerIsSystemOrSystemUi()) {
+                    || isCallerIsSystemOrSysemUiOrShell()) {
                 int targetUid = -1;
                 try {
                     targetUid = mPackageManagerClient.getPackageUidAsUser(targetPkg, userId);
@@ -3417,7 +3417,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void updateNotificationChannelForPackage(String pkg, int uid,
                 NotificationChannel channel) {
-            enforceSystemOrSystemUI("Caller not system or systemui");
+            checkCallerIsSystemOrSystemUiOrShell("Caller not system or sysui or shell");
             Objects.requireNonNull(channel);
             updateNotificationChannelInt(pkg, uid, channel, false);
         }
@@ -5847,6 +5847,7 @@ public class NotificationManagerService extends SystemService {
                     synchronized (mNotificationLock) {
                         NotificationRecord r = mNotificationsByKey.get(key);
                         if (r != null) {
+                            r.setShortcutInfo(null);
                             // Enqueue will trigger resort & flag is updated that way.
                             r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
                             mHandler.post(
@@ -8254,6 +8255,14 @@ public class NotificationManagerService extends SystemService {
                 == PERMISSION_GRANTED;
     }
 
+    private boolean isCallerIsSystemOrSysemUiOrShell() {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+            return true;
+        }
+        return isCallerIsSystemOrSystemUi();
+    }
+
     private void checkCallerIsSystemOrShell() {
         int callingUid = Binder.getCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
@@ -8270,6 +8279,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void checkCallerIsSystemOrSystemUiOrShell() {
+        checkCallerIsSystemOrSystemUiOrShell(null);
+    }
+
+    private void checkCallerIsSystemOrSystemUiOrShell(String message) {
         int callingUid = Binder.getCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             return;
@@ -8277,7 +8290,8 @@ public class NotificationManagerService extends SystemService {
         if (isCallerSystemOrPhone()) {
             return;
         }
-        getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE, null);
+        getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                message);
     }
 
     private void checkCallerIsSystemOrSameApp(String pkg) {
