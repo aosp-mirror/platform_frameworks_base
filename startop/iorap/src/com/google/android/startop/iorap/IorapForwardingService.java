@@ -324,6 +324,11 @@ public class IorapForwardingService extends SystemService {
             String[] updated = updatedPackages.toArray(new String[0]);
             for (String packageName : updated) {
                 Log.d(TAG, "onPackagesUpdated: " + packageName);
+                invokeRemote(mIorapRemote,
+                    (IIorap remote) ->
+                        remote.onDexOptEvent(RequestId.nextValueForSequence(),
+                                DexOptEvent.createPackageUpdate(packageName))
+                );
             }
         }
     }
