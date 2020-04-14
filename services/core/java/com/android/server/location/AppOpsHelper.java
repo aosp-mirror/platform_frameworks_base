@@ -19,8 +19,8 @@ package com.android.server.location;
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 
-import static com.android.server.LocationManagerService.D;
-import static com.android.server.LocationManagerService.TAG;
+import static com.android.server.location.LocationManagerService.D;
+import static com.android.server.location.LocationManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
