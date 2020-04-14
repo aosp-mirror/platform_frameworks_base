@@ -70,6 +70,7 @@ import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -576,6 +577,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void onNotificationRankingUpdated() {
         if (mMenuRow != null) {
             mMenuRow.onNotificationUpdated(mEntry.getSbn());
+        }
+    }
+
+    /** Call when bubble state has changed and the button on the notification should be updated. */
+    public void updateBubbleButton() {
+        for (NotificationContentView l : mLayouts) {
+            l.updateBubbleButton(mEntry);
         }
     }
 
@@ -1086,6 +1094,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateClickAndFocus();
     }
 
+    /** The click listener for the bubble button. */
+    public View.OnClickListener getBubbleClickListener() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dependency.get(BubbleController.class)
+                        .onUserChangedBubble(mEntry, !mEntry.isBubble() /* createBubble */);
+                mHeadsUpManager.removeNotification(mEntry.getKey(), true /* releaseImmediately */);
+            }
+        };
+    }
+
     private void updateClickAndFocus() {
         boolean normalChild = !isChildInGroup() || isGroupExpanded();
         boolean clickable = mOnClickListener != null && normalChild;
@@ -1267,7 +1287,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mNotificationColor;
     }
 
-    private void updateNotificationColor() {
+    public void updateNotificationColor() {
         Configuration currentConfig = getResources().getConfiguration();
         boolean nightMode = (currentConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
                 == Configuration.UI_MODE_NIGHT_YES;
@@ -1613,6 +1633,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mFalsingManager = falsingManager;
         mStatusbarStateController = statusBarStateController;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
+        for (NotificationContentView l : mLayouts) {
+            l.setPeopleNotificationIdentifier(mPeopleNotificationIdentifier);
+        }
     }
 
     private void initDimens() {

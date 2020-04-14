@@ -40,11 +40,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.transition.ChangeBounds;
@@ -53,7 +51,6 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Slog;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
@@ -64,6 +61,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -205,34 +203,14 @@ public class NotificationConversationInfo extends LinearLayout implements
         }
         mShortcutInfo = entry.getRanking().getShortcutInfo();
 
-        createConversationChannelIfNeeded();
+        mNotificationChannel = NotificationChannelHelper.createConversationChannelIfNeeded(
+                getContext(), mINotificationManager, entry, mNotificationChannel);
 
         bindHeader();
         bindActions();
 
         View done = findViewById(R.id.done);
         done.setOnClickListener(mOnDone);
-    }
-
-    void createConversationChannelIfNeeded() {
-        // If this channel is not already a customized conversation channel, create
-        // a custom channel
-        if (TextUtils.isEmpty(mNotificationChannel.getConversationId())) {
-            try {
-                // TODO: remove
-                mNotificationChannel.setName(mContext.getString(
-                        R.string.notification_summary_message_format,
-                        getName(), mNotificationChannel.getName()));
-                mINotificationManager.createConversationNotificationChannelForPackage(
-                        mPackageName, mAppUid, mSbn.getKey(), mNotificationChannel,
-                        mConversationId);
-                mNotificationChannel = mINotificationManager.getConversationNotificationChannel(
-                        mContext.getOpPackageName(), UserHandle.getUserId(mAppUid), mPackageName,
-                        mNotificationChannel.getId(), false, mConversationId);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Could not create conversation channel", e);
-            }
-        }
     }
 
     private void bindActions() {
@@ -315,24 +293,6 @@ public class NotificationConversationInfo extends LinearLayout implements
                     image.setImageDrawable(mPm.getDefaultActivityIcon());
                 }
             }
-        }
-    }
-
-    private void bindName() {
-        TextView name = findViewById(R.id.name);
-        name.setText(getName());
-    }
-
-    private String getName() {
-        if (mShortcutInfo != null) {
-            return mShortcutInfo.getShortLabel().toString();
-        } else {
-            Bundle extras = mSbn.getNotification().extras;
-            String nameString = extras.getString(Notification.EXTRA_CONVERSATION_TITLE);
-            if (TextUtils.isEmpty(nameString)) {
-                nameString = extras.getString(Notification.EXTRA_TITLE);
-            }
-            return nameString;
         }
     }
 
