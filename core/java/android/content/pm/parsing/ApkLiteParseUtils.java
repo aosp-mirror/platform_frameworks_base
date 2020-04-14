@@ -292,6 +292,7 @@ public class ApkLiteParseUtils {
         String targetPackage = null;
         boolean overlayIsStatic = false;
         int overlayPriority = 0;
+        int rollbackDataPolicy = 0;
 
         String requiredSystemPropertyName = null;
         String requiredSystemPropertyValue = null;
@@ -369,6 +370,9 @@ public class ApkLiteParseUtils {
                         case "useEmbeddedDex":
                             useEmbeddedDex = attrs.getAttributeBooleanValue(i, false);
                             break;
+                        case "rollbackDataPolicy":
+                            rollbackDataPolicy = attrs.getAttributeIntValue(i, 0);
+                            break;
                     }
                 }
             } else if (PackageParser.TAG_OVERLAY.equals(parser.getName())) {
@@ -428,7 +432,7 @@ public class ApkLiteParseUtils {
                 versionCodeMajor, revisionCode, installLocation, verifiers, signingDetails,
                 coreApp, debuggable, multiArch, use32bitAbi, useEmbeddedDex, extractNativeLibs,
                 isolatedSplits, targetPackage, overlayIsStatic, overlayPriority, minSdkVersion,
-                targetSdkVersion);
+                targetSdkVersion, rollbackDataPolicy);
     }
 
     public static VerifierInfo parseVerifier(AttributeSet attrs) {
