@@ -28,6 +28,9 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * A class that contains biometric utilities. For authentication, see {@link BiometricPrompt}.
  */
@@ -69,12 +72,16 @@ public class BiometricManager {
     public static final int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED =
             BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
 
+    /**
+     * @hide
+     */
     @IntDef({BIOMETRIC_SUCCESS,
             BIOMETRIC_ERROR_HW_UNAVAILABLE,
             BIOMETRIC_ERROR_NONE_ENROLLED,
             BIOMETRIC_ERROR_NO_HARDWARE,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED})
-    @interface BiometricError {}
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BiometricError {}
 
     /**
      * Types of authenticators, defined at a level of granularity supported by
