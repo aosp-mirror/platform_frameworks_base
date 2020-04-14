@@ -126,7 +126,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
     };
 
     @SuppressWarnings("unchecked")
-    private Handler.Callback mUpdateCallbacks = (msg) -> {
+    private final Handler.Callback mUpdateCallbacks = (msg) -> {
         SomeArgs args = (SomeArgs) msg.obj;
         Consumer<Rect> updateBoundsCallback = (Consumer<Rect>) args.arg1;
         switch (msg.what) {
@@ -282,7 +282,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
      */
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
-        WindowContainerToken token = info.token;
+        final WindowContainerToken token = info.token;
         Objects.requireNonNull(token, "Requires valid WindowContainerToken");
         if (token.asBinder() != mToken.asBinder()) {
             Log.wtf(TAG, "Unrecognized token: " + token);
@@ -297,6 +297,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
+        Objects.requireNonNull(mToken, "onTaskInfoChanged requires valid existing mToken");
         final PictureInPictureParams newParams = info.pictureInPictureParams;
         if (!shouldUpdateDestinationBounds(newParams)) {
             Log.d(TAG, "Ignored onTaskInfoChanged with PiP param: " + newParams);
@@ -375,7 +376,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
             @PipAnimationController.TransitionDirection int direction, int durationMs,
             Consumer<Rect> updateBoundsCallback) {
         if (!mInPip) {
-            // Ignore animation when we are no longer in PIP
+            // can be initiated in other component, ignore if we are no longer in PIP
             return;
         }
         SomeArgs args = SomeArgs.obtain();
@@ -427,6 +428,10 @@ public class PipTaskOrganizer extends TaskOrganizer {
     private void scheduleFinishResizePip(SurfaceControl.Transaction tx,
             Rect destinationBounds, @PipAnimationController.TransitionDirection int direction,
             Consumer<Rect> updateBoundsCallback) {
+        if (!mInPip) {
+            // can be initiated in other component, ignore if we are no longer in PIP
+            return;
+        }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = updateBoundsCallback;
         args.arg2 = tx;
@@ -441,7 +446,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
     public void scheduleOffsetPip(Rect originalBounds, int offset, int duration,
             Consumer<Rect> updateBoundsCallback) {
         if (!mInPip) {
-            // Ignore offsets when we are no longer in PIP
+            // can be initiated in other component, ignore if we are no longer in PIP
             return;
         }
         SomeArgs args = SomeArgs.obtain();
