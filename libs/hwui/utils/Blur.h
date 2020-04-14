@@ -26,9 +26,9 @@ namespace uirenderer {
 class Blur {
 public:
     // If radius > 0, return the corresponding sigma, else return 0
-    ANDROID_API static float convertRadiusToSigma(float radius);
+    static float convertRadiusToSigma(float radius);
     // If sigma > 0.5, return the corresponding radius, else return 0
-    ANDROID_API static float convertSigmaToRadius(float sigma);
+    static float convertSigmaToRadius(float sigma);
     // If the original radius was on an integer boundary then after the sigma to
     // radius conversion a small rounding error may be introduced. This function
     // accounts for that error and snaps to the appropriate integer boundary.

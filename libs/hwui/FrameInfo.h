@@ -69,7 +69,7 @@ enum {
 };
 };
 
-class ANDROID_API UiFrameInfoBuilder {
+class UiFrameInfoBuilder {
 public:
     explicit UiFrameInfoBuilder(int64_t* buffer) : mBuffer(buffer) {
         memset(mBuffer, 0, UI_THREAD_FRAME_INFO_SIZE * sizeof(int64_t));

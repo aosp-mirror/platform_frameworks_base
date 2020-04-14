@@ -28,10 +28,10 @@ namespace uirenderer {
 
 class VectorDrawableUtils {
 public:
-    ANDROID_API static bool canMorph(const PathData& morphFrom, const PathData& morphTo);
-    ANDROID_API static bool interpolatePathData(PathData* outData, const PathData& morphFrom,
+    static bool canMorph(const PathData& morphFrom, const PathData& morphTo);
+    static bool interpolatePathData(PathData* outData, const PathData& morphFrom,
                                                 const PathData& morphTo, float fraction);
-    ANDROID_API static void verbsToPath(SkPath* outPath, const PathData& data);
+    static void verbsToPath(SkPath* outPath, const PathData& data);
     static void interpolatePaths(PathData* outPathData, const PathData& from, const PathData& to,
                                  float fraction);
 };
