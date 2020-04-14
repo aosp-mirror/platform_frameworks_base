@@ -16,7 +16,7 @@ java_test_host {
     name: "OverlayHostTests",
     srcs: ["src/**/*.java"],
     libs: ["tradefed"],
-    test_suites: ["device-tests"],
+    test_suites: ["general-tests"],
     target_required: [
         "OverlayHostTests_NonPlatformSignatureOverlay",
         "OverlayHostTests_PlatformSignatureStaticOverlay",
