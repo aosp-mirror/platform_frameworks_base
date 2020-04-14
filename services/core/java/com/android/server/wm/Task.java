@@ -3072,6 +3072,7 @@ class Task extends WindowContainer<WindowContainer> {
         mForceShowForAllUsers = forceShowForAllUsers;
     }
 
+    @Override
     public boolean isAttached() {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
         return taskDisplayArea != null && !taskDisplayArea.isRemoved();
