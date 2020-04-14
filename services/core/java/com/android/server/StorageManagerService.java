@@ -3215,10 +3215,14 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
-        Slog.d(TAG, "unlockUserKey: " + userId);
+        boolean isFsEncrypted = StorageManager.isFileEncryptedNativeOrEmulated();
+        Slog.d(TAG, "unlockUserKey: " + userId
+                + " isFileEncryptedNativeOrEmulated: " + isFsEncrypted
+                + " hasToken: " + (token != null)
+                + " hasSecret: " + (secret != null));
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
-        if (StorageManager.isFileEncryptedNativeOrEmulated()) {
+        if (isFsEncrypted) {
             try {
                 mVold.unlockUserKey(userId, serialNumber, encodeBytes(token),
                         encodeBytes(secret));
