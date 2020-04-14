@@ -142,7 +142,7 @@ message ProcessStatsStateProto {
     optional android.util.AggStats rss = 8;
 }
 
-// Next Tag: 7
+// Next Tag: 8
 message ProcessStatsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -173,6 +173,25 @@ message ProcessStatsProto {
     // Total time process has been running...  screen_state, memory_state, and process_state
     // will not be set.
     optional ProcessStatsStateProto total_running_state = 6;
+
+    // Association data for this process in this state;
+    // each entry here is one association.
+    repeated ProcessStatsAssociationProto assocs = 7;
+}
+
+// Next Tag: 5
+message ProcessStatsAssociationProto {
+    // Procss Name of the associated process/package
+    optional string assoc_process_name = 1;
+
+    // Package Name of the associated process/package
+    optional string assoc_package_name = 2;
+
+    // Total count of the times this association appeared.
+    optional int32 total_count = 3;
+
+    // Uptime total duration in seconds this association was around.
+    optional int32 total_duration_secs = 4;
 }
 
 // Next Tag: 4
