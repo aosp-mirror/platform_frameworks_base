@@ -962,7 +962,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Rakendusi käitatakse taustal"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Aku ja andmekasutuse üksikasjade nägemiseks puudutage"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Kas lülitada mobiilne andmeside välja?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Teil ei ole operaatori <xliff:g id="CARRIER">%s</xliff:g> kaudu juurdepääsu andmesidele ega Internetile. Internet on saadaval ainult WiFi kaudu."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Pärast seda pole teil operaatori <xliff:g id="CARRIER">%s</xliff:g> kaudu juurdepääsu andmesidele ega internetile. Internet on saadaval ainult WiFi kaudu."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"teie operaator"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Seaded ei saa teie vastust kinnitada, sest rakendus varjab loataotlust."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Kas lubada rakendusel <xliff:g id="APP_0">%1$s</xliff:g> näidata rakenduse <xliff:g id="APP_2">%2$s</xliff:g> lõike?"</string>
@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Juhtnupud"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Valige toitemenüüs saadaolevad juhtelemendid"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Hoidke ja lohistage juhtelementi, et seda liigutada"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Kõikide juhtelementide loendit ei saanud laadida."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Muu"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Seadme juhtelementide hulka lisamine"</string>

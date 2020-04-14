@@ -223,7 +223,7 @@
     <string name="data_connection_lte" msgid="557021044282539923">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
     <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
-    <string name="data_connection_roaming" msgid="375650836665414797">"Barangolás"</string>
+    <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Nincs SIM."</string>
@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Vezérlők"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"A bekapcsológomb menüjéből hozzáférhető vezérlők kiválasztása"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Áthelyezéséhez tartsa nyomva, majd húzza a kívánt helyre a vezérlőt"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nem sikerült betölteni az összes vezérlő listáját."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Más"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Hozzáadás az eszközvezérlőkhöz"</string>

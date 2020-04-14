@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"제어"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"전원 메뉴에서 액세스할 컨트롤을 선택합니다."</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"컨트롤을 길게 터치하고 드래그하여 이동"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"전체 컨트롤 목록을 로드할 수 없습니다."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"기타"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"기기 컨트롤에 추가"</string>

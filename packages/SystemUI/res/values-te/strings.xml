@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"నియంత్రణలు"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"పవర్ మెనూ నుండి యాక్సెస్ చేయడానికి నియంత్రణలను ఎంచుకోండి"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"తరలించడానికి నియంత్రణను పట్టుకొని, లాగండి"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"అన్ని నియంత్రణలు గల జాబితాను లోడ్ చేయలేకపోయాము."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ఇతరం"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"పరికర నియంత్రణలకు జోడించడం"</string>

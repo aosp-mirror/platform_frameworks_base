@@ -582,7 +582,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"声音设置"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"展开"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"收起"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"自动字幕媒体"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"自动生成媒体字幕"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"关闭字幕提示"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"字幕重叠显示"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"启用"</string>
@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控件"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"选择要从电源菜单访问的控件"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"按住并拖动即可移动控件"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"无法加载所有控件的列表。"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"添加到设备控件"</string>

@@ -500,7 +500,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"လုပ်ကိုင်မှုကို လျှော့ချလျက် နောက်ခံ ဒေတာကို ကန့်သတ်သည်"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ဘက်ထရီ အားထိန်းကို ပိတ်ရန်"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> သည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်မျက်နှာပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ဤလုပ်ဆောင်ချက်ကို ပေးအပ်သည့် ဝန်ဆောင်မှုသည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်မျက်နှာပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ဤလုပ်ရပ်အတွက် ဝန်ဆောင်မှုသည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်မျက်နှာပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ဖမ်းယူခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> နှင့် ဖမ်းယူခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"နောက်ထပ် မပြပါနှင့်"</string>
@@ -1015,7 +1015,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ထိန်းချုပ်မှုများ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ဖွင့်ပိတ်မီနူးမှ သုံးရန် ထိန်းချုပ်မှုများ ရွေးပါ"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ထိန်းချုပ်မှုတစ်ခု ရွှေ့ရန် ၎င်းကိုဖိဆွဲပါ"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ထိန်းချုပ်မှုများ ပြန်စီစဉ်ရန် ဖိပြီးဆွဲပါ"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"ထိန်းချုပ်မှုအားလုံး ဖယ်ရှားလိုက်သည်"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ထိန်းချုပ်မှုအားလုံး၏ စာရင်းကို ဖွင့်၍မရပါ။"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"အခြား"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"စက်ပစ္စည်းထိန်းချုပ်မှုများသို့ ထည့်ရန်"</string>

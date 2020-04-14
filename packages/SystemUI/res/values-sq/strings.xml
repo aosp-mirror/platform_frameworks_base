@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrollet"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Zgjidh kontrollet për të pasur qasje nga menyja e energjisë"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Mbaj dhe zvarrit një kontroll për ta zhvendosur"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Lista e të gjitha kontrolleve nuk mund të ngarkohej."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Tjetër"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Shto te kontrollet e pajisjes"</string>

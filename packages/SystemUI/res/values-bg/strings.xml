@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроли"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Избиране на контроли, които да са достъпни в менюто за захранване"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Задръжте и плъзнете дадена контрола, за да я преместите"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Списъкът с всички контроли не бе зареден."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друго"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Добавяне към контролите за устройството"</string>

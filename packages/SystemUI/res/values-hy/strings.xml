@@ -1015,7 +1015,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Կառավարման տարրեր"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Ընտրեք կառավարման տարրերը՝ դրանք սնուցման ընտրացանկից բացելու համար"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Կառավարման տարրը տեղափոխելու համար պահեք և քաշեք այն"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Պահեք և քաշեք՝ կառավարման տարրերը վերադասավորելու համար"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Կառավարման բոլոր տարրերը հեռացվեցին"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Չհաջողվեց բեռնել բոլոր կառավարների ցանկը։"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Այլ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Ավելացրեք սարքի կառավարման տարրերում"</string>

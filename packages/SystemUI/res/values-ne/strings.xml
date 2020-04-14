@@ -174,7 +174,7 @@
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"तपाईंलाई खोज्दै…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"अनुहारको आइकन"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"मिलाउने जुम बटन।"</string>
-    <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"स्क्रिनलाई सानोबाट ठूलो पार्नुहोस्।"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"स्क्रिनलाई सानोबाट ठुलो पार्नुहोस्।"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ब्लुटुथ जडान भयो।"</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7195823280221275929">"ब्लुटुथसँग विच्छेद गरियो।"</string>
     <string name="accessibility_no_battery" msgid="3789287732041910804">"कुनै ब्याट्री छैन।"</string>
@@ -866,16 +866,16 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"कम प्राथमिकताका सूचना आइकनहरू देखाउनुहोस्"</string>
     <string name="other" msgid="429768510980739978">"अन्य"</string>
     <string name="accessibility_divider" msgid="2830785970889237307">"विभाजित-स्क्रिन छुट्याउने"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"बायाँ भाग पूर्ण स्क्रिन"</string>
+    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"बायाँ भाग फुल स्क्रिन"</string>
     <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"बायाँ भाग ७०%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"बायाँ भाग ५०%"</string>
     <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"बायाँ भाग ३०%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"दायाँ भाग पूर्ण स्क्रिन"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"माथिल्लो भाग पूर्ण स्क्रिन"</string>
+    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"दायाँ भाग फुल स्क्रिन"</string>
+    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"माथिल्लो भाग फुल स्क्रिन"</string>
     <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"माथिल्लो भाग ७०%"</string>
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"माथिल्लो भाग ५०%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"माथिल्लो भाग ३०%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"तल्लो भाग पूर्ण स्क्रिन"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"तल्लो भाग फुल स्क्रिन"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। सम्पादन गर्नाका लागि डबल ट्याप गर्नुहोस्।"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। थप्नका लागि डबल ट्याप गर्नुहोस्।"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई सार्नुहोस्"</string>
@@ -982,7 +982,7 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"सेन्सरहरू निष्क्रिय छन्"</string>
     <string name="device_services" msgid="1549944177856658705">"यन्त्रका सेवाहरू"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"शीर्षक छैन"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"यो अनुप्रयोग पुनः सुरु गर्न ट्याप गर्नुहोस् र पूर्ण स्क्रिन मोडमा जानुहोस्।"</string>
+    <string name="restart_button_description" msgid="6916116576177456480">"यो अनुप्रयोग पुनः सुरु गर्न ट्याप गर्नुहोस् र फुल स्क्रिन मोडमा जानुहोस्।"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> का बबलसम्बन्धी सेटिङहरू"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"व्यवस्थापन गर्नुहोस्"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> को <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"नियन्त्रणहरू"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पावर मेनुबाट प्रयोग गर्न चाहेका नियन्त्रण सुविधाहरू छान्नुहोस्"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"कुनै नियन्त्रण सुविधा सार्न त्यसलाई थिचेर ड्र्याग गर्नुहोस्"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सबै नियन्त्रणहरूको सूची लोड गर्न सकिएन।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"यन्त्रले नियन्त्रण गर्न सक्ने कुराहरूको सूचीमा थप्नुहोस्"</string>
