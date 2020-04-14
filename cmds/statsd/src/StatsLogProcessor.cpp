@@ -1052,8 +1052,8 @@ int64_t StatsLogProcessor::getLastReportTimeNs(const ConfigKey& key) {
 void StatsLogProcessor::notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk,
                                          const int uid, const int64_t version) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    ALOGW("Received app upgrade");
-    for (auto it : mMetricsManagers) {
+    VLOG("Received app upgrade");
+    for (const auto& it : mMetricsManagers) {
         it.second->notifyAppUpgrade(eventTimeNs, apk, uid, version);
     }
 }
@@ -1061,17 +1061,25 @@ void StatsLogProcessor::notifyAppUpgrade(const int64_t& eventTimeNs, const strin
 void StatsLogProcessor::notifyAppRemoved(const int64_t& eventTimeNs, const string& apk,
                                          const int uid) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    ALOGW("Received app removed");
-    for (auto it : mMetricsManagers) {
+    VLOG("Received app removed");
+    for (const auto& it : mMetricsManagers) {
         it.second->notifyAppRemoved(eventTimeNs, apk, uid);
     }
 }
 
 void StatsLogProcessor::onUidMapReceived(const int64_t& eventTimeNs) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    ALOGW("Received uid map");
-    for (auto it : mMetricsManagers) {
+    VLOG("Received uid map");
+    for (const auto& it : mMetricsManagers) {
         it.second->onUidMapReceived(eventTimeNs);
+    }
+}
+
+void StatsLogProcessor::onStatsdInitCompleted(const int64_t& elapsedTimeNs) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    VLOG("Received boot completed signal");
+    for (const auto& it : mMetricsManagers) {
+        it.second->onStatsdInitCompleted(elapsedTimeNs);
     }
 }
 

@@ -33,7 +33,7 @@
 #include "packages/UidMap.h"
 #include "shell/ShellSubscriber.h"
 #include "statscompanion_util.h"
-#include "utils/NamedLatch.h"
+#include "utils/MultiConditionTrigger.h"
 
 using namespace android;
 using namespace android::os;
@@ -386,7 +386,7 @@ private:
     mutable mutex mShellSubscriberMutex;
     std::shared_ptr<LogEventQueue> mEventQueue;
 
-    NamedLatch mBootCompleteLatch;
+    MultiConditionTrigger mBootCompleteTrigger;
     static const inline string kBootCompleteTag = "BOOT_COMPLETE";
     static const inline string kUidMapReceivedTag = "UID_MAP";
     static const inline string kAllPullersRegisteredTag = "PULLERS_REGISTERED";
@@ -399,11 +399,14 @@ private:
     FRIEND_TEST(StatsServiceTest, TestAddConfig_invalid);
     FRIEND_TEST(StatsServiceTest, TestGetUidFromArgs);
     FRIEND_TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp);
+    FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnBoot);
     FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade);
     FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval);
     FRIEND_TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit);
+    FRIEND_TEST(PartialBucketE2eTest, TestValueMetricOnBootWithoutMinPartialBucket);
     FRIEND_TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket);
     FRIEND_TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket);
+    FRIEND_TEST(PartialBucketE2eTest, TestGaugeMetricOnBootWithoutMinPartialBucket);
     FRIEND_TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket);
     FRIEND_TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket);
 };
