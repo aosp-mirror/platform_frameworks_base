@@ -322,13 +322,19 @@ public class PipTaskOrganizer extends TaskOrganizer {
      * @param destinationBoundsOut the current destination bounds will be populated to this param
      */
     @SuppressWarnings("unchecked")
-    public void onMovementBoundsChanged(Rect destinationBoundsOut,
+    public void onMovementBoundsChanged(Rect destinationBoundsOut, boolean fromRotation,
             boolean fromImeAdjustment, boolean fromShelfAdjustment) {
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getCurrentAnimator();
-        destinationBoundsOut.set(mLastReportedBounds);
         if (animator == null || !animator.isRunning()
                 || animator.getTransitionDirection() != TRANSITION_DIRECTION_TO_PIP) {
+            if (mInPip && fromRotation) {
+                // this could happen if rotation finishes before the animation
+                mLastReportedBounds.set(destinationBoundsOut);
+                scheduleFinishResizePip(mLastReportedBounds);
+            } else if (!mLastReportedBounds.isEmpty()) {
+                destinationBoundsOut.set(mLastReportedBounds);
+            }
             return;
         }
 
