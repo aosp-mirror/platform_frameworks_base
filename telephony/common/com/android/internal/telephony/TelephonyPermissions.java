@@ -445,8 +445,9 @@ public final class TelephonyPermissions {
     /**
      * Returns whether the caller can read phone numbers.
      *
-     * <p>Besides apps with the ability to read phone state per {@link #checkReadPhoneState}, the
-     * default SMS app and apps with READ_SMS or READ_PHONE_NUMBERS can also read phone numbers.
+     * <p>Besides apps with the ability to read phone state per {@link #checkReadPhoneState}
+     * (only prior to R), the default SMS app and apps with READ_SMS or READ_PHONE_NUMBERS
+     * can also read phone numbers.
      */
     public static boolean checkCallingOrSelfReadPhoneNumber(
             Context context, int subId, String callingPackage, @Nullable String callingFeatureId,
@@ -459,8 +460,9 @@ public final class TelephonyPermissions {
     /**
      * Returns whether the caller can read phone numbers.
      *
-     * <p>Besides apps with the ability to read phone state per {@link #checkReadPhoneState}, the
-     * default SMS app and apps with READ_SMS or READ_PHONE_NUMBERS can also read phone numbers.
+     * <p>Besides apps with the ability to read phone state per {@link #checkReadPhoneState}
+     * (only prior to R), the default SMS app and apps with READ_SMS or READ_PHONE_NUMBERS
+     * can also read phone numbers.
      */
     @VisibleForTesting
     public static boolean checkReadPhoneNumber(
@@ -476,12 +478,15 @@ public final class TelephonyPermissions {
         // NOTE(b/73308711): If an app has one of the following AppOps bits explicitly revoked, they
         // will be denied access, even if they have another permission and AppOps bit if needed.
 
-        // First, check if we can read the phone state.
+        // First, check if we can read the phone state and the SDK version is below R.
         try {
-            return checkReadPhoneState(
-                    context, subId, pid, uid, callingPackage, callingFeatureId,
-                    message);
-        } catch (SecurityException readPhoneStateSecurityException) {
+            ApplicationInfo info = context.getPackageManager().getApplicationInfoAsUser(
+                    callingPackage, 0, UserHandle.getUserHandleForUid(Binder.getCallingUid()));
+            if (info.targetSdkVersion <= Build.VERSION_CODES.Q) {
+                return checkReadPhoneState(
+                        context, subId, pid, uid, callingPackage, callingFeatureId, message);
+            }
+        } catch (SecurityException | PackageManager.NameNotFoundException e) {
         }
         // Can be read with READ_SMS too.
         try {
