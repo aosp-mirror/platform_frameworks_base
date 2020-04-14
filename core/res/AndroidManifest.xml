@@ -5062,7 +5062,7 @@
                 <category android:name="android.intent.category.VOICE" />
             </intent-filter>
         </activity>
-        <activity android:name="com.android.internal.app.AccessibilityButtonChooserActivity"
+        <activity android:name="com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity"
                   android:exported="false"
                   android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
                   android:finishOnCloseSystemDialogs="true"
