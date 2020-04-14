@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
@@ -47,7 +47,7 @@ import static android.net.wifi.WifiManager.IFACE_IP_MODE_TETHERED;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-import static com.android.server.connectivity.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE;
+import static com.android.networkstack.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -137,7 +137,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
-import com.android.networkstack.tethering.R;
 import com.android.testutils.MiscAssertsKt;
 
 import org.junit.After;

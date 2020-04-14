@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package com.android.networkstack.tethering;
 
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.METERED_NO;
@@ -50,7 +50,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.connectivity.tethering.OffloadHardwareInterface.ForwardedStats;
+import com.android.networkstack.tethering.OffloadHardwareInterface.ForwardedStats;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
