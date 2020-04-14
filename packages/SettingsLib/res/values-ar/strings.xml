@@ -206,13 +206,13 @@
     <string name="enable_adb" msgid="8072776357237289039">"‏تصحيح أخطاء USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"‏وضع تصحيح الأخطاء عند توصيل USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"‏إلغاء عمليات تفويض تصحيح أخطاء USB"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"‏تصحيح الأخطاء عبر شبكة Wi-Fi"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"تصحيح الأخطاء اللاسلكي"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"‏وضع تصحيح الأخطاء عندما يتم الاتصال بشبكة Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"خطأ"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"‏تصحيح الأخطاء عبر شبكة Wi-Fi"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"لعرض الأجهزة المتاحة واستخدامها، فعِّل ميزة تصحيح الأخطاء لاسلكيًا."</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"تصحيح الأخطاء اللاسلكي"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"لعرض الأجهزة المتاحة واستخدامها، فعِّل ميزة \"تصحيح الأخطاء اللاسلكي\"."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"إقران الجهاز باستخدام رمز الاستجابة السريعة"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"إقران الأجهزة الجديدة باستخدام الماسح الضوئي لرموز الاستجابة السريعة"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"إقران الأجهزة الجديدة باستخدام الماسح الضوئي لرموز الاستجابة السريعة"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"إقران الجهاز باستخدام رمز الإقران"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"إقران الأجهزة الجديدة باستخدام رمز مكوّن من 6 أعداد"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"الأجهزة المقترنة"</string>
@@ -231,7 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"تعذّر إقران الجهاز. إما أن رمز الاستجابة السريعة غير صحيح أو أن الجهاز غير متصل بالشبكة نفسها."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏عنوان IP والمنفذ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"المسح الضوئي لرمز الاستجابة السريعة"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"‏إقران الجهاز من خلال شبكة Wi‑Fi عن طريق المسح الضوئي لرمز استجابة سريعة"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏إقران الجهاز من خلال شبكة Wi‑Fi عن طريق المسح الضوئي لرمز استجابة سريعة"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏يُرجى الاتصال بشبكة Wi-Fi."</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb، تصحيح الأخطاء، مطور برامج"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"اختصار تقرير الأخطاء"</string>
@@ -251,6 +251,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏تفعيل تسجيل Wi‑Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏تقييد البحث عن شبكات Wi-Fi"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"تسريع الأجهزة للتوصيل"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"عرض أجهزة البلوتوث بدون أسماء"</string>
@@ -283,6 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"لتقليل استنفاد البطارية وتحسين أداء الشبكة."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"تفرض تكلفة استخدام"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"بدون قياس"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>
@@ -300,8 +304,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"استخدام إعداد تسريع الأجهزة للتوصيل إن كان متاحًا"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"‏تم تصميم تصحيح أخطاء USB لأغراض التطوير فقط. يمكن استخدامه لنسخ البيانات بين الكمبيوتر والجهاز، وتثبيت التطبيقات على جهازك بدون تنبيه، وقراءة بيانات السجل."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"‏هل تريد السماح بتصحيح الأخطاء عبر شبكة Wi-Fi؟"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"‏تم تصميم ميزة \"تصحيح الأخطاء عبر شبكة Wi-Fi\" لأغراض التطوير فقط. يمكن استخدامها لنسخ البيانات بين الكمبيوتر والجهاز وتثبيت التطبيقات على جهازك بدون إرسال إشعار وقراءة بيانات السجلّ."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"هل تريد السماح بتفعيل ميزة \"تصحيح الأخطاء اللاسلكي\"؟"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"تم تصميم ميزة \"تصحيح الأخطاء اللاسلكي\" لأغراض التطوير فقط. ويمكن استخدامها لنسخ البيانات بين الكمبيوتر والجهاز ، وتثبيت التطبيقات على جهازك بدون إرسال إشعار، وقراءة بيانات السجلّ."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"‏هل تريد إلغاء إمكانية الدخول إلى تصحيح أخطاء USB من جميع أجهزة الكمبيوتر التي تم التصريح لها سابقًا؟"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"هل تريد السماح لإعدادات التطوير؟"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"هذه الإعدادات مخصصة لاستخدام التطوير فقط. قد يتسبب هذا في حدوث أعطال أو خلل في أداء الجهاز والتطبيقات المثبتة عليه."</string>
@@ -371,6 +375,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"عرض مربع الحوار \"التطبيق لا يستجيب\" مع تطبيقات الخلفية"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"عرض تحذيرات قناة الإشعار"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"عرض تحذير على الشاشة عندما ينشر تطبيق إشعارًا بدون قناة صالحة"</string>
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"فرض اختصارات لإشعارات المحادثات"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"يجب دعم الإشعارات باختصار مشاركة قديم لتظهر في قسم المحادثات."</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"السماح بإدراج التطبيقات في وحدة تخزين خارجية"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"تأهيل أي تطبيق بحيث تتم كتابته على وحدة تخزين خارجية، بغض النظر عن قيم البيان"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"فرض إمكانية تغيير حجم الأنشطة"</string>
