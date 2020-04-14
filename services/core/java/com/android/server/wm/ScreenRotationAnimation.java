@@ -41,7 +41,6 @@ import android.graphics.Rect;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -117,8 +116,9 @@ class ScreenRotationAnimation {
     private BlackFrame mEnteringBlackFrame;
     private int mWidth, mHeight;
 
-    private int mOriginalRotation;
-    private int mOriginalWidth, mOriginalHeight;
+    private final int mOriginalRotation;
+    private final int mOriginalWidth;
+    private final int mOriginalHeight;
     private int mCurRotation;
 
     private Rect mOriginalDisplayRect = new Rect();
@@ -140,20 +140,18 @@ class ScreenRotationAnimation {
     /** Intensity of light/whiteness of the layout after rotation occurs. */
     private float mEndLuma;
 
-    public ScreenRotationAnimation(Context context, DisplayContent displayContent,
-            boolean fixedToUserRotation, boolean isSecure, WindowManagerService service) {
-        mService = service;
-        mContext = context;
+    ScreenRotationAnimation(DisplayContent displayContent, @Surface.Rotation int originalRotation) {
+        mService = displayContent.mWmService;
+        mContext = mService.mContext;
         mDisplayContent = displayContent;
         displayContent.getBounds(mOriginalDisplayRect);
 
         // Screenshot does NOT include rotation!
-        final Display display = displayContent.getDisplay();
-        int originalRotation = display.getRotation();
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final int realOriginalRotation = displayInfo.rotation;
         final int originalWidth;
         final int originalHeight;
-        DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        if (fixedToUserRotation) {
+        if (displayContent.getDisplayRotation().isFixedToUserRotation()) {
             // Emulated orientation.
             mForceDefaultOrientation = true;
             originalWidth = displayContent.mBaseDisplayWidth;
@@ -163,8 +161,8 @@ class ScreenRotationAnimation {
             originalWidth = displayInfo.logicalWidth;
             originalHeight = displayInfo.logicalHeight;
         }
-        if (originalRotation == Surface.ROTATION_90
-                || originalRotation == Surface.ROTATION_270) {
+        if (realOriginalRotation == Surface.ROTATION_90
+                || realOriginalRotation == Surface.ROTATION_270) {
             mWidth = originalHeight;
             mHeight = originalWidth;
         } else {
@@ -173,10 +171,18 @@ class ScreenRotationAnimation {
         }
 
         mOriginalRotation = originalRotation;
-        mOriginalWidth = originalWidth;
-        mOriginalHeight = originalHeight;
+        // If the delta is not zero, the rotation of display may not change, but we still want to
+        // apply rotation animation because there should be a top app shown as rotated. So the
+        // specified original rotation customizes the direction of animation to have better look
+        // when restoring the rotated app to the same rotation as current display.
+        final int delta = DisplayContent.deltaRotation(originalRotation, realOriginalRotation);
+        final boolean flipped = delta == Surface.ROTATION_90 || delta == Surface.ROTATION_270;
+        mOriginalWidth = flipped ? originalHeight : originalWidth;
+        mOriginalHeight = flipped ? originalWidth : originalHeight;
         mSurfaceRotationAnimationController = new SurfaceRotationAnimationController();
 
+        // Check whether the current screen contains any secure content.
+        final boolean isSecure = displayContent.hasSecureWindowOnScreen();
         final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
         try {
             mBackColorSurface = displayContent.makeChildSurface(null)
@@ -202,7 +208,7 @@ class ScreenRotationAnimation {
             t2.apply(true /* sync */);
 
             // Capture a screenshot into the surface we just created.
-            final int displayId = display.getDisplayId();
+            final int displayId = displayContent.getDisplayId();
             final Surface surface = mService.mSurfaceFactory.get();
             surface.copyFrom(mScreenshotLayer);
             SurfaceControl.ScreenshotGraphicBuffer gb =
@@ -242,7 +248,7 @@ class ScreenRotationAnimation {
 
         ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
                     "  FREEZE %s: CREATE", mScreenshotLayer);
-        setRotation(t, originalRotation);
+        setRotation(t, realOriginalRotation);
         t.apply();
     }
 
