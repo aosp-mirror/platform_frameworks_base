@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
@@ -48,6 +49,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.InsetsState;
 import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -1203,6 +1205,17 @@ final class AccessibilityController {
                         updateUnaccountedSpace(windowState, regionInScreen, unaccountedSpace,
                                 skipRemainingWindowsForTasks);
                         focusedWindowAdded |= windowState.isFocused();
+                    } else if (isUntouchableNavigationBar(windowState)) {
+                        // If this widow is navigation bar without touchable region, accounting the
+                        // region of navigation bar inset because all touch events from this region
+                        // would be received by launcher, i.e. this region is a un-touchable one
+                        // for the application.
+                        final InsetsState insetsState =
+                                dc.getInsetsStateController().getRawInsetsState();
+                        final Rect displayFrame =
+                                insetsState.getSource(ITYPE_NAVIGATION_BAR).getFrame();
+                        unaccountedSpace.op(displayFrame, unaccountedSpace,
+                                Region.Op.REVERSE_DIFFERENCE);
                     }
 
                     if (unaccountedSpace.isEmpty() && focusedWindowAdded) {
@@ -1279,6 +1292,18 @@ final class AccessibilityController {
             }
 
             return false;
+        }
+
+        private boolean isUntouchableNavigationBar(WindowState windowState) {
+            if (windowState.mAttrs.type != WindowManager.LayoutParams.TYPE_NAVIGATION_BAR) {
+                return false;
+            }
+
+            // Gets the touchable region.
+            Region touchableRegion = mTempRegion1;
+            windowState.getTouchableRegion(touchableRegion);
+
+            return touchableRegion.isEmpty();
         }
 
         private void updateUnaccountedSpace(WindowState windowState, Region regionInScreen,
