@@ -313,6 +313,14 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
     /** State of a sound model. */
     static class ModelState {
+        ModelState(SoundModel model) {
+            this.description = ObjectPrinter.print(model, true, 16);
+        }
+
+        ModelState(PhraseSoundModel model) {
+            this.description = ObjectPrinter.print(model, true, 16);
+        }
+
         /** Activity state of a sound model. */
         enum Activity {
             /** Model is loaded, recognition is inactive. */
@@ -323,6 +331,9 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         /** Activity state. */
         Activity activityState = Activity.LOADED;
+
+        /** Human-readable description of the model. */
+        final String description;
 
         /**
          * A map of known parameter support. A missing key means we don't know yet whether the
@@ -419,7 +430,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 // From here on, every exception isn't client's fault.
                 try {
                     int handle = mDelegate.loadModel(model);
-                    mLoadedModels.put(handle, new ModelState());
+                    mLoadedModels.put(handle, new ModelState(model));
                     return handle;
                 } catch (Exception e) {
                     throw handleException(e);
@@ -443,7 +454,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 // From here on, every exception isn't client's fault.
                 try {
                     int handle = mDelegate.loadPhraseModel(model);
-                    mLoadedModels.put(handle, new ModelState());
+                    mLoadedModels.put(handle, new ModelState(model));
                     return handle;
                 } catch (Exception e) {
                     throw handleException(e);
@@ -711,6 +722,8 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     pw.print(entry.getKey());
                     pw.print('\t');
                     pw.print(entry.getValue().activityState.name());
+                    pw.print('\t');
+                    pw.print(entry.getValue().description);
                     pw.println();
                 }
             } else {
