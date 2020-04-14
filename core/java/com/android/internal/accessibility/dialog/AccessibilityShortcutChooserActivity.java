@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.app;
+package com.android.internal.accessibility.dialog;
 
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
@@ -79,9 +79,10 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Activity used to display and persist a service or feature target for the Accessibility button.
+ * Activity used to display various targets related to accessibility service, accessibility
+ * activity or white listing feature for volume key shortcut.
  */
-public class AccessibilityButtonChooserActivity extends Activity {
+public class AccessibilityShortcutChooserActivity extends Activity {
     @ShortcutType
     private static int sShortcutType;
     @UserShortcutType
@@ -355,17 +356,18 @@ public class AccessibilityButtonChooserActivity extends Activity {
             ViewHolder holder;
             if (convertView == null) {
                 convertView = LayoutInflater.from(context).inflate(
-                        R.layout.accessibility_button_chooser_item, parent, /* attachToRoot= */
+                        R.layout.accessibility_shortcut_chooser_item, parent, /* attachToRoot= */
                         false);
                 holder = new ViewHolder();
                 holder.mItemView = convertView;
                 holder.mCheckBox = convertView.findViewById(
-                        R.id.accessibility_button_target_checkbox);
-                holder.mIconView = convertView.findViewById(R.id.accessibility_button_target_icon);
+                        R.id.accessibility_shortcut_target_checkbox);
+                holder.mIconView = convertView.findViewById(
+                        R.id.accessibility_shortcut_target_icon);
                 holder.mLabelView = convertView.findViewById(
-                        R.id.accessibility_button_target_label);
+                        R.id.accessibility_shortcut_target_label);
                 holder.mSwitchItem = convertView.findViewById(
-                        R.id.accessibility_button_target_switch_item);
+                        R.id.accessibility_shortcut_target_switch_item);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
