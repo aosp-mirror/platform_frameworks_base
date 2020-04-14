@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Tria un perfil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personal"</string>
-    <string name="category_work" msgid="4014193632325996115">"Feina"</string>
+    <string name="category_work" msgid="4014193632325996115">"Treball"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opcions per a desenvolupadors"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Activa les opcions per a desenvolupadors"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Defineix les opcions per al desenvolupament d\'aplicacions"</string>
@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuració sense fil"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Per veure i utilitzar els dispositius disponibles, activa la depuració sense fil"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Vincula el dispositiu amb un codi QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Vincula dispositius nous utilitzant l\'escàner de codis QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Vincula dispositius nous utilitzant l\'escàner de codis QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincula el dispositiu amb un codi de vinculació"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Vincula dispositius nous utilitzant un codi de sis dígits"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositius vinculats"</string>
@@ -226,12 +226,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Codi de vinculació Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"No s\'ha pogut vincular"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Assegura\'t que el dispositiu estigui connectat a la mateixa xarxa."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Vincula el dispositiu per Wi‑Fi escanejant un codi QR"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Escaneja un codi QR per vincular el dispositiu per Wi‑Fi"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"S\'està vinculant el dispositiu…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"No s\'ha pogut vincular el dispositiu. O bé el codi QR és incorrecte, o bé el dispositiu no està connectat a la mateixa xarxa."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adreça IP i port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escaneja un codi QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Vincula el dispositiu per Wi‑Fi escanejant un codi QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Escaneja un codi QR per vincular el dispositiu per Wi‑Fi"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Connecta\'t a una xarxa Wi‑Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depurar, desenvolupador"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Drecera per a informe d\'errors"</string>
@@ -251,6 +251,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Activa el registre Wi‑Fi detallat"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitació de la cerca de xarxes Wi‑Fi"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dades mòbils sempre actives"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Acceleració per maquinari per a compartició de xarxa"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostra els dispositius Bluetooth sense el nom"</string>
@@ -283,6 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra les opcions per a la certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Augmenta nivell de registre Wi‑Fi, mostra\'l per SSID RSSI al selector de Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Redueix el consum de bateria i millora el rendiment de la xarxa"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la mem. intermèdia del registrador"</string>
@@ -371,6 +375,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostra el quadre de diàleg L\'aplicació no respon per a aplicacions en segon pla"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostra avisos del canal de notificacions"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostra un avís en pantalla quan una aplicació publica una notificació sense un canal vàlid"</string>
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Aplica dreceres per a notificacions de converses"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Requereix que les notificacions tinguin una drecera fixa per aparèixer la secció de converses"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Força permetre aplicacions de manera externa"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Força l\'ajust de la mida de les activitats"</string>
