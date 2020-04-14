@@ -71,6 +71,8 @@ public class Installer extends SystemService {
     public static final int DEXOPT_GENERATE_COMPACT_DEX = 1 << 11;
     /** Indicates that dexopt should generate an app image */
     public static final int DEXOPT_GENERATE_APP_IMAGE = 1 << 12;
+    /** Indicates that dexopt may be run with different performance / priority tuned for restore */
+    public static final int DEXOPT_FOR_RESTORE = 1 << 13; // TODO(b/135202722): remove
 
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
     public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;

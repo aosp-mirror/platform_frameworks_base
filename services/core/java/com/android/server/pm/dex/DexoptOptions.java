@@ -61,6 +61,10 @@ public final class DexoptOptions {
     // should get the dex metdata file if present.
     public static final int DEXOPT_INSTALL_WITH_DEX_METADATA_FILE = 1 << 10;
 
+    // When set, indicates that dexopt is being invoked from the install flow during device restore
+    // or device setup and should be scheduled appropriately.
+    public static final int DEXOPT_FOR_RESTORE = 1 << 11; // TODO(b/135202722): remove
+
     // The name of package to optimize.
     private final String mPackageName;
 
@@ -99,7 +103,8 @@ public final class DexoptOptions {
                 DEXOPT_DOWNGRADE |
                 DEXOPT_AS_SHARED_LIBRARY |
                 DEXOPT_IDLE_BACKGROUND_JOB |
-                DEXOPT_INSTALL_WITH_DEX_METADATA_FILE;
+                DEXOPT_INSTALL_WITH_DEX_METADATA_FILE |
+                DEXOPT_FOR_RESTORE;
         if ((flags & (~validityMask)) != 0) {
             throw new IllegalArgumentException("Invalid flags : " + Integer.toHexString(flags));
         }
@@ -153,6 +158,10 @@ public final class DexoptOptions {
 
     public boolean isDexoptInstallWithDexMetadata() {
         return (mFlags & DEXOPT_INSTALL_WITH_DEX_METADATA_FILE) != 0;
+    }
+
+    public boolean isDexoptInstallForRestore() {
+        return (mFlags & DEXOPT_FOR_RESTORE) != 0;
     }
 
     public String getSplitName() {
