@@ -9249,12 +9249,13 @@ message SharesheetStarted {
     optional bool is_workprofile = 7;
 
     enum SharesheetPreviewType {  // Constants from ChooserActivity.java
+        CONTENT_PREVIEW_TYPE_UNKNOWN = 0;  // Default for proto 2 / 3 compatibility.
         CONTENT_PREVIEW_IMAGE = 1;  // The preview shown in the sharesheet is an image.
         CONTENT_PREVIEW_FILE = 2;  // The preview shown in the sharesheet is a file.
         CONTENT_PREVIEW_TEXT = 3;  // The preview shown in the sharesheet is text.
     }
     // How the sharesheet preview is presented.
-    optional SharesheetPreviewType previewType = 8;
+    optional SharesheetPreviewType preview_type = 8;
 
     enum ResolverActivityIntent { // Intents handled by ResolverActivity.java
         INTENT_DEFAULT = 0;
@@ -9267,7 +9268,7 @@ message SharesheetStarted {
         INTENT_ACTION_MAIN = 7;
     }
     // The intent being processed (only SEND and SEND_MULTIPLE are system sharesheet)
-    optional ResolverActivityIntent intentType = 9;
+    optional ResolverActivityIntent intent_type = 9;
 }
 
 /**
