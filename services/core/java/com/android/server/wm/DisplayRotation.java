@@ -537,8 +537,29 @@ public class DisplayRotation {
     }
 
     void prepareNormalRotationAnimation() {
+        cancelSeamlessRotation();
         final RotationAnimationPair anim = selectRotationAnimation();
-        mService.startFreezingDisplayLocked(anim.mExit, anim.mEnter, mDisplayContent);
+        mService.startFreezingDisplay(anim.mExit, anim.mEnter, mDisplayContent);
+    }
+
+    /**
+     * This ensures that normal rotation animation is used. E.g. {@link #mRotatingSeamlessly} was
+     * set by previous {@link #updateRotationUnchecked}, but another orientation change happens
+     * before calling {@link DisplayContent#sendNewConfiguration} (remote rotation hasn't finished)
+     * and it doesn't choose seamless rotation.
+     */
+    void cancelSeamlessRotation() {
+        if (!mRotatingSeamlessly) {
+            return;
+        }
+        mDisplayContent.forAllWindows(w -> {
+            if (w.mSeamlesslyRotated) {
+                w.finishSeamlessRotation(false /* timeout */);
+                w.mSeamlesslyRotated = false;
+            }
+        }, true /* traverseTopToBottom */);
+        mSeamlessRotationCount = 0;
+        mRotatingSeamlessly = false;
     }
 
     private void prepareSeamlessRotation() {
