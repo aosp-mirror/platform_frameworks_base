@@ -35,10 +35,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.StyleSpan;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -109,7 +113,7 @@ public class ConversationLayout extends FrameLayout
     private CharSequence mNameReplacement;
     private boolean mIsCollapsed;
     private ImageResolver mImageResolver;
-    private CachingIconView mConversationIcon;
+    private CachingIconView mConversationIconView;
     private View mConversationIconContainer;
     private int mConversationIconTopPadding;
     private int mConversationIconTopPaddingExpandedGroup;
@@ -157,6 +161,7 @@ public class ConversationLayout extends FrameLayout
     private ViewGroup mAppOps;
     private Rect mAppOpsTouchRect = new Rect();
     private float mMinTouchSize;
+    private Icon mConversationIcon;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -192,7 +197,7 @@ public class ConversationLayout extends FrameLayout
         mAvatarSize = getResources().getDimensionPixelSize(R.dimen.messaging_avatar_size);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setAntiAlias(true);
-        mConversationIcon = findViewById(R.id.conversation_icon);
+        mConversationIconView = findViewById(R.id.conversation_icon);
         mConversationIconContainer = findViewById(R.id.conversation_icon_container);
         mIcon = findViewById(R.id.icon);
         mAppOps = findViewById(com.android.internal.R.id.app_ops);
@@ -232,7 +237,7 @@ public class ConversationLayout extends FrameLayout
         });
 
         // When the conversation icon is gone, hide the whole badge
-        mConversationIcon.setOnForceHiddenChangedListener((forceHidden) -> {
+        mConversationIconView.setOnForceHiddenChangedListener((forceHidden) -> {
             animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
             animateViewForceHidden(mImportanceRingView, forceHidden);
             animateViewForceHidden(mIcon, forceHidden);
@@ -463,7 +468,7 @@ public class ConversationLayout extends FrameLayout
         CharSequence conversationText = mConversationTitle;
         if (mIsOneToOne) {
             // Let's resolve the icon / text from the last sender
-            mConversationIcon.setVisibility(VISIBLE);
+            mConversationIconView.setVisibility(VISIBLE);
             mConversationFacePile.setVisibility(GONE);
             CharSequence userKey = getKey(mUser);
             for (int i = mGroups.size() - 1; i >= 0; i--) {
@@ -480,17 +485,20 @@ public class ConversationLayout extends FrameLayout
                     if (avatarIcon == null) {
                         avatarIcon = createAvatarSymbol(conversationText, "", mLayoutColor);
                     }
-                    mConversationIcon.setImageIcon(avatarIcon);
+                    mConversationIcon = avatarIcon;
+                    mConversationIconView.setImageIcon(mConversationIcon);
                     break;
                 }
             }
         } else {
             if (mLargeIcon != null) {
-                mConversationIcon.setVisibility(VISIBLE);
+                mConversationIcon = mLargeIcon;
+                mConversationIconView.setVisibility(VISIBLE);
                 mConversationFacePile.setVisibility(GONE);
-                mConversationIcon.setImageIcon(mLargeIcon);
+                mConversationIconView.setImageIcon(mLargeIcon);
             } else {
-                mConversationIcon.setVisibility(GONE);
+                mConversationIcon = null;
+                mConversationIconView.setVisibility(GONE);
                 // This will also inflate it!
                 mConversationFacePile.setVisibility(VISIBLE);
                 // rebind the value to the inflated view instead of the stub
@@ -561,15 +569,8 @@ public class ConversationLayout extends FrameLayout
         mImageMessageContainer.setVisibility(newMessage != null ? VISIBLE : GONE);
     }
 
-    private void bindFacePile() {
-        // Let's bind the face pile
-        ImageView bottomBackground = mConversationFacePile.findViewById(
-                R.id.conversation_face_pile_bottom_background);
+    public void bindFacePile(ImageView bottomBackground, ImageView bottomView, ImageView topView) {
         applyNotificationBackgroundColor(bottomBackground);
-        ImageView bottomView = mConversationFacePile.findViewById(
-                R.id.conversation_face_pile_bottom);
-        ImageView topView = mConversationFacePile.findViewById(
-                R.id.conversation_face_pile_top);
         // Let's find the two last conversations:
         Icon secondLastIcon = null;
         CharSequence lastKey = null;
@@ -601,6 +602,17 @@ public class ConversationLayout extends FrameLayout
             secondLastIcon = createAvatarSymbol("", "", mLayoutColor);
         }
         topView.setImageIcon(secondLastIcon);
+    }
+
+    private void bindFacePile() {
+        ImageView bottomBackground = mConversationFacePile.findViewById(
+                R.id.conversation_face_pile_bottom_background);
+        ImageView bottomView = mConversationFacePile.findViewById(
+                R.id.conversation_face_pile_bottom);
+        ImageView topView = mConversationFacePile.findViewById(
+                R.id.conversation_face_pile_top);
+
+        bindFacePile(bottomBackground, bottomView, topView);
 
         int conversationAvatarSize;
         int facepileAvatarSize;
@@ -614,7 +626,7 @@ public class ConversationLayout extends FrameLayout
             facepileAvatarSize = mFacePileAvatarSizeExpandedGroup;
             facePileBackgroundSize = facepileAvatarSize + 2 * mFacePileProtectionWidthExpanded;
         }
-        LayoutParams layoutParams = (LayoutParams) mConversationIcon.getLayoutParams();
+        LayoutParams layoutParams = (LayoutParams) mConversationIconView.getLayoutParams();
         layoutParams.width = conversationAvatarSize;
         layoutParams.height = conversationAvatarSize;
         mConversationFacePile.setLayoutParams(layoutParams);
@@ -664,11 +676,11 @@ public class ConversationLayout extends FrameLayout
         layoutParams.setMarginStart(sidemargin);
         mConversationIconBadge.setLayoutParams(layoutParams);
 
-        if (mConversationIcon.getVisibility() == VISIBLE) {
-            layoutParams = (LayoutParams) mConversationIcon.getLayoutParams();
+        if (mConversationIconView.getVisibility() == VISIBLE) {
+            layoutParams = (LayoutParams) mConversationIconView.getLayoutParams();
             layoutParams.width = conversationAvatarSize;
             layoutParams.height = conversationAvatarSize;
-            mConversationIcon.setLayoutParams(layoutParams);
+            mConversationIconView.setLayoutParams(layoutParams);
         }
     }
 
@@ -717,6 +729,10 @@ public class ConversationLayout extends FrameLayout
     @RemotableViewMethod
     public void setConversationTitle(CharSequence conversationTitle) {
         mConversationTitle = conversationTitle;
+    }
+
+    public CharSequence getConversationTitle() {
+        return mConversationText.getText();
     }
 
     private void removeGroups(ArrayList<MessagingGroup> oldGroups) {
@@ -1217,5 +1233,44 @@ public class ConversationLayout extends FrameLayout
     @Override
     public void setMessagingClippingDisabled(boolean clippingDisabled) {
         mMessagingLinearLayout.setClipBounds(clippingDisabled ? null : mMessagingClipRect);
+    }
+
+    @Nullable
+    public CharSequence getConversationSenderName() {
+        if (mGroups.isEmpty()) {
+            return null;
+        }
+        final CharSequence name = mGroups.get(mGroups.size() - 1).getSenderName();
+        return getResources().getString(R.string.conversation_single_line_name_display, name);
+    }
+
+    public boolean isOneToOne() {
+        return mIsOneToOne;
+    }
+
+    @Nullable
+    public CharSequence getConversationText() {
+        if (mMessages.isEmpty()) {
+            return null;
+        }
+        final MessagingMessage messagingMessage = mMessages.get(mMessages.size() - 1);
+        final CharSequence text = messagingMessage.getMessage().getText();
+        if (text == null && messagingMessage instanceof MessagingImageMessage) {
+            final String unformatted =
+                    getResources().getString(R.string.conversation_single_line_image_placeholder);
+            SpannableString spannableString = new SpannableString(unformatted);
+            spannableString.setSpan(
+                    new StyleSpan(Typeface.ITALIC),
+                    0,
+                    spannableString.length(),
+                    Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+            return spannableString;
+        }
+        return text;
+    }
+
+    @Nullable
+    public Icon getConversationIcon() {
+        return mConversationIcon;
     }
 }

@@ -625,6 +625,15 @@
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>
 
+    <!-- Size of the face pile shown on one-line (children of a group) conversation notifications -->
+    <dimen name="conversation_single_line_face_pile_size">36dp</dimen>
+
+    <!-- Size of an avatar shown on one-line (children of a group) conversation notifications -->
+    <dimen name="conversation_single_line_avatar_size">24dp</dimen>
+
+    <!-- Border width for avatars in the face pile shown on one-line (children of a group) conversation notifications -->
+    <dimen name="conversation_single_line_face_pile_protection_width">1dp</dimen>
+
     <!-- The minimum amount of top overscroll to go to the quick settings. -->
     <dimen name="min_top_overscroll_to_qs">36dp</dimen>
 

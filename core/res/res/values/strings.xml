@@ -5449,6 +5449,9 @@
     <!-- The way a conversation name is displayed when single line. The text will be displayed to the end of this text with some spacing -->
     <string name="conversation_single_line_name_display"><xliff:g id="sender_name" example="Sara">%1$s</xliff:g>:</string>
 
+    <!-- Text used when a conversation is displayed in a single-line when the latest message is an image. [CHAR_LIMIT=NONE] -->
+    <string name="conversation_single_line_image_placeholder">sent an image</string>
+
     <!-- Conversation Title fallback if the there is no name provided in a 1:1 conversation [CHAR LIMIT=40]-->
     <string name="conversation_title_fallback_one_to_one">Conversation</string>
 

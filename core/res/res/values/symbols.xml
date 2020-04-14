@@ -1599,6 +1599,8 @@
   <java-symbol type="style" name="Theme.DeviceDefault.VoiceInteractionSession" />
   <java-symbol type="style" name="Pointer" />
   <java-symbol type="style" name="LargePointer" />
+  <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Title" />
+  <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Info" />
 
   <java-symbol type="attr" name="mediaRouteButtonStyle" />
   <java-symbol type="attr" name="externalRouteEnabledDrawable" />
@@ -3863,7 +3865,10 @@
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionPkgs" />
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionProcStates" />
 
+  <java-symbol type="id" name="header_icon_container" />
+  <java-symbol type="attr" name="notificationHeaderTextAppearance" />
   <java-symbol type="string" name="conversation_single_line_name_display" />
+  <java-symbol type="string" name="conversation_single_line_image_placeholder" />
   <java-symbol type="string" name="conversation_title_fallback_one_to_one" />
   <java-symbol type="string" name="conversation_title_fallback_group_chat" />
   <java-symbol type="id" name="conversation_icon" />
@@ -3907,6 +3912,7 @@
   <java-symbol type="layout" name="conversation_face_pile_layout" />
   <java-symbol type="id" name="conversation_unread_count" />
   <java-symbol type="string" name="unread_convo_overflow" />
+  <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Conversation.AppName" />
 
   <!-- Intent resolver and share sheet -->
   <java-symbol type="string" name="resolver_personal_tab" />
