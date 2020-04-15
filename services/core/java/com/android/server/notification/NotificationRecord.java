@@ -590,6 +590,8 @@ public final class NotificationRecord {
             pw.println(prefix + "snoozeCriteria=" + TextUtils.join(",", getSnoozeCriteria()));
         }
         pw.println(prefix + "mAdjustments=" + mAdjustments);
+        pw.println(prefix + "shortcut=" + notification.getShortcutId()
+                + " found valid? " + (mShortcutInfo != null));
     }
 
     @Override
