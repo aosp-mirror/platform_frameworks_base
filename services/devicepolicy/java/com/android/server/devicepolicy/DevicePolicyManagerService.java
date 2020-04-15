@@ -161,8 +161,11 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -171,6 +174,7 @@ import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
@@ -2705,6 +2709,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Slog.i(LOG_TAG, "Removing admin artifacts...");
         // TODO(b/149075700): Clean up application restrictions in UserManager.
         removeAdminArtifacts(doAdminReceiver, doUserId);
+        Slog.i(LOG_TAG, "Uninstalling the DO...");
+        uninstallOrDisablePackage(doAdminComponent.getPackageName(), doUserId);
         Slog.i(LOG_TAG, "Migration complete.");
 
         // Note: KeyChain keys are not removed and will remain accessible for the apps that have
@@ -2714,6 +2720,47 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .createEvent(DevicePolicyEnums.COMP_TO_ORG_OWNED_PO_MIGRATED)
                 .setAdmin(poAdminComponent)
                 .write();
+    }
+
+    private void uninstallOrDisablePackage(String packageName, int userHandle) {
+        final ApplicationInfo appInfo;
+        try {
+            appInfo = mIPackageManager.getApplicationInfo(
+                    packageName, MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userHandle);
+        } catch (RemoteException e) {
+            // Shouldn't happen.
+            return;
+        }
+        if (appInfo == null) {
+            Slog.wtf(LOG_TAG, "Failed to get package info for " + packageName);
+            return;
+        }
+        if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            Slog.i(LOG_TAG, String.format(
+                    "Package %s is pre-installed, marking disabled until used", packageName));
+            mContext.getPackageManager().setApplicationEnabledSetting(packageName,
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED, 0 /* flags */);
+            return;
+        }
+
+        final IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
+            @Override
+            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
+                    IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+                final int status = intent.getIntExtra(
+                        PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
+                if (status == PackageInstaller.STATUS_SUCCESS) {
+                    Slog.i(LOG_TAG, String.format(
+                            "Package %s uninstalled for user %d", packageName, userHandle));
+                } else {
+                    Slog.e(LOG_TAG, String.format(
+                            "Failed to uninstall %s; status: %d", packageName, status));
+                }
+            }
+        };
+
+        final PackageInstaller pi = mInjector.getPackageManager(userHandle).getPackageInstaller();
+        pi.uninstall(packageName, 0 /* flags */, new IntentSender((IIntentSender) mLocalSender));
     }
 
     private void moveDoPoliciesToProfileParentAdmin(ActiveAdmin doAdmin, ActiveAdmin parentAdmin) {
