@@ -1333,13 +1333,13 @@ void IncrementalService::extractZipFile(const IfsMountPtr& ifs, ZipArchiveHandle
     std::vector<IncFsDataBlock> instructions(numBlocks);
     auto remainingData = std::span(libData.get(), entry.uncompressed_length);
     for (int i = 0; i < numBlocks; i++) {
-        const auto blockSize = std::min<uint16_t>(constants().blockSize, remainingData.size());
+        const auto blockSize = std::min<long>(constants().blockSize, remainingData.size());
         instructions[i] = IncFsDataBlock{
                 .fileFd = writeFd.get(),
                 .pageIndex = static_cast<IncFsBlockIndex>(i),
                 .compression = INCFS_COMPRESSION_KIND_NONE,
                 .kind = INCFS_BLOCK_KIND_DATA,
-                .dataSize = blockSize,
+                .dataSize = static_cast<uint32_t>(blockSize),
                 .data = reinterpret_cast<const char*>(remainingData.data()),
         };
         remainingData = remainingData.subspan(blockSize);
