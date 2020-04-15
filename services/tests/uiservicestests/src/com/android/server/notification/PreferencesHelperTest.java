@@ -15,6 +15,9 @@
  */
 package com.android.server.notification;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
@@ -50,6 +53,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -132,6 +136,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Spy IContentProvider mTestIContentProvider = new MockIContentProvider();
     @Mock Context mContext;
     @Mock ZenModeHelper mMockZenModeHelper;
+    @Mock AppOpsManager mAppOpsManager;
 
     private NotificationManager.Policy mTestNotificationPolicy;
 
@@ -187,7 +192,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
                 NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        when(mAppOpsManager.noteOpNoThrow(anyInt(), anyInt(),
+                anyString(), eq(null), anyString())).thenReturn(MODE_DEFAULT);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         resetZenModeHelper();
 
         mAudioAttributes = new AudioAttributes.Builder()
@@ -1464,7 +1472,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
                 NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
         resetZenModeHelper();
@@ -1475,7 +1484,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // start notification policy off with mAreChannelsBypassingDnd = false
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0, 0, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, never()).setNotificationPolicy(any());
         resetZenModeHelper();
@@ -2241,7 +2251,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
                 + "</ranking>\n";
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         loadByteArrayXml(preQXml.getBytes(), true, UserHandle.USER_SYSTEM);
 
         assertEquals(PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS,
@@ -2253,7 +2264,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setHideSilentStatusIcons(!PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertEquals(!PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS,
@@ -2349,7 +2361,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_UNSPECIFIED);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
@@ -2360,7 +2373,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertEquals("other", mHelper.getNotificationDelegate(PKG_O, UID_O));
@@ -2372,7 +2386,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.revokeNotificationDelegate(PKG_O, UID_O);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
@@ -2384,7 +2399,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.toggleNotificationDelegate(PKG_O, UID_O, false);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         // appears disabled
@@ -2402,7 +2418,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.revokeNotificationDelegate(PKG_O, UID_O);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         // appears disabled
@@ -2417,14 +2434,71 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testBubblePreference_defaults() throws Exception {
-        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_NONE);
+        assertEquals(BUBBLE_PREFERENCE_NONE, mHelper.getBubblePreference(PKG_O, UID_O));
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
-        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_NONE);
+        assertEquals(BUBBLE_PREFERENCE_NONE, mHelper.getBubblePreference(PKG_O, UID_O));
         assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testBubblePreference_upgradeWithSAWPermission() throws Exception {
+        when(mAppOpsManager.noteOpNoThrow(eq(OP_SYSTEM_ALERT_WINDOW), anyInt(),
+                anyString(), eq(null), anyString())).thenReturn(MODE_ALLOWED);
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\">\n"
+                + "<channel id=\"someId\" name=\"hi\""
+                + " importance=\"3\"/>"
+                + "</package>"
+                + "</ranking>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertEquals(BUBBLE_PREFERENCE_ALL, mHelper.getBubblePreference(PKG_O, UID_O));
+        assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testBubblePreference_upgradeWithSAWThenUserOverride() throws Exception {
+        when(mAppOpsManager.noteOpNoThrow(eq(OP_SYSTEM_ALERT_WINDOW), anyInt(),
+                anyString(), eq(null), anyString())).thenReturn(MODE_ALLOWED);
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\">\n"
+                + "<channel id=\"someId\" name=\"hi\""
+                + " importance=\"3\"/>"
+                + "</package>"
+                + "</ranking>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertEquals(BUBBLE_PREFERENCE_ALL, mHelper.getBubblePreference(PKG_O, UID_O));
+        assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
+
+        mHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_SELECTED);
+        assertEquals(BUBBLE_PREFERENCE_SELECTED, mHelper.getBubblePreference(PKG_O, UID_O));
+        assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE,
+                mHelper.getAppLockedFields(PKG_O, UID_O));
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
+        loadStreamXml(baos, false, UserHandle.USER_ALL);
+
+        assertEquals(BUBBLE_PREFERENCE_SELECTED, mHelper.getBubblePreference(PKG_O, UID_O));
+        assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE,
+                mHelper.getAppLockedFields(PKG_O, UID_O));
     }
 
     @Test
@@ -2435,7 +2509,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 mHelper.getAppLockedFields(PKG_O, UID_O));
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_NONE);
@@ -2949,7 +3024,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0);
 
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
@@ -2969,7 +3045,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testPlaceholderConversationId_shortcutRequired() throws Exception {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
@@ -2989,7 +3066,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testNormalConversationId_shortcutRequired() throws Exception {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
@@ -3009,7 +3087,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testNoConversationId_shortcutRequired() throws Exception {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
