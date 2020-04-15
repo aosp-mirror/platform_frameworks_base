@@ -81,9 +81,6 @@ public class OneTimePermissionUserManager {
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mPermissionControllerManager = context.getSystemService(PermissionControllerManager.class);
         mHandler = context.getMainThreadHandler();
-
-        // Listen for tracked uid being uninstalled
-        context.registerReceiver(mUninstallListener, new IntentFilter(Intent.ACTION_UID_REMOVED));
     }
 
     /**
@@ -168,6 +165,14 @@ public class OneTimePermissionUserManager {
     private static long getKilledDelayMillis() {
         return DeviceConfig.getLong(DeviceConfig.NAMESPACE_PERMISSIONS,
                 PROPERTY_KILLED_DELAY_CONFIG_KEY, DEFAULT_KILLED_DELAY_MILLIS);
+    }
+
+    /**
+     * Register to listen for Uids being uninstalled. This must be done outside of the
+     * PermissionManagerService lock.
+     */
+    void registerUninstallListener() {
+        mContext.registerReceiver(mUninstallListener, new IntentFilter(Intent.ACTION_UID_REMOVED));
     }
 
     /**
