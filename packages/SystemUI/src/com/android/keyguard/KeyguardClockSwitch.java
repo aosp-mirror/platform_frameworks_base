@@ -423,9 +423,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
         final boolean inDisplayState = mStatusBarState == StatusBarState.KEYGUARD
                 || mStatusBarState == StatusBarState.SHADE_LOCKED;
-        final int visibility =
-                inDisplayState && mBigClockContainer.getChildCount() != 0 ? View.VISIBLE
-                        : View.GONE;
+        final int visibility = !mShowingHeader && inDisplayState
+                    && mBigClockContainer.getChildCount() != 0 ? View.VISIBLE : View.GONE;
         if (mBigClockContainer.getVisibility() != visibility) {
             mBigClockContainer.setVisibility(visibility);
         }
@@ -495,6 +494,16 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 mClockView.getPaddingRight(), paddingBottom);
         mClockViewBold.setPadding(mClockViewBold.getPaddingLeft(), mClockViewBold.getPaddingTop(),
                 mClockViewBold.getPaddingRight(), paddingBottom);
+    }
+
+    /**
+     * Hide big clock if the keyguard slice is showing a header, need to reduce visual clutter in
+     * these cases.
+     */
+    public void setKeyguardHidingBigClock(boolean hasHeader) {
+        if (mBigClockContainer != null) {
+            mBigClockContainer.setVisibility(hasHeader ? View.GONE : View.VISIBLE);
+        }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)

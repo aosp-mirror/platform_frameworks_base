@@ -245,6 +245,8 @@ public class KeyguardStatusView extends GridLayout implements
                     params.bottomMargin);
             mNotificationIcons.setLayoutParams(params);
         }
+
+        mClockView.setKeyguardHidingBigClock(hasHeader);
     }
 
     @Override
