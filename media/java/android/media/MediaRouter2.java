@@ -409,7 +409,7 @@ public final class MediaRouter2 {
 
         // TODO: Check thread-safety
         if (!mRoutes.containsKey(route.getId())) {
-            notifyTransferFailed(route);
+            notifyTransferFailure(route);
             return;
         }
         if (controller.getRoutingSessionInfo().getTransferableRoutes().contains(route.getId())) {
@@ -588,14 +588,14 @@ public final class MediaRouter2 {
             if (sessionInfo == null) {
                 // TODO: We may need to distinguish between failure and rejection.
                 //       One way can be introducing 'reason'.
-                notifyTransferFailed(requestedRoute);
+                notifyTransferFailure(requestedRoute);
                 return;
             } else if (!sessionInfo.getSelectedRoutes().contains(requestedRoute.getId())) {
                 Log.w(TAG, "The session does not contain the requested route. "
                         + "(requestedRouteId=" + requestedRoute.getId()
                         + ", actualRoutes=" + sessionInfo.getSelectedRoutes()
                         + ")");
-                notifyTransferFailed(requestedRoute);
+                notifyTransferFailure(requestedRoute);
                 return;
             } else if (!TextUtils.equals(requestedRoute.getProviderId(),
                     sessionInfo.getProviderId())) {
@@ -603,7 +603,7 @@ public final class MediaRouter2 {
                         + "(requested route's providerId=" + requestedRoute.getProviderId()
                         + ", actual providerId=" + sessionInfo.getProviderId()
                         + ")");
-                notifyTransferFailed(requestedRoute);
+                notifyTransferFailure(requestedRoute);
                 return;
             }
         }
@@ -619,7 +619,7 @@ public final class MediaRouter2 {
                 }
             }
             //TODO: Determine oldController properly when transfer is launched by Output Switcher.
-            notifyTransferred(matchingRequest != null ? matchingRequest.mController :
+            notifyTransfer(matchingRequest != null ? matchingRequest.mController :
                     getSystemController(), newController);
         }
     }
@@ -687,15 +687,7 @@ public final class MediaRouter2 {
             return;
         }
 
-        boolean removed;
-        synchronized (sRouterLock) {
-            removed = mRoutingControllers.remove(uniqueSessionId, matchingController);
-        }
-
-        if (removed) {
-            matchingController.release();
-            notifyStopped(matchingController);
-        }
+        matchingController.releaseInternal(/* shouldReleaseSession= */ false);
     }
 
     private List<MediaRoute2Info> filterRoutes(List<MediaRoute2Info> routes,
@@ -736,22 +728,21 @@ public final class MediaRouter2 {
         }
     }
 
-    private void notifyTransferred(RoutingController oldController,
-            RoutingController newController) {
+    private void notifyTransfer(RoutingController oldController, RoutingController newController) {
         for (TransferCallbackRecord record: mTransferCallbackRecords) {
             record.mExecutor.execute(
                     () -> record.mTransferCallback.onTransfer(oldController, newController));
         }
     }
 
-    private void notifyTransferFailed(MediaRoute2Info route) {
+    private void notifyTransferFailure(MediaRoute2Info route) {
         for (TransferCallbackRecord record: mTransferCallbackRecords) {
             record.mExecutor.execute(
                     () -> record.mTransferCallback.onTransferFailure(route));
         }
     }
 
-    private void notifyStopped(RoutingController controller) {
+    private void notifyStop(RoutingController controller) {
         for (TransferCallbackRecord record: mTransferCallbackRecords) {
             record.mExecutor.execute(
                     () -> record.mTransferCallback.onStop(controller));
@@ -1189,31 +1180,37 @@ public final class MediaRouter2 {
          */
         // TODO: Add tests using {@link MediaRouter2Manager#getActiveSessions()}.
         public void release() {
+            releaseInternal(/* shouldReleaseSession= */ true);
+        }
+
+        void releaseInternal(boolean shouldReleaseSession) {
             synchronized (mControllerLock) {
                 if (mIsReleased) {
-                    Log.w(TAG, "release() called on released controller. Ignoring.");
+                    Log.w(TAG, "releaseInternal() called on released controller. Ignoring.");
                     return;
                 }
                 mIsReleased = true;
             }
 
             MediaRouter2Stub stub;
-            boolean removed;
             synchronized (sRouterLock) {
-                removed = mRoutingControllers.remove(getId(), this);
+                mRoutingControllers.remove(getId(), this);
                 stub = mStub;
             }
 
-            if (removed) {
-                mHandler.post(() -> notifyStopped(RoutingController.this));
-            }
-
-            if (stub != null) {
+            if (shouldReleaseSession && stub != null) {
                 try {
                     mMediaRouterService.releaseSessionWithRouter2(stub, getId());
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to notify of controller release", ex);
+                    Log.e(TAG, "Unable to release session", ex);
                 }
+            }
+
+            if (Thread.currentThread() == mHandler.getLooper().getThread()) {
+                notifyStop(this);
+            } else {
+                mHandler.sendMessage(obtainMessage(MediaRouter2::notifyStop, MediaRouter2.this,
+                        RoutingController.this));
             }
         }
 
