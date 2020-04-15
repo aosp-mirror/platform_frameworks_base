@@ -77,11 +77,23 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
         val seekAvailable = ((playbackState?.actions ?: 0L) and PlaybackState.ACTION_SEEK_TO) != 0L
         val position = playbackState?.position?.toInt()
         val duration = mediaMetadata?.getLong(MediaMetadata.METADATA_KEY_DURATION)?.toInt()
-        val enabled = if (duration != null && duration <= 0) false else true
+        val enabled = if (playbackState == null ||
+                playbackState?.getState() == PlaybackState.STATE_NONE ||
+                (duration != null && duration <= 0)) false else true
         _data = Progress(enabled, seekAvailable, position, duration, color)
         if (shouldPollPlaybackPosition()) {
             checkPlaybackPosition()
         }
+    }
+
+    /**
+     * Puts the seek bar into a resumption state.
+     *
+     * This should be called when the media session behind the controller has been destroyed.
+     */
+    @AnyThread
+    fun clearController() = bgExecutor.execute {
+        _data = _data.copy(enabled = false)
     }
 
     @AnyThread
