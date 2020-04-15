@@ -348,9 +348,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
                 if (Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) {
                     String packageName = intent.getData().getSchemeSpecificPart();
-                    if (LOCAL_LOGV) {
-                        Slog.v(TAG, "broadcast=ACTION_PACKAGE_FULLY_REMOVED pkg=" + packageName);
-                    }
+                    Slog.i(TAG, "broadcast=ACTION_PACKAGE_FULLY_REMOVED pkg=" + packageName);
                     onPackageFullyRemoved(packageName);
                 }
             }
