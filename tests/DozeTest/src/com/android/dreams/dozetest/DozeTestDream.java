@@ -100,7 +100,6 @@ public class DozeTestDream extends DreamService {
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         setInteractive(false);
-        setLowProfile(true);
         setFullscreen(true);
         setContentView(R.layout.dream);
         setScreenBright(false);
