@@ -15,7 +15,7 @@
 android_test {
     name: "iorap-functional-tests",
     srcs: ["src/**/*.java"],
-    data: ["test_data/*"],
+    data: [":iorap-functional-test-apps"],
     static_libs: [
         // Non-test dependencies
         // library under test
