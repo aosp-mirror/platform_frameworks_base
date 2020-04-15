@@ -19,10 +19,12 @@ package com.android.server.job.controllers.idle;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.app.AlarmManager;
+import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.PowerManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -39,6 +41,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
             || Log.isLoggable(TAG, Log.DEBUG);
 
     private AlarmManager mAlarm;
+    private PowerManager mPowerManager;
 
     // After construction, mutations of idle/screen-on state will only happen
     // on the main looper thread, either in onReceive() or in an alarm callback.
@@ -47,6 +50,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
     private boolean mIdle;
     private boolean mScreenOn;
     private boolean mDockIdle;
+    private boolean mInCarMode;
     private IdlenessListener mIdleListener;
 
     private AlarmManager.OnAlarmListener mIdleAlarmListener = () -> {
@@ -59,6 +63,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         mIdle = false;
         mScreenOn = true;
         mDockIdle = false;
+        mInCarMode = false;
     }
 
     @Override
@@ -74,6 +79,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         mIdleWindowSlop = context.getResources().getInteger(
                 com.android.internal.R.integer.config_jobSchedulerIdleWindowSlop);
         mAlarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mPowerManager = context.getSystemService(PowerManager.class);
 
         IntentFilter filter = new IntentFilter();
 
@@ -92,6 +98,10 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         filter.addAction(Intent.ACTION_DOCK_IDLE);
         filter.addAction(Intent.ACTION_DOCK_ACTIVE);
 
+        // Car mode
+        filter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED);
+        filter.addAction(UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED);
+
         context.registerReceiver(this, filter);
     }
 
@@ -100,6 +110,8 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         pw.print("  mIdle: "); pw.println(mIdle);
         pw.print("  mScreenOn: "); pw.println(mScreenOn);
         pw.print("  mDockIdle: "); pw.println(mDockIdle);
+        pw.print("  mInCarMode: ");
+        pw.println(mInCarMode);
     }
 
     @Override
@@ -116,6 +128,9 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         proto.write(
                 StateControllerProto.IdleController.IdlenessTracker.DeviceIdlenessTracker.IS_DOCK_IDLE,
                 mDockIdle);
+        proto.write(
+                StateControllerProto.IdleController.IdlenessTracker.DeviceIdlenessTracker.IN_CAR_MODE,
+                mInCarMode);
 
         proto.end(diToken);
         proto.end(token);
@@ -124,63 +139,90 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
-        if (action.equals(Intent.ACTION_SCREEN_ON)
-                || action.equals(Intent.ACTION_DREAMING_STOPPED)
-                || action.equals(Intent.ACTION_DOCK_ACTIVE)) {
-            if (action.equals(Intent.ACTION_DOCK_ACTIVE)) {
+        if (DEBUG) {
+            Slog.v(TAG, "Received action: " + action);
+        }
+        switch (action) {
+            case Intent.ACTION_DOCK_ACTIVE:
                 if (!mScreenOn) {
                     // Ignore this intent during screen off
                     return;
-                } else {
-                    mDockIdle = false;
                 }
-            } else {
+                // Intentional fallthrough
+            case Intent.ACTION_DREAMING_STOPPED:
+                if (!mPowerManager.isInteractive()) {
+                    // Ignore this intent if the device isn't interactive.
+                    return;
+                }
+                // Intentional fallthrough
+            case Intent.ACTION_SCREEN_ON:
                 mScreenOn = true;
                 mDockIdle = false;
-            }
-            if (DEBUG) {
-                Slog.v(TAG,"exiting idle : " + action);
-            }
-            //cancel the alarm
-            mAlarm.cancel(mIdleAlarmListener);
-            if (mIdle) {
-            // possible transition to not-idle
-                mIdle = false;
-                mIdleListener.reportNewIdleState(mIdle);
-            }
-        } else if (action.equals(Intent.ACTION_SCREEN_OFF)
-                || action.equals(Intent.ACTION_DREAMING_STARTED)
-                || action.equals(Intent.ACTION_DOCK_IDLE)) {
-            // when the screen goes off or dreaming starts or wireless charging dock in idle,
-            // we schedule the alarm that will tell us when we have decided the device is
-            // truly idle.
-            if (action.equals(Intent.ACTION_DOCK_IDLE)) {
-                if (!mScreenOn) {
-                    // Ignore this intent during screen off
-                    return;
-                } else {
-                    mDockIdle = true;
+                if (DEBUG) {
+                    Slog.v(TAG, "exiting idle");
                 }
-            } else {
-                mScreenOn = false;
-                mDockIdle = false;
-            }
+                cancelIdlenessCheck();
+                if (mIdle) {
+                    mIdle = false;
+                    mIdleListener.reportNewIdleState(mIdle);
+                }
+                break;
+            case Intent.ACTION_SCREEN_OFF:
+            case Intent.ACTION_DREAMING_STARTED:
+            case Intent.ACTION_DOCK_IDLE:
+                // when the screen goes off or dreaming starts or wireless charging dock in idle,
+                // we schedule the alarm that will tell us when we have decided the device is
+                // truly idle.
+                if (action.equals(Intent.ACTION_DOCK_IDLE)) {
+                    if (!mScreenOn) {
+                        // Ignore this intent during screen off
+                        return;
+                    } else {
+                        mDockIdle = true;
+                    }
+                } else {
+                    mScreenOn = false;
+                    mDockIdle = false;
+                }
+                maybeScheduleIdlenessCheck(action);
+                break;
+            case UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED:
+                mInCarMode = true;
+                cancelIdlenessCheck();
+                if (mIdle) {
+                    mIdle = false;
+                    mIdleListener.reportNewIdleState(mIdle);
+                }
+                break;
+            case UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED:
+                mInCarMode = false;
+                maybeScheduleIdlenessCheck(action);
+                break;
+            case ActivityManagerService.ACTION_TRIGGER_IDLE:
+                handleIdleTrigger();
+                break;
+        }
+    }
+
+    private void maybeScheduleIdlenessCheck(String reason) {
+        if ((!mScreenOn || mDockIdle) && !mInCarMode) {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             final long when = nowElapsed + mInactivityIdleThreshold;
             if (DEBUG) {
-                Slog.v(TAG, "Scheduling idle : " + action + " now:" + nowElapsed + " when="
-                        + when);
+                Slog.v(TAG, "Scheduling idle : " + reason + " now:" + nowElapsed + " when=" + when);
             }
             mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     when, mIdleWindowSlop, "JS idleness", mIdleAlarmListener, null);
-        } else if (action.equals(ActivityManagerService.ACTION_TRIGGER_IDLE)) {
-            handleIdleTrigger();
         }
+    }
+
+    private void cancelIdlenessCheck() {
+        mAlarm.cancel(mIdleAlarmListener);
     }
 
     private void handleIdleTrigger() {
         // idle time starts now. Do not set mIdle if screen is on.
-        if (!mIdle && (!mScreenOn || mDockIdle)) {
+        if (!mIdle && (!mScreenOn || mDockIdle) && !mInCarMode) {
             if (DEBUG) {
                 Slog.v(TAG, "Idle trigger fired @ " + sElapsedRealtimeClock.millis());
             }
@@ -189,7 +231,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         } else {
             if (DEBUG) {
                 Slog.v(TAG, "TRIGGER_IDLE received but not changing state; idle="
-                        + mIdle + " screen=" + mScreenOn);
+                        + mIdle + " screen=" + mScreenOn + " car=" + mInCarMode);
             }
         }
     }
