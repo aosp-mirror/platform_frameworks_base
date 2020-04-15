@@ -30,6 +30,7 @@ import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionProvider;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -54,7 +55,6 @@ public class ConditionProviders extends ManagedServices {
     private final ArraySet<String> mSystemConditionProviderNames;
     private final ArraySet<SystemConditionProviderService> mSystemConditionProviders
             = new ArraySet<>();
-
     private Callback mCallback;
 
     public ConditionProviders(Context context, UserProfiles userProfiles, IPackageManager pm) {
@@ -191,6 +191,21 @@ public class ConditionProviders extends ManagedServices {
         }
         if (mCallback != null) {
             mCallback.onServiceAdded(info.component);
+        }
+    }
+
+    @Override
+    protected void loadDefaultsFromConfig() {
+        String defaultDndAccess = mContext.getResources().getString(
+                R.string.config_defaultDndAccessPackages);
+        if (defaultDndAccess != null) {
+            String[] dnds = defaultDndAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
+            for (int i = 0; i < dnds.length; i++) {
+                if (TextUtils.isEmpty(dnds[i])) {
+                    continue;
+                }
+                addDefaultComponentOrPackage(dnds[i]);
+            }
         }
     }
 

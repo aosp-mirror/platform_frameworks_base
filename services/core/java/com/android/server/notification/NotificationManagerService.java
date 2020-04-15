@@ -600,57 +600,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     void loadDefaultApprovedServices(int userId) {
-        String defaultListenerAccess = getContext().getResources().getString(
-                com.android.internal.R.string.config_defaultListenerAccessPackages);
-        if (defaultListenerAccess != null) {
-            String[] listeners =
-                    defaultListenerAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
-            for (int i = 0; i < listeners.length; i++) {
-                if (TextUtils.isEmpty(listeners[i])) {
-                    continue;
-                }
-                ArraySet<ComponentName> approvedListeners =
-                        mListeners.queryPackageForServices(listeners[i],
-                                MATCH_DIRECT_BOOT_AWARE
-                                        | MATCH_DIRECT_BOOT_UNAWARE, userId);
-                for (int k = 0; k < approvedListeners.size(); k++) {
-                    ComponentName cn = approvedListeners.valueAt(k);
-                    mListeners.addDefaultComponentOrPackage(cn.flattenToString());
-                }
-            }
-        }
+        mListeners.loadDefaultsFromConfig();
 
-        String defaultDndAccess = getContext().getResources().getString(
-                com.android.internal.R.string.config_defaultDndAccessPackages);
-        if (defaultDndAccess != null) {
-            String[] dnds = defaultDndAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
-            for (int i = 0; i < dnds.length; i++) {
-                if (TextUtils.isEmpty(dnds[i])) {
-                    continue;
-                }
-                mConditionProviders.addDefaultComponentOrPackage(dnds[i]);
-            }
-        }
+        mConditionProviders.loadDefaultsFromConfig();
 
-
-        ArraySet<String> assistants = new ArraySet<>();
-        String deviceAssistant = DeviceConfig.getProperty(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE);
-        if (deviceAssistant != null) {
-            assistants.addAll(Arrays.asList(deviceAssistant.split(
-                    ManagedServices.ENABLED_SERVICES_SEPARATOR)));
-        }
-        assistants.addAll(Arrays.asList(getContext().getResources().getString(
-                com.android.internal.R.string.config_defaultAssistantAccessComponent)
-                .split(ManagedServices.ENABLED_SERVICES_SEPARATOR)));
-        for (int i = 0; i < assistants.size(); i++) {
-            String cnString = assistants.valueAt(i);
-            if (TextUtils.isEmpty(cnString)) {
-                continue;
-            }
-            mAssistants.addDefaultComponentOrPackage(cnString);
-        }
+        mAssistants.loadDefaultsFromConfig();
     }
 
     protected void allowDefaultApprovedServices(int userId) {
@@ -673,11 +627,14 @@ public class NotificationManagerService extends SystemService {
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE);
         if (overrideDefaultAssistantString != null) {
-            ComponentName overrideDefaultAssistant =
-                    ComponentName.unflattenFromString(overrideDefaultAssistantString);
-            if (allowAssistant(userId, overrideDefaultAssistant)) return;
+            ArraySet<ComponentName> approved = mAssistants.queryPackageForServices(
+                    overrideDefaultAssistantString,
+                    MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                    userId);
+            for (int i = 0; i < approved.size(); i++) {
+                if (allowAssistant(userId, approved.valueAt(i))) return;
+            }
         }
-
         ArraySet<ComponentName> defaults = mAssistants.getDefaultComponents();
         // We should have only one default assistant by default
         // allowAssistant should execute once in practice
@@ -8603,6 +8560,26 @@ public class NotificationManagerService extends SystemService {
         private ArrayMap<Integer, Boolean> mUserSetMap = new ArrayMap<>();
         private Set<String> mAllowedAdjustments = new ArraySet<>();
 
+        @Override
+        protected void loadDefaultsFromConfig() {
+            ArraySet<String> assistants = new ArraySet<>();
+            assistants.addAll(Arrays.asList(mContext.getResources().getString(
+                    com.android.internal.R.string.config_defaultAssistantAccessComponent)
+                    .split(ManagedServices.ENABLED_SERVICES_SEPARATOR)));
+            for (int i = 0; i < assistants.size(); i++) {
+                String cnString = assistants.valueAt(i);
+                if (TextUtils.isEmpty(cnString)) {
+                    continue;
+                }
+                ArraySet<ComponentName> approved = queryPackageForServices(cnString,
+                        MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, USER_SYSTEM);
+                for (int k = 0; k < approved.size(); k++) {
+                    ComponentName cn = approved.valueAt(k);
+                    addDefaultComponentOrPackage(cn.flattenToString());
+                }
+            }
+        }
+
         public NotificationAssistants(Context context, Object lock, UserProfiles up,
                 IPackageManager pm) {
             super(context, lock, up, pm);
@@ -9040,7 +9017,29 @@ public class NotificationManagerService extends SystemService {
 
         public NotificationListeners(IPackageManager pm) {
             super(getContext(), mNotificationLock, mUserProfiles, pm);
+        }
 
+        @Override
+        protected void loadDefaultsFromConfig() {
+            String defaultListenerAccess = mContext.getResources().getString(
+                    R.string.config_defaultListenerAccessPackages);
+            if (defaultListenerAccess != null) {
+                String[] listeners =
+                        defaultListenerAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
+                for (int i = 0; i < listeners.length; i++) {
+                    if (TextUtils.isEmpty(listeners[i])) {
+                        continue;
+                    }
+                    ArraySet<ComponentName> approvedListeners =
+                            this.queryPackageForServices(listeners[i],
+                                    MATCH_DIRECT_BOOT_AWARE
+                                            | MATCH_DIRECT_BOOT_UNAWARE, USER_SYSTEM);
+                    for (int k = 0; k < approvedListeners.size(); k++) {
+                        ComponentName cn = approvedListeners.valueAt(k);
+                        addDefaultComponentOrPackage(cn.flattenToString());
+                    }
+                }
+            }
         }
 
         @Override
