@@ -674,6 +674,15 @@ final class AccessibilityController {
                         availableBounds.op(windowBounds, Region.Op.DIFFERENCE);
                     }
 
+                    // If the navigation bar window doesn't have touchable region, count
+                    // navigation bar insets into nonMagnifiedBounds. It happens when
+                    // navigation mode is gestural.
+                    if (isUntouchableNavigationBar(windowState, mTempRegion3)) {
+                        final Rect navBarInsets = getNavBarInsets(mDisplayContent);
+                        nonMagnifiedBounds.op(navBarInsets, Region.Op.UNION);
+                        availableBounds.op(navBarInsets, Region.Op.DIFFERENCE);
+                    }
+
                     // Count letterbox into nonMagnifiedBounds
                     if (windowState.isLetterboxedForDisplayCutoutLw()) {
                         Region letterboxBounds = getLetterboxBounds(windowState);
@@ -1091,6 +1100,24 @@ final class AccessibilityController {
         }
     }
 
+    static boolean isUntouchableNavigationBar(WindowState windowState,
+            Region touchableRegion) {
+        if (windowState.mAttrs.type != WindowManager.LayoutParams.TYPE_NAVIGATION_BAR) {
+            return false;
+        }
+
+        // Gets the touchable region.
+        windowState.getTouchableRegion(touchableRegion);
+
+        return touchableRegion.isEmpty();
+    }
+
+    static Rect getNavBarInsets(DisplayContent displayContent) {
+        final InsetsState insetsState =
+                displayContent.getInsetsStateController().getRawInsetsState();
+        return insetsState.getSource(ITYPE_NAVIGATION_BAR).getFrame();
+    }
+
     /**
      * This class encapsulates the functionality related to computing the windows
      * reported for accessibility purposes. These windows are all windows a sighted
@@ -1205,16 +1232,12 @@ final class AccessibilityController {
                         updateUnaccountedSpace(windowState, regionInScreen, unaccountedSpace,
                                 skipRemainingWindowsForTasks);
                         focusedWindowAdded |= windowState.isFocused();
-                    } else if (isUntouchableNavigationBar(windowState)) {
+                    } else if (isUntouchableNavigationBar(windowState, mTempRegion1)) {
                         // If this widow is navigation bar without touchable region, accounting the
                         // region of navigation bar inset because all touch events from this region
                         // would be received by launcher, i.e. this region is a un-touchable one
                         // for the application.
-                        final InsetsState insetsState =
-                                dc.getInsetsStateController().getRawInsetsState();
-                        final Rect displayFrame =
-                                insetsState.getSource(ITYPE_NAVIGATION_BAR).getFrame();
-                        unaccountedSpace.op(displayFrame, unaccountedSpace,
+                        unaccountedSpace.op(getNavBarInsets(dc), unaccountedSpace,
                                 Region.Op.REVERSE_DIFFERENCE);
                     }
 
@@ -1292,18 +1315,6 @@ final class AccessibilityController {
             }
 
             return false;
-        }
-
-        private boolean isUntouchableNavigationBar(WindowState windowState) {
-            if (windowState.mAttrs.type != WindowManager.LayoutParams.TYPE_NAVIGATION_BAR) {
-                return false;
-            }
-
-            // Gets the touchable region.
-            Region touchableRegion = mTempRegion1;
-            windowState.getTouchableRegion(touchableRegion);
-
-            return touchableRegion.isEmpty();
         }
 
         private void updateUnaccountedSpace(WindowState windowState, Region regionInScreen,
