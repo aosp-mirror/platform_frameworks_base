@@ -17,7 +17,14 @@
 #ifndef STATS_SERVICE_H
 #define STATS_SERVICE_H
 
+#include <aidl/android/os/BnStatsd.h>
+#include <aidl/android/os/IPendingIntentRef.h>
+#include <aidl/android/os/IPullAtomCallback.h>
 #include <gtest/gtest_prod.h>
+#include <utils/Looper.h>
+
+#include <mutex>
+
 #include "StatsLogProcessor.h"
 #include "anomaly/AlarmMonitor.h"
 #include "config/ConfigManager.h"
@@ -26,13 +33,7 @@
 #include "packages/UidMap.h"
 #include "shell/ShellSubscriber.h"
 #include "statscompanion_util.h"
-
-#include <aidl/android/os/BnStatsd.h>
-#include <aidl/android/os/IPendingIntentRef.h>
-#include <aidl/android/os/IPullAtomCallback.h>
-#include <utils/Looper.h>
-
-#include <mutex>
+#include "utils/NamedLatch.h"
 
 using namespace android;
 using namespace android::os;
@@ -384,6 +385,11 @@ private:
      */
     mutable mutex mShellSubscriberMutex;
     std::shared_ptr<LogEventQueue> mEventQueue;
+
+    NamedLatch mBootCompleteLatch;
+    static const inline string kBootCompleteTag = "BOOT_COMPLETE";
+    static const inline string kUidMapReceivedTag = "UID_MAP";
+    static const inline string kAllPullersRegisteredTag = "PULLERS_REGISTERED";
 
     ScopedAIBinder_DeathRecipient mStatsCompanionServiceDeathRecipient;
 
