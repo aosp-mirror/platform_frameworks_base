@@ -42,7 +42,9 @@ import java.util.Set;
  * Settings data for a particular package we know about.
  */
 public class PackageSetting extends PackageSettingBase {
-    int appId;
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public int appId;
 
     /**
      * This can be null whenever a physical APK on device is missing. This can be the result of

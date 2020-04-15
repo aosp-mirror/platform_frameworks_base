@@ -29,6 +29,7 @@ import android.compat.annotation.Disabled;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
@@ -73,12 +74,29 @@ public class Environment {
     private static final String DIR_FILES = "files";
     private static final String DIR_CACHE = "cache";
 
+    /**
+     * The folder name prefix for the user credential protected data directory. This is exposed for
+     * use in string path caching for {@link ApplicationInfo} objects, and should not be accessed
+     * directly otherwise. Prefer {@link #getDataUserCeDirectory(String, int)}.
+     * {@hide}
+     */
+    public static final String DIR_USER_CE = "user";
+
+    /**
+     * The folder name prefix for the user device protected data directory. This is exposed for use
+     * in string path caching for {@link ApplicationInfo} objects, and should not be accessed
+     * directly otherwise. Prefer {@link #getDataUserDeDirectory(String, int)}.
+     * {@hide}
+     */
+    public static final String DIR_USER_DE = "user_de";
+
     /** {@hide} */
     @Deprecated
     public static final String DIRECTORY_ANDROID = DIR_ANDROID;
 
     private static final File DIR_ANDROID_ROOT = getDirectory(ENV_ANDROID_ROOT, "/system");
-    private static final File DIR_ANDROID_DATA = getDirectory(ENV_ANDROID_DATA, "/data");
+    private static final String DIR_ANDROID_DATA_PATH = getDirectoryPath(ENV_ANDROID_DATA, "/data");
+    private static final File DIR_ANDROID_DATA = new File(DIR_ANDROID_DATA_PATH);
     private static final File DIR_ANDROID_EXPAND = getDirectory(ENV_ANDROID_EXPAND, "/mnt/expand");
     private static final File DIR_ANDROID_STORAGE = getDirectory(ENV_ANDROID_STORAGE, "/storage");
     private static final File DIR_DOWNLOAD_CACHE = getDirectory(ENV_DOWNLOAD_CACHE, "/cache");
@@ -357,12 +375,29 @@ public class Environment {
         return DIR_ANDROID_DATA;
     }
 
+    /**
+     * @see #getDataDirectory()
+     * @hide
+     */
+    public static String getDataDirectoryPath() {
+        return DIR_ANDROID_DATA_PATH;
+    }
+
     /** {@hide} */
     public static File getDataDirectory(String volumeUuid) {
         if (TextUtils.isEmpty(volumeUuid)) {
             return DIR_ANDROID_DATA;
         } else {
             return new File("/mnt/expand/" + volumeUuid);
+        }
+    }
+
+    /** @hide */
+    public static String getDataDirectoryPath(String volumeUuid) {
+        if (TextUtils.isEmpty(volumeUuid)) {
+            return DIR_ANDROID_DATA_PATH;
+        } else {
+            return getExpandDirectory().getAbsolutePath() + File.separator + volumeUuid;
         }
     }
 
@@ -489,7 +524,7 @@ public class Environment {
 
     /** {@hide} */
     public static File getDataUserCeDirectory(String volumeUuid) {
-        return new File(getDataDirectory(volumeUuid), "user");
+        return new File(getDataDirectory(volumeUuid), DIR_USER_CE);
     }
 
     /** {@hide} */
@@ -506,7 +541,7 @@ public class Environment {
 
     /** {@hide} */
     public static File getDataUserDeDirectory(String volumeUuid) {
-        return new File(getDataDirectory(volumeUuid), "user_de");
+        return new File(getDataDirectory(volumeUuid), DIR_USER_DE);
     }
 
     /** {@hide} */
@@ -1370,6 +1405,12 @@ public class Environment {
     static File getDirectory(String variableName, String defaultPath) {
         String path = System.getenv(variableName);
         return path == null ? new File(defaultPath) : new File(path);
+    }
+
+    @NonNull
+    static String getDirectoryPath(@NonNull String variableName, @NonNull String defaultPath) {
+        String path = System.getenv(variableName);
+        return path == null ? defaultPath : path;
     }
 
     /** {@hide} */
