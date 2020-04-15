@@ -5250,16 +5250,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
-        super.onAnimationLeashCreated(t, leash);
-    }
-
-    @Override
-    public void onAnimationLeashLost(Transaction t) {
-        super.onAnimationLeashLost(t);
-    }
-
-    @Override
     @VisibleForTesting
     void updateSurfacePosition(Transaction t) {
         if (mSurfaceControl == null) {
