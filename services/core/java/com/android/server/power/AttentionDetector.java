@@ -17,7 +17,6 @@
 package com.android.server.power;
 
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
-import static android.provider.Settings.Secure.ADAPTIVE_SLEEP;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -192,9 +191,6 @@ public class AttentionDetector {
         }
 
         if (!isAttentionServiceSupported() || !serviceHasSufficientPermissions()) {
-            // Turns off adaptive sleep in settings for all users if attention service is not
-            // available. The setting itself should also be grayed out in this case.
-            Settings.Secure.putInt(mContentResolver, ADAPTIVE_SLEEP, 0);
             return nextScreenDimming;
         }
 
