@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
@@ -434,7 +435,7 @@ public class BackgroundDexOptService extends JobService {
                 | DexoptOptions.DEXOPT_DOWNGRADE;
         long package_size_before = getPackageSize(pm, pkg);
 
-        if (isForPrimaryDex) {
+        if (isForPrimaryDex || PLATFORM_PACKAGE_NAME.equals(pkg)) {
             // This applies for system apps or if packages location is not a directory, i.e.
             // monolithic install.
             if (!pm.canHaveOatDir(pkg)) {
@@ -486,7 +487,9 @@ public class BackgroundDexOptService extends JobService {
                 | DexoptOptions.DEXOPT_BOOT_COMPLETE
                 | DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB;
 
-        return isForPrimaryDex
+        // System server share the same code path as primary dex files.
+        // PackageManagerService will select the right optimization path for it.
+        return (isForPrimaryDex || PLATFORM_PACKAGE_NAME.equals(pkg))
             ? performDexOptPrimary(pm, pkg, reason, dexoptFlags)
             : performDexOptSecondary(pm, pkg, reason, dexoptFlags);
     }
