@@ -108,6 +108,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -221,6 +222,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseArrayMap;
 import android.util.StatsEvent;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
@@ -292,6 +294,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -529,13 +532,15 @@ public class NotificationManagerService extends SystemService {
     private NotificationRecordLogger mNotificationRecordLogger;
     private InstanceIdSequence mNotificationInstanceIdSequence;
 
-    private static class Archive {
+    static class Archive {
+        final SparseArray<Boolean> mEnabled;
         final int mBufferSize;
-        final ArrayDeque<Pair<StatusBarNotification, Integer>> mBuffer;
+        final LinkedList<Pair<StatusBarNotification, Integer>> mBuffer;
 
         public Archive(int size) {
             mBufferSize = size;
-            mBuffer = new ArrayDeque<>(mBufferSize);
+            mBuffer = new LinkedList<>();
+            mEnabled = new SparseArray<>();
         }
 
         public String toString() {
@@ -548,7 +553,10 @@ public class NotificationManagerService extends SystemService {
             return sb.toString();
         }
 
-        public void record(StatusBarNotification nr, int reason) {
+        public void record(StatusBarNotification sbn, int reason) {
+            if (!mEnabled.get(sbn.getNormalizedUserId(), false)) {
+                return;
+            }
             if (mBuffer.size() == mBufferSize) {
                 mBuffer.removeFirst();
             }
@@ -556,7 +564,7 @@ public class NotificationManagerService extends SystemService {
             // We don't want to store the heavy bits of the notification in the archive,
             // but other clients in the system process might be using the object, so we
             // store a (lightened) copy.
-            mBuffer.addLast(new Pair<>(nr.cloneLight(), reason));
+            mBuffer.addLast(new Pair<>(sbn.cloneLight(), reason));
         }
 
         public Iterator<Pair<StatusBarNotification, Integer>> descendingIterator() {
@@ -578,6 +586,17 @@ public class NotificationManagerService extends SystemService {
             return  a.toArray(new StatusBarNotification[a.size()]);
         }
 
+        public void updateHistoryEnabled(@UserIdInt int userId, boolean enabled) {
+            mEnabled.put(userId, enabled);
+
+            if (!enabled) {
+                for (int i = mBuffer.size() - 1; i >= 0; i--) {
+                    if (userId == mBuffer.get(i).first.getNormalizedUserId()) {
+                        mBuffer.remove(i);
+                    }
+                }
+            }
+        }
     }
 
     void loadDefaultApprovedServices(int userId) {
@@ -1639,6 +1658,9 @@ public class NotificationManagerService extends SystemService {
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
         private final Uri NOTIFICATION_RATE_LIMIT_URI
                 = Settings.Global.getUriFor(Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE);
+        private final Uri NOTIFICATION_HISTORY_ENABLED
+                = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
+
 
         SettingsObserver(Handler handler) {
             super(handler);
@@ -1654,10 +1676,12 @@ public class NotificationManagerService extends SystemService {
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_BUBBLES_URI,
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(NOTIFICATION_HISTORY_ENABLED,
+                    false, this, UserHandle.USER_ALL);
             update(null);
         }
 
-        @Override public void onChange(boolean selfChange, Uri uri) {
+        @Override public void onChange(boolean selfChange, Uri uri, int userId) {
             update(uri);
         }
 
@@ -1681,6 +1705,14 @@ public class NotificationManagerService extends SystemService {
             }
             if (uri == null || NOTIFICATION_BUBBLES_URI.equals(uri)) {
                 mPreferencesHelper.updateBubblesEnabled();
+            }
+            if (uri == null || NOTIFICATION_HISTORY_ENABLED.equals(uri)) {
+                final IntArray userIds = mUserProfiles.getCurrentProfileIds();
+
+                for (int i = 0; i < userIds.size(); i++) {
+                    mArchive.updateHistoryEnabled(userIds.get(i), Settings.Secure.getInt(resolver,
+                            Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0) == 1);
+                }
             }
         }
     }
