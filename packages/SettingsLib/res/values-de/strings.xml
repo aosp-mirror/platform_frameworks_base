@@ -206,13 +206,13 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB-Debugging"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Debugmodus bei Anschluss über USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB-Debugging-Autorisierungen aufheben"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Kabelloses Debugging"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Debugging über WLAN"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Debugging-Modus, wenn eine WLAN-Verbindung besteht"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Fehler"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"Kabelloses Debugging"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Aktiviere das kabellose Debugging, um verfügbare Geräte zu sehen und zu verwenden"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Debugging über WLAN"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Aktiviere \"Debugging über WLAN\", um verfügbare Geräte zu sehen und zu verwenden"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Gerät über einen QR-Code koppeln"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Neue Geräte über QR-Codescanner koppeln"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Neue Geräte über QR-Codescanner koppeln"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Gerät über einen Kopplungscode koppeln"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Neue Geräte mit sechsstelligem Code koppeln"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Gekoppelte Geräte"</string>
@@ -231,11 +231,11 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Das Gerät konnte nicht gekoppelt werden. Der QR-Code war nicht korrekt oder das Gerät ist nicht mit demselben Netzwerk verbunden."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-Adresse &amp; Port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR-Code scannen"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Scanne einen QR-Code, um ein Gerät über WLAN zu koppeln"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Scanne einen QR-Code, um ein Gerät über WLAN zu koppeln"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Bitte stell eine WLAN-Verbindung her"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, Debug, Dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Verknüpfung zu Fehlerbericht"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Im Menü \"Ein/Aus\" wird eine Option zum Erstellen eines Fehlerberichts angezeigt"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Im Ein-/Aus-Menü wird eine Option zum Erstellen eines Fehlerberichts angezeigt"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Aktiv lassen"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Display wird beim Laden nie in den Ruhezustand versetzt"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI-Snoop-Protokoll aktivieren"</string>
@@ -251,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Zertifizierung für kabellose Übertragung"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Ausführliche WLAN-Protokollierung aktivieren"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Drosselung der WLAN-Suche"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"WLAN-erweiterte MAC-Adressrandomisierung"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobile Datennutzung immer aktiviert"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardwarebeschleunigung für Tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth-Geräte ohne Namen anzeigen"</string>
@@ -283,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"WLAN-Protokollierungsebene erhöhen, pro SSID RSSI in WiFi Picker anzeigen"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verringert den Akkuverbrauch und verbessert die Netzwerkleistung"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Hiermit wird das Verhalten der MAC-Adressrandomisierung ausschließlich für den Clientmodus umgeschaltet.\nWenn dieser Modus aktiviert ist, werden bei allen Netzwerken, bei denen die MAC-Randomisierung aktiviert ist, die MAC-Adressen während der Verknüpfung abhängig davon, wann der Client zuletzt vom Netzwerk getrennt wurde, wieder randomisiert. Die erneute Randomisierung findet nicht statt, wenn die Verbindung des Geräts innerhalb von maximal 4 Stunden wiederhergestellt wird."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Kostenpflichtig"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Kostenlos"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-Puffergrößen"</string>
@@ -300,8 +302,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Falls verfügbar, Hardwarebeschleunigung für Tethering verwenden"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB-Debugging zulassen?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-Debugging ist nur für Entwicklungszwecke vorgesehen. Damit kannst du Daten zwischen deinem Computer und deinem Gerät kopieren, Apps auf deinem Gerät ohne Benachrichtigung installieren und Protokolldaten lesen."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Kabelloses Debugging zulassen?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Das kabellose Debugging ist nur für Entwicklungszwecke vorgesehen. Damit kannst du Daten zwischen deinem Computer und deinem Gerät kopieren, Apps auf deinem Gerät ohne Benachrichtigung installieren und Protokolldaten lesen."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"\"Debugging über WLAN\" zulassen?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"\"Debugging über WLAN\" ist nur für Entwicklungszwecke vorgesehen. Damit kannst du Daten zwischen deinem Computer und deinem Gerät kopieren, Apps auf deinem Gerät ohne Benachrichtigung installieren und Protokolldaten lesen."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Zugriff auf USB-Debugging für alle zuvor autorisierten Computer aufheben?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Entwicklungseinstellungen zulassen?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Diese Einstellungen sind ausschließlich für Entwicklungszwecke gedacht. Sie können dein Gerät und die darauf installierten Apps beschädigen oder zu unerwünschtem Verhalten führen."</string>
@@ -371,6 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Bei Abstürzen von Hintergrund-Apps \"App reagiert nicht\"-Dialog anzeigen"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Benachrichtigungskanal- Warnungen anzeigen"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bei Benachrichtigungen ohne gültigen Kanal wird eine Warnung angezeigt"</string>
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Tastenkombination für Benachrichtigungen zur Unterhaltung erzwingen"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Benachrichtigungen müssen durch eine langlebige Tastenkombination zum Teilen unterstützt werden, um im Bereich der Unterhaltung zu erscheinen"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Sperrung des externen Speichers für alle Apps aufheben"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Jede App kann, ungeachtet der Manifestwerte, in den externen Speicher geschrieben werden"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Aktivitätengröße darf immer angepasst werden"</string>
@@ -492,7 +496,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mehr Zeit."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Weniger Zeit."</string>
     <string name="cancel" msgid="5665114069455378395">"Abbrechen"</string>
-    <string name="okay" msgid="949938843324579502">"Ok"</string>
+    <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivieren"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Bitte nicht stören\" aktivieren"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nie"</string>
@@ -513,10 +517,14 @@
     <string name="storage_category" msgid="2287342585424631813">"Speicher"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Geteilte Daten"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Geteilte Daten anzeigen und ändern"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Es gibt keine geteilten Daten für diesen Nutzer."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Beim Abrufen der geteilten Daten ist ein Fehler aufgetreten. Versuch es noch einmal."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID für geteilte Daten: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Läuft am <xliff:g id="DATE">%s</xliff:g> ab"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Beim Löschen der geteilten Daten ist ein Fehler aufgetreten."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Für diese geteilten Daten gibt es keine Freigaben. Möchtest du sie löschen?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Apps, die Daten teilen"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"Keine Beschreibung der App verfügbar."</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Keine von der App bereitgestellte Beschreibung verfügbar."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Freigabe läuft am <xliff:g id="DATE">%s</xliff:g> ab"</string>
     <string name="delete_blob_text" msgid="2819192607255625697">"Geteilte Daten löschen"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Bist du sicher, dass du diese geteilten Daten löschen möchtest?"</string>
@@ -539,4 +547,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profilinformationen"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Vor dem Erstellen eines eingeschränkten Profils musst du eine Displaysperre einrichten, um deine Apps und personenbezogenen Daten zu schützen."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Sperre einrichten"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Zu <xliff:g id="USER_NAME">%s</xliff:g> wechseln"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Gast hinzufügen"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Gast entfernen"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Gast"</string>
 </resources>

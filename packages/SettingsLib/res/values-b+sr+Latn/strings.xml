@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Bežično otklanjanje grešaka"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Da biste videli i koristili dostupne uređaje, uključite bežično otklanjanje grešaka"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Uparite uređaj pomoću QR koda"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Uparite nove uređaje pomoću čitača QR koda"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Uparite nove uređaje pomoću čitača QR koda"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Uparite uređaj pomoću koda za uparivanje"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Uparite nove uređaje pomoću šestocifrenog koda"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Upareni uređaji"</string>
@@ -231,7 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Uparivanje uređaja nije uspelo. QR kôd je pogrešan ili uređaj nije povezan sa istom mrežom."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP adresa i port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skeniraj QR kôd"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Uparite uređaj pomoću Wi‑Fi mreže ili tako što ćete skenirati QR kôd"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Uparite uređaj pomoću Wi‑Fi mreže tako što ćete skenirati QR kôd"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Povežite se na Wi-Fi mrežu"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, otklanjanje grešaka, programer"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Prečica za izveštaj o greškama"</string>
@@ -251,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Sertifikacija bežičnog ekrana"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogući detaljniju evidenciju za Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Usporavanje Wi-Fi skeniranja"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Nasumično MAC razvrstavanje po Wi‑Fi‑ju"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilni podaci su uvek aktivni"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardversko ubrzanje privezivanja"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži Bluetooth uređaje bez naziva"</string>
@@ -283,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Prikaz opcija za sertifikaciju bežičnog ekrana"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povećava nivo evidentiranja za Wi‑Fi. Prikaz po SSID RSSI-u u biraču Wi‑Fi mreže"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Smanjuje potrošnju baterije i poboljšava učinak mreže"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ovaj prekidač utiče na ponašanje nasumičnog razvrstavanja MAC adresa samo za režim klijenta.\nKada se ovaj režim aktivira, za mreže na kojima je omogućeno nasumično razvrstavanje MAC adresa može da dođe do ponovnog nasumičnog razvrstavanja MAC adresa tokom povezivanja, u zavisnosti od toga kada se klijent pre toga isključio sa mreže. Do ponovnog nasumičnog razvrstavanja ne dolazi ako se uređaj ponovo poveže za 4 sata ili manje."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sa ograničenjem"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez ograničenja"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Veličine bafera podataka u programu za evidentiranje"</string>
@@ -371,6 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaži dijalog Aplikacija ne reaguje za aplikacije u pozadini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Prikazuj upozorenja zbog kanala za obaveštenja"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Prikazuje upozorenje na ekranu kada aplikacija postavi obaveštenje bez važećeg kanala"</string>
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Primenjuj prečice za obaveštenja o konverzacijama"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Zahteva da obaveštenja imaju i dugoročnu prečicu za deljenje kako bi se pojavljivala u odeljku za konverzacije"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Prinudno dozvoli aplikacije u spoljnoj"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Omogućava upisivanje svih aplikacija u spoljnu memoriju, bez obzira na vrednosti manifesta"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Prinudno omogući promenu veličine aktivnosti"</string>
@@ -514,8 +518,12 @@
     <string name="storage_category" msgid="2287342585424631813">"Memorijski prostor"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Deljeni podaci"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Pregledajte i izmenite deljene podatke"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Nema deljenih podataka za ovog korisnika."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Došlo je do greške pri preuzimanju deljenih podataka. Probajte ponovo."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID deljenih podataka: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Ističe: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Došlo je do greške pri brisanju deljenih podataka."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Nema kupljenih zakupa za ove deljene podatke. Želite li da ih izbrišete?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Aplikacije koje dele podatke"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"U aplikaciji nije naveden nijedan opis."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Iznajmljivanje ističe: <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -540,4 +548,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Podaci o profilu"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Da biste mogli da napravite ograničeni profil, treba da podesite zaključavanje ekrana da biste zaštitili aplikacije i lične podatke."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Podesi zaključavanje"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Pređi na korisnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Dodaj gosta"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Gost"</string>
 </resources>
