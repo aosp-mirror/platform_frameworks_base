@@ -348,4 +348,40 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         // THEN the container is made visible.
         assertThat(mBigClockContainer.getVisibility()).isEqualTo(View.VISIBLE);
     }
+
+    @Test
+    public void setKeyguardHidingBigClock_gone() {
+        // GIVEN that the container for the big clock has visibility GONE
+        mBigClockContainer.setVisibility(GONE);
+        mKeyguardClockSwitch.setBigClockContainer(mBigClockContainer);
+        // AND the plugin returns a view for the big clock
+        ClockPlugin plugin = mock(ClockPlugin.class);
+        when(plugin.getBigClockView()).thenReturn(mBigClock);
+        // AND in the keyguard state
+        mStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        // WHEN the plugin is connected
+        mKeyguardClockSwitch.getClockChangedListener().onClockChanged(plugin);
+        // WHEN the container set hiding clock as true
+        mKeyguardClockSwitch.setKeyguardHidingBigClock(true);
+        // THEN the container is gone.
+        assertThat(mBigClockContainer.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void setKeyguardHidingBigClock_visible() {
+        // GIVEN that the container for the big clock has visibility GONE
+        mBigClockContainer.setVisibility(GONE);
+        mKeyguardClockSwitch.setBigClockContainer(mBigClockContainer);
+        // AND the plugin returns a view for the big clock
+        ClockPlugin plugin = mock(ClockPlugin.class);
+        when(plugin.getBigClockView()).thenReturn(mBigClock);
+        // AND in the keyguard state
+        mStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        // WHEN the plugin is connected
+        mKeyguardClockSwitch.getClockChangedListener().onClockChanged(plugin);
+        // WHEN the container set hiding clock as false
+        mKeyguardClockSwitch.setKeyguardHidingBigClock(false);
+        // THEN the container is made visible.
+        assertThat(mBigClockContainer.getVisibility()).isEqualTo(View.VISIBLE);
+    }
 }
