@@ -33,7 +33,7 @@ import java.util.Map;
  * This is not necessarily a strict enforcement for the HAL contract, but a place to add checks for
  * common HAL malfunctions, to help track them and assist in debugging.
  *
- * The class is not thread-safe.
+ * The class is thread-safe.
  */
 public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     static final String TAG = "SoundTriggerHw2Enforcer";
@@ -55,7 +55,9 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, Callback callback,
             int cookie) {
         int handle = mUnderlying.loadSoundModel(soundModel, new CallbackEnforcer(callback), cookie);
-        mModelStates.put(handle, false);
+        synchronized (mModelStates) {
+            mModelStates.put(handle, false);
+        }
         return handle;
     }
 
@@ -64,27 +66,35 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
             int cookie) {
         int handle = mUnderlying.loadPhraseSoundModel(soundModel, new CallbackEnforcer(callback),
                 cookie);
-        mModelStates.put(handle, false);
+        synchronized (mModelStates) {
+            mModelStates.put(handle, false);
+        }
         return handle;
     }
 
     @Override
     public void unloadSoundModel(int modelHandle) {
         mUnderlying.unloadSoundModel(modelHandle);
-        mModelStates.remove(modelHandle);
+        synchronized (mModelStates) {
+            mModelStates.remove(modelHandle);
+        }
     }
 
     @Override
     public void stopRecognition(int modelHandle) {
         mUnderlying.stopRecognition(modelHandle);
-        mModelStates.replace(modelHandle, false);
+        synchronized (mModelStates) {
+            mModelStates.replace(modelHandle, false);
+        }
     }
 
     @Override
     public void stopAllRecognitions() {
         mUnderlying.stopAllRecognitions();
-        for (Map.Entry<Integer, Boolean> entry : mModelStates.entrySet()) {
-            entry.setValue(false);
+        synchronized (mModelStates) {
+            for (Map.Entry<Integer, Boolean> entry : mModelStates.entrySet()) {
+                entry.setValue(false);
+            }
         }
     }
 
@@ -92,7 +102,9 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     public void startRecognition(int modelHandle, RecognitionConfig config, Callback callback,
             int cookie) {
         mUnderlying.startRecognition(modelHandle, config, new CallbackEnforcer(callback), cookie);
-        mModelStates.replace(modelHandle, true);
+        synchronized (mModelStates) {
+            mModelStates.replace(modelHandle, true);
+        }
     }
 
     @Override
@@ -142,12 +154,14 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
         public void recognitionCallback(ISoundTriggerHwCallback.RecognitionEvent event,
                 int cookie) {
             int model = event.header.model;
-            if (!mModelStates.getOrDefault(model, false)) {
-                Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
-            }
-            if (event.header.status
-                    != android.media.soundtrigger_middleware.RecognitionStatus.FORCED) {
-                mModelStates.replace(model, false);
+            synchronized (mModelStates) {
+                if (!mModelStates.getOrDefault(model, false)) {
+                    Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
+                }
+                if (event.header.status
+                        != android.media.soundtrigger_middleware.RecognitionStatus.FORCED) {
+                    mModelStates.replace(model, false);
+                }
             }
             mUnderlying.recognitionCallback(event, cookie);
         }
@@ -156,12 +170,14 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
         public void phraseRecognitionCallback(ISoundTriggerHwCallback.PhraseRecognitionEvent event,
                 int cookie) {
             int model = event.common.header.model;
-            if (!mModelStates.getOrDefault(model, false)) {
-                Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
-            }
-            if (event.common.header.status
-                    != android.media.soundtrigger_middleware.RecognitionStatus.FORCED) {
-                mModelStates.replace(model, false);
+            synchronized (mModelStates) {
+                if (!mModelStates.getOrDefault(model, false)) {
+                    Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
+                }
+                if (event.common.header.status
+                        != android.media.soundtrigger_middleware.RecognitionStatus.FORCED) {
+                    mModelStates.replace(model, false);
+                }
             }
             mUnderlying.phraseRecognitionCallback(event, cookie);
         }
