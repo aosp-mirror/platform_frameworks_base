@@ -42,7 +42,9 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ApplicationInfo.FLAG_FACTORY_TEST;
 import static android.content.pm.ConfigurationInfo.GL_ES_VERSION_UNDEFINED;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
+import static android.content.pm.PackageManager.FEATURE_CANT_SAVE_STATE;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
+import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.FactoryTest.FACTORY_TEST_HIGH_LEVEL;
@@ -393,6 +395,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** The currently running heavy-weight process, if any. */
     WindowProcessController mHeavyWeightProcess = null;
     boolean mHasHeavyWeightFeature;
+    boolean mHasLeanbackFeature;
     /**
      * This is the process holding the activity the user last visited that is in a different process
      * from the one they are currently in.
@@ -734,8 +737,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     public void onSystemReady() {
         synchronized (mGlobalLock) {
-            mHasHeavyWeightFeature = mContext.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_CANT_SAVE_STATE);
+            final PackageManager pm = mContext.getPackageManager();
+            mHasHeavyWeightFeature = pm.hasSystemFeature(FEATURE_CANT_SAVE_STATE);
+            mHasLeanbackFeature = pm.hasSystemFeature(FEATURE_LEANBACK);
             mAssistUtils = new AssistUtils(mContext);
             mVrController.onSystemReady();
             mRecentTasks.onSystemReadyLocked();

@@ -3610,7 +3610,15 @@ class ActivityStack extends Task {
     }
 
     boolean shouldIgnoreInput() {
-        return inSplitScreenPrimaryWindowingMode() && !isFocusable();
+        if (inSplitScreenPrimaryWindowingMode() && !isFocusable()) {
+            return true;
+        }
+        if (mAtmService.mHasLeanbackFeature && inPinnedWindowingMode()
+                && !isFocusedStackOnDisplay()) {
+            // Preventing Picture-in-Picture stack from receiving input on TVs.
+            return true;
+        }
+        return false;
     }
 
     @Override
