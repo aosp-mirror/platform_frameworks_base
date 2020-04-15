@@ -1,0 +1,17 @@
+android_test {
+    name: "audiopolicytest",
+    srcs: ["**/*.java"],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+    static_libs: [
+        "mockito-target-minus-junit4",
+        "androidx.test.rules",
+        "android-ex-camera2",
+        "testng",
+    ],
+    platform_apis: true,
+    certificate: "platform",
+    resource_dirs: ["res"],
+}
