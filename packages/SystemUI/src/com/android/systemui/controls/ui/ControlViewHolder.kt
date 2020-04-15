@@ -66,7 +66,10 @@ class ControlViewHolder(
         )
     }
 
+    private val toggleBackgroundIntensity: Float = layout.context.resources
+            .getFraction(R.fraction.controls_toggle_bg_intensity, 1, 1)
     private var stateAnimator: ValueAnimator? = null
+    private val baseLayer: GradientDrawable
     val icon: ImageView = layout.requireViewById(R.id.icon)
     val status: TextView = layout.requireViewById(R.id.status)
     val title: TextView = layout.requireViewById(R.id.title)
@@ -85,6 +88,7 @@ class ControlViewHolder(
         ld.mutate()
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer) as ClipDrawable
         clipLayer.alpha = ALPHA_DISABLED
+        baseLayer = ld.findDrawableByLayerId(R.id.background) as GradientDrawable
         // needed for marquee to start
         status.setSelected(true)
     }
@@ -171,11 +175,12 @@ class ControlViewHolder(
 
         val ri = RenderInfo.lookup(context, cws.componentName, deviceType, enabled, offset)
 
-        val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
-        val (bg, newAlpha) = if (enabled) {
-            Pair(ri.enabledBackground, ALPHA_ENABLED)
+        val fg = context.resources.getColorStateList(ri.foreground, context.theme)
+        val bg = context.resources.getColor(R.color.control_default_background, context.theme)
+        val (clip, newAlpha) = if (enabled) {
+            listOf(ri.enabledBackground, ALPHA_ENABLED)
         } else {
-            Pair(R.color.control_default_background, ALPHA_DISABLED)
+            listOf(R.color.control_default_background, ALPHA_DISABLED)
         }
 
         status.setTextColor(fg)
@@ -187,14 +192,22 @@ class ControlViewHolder(
         }
 
         (clipLayer.getDrawable() as GradientDrawable).apply {
-            val newColor = context.resources.getColor(bg, context.theme)
+            val newClipColor = context.resources.getColor(clip, context.theme)
+            val newBaseColor = if (behavior is ToggleRangeBehavior) {
+                ColorUtils.blendARGB(bg, newClipColor, toggleBackgroundIntensity)
+            } else {
+                bg
+            }
             stateAnimator?.cancel()
             if (animated) {
-                val oldColor = color?.defaultColor ?: newColor
+                val oldColor = color?.defaultColor ?: newClipColor
+                val oldBaseColor = baseLayer.color?.defaultColor ?: newBaseColor
                 stateAnimator = ValueAnimator.ofInt(clipLayer.alpha, newAlpha).apply {
                     addUpdateListener {
                         alpha = it.animatedValue as Int
-                        setColor(ColorUtils.blendARGB(oldColor, newColor, it.animatedFraction))
+                        setColor(ColorUtils.blendARGB(oldColor, newClipColor, it.animatedFraction))
+                        baseLayer.setColor(ColorUtils.blendARGB(oldBaseColor,
+                                newBaseColor, it.animatedFraction))
                     }
                     addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator?) {
@@ -207,7 +220,8 @@ class ControlViewHolder(
                 }
             } else {
                 alpha = newAlpha
-                setColor(newColor)
+                setColor(newClipColor)
+                baseLayer.setColor(newBaseColor)
             }
         }
     }
