@@ -19,9 +19,9 @@ package android.telephony;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.hardware.radio.V1_1.EutranBands;
 import android.hardware.radio.V1_1.GeranBands;
 import android.hardware.radio.V1_5.AccessNetwork;
+import android.hardware.radio.V1_5.EutranBands;
 import android.hardware.radio.V1_5.UtranBands;
 
 import java.lang.annotation.Retention;
@@ -212,7 +212,8 @@ public final class AccessNetworkConstants {
 
     /**
      * Frequency bands for EUTRAN.
-     * http://www.etsi.org/deliver/etsi_ts/136100_136199/136101/14.03.00_60/ts_136101v140p.pdf
+     * 3GPP TS 36.101, Version 16.4.0, Table 5.5: Operating bands
+     * https://www.etsi.org/deliver/etsi_ts/136100_136199/136101/15.09.00_60/ts_136101v150900p.pdf
      */
     public static final class EutranBand {
         public static final int BAND_1 = EutranBands.BAND_1;
@@ -259,10 +260,22 @@ public final class AccessNetworkConstants {
         public static final int BAND_46 = EutranBands.BAND_46;
         public static final int BAND_47 = EutranBands.BAND_47;
         public static final int BAND_48 = EutranBands.BAND_48;
+        public static final int BAND_49 = EutranBands.BAND_49;
+        public static final int BAND_50 = EutranBands.BAND_50;
+        public static final int BAND_51 = EutranBands.BAND_51;
+        public static final int BAND_52 = EutranBands.BAND_52;
+        public static final int BAND_53 = EutranBands.BAND_53;
         public static final int BAND_65 = EutranBands.BAND_65;
         public static final int BAND_66 = EutranBands.BAND_66;
         public static final int BAND_68 = EutranBands.BAND_68;
         public static final int BAND_70 = EutranBands.BAND_70;
+        public static final int BAND_71 = EutranBands.BAND_71;
+        public static final int BAND_72 = EutranBands.BAND_72;
+        public static final int BAND_73 = EutranBands.BAND_73;
+        public static final int BAND_74 = EutranBands.BAND_74;
+        public static final int BAND_85 = EutranBands.BAND_85;
+        public static final int BAND_87 = EutranBands.BAND_87;
+        public static final int BAND_88 = EutranBands.BAND_88;
 
         /** @hide */
         private EutranBand() {};
@@ -305,9 +318,11 @@ public final class AccessNetworkConstants {
 
     /**
      * Frequency bands for NGRAN
+     * https://www.etsi.org/deliver/etsi_ts/138100_138199/13810101/15.08.02_60/ts_13810101v150802p.pdf
+     * https://www.etsi.org/deliver/etsi_ts/138100_138199/13810102/15.08.00_60/ts_13810102v150800p.pdf
      */
     public static final class NgranBands {
-        /** FR1 bands */
+        /** 3GPP TS 38.101-1, Version 16.2.0, Table 5.2-1: FR1 bands */
         public static final int BAND_1 = android.hardware.radio.V1_5.NgranBands.BAND_1;
         public static final int BAND_2 = android.hardware.radio.V1_5.NgranBands.BAND_2;
         public static final int BAND_3 = android.hardware.radio.V1_5.NgranBands.BAND_3;
@@ -346,9 +361,15 @@ public final class AccessNetworkConstants {
         public static final int BAND_83 = android.hardware.radio.V1_5.NgranBands.BAND_83;
         public static final int BAND_84 = android.hardware.radio.V1_5.NgranBands.BAND_84;
         public static final int BAND_86 = android.hardware.radio.V1_5.NgranBands.BAND_86;
+        public static final int BAND_89 = android.hardware.radio.V1_5.NgranBands.BAND_89;
         public static final int BAND_90 = android.hardware.radio.V1_5.NgranBands.BAND_90;
+        public static final int BAND_91 = android.hardware.radio.V1_5.NgranBands.BAND_91;
+        public static final int BAND_92 = android.hardware.radio.V1_5.NgranBands.BAND_92;
+        public static final int BAND_93 = android.hardware.radio.V1_5.NgranBands.BAND_93;
+        public static final int BAND_94 = android.hardware.radio.V1_5.NgranBands.BAND_94;
+        public static final int BAND_95 = android.hardware.radio.V1_5.NgranBands.BAND_95;
 
-        /** FR2 bands */
+        /** 3GPP TS 38.101-2, Version 16.2.0, Table 5.2-1: FR2 bands */
         public static final int BAND_257 = android.hardware.radio.V1_5.NgranBands.BAND_257;
         public static final int BAND_258 = android.hardware.radio.V1_5.NgranBands.BAND_258;
         public static final int BAND_260 = android.hardware.radio.V1_5.NgranBands.BAND_260;
@@ -398,7 +419,13 @@ public final class AccessNetworkConstants {
                         BAND_83,
                         BAND_84,
                         BAND_86,
+                        BAND_89,
                         BAND_90,
+                        BAND_91,
+                        BAND_92,
+                        BAND_93,
+                        BAND_94,
+                        BAND_95,
                         BAND_257,
                         BAND_258,
                         BAND_260,
@@ -495,7 +522,13 @@ public final class AccessNetworkConstants {
                 case BAND_83:
                 case BAND_84:
                 case BAND_86:
+                case BAND_89:
                 case BAND_90:
+                case BAND_91:
+                case BAND_92:
+                case BAND_93:
+                case BAND_94:
+                case BAND_95:
                     return FREQUENCY_RANGE_GROUP_1;
                 case BAND_257:
                 case BAND_258:
