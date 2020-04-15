@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ಪವರ್ ಮೆನುವಿನಿಂದ ಪ್ರವೇಶಿಸಲು ನಿಯಂತ್ರಣಗಳನ್ನು ಆರಿಸಿ"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ಅದನ್ನು ಸರಿಸಲು ನಿಯಂತ್ರಣವೊಂದನ್ನು ಹಿಡಿದುಕೊಂಡು ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ಎಲ್ಲಾ ನಿಯಂತ್ರಣಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಆಗಲಿಲ್ಲ."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ಇತರ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳಿಗೆ ಸೇರಿಸಿ"</string>

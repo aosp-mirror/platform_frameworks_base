@@ -350,9 +350,6 @@ public class PackageInfoWithoutStateUtils {
         // TODO(b/135203078): Consolidate the data directory logic, remove initForUser
         ai.initForUser(userId);
 
-        ai.flags = appInfoFlags(pkg);
-        ai.privateFlags = appInfoPrivateFlags(pkg);
-
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             ai.metaData = null;
         }

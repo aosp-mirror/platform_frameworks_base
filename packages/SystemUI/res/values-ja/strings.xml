@@ -1015,7 +1015,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源メニューからアクセスするコントロールを選択する"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"コントロールを移動するには、長押してドラッグします"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"全コントロールの一覧を読み込めませんでした。"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"その他"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"デバイス コントロールに追加"</string>

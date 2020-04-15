@@ -398,11 +398,6 @@ public class ResolverActivity extends Activity implements
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             rdl.setOnApplyWindowInsetsListener(this::onApplyWindowInsets);
 
-            if (shouldShowTabs() && isIntentPicker()) {
-                rdl.setMaxCollapsedHeight(getResources()
-                        .getDimensionPixelSize(R.dimen.resolver_max_collapsed_height_with_tabs));
-            }
-
             mResolverDrawerLayout = rdl;
         }
 
@@ -1012,6 +1007,15 @@ public class ResolverActivity extends Activity implements
     protected void onListRebuilt(ResolverListAdapter listAdapter) {
         final ItemClickListener listener = new ItemClickListener();
         setupAdapterListView((ListView) mMultiProfilePagerAdapter.getActiveAdapterView(), listener);
+        if (shouldShowTabs() && isIntentPicker()) {
+            final ResolverDrawerLayout rdl = findViewById(R.id.contentPanel);
+            if (rdl != null) {
+                rdl.setMaxCollapsedHeight(getResources()
+                        .getDimensionPixelSize(useLayoutWithDefault()
+                                ? R.dimen.resolver_max_collapsed_height_with_default_with_tabs
+                                : R.dimen.resolver_max_collapsed_height_with_tabs));
+            }
+        }
     }
 
     protected boolean onTargetSelected(TargetInfo target, boolean alwaysCheck) {

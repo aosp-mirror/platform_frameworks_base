@@ -32,6 +32,7 @@ import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_ID;
 import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_STATUS;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
@@ -1198,14 +1199,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationBubbleChanged(String key, boolean isBubble) {
-            String pkg;
-            synchronized (mNotificationLock) {
-                NotificationRecord r = mNotificationsByKey.get(key);
-                pkg = r != null && r.getSbn() != null ? r.getSbn().getPackageName() : null;
-            }
-            boolean isAppForeground = pkg != null
-                    && mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
+        public void onNotificationBubbleChanged(String key, boolean isBubble, int flags) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
@@ -1222,8 +1216,13 @@ public class NotificationManagerService extends SystemService {
                         // be applied there.
                         r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
                         r.setFlagBubbleRemoved(false);
+                        if (r.getNotification().getBubbleMetadata() != null) {
+                            r.getNotification().getBubbleMetadata().setFlags(flags);
+                        }
+                        // Force isAppForeground true here, because for sysui's purposes we
+                        // want to adjust the flag behaviour.
                         mHandler.post(new EnqueueNotificationRunnable(r.getUser().getIdentifier(),
-                                r, isAppForeground));
+                                r, true /* isAppForeground*/));
                     }
                 }
             }
@@ -3082,37 +3081,34 @@ public class NotificationManagerService extends SystemService {
             return mPreferencesHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
         }
 
+        /**
+         * @return true if and only if "all" bubbles are allowed from the provided package.
+         */
         @Override
         public boolean areBubblesAllowed(String pkg) {
-            return areBubblesAllowedForPackage(pkg, Binder.getCallingUid());
+            return getBubblePreferenceForPackage(pkg, Binder.getCallingUid())
+                    == BUBBLE_PREFERENCE_ALL;
         }
 
         @Override
-        public boolean areBubblesAllowedForPackage(String pkg, int uid) {
+        public int getBubblePreferenceForPackage(String pkg, int uid) {
             enforceSystemOrSystemUIOrSamePackage(pkg,
                     "Caller not system or systemui or same package");
 
             if (UserHandle.getCallingUserId() != UserHandle.getUserId(uid)) {
                 getContext().enforceCallingPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
-                        "canNotifyAsPackage for uid " + uid);
+                        "getBubblePreferenceForPackage for uid " + uid);
             }
 
-            return mPreferencesHelper.areBubblesAllowed(pkg, uid);
+            return mPreferencesHelper.getBubblePreference(pkg, uid);
         }
 
         @Override
-        public void setBubblesAllowed(String pkg, int uid, boolean allowed) {
-            enforceSystemOrSystemUI("Caller not system or systemui");
-            mPreferencesHelper.setBubblesAllowed(pkg, uid, allowed);
+        public void setBubblesAllowed(String pkg, int uid, int bubblePreference) {
+            checkCallerIsSystemOrSystemUiOrShell("Caller not system or sysui or shell");
+            mPreferencesHelper.setBubblesAllowed(pkg, uid, bubblePreference);
             handleSavePolicyFile();
-        }
-
-        @Override
-        public boolean hasUserApprovedBubblesForPackage(String pkg, int uid) {
-            enforceSystemOrSystemUI("Caller not system or systemui");
-            int lockedFields = mPreferencesHelper.getAppLockedFields(pkg, uid);
-            return (lockedFields & PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE) != 0;
         }
 
         @Override
@@ -3311,7 +3307,7 @@ public class NotificationManagerService extends SystemService {
                 String targetPkg, String channelId, boolean returnParentIfNoConversationChannel,
                 String conversationId) {
             if (canNotifyAsPackage(callingPkg, targetPkg, userId)
-                    || isCallerIsSystemOrSystemUi()) {
+                    || isCallerIsSystemOrSysemUiOrShell()) {
                 int targetUid = -1;
                 try {
                     targetUid = mPackageManagerClient.getPackageUidAsUser(targetPkg, userId);
@@ -3421,7 +3417,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void updateNotificationChannelForPackage(String pkg, int uid,
                 NotificationChannel channel) {
-            enforceSystemOrSystemUI("Caller not system or systemui");
+            checkCallerIsSystemOrSystemUiOrShell("Caller not system or sysui or shell");
             Objects.requireNonNull(channel);
             updateNotificationChannelInt(pkg, uid, channel, false);
         }
@@ -5851,6 +5847,7 @@ public class NotificationManagerService extends SystemService {
                     synchronized (mNotificationLock) {
                         NotificationRecord r = mNotificationsByKey.get(key);
                         if (r != null) {
+                            r.setShortcutInfo(null);
                             // Enqueue will trigger resort & flag is updated that way.
                             r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
                             mHandler.post(
@@ -7217,7 +7214,10 @@ public class NotificationManagerService extends SystemService {
             boolean interruptiveChanged =
                     record.canBubble() && (interruptiveBefore != record.isInterruptive());
 
-            changed = indexChanged || interceptChanged || visibilityChanged || interruptiveChanged;
+            changed = indexChanged
+                    || interceptChanged
+                    || visibilityChanged
+                    || interruptiveChanged;
             if (interceptBefore && !record.isIntercepted()
                     && record.isNewEnoughForAlerting(System.currentTimeMillis())) {
                 buzzBeepBlinkLocked(record);
@@ -8255,6 +8255,14 @@ public class NotificationManagerService extends SystemService {
                 == PERMISSION_GRANTED;
     }
 
+    private boolean isCallerIsSystemOrSysemUiOrShell() {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+            return true;
+        }
+        return isCallerIsSystemOrSystemUi();
+    }
+
     private void checkCallerIsSystemOrShell() {
         int callingUid = Binder.getCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
@@ -8271,6 +8279,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void checkCallerIsSystemOrSystemUiOrShell() {
+        checkCallerIsSystemOrSystemUiOrShell(null);
+    }
+
+    private void checkCallerIsSystemOrSystemUiOrShell(String message) {
         int callingUid = Binder.getCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             return;
@@ -8278,7 +8290,8 @@ public class NotificationManagerService extends SystemService {
         if (isCallerSystemOrPhone()) {
             return;
         }
-        getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE, null);
+        getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                message);
     }
 
     private void checkCallerIsSystemOrSameApp(String pkg) {

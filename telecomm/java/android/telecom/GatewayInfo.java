@@ -111,7 +111,7 @@ public class GatewayInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeString(mGatewayProviderPackageName);
-        mGatewayAddress.writeToParcel(destination, 0);
-        mOriginalAddress.writeToParcel(destination, 0);
+        Uri.writeToParcel(destination, mGatewayAddress);
+        Uri.writeToParcel(destination, mOriginalAddress);
     }
 }

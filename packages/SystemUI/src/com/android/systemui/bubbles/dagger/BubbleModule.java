@@ -16,6 +16,7 @@
 
 package com.android.systemui.bubbles.dagger;
 
+import android.app.INotificationManager;
 import android.content.Context;
 
 import com.android.systemui.bubbles.BubbleController;
@@ -64,14 +65,15 @@ public interface BubbleModule {
             FeatureFlags featureFlags,
             DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator,
-            SysUiState sysUiState) {
+            SysUiState sysUiState,
+            INotificationManager notifManager) {
         return new BubbleController(
                 context,
                 notificationShadeWindowController,
                 statusBarStateController,
                 shadeController,
                 data,
-                /* synchronizer */null,
+                null /* synchronizer */,
                 configurationController,
                 interruptionStateProvider,
                 zenModeController,
@@ -82,6 +84,7 @@ public interface BubbleModule {
                 featureFlags,
                 dumpManager,
                 floatingContentCoordinator,
-                sysUiState);
+                sysUiState,
+                notifManager);
     }
 }

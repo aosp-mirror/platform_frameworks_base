@@ -32,6 +32,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
@@ -63,6 +64,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 
@@ -1024,6 +1026,38 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     /**
+     * Verify that complete finish request for a show-when-locked activity must ensure the
+     * keyguard occluded state being updated.
+     */
+    @Test
+    public void testCompleteFinishing_showWhenLocked() {
+        // Make keyguard locked and set the top activity show-when-locked.
+        KeyguardController keyguardController = mActivity.mStackSupervisor.getKeyguardController();
+        doReturn(true).when(keyguardController).isKeyguardLocked();
+        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.mVisibleRequested = true;
+        topActivity.nowVisible = true;
+        topActivity.setState(RESUMED, "true");
+        doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
+                any() /* starting */, anyInt() /* configChanges */,
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
+        topActivity.setShowWhenLocked(true);
+
+        // Verify the stack-top activity is occluded keyguard.
+        assertEquals(topActivity, mStack.topRunningActivity());
+        assertTrue(mStack.topActivityOccludesKeyguard());
+
+        // Finish the top activity
+        topActivity.setState(PAUSED, "true");
+        topActivity.finishing = true;
+        topActivity.completeFinishing("test");
+
+        // Verify new top activity does not occlude keyguard.
+        assertEquals(mActivity, mStack.topRunningActivity());
+        assertFalse(mStack.topActivityOccludesKeyguard());
+    }
+
+    /**
      * Verify destroy activity request completes successfully.
      */
     @Test
@@ -1270,6 +1304,48 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertTrue(wpc.registeredForActivityConfigChanges());
         assertEquals(0, secondActivityRecord.getMergedOverrideConfiguration()
                 .diff(wpc.getRequestedOverrideConfiguration()));
+    }
+
+    @Test
+    public void testActivityOnCancelFixedRotationTransform() {
+        mService.mWindowManager.mIsFixedRotationTransformEnabled = true;
+        final DisplayRotation displayRotation = mActivity.mDisplayContent.getDisplayRotation();
+        spyOn(displayRotation);
+
+        final DisplayContent display = mActivity.mDisplayContent;
+        final int originalRotation = display.getRotation();
+
+        // Make {@link DisplayContent#sendNewConfiguration} not apply rotation immediately.
+        doReturn(true).when(displayRotation).isWaitingForRemoteRotation();
+        doReturn((originalRotation + 1) % 4).when(displayRotation).rotationForOrientation(
+                anyInt() /* orientation */, anyInt() /* lastRotation */);
+        // Set to visible so the activity can freeze the screen.
+        mActivity.setVisibility(true);
+
+        display.rotateInDifferentOrientationIfNeeded(mActivity);
+        display.mFixedRotationLaunchingApp = mActivity;
+        displayRotation.updateRotationUnchecked(false /* forceUpdate */);
+
+        assertTrue(displayRotation.isRotatingSeamlessly());
+
+        // Simulate the rotation has been updated to previous one, e.g. sensor updates before the
+        // remote rotation is completed.
+        doReturn(originalRotation).when(displayRotation).rotationForOrientation(
+                anyInt() /* orientation */, anyInt() /* lastRotation */);
+        display.updateOrientation();
+
+        final DisplayInfo rotatedInfo = mActivity.getFixedRotationTransformDisplayInfo();
+        mActivity.finishFixedRotationTransform();
+        final ScreenRotationAnimation rotationAnim = display.getRotationAnimation();
+        rotationAnim.setRotation(display.getPendingTransaction(), originalRotation);
+
+        // Because the display doesn't rotate, the rotated activity needs to cancel the fixed
+        // rotation. There should be a rotation animation to cover the change of activity.
+        verify(mActivity).onCancelFixedRotationTransform(rotatedInfo.rotation);
+        assertTrue(mActivity.isFreezingScreen());
+        assertFalse(displayRotation.isRotatingSeamlessly());
+        assertNotNull(rotationAnim);
+        assertTrue(rotationAnim.isRotating());
     }
 
     @Test

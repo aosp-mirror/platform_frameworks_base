@@ -1027,7 +1027,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládací prvky"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Vyberte ovládací prvky, které budou zobrazeny v nabídce vypínače"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Ovládací prvek přesunete přetáhnutím"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Načtení seznamu všech ovládacích prvků se nezdařilo."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Jiné"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Přidání ovládacích prvků zařízení"</string>

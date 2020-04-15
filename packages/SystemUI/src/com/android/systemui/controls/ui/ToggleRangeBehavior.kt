@@ -16,11 +16,20 @@
 
 package com.android.systemui.controls.ui
 
-import android.os.Bundle
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.os.Bundle
+import android.service.controls.Control
+import android.service.controls.actions.FloatAction
+import android.service.controls.templates.RangeTemplate
+import android.service.controls.templates.ToggleRangeTemplate
 import android.util.Log
+import android.util.MathUtils
+import android.util.TypedValue
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
@@ -29,19 +38,14 @@ import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
-import android.service.controls.Control
-import android.service.controls.actions.FloatAction
-import android.service.controls.templates.RangeTemplate
-import android.service.controls.templates.ToggleRangeTemplate
-import android.util.TypedValue
-
+import com.android.systemui.Interpolators
 import com.android.systemui.R
-import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
 import com.android.systemui.controls.ui.ControlActionCoordinator.MAX_LEVEL
-
+import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
 import java.util.IllegalFormatException
 
 class ToggleRangeBehavior : Behavior {
+    private var rangeAnimator: ValueAnimator? = null
     lateinit var clipLayer: Drawable
     lateinit var template: ToggleRangeTemplate
     lateinit var control: Control
@@ -61,20 +65,21 @@ class ToggleRangeBehavior : Behavior {
         status = cvh.status
         context = status.getContext()
 
-        cvh.applyRenderInfo(false)
+        cvh.applyRenderInfo(false /* enabled */, 0 /* offset */, false /* animated */)
 
         val gestureListener = ToggleRangeGestureListener(cvh.layout)
         val gestureDetector = GestureDetector(context, gestureListener)
         cvh.layout.setOnTouchListener { v: View, e: MotionEvent ->
             if (gestureDetector.onTouchEvent(e)) {
-                return@setOnTouchListener true
+                // Don't return true to let the state list change to "pressed"
+                return@setOnTouchListener false
             }
 
             if (e.getAction() == MotionEvent.ACTION_UP && gestureListener.isDragging) {
                 v.getParent().requestDisallowInterceptTouchEvent(false)
                 gestureListener.isDragging = false
                 endUpdateRange()
-                return@setOnTouchListener true
+                return@setOnTouchListener false
             }
 
             return@setOnTouchListener false
@@ -87,17 +92,18 @@ class ToggleRangeBehavior : Behavior {
         currentStatusText = control.getStatusText()
         status.setText(currentStatusText)
 
+        // ControlViewHolder sets a long click listener, but we want to handle touch in
+        // here instead, otherwise we'll have state conflicts.
+        cvh.layout.setOnLongClickListener(null)
+
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
-        clipLayer.setLevel(MIN_LEVEL)
 
         template = control.getControlTemplate() as ToggleRangeTemplate
         rangeTemplate = template.getRange()
 
         val checked = template.isChecked()
-        val currentRatio = rangeTemplate.getCurrentValue() /
-                (rangeTemplate.getMaxValue() - rangeTemplate.getMinValue())
-        updateRange(currentRatio, checked, /* isDragging */ false)
+        updateRange(rangeToLevelValue(rangeTemplate.currentValue), checked, /* isDragging */ false)
 
         cvh.applyRenderInfo(checked)
 
@@ -146,9 +152,8 @@ class ToggleRangeBehavior : Behavior {
                         } else {
                             val value = arguments.getFloat(
                                 AccessibilityNodeInfo.ACTION_ARGUMENT_PROGRESS_VALUE)
-                            val ratioDiff = (value - rangeTemplate.getCurrentValue()) /
-                                (rangeTemplate.getMaxValue() - rangeTemplate.getMinValue())
-                            updateRange(ratioDiff, template.isChecked(), /* isDragging */ false)
+                            val level = rangeToLevelValue(value - rangeTemplate.getCurrentValue())
+                            updateRange(level, template.isChecked(), /* isDragging */ false)
                             endUpdateRange()
                             true
                         }
@@ -172,13 +177,30 @@ class ToggleRangeBehavior : Behavior {
                 .getDimensionPixelSize(R.dimen.control_status_expanded).toFloat())
     }
 
-    fun updateRange(ratioDiff: Float, checked: Boolean, isDragging: Boolean) {
-        val changeAmount = if (checked) (MAX_LEVEL * ratioDiff).toInt() else MIN_LEVEL
-        val newLevel = Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, clipLayer.getLevel() + changeAmount))
-        clipLayer.setLevel(newLevel)
+    fun updateRange(level: Int, checked: Boolean, isDragging: Boolean) {
+        val newLevel = if (checked) Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, level)) else MIN_LEVEL
+
+        rangeAnimator?.cancel()
+        if (isDragging) {
+            clipLayer.level = newLevel
+        } else {
+            rangeAnimator = ValueAnimator.ofInt(cvh.clipLayer.level, newLevel).apply {
+                addUpdateListener {
+                    cvh.clipLayer.level = it.animatedValue as Int
+                }
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        rangeAnimator = null
+                    }
+                })
+                duration = ControlViewHolder.STATE_ANIMATION_DURATION
+                interpolator = Interpolators.CONTROL_STATE
+                start()
+            }
+        }
 
         if (checked) {
-            val newValue = levelToRangeValue(clipLayer.getLevel())
+            val newValue = levelToRangeValue(newLevel)
             currentRangeValue = format(rangeTemplate.getFormatString().toString(),
                     DEFAULT_FORMAT, newValue)
             val text = if (isDragging) {
@@ -206,9 +228,13 @@ class ToggleRangeBehavior : Behavior {
     }
 
     private fun levelToRangeValue(i: Int): Float {
-        val ratio = i.toFloat() / MAX_LEVEL
-        return rangeTemplate.getMinValue() +
-            (ratio * (rangeTemplate.getMaxValue() - rangeTemplate.getMinValue()))
+        return MathUtils.constrainedMap(rangeTemplate.minValue, rangeTemplate.maxValue,
+                MIN_LEVEL.toFloat(), MAX_LEVEL.toFloat(), i.toFloat())
+    }
+
+    private fun rangeToLevelValue(i: Float): Int {
+        return MathUtils.constrainedMap(MIN_LEVEL.toFloat(), MAX_LEVEL.toFloat(),
+                rangeTemplate.minValue, rangeTemplate.maxValue, i).toInt()
     }
 
     fun endUpdateRange() {
@@ -247,6 +273,9 @@ class ToggleRangeBehavior : Behavior {
         }
 
         override fun onLongPress(e: MotionEvent) {
+            if (isDragging) {
+                return
+            }
             ControlActionCoordinator.longPress(this@ToggleRangeBehavior.cvh)
         }
 
@@ -256,14 +285,19 @@ class ToggleRangeBehavior : Behavior {
             xDiff: Float,
             yDiff: Float
         ): Boolean {
+            if (!template.isChecked) {
+                return false
+            }
             if (!isDragging) {
                 v.getParent().requestDisallowInterceptTouchEvent(true)
                 this@ToggleRangeBehavior.beginUpdateRange()
                 isDragging = true
             }
 
-            this@ToggleRangeBehavior.updateRange(-xDiff / v.getWidth(),
-                /* checked */ true, /* isDragging */ true)
+            val ratioDiff = -xDiff / v.width
+            val changeAmount = ((MAX_LEVEL - MIN_LEVEL) * ratioDiff).toInt()
+            this@ToggleRangeBehavior.updateRange(clipLayer.level + changeAmount,
+                    checked = true, isDragging = true)
             return true
         }
 

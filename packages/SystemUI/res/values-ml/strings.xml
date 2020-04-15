@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"നിയന്ത്രണങ്ങൾ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"പവർ മെനുവിൽ നിന്ന് ആക്സസ് ചെയ്യേണ്ട നിയന്ത്രണങ്ങൾ തിരഞ്ഞെടുക്കുക"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ഇത് നീക്കാൻ, നിയന്ത്രണം പിടിച്ച് വലിച്ചിടുക"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"എല്ലാ നിയന്ത്രണങ്ങളുടെയും ലിസ്റ്റ് ലോഡ് ചെയ്യാനായില്ല."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"മറ്റുള്ളവ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ഉപകരണ നിയന്ത്രണങ്ങളിലേക്ക് ചേർക്കുക"</string>

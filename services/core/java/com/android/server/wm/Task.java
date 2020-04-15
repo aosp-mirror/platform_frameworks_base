@@ -212,7 +212,6 @@ class Task extends WindowContainer<WindowContainer> {
     static final int INVALID_MIN_SIZE = -1;
     private float mShadowRadius = 0;
     private final Rect mLastSurfaceCrop = new Rect();
-    private static final boolean ENABLE_FREEFORM_COMPOSITOR_SHADOWS = false;
 
     /**
      * The modes to control how the stack is moved to the front when calling {@link Task#reparent}.
@@ -2729,10 +2728,8 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private void updateSurfaceCrop() {
-        // TODO(b/149585281) remove when root task has the correct bounds for freeform
         // Only update the crop if we are drawing shadows on the task.
-        if (mSurfaceControl == null || !mWmService.mRenderShadowsInCompositor
-                || !isRootTask() || !ENABLE_FREEFORM_COMPOSITOR_SHADOWS) {
+        if (mSurfaceControl == null || !mWmService.mRenderShadowsInCompositor || !isRootTask()) {
             return;
         }
 
@@ -3072,6 +3069,7 @@ class Task extends WindowContainer<WindowContainer> {
         mForceShowForAllUsers = forceShowForAllUsers;
     }
 
+    @Override
     public boolean isAttached() {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
         return taskDisplayArea != null && !taskDisplayArea.isRemoved();
@@ -4272,8 +4270,7 @@ class Task extends WindowContainer<WindowContainer> {
         // Get elevation for a specific windowing mode.
         if (inPinnedWindowingMode()) {
             elevation = PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
-        } else if (ENABLE_FREEFORM_COMPOSITOR_SHADOWS && inFreeformWindowingMode()) {
-            // TODO(b/149585281) remove when root task has the correct bounds for freeform
+        } else if (inFreeformWindowingMode()) {
             elevation = taskIsFocused
                     ? DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
         } else {

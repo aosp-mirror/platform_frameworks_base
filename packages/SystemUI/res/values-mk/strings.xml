@@ -394,7 +394,7 @@
     <string name="quick_settings_connected" msgid="3873605509184830379">"Поврзано"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Поврзан, ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Се поврзува..."</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Поврзување"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Врзување"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Точка на пристап"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Се вклучува…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Вклучен штедач"</string>
@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроли"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Изберете ги контролите до кои ќе пристапувате од менито за вклучување"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Задржете и влечете ја контролата за да ја преместите"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не можеше да се вчита списокот со сите контроли."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друга"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте во контроли за уредите"</string>

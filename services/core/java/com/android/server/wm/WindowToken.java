@@ -422,14 +422,17 @@ class WindowToken extends WindowContainer<WindowState> {
         if (!shouldReportToClient()) {
             return;
         }
+        if (mLastReportedConfig == null) {
+            mLastReportedConfig = new Configuration();
+        }
         final Configuration config = getConfiguration();
         final int displayId = getDisplayContent().getDisplayId();
-        if (config.equals(mLastReportedConfig) && displayId == mLastReportedDisplay) {
+        if (config.diff(mLastReportedConfig) == 0 && displayId == mLastReportedDisplay) {
             // No changes since last reported time.
             return;
         }
 
-        mLastReportedConfig = config;
+        mLastReportedConfig.setTo(config);
         mLastReportedDisplay = displayId;
 
         IWindowToken windowTokenClient = IWindowToken.Stub.asInterface(token);
@@ -595,7 +598,17 @@ class WindowToken extends WindowContainer<WindowState> {
             // The window may be detached or detaching.
             return;
         }
+        final int originalRotation = getWindowConfiguration().getRotation();
         onConfigurationChanged(parent.getConfiguration());
+        onCancelFixedRotationTransform(originalRotation);
+    }
+
+    /**
+     * It is called when the window is using fixed rotation transform, and before display applies
+     * the same rotation, the rotation change for display is canceled, e.g. the orientation from
+     * sensor is updated to previous direction.
+     */
+    void onCancelFixedRotationTransform(int originalDisplayRotation) {
     }
 
     @Override

@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"கட்டுப்பாடுகள்"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"பவர் மெனுவில் இருந்து அணுகுவதற்கான கட்டுப்பாடுகளைத் தேர்ந்தெடுக்கலாம்"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"இதை நகர்த்த கட்டுப்பாட்டைப் பிடித்து இழுக்கவும்"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"எல்லா கட்டுப்பாடுகளின் பட்டியலை ஏற்ற முடியவில்லை."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"பிற"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"சாதனக் கட்டுப்பாடுகளில் சேர்த்தல்"</string>

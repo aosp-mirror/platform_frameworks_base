@@ -186,6 +186,9 @@ public class AudioService extends IAudioService.Stub
 
     private static final String TAG = "AS.AudioService";
 
+    private final AudioSystemAdapter mAudioSystem;
+    private final SystemServerAdapter mSystemServer;
+
     /** Debug audio mode */
     protected static final boolean DEBUG_MODE = false;
 
@@ -650,9 +653,18 @@ public class AudioService extends IAudioService.Stub
 
     /** @hide */
     public AudioService(Context context) {
+        this(context, AudioSystemAdapter.getDefaultAdapter(),
+                SystemServerAdapter.getDefaultAdapter(context));
+    }
+
+    public AudioService(Context context, AudioSystemAdapter audioSystem,
+            SystemServerAdapter systemServer) {
         mContext = context;
         mContentResolver = context.getContentResolver();
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
+
+        mAudioSystem = audioSystem;
+        mSystemServer = systemServer;
 
         mPlatformType = AudioSystem.getPlatformType(context);
 
@@ -843,11 +855,13 @@ public class AudioService extends IAudioService.Stub
 
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
 
-        LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
+        if (mSystemServer.isPrivileged()) {
+            LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
 
-        mUserManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
+            mUserManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
 
-        mRecordMonitor.initMonitor();
+            mRecordMonitor.initMonitor();
+        }
 
         final float[] preScale = new float[3];
         preScale[0] = mContext.getResources().getFraction(
@@ -936,7 +950,7 @@ public class AudioService extends IAudioService.Stub
 
         onIndicateSystemReady();
 
-        mMicMuteFromSystemCached = AudioSystem.isMicrophoneMuted();
+        mMicMuteFromSystemCached = mAudioSystem.isMicrophoneMuted();
         setMicMuteFromSwitchInput();
     }
 
@@ -1637,12 +1651,15 @@ public class AudioService extends IAudioService.Stub
         }
 
         if (currentImeUid != mCurrentImeUid || forceUpdate) {
-            AudioSystem.setCurrentImeUid(currentImeUid);
+            mAudioSystem.setCurrentImeUid(currentImeUid);
             mCurrentImeUid = currentImeUid;
         }
     }
 
     private void readPersistedSettings() {
+        if (!mSystemServer.isPrivileged()) {
+            return;
+        }
         final ContentResolver cr = mContentResolver;
 
         int ringerModeFromSettings =
@@ -1713,6 +1730,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void readUserRestrictions() {
+        if (!mSystemServer.isPrivileged()) {
+            return;
+        }
         final int currentUser = getCurrentUserId();
 
         // Check the current user restriction.
@@ -2817,6 +2837,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void sendBroadcastToAll(Intent intent) {
+        if (!mSystemServer.isPrivileged()) {
+            return;
+        }
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final long ident = Binder.clearCallingIdentity();
@@ -3246,9 +3269,9 @@ public class AudioService extends IAudioService.Stub
         }
         // only mute for the current user
         if (getCurrentUserId() == userId || userId == android.os.Process.SYSTEM_UID) {
-            final boolean currentMute = AudioSystem.isMicrophoneMuted();
+            final boolean currentMute = mAudioSystem.isMicrophoneMuted();
             final long identity = Binder.clearCallingIdentity();
-            final int ret = AudioSystem.muteMicrophone(muted);
+            final int ret = mAudioSystem.muteMicrophone(muted);
 
             new MediaMetrics.Item(mAnalyticsId + "setMicrophoneMuteNoCallerCheck")
                     .setUid(userId)
@@ -3258,7 +3281,7 @@ public class AudioService extends IAudioService.Stub
                     .record();
 
             // update cache with the real state independently from what was set
-            mMicMuteFromSystemCached = AudioSystem.isMicrophoneMuted();
+            mMicMuteFromSystemCached = mAudioSystem.isMicrophoneMuted();
             if (ret != AudioSystem.AUDIO_STATUS_OK) {
                 Log.e(TAG, "Error changing mic mute state to " + muted + " current:"
                         + mMicMuteFromSystemCached);
@@ -4670,6 +4693,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void broadcastRingerMode(String action, int ringerMode) {
+        if (!mSystemServer.isPrivileged()) {
+            return;
+        }
         // Send sticky broadcast
         Intent broadcast = new Intent(action);
         broadcast.putExtra(AudioManager.EXTRA_RINGER_MODE, ringerMode);
@@ -4679,6 +4705,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void broadcastVibrateSetting(int vibrateType) {
+        if (!mSystemServer.isPrivileged()) {
+            return;
+        }
         // Send broadcast
         if (mActivityManagerInternal.isSystemReady()) {
             Intent broadcast = new Intent(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
@@ -5250,14 +5279,29 @@ public class AudioService extends IAudioService.Stub
             return mIndexMin;
         }
 
+        private boolean isValidLegacyStreamType() {
+            return (mLegacyStreamType != AudioSystem.STREAM_DEFAULT)
+                    && (mLegacyStreamType < mStreamStates.length);
+        }
+
         public void applyAllVolumes() {
             synchronized (VolumeGroupState.class) {
+                int deviceForStream = AudioSystem.DEVICE_NONE;
+                int volumeIndexForStream = 0;
+                if (isValidLegacyStreamType()) {
+                    // Prevent to apply settings twice when group is associated to public stream
+                    deviceForStream = getDeviceForStream(mLegacyStreamType);
+                    volumeIndexForStream = getStreamVolume(mLegacyStreamType);
+                }
                 // apply device specific volumes first
                 int index;
                 for (int i = 0; i < mIndexMap.size(); i++) {
                     final int device = mIndexMap.keyAt(i);
                     if (device != AudioSystem.DEVICE_OUT_DEFAULT) {
                         index = mIndexMap.valueAt(i);
+                        if (device == deviceForStream && volumeIndexForStream == index) {
+                            continue;
+                        }
                         if (DEBUG_VOL) {
                             Log.v(TAG, "applyAllVolumes: restore index " + index + " for group "
                                     + mAudioVolumeGroup.name() + " and device "
@@ -5273,6 +5317,13 @@ public class AudioService extends IAudioService.Stub
                     Log.v(TAG, "applyAllVolumes: restore default device index " + index
                             + " for group " + mAudioVolumeGroup.name());
                 }
+                if (isValidLegacyStreamType()) {
+                    int defaultStreamIndex = (mStreamStates[mLegacyStreamType]
+                            .getIndex(AudioSystem.DEVICE_OUT_DEFAULT) + 5) / 10;
+                    if (defaultStreamIndex == index) {
+                        return;
+                    }
+                }
                 setVolumeIndexInt(index, AudioSystem.DEVICE_OUT_DEFAULT, 0 /*flags*/);
             }
         }
@@ -5283,8 +5334,9 @@ public class AudioService extends IAudioService.Stub
             }
             if (DEBUG_VOL) {
                 Log.v(TAG, "persistVolumeGroup: storing index " + getIndex(device) + " for group "
-                        + mAudioVolumeGroup.name() + " and device "
-                        + AudioSystem.getOutputDeviceName(device));
+                        + mAudioVolumeGroup.name()
+                        + ", device " + AudioSystem.getOutputDeviceName(device)
+                        + " and User=" + ActivityManager.getCurrentUser());
             }
             boolean success = Settings.System.putIntForUser(mContentResolver,
                     getSettingNameForDevice(device),
@@ -5319,7 +5371,8 @@ public class AudioService extends IAudioService.Stub
                     }
                     if (DEBUG_VOL) {
                         Log.v(TAG, "readSettings: found stored index " + getValidIndex(index)
-                                 + " for group " + mAudioVolumeGroup.name() + ", device: " + name);
+                                 + " for group " + mAudioVolumeGroup.name() + ", device: " + name
+                                 + ", User=" + ActivityManager.getCurrentUser());
                     }
                     mIndexMap.put(device, getValidIndex(index));
                 }
@@ -5417,6 +5470,9 @@ public class AudioService extends IAudioService.Stub
         }
 
         public int observeDevicesForStream_syncVSS(boolean checkOthers) {
+            if (!mSystemServer.isPrivileged()) {
+                return AudioSystem.DEVICE_NONE;
+            }
             final int devices = AudioSystem.getDevicesForStream(mStreamType);
             if (devices == mObservedDevices) {
                 return devices;
@@ -6157,10 +6213,7 @@ public class AudioService extends IAudioService.Stub
                     break;
 
                 case MSG_BROADCAST_MICROPHONE_MUTE:
-                    mContext.sendBroadcastAsUser(
-                            new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
-                                    .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                                    UserHandle.ALL);
+                    mSystemServer.sendMicrophoneMuteChangedIntent();
                     break;
             }
         }
@@ -8629,6 +8682,23 @@ public class AudioService extends IAudioService.Stub
         int[] pidsArray = pidsSet.stream().mapToInt(Integer::intValue).toArray();
         AudioSystem.setAudioHalPids(pidsArray);
     }
+
+    //======================
+    // Multi Audio Focus
+    //======================
+    public void setMultiAudioFocusEnabled(boolean enabled) {
+        enforceModifyAudioRoutingPermission();
+        if (mMediaFocusControl != null) {
+            boolean mafEnabled = mMediaFocusControl.getMultiAudioFocusEnabled();
+            if (mafEnabled != enabled) {
+                mMediaFocusControl.updateMultiAudioFocus(enabled);
+                if (!enabled) {
+                    mDeviceBroker.postBroadcastBecomingNoisy();
+                }
+            }
+        }
+    }
+
 
     //======================
     // misc

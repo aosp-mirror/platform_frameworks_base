@@ -3232,12 +3232,13 @@
   <java-symbol type="string" name="accessibility_enable_service_title" />
   <java-symbol type="string" name="accessibility_enable_service_encryption_warning" />
 
+  <java-symbol type="layout" name="accessibility_shortcut_chooser_item" />
+  <java-symbol type="id" name="accessibility_shortcut_target_checkbox" />
+  <java-symbol type="id" name="accessibility_shortcut_target_icon" />
+  <java-symbol type="id" name="accessibility_shortcut_target_label" />
+  <java-symbol type="id" name="accessibility_shortcut_target_switch_item" />
+
   <!-- Accessibility Button -->
-  <java-symbol type="layout" name="accessibility_button_chooser_item" />
-  <java-symbol type="id" name="accessibility_button_target_checkbox" />
-  <java-symbol type="id" name="accessibility_button_target_icon" />
-  <java-symbol type="id" name="accessibility_button_target_label" />
-  <java-symbol type="id" name="accessibility_button_target_switch_item" />
   <java-symbol type="string" name="accessibility_magnification_chooser_text" />
   <java-symbol type="string" name="edit_accessibility_shortcut_menu_button" />
   <java-symbol type="string" name="done_accessibility_shortcut_menu_button" />
@@ -3496,6 +3497,7 @@
   <java-symbol type="id" name="clip_children_set_tag" />
   <java-symbol type="id" name="clip_to_padding_tag" />
   <java-symbol type="id" name="clip_children_tag" />
+  <java-symbol type="id" name="bubble_button" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
   <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />
@@ -3937,6 +3939,7 @@
   <java-symbol type="dimen" name="resolver_empty_state_height" />
   <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />
   <java-symbol type="dimen" name="resolver_max_collapsed_height_with_tabs" />
+  <java-symbol type="dimen" name="resolver_max_collapsed_height_with_default_with_tabs" />
   <java-symbol type="bool" name="resolver_landscape_phone" />
   <java-symbol type="dimen" name="resolver_tab_text_size" />
 

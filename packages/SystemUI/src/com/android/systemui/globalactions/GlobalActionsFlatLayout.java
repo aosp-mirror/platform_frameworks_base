@@ -32,7 +32,6 @@ import com.android.systemui.R;
  * Flat, single-row implementation of the button layout created by the global actions dialog.
  */
 public class GlobalActionsFlatLayout extends GlobalActionsLayout {
-    private static final int MAX_ITEMS = 4;
     public GlobalActionsFlatLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -54,11 +53,28 @@ public class GlobalActionsFlatLayout extends GlobalActionsLayout {
         return null;
     }
 
+    private View getOverflowButton() {
+        return findViewById(com.android.systemui.R.id.global_actions_overflow_button);
+    }
+
     @Override
     protected void addToListView(View v, boolean reverse) {
-        // only add items to the list view if we haven't hit our max yet
-        if (getListView().getChildCount() < MAX_ITEMS) {
-            super.addToListView(v, reverse);
+        super.addToListView(v, reverse);
+        View overflowButton = getOverflowButton();
+        // if there's an overflow button, make sure it stays at the end
+        if (overflowButton != null) {
+            getListView().removeView(overflowButton);
+            super.addToListView(overflowButton, reverse);
+        }
+    }
+
+    @Override
+    protected void removeAllListViews() {
+        View overflowButton = getOverflowButton();
+        super.removeAllListViews();
+        // if there's an overflow button, add it back after clearing the list views
+        if (overflowButton != null) {
+            super.addToListView(overflowButton, false);
         }
     }
 

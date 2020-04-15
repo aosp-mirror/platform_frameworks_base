@@ -209,7 +209,7 @@
     <string name="accessibility_two_bars" msgid="1335676987274417121">"ଦୁଇଟି ବାର୍‍ ଅଛି।"</string>
     <string name="accessibility_three_bars" msgid="819417766606501295">"ତିନୋଟି ବାର୍‍ ଅଛି।"</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"ସିଗ୍ନାଲ୍ ଫୁଲ୍ ଅଛି।"</string>
-    <string name="accessibility_desc_on" msgid="2899626845061427845">"ଅନ୍।"</string>
+    <string name="accessibility_desc_on" msgid="2899626845061427845">"ଚାଲୁ।"</string>
     <string name="accessibility_desc_off" msgid="8055389500285421408">"ଅଫ୍।"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"ସଂଯୁକ୍ତ।"</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"ସଂଯୋଗ କରୁଛି।"</string>
@@ -232,7 +232,7 @@
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"ମୋବାଇଲ୍‌ ଡାଟା ବନ୍ଦ ଅଛି"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"ବ୍ୟବହୃତ ଡାଟା ପାଇଁ ସେଟ୍ ହୋଇନାହିଁ"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"ଅଫ୍ ଅଛି"</string>
-    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"ବ୍ଲୁଟୂଥ୍‍ ଟିଥରିଙ୍ଗ।"</string>
+    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"ବ୍ଲୁଟୁଥ ଟିଥରିଂ।"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍‌।"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ଅନ୍‍।"</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"କୌଣସି SIM କାର୍ଡ ନାହିଁ।"</string>
@@ -276,7 +276,7 @@
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ।"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\"କୁ ବନ୍ଦ କରାଯାଇଛି।"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଚାଲୁ ଅଛି।"</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ବ୍ଲୁଟୂଥ୍‍‌।"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ବ୍ଲୁଟୁଥ।"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="3795983516942423240">"ବ୍ଲୁଟୂଥ୍‌ ଅଫ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ବ୍ଲୁଟୂଥ୍‍‍ ଅନ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="7362294657419149294">"ବ୍ଲୁଟୂଥ୍‍‌ ସଂଯୋଗ ହେଉଛି।"</string>
@@ -344,7 +344,7 @@
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"କେବଳ ପ୍ରାଥମିକତା"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"କେବଳ ଆଲାର୍ମ"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବ"</string>
-    <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ବ୍ଲୁଟୂଥ୍‍‌"</string>
+    <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ବ୍ଲୁଟୁଥ"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"ବ୍ଲୁଟୂଥ୍‍‌ (<xliff:g id="NUMBER">%d</xliff:g>ଟି ଡିଭାଇସ୍‌)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଫ୍"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ପେୟାର୍‍ ହୋଇଥିବା କୌଣସି ଡିଭାଇସ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -394,7 +394,7 @@
     <string name="quick_settings_connected" msgid="3873605509184830379">"ସଂଯୁକ୍ତ"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"କନେକ୍ଟ ରହିଛି, ବ୍ୟାଟେରୀ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"ସଂଯୋଗ କରୁଛି..."</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"ଟିଥରିଙ୍ଗ"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"ଟିଥରିଂ"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"ହଟସ୍ପଟ୍‌"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"ଅନ୍ ହେଉଛି…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"ଡାଟା ସେଭର୍‌ ଅନ୍‌ ଅଛି"</string>
@@ -597,7 +597,7 @@
     <string name="screen_pinning_toast" msgid="2083944237147005811">"ଏହି ସ୍କ୍ରୀନ୍‍‍କୁ ଅନପିନ୍‍ କରିବା ପାଇଁ, ବ୍ୟାକ୍ ଏବଂ ଓଭରଭ୍ୟୁ ବଟନ୍‍‌କୁ ଦାବିଧରନ୍ତୁ"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"ଏହି ସ୍କ୍ରୀନ୍‍‍କୁ ଅନପିନ୍‍ କରିବା ପାଇଁ, ବ୍ୟାକ୍ ଏବଂ ହୋମ୍ ବଟନ୍‍‌କୁ ଦାବିଧରନ୍ତୁ"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"ଏହି ସ୍କ୍ରୀନ୍‌କୁ ଅନପିନ୍ କରିବା ପାଇଁ, ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ ଏବଂ ଧରି ରଖନ୍ତୁ"</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"ବୁଝିଲି"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"ବୁଝିଗଲି"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ନାହିଁ, ଥାଉ"</string>
     <string name="screen_pinning_start" msgid="5695091877402422575">"ସ୍କ୍ରୀନ୍‌କୁ ପିନ୍‌ କରାଗଲା"</string>
     <string name="screen_pinning_exit" msgid="5114993350662745840">"ସ୍କ୍ରୀନ୍‌ ଅନପିନ୍ ହୋଇଗଲା"</string>
@@ -633,7 +633,7 @@
     <string name="output_calls_title" msgid="7085583034267889109">"ଫୋନ୍‍ କଲ୍‍ ଆଉଟପୁଟ୍‍"</string>
     <string name="output_none_found" msgid="5488087293120982770">"କୌଣସି ଡିଭାଇସ୍ ମିଳିଲା ନାହିଁ"</string>
     <string name="output_none_found_service_off" msgid="935667567681386368">"କୌଣସି ଡିଭାଇସ୍ ମିଳିଲା ନାହିଁ। <xliff:g id="SERVICE">%1$s</xliff:g> ଅନ୍‍ କରି ଦେଖନ୍ତୁ"</string>
-    <string name="output_service_bt" msgid="4315362133973911687">"ବ୍ଲୁଟୂଥ୍‍‌"</string>
+    <string name="output_service_bt" msgid="4315362133973911687">"ବ୍ଲୁଟୁଥ"</string>
     <string name="output_service_wifi" msgid="9003667810868222134">"ୱାଇ-ଫାଇ"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"ବ୍ଲୁଟୂଥ୍‍‌ ଓ ୱାଇ-ଫାଇ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ସିଷ୍ଟମ୍ UI ଟ୍ୟୁନର୍‍"</string>
@@ -679,7 +679,7 @@
     <string name="do_not_silence" msgid="4982217934250511227">"ନିରବ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"ନିରବ କିମ୍ବା ବ୍ଲକ୍‌ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ପାୱାର୍‍ ବିଜ୍ଞପ୍ତି କଣ୍ଟ୍ରୋଲ୍‌"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ଅନ୍"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ଚାଲୁ"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ଅଫ୍"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ପାୱାର୍‍ ବିଜ୍ଞପ୍ତି କଣ୍ଟ୍ରୋଲ୍‌ରେ, ଆପଣ ଏକ ଆପ୍‍ ବିଜ୍ଞପ୍ତି ପାଇଁ 0 ରୁ 5 ଗୁରୁତ୍ୱ ସ୍ତର ସେଟ୍‍ କରିହେବେ। \n\n"<b>"ସ୍ତର 5"</b>" \n- ବିଜ୍ଞପ୍ତି ତାଲିକାର ଶୀର୍ଷରେ ଦେଖାନ୍ତୁ \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ \n- ସର୍ବଦା ପିକ୍‍ କରନ୍ତୁ \n\n"<b>"ସ୍ତର 4"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- ସର୍ବଦା ପିକ୍‍ କରନ୍ତୁ \n\n"<b>"ସ୍ତର 3"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n\n"<b>"ସ୍ତର 2"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n- କଦାପି ସାଉଣ୍ଡ ଓ ଭାଇବ୍ରେଟ୍‍ କରନ୍ତୁ ନାହିଁ \n\n"<b>"ସ୍ତର 1"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n- କଦାପି ସାଉଣ୍ଡ ଓ ଭାଇବ୍ରେଟ୍‍ କରନ୍ତୁ ନାହିଁ \n- ଲକ୍‍ ସ୍କ୍ରୀନ୍‍ ଓ ଷ୍ଟାଟସ୍‍ ବାର୍‌ରୁ ଲୁଚାନ୍ତୁ \n- ବିଜ୍ଞପ୍ତି ତାଲିକାର ନିମ୍ନରେ ଦେଖାନ୍ତୁ \n\n"<b>"ସ୍ତର 0"</b>" \n- ଆପରୁ ସମସ୍ତ ବିଜ୍ଞପ୍ତି ବ୍ଲକ୍‌ କରନ୍ତୁ"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"ବିଜ୍ଞପ୍ତି"</string>
@@ -977,7 +977,7 @@
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"ଆଗରୁ ସେଟ୍‌ କରିଥିବା ସମୟ ଅନୁସାରେ ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍‌ ହୋଇଛି"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ଚାର୍ଜ <xliff:g id="PERCENTAGE">%d</xliff:g>%%ରୁ କମ୍‌ ହେଲେ ବ୍ୟାଟେରୀ ସେଭର୍‌ ଆପେ ଅନ୍‌ ହୋଇଯିବ।"</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ସେଟିଙ୍ଗ"</string>
-    <string name="auto_saver_okay_action" msgid="7815925750741935386">"ବୁଝିଲି"</string>
+    <string name="auto_saver_okay_action" msgid="7815925750741935386">"ବୁଝିଗଲି"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI ହିପ୍ ଡମ୍ପ୍ କରନ୍ତୁ"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"ସେନ୍ସର୍‍ଗୁଡ଼ିକ ବନ୍ଦ ଅଛି"</string>
     <string name="device_services" msgid="1549944177856658705">"ଡିଭାଇସ୍‍ ସେବାଗୁଡିକ"</string>
@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ପାୱାର ମେନୁରୁ ଆକ୍ସେସ୍ କରିବାକୁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ବାଛନ୍ତୁ"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"ଏକ ନିୟନ୍ତ୍ରଣକୁ ମୁଭ୍ କରିବାକୁ ଏହାକୁ ଧରି ଟାଣନ୍ତୁ"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ସବୁ ନିୟନ୍ତ୍ରଣର ତାଲିକା ଲୋଡ୍ କରିପାରିଲା ନାହିଁ।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ଅନ୍ୟ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକରେ ଯୋଗ କରନ୍ତୁ"</string>

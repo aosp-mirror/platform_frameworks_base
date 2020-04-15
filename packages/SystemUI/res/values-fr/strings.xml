@@ -1015,7 +1015,10 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Sélectionnez les commandes auxquelles vous souhaitez accéder depuis le menu de démarrage"</string>
-    <string name="controls_favorite_rearrange" msgid="7364147066539766260">"Appuyez de manière prolongée sur une commande pour la déplacer"</string>
+    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
+    <skip />
+    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossible de charger toutes les commandes."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes de l\'appareil"</string>

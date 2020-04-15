@@ -37,7 +37,7 @@ public:
      * "get" returns a pointer to the singleton ShaderCache object.  This
      * singleton object will never be destroyed.
      */
-    ANDROID_API static ShaderCache& get();
+    static ShaderCache& get();
 
     /**
      * initShaderDiskCache" loads the serialized cache contents from disk,
