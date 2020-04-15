@@ -377,11 +377,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
     }
 
     private static void printObject(@NonNull StringBuilder builder, @Nullable Object obj) {
-        if (obj instanceof Parcelable) {
-            ObjectPrinter.print(builder, obj, true, 16);
-        } else {
-            builder.append(obj.toString());
-        }
+        ObjectPrinter.print(builder, obj, true, 16);
     }
 
     private static String printObject(@Nullable Object obj) {
