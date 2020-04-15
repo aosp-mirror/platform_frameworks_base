@@ -214,6 +214,41 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
+        public void deleteByTypes(
+                List<String> schemaTypes, AndroidFuture<AppSearchBatchResult> callback) {
+            Preconditions.checkNotNull(schemaTypes);
+            Preconditions.checkNotNull(callback);
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                AppSearchBatchResult.Builder<String, Void> resultBuilder =
+                        new AppSearchBatchResult.Builder<>();
+                for (int i = 0; i < schemaTypes.size(); i++) {
+                    String schemaType = schemaTypes.get(i);
+                    try {
+                        if (!impl.deleteByType(callingUid, schemaType)) {
+                            resultBuilder.setFailure(
+                                    schemaType,
+                                    AppSearchResult.RESULT_NOT_FOUND,
+                                    /*errorMessage=*/ null);
+                        } else {
+                            resultBuilder.setSuccess(schemaType, /*value=*/ null);
+                        }
+                    } catch (Throwable t) {
+                        resultBuilder.setResult(schemaType, throwableToFailedResult(t));
+                    }
+                }
+                callback.complete(resultBuilder.build());
+            } catch (Throwable t) {
+                callback.completeExceptionally(t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
         public void deleteAll(@NonNull AndroidFuture<AppSearchResult> callback) {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();

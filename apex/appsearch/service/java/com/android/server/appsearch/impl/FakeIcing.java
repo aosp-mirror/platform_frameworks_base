@@ -157,6 +157,25 @@ public class FakeIcing {
         }
     }
 
+    /**
+     * Deletes all documents having the given type.
+     *
+     * @return true if any documents were deleted.
+     */
+    public boolean deleteByType(@NonNull String type) {
+        boolean deletedAny = false;
+        for (int i = 0; i < mDocStore.size(); i++) {
+            DocumentProto document = mDocStore.valueAt(i);
+            if (type.equals(document.getSchema())) {
+                mDocStore.removeAt(i);
+                mUriToDocIdMap.remove(document.getUri());
+                i--;
+                deletedAny = true;
+            }
+        }
+        return deletedAny;
+    }
+
     private void indexDocument(int docId, DocumentProto document) {
         for (PropertyProto property : document.getPropertiesList()) {
             for (String stringValue : property.getStringValuesList()) {
