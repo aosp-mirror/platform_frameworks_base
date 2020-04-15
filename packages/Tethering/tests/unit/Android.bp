@@ -14,39 +14,33 @@
 // limitations under the License.
 //
 
-android_test {
-    name: "TetheringTests",
-    certificate: "platform",
+java_defaults {
+    name: "TetheringTestsDefaults",
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
     ],
-    test_suites: [
-        "device-tests",
-        "mts",
-    ],
-    compile_multilib: "both",
     static_libs: [
+        "TetheringApiCurrentLib",
         "androidx.test.rules",
         "frameworks-base-testutils",
-        "net-tests-utils",
         "mockito-target-extended-minus-junit4",
-        "TetheringApiCurrentLib",
+        "net-tests-utils",
         "testables",
     ],
     // TODO(b/147200698) change sdk_version to module-current and
     // remove framework-minus-apex, ext, and framework-res
     sdk_version: "core_platform",
     libs: [
-        "framework-minus-apex",
-        "ext",
-        "framework-res",
-        "framework-wifi-stubs-module_libs_api",
-        "framework-telephony-stubs",
         "android.test.runner",
         "android.test.base",
         "android.test.mock",
+        "ext",
+        "framework-minus-apex",
+        "framework-res",
+        "framework-telephony-stubs",
         "framework-tethering",
+        "framework-wifi-stubs-module_libs_api",
     ],
     jni_libs: [
         // For mockito extended
@@ -54,4 +48,26 @@ android_test {
         "libstaticjvmtiagent",
     ],
     jarjar_rules: "jarjar-rules.txt",
+}
+
+// Library containing the unit tests. This is used by the coverage test target to pull in the
+// unit test code. It is not currently used by the tests themselves because all the build
+// configuration needed by the tests is in the TetheringTestsDefaults rule.
+android_library {
+    name: "TetheringTestsLib",
+    defaults: ["TetheringTestsDefaults"],
+    visibility: [
+        "//frameworks/base/packages/Tethering/tests/integration",
+    ]
+}
+
+android_test {
+    name: "TetheringTests",
+    certificate: "platform",
+    test_suites: [
+        "device-tests",
+        "mts",
+    ],
+    defaults: ["TetheringTestsDefaults"],
+    compile_multilib: "both",
 }
