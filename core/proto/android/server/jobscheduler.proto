@@ -523,6 +523,7 @@ message StateControllerProto {
                 optional bool is_idle = 1;
                 optional bool is_screen_on = 2;
                 optional bool is_dock_idle = 3;
+                optional bool in_car_mode = 4;
             }
 
             oneof active_tracker {
