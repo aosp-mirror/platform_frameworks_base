@@ -366,10 +366,15 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (mStorage.hasChildProfileLock(managedUserId)) {
             return;
         }
-        // Do not tie it to parent when parent does not have a screen lock
+        // If parent does not have a screen lock, simply clear credential from the managed profile,
+        // to maintain the invariant that unified profile should always have the same secure state
+        // as its parent.
         final int parentId = mUserManager.getProfileParent(managedUserId).id;
-        if (!isUserSecure(parentId)) {
-            if (DEBUG) Slog.v(TAG, "Parent does not have a screen lock");
+        if (!isUserSecure(parentId) && !managedUserPassword.isNone()) {
+            if (DEBUG) Slog.v(TAG, "Parent does not have a screen lock but profile has one");
+
+            setLockCredentialInternal(LockscreenCredential.createNone(), managedUserPassword,
+                    managedUserId, /* isLockTiedToParent= */ true);
             return;
         }
         // Do not tie when the parent has no SID (but does have a screen lock).
@@ -3161,6 +3166,21 @@ public class LockSettingsService extends ILockSettings.Stub {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(timestamp));
     }
 
+    private static String credentialTypeToString(int credentialType) {
+        switch (credentialType) {
+            case CREDENTIAL_TYPE_NONE:
+                return "None";
+            case CREDENTIAL_TYPE_PATTERN:
+                return "Pattern";
+            case CREDENTIAL_TYPE_PIN:
+                return "Pin";
+            case CREDENTIAL_TYPE_PASSWORD:
+                return "Password";
+            default:
+                return "Unknown " + credentialType;
+        }
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, printWriter)) return;
@@ -3192,7 +3212,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             // It's OK to dump the password type since anyone with physical access can just
             // observe it from the keyguard directly.
             pw.println("Quality: " + getKeyguardStoredQuality(userId));
-            pw.println("CredentialType: " + getCredentialTypeInternal(userId));
+            pw.println("CredentialType: " + credentialTypeToString(
+                    getCredentialTypeInternal(userId)));
             pw.println("SeparateChallenge: " + getSeparateProfileChallengeEnabledInternal(userId));
             pw.println(String.format("Metrics: %s",
                     getUserPasswordMetrics(userId) != null ? "known" : "unknown"));
