@@ -14,15 +14,16 @@
      limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.networkstack.tethering.tests.integration">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.android.networkstack.tethering.tests.coverage">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-
-    <application android:debuggable="true">
+    <application tools:replace="android:label"
+                 android:debuggable="true"
+                 android:label="Tethering coverage tests">
         <uses-library android:name="android.test.runner" />
     </application>
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="com.android.networkstack.tethering.tests.integration"
-        android:label="Tethering integration tests">
+                     android:targetPackage="com.android.networkstack.tethering.tests.coverage"
+                     android:label="Tethering coverage tests">
     </instrumentation>
 </manifest>
