@@ -4841,6 +4841,33 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertFalse(dpm.isActivePasswordSufficient());
     }
 
+    public void testIsPasswordSufficientAfterProfileUnification() throws Exception {
+        final int managedProfileUserId = DpmMockContext.CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        doReturn(true).when(getServices().lockPatternUtils)
+                .isSeparateProfileChallengeEnabled(managedProfileUserId);
+
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC);
+        parentDpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
+
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
+                .thenReturn(computeForPassword("1234".getBytes()));
+
+        // Numeric password is compliant with current requirement (QUALITY_NUMERIC set explicitly
+        // on the parent admin)
+        assertTrue(dpm.isPasswordSufficientAfterProfileUnification(UserHandle.USER_SYSTEM,
+                UserHandle.USER_NULL));
+        // Numeric password is not compliant if profile is to be unified: the profile has a
+        // QUALITY_ALPHABETIC policy on itself which will be enforced on the password after
+        // unification.
+        assertFalse(dpm.isPasswordSufficientAfterProfileUnification(UserHandle.USER_SYSTEM,
+                managedProfileUserId));
+    }
+
     private void setActivePasswordState(PasswordMetrics passwordMetrics)
             throws Exception {
         final int userHandle = UserHandle.getUserId(mContext.binder.callingUid);

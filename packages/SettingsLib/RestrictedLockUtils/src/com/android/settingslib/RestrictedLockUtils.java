@@ -147,6 +147,28 @@ public class RestrictedLockUtils {
         public EnforcedAdmin() {
         }
 
+        /**
+         * Combines two {@link EnforcedAdmin} into one: if one of them is null, then just return
+         * the other. If both of them are the same, then return that. Otherwise return the symbolic
+         * {@link #MULTIPLE_ENFORCED_ADMIN}
+         */
+        public static EnforcedAdmin combine(EnforcedAdmin admin1, EnforcedAdmin admin2) {
+            if (admin1 == null) {
+                return admin2;
+            }
+            if (admin2 == null) {
+                return admin1;
+            }
+            if (admin1.equals(admin2)) {
+                return admin1;
+            }
+            if (!admin1.enforcedRestriction.equals(admin2.enforcedRestriction)) {
+                throw new IllegalArgumentException(
+                        "Admins with different restriction cannot be combined");
+            }
+            return MULTIPLE_ENFORCED_ADMIN;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
