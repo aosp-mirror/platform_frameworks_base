@@ -206,12 +206,12 @@ public class NotificationMediaManager implements Dumpable {
         mMainExecutor = mainExecutor;
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onPendingEntryAdded(NotificationEntry entry) {
+            public void onEntryInflated(NotificationEntry entry) {
                 findAndUpdateMediaNotifications();
             }
 
             @Override
-            public void onPreEntryUpdated(NotificationEntry entry) {
+            public void onEntryReinflated(NotificationEntry entry) {
                 findAndUpdateMediaNotifications();
             }
 
