@@ -3158,6 +3158,23 @@ public abstract class PackageManager {
             "android.content.pm.extra.VERIFICATION_LONG_VERSION_CODE";
 
     /**
+     * Extra field name for the Merkle tree root hash of a package.
+     * <p>Passed to a package verifier both prior to verification and as a result
+     * of verification.
+     * <p>The value of the extra is a specially formatted list:
+     * {@code filename1:HASH_1;filename2:HASH_2;...;filenameN:HASH_N}
+     * <p>The extra must include an entry for every APK within an installation. If
+     * a hash is not physically present, a hash value of {@code 0} will be used.
+     * <p>The root hash is generated using SHA-256, no salt with a 4096 byte block
+     * size. See the description of the
+     * <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html#merkle-tree">fs-verity merkle-tree</a>
+     * for more details.
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_ROOT_HASH =
+            "android.content.pm.extra.EXTRA_VERIFICATION_ROOT_HASH";
+
+    /**
      * Extra field name for the ID of a intent filter pending verification.
      * Passed to an intent filter verifier and is used to call back to
      * {@link #verifyIntentFilter}

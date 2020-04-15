@@ -94,6 +94,7 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
+import static android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.incremental.IncrementalManager.isIncrementalPath;
@@ -1820,10 +1821,12 @@ public class PackageManagerService extends IPackageManager.Stub
                             state.setVerifierResponse(Binder.getCallingUid(),
                                     PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
                             broadcastPackageVerified(verificationId, originUri,
-                                    PackageManager.VERIFICATION_ALLOW, user);
+                                    PackageManager.VERIFICATION_ALLOW, null, args.mDataLoaderType,
+                                    user);
                         } else {
                             broadcastPackageVerified(verificationId, originUri,
-                                    PackageManager.VERIFICATION_REJECT, user);
+                                    PackageManager.VERIFICATION_REJECT, null, args.mDataLoaderType,
+                                    user);
                             params.setReturnCode(
                                     PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE);
                             state.setVerifierResponse(Binder.getCallingUid(),
@@ -1899,7 +1902,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                         if (state.isInstallAllowed()) {
                             broadcastPackageVerified(verificationId, originUri,
-                                    response.code, args.getUser());
+                                    response.code, null, args.mDataLoaderType, args.getUser());
                         } else {
                             params.setReturnCode(
                                     PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE);
@@ -13575,12 +13578,17 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void broadcastPackageVerified(int verificationId, Uri packageUri,
-            int verificationCode, UserHandle user) {
+            int verificationCode, @Nullable String rootHashString, int dataLoaderType,
+            UserHandle user) {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_VERIFIED);
         intent.setDataAndType(packageUri, PACKAGE_MIME_TYPE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.putExtra(PackageManager.EXTRA_VERIFICATION_ID, verificationId);
         intent.putExtra(PackageManager.EXTRA_VERIFICATION_RESULT, verificationCode);
+        if (rootHashString != null) {
+            intent.putExtra(PackageManager.EXTRA_VERIFICATION_ROOT_HASH, rootHashString);
+        }
+        intent.putExtra(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
 
         mContext.sendBroadcastAsUser(intent, user,
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
@@ -14952,8 +14960,17 @@ public class PackageManagerService extends IPackageManager.Stub
             verificationState.setRequiredVerifierUid(requiredUid);
             final int installerUid =
                     verificationInfo == null ? -1 : verificationInfo.installerUid;
-            if (!origin.existing && isVerificationEnabled(pkgLite, verifierUser.getIdentifier(),
-                      installFlags, installerUid)) {
+            final boolean isVerificationEnabled = isVerificationEnabled(
+                    pkgLite, verifierUser.getIdentifier(), installFlags, installerUid);
+            final boolean isV4Signed =
+                    (mArgs.signingDetails.signatureSchemeVersion == SIGNING_BLOCK_V4);
+            final boolean isIncrementalInstall =
+                    (mArgs.mDataLoaderType == DataLoaderType.INCREMENTAL);
+            // NOTE: We purposefully skip verification for only incremental installs when there's
+            // a v4 signature block. Otherwise, proceed with verification as usual.
+            if (!origin.existing
+                    && isVerificationEnabled
+                    && (!isIncrementalInstall || !isV4Signed)) {
                 final Intent verification = new Intent(
                         Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
                 verification.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -16569,7 +16586,29 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             executePostCommitSteps(commitRequest);
         } finally {
-            if (!success) {
+            if (success) {
+                for (InstallRequest request : requests) {
+                    final InstallArgs args = request.args;
+                    if (args.mDataLoaderType != DataLoaderType.INCREMENTAL) {
+                        continue;
+                    }
+                    if (args.signingDetails.signatureSchemeVersion != SIGNING_BLOCK_V4) {
+                        continue;
+                    }
+                    // For incremental installs, we bypass the verifier prior to install. Now
+                    // that we know the package is valid, send a notice to the verifier with
+                    // the root hash of the base.apk.
+                    final String baseCodePath = request.installResult.pkg.getBaseCodePath();
+                    final String[] splitCodePaths = request.installResult.pkg.getSplitCodePaths();
+                    final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
+                    final int verificationId = mPendingVerificationToken++;
+                    final String rootHashString = PackageManagerServiceUtils
+                            .buildVerificationRootHashString(baseCodePath, splitCodePaths);
+                    broadcastPackageVerified(verificationId, originUri,
+                            PackageManager.VERIFICATION_ALLOW, rootHashString,
+                            args.mDataLoaderType, args.getUser());
+                }
+            } else {
                 for (ScanResult result : preparedScans.values()) {
                     if (createdAppId.getOrDefault(result.request.parsedPackage.getPackageName(),
                             false)) {
@@ -16911,7 +16950,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (args.signingDetails != PackageParser.SigningDetails.UNKNOWN) {
                 parsedPackage.setSigningDetails(args.signingDetails);
             } else {
-                // TODO(b/136132412): skip for Incremental installation
                 parsedPackage.setSigningDetails(
                         ParsingPackageUtils.collectCertificates(parsedPackage, false /* skipVerify */));
             }
