@@ -29,7 +29,6 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.media.MediaControlPanel;
-import com.android.systemui.statusbar.NotificationMediaManager;
 
 import java.util.concurrent.Executor;
 
@@ -47,13 +46,12 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
      * Initialize mini media player for QQS
      * @param context
      * @param parent
-     * @param manager
      * @param foregroundExecutor
      * @param backgroundExecutor
      */
-    public QuickQSMediaPlayer(Context context, ViewGroup parent, NotificationMediaManager manager,
-            Executor foregroundExecutor, Executor backgroundExecutor) {
-        super(context, parent, manager, null, R.layout.qqs_media_panel, QQS_ACTION_IDS,
+    public QuickQSMediaPlayer(Context context, ViewGroup parent, Executor foregroundExecutor,
+            Executor backgroundExecutor) {
+        super(context, parent, null, R.layout.qqs_media_panel, QQS_ACTION_IDS,
                 foregroundExecutor, backgroundExecutor);
     }
 

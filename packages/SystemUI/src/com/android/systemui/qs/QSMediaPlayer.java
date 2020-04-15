@@ -39,7 +39,6 @@ import com.android.systemui.R;
 import com.android.systemui.media.MediaControlPanel;
 import com.android.systemui.media.SeekBarObserver;
 import com.android.systemui.media.SeekBarViewModel;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.concurrent.Executor;
@@ -69,14 +68,13 @@ public class QSMediaPlayer extends MediaControlPanel {
      * Initialize quick shade version of player
      * @param context
      * @param parent
-     * @param manager
+     * @param routeManager Provides information about device
      * @param foregroundExecutor
      * @param backgroundExecutor
      */
-    public QSMediaPlayer(Context context, ViewGroup parent, NotificationMediaManager manager,
-            LocalMediaManager routeManager, Executor foregroundExecutor,
-            DelayableExecutor backgroundExecutor) {
-        super(context, parent, manager, routeManager, R.layout.qs_media_panel, QS_ACTION_IDS,
+    public QSMediaPlayer(Context context, ViewGroup parent, LocalMediaManager routeManager,
+            Executor foregroundExecutor, DelayableExecutor backgroundExecutor) {
+        super(context, parent, routeManager, R.layout.qs_media_panel, QS_ACTION_IDS,
                 foregroundExecutor, backgroundExecutor);
         mParent = (QSPanel) parent;
         mBackgroundExecutor = backgroundExecutor;

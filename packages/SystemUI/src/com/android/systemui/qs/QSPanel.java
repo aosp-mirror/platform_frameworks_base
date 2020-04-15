@@ -63,7 +63,6 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
@@ -99,7 +98,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     private final LinearLayout mMediaCarousel;
     private final ArrayList<QSMediaPlayer> mMediaPlayers = new ArrayList<>();
-    private final NotificationMediaManager mNotificationMediaManager;
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final Executor mForegroundExecutor;
     private final DelayableExecutor mBackgroundExecutor;
@@ -133,7 +131,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
-            NotificationMediaManager notificationMediaManager,
             @Main Executor foregroundExecutor,
             @Background DelayableExecutor backgroundExecutor,
             @Nullable LocalBluetoothManager localBluetoothManager
@@ -142,7 +139,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mContext = context;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
-        mNotificationMediaManager = notificationMediaManager;
         mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mLocalBluetoothManager = localBluetoothManager;
@@ -252,8 +248,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             LocalMediaManager routeManager = new LocalMediaManager(mContext, mLocalBluetoothManager,
                     imm, notif.getPackageName());
 
-            player = new QSMediaPlayer(mContext, this, mNotificationMediaManager, routeManager,
-                    mForegroundExecutor, mBackgroundExecutor);
+            player = new QSMediaPlayer(mContext, this, routeManager, mForegroundExecutor,
+                    mBackgroundExecutor);
             player.setListening(mListening);
             if (player.isPlaying()) {
                 mMediaCarousel.addView(player.getView(), 0, lp); // add in front
