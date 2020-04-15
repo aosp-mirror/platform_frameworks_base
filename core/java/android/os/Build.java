@@ -1005,7 +1005,7 @@ public class Build {
         /**
          * R.
          */
-        public static final int R = CUR_DEVELOPMENT;
+        public static final int R = 30;
     }
 
     /** The type of build, like "user" or "eng". */
