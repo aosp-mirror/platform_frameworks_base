@@ -1324,7 +1324,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         display.rotateInDifferentOrientationIfNeeded(mActivity);
         display.mFixedRotationLaunchingApp = mActivity;
-        displayRotation.updateRotationUnchecked(false /* forceUpdate */);
+        displayRotation.updateRotationUnchecked(true /* forceUpdate */);
 
         assertTrue(displayRotation.isRotatingSeamlessly());
 
