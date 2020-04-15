@@ -188,7 +188,6 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // Adding FLAG_NOT_FOCUSABLE makes app above IME.
         app.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
         mDisplayContent.computeImeTarget(true);
-        mDisplayContent.setLayoutNeeded();
         mDisplayContent.applySurfaceChangesTransaction();
 
         // app won't get IME insets while above IME.
@@ -200,7 +199,6 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // Removing FLAG_NOT_FOCUSABLE makes app below IME.
         app.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
         mDisplayContent.computeImeTarget(true);
-        mDisplayContent.setLayoutNeeded();
         mDisplayContent.applySurfaceChangesTransaction();
 
         // Make sure app got notified.
