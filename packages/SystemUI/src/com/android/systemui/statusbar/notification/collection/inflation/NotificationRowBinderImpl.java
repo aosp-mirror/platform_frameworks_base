@@ -180,13 +180,14 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             NotificationEntry entry,
             @Nullable Integer oldImportance,
             NotificationUiAdjustment oldAdjustment,
-            NotificationUiAdjustment newAdjustment) {
+            NotificationUiAdjustment newAdjustment,
+            NotificationRowContentBinder.InflationCallback callback) {
         if (NotificationUiAdjustment.needReinflate(oldAdjustment, newAdjustment)) {
             if (entry.rowExists()) {
                 ExpandableNotificationRow row = entry.getRow();
                 row.reset();
                 updateRow(entry, row);
-                inflateContentViews(entry, row, null /* callback */);
+                inflateContentViews(entry, row, callback);
             } else {
                 // Once the RowInflaterTask is done, it will pick up the updated entry, so
                 // no-op here.
@@ -221,7 +222,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private void inflateContentViews(
             NotificationEntry entry,
             ExpandableNotificationRow row,
-            NotificationRowContentBinder.InflationCallback inflationCallback) {
+            @Nullable NotificationRowContentBinder.InflationCallback inflationCallback) {
         final boolean useIncreasedCollapsedHeight =
                 mMessagingUtil.isImportantMessaging(entry.getSbn(), entry.getImportance());
         final boolean isLowPriority = entry.isAmbient();
@@ -238,7 +239,9 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mRowContentBindStage.requestRebind(entry, en -> {
             row.setUsesIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
             row.setIsLowPriority(isLowPriority);
-            inflationCallback.onAsyncInflationFinished(en);
+            if (inflationCallback != null) {
+                inflationCallback.onAsyncInflationFinished(en);
+            }
         });
     }
 

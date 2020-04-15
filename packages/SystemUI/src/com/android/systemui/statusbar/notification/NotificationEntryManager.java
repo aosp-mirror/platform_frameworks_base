@@ -699,7 +699,8 @@ public class NotificationEntryManager implements
                             entry,
                             oldImportances.get(entry.getKey()),
                             oldAdjustments.get(entry.getKey()),
-                            NotificationUiAdjustment.extractFromNotificationEntry(entry));
+                            NotificationUiAdjustment.extractFromNotificationEntry(entry),
+                            mInflationCallback);
         }
 
         updateNotifications("updateNotificationRanking");
