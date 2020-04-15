@@ -40,6 +40,7 @@ import static com.android.server.am.UserState.STATE_RUNNING_LOCKED;
 import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKED;
 import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKING;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -89,6 +90,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
@@ -112,6 +114,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -161,6 +164,46 @@ class UserController implements Handler.Callback {
 
     // TODO(b/149604218): STOPSHIP remove  this constant and the logcat
     private static final boolean TESTS_NEED_LOGCAT = true;
+
+    // Used for statsd logging with UserLifecycleJourneyReported + UserLifecycleEventOccurred atoms
+    private static final long INVALID_SESSION_ID = 0;
+
+    // The various user journeys, defined in the UserLifecycleJourneyReported atom for statsd
+    private static final int USER_JOURNEY_UNKNOWN =
+            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__UNKNOWN;
+    private static final int USER_JOURNEY_USER_SWITCH_FG =
+            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_SWITCH_FG;
+    private static final int USER_JOURNEY_USER_SWITCH_UI =
+            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_SWITCH_UI;
+    private static final int USER_JOURNEY_USER_START =
+            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_START;
+    private static final int USER_JOURNEY_USER_CREATE =
+            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE;
+    @IntDef(prefix = { "USER_JOURNEY" }, value = {
+            USER_JOURNEY_UNKNOWN,
+            USER_JOURNEY_USER_SWITCH_FG,
+            USER_JOURNEY_USER_SWITCH_UI,
+            USER_JOURNEY_USER_START,
+            USER_JOURNEY_USER_CREATE,
+    })
+    @interface UserJourney {}
+
+    // The various user lifecycle events, defined in the UserLifecycleEventOccurred atom for statsd
+    private static final int USER_LIFECYCLE_EVENT_UNKNOWN =
+            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__UNKNOWN;
+    private static final int USER_LIFECYCLE_EVENT_SWITCH_USER =
+            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__SWITCH_USER;
+    private static final int USER_LIFECYCLE_EVENT_START_USER =
+            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__START_USER;
+    private static final int USER_LIFECYCLE_EVENT_CREATE_USER =
+            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER;
+    @IntDef(prefix = { "USER_LIFECYCLE_EVENT" }, value = {
+            USER_LIFECYCLE_EVENT_UNKNOWN,
+            USER_LIFECYCLE_EVENT_SWITCH_USER,
+            USER_LIFECYCLE_EVENT_START_USER,
+            USER_LIFECYCLE_EVENT_CREATE_USER,
+    })
+    @interface UserLifecycleEvent {}
 
     /**
      * Maximum number of users we allow to be running at a time, including system user.
@@ -269,6 +312,13 @@ class UserController implements Handler.Callback {
      */
     @GuardedBy("mLock")
     private final ArrayList<Integer> mLastActiveUsers = new ArrayList<>();
+
+    /**
+     * A per-user, journey to session id map, used for statsd logging for the
+     * UserLifecycleJourneyReported and UserLifecycleEventOccurred atoms.
+     */
+    @GuardedBy("mUserJourneyToSessionIdMap")
+    private final SparseArray<SparseLongArray> mUserJourneyToSessionIdMap = new SparseArray<>();
 
     UserController(ActivityManagerService service) {
         this(new Injector(service));
@@ -2349,6 +2399,10 @@ class UserController implements Handler.Callback {
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
             case START_USER_SWITCH_FG_MSG:
+                logUserJourneyInfo(getUserInfo(getCurrentUserId()), getUserInfo(msg.arg1),
+                        USER_JOURNEY_USER_SWITCH_FG);
+                logUserLifecycleEvent(msg.arg1, USER_JOURNEY_USER_SWITCH_FG,
+                        USER_LIFECYCLE_EVENT_SWITCH_USER, true);
                 startUserInForeground(msg.arg1);
                 break;
             case REPORT_USER_SWITCH_MSG:
@@ -2370,8 +2424,14 @@ class UserController implements Handler.Callback {
                 mInjector.batteryStatsServiceNoteEvent(
                         BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                         Integer.toString(msg.arg1), msg.arg1);
+                logUserJourneyInfo(null, getUserInfo(msg.arg1), USER_JOURNEY_USER_START);
+                logUserLifecycleEvent(msg.arg1, USER_JOURNEY_USER_START,
+                        USER_LIFECYCLE_EVENT_START_USER, true);
                 mInjector.getSystemServiceManager().startUser(TimingsTraceAndSlog.newAsyncLog(),
                         msg.arg1);
+                logUserLifecycleEvent(msg.arg1, USER_JOURNEY_USER_START,
+                        USER_LIFECYCLE_EVENT_START_USER, false);
+                clearSessionId(msg.arg1, USER_JOURNEY_USER_START);
                 break;
             case USER_UNLOCK_MSG:
                 final int userId = msg.arg1;
@@ -2400,15 +2460,92 @@ class UserController implements Handler.Callback {
                 break;
             case REPORT_USER_SWITCH_COMPLETE_MSG:
                 dispatchUserSwitchComplete(msg.arg1);
+                final int currentJourney = mUserSwitchUiEnabled ? USER_JOURNEY_USER_SWITCH_UI
+                                                                : USER_JOURNEY_USER_SWITCH_FG;
+                logUserLifecycleEvent(msg.arg1, currentJourney,
+                        USER_LIFECYCLE_EVENT_SWITCH_USER, false);
+                clearSessionId(msg.arg1, currentJourney);
                 break;
             case REPORT_LOCKED_BOOT_COMPLETE_MSG:
                 dispatchLockedBootComplete(msg.arg1);
                 break;
             case START_USER_SWITCH_UI_MSG:
-                showUserSwitchDialog((Pair<UserInfo, UserInfo>) msg.obj);
+                final Pair<UserInfo, UserInfo> fromToUserPair = (Pair<UserInfo, UserInfo>) msg.obj;
+                logUserJourneyInfo(fromToUserPair.first, fromToUserPair.second,
+                        USER_JOURNEY_USER_SWITCH_UI);
+                logUserLifecycleEvent(fromToUserPair.second.id, USER_JOURNEY_USER_SWITCH_UI,
+                        USER_LIFECYCLE_EVENT_SWITCH_USER, true);
+                showUserSwitchDialog(fromToUserPair);
                 break;
         }
         return false;
+    }
+
+    /**
+     * statsd helper method for logging the start of a user journey via a UserLifecycleEventOccurred
+     * atom given the originating and targeting users for the journey.
+     *
+     * Note: these info atoms are currently logged more than once per journey since there is no
+     * state associated with the user's ongoing journey - this will be updated in a later CL.
+     */
+    private void logUserJourneyInfo(UserInfo origin, UserInfo target, @UserJourney int journey) {
+        final long newSessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
+        synchronized (mUserJourneyToSessionIdMap) {
+            SparseLongArray userSessions = mUserJourneyToSessionIdMap.get(target.id);
+            if (userSessions == null) {
+                userSessions = new SparseLongArray();
+                mUserJourneyToSessionIdMap.put(target.id, userSessions);
+            }
+            final long oldSessionId = userSessions.get(journey);
+            if (oldSessionId != INVALID_SESSION_ID) {
+                // potentially an incomplete or timed-out session
+                FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED,
+                        oldSessionId, target.id, USER_LIFECYCLE_EVENT_UNKNOWN,
+                        FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
+            }
+            // update session id
+            userSessions.put(journey, newSessionId);
+        }
+
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, newSessionId,
+                journey, origin != null ? origin.id : -1,
+                target.id, UserManager.getUserTypeForStatsd(target.userType), target.flags);
+    }
+
+    /**
+     * statsd helper method for logging the begin or finish of the given event for the
+     * UserLifecycleEventOccurred statsd atom.
+     * Note: This does not clear the user's journey session id - if this event represents the end of
+     * a particular journey, call {@link #clearSessionId} to indicate that the session is over.
+     */
+    private void logUserLifecycleEvent(@UserIdInt int userId, @UserJourney int journey,
+            @UserLifecycleEvent int event, boolean begin) {
+        final long sessionId;
+        synchronized (mUserJourneyToSessionIdMap) {
+            final SparseLongArray eventToSessionMap = mUserJourneyToSessionIdMap.get(userId);
+            if (eventToSessionMap == null || eventToSessionMap.size() == 0) {
+                return;
+            }
+            sessionId = eventToSessionMap.get(journey);
+            if (sessionId == INVALID_SESSION_ID) {
+                return;
+            }
+        }
+
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
+                event, begin ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN
+                             : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH);
+    }
+
+    /**
+     * Clears the user's session id associated with the given UserJourney (for statsd).
+     */
+    private void clearSessionId(@UserIdInt int userId, @UserJourney int journey) {
+        synchronized (mUserJourneyToSessionIdMap) {
+            if (mUserJourneyToSessionIdMap.get(userId) != null) {
+                mUserJourneyToSessionIdMap.get(userId).delete(journey);
+            }
+        }
     }
 
     private static class UserProgressListener extends IProgressListener.Stub {
