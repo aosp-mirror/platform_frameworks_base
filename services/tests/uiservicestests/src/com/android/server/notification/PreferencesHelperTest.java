@@ -16,6 +16,9 @@
 package com.android.server.notification;
 
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
@@ -23,6 +26,7 @@ import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
+import static com.android.server.notification.PreferencesHelper.DEFAULT_BUBBLE_PREFERENCE;
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -1094,7 +1098,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                         .getUserLockedFields());
 
         final NotificationChannel update = getChannel();
-        update.setAllowBubbles(false);
+        update.setAllowBubbles(true);
         mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, update, true);
         assertEquals(NotificationChannel.USER_LOCKED_ALLOW_BUBBLE,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, update.getId(), false)
@@ -1734,14 +1738,14 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, pkgPair);
         mHelper.setNotificationDelegate(PKG_O, UID_O, "", 1);
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_NONE);
-        mHelper.setBubblesAllowed(PKG_O, UID_O, false);
+        mHelper.setBubblesAllowed(PKG_O, UID_O, DEFAULT_BUBBLE_PREFERENCE);
         mHelper.setShowBadge(PKG_O, UID_O, false);
         mHelper.setAppImportanceLocked(PKG_O, UID_O);
 
         mHelper.clearData(PKG_O, UID_O);
 
         assertEquals(IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG_O, UID_O));
-        assertTrue(mHelper.areBubblesAllowed(PKG_O, UID_O));
+        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), DEFAULT_BUBBLE_PREFERENCE);
         assertTrue(mHelper.canShowBadge(PKG_O, UID_O));
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
         assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
@@ -2412,21 +2416,21 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAllowBubbles_defaults() throws Exception {
-        assertTrue(mHelper.areBubblesAllowed(PKG_O, UID_O));
+    public void testBubblePreference_defaults() throws Exception {
+        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_NONE);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
-        assertTrue(mHelper.areBubblesAllowed(PKG_O, UID_O));
+        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_NONE);
         assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
     }
 
     @Test
-    public void testAllowBubbles_xml() throws Exception {
-        mHelper.setBubblesAllowed(PKG_O, UID_O, false);
-        assertFalse(mHelper.areBubblesAllowed(PKG_O, UID_O));
+    public void testBubblePreference_xml() throws Exception {
+        mHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_NONE);
+        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_NONE);
         assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE,
                 mHelper.getAppLockedFields(PKG_O, UID_O));
 
@@ -2434,7 +2438,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
-        assertFalse(mHelper.areBubblesAllowed(PKG_O, UID_O));
+        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_NONE);
         assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE,
                 mHelper.getAppLockedFields(PKG_O, UID_O));
     }
@@ -2766,9 +2770,29 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testSetBubblesAllowed_false() {
-        mHelper.setBubblesAllowed(PKG_O, UID_O, false);
-        assertFalse(mHelper.areBubblesAllowed(PKG_O, UID_O));
+    public void testSetBubblesAllowed_none() {
+        // Change it to non-default first
+        mHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_ALL);
+        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_ALL);
+        verify(mHandler, times(1)).requestSort();
+        reset(mHandler);
+        // Now test
+        mHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_NONE);
+        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_NONE);
+        verify(mHandler, times(1)).requestSort();
+    }
+
+    @Test
+    public void testSetBubblesAllowed_all() {
+        mHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_ALL);
+        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_ALL);
+        verify(mHandler, times(1)).requestSort();
+    }
+
+    @Test
+    public void testSetBubblesAllowed_selected() {
+        mHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_SELECTED);
+        assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_SELECTED);
         verify(mHandler, times(1)).requestSort();
     }
 
