@@ -185,6 +185,9 @@ public class AudioService extends IAudioService.Stub
 
     private static final String TAG = "AS.AudioService";
 
+    private final AudioSystemAdapter mAudioSystem;
+    private final SystemServerAdapter mSystemServer;
+
     /** Debug audio mode */
     protected static final boolean DEBUG_MODE = false;
 
@@ -649,9 +652,18 @@ public class AudioService extends IAudioService.Stub
 
     /** @hide */
     public AudioService(Context context) {
+        this(context, AudioSystemAdapter.getDefaultAdapter(),
+                SystemServerAdapter.getDefaultAdapter(context));
+    }
+
+    public AudioService(Context context, AudioSystemAdapter audioSystem,
+            SystemServerAdapter systemServer) {
         mContext = context;
         mContentResolver = context.getContentResolver();
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
+
+        mAudioSystem = audioSystem;
+        mSystemServer = systemServer;
 
         mPlatformType = AudioSystem.getPlatformType(context);
 
@@ -842,11 +854,13 @@ public class AudioService extends IAudioService.Stub
 
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
 
-        LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
+        if (mSystemServer.isPrivileged()) {
+            LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
 
-        mUserManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
+            mUserManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
 
-        mRecordMonitor.initMonitor();
+            mRecordMonitor.initMonitor();
+        }
 
         final float[] preScale = new float[3];
         preScale[0] = mContext.getResources().getFraction(
@@ -935,7 +949,7 @@ public class AudioService extends IAudioService.Stub
 
         onIndicateSystemReady();
 
-        mMicMuteFromSystemCached = AudioSystem.isMicrophoneMuted();
+        mMicMuteFromSystemCached = mAudioSystem.isMicrophoneMuted();
         setMicMuteFromSwitchInput();
     }
 
@@ -1636,12 +1650,15 @@ public class AudioService extends IAudioService.Stub
         }
 
         if (currentImeUid != mCurrentImeUid || forceUpdate) {
-            AudioSystem.setCurrentImeUid(currentImeUid);
+            mAudioSystem.setCurrentImeUid(currentImeUid);
             mCurrentImeUid = currentImeUid;
         }
     }
 
     private void readPersistedSettings() {
+        if (!mSystemServer.isPrivileged()) {
+            return;
+        }
         final ContentResolver cr = mContentResolver;
 
         int ringerModeFromSettings =
@@ -1712,6 +1729,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void readUserRestrictions() {
+        if (!mSystemServer.isPrivileged()) {
+            return;
+        }
         final int currentUser = getCurrentUserId();
 
         // Check the current user restriction.
@@ -2782,6 +2802,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void sendBroadcastToAll(Intent intent) {
+        if (!mSystemServer.isPrivileged()) {
+            return;
+        }
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final long ident = Binder.clearCallingIdentity();
@@ -3174,12 +3197,12 @@ public class AudioService extends IAudioService.Stub
         }
         // only mute for the current user
         if (getCurrentUserId() == userId || userId == android.os.Process.SYSTEM_UID) {
-            final boolean currentMute = AudioSystem.isMicrophoneMuted();
+            final boolean currentMute = mAudioSystem.isMicrophoneMuted();
             final long identity = Binder.clearCallingIdentity();
-            final int ret = AudioSystem.muteMicrophone(muted);
+            final int ret = mAudioSystem.muteMicrophone(muted);
 
             // update cache with the real state independently from what was set
-            mMicMuteFromSystemCached = AudioSystem.isMicrophoneMuted();
+            mMicMuteFromSystemCached = mAudioSystem.isMicrophoneMuted();
             if (ret != AudioSystem.AUDIO_STATUS_OK) {
                 Log.e(TAG, "Error changing mic mute state to " + muted + " current:"
                         + mMicMuteFromSystemCached);
@@ -4518,6 +4541,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void broadcastRingerMode(String action, int ringerMode) {
+        if (!mSystemServer.isPrivileged()) {
+            return;
+        }
         // Send sticky broadcast
         Intent broadcast = new Intent(action);
         broadcast.putExtra(AudioManager.EXTRA_RINGER_MODE, ringerMode);
@@ -4527,6 +4553,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void broadcastVibrateSetting(int vibrateType) {
+        if (!mSystemServer.isPrivileged()) {
+            return;
+        }
         // Send broadcast
         if (mActivityManagerInternal.isSystemReady()) {
             Intent broadcast = new Intent(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
@@ -5258,6 +5287,9 @@ public class AudioService extends IAudioService.Stub
         }
 
         public int observeDevicesForStream_syncVSS(boolean checkOthers) {
+            if (!mSystemServer.isPrivileged()) {
+                return AudioSystem.DEVICE_NONE;
+            }
             final int devices = AudioSystem.getDevicesForStream(mStreamType);
             if (devices == mObservedDevices) {
                 return devices;
@@ -5998,10 +6030,7 @@ public class AudioService extends IAudioService.Stub
                     break;
 
                 case MSG_BROADCAST_MICROPHONE_MUTE:
-                    mContext.sendBroadcastAsUser(
-                            new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
-                                    .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                                    UserHandle.ALL);
+                    mSystemServer.sendMicrophoneMuteChangedIntent();
                     break;
             }
         }
