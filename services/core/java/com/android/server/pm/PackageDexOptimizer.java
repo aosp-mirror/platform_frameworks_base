@@ -22,6 +22,7 @@ import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
 import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
 import static com.android.server.pm.Installer.DEXOPT_ENABLE_HIDDEN_API_CHECKS;
 import static com.android.server.pm.Installer.DEXOPT_FORCE;
+import static com.android.server.pm.Installer.DEXOPT_FOR_RESTORE;
 import static com.android.server.pm.Installer.DEXOPT_GENERATE_APP_IMAGE;
 import static com.android.server.pm.Installer.DEXOPT_GENERATE_COMPACT_DEX;
 import static com.android.server.pm.Installer.DEXOPT_IDLE_BACKGROUND_JOB;
@@ -706,6 +707,7 @@ public class PackageDexOptimizer {
                 | (options.isDexoptIdleBackgroundJob() ? DEXOPT_IDLE_BACKGROUND_JOB : 0)
                 | (generateCompactDex ? DEXOPT_GENERATE_COMPACT_DEX : 0)
                 | (generateAppImage ? DEXOPT_GENERATE_APP_IMAGE : 0)
+                | (options.isDexoptInstallForRestore() ? DEXOPT_FOR_RESTORE : 0)
                 | hiddenApiFlag;
         return adjustDexoptFlags(dexFlags);
     }
