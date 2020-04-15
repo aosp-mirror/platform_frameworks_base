@@ -72,13 +72,13 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
     Object mLock = new Object();
 
+
     UserInfo mZero = new UserInfo(0, "zero", 0);
     UserInfo mTen = new UserInfo(10, "ten", 0);
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
         getContext().setMockPackageManager(mPm);
         getContext().addMockSystemService(Context.USER_SERVICE, mUm);
         mAssistants = spy(mNm.new NotificationAssistants(getContext(), mLock, mUserProfiles, miPm));
@@ -122,7 +122,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
     @Test
     public void testXmlUpgradeExistingApprovedComponents() throws Exception {
-        String xml = "<enabled_assistants>"
+        String xml = "<enabled_assistants version=\"2\" defaults=\"b\\b\">"
                 + "<service_listing approved=\"b/b\" user=\"10\" primary=\"true\" />"
                 + "</enabled_assistants>";
 
