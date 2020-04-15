@@ -193,7 +193,8 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                     mBackgroundColor,
                     mActions,
                     compactActions,
-                    notif.contentIntent);
+                    notif.contentIntent,
+                    sbn.getKey());
             QSPanel bigPanel = ctrl.getNotificationShadeView().findViewById(
                     com.android.systemui.R.id.quick_settings_panel);
             bigPanel.addMediaSession(token,
@@ -201,7 +202,8 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                     tintColor,
                     mBackgroundColor,
                     mActions,
-                    sbn);
+                    sbn,
+                    sbn.getKey());
         }
 
         boolean showCompactSeekbar = mMediaManager.getShowCompactMediaSeekbar();
