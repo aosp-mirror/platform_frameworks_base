@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -492,6 +493,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * The launching activity which is using fixed rotation transformation.
      *
      * @see #handleTopActivityLaunchingInDifferentOrientation
+     * @see DisplayRotation#shouldRotateSeamlessly
      */
     ActivityRecord mFixedRotationLaunchingApp;
 
@@ -1244,7 +1246,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (configChanged) {
             mWaitingForConfig = true;
-            mWmService.startFreezingDisplayLocked(0 /* exitAnim */, 0 /* enterAnim */, this);
+            mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
             sendNewConfiguration();
         }
 
@@ -1482,6 +1484,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             sendNewConfiguration();
             return true;
         }
+        // The display won't rotate (e.g. the orientation from sensor has updated again before
+        // applying rotation to display), so clear it to stop using seamless rotation.
+        mFixedRotationLaunchingApp = null;
         return false;
     }
 
@@ -3464,11 +3469,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void updateImeParent() {
-        // Force attaching IME to the display when magnifying, or it would be magnified with
-        // target app together.
-        final boolean shouldAttachToDisplay = (mMagnificationSpec != null);
-        final SurfaceControl newParent =
-                shouldAttachToDisplay ? mWindowContainers.getSurfaceControl() : computeImeParent();
+        final SurfaceControl newParent = computeImeParent();
         if (newParent != null) {
             getPendingTransaction().reparent(mImeWindowsContainers.mSurfaceControl, newParent);
             scheduleAnimation();
@@ -3480,16 +3481,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     @VisibleForTesting
     SurfaceControl computeImeParent() {
+        // Force attaching IME to the display when magnifying, or it would be magnified with
+        // target app together.
+        final boolean allowAttachToApp = (mMagnificationSpec == null);
 
         // Attach it to app if the target is part of an app and such app is covering the entire
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
-        if (isImeAttachedToApp()) {
+        if (allowAttachToApp && isImeAttachedToApp()) {
             return mInputMethodTarget.mActivityRecord.getSurfaceControl();
         }
 
-        // Otherwise, we just attach it to the display.
-        return mWindowContainers.getSurfaceControl();
+        // Otherwise, we just attach it to where the display area policy put it.
+        return mImeWindowsContainers.getParent().getSurfaceControl();
     }
 
     void setLayoutNeeded() {
@@ -4734,6 +4738,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mWindowContainers.getSurfaceControl();
     }
 
+    @VisibleForTesting
+    WindowContainer<?> getImeContainer() {
+        return mImeWindowsContainers;
+    }
+
     SurfaceControl getOverlayLayer() {
         return mOverlayContainers.getSurfaceControl();
     }
@@ -5040,6 +5049,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return activityType == ACTIVITY_TYPE_STANDARD
                 && (windowingMode == WINDOWING_MODE_FULLSCREEN
                 || windowingMode == WINDOWING_MODE_FREEFORM
+                || windowingMode == WINDOWING_MODE_PINNED
                 || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                 || windowingMode == WINDOWING_MODE_MULTI_WINDOW);
     }

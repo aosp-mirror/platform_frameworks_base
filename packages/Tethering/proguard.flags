@@ -1,5 +1,5 @@
 # Keep class's integer static field for MessageUtils to parsing their name.
--keep class com.android.server.connectivity.tethering.Tethering$TetherMasterSM {
+-keep class com.android.networkstack.tethering.Tethering$TetherMasterSM {
     static final int CMD_*;
     static final int EVENT_*;
 }

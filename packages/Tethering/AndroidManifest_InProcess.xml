@@ -22,9 +22,10 @@
           android:process="system">
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29" />
     <application>
-        <service android:name="com.android.server.connectivity.tethering.TetheringService"
+        <service android:name="com.android.networkstack.tethering.TetheringService"
                  android:process="system"
-                 android:permission="android.permission.MAINLINE_NETWORK_STACK">
+                 android:permission="android.permission.MAINLINE_NETWORK_STACK"
+                 android:exported="true">
             <intent-filter>
                 <action android:name="android.net.ITetheringConnector.InProcess"/>
             </intent-filter>

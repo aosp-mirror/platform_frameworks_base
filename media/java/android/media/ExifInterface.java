@@ -31,6 +31,7 @@ import android.system.OsConstants;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
@@ -586,7 +587,9 @@ public class ExifInterface {
     private static final int WEBP_CHUNK_SIZE_BYTE_LENGTH = 4;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @GuardedBy("sFormatter")
     private static SimpleDateFormat sFormatter;
+    @GuardedBy("sFormatterTz")
     private static SimpleDateFormat sFormatterTz;
 
     // See Exchangeable image file format for digital still cameras: Exif version 2.2.
@@ -2426,12 +2429,17 @@ public class ExifInterface {
         try {
             // The exif field is in local time. Parsing it as if it is UTC will yield time
             // since 1/1/1970 local time
-            Date datetime = sFormatter.parse(dateTimeString, pos);
+            Date datetime;
+            synchronized (sFormatter) {
+                datetime = sFormatter.parse(dateTimeString, pos);
+            }
 
             if (offsetString != null) {
                 dateTimeString = dateTimeString + " " + offsetString;
                 ParsePosition position = new ParsePosition(0);
-                datetime = sFormatterTz.parse(dateTimeString, position);
+                synchronized (sFormatterTz) {
+                    datetime = sFormatterTz.parse(dateTimeString, position);
+                }
             }
 
             if (datetime == null) return -1;
@@ -2473,7 +2481,10 @@ public class ExifInterface {
 
         ParsePosition pos = new ParsePosition(0);
         try {
-            Date datetime = sFormatter.parse(dateTimeString, pos);
+            final Date datetime;
+            synchronized (sFormatter) {
+                datetime = sFormatter.parse(dateTimeString, pos);
+            }
             if (datetime == null) return -1;
             return datetime.getTime();
         } catch (IllegalArgumentException e) {

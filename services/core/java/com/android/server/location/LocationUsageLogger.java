@@ -16,7 +16,7 @@
 
 package com.android.server.location;
 
-import static com.android.server.LocationManagerService.TAG;
+import static com.android.server.location.LocationManagerService.TAG;
 
 import android.app.ActivityManager;
 import android.location.Geofence;

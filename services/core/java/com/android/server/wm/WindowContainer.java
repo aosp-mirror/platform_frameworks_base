@@ -737,6 +737,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return parent != null ? parent.getDisplayArea() : null;
     }
 
+    boolean isAttached() {
+        return getDisplayArea() != null;
+    }
+
     void setWaitingForDrawnIfResizingChanged() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
