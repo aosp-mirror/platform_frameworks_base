@@ -850,7 +850,7 @@ public final class MediaParser {
     private final InputReadingDataSource mDataSource;
     private final DataReaderAdapter mScratchDataReaderAdapter;
     private final ParsableByteArrayAdapter mScratchParsableByteArrayAdapter;
-    private String mExtractorName;
+    private String mParserName;
     private Extractor mExtractor;
     private ExtractorInput mExtractorInput;
     private long mPendingSeekPosition;
@@ -924,7 +924,7 @@ public final class MediaParser {
     @NonNull
     @ParserName
     public String getParserName() {
-        return mExtractorName;
+        return mParserName;
     }
 
     /**
@@ -958,15 +958,15 @@ public final class MediaParser {
 
         // TODO: Apply parameters when creating extractor instances.
         if (mExtractor == null) {
-            if (!mExtractorName.equals(PARSER_NAME_UNKNOWN)) {
-                mExtractor = EXTRACTOR_FACTORIES_BY_NAME.get(mExtractorName).createInstance();
+            if (!mParserName.equals(PARSER_NAME_UNKNOWN)) {
+                mExtractor = createExtractor(mParserName);
                 mExtractor.init(new ExtractorOutputAdapter());
             } else {
                 for (String parserName : mParserNamesPool) {
                     Extractor extractor = createExtractor(parserName);
                     try {
                         if (extractor.sniff(mExtractorInput)) {
-                            mExtractorName = parserName;
+                            mParserName = parserName;
                             mExtractor = extractor;
                             mExtractor.init(new ExtractorOutputAdapter());
                             break;
@@ -1044,7 +1044,7 @@ public final class MediaParser {
         mParserParameters = new HashMap<>();
         mOutputConsumer = outputConsumer;
         mParserNamesPool = parserNamesPool;
-        mExtractorName = sniff ? PARSER_NAME_UNKNOWN : parserNamesPool[0];
+        mParserName = sniff ? PARSER_NAME_UNKNOWN : parserNamesPool[0];
         mPositionHolder = new PositionHolder();
         mDataSource = new InputReadingDataSource();
         removePendingSeek();
@@ -1090,7 +1090,7 @@ public final class MediaParser {
                         getBooleanParameter(PARAMETER_MP4_IGNORE_EDIT_LISTS)
                                 ? Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS
                                 : 0;
-                return new Mp4Extractor();
+                return new Mp4Extractor(flags);
             case PARSER_NAME_MP3:
                 flags |=
                         getBooleanParameter(PARAMETER_MP3_DISABLE_ID3)
