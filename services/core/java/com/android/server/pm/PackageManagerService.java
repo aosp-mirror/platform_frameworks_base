@@ -24651,6 +24651,14 @@ public class PackageManagerService extends IPackageManager.Stub
             return packageName.equals(
                     PackageManagerService.this.ensureSystemPackageName(packageName));
         }
+
+        @Override
+        public void clearBlockUninstallForUser(@UserIdInt int userId) {
+            synchronized (mLock) {
+                mSettings.clearBlockUninstallLPw(userId);
+                mSettings.writePackageRestrictionsLPr(userId);
+            }
+        }
     }
 
     @GuardedBy("mLock")

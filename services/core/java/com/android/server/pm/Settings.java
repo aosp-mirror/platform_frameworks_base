@@ -1829,6 +1829,10 @@ public final class Settings {
         }
     }
 
+    void clearBlockUninstallLPw(int userId) {
+        mBlockUninstallPackages.remove(userId);
+    }
+
     boolean getBlockUninstallLPr(int userId, String packageName) {
         ArraySet<String> packages = mBlockUninstallPackages.get(userId);
         if (packages == null) {

@@ -8766,6 +8766,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         clearUserPoliciesLocked(userId);
         clearOverrideApnUnchecked();
         clearApplicationRestrictions(userId);
+        mInjector.getPackageManagerInternal().clearBlockUninstallForUser(userId);
 
         mOwners.clearDeviceOwner();
         mOwners.writeDeviceOwner();

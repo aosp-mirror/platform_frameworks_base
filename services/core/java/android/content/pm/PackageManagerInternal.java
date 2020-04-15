@@ -977,4 +977,9 @@ public abstract class PackageManagerInternal {
      * Returns if a package name is a valid system package.
      */
     public abstract boolean isSystemPackage(@NonNull String packageName);
+
+    /**
+     * Unblocks uninstall for all packages for the user.
+     */
+    public abstract void clearBlockUninstallForUser(@UserIdInt int userId);
 }
