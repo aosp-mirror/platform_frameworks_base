@@ -79,6 +79,10 @@ public class DexManager {
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST =
             "pm.dexopt.priv-apps-oob-list";
 
+    // System server cannot load executable code outside system partitions.
+    // However it can load verification data - thus we pick the "verify" compiler filter.
+    private static final String SYSTEM_SERVER_COMPILER_FILTER = "verify";
+
     private final Context mContext;
 
     // Maps package name to code locations.
@@ -443,6 +447,14 @@ public class DexManager {
      *         because they don't need to be compiled)..
      */
     public boolean dexoptSecondaryDex(DexoptOptions options) {
+        if (PLATFORM_PACKAGE_NAME.equals(options.getPackageName())) {
+            // We could easily redirect to #dexoptSystemServer in this case. But there should be
+            // no-one calling this method directly for system server.
+            // As such we prefer to abort in this case.
+            Slog.wtf(TAG, "System server jars should be optimized with dexoptSystemServer");
+            return false;
+        }
+
         PackageDexOptimizer pdo = getPackageDexOptimizer(options);
         String packageName = options.getPackageName();
         PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
@@ -501,8 +513,17 @@ public class DexManager {
             return PackageDexOptimizer.DEX_OPT_FAILED;
         }
 
-        PackageDexOptimizer pdo = getPackageDexOptimizer(options);
-        String packageName = options.getPackageName();
+        // Override compiler filter for system server to the expected one.
+        //
+        // We could let the caller do this every time the invoke PackageManagerServer#dexopt.
+        // However, there are a few places were this will need to be done which creates
+        // redundancy and the danger of overlooking the config (and thus generating code that will
+        // waste storage and time).
+        DexoptOptions overriddenOptions = options.overrideCompilerFilter(
+                SYSTEM_SERVER_COMPILER_FILTER);
+
+        PackageDexOptimizer pdo = getPackageDexOptimizer(overriddenOptions);
+        String packageName = overriddenOptions.getPackageName();
         PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
         if (useInfo.getDexUseInfoMap().isEmpty()) {
             if (DEBUG) {
@@ -527,7 +548,7 @@ public class DexManager {
                 continue;
             }
 
-            int newResult = pdo.dexoptSystemServerPath(dexPath, dexUseInfo, options);
+            int newResult = pdo.dexoptSystemServerPath(dexPath, dexUseInfo, overriddenOptions);
 
             // The end result is:
             //  - FAILED if any path failed,
@@ -600,6 +621,23 @@ public class DexManager {
                         packageName, dexUseInfo.getOwnerUserId()) || updated;
                 continue;
             }
+
+            // Special handle system server files.
+            // We don't need an installd call because we have permissions to check if the file
+            // exists.
+            if (PLATFORM_PACKAGE_NAME.equals(packageName)) {
+                if (!Files.exists(Paths.get(dexPath))) {
+                    if (DEBUG) {
+                        Slog.w(TAG, "A dex file previously loaded by System Server does not exist "
+                                + " anymore: " + dexPath);
+                    }
+                    updated = mPackageDexUsage.removeUserPackage(
+                            packageName, dexUseInfo.getOwnerUserId()) || updated;
+                }
+                continue;
+            }
+
+            // This is a regular application.
             ApplicationInfo info = pkg.applicationInfo;
             int flags = 0;
             if (info.deviceProtectedDataDir != null &&
