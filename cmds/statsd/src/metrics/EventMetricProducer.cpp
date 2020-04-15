@@ -151,8 +151,7 @@ void EventMetricProducer::onMatchedLogEventInternalLocked(
 
     uint64_t wrapperToken =
             mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
-    const int64_t elapsedTimeNs = truncateTimestampIfNecessary(
-            event.GetTagId(), event.GetElapsedTimestampNs());
+    const int64_t elapsedTimeNs = truncateTimestampIfNecessary(event);
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS, (long long) elapsedTimeNs);
 
     uint64_t eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOMS);

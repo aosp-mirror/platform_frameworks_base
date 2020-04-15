@@ -17,11 +17,12 @@
 #pragma once
 
 #include <android/util/ProtoOutputStream.h>
+
 #include "FieldValue.h"
 #include "HashableDimensionKey.h"
-#include "atoms_info.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "guardrail/StatsdStats.h"
+#include "logd/LogEvent.h"
 
 using android::util::ProtoOutputStream;
 
@@ -93,9 +94,9 @@ bool parseProtoOutputStream(ProtoOutputStream& protoOutput, T* message) {
     return message->ParseFromArray(pbBytes.c_str(), pbBytes.size());
 }
 
-// Checks the blacklist of atoms as well as the blacklisted range of 300,000 - 304,999.
+// Checks the truncate timestamp annotation as well as the blacklisted range of 300,000 - 304,999.
 // Returns the truncated timestamp to the nearest 5 minutes if needed.
-int64_t truncateTimestampIfNecessary(int atomId, int64_t timestampNs);
+int64_t truncateTimestampIfNecessary(const LogEvent& event);
 
 // Checks permission for given pid and uid.
 bool checkPermissionForIds(const char* permission, pid_t pid, uid_t uid);

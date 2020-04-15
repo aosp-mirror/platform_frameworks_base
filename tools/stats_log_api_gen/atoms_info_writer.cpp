@@ -39,9 +39,6 @@ static void write_atoms_info_header_body(FILE* out, const Atoms& atoms) {
     fprintf(out, "\n");
 
     fprintf(out, "struct AtomsInfo {\n");
-    fprintf(out,
-            "  const static std::set<int> "
-            "kTruncatingTimestampAtomBlackList;\n");
     fprintf(out, "  const static std::set<int> kAtomsWithAttributionChain;\n");
     fprintf(out,
             "  const static std::map<int, StateAtomFieldOptions> "
@@ -52,25 +49,6 @@ static void write_atoms_info_header_body(FILE* out, const Atoms& atoms) {
 }
 
 static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
-    std::set<string> kTruncatingAtomNames = {"mobile_radio_power_state_changed",
-                                             "audio_state_changed",
-                                             "call_state_changed",
-                                             "phone_signal_strength_changed",
-                                             "mobile_bytes_transfer_by_fg_bg",
-                                             "mobile_bytes_transfer"};
-    fprintf(out,
-            "const std::set<int> "
-            "AtomsInfo::kTruncatingTimestampAtomBlackList = {\n");
-    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
-         atomIt++) {
-        if (kTruncatingAtomNames.find((*atomIt)->name) != kTruncatingAtomNames.end()) {
-            const string constant = make_constant_name((*atomIt)->name);
-            fprintf(out, "    %d, // %s\n", (*atomIt)->code, constant.c_str());
-        }
-    }
-
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
 
     fprintf(out, "const std::set<int> AtomsInfo::kAtomsWithAttributionChain = {\n");
     for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
