@@ -67,6 +67,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
             if (!mIsOneHandedEnabled || !mDisplayAreaOrganizer.isInOneHanded()) {
                 return;
             }
+            OneHandedEvents.writeEvent(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
             stopOneHanded();
         }
 
@@ -75,6 +76,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
             if (!mIsOneHandedEnabled || !mDisplayAreaOrganizer.isInOneHanded()) {
                 return;
             }
+            OneHandedEvents.writeEvent(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
             stopOneHanded();
         }
     };
