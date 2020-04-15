@@ -74,16 +74,16 @@ public interface RichContentReceiver<T extends View> {
      *
      * @hide
      */
-    @IntDef(prefix = {"SOURCE_"}, value = {SOURCE_MENU, SOURCE_INPUT_METHOD, SOURCE_DRAG_AND_DROP,
-            SOURCE_AUTOFILL, SOURCE_PROCESS_TEXT})
+    @IntDef(prefix = {"SOURCE_"}, value = {SOURCE_CLIPBOARD, SOURCE_INPUT_METHOD,
+            SOURCE_DRAG_AND_DROP, SOURCE_AUTOFILL, SOURCE_PROCESS_TEXT})
     @Retention(RetentionPolicy.SOURCE)
     @interface Source {}
 
     /**
-     * Specifies that the operation was triggered from the insertion/selection menu ("Paste" or
-     * "Paste as plain text" action).
+     * Specifies that the operation was triggered by a paste from the clipboard (e.g. "Paste" or
+     * "Paste as plain text" action in the insertion/selection menu).
      */
-    int SOURCE_MENU = 0;
+    int SOURCE_CLIPBOARD = 0;
 
     /**
      * Specifies that the operation was triggered from the soft keyboard (also known as input method
@@ -131,7 +131,7 @@ public interface RichContentReceiver<T extends View> {
      * <p>For editable {@link TextView} components, this function will be invoked for the
      * following scenarios:
      * <ol>
-     *     <li>Paste from the clipboard ("Paste" and "Paste as plain text" actions in the
+     *     <li>Paste from the clipboard (e.g. "Paste" or "Paste as plain text" action in the
      *     insertion/selection menu)
      *     <li>Content insertion from the keyboard ({@link InputConnection#commitContent})
      *     <li>Drag and drop ({@link View#onDragEvent})

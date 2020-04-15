@@ -12843,7 +12843,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
         int flags = withFormatting ? 0 : RichContentReceiver.FLAG_CONVERT_TO_PLAIN_TEXT;
-        mRichContentReceiver.onReceive(this, clip, RichContentReceiver.SOURCE_MENU, flags);
+        mRichContentReceiver.onReceive(this, clip, RichContentReceiver.SOURCE_CLIPBOARD, flags);
         sLastCutCopyOrTextChangedTime = 0;
     }
 
@@ -13649,7 +13649,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * <p>This callback will be invoked for the following scenarios:
      * <ol>
-     *     <li>Paste from the clipboard ("Paste" and "Paste as plain text" actions in the
+     *     <li>Paste from the clipboard (e.g. "Paste" or "Paste as plain text" action in the
      *     insertion/selection menu)
      *     <li>Content insertion from the keyboard ({@link InputConnection#commitContent})
      *     <li>Drag and drop ({@link View#onDragEvent})
