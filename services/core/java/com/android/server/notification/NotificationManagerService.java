@@ -156,6 +156,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -2300,7 +2301,8 @@ public class NotificationManagerService extends SystemService {
             mRoleObserver.init();
             LauncherApps launcherApps =
                     (LauncherApps) getContext().getSystemService(Context.LAUNCHER_APPS_SERVICE);
-            mShortcutHelper = new ShortcutHelper(launcherApps, mShortcutListener);
+            mShortcutHelper = new ShortcutHelper(launcherApps, mShortcutListener, getLocalService(
+                    ShortcutServiceInternal.class));
             BubbleExtractor bubbsExtractor = mRankingHelper.findExtractor(BubbleExtractor.class);
             if (bubbsExtractor != null) {
                 bubbsExtractor.setShortcutHelper(mShortcutHelper);
