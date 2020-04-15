@@ -89,9 +89,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.function.Supplier;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
 public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
@@ -656,8 +656,10 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         String callerPackageName = getCallerPackageName();
         if (callerPackageName == null) {
             throw new SecurityException(
-                    "Only system packages specified in config_integrityRuleProviderPackages are"
-                            + " allowed to call this method.");
+                    String.format(
+                            "Only system packages specified in config_integrityRuleProviderPackages"
+                                    + " are allowed to call this method. These packages are %s.",
+                            getAllowedRuleProviders().toString()));
         }
         return callerPackageName;
     }
@@ -674,7 +676,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                     if (isSystemApp(packageName)) {
                         return packageName;
                     }
+                    Slog.i(TAG, "Rule provider package " + packageName + " is not a system app.");
                 }
+                Slog.i(TAG, "Package " + packageName + " is not among calling package list.");
             } catch (PackageManager.NameNotFoundException e) {
                 // Ignore the exception. We don't expect the app to be necessarily installed.
                 Slog.i(TAG, "Rule provider package " + packageName + " not installed.");
