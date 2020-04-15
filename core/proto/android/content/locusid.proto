@@ -20,8 +20,10 @@ package android.content;
 
 option java_multiple_files = true;
 
+import "frameworks/base/core/proto/android/privacy.proto";
+
 // On disk representation of android.content.LocusId. Currently used by
 // com.android.server.people.ConversationInfoProto.
 message LocusIdProto {
-  optional string locus_id = 1;
+    optional string locus_id = 1 [(.android.privacy).dest = DEST_EXPLICIT];
 }

@@ -28,13 +28,3 @@ cc_library_static {
         "android/bluetooth/smp/enums.proto",
     ],
 }
-
-java_library_host {
-    name: "protolog-proto",
-    srcs: [
-        "android/server/protolog.proto"
-    ],
-    proto: {
-        type: "full",
-    },
-}

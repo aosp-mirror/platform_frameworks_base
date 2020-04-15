@@ -104,7 +104,7 @@ message P2pLinkManagerProto {
     optional int32 send_flags = 5;
     optional bool send_enabled = 6;
     optional bool receive_enabled = 7;
-    optional string callback_ndef = 8;
+    optional string callback_ndef = 8 [(.android.privacy).dest = DEST_EXPLICIT];
     optional .android.nfc.NdefMessageProto message_to_send = 9;
     repeated string uris_to_send = 10 [(.android.privacy).dest = DEST_EXPLICIT];
 }

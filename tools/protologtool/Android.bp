@@ -6,7 +6,7 @@ java_library_host {
     static_libs: [
         "protolog-common",
         "javaparser",
-        "protolog-proto",
+        "platformprotos",
         "jsonlib",
     ],
 }

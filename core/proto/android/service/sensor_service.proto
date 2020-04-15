@@ -166,7 +166,7 @@ message SensorEventsProto {
     message RecentEventsLog {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional string name = 1;
+        optional string name = 1 [(.android.privacy).dest = DEST_EXPLICIT];
         optional int32 recent_events_count = 2;
         repeated Event events = 3;
     }

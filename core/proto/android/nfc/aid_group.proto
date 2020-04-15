@@ -23,7 +23,7 @@ option java_multiple_files = true;
 
 // Debugging information for android.nfc.cardemulation.AidGroup
 message AidGroupProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_EXPLICIT;
 
     optional string category = 1;
     // A group of Application Identifiers. A hexadecimal string, with an even amount of hexadecimal

@@ -75,8 +75,8 @@ message EnabledNfcFServicesProto {
 message RegisteredAidCacheProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
     message AidCacheEntry {
-        optional string key = 1;
-        optional string category = 2;
+        optional string key = 1 [(.android.privacy).dest = DEST_EXPLICIT];
+        optional string category = 2 [(.android.privacy).dest = DEST_EXPLICIT];
         optional .android.content.ComponentNameProto default_component = 3;
         repeated .android.nfc.cardemulation.ApduServiceInfoProto services = 4;
     }
@@ -91,7 +91,7 @@ message AidRoutingManagerProto {
     message Route {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
         optional int32 id = 1;
-        repeated string aids = 2;
+        repeated string aids = 2 [(.android.privacy).dest = DEST_EXPLICIT];
     }
     optional int32 default_route = 1;
     repeated Route routes = 2;
@@ -108,7 +108,7 @@ message RegisteredT3tIdentifiersCacheProto {
 message SystemCodeRoutingManagerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
     message T3tIdentifier {
-        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+        option (.android.msg_privacy).dest = DEST_EXPLICIT;
         optional string system_code = 1;
         optional string nfcid2 = 2;
     }

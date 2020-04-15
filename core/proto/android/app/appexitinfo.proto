@@ -41,7 +41,7 @@ message ApplicationExitInfoProto {
     optional int64 pss = 11;
     optional int64 rss = 12;
     optional int64 timestamp = 13;
-    optional string description = 14;
+    optional string description = 14 [(.android.privacy).dest = DEST_EXPLICIT];
     optional bytes state = 15;
     optional string trace_file = 16;
 }
