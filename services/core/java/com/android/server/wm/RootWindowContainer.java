@@ -1369,7 +1369,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         calculateDefaultMinimalSizeOfResizeableTasks();
 
         final TaskDisplayArea defaultTaskDisplayArea = getDefaultTaskDisplayArea();
-        defaultTaskDisplayArea.getOrCreateRootHomeTask();
+        defaultTaskDisplayArea.getOrCreateRootHomeTask(ON_TOP);
         positionChildAt(POSITION_TOP, defaultTaskDisplayArea.mDisplayContent,
                 false /* includingParents */);
     }
