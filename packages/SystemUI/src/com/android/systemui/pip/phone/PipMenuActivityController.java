@@ -30,6 +30,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
@@ -122,7 +123,7 @@ public class PipMenuActivityController {
     private boolean mStartActivityRequested;
     private long mStartActivityRequestedTime;
     private Messenger mToActivityMessenger;
-    private Handler mHandler = new Handler() {
+    private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -133,15 +134,15 @@ public class PipMenuActivityController {
                     break;
                 }
                 case MESSAGE_EXPAND_PIP: {
-                    mListeners.forEach(l -> l.onPipExpand());
+                    mListeners.forEach(Listener::onPipExpand);
                     break;
                 }
                 case MESSAGE_DISMISS_PIP: {
-                    mListeners.forEach(l -> l.onPipDismiss());
+                    mListeners.forEach(Listener::onPipDismiss);
                     break;
                 }
                 case MESSAGE_SHOW_MENU: {
-                    mListeners.forEach(l -> l.onPipShowMenu());
+                    mListeners.forEach(Listener::onPipShowMenu);
                     break;
                 }
                 case MESSAGE_UPDATE_ACTIVITY_CALLBACK: {
@@ -259,6 +260,8 @@ public class PipMenuActivityController {
         if (DEBUG) {
             Log.d(TAG, "showMenu() state=" + menuState
                     + " hasActivity=" + (mToActivityMessenger != null)
+                    + " allowMenuTimeout=" + allowMenuTimeout
+                    + " willResizeMenu=" + willResizeMenu
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
 
