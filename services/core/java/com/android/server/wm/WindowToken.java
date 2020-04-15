@@ -632,6 +632,15 @@ class WindowToken extends WindowContainer<WindowState> {
         }
     }
 
+    @Override
+    void resetSurfacePositionForAnimationLeash(SurfaceControl.Transaction t) {
+        // Keep the transformed position to animate because the surface will show in different
+        // rotation than the animator of leash.
+        if (!isFixedRotationTransforming()) {
+            super.resetSurfacePositionForAnimationLeash(t);
+        }
+    }
+
     /**
      * Gives a chance to this {@link WindowToken} to adjust the {@link
      * android.view.WindowManager.LayoutParams} of its windows.
