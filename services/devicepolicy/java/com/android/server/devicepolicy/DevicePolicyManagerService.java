@@ -2703,7 +2703,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final ComponentName doAdminReceiver = doAdmin.info.getComponent();
         clearDeviceOwnerLocked(doAdmin, doUserId);
         Slog.i(LOG_TAG, "Removing admin artifacts...");
-        // TODO(b/149075700): Clean up application restrictions in UserManager.
         removeAdminArtifacts(doAdminReceiver, doUserId);
         Slog.i(LOG_TAG, "Migration complete.");
 
@@ -8766,6 +8765,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         saveSettingsLocked(UserHandle.USER_SYSTEM);
         clearUserPoliciesLocked(userId);
         clearOverrideApnUnchecked();
+        clearApplicationRestrictions(userId);
 
         mOwners.clearDeviceOwner();
         mOwners.writeDeviceOwner();
@@ -8777,6 +8777,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         setNetworkLoggingActiveInternal(false);
         deleteTransferOwnershipBundleLocked(userId);
         toggleBackupServiceActive(UserHandle.USER_SYSTEM, true);
+    }
+
+    private void clearApplicationRestrictions(int userId) {
+        // Changing app restrictions involves disk IO, offload it to the background thread.
+        mBackgroundHandler.post(() -> {
+            final List<PackageInfo> installedPackageInfos = mInjector.getPackageManager(userId)
+                    .getInstalledPackages(MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE);
+            final UserHandle userHandle = UserHandle.of(userId);
+            for (final PackageInfo packageInfo : installedPackageInfos) {
+                mInjector.getUserManager().setApplicationRestrictions(
+                        packageInfo.packageName, null /* restrictions */, userHandle);
+            }
+        });
     }
 
     @Override
@@ -8898,6 +8911,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         policyData.mOwnerInstalledCaCerts.clear();
         saveSettingsLocked(userId);
         clearUserPoliciesLocked(userId);
+        clearApplicationRestrictions(userId);
         mOwners.removeProfileOwner(userId);
         mOwners.writeProfileOwner(userId);
         deleteTransferOwnershipBundleLocked(userId);
