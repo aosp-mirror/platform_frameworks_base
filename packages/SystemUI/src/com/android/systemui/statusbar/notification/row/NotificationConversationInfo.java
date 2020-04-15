@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.app.Notification.EXTRA_IS_GROUP_CONVERSATION;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
@@ -33,6 +34,7 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -51,6 +53,7 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
@@ -91,6 +94,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     private String mConversationId;
     private StatusBarNotification mSbn;
     private boolean mIsDeviceProvisioned;
+    private int mAppBubble;
 
     private TextView mPriorityDescriptionView;
     private TextView mDefaultDescriptionView;
@@ -206,6 +210,13 @@ public class NotificationConversationInfo extends LinearLayout implements
         mNotificationChannel = NotificationChannelHelper.createConversationChannelIfNeeded(
                 getContext(), mINotificationManager, entry, mNotificationChannel);
 
+        try {
+            mAppBubble = mINotificationManager.getBubblePreferenceForPackage(mPackageName, mAppUid);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "can't reach OS", e);
+            mAppBubble = BUBBLE_PREFERENCE_SELECTED;
+        }
+
         bindHeader();
         bindActions();
 
@@ -226,6 +237,11 @@ public class NotificationConversationInfo extends LinearLayout implements
         Button snooze = findViewById(R.id.snooze);
         snooze.setOnClickListener(mOnSnoozeClick);
         */
+
+        if (mAppBubble == BUBBLE_PREFERENCE_ALL) {
+            ((TextView) findViewById(R.id.default_summary)).setText(getResources().getString(
+                    R.string.notification_channel_summary_default_with_bubbles, mAppName));
+        }
 
         findViewById(R.id.priority).setOnClickListener(mOnFavoriteClick);
         findViewById(R.id.default_behavior).setOnClickListener(mOnDefaultClick);
@@ -264,7 +280,6 @@ public class NotificationConversationInfo extends LinearLayout implements
         // bindName();
         bindPackage();
         bindIcon(mNotificationChannel.isImportantConversation());
-
     }
 
     private void bindIcon(boolean important) {
@@ -560,10 +575,7 @@ public class NotificationConversationInfo extends LinearLayout implements
                                 !mChannelToUpdate.isImportantConversation());
                         if (mChannelToUpdate.isImportantConversation()) {
                             mChannelToUpdate.setAllowBubbles(true);
-                            int currentPref =
-                                    mINotificationManager.getBubblePreferenceForPackage(
-                                            mAppPkg, mAppUid);
-                            if (currentPref == BUBBLE_PREFERENCE_NONE) {
+                            if (mAppBubble == BUBBLE_PREFERENCE_NONE) {
                                 mINotificationManager.setBubblesAllowed(mAppPkg, mAppUid,
                                         BUBBLE_PREFERENCE_SELECTED);
                             }
