@@ -72,6 +72,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
 
         state.value = isRecording || isStarting;
         state.state = (isRecording || isStarting) ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.label = mContext.getString(R.string.quick_settings_screen_record_label);
 
         if (isRecording) {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_screenrecord);
