@@ -1,0 +1,12 @@
+<configuration description="Runs coverage tests for Tethering">
+    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+        <option name="test-file-name" value="TetheringCoverageTests.apk" />
+    </target_preparer>
+
+    <option name="test-tag" value="TetheringCoverageTests" />
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
+        <option name="package" value="com.android.networkstack.tethering.tests.coverage" />
+        <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
+        <option name="hidden-api-checks" value="false"/>
+    </test>
+</configuration>
