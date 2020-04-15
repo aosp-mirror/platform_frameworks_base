@@ -922,8 +922,10 @@ public class Tethering {
                     case WifiManager.WIFI_AP_STATE_ENABLED:
                         enableWifiIpServingLocked(ifname, ipmode);
                         break;
-                    case WifiManager.WIFI_AP_STATE_DISABLED:
                     case WifiManager.WIFI_AP_STATE_DISABLING:
+                        // We can see this state on the way to disabled.
+                        break;
+                    case WifiManager.WIFI_AP_STATE_DISABLED:
                     case WifiManager.WIFI_AP_STATE_FAILED:
                     default:
                         disableWifiIpServingLocked(ifname, curState);
