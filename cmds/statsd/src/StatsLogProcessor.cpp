@@ -139,8 +139,7 @@ void StatsLogProcessor::onPeriodicAlarmFired(
 }
 
 void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const {
-    if (android::util::AtomsInfo::kAtomsWithAttributionChain.find(event->GetTagId()) !=
-        android::util::AtomsInfo::kAtomsWithAttributionChain.end()) {
+    if (event->getAttributionChainIndex() != -1) {
         for (auto& value : *(event->getMutableValues())) {
             if (value.mField.getPosAtDepth(0) > kAttributionField) {
                 break;
