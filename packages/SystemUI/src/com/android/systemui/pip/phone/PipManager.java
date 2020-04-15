@@ -339,18 +339,18 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     @Override
     public void onPipTransitionFinished(ComponentName activity, int direction) {
-        onPipTransitionFinishedOrCanceled();
+        onPipTransitionFinishedOrCanceled(direction);
     }
 
     @Override
     public void onPipTransitionCanceled(ComponentName activity, int direction) {
-        onPipTransitionFinishedOrCanceled();
+        onPipTransitionFinishedOrCanceled(direction);
     }
 
-    private void onPipTransitionFinishedOrCanceled() {
+    private void onPipTransitionFinishedOrCanceled(int direction) {
         // Re-enable touches after the animation completes
         mTouchHandler.setTouchEnabled(true);
-        mTouchHandler.onPinnedStackAnimationEnded();
+        mTouchHandler.onPinnedStackAnimationEnded(direction);
         mMenuController.onPinnedStackAnimationEnded();
     }
 
