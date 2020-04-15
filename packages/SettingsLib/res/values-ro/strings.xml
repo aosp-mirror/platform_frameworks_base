@@ -206,13 +206,13 @@
     <string name="enable_adb" msgid="8072776357237289039">"Remedierea erorilor prin USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Mod de depanare când este conectat USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revoc autorizații remediere a erorilor prin USB"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Remedierea erorilor prin wireless"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Remedierea erorilor wireless"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modul de remediere a erorilor când rețeaua Wi-Fi este conectată"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Eroare"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"Remedierea erorilor prin wireless"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Remedierea erorilor wireless"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Activați remedierea erorilor wireless pentru a vedea și a folosi dispozitivele disponibile"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Asociați dispozitivul folosind codul QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Asociați dispozitive noi folosind scannerul de coduri QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Asociați dispozitive noi folosind scannerul de coduri QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Asociați dispozitivul folosind codul de conectare"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Asociați dispozitive noi folosind codul din șase cifre"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispozitive asociate"</string>
@@ -231,7 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Nu s-a asociat dispozitivul. Codul QR este incorect sau dispozitivul nu este conectat la aceeași rețea."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa IP și portul"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scanați codul QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Asociați dispozitivul prin Wi-Fi scanând un cod QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Asociați dispozitivul prin Wi-Fi scanând un cod QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Conectați-vă la o rețea Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, remedierea erorilor, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Comandă rapidă pentru raportul de erori"</string>
@@ -251,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificare Ecran wireless"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Înregistrare prin Wi-Fi de volume mari de date"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitare căutare de rețele Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Randomizare MAC îmbunătățită prin Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Date mobile permanent active"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accelerare hardware pentru tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afișați dispozitivele Bluetooth fără nume"</string>
@@ -283,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce descărcarea bateriei și îmbunătățește performanța rețelei"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Acest comutator influențează comportamentul de randomizare a adresei MAC numai pentru modul client.\nCând este activat acest mod, toate rețelele care au activată randomizarea adresei MAC pot randomiza din nou adresele MAC în timpul asocierii, în funcție de ora ultimei deconectări a clientului de la rețea. Randomizarea nu se repetă dacă dispozitivul se reconectează în decurs de 4 ore."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Contorizată"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Necontorizată"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensiunile memoriei temporare a jurnalului"</string>
@@ -300,8 +302,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Folosiți accelerarea hardware pentru tethering, dacă este disponibilă"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Permiteți remedierea erorilor prin USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Remedierea erorilor prin USB are exclusiv scopuri de dezvoltare. Utilizați-o pentru a copia date de pe computer pe dispozitiv, pentru a instala aplicații pe dispozitiv fără notificare și pentru a citi datele din jurnale."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Permiteți remedierea erorilor prin wireless?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Remedierea erorilor prin wireless are exclusiv scopuri de dezvoltare. Folosiți-o pentru a copia date de pe computer pe dispozitiv, pentru a instala aplicații pe dispozitiv fără notificare și pentru a citi datele din jurnale."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Permiteți remedierea erorilor wireless?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Remedierea erorilor wireless are exclusiv scopuri de dezvoltare. Folosiți-o pentru a copia date de pe computer pe dispozitiv, pentru a instala aplicații pe dispozitiv fără notificare și pentru a citi datele din jurnale."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Revocați accesul la remedierea erorilor prin USB de pe toate computerele pe care le-ați autorizat anterior?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Permiteți setările pentru dezvoltare?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Aceste setări sunt destinate exclusiv utilizării pentru dezvoltare. Din cauza lor, este posibil ca dispozitivul dvs. și aplicațiile de pe acesta să nu mai funcționeze sau să funcționeze necorespunzător."</string>
@@ -371,6 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Afișați dialogul Aplicația nu răspunde pentru aplicațiile din fundal"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Afișați avertismentele de pe canalul de notificări"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afișați avertisment pe ecran când o aplicație postează o notificare fără canal valid"</string>
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Comenzi rapide pt. notif. de conversație"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Notificările trebuie susținute de o comandă rapidă veche de trimitere ca să apară în secțiunea conversației"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forțați accesul aplicațiilor la stocarea externă"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Faceți ca orice aplicație eligibilă să fie scrisă în stocarea externă, indiferent de valorile manifestului"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forțați redimensionarea activităților"</string>
@@ -417,7 +421,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (roșu-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (albastru-galben)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corecția culorii"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Cu corecția culorii, puteți ajusta modul în care se afișează culorile pe dispozitiv"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Folosind corecția culorii, puteți ajusta modul în care se afișează culorile pe dispozitiv"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Valoare înlocuită de <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Timp aproximativ rămas: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -514,8 +518,12 @@
     <string name="storage_category" msgid="2287342585424631813">"Stocare"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Date la care se permite accesul"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Vedeți și modificați datele la care se permite accesul"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Nu există date la care se permite accesul pentru acest utilizator."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"A apărut o eroare la preluarea datelor la care se permite accesul. Încercați din nou."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID-ul datelor la care se permite accesul: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Expiră pe <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"A apărut o eroare la ștergerea datelor la care se permite accesul."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Nu există închirieri pentru datele la care se permite accesul. Doriți să le ștergeți?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Aplicații care permit accesul la date"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"Aplicația nu oferă nicio descriere."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Închirierea expiră pe <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -540,4 +548,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informații de profil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Înainte de a putea crea un profil cu permisiuni limitate, va trebui să configurați blocarea ecranului pentru a vă proteja aplicațiile și datele personale."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Configurați blocarea"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Comutați la <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Adăugați un invitat"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Ștergeți invitatul"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Invitat"</string>
 </resources>

@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Impossibile cercare reti"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Nessuna"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Salvata"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"Nessuna connessione"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Non connessa"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Disattivata"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Errore configurazione IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Impossibile connettersi a causa della bassa qualità della rete"</string>
@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Debug wireless"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Per trovare e utilizzare i dispositivi disponibili, attiva il debug wireless"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Accoppia il dispositivo con il codice QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Accoppia i nuovi dispositivi utilizzando lo scanner di codici QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Accoppia i nuovi dispositivi utilizzando lo scanner di codici QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Accoppia dispositivo con codice di accoppiamento"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Accoppia i nuovi dispositivi utilizzando un codice di sei cifre"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositivi accoppiati"</string>
@@ -231,7 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Impossibile accoppiare il dispositivo. Il codice QR non era corretto oppure il dispositivo non è connesso alla stessa rete."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Indirizzo IP e porta"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scansiona codice QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Accoppia il dispositivo tramite Wi-Fi eseguendo la scansione di un codice QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Accoppia il dispositivo tramite Wi-Fi scansionando un codice QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Collegati a una rete Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, debug, sviluppatori"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Scorciatoia segnalazione bug"</string>
@@ -251,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificazione display wireless"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Attiva logging dettagliato Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limita ricerca di reti Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Randomizzazione MAC con Wi‑Fi migliorato"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dati mobili sempre attivi"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering accelerazione hardware"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostra dispositivi Bluetooth senza nome"</string>
@@ -275,7 +276,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS privato"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Seleziona modalità DNS privato"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"OFF"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"Off"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatico"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome host del provider DNS privato"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Inserisci il nome host del provider DNS"</string>
@@ -283,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta livello di logging Wi-Fi, mostra SSID RSSI nel selettore Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Riduce il consumo della batteria e migliora le prestazioni della rete"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Questa opzione influenza il comportamento della randomizzazione MAC solo nella modalità client.\nQuando questa modalità è attiva, durante l\'associazione gli indirizzi MAC di tutte le reti con randomizzazione MAC abilitata potrebbero essere nuovamente sottoposti a randomizzazione, a seconda di quando il client è stato disconnesso l\'ultima volta dalla rete. La randomizzazione non viene eseguita nuovamente se il dispositivo si riconnette entro quattro ore."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"A consumo"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non a consumo"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensioni buffer logger"</string>
@@ -371,6 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostra finestra di dialogo ANR per app in background"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostra avvisi canale di notifica"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Viene mostrato un avviso sullo schermo quando un\'app pubblica una notifica senza un canale valido"</string>
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Applica scorciatoie per notifiche delle conversazioni"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Richiedi il supporto di una scorciatoia di condivisione di lunga durata per la visualizzazione delle notifiche nella sezione delle conversazioni"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forza autorizzazione app su memoria esterna"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Consente l\'installazione di qualsiasi app su memoria esterna, indipendentemente dai valori manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Imponi formato modificabile alle attività"</string>
@@ -426,10 +430,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"Tempo rimanente in base al tuo utilizzo (<xliff:g id="LEVEL">%2$s</xliff:g>): <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Tempo stimato rimanente in base al tuo utilizzo: <xliff:g id="TIME">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Tempo stimato rimanente in base al tuo utilizzo: <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"Tempo stimato rimanente: <xliff:g id="TIME">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Tempo stimato rimanente: <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Ora stimata esaurimento batteria in base al tuo utilizzo: <xliff:g id="TIME">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Ora stimata esaurimento batteria in base al tuo utilizzo: <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"Ora stimata esaurimento batteria: <xliff:g id="TIME">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Ora stimata esaurimento batteria: <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Fino alle ore <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"La batteria potrebbe esaurirsi entro <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Tempo rimanente: meno di <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
@@ -454,7 +458,7 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"Carica"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Gestita dall\'amministratore"</string>
     <string name="disabled" msgid="8017887509554714950">"Disattivato"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Consentite"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Autorizzate"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Non consentite"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Installa app sconosciute"</string>
     <string name="home" msgid="973834627243661438">"Home page Impostazioni"</string>
@@ -513,13 +517,17 @@
     <string name="storage_category" msgid="2287342585424631813">"Archiviazione"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Dati condivisi"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Visualizza e modifica i dati condivisi"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Nessun dato condiviso per questo utente."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Si è verificato un errore durante il recupero dei dati condivisi. Riprova."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID dati condivisi: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Scadenza: <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="accessor_info_title" msgid="8289823651512477787">"Dati delle app condivisi"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Si è verificato un errore durante l\'eliminazione dei dati condivisi."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Nessun lease acquisito per questi dati condivisi. Vuoi eliminarli?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"App che condividono dati"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"Nessuna descrizione fornita dall\'app."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Scadenza lease: <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="delete_blob_text" msgid="2819192607255625697">"Elimina dati condivisi"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Eliminare dati condivisi?"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Eliminare i dati condivisi?"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"Gli utenti hanno applicazioni e contenuti personali"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Puoi limitare l\'accesso alle applicazioni e ai contenuti dal tuo account"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utente"</string>
@@ -535,8 +543,12 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Aggiungi"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Nuovo utente"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Nuovo profilo"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Dati utente"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Informazioni utente"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informazioni profilo"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Prima di poter creare un profilo con limitazioni, devi impostare un blocco schermo per proteggere le tue app e i tuoi dati personali."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Imposta blocco"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Passa a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Aggiungi ospite"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Rimuovi ospite"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Ospite"</string>
 </resources>

@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Бежично отклањање грешака"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Да бисте видели и користили доступне уређаје, укључите бежично отклањање грешака"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Упарите уређај помоћу QR кода"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Упарите нове уређаје помоћу читача QR кода"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Упарите нове уређаје помоћу читача QR кода"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Упарите уређај помоћу кода за упаривање"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Упарите нове уређаје помоћу шестоцифреног кода"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Упарени уређаји"</string>
@@ -231,7 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Упаривање уређаја није успело. QR кôд је погрешан или уређај није повезан са истом мрежом."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP адреса и порт"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Скенирај QR кôд"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Упарите уређај помоћу Wi‑Fi мреже или тако што ћете скенирати QR кôд"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Упарите уређај помоћу Wi‑Fi мреже тако што ћете скенирати QR кôд"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Повежите се на Wi-Fi мрежу"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, отклањање грешака, програмер"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Пречица за извештај о грешкама"</string>
@@ -251,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сертификација бежичног екрана"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Омогући детаљнију евиденцију за Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Успоравање Wi-Fi скенирања"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Насумично MAC разврставање по Wi‑Fi‑ју"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобилни подаци су увек активни"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Хардверско убрзање привезивања"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Прикажи Bluetooth уређаје без назива"</string>
@@ -283,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Приказ опција за сертификацију бежичног екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Повећава ниво евидентирања за Wi‑Fi. Приказ по SSID RSSI-у у бирачу Wi‑Fi мреже"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Смањује потрошњу батерије и побољшава учинак мреже"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Овај прекидач утиче на понашање насумичног разврставања MAC адреса само за режим клијента.\nКада се овај режим активира, за мреже на којима је омогућено насумично разврставање MAC адреса може да дође до поновног насумичног разврставања MAC адреса током повезивања, у зависности од тога када се клијент пре тога искључио са мреже. До поновног насумичног разврставања не долази ако се уређај поново повеже за 4 сата или мање."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Са ограничењем"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без ограничења"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Величине бафера података у програму за евидентирање"</string>
@@ -371,6 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Прикажи дијалог Апликација не реагује за апликације у позадини"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Приказуј упозорења због канала за обавештења"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Приказује упозорење на екрану када апликација постави обавештење без важећег канала"</string>
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Примењуј пречице за обавештења о конверзацијама"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Захтева да обавештења имају и дугорочну пречицу за дељење како би се појављивала у одељку за конверзације"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Принудно дозволи апликације у спољној"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Омогућава уписивање свих апликација у спољну меморију, без обзира на вредности манифеста"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Принудно омогући промену величине активности"</string>
@@ -514,8 +518,12 @@
     <string name="storage_category" msgid="2287342585424631813">"Меморијски простор"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Дељени подаци"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Прегледајте и измените дељене податке"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Нема дељених података за овог корисника."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Дошло је до грешке при преузимању дељених података. Пробајте поново."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ИД дељених података: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Истиче: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Дошло је до грешке при брисању дељених података."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Нема купљених закупа за ове дељене податке. Желите ли да их избришете?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Апликације које деле податке"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"У апликацији није наведен ниједан опис."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Изнајмљивање истиче: <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -540,4 +548,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Подаци о профилу"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Да бисте могли да направите ограничени профил, треба да подесите закључавање екрана да бисте заштитили апликације и личне податке."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Подеси закључавање"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Пређи на корисника <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Додај госта"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Уклони госта"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Гост"</string>
 </resources>

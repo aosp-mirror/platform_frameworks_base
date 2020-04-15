@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Þráðlaus villuleit"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Til að sjá og nota tiltæk tæki skal kveikja á þráðlausri villuleit"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Para tæki með QR-kóða"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Para ný tæki með QR-kóðaskanna"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Para ný tæki með QR-kóðaskanna"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Para tæki með pörunarkóða"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Para ný tæki með sex tölustafa kóða"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Pöruð tæki"</string>
@@ -231,9 +231,8 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Ekki tókst að para við tækið. Annað hvort var QR-kóðinn rangur eða tækið ekki tengt sama neti."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-tala og gátt"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skanna QR-kóða"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Tengja tæki með Wi-Fi með því að skanna QR-kóða"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Tengja tæki með Wi-Fi með því að skanna QR-kóða"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Tengstu Wi-Fi neti"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, villuleit, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Flýtileið í villutilkynningu"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Sýna hnapp til að skrá villutilkynningu í valmynd aflrofans"</string>
@@ -252,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Kveikja á ítarlegri skráningu Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Hægja á Wi‑Fi leit"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Slembival MAC-vistfanga með Wi-Fi styrk"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Alltaf kveikt á farsímagögnum"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Vélbúnaðarhröðun fyrir tjóðrun"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Sýna Bluetooth-tæki án heita"</string>
@@ -284,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Sýna valkosti fyrir vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Auka skráningarstig Wi-Fi, sýna RSSI fyrir hvert SSID í Wi-Fi vali"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Dregur úr rafhlöðunotkun og eykur netafköst"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Þessi rofi hefur eingöngu áhrif á slembival MAC-vistfanga fyrir biðlarastillingu.\nÞegar þessi stilling er virk geta öll netkerfi sem eru með slembival MAC-vistfanga virkt látið slembiraða MAC-vistföngum aftur við tengingu, allt eftir því hvenær biðlarinn aftengdist netinu síðast. Endurslembiröðun á sér ekki stað ef tækið tengist aftur innan fjögurra klukkustunda."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mæld notkun"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Notkun ekki mæld"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Annálsritastærðir biðminna"</string>
@@ -372,6 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Sýna „Forrit svarar ekki“ fyrir bakgrunnsforrit"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Sýna viðvaranir tilkynningarásar"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Birtir viðvörun á skjánum þegar forrit birtir tilkynningu án gildrar rásar"</string>
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Þvinga flýtileiðir fyrir tilkynningar um samtöl"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Krefjast þess að flýtileiðir séu studdar af langvarandi deilingarflýtileið fyrir birtingu í samtalshluta"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Þvinga fram leyfi forrita í ytri geymslu"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Gerir öll forrit skrifanleg í ytra geymslurými, óháð gildum í upplýsingaskrá"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Þvinga breytanlega stærð virkni"</string>
@@ -432,8 +435,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Ætti að endast til u.þ.b. <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ætti að endast til u.þ.b. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Til klukkan <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Rafhlaðan gæti tæmst kl. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Minna en <xliff:g id="THRESHOLD">%1$s</xliff:g> eftir"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Minna en <xliff:g id="THRESHOLD">%1$s</xliff:g> eftir (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Meira en <xliff:g id="TIME_REMAINING">%1$s</xliff:g> eftir (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -511,28 +513,21 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Símahátalari"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Vandamál í tengingu. Slökktu og kveiktu á tækinu"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Snúrutengt hljómtæki"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"Hjálp og ábendingar"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Geymsla"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Deild gögn"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Skoða og breyta deildum gögnum"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Engin deild gögn eru fyrir þennan notanda."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Villa kom upp við að sækja deild gögn. Reyndu aftur."</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Deilt gagnaauðkenni: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Rennur út þann <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Villa kom upp við að eyða deildu gögnunum."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Engin leiga er fyrir þessi deildu gögn. Viltu eyða henni?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Forrit sem deila gögnum"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Forritið er ekki með neina lýsingu."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Leiga rennur út <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Eyða deildum gögnum"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Ertu viss um að þú viljir eyða þessum deildu gögnum?"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"Notendur hafa sín eigin forrit og efni"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Hægt er að takmarka aðgang að forritum og efni á reikningnum þínum"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Notandi"</string>
@@ -549,7 +544,11 @@
     <string name="user_new_user_name" msgid="60979820612818840">"Nýr notandi"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Nýtt snið"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"Notandaupplýsingar"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"Upplýsingar um snið"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Notandaupplýsingar"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Áður en þú getur búið til takmarkað snið þarftu að setja upp skjálás til að vernda forritin þín og persónuleg gögn."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Velja lás"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Skipta yfir í <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Bæta gesti við"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Fjarlægja gest"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Gestur"</string>
 </resources>
