@@ -784,6 +784,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private static final AtomicInteger sSequenceNumber = new AtomicInteger(0);
 
         private static final class Entry {
+            final int mSequenceNumber = sSequenceNumber.getAndIncrement();
             final ClientState mClientState;
             @SoftInputModeFlags
             final int mFocusedWindowSoftInputMode;
@@ -831,7 +832,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     continue;
                 }
                 pw.print(prefix);
-                pw.println("SoftInputShowHideHistory #" + sSequenceNumber.getAndIncrement() + ":");
+                pw.println("SoftInputShowHideHistory #" + entry.mSequenceNumber + ":");
 
                 pw.print(prefix);
                 pw.println(" time=" + dataFormat.format(new Date(entry.mWallTime))
