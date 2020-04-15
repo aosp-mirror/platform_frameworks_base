@@ -250,7 +250,8 @@ class NotificationShadeDepthController @Inject constructor(
     private fun updateShadeBlur() {
         var newBlur = 0
         val state = statusBarStateController.state
-        if (state == StatusBarState.SHADE || state == StatusBarState.SHADE_LOCKED) {
+        if ((state == StatusBarState.SHADE || state == StatusBarState.SHADE_LOCKED) &&
+                !keyguardStateController.isKeyguardFadingAway) {
             newBlur = blurUtils.blurRadiusOfRatio(shadeExpansion)
         }
         shadeSpring.animateTo(newBlur)
