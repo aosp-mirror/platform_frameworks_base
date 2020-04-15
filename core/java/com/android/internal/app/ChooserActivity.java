@@ -169,6 +169,17 @@ public class ChooserActivity extends ResolverActivity implements
     public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
+    /**
+     * Integer extra to indicate which profile should be automatically selected.
+     * <p>Can only be used if there is a work profile.
+     * <p>Possible values can be either {@link #PROFILE_PERSONAL} or {@link #PROFILE_WORK}.
+     */
+    static final String EXTRA_SELECTED_PROFILE =
+            "com.android.internal.app.ChooserActivity.EXTRA_SELECTED_PROFILE";
+
+    static final int PROFILE_PERSONAL = AbstractMultiProfilePagerAdapter.PROFILE_PERSONAL;
+    static final int PROFILE_WORK = AbstractMultiProfilePagerAdapter.PROFILE_WORK;
+
     private static final String PREF_NUM_SHEET_EXPANSIONS = "pref_num_sheet_expansions";
 
     private static final String CHIP_LABEL_METADATA_KEY = "android.service.chooser.chip_label";
@@ -860,13 +871,29 @@ public class ChooserActivity extends ResolverActivity implements
                 filterLastUsed,
                 mUseLayoutForBrowsables,
                 /* userHandle */ getWorkProfileUserHandle());
+        int selectedProfile = findSelectedProfile();
         return new ChooserMultiProfilePagerAdapter(
                 /* context */ this,
                 personalAdapter,
                 workAdapter,
-                /* defaultProfile */ getCurrentProfile(),
+                selectedProfile,
                 getPersonalProfileUserHandle(),
                 getWorkProfileUserHandle());
+    }
+
+    private int findSelectedProfile() {
+        int selectedProfile;
+        if (getIntent().hasExtra(EXTRA_SELECTED_PROFILE)) {
+            selectedProfile = getIntent().getIntExtra(EXTRA_SELECTED_PROFILE, /* defValue = */ -1);
+            if (selectedProfile != PROFILE_PERSONAL && selectedProfile != PROFILE_WORK) {
+                throw new IllegalArgumentException(EXTRA_SELECTED_PROFILE + " has invalid value "
+                        + selectedProfile + ". Must be either ChooserActivity.PROFILE_PERSONAL or "
+                        + "ChooserActivity.PROFILE_WORK.");
+            }
+        } else {
+            selectedProfile = getProfileForUser(getUser());
+        }
+        return selectedProfile;
     }
 
     @Override
@@ -2479,7 +2506,10 @@ public class ChooserActivity extends ResolverActivity implements
                         gridAdapter.getMaxTargetsPerRow());
             }
 
-            if (mChooserMultiProfilePagerAdapter.getCurrentUserHandle() != getUser()) {
+            UserHandle currentUserHandle = mChooserMultiProfilePagerAdapter.getCurrentUserHandle();
+            int currentProfile = getProfileForUser(currentUserHandle);
+            int initialProfile = findSelectedProfile();
+            if (currentProfile != initialProfile) {
                 return;
             }
 
@@ -2574,6 +2604,19 @@ public class ChooserActivity extends ResolverActivity implements
                 mResolverDrawerLayout.setCollapsibleHeightReserved(Math.min(offset, bottom - top));
             });
         }
+    }
+
+    /**
+     * Returns {@link #PROFILE_PERSONAL}, {@link #PROFILE_WORK}, or -1 if the given user handle
+     * does not match either the personal or work user handle.
+     **/
+    private int getProfileForUser(UserHandle currentUserHandle) {
+        if (currentUserHandle == getPersonalProfileUserHandle()) {
+            return PROFILE_PERSONAL;
+        } else if (currentUserHandle == getWorkProfileUserHandle()) {
+            return PROFILE_WORK;
+        }
+        return -1;
     }
 
     private ViewGroup getCurrentEmptyStateView() {

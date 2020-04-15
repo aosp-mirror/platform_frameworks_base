@@ -473,6 +473,12 @@ public final class WindowInsets {
     /**
      * Returns the display cutout if there is one.
      *
+     * <p>Note: the display cutout will already be {@link #consumeDisplayCutout consumed} during
+     * dispatch to {@link View#onApplyWindowInsets}, unless the window has requested a
+     * {@link WindowManager.LayoutParams#layoutInDisplayCutoutMode} other than
+     * {@link WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER never} or
+     * {@link WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT default}.
+     *
      * @return the display cutout or null if there is none
      * @see DisplayCutout
      */
@@ -1424,7 +1430,13 @@ public final class WindowInsets {
         /**
          * Returns an insets type representing the area that used by {@link DisplayCutout}.
          *
-         * <p>This is equivalent to the safe insets on {@link #getDisplayCutout()}.</p>
+         * <p>This is equivalent to the safe insets on {@link #getDisplayCutout()}.
+         *
+         * <p>Note: During dispatch to {@link View#onApplyWindowInsets}, if the window is using
+         * the {@link WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT default}
+         * {@link WindowManager.LayoutParams#layoutInDisplayCutoutMode}, {@link #getDisplayCutout()}
+         * will return {@code null} even if the window overlaps a display cutout area, in which case
+         * the {@link #displayCutout() displayCutout() inset} will still report the accurate value.
          *
          * @see DisplayCutout#getSafeInsetLeft()
          * @see DisplayCutout#getSafeInsetTop()

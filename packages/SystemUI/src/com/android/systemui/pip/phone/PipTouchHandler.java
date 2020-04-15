@@ -321,7 +321,7 @@ public class PipTouchHandler {
     }
 
     public void onActivityPinned() {
-        createDismissTargetMaybe();
+        createOrUpdateDismissTarget();
 
         mShowPipMenuOnAnimationEnd = true;
         mPipResizeGestureHandler.onActivityPinned();
@@ -357,8 +357,7 @@ public class PipTouchHandler {
         mMotionHelper.synchronizePinnedStackBounds();
 
         // Recreate the dismiss target for the new orientation.
-        cleanUpDismissTarget();
-        createDismissTargetMaybe();
+        createOrUpdateDismissTarget();
     }
 
     public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
@@ -454,34 +453,51 @@ public class PipTouchHandler {
     }
 
     /** Adds the magnetic target view to the WindowManager so it's ready to be animated in. */
-    private void createDismissTargetMaybe() {
+    private void createOrUpdateDismissTarget() {
         if (!mTargetViewContainer.isAttachedToWindow()) {
             mHandler.removeCallbacks(mShowTargetAction);
             mMagneticTargetAnimator.cancel();
 
-            final Point windowSize = new Point();
-            mWindowManager.getDefaultDisplay().getRealSize(windowSize);
-            WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.MATCH_PARENT,
-                    mDismissAreaHeight,
-                    0, windowSize.y - mDismissAreaHeight,
-                    WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                            | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                    PixelFormat.TRANSLUCENT);
-            lp.setTitle("pip-dismiss-overlay");
-            lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
-            lp.setFitInsetsTypes(0 /* types */);
-
             mTargetViewContainer.setVisibility(View.INVISIBLE);
-            mWindowManager.addView(mTargetViewContainer, lp);
+
+            try {
+                mWindowManager.addView(mTargetViewContainer, getDismissTargetLayoutParams());
+            } catch (IllegalStateException e) {
+                // This shouldn't happen, but if the target is already added, just update its layout
+                // params.
+                mWindowManager.updateViewLayout(
+                        mTargetViewContainer, getDismissTargetLayoutParams());
+            }
+        } else {
+            mWindowManager.updateViewLayout(mTargetViewContainer, getDismissTargetLayoutParams());
         }
+    }
+
+    /** Returns layout params for the dismiss target, using the latest display metrics. */
+    private WindowManager.LayoutParams getDismissTargetLayoutParams() {
+        final Point windowSize = new Point();
+        mWindowManager.getDefaultDisplay().getRealSize(windowSize);
+
+        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                mDismissAreaHeight,
+                0, windowSize.y - mDismissAreaHeight,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+
+        lp.setTitle("pip-dismiss-overlay");
+        lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+        lp.setFitInsetsTypes(0 /* types */);
+
+        return lp;
     }
 
     /** Makes the dismiss target visible and animates it in, if it isn't already visible. */
     private void showDismissTargetMaybe() {
-        createDismissTargetMaybe();
+        createOrUpdateDismissTarget();
 
         if (mTargetViewContainer.getVisibility() != View.VISIBLE) {
 
