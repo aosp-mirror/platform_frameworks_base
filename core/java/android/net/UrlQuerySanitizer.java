@@ -307,7 +307,7 @@ public class UrlQuerySanitizer {
                 return null;
             }
             int length = value.length();
-            if ((mFlags & SCRIPT_URL_OK) != 0) {
+            if ((mFlags & SCRIPT_URL_OK) == 0) {
                 if (length >= MIN_SCRIPT_PREFIX_LENGTH) {
                     String asLower = value.toLowerCase(Locale.ROOT);
                     if (asLower.startsWith(JAVASCRIPT_PREFIX)  ||
