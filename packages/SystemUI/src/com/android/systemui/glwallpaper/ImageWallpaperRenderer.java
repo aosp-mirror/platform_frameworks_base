@@ -19,18 +19,14 @@ package com.android.systemui.glwallpaper;
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
-import static android.opengl.GLES20.glUniform1f;
 import static android.opengl.GLES20.glViewport;
 
 import android.app.WallpaperManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
-import android.util.MathUtils;
 import android.util.Size;
-import android.view.DisplayInfo;
 
 import com.android.systemui.R;
 
@@ -42,57 +38,24 @@ import java.util.function.Consumer;
 /**
  * A GL renderer for image wallpaper.
  */
-public class ImageWallpaperRenderer implements GLWallpaperRenderer,
-        ImageRevealHelper.RevealStateListener {
+public class ImageWallpaperRenderer implements GLWallpaperRenderer {
     private static final String TAG = ImageWallpaperRenderer.class.getSimpleName();
-    private static final float SCALE_VIEWPORT_MIN = 1f;
-    private static final float SCALE_VIEWPORT_MAX = 1.1f;
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private final ImageGLProgram mProgram;
     private final ImageGLWallpaper mWallpaper;
-    private final ImageProcessHelper mImageProcessHelper;
-    private final ImageRevealHelper mImageRevealHelper;
-
-    private SurfaceProxy mProxy;
-    private final Rect mScissor;
     private final Rect mSurfaceSize = new Rect();
-    private final Rect mViewport = new Rect();
-    private boolean mScissorMode;
-    private float mXOffset;
-    private float mYOffset;
     private final WallpaperTexture mTexture;
 
-    public ImageWallpaperRenderer(Context context, SurfaceProxy proxy) {
+    public ImageWallpaperRenderer(Context context) {
         final WallpaperManager wpm = context.getSystemService(WallpaperManager.class);
         if (wpm == null) {
             Log.w(TAG, "WallpaperManager not available");
         }
 
         mTexture = new WallpaperTexture(wpm);
-        DisplayInfo displayInfo = new DisplayInfo();
-        context.getDisplay().getDisplayInfo(displayInfo);
-
-        // We only do transition in portrait currently, b/137962047.
-        int orientation = context.getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mScissor = new Rect(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
-        } else {
-            mScissor = new Rect(0, 0, displayInfo.logicalHeight, displayInfo.logicalWidth);
-        }
-
-        mProxy = proxy;
         mProgram = new ImageGLProgram(context);
         mWallpaper = new ImageGLWallpaper(mProgram);
-        mImageProcessHelper = new ImageProcessHelper();
-        mImageRevealHelper = new ImageRevealHelper(this);
-
-        startProcessingImage();
-    }
-
-    protected void startProcessingImage() {
-        // Compute threshold of the image, this is an async work.
-        mImageProcessHelper.start(mTexture);
     }
 
     @Override
@@ -121,103 +84,26 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
 
     @Override
     public void onDrawFrame() {
-        float threshold = mImageProcessHelper.getThreshold();
-        float reveal = mImageRevealHelper.getReveal();
-
-        glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_AOD2OPACITY), 1);
-        glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_PER85), threshold);
-        glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_REVEAL), reveal);
-
         glClear(GL_COLOR_BUFFER_BIT);
-        // We only need to scale viewport while doing transition.
-        if (mScissorMode) {
-            scaleViewport(reveal);
-        } else {
-            glViewport(0, 0, mSurfaceSize.width(), mSurfaceSize.height());
-        }
+        glViewport(0, 0, mSurfaceSize.width(), mSurfaceSize.height());
         mWallpaper.useTexture();
         mWallpaper.draw();
     }
 
     @Override
-    public void updateAmbientMode(boolean inAmbientMode, long duration) {
-        mImageRevealHelper.updateAwake(!inAmbientMode, duration);
-    }
-
-    @Override
-    public void updateOffsets(float xOffset, float yOffset) {
-        mXOffset = xOffset;
-        mYOffset = yOffset;
-        int left = (int) ((mSurfaceSize.width() - mScissor.width()) * xOffset);
-        int right = left + mScissor.width();
-        mScissor.set(left, mScissor.top, right, mScissor.bottom);
-    }
-
-    @Override
     public Size reportSurfaceSize() {
-        mTexture.use(null);
+        mTexture.use(null /* consumer */);
         mSurfaceSize.set(mTexture.getTextureDimensions());
         return new Size(mSurfaceSize.width(), mSurfaceSize.height());
     }
 
     @Override
     public void finish() {
-        mProxy = null;
-    }
-
-    private void scaleViewport(float reveal) {
-        int left = mScissor.left;
-        int top = mScissor.top;
-        int width = mScissor.width();
-        int height = mScissor.height();
-        // Interpolation between SCALE_VIEWPORT_MAX and SCALE_VIEWPORT_MIN by reveal.
-        float vpScaled = MathUtils.lerp(SCALE_VIEWPORT_MIN, SCALE_VIEWPORT_MAX, reveal);
-        // Calculate the offset amount from the lower left corner.
-        float offset = (SCALE_VIEWPORT_MIN - vpScaled) / 2;
-        // Change the viewport.
-        mViewport.set((int) (left + width * offset), (int) (top + height * offset),
-                (int) (width * vpScaled), (int) (height * vpScaled));
-        glViewport(mViewport.left, mViewport.top, mViewport.right, mViewport.bottom);
-    }
-
-    @Override
-    public void onRevealStateChanged() {
-        mProxy.requestRender();
-    }
-
-    @Override
-    public void onRevealStart(boolean animate) {
-        if (animate) {
-            mScissorMode = true;
-            // Use current display area of texture.
-            mWallpaper.adjustTextureCoordinates(mSurfaceSize, mScissor, mXOffset, mYOffset);
-        }
-        mProxy.preRender();
-    }
-
-    @Override
-    public void onRevealEnd() {
-        if (mScissorMode) {
-            mScissorMode = false;
-            // reset texture coordinates to use full texture.
-            mWallpaper.adjustTextureCoordinates(null, null, 0, 0);
-            // We need draw full texture back before finishing render.
-            mProxy.requestRender();
-        }
-        mProxy.postRender();
     }
 
     @Override
     public void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
-        out.print(prefix); out.print("mProxy="); out.print(mProxy);
         out.print(prefix); out.print("mSurfaceSize="); out.print(mSurfaceSize);
-        out.print(prefix); out.print("mScissor="); out.print(mScissor);
-        out.print(prefix); out.print("mViewport="); out.print(mViewport);
-        out.print(prefix); out.print("mScissorMode="); out.print(mScissorMode);
-        out.print(prefix); out.print("mXOffset="); out.print(mXOffset);
-        out.print(prefix); out.print("mYOffset="); out.print(mYOffset);
-        out.print(prefix); out.print("threshold="); out.print(mImageProcessHelper.getThreshold());
-        out.print(prefix); out.print("mReveal="); out.print(mImageRevealHelper.getReveal());
         out.print(prefix); out.print("mWcgContent="); out.print(isWcgContent());
         mWallpaper.dump(prefix, fd, out, args);
     }
