@@ -86,7 +86,29 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun updateDuration() {
+    fun updateDurationWithPlayback() {
+        // GIVEN that the duration is contained within the metadata
+        val duration = 12000L
+        val metadata = MediaMetadata.Builder().run {
+            putLong(MediaMetadata.METADATA_KEY_DURATION, duration)
+            build()
+        }
+        whenever(mockController.getMetadata()).thenReturn(metadata)
+        // AND a valid playback state (ie. media session is not destroyed)
+        val state = PlaybackState.Builder().run {
+            setState(PlaybackState.STATE_PLAYING, 200L, 1f)
+            build()
+        }
+        whenever(mockController.getPlaybackState()).thenReturn(state)
+        // WHEN the controller is updated
+        viewModel.updateController(mockController, Color.RED)
+        // THEN the duration is extracted
+        assertThat(viewModel.progress.value!!.duration).isEqualTo(duration)
+        assertThat(viewModel.progress.value!!.enabled).isTrue()
+    }
+
+    @Test
+    fun updateDurationWithoutPlayback() {
         // GIVEN that the duration is contained within the metadata
         val duration = 12000L
         val metadata = MediaMetadata.Builder().run {
@@ -98,7 +120,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         viewModel.updateController(mockController, Color.RED)
         // THEN the duration is extracted
         assertThat(viewModel.progress.value!!.duration).isEqualTo(duration)
-        assertThat(viewModel.progress.value!!.enabled).isTrue()
+        assertThat(viewModel.progress.value!!.enabled).isFalse()
     }
 
     @Test
@@ -110,6 +132,12 @@ public class SeekBarViewModelTest : SysuiTestCase() {
             build()
         }
         whenever(mockController.getMetadata()).thenReturn(metadata)
+        // AND a valid playback state (ie. media session is not destroyed)
+        val state = PlaybackState.Builder().run {
+            setState(PlaybackState.STATE_PLAYING, 200L, 1f)
+            build()
+        }
+        whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN the controller is updated
         viewModel.updateController(mockController, Color.RED)
         // THEN the seek bar is disabled
@@ -125,6 +153,12 @@ public class SeekBarViewModelTest : SysuiTestCase() {
             build()
         }
         whenever(mockController.getMetadata()).thenReturn(metadata)
+        // AND a valid playback state (ie. media session is not destroyed)
+        val state = PlaybackState.Builder().run {
+            setState(PlaybackState.STATE_PLAYING, 200L, 1f)
+            build()
+        }
+        whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN the controller is updated
         viewModel.updateController(mockController, Color.RED)
         // THEN the seek bar is disabled
@@ -371,5 +405,31 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         viewModel.listening = true
         // THEN an update task is queued
         assertThat(fakeExecutor.numPending()).isEqualTo(1)
+    }
+
+    @Test
+    fun clearSeekBar() {
+        // GIVEN that the duration is contained within the metadata
+        val metadata = MediaMetadata.Builder().run {
+            putLong(MediaMetadata.METADATA_KEY_DURATION, 12000L)
+            build()
+        }
+        whenever(mockController.getMetadata()).thenReturn(metadata)
+        // AND a valid playback state (ie. media session is not destroyed)
+        val state = PlaybackState.Builder().run {
+            setState(PlaybackState.STATE_PLAYING, 200L, 1f)
+            build()
+        }
+        whenever(mockController.getPlaybackState()).thenReturn(state)
+        // AND the controller has been updated
+        viewModel.updateController(mockController, Color.RED)
+        // WHEN the controller is cleared on the event when the session is destroyed
+        viewModel.clearController()
+        with(fakeExecutor) {
+            advanceClockToNext()
+            runAllReady()
+        }
+        // THEN the seek bar is disabled
+        assertThat(viewModel.progress.value!!.enabled).isFalse()
     }
 }
