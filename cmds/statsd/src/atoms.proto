@@ -421,6 +421,8 @@ message Atom {
         TvSettingsUIInteracted tvsettings_ui_interacted = 261 [(module) = "tv_settings"];
         LauncherStaticLayout launcher_snapshot = 262 [(module) = "sysui"];
         PackageInstallerV2Reported package_installer_v2_reported = 263 [(module) = "framework"];
+        UserLifecycleJourneyReported user_lifecycle_journey_reported = 264 [(module) = "framework"];
+        UserLifecycleEventOccurred user_lifecycle_event_occurred = 265 [(module) = "framework"];
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
@@ -9356,4 +9358,83 @@ message SettingSnapshot {
 
     // Android user index. 0 for primary user, 10, 11 for secondary or profile user
     optional int32 user_id = 7;
+}
+
+/**
+ * An event logged to indicate that a user journey is about to be performed. This atom includes
+ * relevant information about the users involved in the journey. A UserLifecycleEventOccurred event
+ * will immediately follow this atom which will describe the event(s) and its state.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/UserController.java
+ *   frameworks/base/services/core/java/com/android/server/pm/UserManagerService.java
+ */
+message UserLifecycleJourneyReported {
+    // An identifier to track a chain of user lifecycle events occurring (referenced in the
+    // UserLifecycleEventOccurred atom)
+    optional int64 session_id = 1;
+
+    // Indicates what type of user journey this session is related to
+    enum Journey {
+        UNKNOWN = 0; // Undefined user lifecycle journey
+        USER_SWITCH_UI = 1; // A user switch journey where a UI is shown
+        USER_SWITCH_FG = 2; // A user switch journey without a UI shown
+        USER_START = 3; // A user start journey
+        USER_CREATE = 4; // A user creation journey
+    }
+    optional Journey journey = 2;
+    // Which user the journey is originating from - could be -1 for certain phases (eg USER_CREATE)
+    // This integer is a UserIdInt (eg 0 for the system user, 10 for secondary/guest)
+    optional int32 origin_user = 3;
+    // Which user the journey is targeting
+    // This integer is a UserIdInt (eg 0 for the system user, 10 for secondary/guest)
+    optional int32 target_user = 4;
+
+    // What is the user type of the target user
+    // These should be in sync with USER_TYPE_* flags defined in UserManager.java
+    enum UserType {
+        TYPE_UNKNOWN = 0;
+        FULL_SYSTEM = 1;
+        FULL_SECONDARY = 2;
+        FULL_GUEST = 3;
+        FULL_DEMO = 4;
+        FULL_RESTRICTED = 5;
+        PROFILE_MANAGED = 6;
+        SYSTEM_HEADLESS = 7;
+    }
+    optional UserType user_type = 5;
+    // What are the flags attached to the target user
+    optional int32 user_flags = 6;
+}
+
+/**
+ * An event logged when a specific user lifecycle event is performed. These events should be
+ * correlated with a UserLifecycleJourneyReported atom via the session_id.
+ * Note: journeys can span over multiple events, hence some events may share a single session id.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/UserController.java
+ *   frameworks/base/services/core/java/com/android/server/pm/UserManagerService.java
+ */
+message UserLifecycleEventOccurred {
+    // An id which links back to user details (reported in the UserLifecycleJourneyReported atom)
+    optional int64 session_id = 1;
+    // The target user for this event (same as target_user in the UserLifecycleJourneyReported atom)
+    // This integer is a UserIdInt (eg 0 for the system user, 10 for secondary/guest)
+    optional int32 user_id = 2;
+
+    enum Event {
+        UNKNOWN = 0; // Indicates that the associated user journey timed-out or resulted in an error
+        SWITCH_USER = 1; // Indicates that this is a user switch event
+        START_USER = 2; // Indicates that this is a user start event
+        CREATE_USER = 3; // Indicates that this is a user create event
+    }
+    optional Event event = 3;
+
+    enum State {
+        NONE = 0; // Indicates the associated event has no start/end defined
+        BEGIN = 1;
+        FINISH = 2;
+    }
+    optional State state = 4; // Represents the state of an event (beginning/ending)
 }
