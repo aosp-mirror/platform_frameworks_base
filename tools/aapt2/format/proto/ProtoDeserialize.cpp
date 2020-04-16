@@ -490,8 +490,10 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
         // Find the overlayable to which this item belongs
         pb::OverlayableItem pb_overlayable_item = pb_entry.overlayable_item();
         if (pb_overlayable_item.overlayable_idx() >= overlayables.size()) {
-          *out_error = android::base::StringPrintf("invalid overlayable_idx value %d",
-                                                   pb_overlayable_item.overlayable_idx());
+          *out_error =
+              android::base::StringPrintf("invalid overlayable_idx value %d for entry %s/%s",
+                                          pb_overlayable_item.overlayable_idx(),
+                                          pb_type.name().c_str(), pb_entry.name().c_str());
           return false;
         }
 
