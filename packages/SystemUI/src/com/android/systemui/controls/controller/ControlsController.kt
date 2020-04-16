@@ -23,6 +23,7 @@ import android.service.controls.actions.ControlAction
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.UserAwareController
 import com.android.systemui.controls.management.ControlsFavoritingActivity
+import com.android.systemui.controls.ui.ControlWithState
 import com.android.systemui.controls.ui.ControlsUiController
 import java.util.function.Consumer
 
@@ -110,6 +111,13 @@ interface ControlsController : UserAwareController {
         controlId: String,
         @ControlAction.ResponseResult response: Int
     )
+
+    /**
+     * When a control should be highlighted, dimming down what's around it.
+     *
+     * @param cws focused control, or {@code null} if nothing should be highlighted.
+     */
+    fun onFocusChanged(cws: ControlWithState?)
 
     // FAVORITE MANAGEMENT
 
