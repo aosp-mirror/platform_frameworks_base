@@ -795,9 +795,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
     for (const auto& it : allMetricProducers) {
         // Register metrics to StateTrackers
         for (int atomId : it->getSlicedStateAtoms()) {
-            if (!StateManager::getInstance().registerListener(atomId, it)) {
-                return false;
-            }
+            StateManager::getInstance().registerListener(atomId, it);
         }
     }
     return true;
