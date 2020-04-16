@@ -32,6 +32,7 @@ import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
+import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -525,6 +526,94 @@ public class TunerResourceManagerServiceTest {
                 .getFrontendResource(infos[1].getId()).isInUse()).isFalse();
         assertThat(mTunerResourceManagerService
                 .getClientProfile(clientId[0]).getInUseFrontendIds().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void requestLnbTest_NoLnbAvailable_RequestWithHigherPriority() {
+        // Register clients
+        ResourceClientProfile[] profiles = new ResourceClientProfile[2];
+        profiles[0] = new ResourceClientProfile("0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        profiles[1] = new ResourceClientProfile("1" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        int[] clientPriorities = {100, 500};
+        int[] clientId0 = new int[1];
+        int[] clientId1 = new int[1];
+        TestResourcesReclaimListener listener = new TestResourcesReclaimListener();
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profiles[0], listener, clientId0);
+        assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+        mTunerResourceManagerService.getClientProfile(clientId0[0])
+                .setPriority(clientPriorities[0]);
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profiles[1], new TestResourcesReclaimListener(), clientId1);
+        assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+        mTunerResourceManagerService.getClientProfile(clientId1[0])
+                .setPriority(clientPriorities[1]);
+
+        // Init lnb resources.
+        int[] lnbIds = {0};
+        mTunerResourceManagerService.setLnbInfoListInternal(lnbIds);
+
+        TunerLnbRequest request = new TunerLnbRequest(clientId0[0]);
+        int[] lnbHandle = new int[1];
+        try {
+            assertThat(mTunerResourceManagerService
+                    .requestLnbInternal(request, lnbHandle)).isTrue();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        assertThat(mTunerResourceManagerService.getResourceIdFromHandle(lnbHandle[0]))
+                .isEqualTo(lnbIds[0]);
+
+        request = new TunerLnbRequest(clientId1[0]);
+        try {
+            assertThat(mTunerResourceManagerService
+                    .requestLnbInternal(request, lnbHandle)).isTrue();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        assertThat(mTunerResourceManagerService.getResourceIdFromHandle(lnbHandle[0]))
+                .isEqualTo(lnbIds[0]);
+        assertThat(mTunerResourceManagerService.getLnbResource(lnbIds[0])
+                .isInUse()).isTrue();
+        assertThat(mTunerResourceManagerService.getLnbResource(lnbIds[0])
+                .getOwnerClientId()).isEqualTo(clientId1[0]);
+        assertThat(listener.isRelaimed()).isTrue();
+    }
+
+    @Test
+    public void releaseLnbTest() {
+        // Register clients
+        ResourceClientProfile[] profiles = new ResourceClientProfile[1];
+        profiles[0] = new ResourceClientProfile("0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        int[] clientId = new int[1];
+        TestResourcesReclaimListener listener = new TestResourcesReclaimListener();
+        mTunerResourceManagerService.registerClientProfileInternal(profiles[0], listener, clientId);
+        assertThat(clientId[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+
+        // Init lnb resources.
+        int[] lnbIds = {0};
+        mTunerResourceManagerService.setLnbInfoListInternal(lnbIds);
+
+        TunerLnbRequest request = new TunerLnbRequest(clientId[0]);
+        int[] lnbHandle = new int[1];
+        try {
+            assertThat(mTunerResourceManagerService
+                    .requestLnbInternal(request, lnbHandle)).isTrue();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        int lnbId = mTunerResourceManagerService.getResourceIdFromHandle(lnbHandle[0]);
+        assertThat(lnbId).isEqualTo(lnbIds[0]);
+
+        // Release lnb
+        mTunerResourceManagerService.releaseLnbInternal(lnbId);
+        assertThat(mTunerResourceManagerService
+                .getLnbResource(lnbId).isInUse()).isFalse();
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(clientId[0]).getInUseLnbIds().size()).isEqualTo(0);
     }
 
     @Test
