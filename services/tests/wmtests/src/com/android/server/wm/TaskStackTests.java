@@ -208,4 +208,22 @@ public class TaskStackTests extends WindowTestsBase {
         assertEquals(stackBounds.left - stackOutset, stack.getLastSurfacePosition().x);
         assertEquals(stackBounds.top - stackOutset, stack.getLastSurfacePosition().y);
     }
+
+    @Test
+    public void testActivityAndTaskGetsProperType() {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task1 = createTaskInStack(stack, 0 /* userId */);
+        ActivityRecord activity1 = WindowTestUtils.createTestActivityRecord(mDisplayContent);
+
+        // First activity should become standard
+        task1.addChild(activity1, 0);
+        assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, activity1.getActivityType());
+        assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, task1.getActivityType());
+
+        // Second activity should also become standard
+        ActivityRecord activity2 = WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        task1.addChild(activity2, WindowContainer.POSITION_TOP);
+        assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, activity2.getActivityType());
+        assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, task1.getActivityType());
+    }
 }
