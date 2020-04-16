@@ -41,10 +41,11 @@ public final class ProcfsMemoryUtil {
     public static MemorySnapshot readMemorySnapshotFromProcfs(int pid) {
         long[] output = new long[STATUS_KEYS.length];
         output[0] = -1;
+        output[3] = -1;
+        output[4] = -1;
         Process.readProcLines("/proc/" + pid + "/status", STATUS_KEYS, output);
-        if (output[0] == -1 || (output[3] == 0 && output[4] == 0)) {
-            // Could not open file or anon rss / swap are 0 indicating the process is in a zombie
-            // state.
+        if (output[0] == -1 || output[3] == -1 || output[4] == -1) {
+            // Could not open or parse file.
             return null;
         }
         final MemorySnapshot snapshot = new MemorySnapshot();
