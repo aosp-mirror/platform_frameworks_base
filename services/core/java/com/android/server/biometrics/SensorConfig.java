@@ -19,8 +19,8 @@ package com.android.server.biometrics;
 /**
  * Parsed sensor config. See core/res/res/values/config.xml config_biometric_sensors
  */
-class SensorConfig {
-    final int id;
+public class SensorConfig {
+    public final int id;
     final int modality;
     final int strength;
 

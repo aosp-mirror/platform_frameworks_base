@@ -243,6 +243,11 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
+        public int getSensorId() {
+            return FaceService.this.getSensorId();
+        }
+
+        @Override
         public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
                 boolean authenticated, ArrayList<Byte> token) {
             final boolean result = super.onAuthenticated(identifier, authenticated, token);
@@ -732,9 +737,9 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void initConfiguredStrength(int strength) {
+        public void initializeConfiguration(int sensorId) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            initConfiguredStrengthInternal(strength);
+            initializeConfigurationInternal(sensorId);
         }
     }
 

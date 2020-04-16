@@ -132,7 +132,7 @@ public class BiometricSensor {
      * strength.
      * @return a bitfield, see {@link BiometricManager.Authenticators}
      */
-    int getActualStrength() {
+    int getCurrentStrength() {
         return oemStrength | mUpdatedStrength;
     }
 
@@ -145,7 +145,7 @@ public class BiometricSensor {
     }
 
     /**
-     * Stores the updated strength, which takes effect whenever {@link #getActualStrength()}
+     * Stores the updated strength, which takes effect whenever {@link #getCurrentStrength()}
      * is checked.
      * @param newStrength
      */

@@ -415,9 +415,9 @@ public class BiometricServiceTest {
         // Hardware authenticated
         final byte[] HAT = generateRandomHAT();
         mBiometricService.mInternalReceiver.onAuthenticationSucceeded(
+                0 /* sensorId */,
                 false /* requireConfirmation */,
-                HAT,
-                isStrongBiometric /* isStrongBiometric */);
+                HAT);
         waitForIdle();
         // Waiting for SystemUI to send dismissed callback
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
@@ -488,10 +488,11 @@ public class BiometricServiceTest {
         // Test authentication succeeded goes to PENDING_CONFIRMATION and that the HAT is not
         // sent to KeyStore yet
         final byte[] HAT = generateRandomHAT();
+        // TODO: Do not hardcode ID (currently face is always 1)
         mBiometricService.mInternalReceiver.onAuthenticationSucceeded(
+                1 /* sensorId */,
                 true /* requireConfirmation */,
-                HAT,
-                isStrongBiometric /* isStrongBiometric */);
+                HAT);
         waitForIdle();
         // Waiting for SystemUI to send confirmation callback
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
@@ -947,9 +948,9 @@ public class BiometricServiceTest {
                 true /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver.onAuthenticationSucceeded(
+                0 /* sensorId */,
                 true /* requireConfirmation */,
-                new byte[69] /* HAT */,
-                true /* isStrongBiometric */);
+                new byte[69] /* HAT */);
         mBiometricService.mInternalReceiver.onDialogDismissed(
                 BiometricPrompt.DISMISSED_REASON_USER_CANCEL, null /* credentialAttestation */);
         waitForIdle();
@@ -1139,7 +1140,7 @@ public class BiometricServiceTest {
                             testCases[i][0],
                             null /* impl */);
             sensor.updateStrength(testCases[i][1]);
-            assertEquals(testCases[i][2], sensor.getActualStrength());
+            assertEquals(testCases[i][2], sensor.getCurrentStrength());
         }
     }
 

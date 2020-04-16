@@ -137,7 +137,7 @@ class PreAuthInfo {
         final boolean wasStrongEnough =
                 Utils.isAtLeastStrength(sensor.oemStrength, requestedStrength);
         final boolean isStrongEnough =
-                Utils.isAtLeastStrength(sensor.getActualStrength(), requestedStrength);
+                Utils.isAtLeastStrength(sensor.getCurrentStrength(), requestedStrength);
 
         if (wasStrongEnough && !isStrongEnough) {
             return BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE;

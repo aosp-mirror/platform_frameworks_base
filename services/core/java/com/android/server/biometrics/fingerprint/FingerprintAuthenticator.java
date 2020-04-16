@@ -22,14 +22,18 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import com.android.server.biometrics.SensorConfig;
+
 /**
- * TODO(b/141025588): Add JavaDoc.
+ * Shim that converts IFingerprintService into a common reusable IBiometricAuthenticator interface.
  */
 public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub {
     private final IFingerprintService mFingerprintService;
 
-    public FingerprintAuthenticator(IFingerprintService fingerprintService) {
+    public FingerprintAuthenticator(IFingerprintService fingerprintService, SensorConfig config)
+            throws RemoteException {
         mFingerprintService = fingerprintService;
+        mFingerprintService.initializeConfiguration(config.id);
     }
 
     @Override

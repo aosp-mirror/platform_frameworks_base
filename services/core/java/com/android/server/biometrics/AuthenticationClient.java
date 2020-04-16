@@ -70,6 +70,11 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     public abstract boolean isStrongBiometric();
 
+    /**
+     * @return The sensor's unique ID as configured by the framework. See {@link AuthSession}
+     */
+    public abstract int getSensorId();
+
     public AuthenticationClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int targetUserId, int groupId, long opId,
@@ -173,8 +178,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 }
                 if (isBiometricPrompt() && listener != null) {
                     // BiometricService will add the token to keystore
-                    listener.onAuthenticationSucceededInternal(mRequireConfirmation, byteToken,
-                            isStrongBiometric());
+                    listener.onAuthenticationSucceededInternal(getSensorId(),
+                            mRequireConfirmation, byteToken);
                 } else if (!isBiometricPrompt() && listener != null) {
                     if (isStrongBiometric()) {
                         KeyStore.getInstance().addAuthToken(byteToken);

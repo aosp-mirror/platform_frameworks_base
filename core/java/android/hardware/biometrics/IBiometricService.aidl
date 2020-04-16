@@ -66,4 +66,6 @@ interface IBiometricService {
     // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore
     // land as SIDs, and are used during key generation.
     long[] getAuthenticatorIds();
+
+    int getCurrentStrength(int sensorId);
 }

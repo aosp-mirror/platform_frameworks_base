@@ -111,6 +111,6 @@ interface IFaceService {
 
     void userActivity();
 
-    // Initialize the OEM configured biometric strength
-    void initConfiguredStrength(int strength);
+    // Give FaceService its ID. See AuthService.java
+    void initializeConfiguration(int sensorId);
 }

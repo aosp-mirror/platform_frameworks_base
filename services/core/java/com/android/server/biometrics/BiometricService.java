@@ -125,9 +125,9 @@ public class BiometricService extends SystemService {
                 case MSG_ON_AUTHENTICATION_SUCCEEDED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleAuthenticationSucceeded(
+                            args.argi1 /* sensorId */,
                             (boolean) args.arg1 /* requireConfirmation */,
-                            (byte[]) args.arg2 /* token */,
-                            (boolean) args.arg3 /* isStrongBiometric */);
+                            (byte[]) args.arg2 /* token */);
                     args.recycle();
                     break;
                 }
@@ -370,12 +370,12 @@ public class BiometricService extends SystemService {
     final IBiometricServiceReceiverInternal mInternalReceiver =
             new IBiometricServiceReceiverInternal.Stub() {
         @Override
-        public void onAuthenticationSucceeded(boolean requireConfirmation, byte[] token,
-                boolean isStrongBiometric) {
+        public void onAuthenticationSucceeded(int sensorId, boolean requireConfirmation,
+                byte[] token) {
             SomeArgs args = SomeArgs.obtain();
+            args.argi1 = sensorId;
             args.arg1 = requireConfirmation;
             args.arg2 = token;
-            args.arg3 = isStrongBiometric;
             mHandler.obtainMessage(MSG_ON_AUTHENTICATION_SUCCEEDED, args).sendToTarget();
         }
 
@@ -647,7 +647,7 @@ public class BiometricService extends SystemService {
             for (BiometricSensor sensor : mSensors) {
                 try {
                     final long id = sensor.impl.getAuthenticatorId();
-                    if (Utils.isAtLeastStrength(sensor.getActualStrength(),
+                    if (Utils.isAtLeastStrength(sensor.getCurrentStrength(),
                             Authenticators.BIOMETRIC_STRONG) && id != 0) {
                         ids.add(id);
                     } else {
@@ -664,6 +664,19 @@ public class BiometricService extends SystemService {
                 result[i] = ids.get(i);
             }
             return result;
+        }
+
+        @Override // Binder call
+        public int getCurrentStrength(int sensorId) {
+            checkInternalPermission();
+
+            for (BiometricSensor sensor : mSensors) {
+                if (sensor.id == sensorId) {
+                    return sensor.getCurrentStrength();
+                }
+            }
+            Slog.e(TAG, "Unknown sensorId: " + sensorId);
+            return Authenticators.EMPTY_SET;
         }
     }
 
@@ -789,6 +802,17 @@ public class BiometricService extends SystemService {
         mBiometricStrengthController.startListening();
     }
 
+    private boolean isStrongBiometric(int id) {
+        for (BiometricSensor sensor : mSensors) {
+            if (sensor.id == id) {
+                return Utils.isAtLeastStrength(sensor.getCurrentStrength(),
+                        Authenticators.BIOMETRIC_STRONG);
+            }
+        }
+        Slog.e(TAG, "Unknown sensorId: " + id);
+        return false;
+    }
+
     private int biometricIdToModality(int id) {
         for (BiometricSensor sensor : mSensors) {
             if (sensor.id == id) {
@@ -879,8 +903,8 @@ public class BiometricService extends SystemService {
         return modality;
     }
 
-    private void handleAuthenticationSucceeded(boolean requireConfirmation, byte[] token,
-            boolean isStrongBiometric) {
+    private void handleAuthenticationSucceeded(int sensorId, boolean requireConfirmation,
+            byte[] token) {
         try {
             // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
             // after user dismissed/canceled dialog).
@@ -889,13 +913,13 @@ public class BiometricService extends SystemService {
                 return;
             }
 
-            if (isStrongBiometric) {
+            if (isStrongBiometric(sensorId)) {
                 // Store the auth token and submit it to keystore after the dialog is confirmed /
                 // animating away.
                 mCurrentAuthSession.mTokenEscrow = token;
             } else {
                 if (token != null) {
-                    Slog.w(TAG, "Dropping authToken for non-strong biometric");
+                    Slog.w(TAG, "Dropping authToken for non-strong biometric, id: " + sensorId);
                 }
             }
 

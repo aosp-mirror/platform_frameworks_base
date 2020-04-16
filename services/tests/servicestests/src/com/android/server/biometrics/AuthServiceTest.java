@@ -114,7 +114,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void testRegisterAuthenticator_callsInitConfiguredStrength() throws Exception {
+    public void testRegisterAuthenticator_initializesConfiguration() throws Exception {
 
         final String[] config = {
                 "0:2:15", // ID0:Fingerprint:Strong
@@ -127,13 +127,13 @@ public class AuthServiceTest {
         mAuthService = new AuthService(mContext, mInjector);
         mAuthService.onStart();
 
-        final int fingerprintStrength = 15;
-        final int irisStrength = 255;
-        final int faceStrength = 4095;
+        final int fingerprintId = 0;
+        final int irisId = 1;
+        final int faceId = 2;
 
-        verify(mFingerprintService).initConfiguredStrength(eq(fingerprintStrength));
-        verify(mIrisService).initConfiguredStrength(eq(irisStrength));
-        verify(mFaceService).initConfiguredStrength(eq(faceStrength));
+        verify(mFingerprintService).initializeConfiguration(eq(fingerprintId));
+        verify(mIrisService).initializeConfiguration(eq(irisId));
+        verify(mFaceService).initializeConfiguration(eq(faceId));
     }
 
 
