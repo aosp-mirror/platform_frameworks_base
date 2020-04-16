@@ -367,7 +367,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mobileSignalController.unregisterListener();
         }
         mSubscriptionManager.removeOnSubscriptionsChangedListener(mSubscriptionListener);
-        mContext.unregisterReceiver(this);
+        mBroadcastDispatcher.unregisterReceiver(this);
     }
 
     public int getConnectedWifiLevel() {
@@ -859,6 +859,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         pw.println("  - telephony ------");
         pw.print("  hasVoiceCallingFeature()=");
         pw.println(hasVoiceCallingFeature());
+        pw.println("  mListening=" + mListening);
 
         pw.println("  - connectivity ------");
         pw.print("  mConnectedTransports=");
