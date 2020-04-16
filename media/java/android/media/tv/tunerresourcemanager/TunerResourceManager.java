@@ -416,11 +416,11 @@ public class TunerResourceManager {
      * <p><strong>Note:</strong> {@link #setFrontendInfoList(TunerFrontendInfo[])} must be called
      * before this release.
      *
-     * @param frontendId the id of the released frontend.
+     * @param frontendHandle the handle of the released frontend.
      */
-    public void releaseFrontend(int frontendId) {
+    public void releaseFrontend(int frontendHandle) {
         try {
-            mService.releaseFrontend(frontendId);
+            mService.releaseFrontend(frontendHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
