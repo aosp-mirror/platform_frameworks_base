@@ -2488,7 +2488,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *    accessibility button.
      * 2) For {@link AccessibilityManager#ACCESSIBILITY_SHORTCUT_KEY} type and service targeting sdk
      *    version <= Q: turns on / off the accessibility service.
-     * 3) For services targeting sdk version > Q:
+     * 3) For {@link AccessibilityManager#ACCESSIBILITY_SHORTCUT_KEY} type and service targeting sdk
+     *    version > Q and request accessibility button: turn on the accessibility service if it's
+     *    not in the enabled state.
+     *    (It'll happen when a service is disabled and assigned to shortcut then upgraded.)
+     * 4) For services targeting sdk version > Q:
      *    a) Turns on / off the accessibility service, if service does not request accessibility
      *       button.
      *    b) Callbacks to accessibility service if service is bounded and requests accessibility
@@ -2521,6 +2525,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     disableAccessibilityServiceLocked(assignedTarget, mCurrentUserId);
                 }
                 return true;
+            }
+            if (shortcutType == ACCESSIBILITY_SHORTCUT_KEY && targetSdk > Build.VERSION_CODES.Q
+                    && requestA11yButton) {
+                if (!userState.getEnabledServicesLocked().contains(assignedTarget)) {
+                    enableAccessibilityServiceLocked(assignedTarget, mCurrentUserId);
+                    return true;
+                }
             }
             // Callbacks to a11y service if it's bounded and requests a11y button.
             if (serviceConnection == null
