@@ -132,6 +132,8 @@ static struct {
     jmethodID asReadOnlyBufferId;
     jmethodID positionId;
     jmethodID limitId;
+    jmethodID getPositionId;
+    jmethodID getLimitId;
 } gByteBufferInfo;
 
 static struct {
@@ -2033,13 +2035,11 @@ static status_t ConvertKeyValueListsToAMessage(
         if (env->IsInstanceOf(jvalue.get(), sFields.mStringClass)) {
             const char *tmp = env->GetStringUTFChars((jstring)jvalue.get(), nullptr);
             AString value;
-            if (tmp) {
-                value.setTo(tmp);
-            }
-            env->ReleaseStringUTFChars((jstring)jvalue.get(), tmp);
-            if (value.empty()) {
+            if (!tmp) {
                 return NO_MEMORY;
             }
+            value.setTo(tmp);
+            env->ReleaseStringUTFChars((jstring)jvalue.get(), tmp);
             result->setString(key.c_str(), value);
         } else if (env->IsInstanceOf(jvalue.get(), sFields.mIntegerClass)) {
             jint value = env->CallIntMethod(jvalue.get(), sFields.mIntegerValueId);
@@ -2051,8 +2051,8 @@ static status_t ConvertKeyValueListsToAMessage(
             jfloat value = env->CallFloatMethod(jvalue.get(), sFields.mFloatValueId);
             result->setFloat(key.c_str(), value);
         } else if (env->IsInstanceOf(jvalue.get(), gByteBufferInfo.clazz)) {
-            jint position = env->CallIntMethod(jvalue.get(), gByteBufferInfo.positionId);
-            jint limit = env->CallIntMethod(jvalue.get(), gByteBufferInfo.limitId);
+            jint position = env->CallIntMethod(jvalue.get(), gByteBufferInfo.getPositionId);
+            jint limit = env->CallIntMethod(jvalue.get(), gByteBufferInfo.getLimitId);
             sp<ABuffer> buffer{new ABuffer(limit - position)};
             void *data = env->GetDirectBufferAddress(jvalue.get());
             if (data != nullptr) {
@@ -2772,6 +2772,14 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
     gByteBufferInfo.limitId = env->GetMethodID(
             clazz.get(), "limit", "(I)Ljava/nio/Buffer;");
     CHECK(gByteBufferInfo.limitId != NULL);
+
+    gByteBufferInfo.getPositionId = env->GetMethodID(
+            clazz.get(), "position", "()I");
+    CHECK(gByteBufferInfo.getPositionId != NULL);
+
+    gByteBufferInfo.getLimitId = env->GetMethodID(
+            clazz.get(), "limit", "()I");
+    CHECK(gByteBufferInfo.getLimitId != NULL);
 
     clazz.reset(env->FindClass("java/util/ArrayList"));
     CHECK(clazz.get() != NULL);
