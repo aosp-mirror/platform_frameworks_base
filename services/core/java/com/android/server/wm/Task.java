@@ -1378,6 +1378,9 @@ class Task extends WindowContainer<WindowContainer> {
     void addChild(WindowContainer child, int index) {
         // If this task had any child before we added this one.
         boolean hadChild = hasChild();
+        // getActivityType() looks at the top child, so we need to read the type before adding
+        // a new child in case the new child is on top and UNDEFINED.
+        final int activityType = getActivityType();
 
         index = getAdjustedChildPosition(child, index);
         super.addChild(child, index);
@@ -1418,7 +1421,7 @@ class Task extends WindowContainer<WindowContainer> {
                     ActivityTaskManager.getMaxAppRecentsLimitStatic());
         } else {
             // Otherwise make all added activities match this one.
-            r.setActivityType(getActivityType());
+            r.setActivityType(activityType);
         }
 
         updateEffectiveIntent();
