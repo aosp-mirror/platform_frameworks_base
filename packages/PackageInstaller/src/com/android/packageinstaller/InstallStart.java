@@ -30,12 +30,16 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.permission.IPermissionManager;
 import android.util.Log;
+
+import java.util.List;
 
 /**
  * Select which activity is the first visible activity of the installation and forward the intent to
@@ -47,6 +51,7 @@ public class InstallStart extends Activity {
     private static final String DOWNLOADS_AUTHORITY = "downloads";
     private IPackageManager mIPackageManager;
     private IPermissionManager mIPermissionManager;
+    private UserManager mUserManager;
     private boolean mAbortInstall = false;
 
     @Override
@@ -54,6 +59,7 @@ public class InstallStart extends Activity {
         super.onCreate(savedInstanceState);
         mIPackageManager = AppGlobals.getPackageManager();
         mIPermissionManager = AppGlobals.getPermissionManager();
+        mUserManager = getSystemService(UserManager.class);
         Intent intent = getIntent();
         String callingPackage = getCallingPackage();
         String callingAttributionTag = null;
@@ -149,13 +155,16 @@ public class InstallStart extends Activity {
             if (packages == null) {
                 return false;
             }
+            final List<UserInfo> users = mUserManager.getUsers();
             for (String packageName : packages) {
-                try {
-                    if (uid == getPackageManager().getPackageUid(packageName, 0)) {
-                        return true;
+                for (UserInfo user : users) {
+                    try {
+                        if (uid == getPackageManager().getPackageUidAsUser(packageName, user.id)) {
+                            return true;
+                        }
+                    } catch (PackageManager.NameNotFoundException e) {
+                        // Ignore and try the next package
                     }
-                } catch (PackageManager.NameNotFoundException e) {
-                    // Ignore and try the next package
                 }
             }
         } catch (RemoteException rexc) {
