@@ -395,6 +395,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         if (preferredComponent == null) {
             Log.i(TAG, "Controls seeding: No preferred component has been set, will not seed");
             mControlsPreferences.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, true).apply();
+            return;
         }
 
         mControlsController.seedFavoritesForComponent(
