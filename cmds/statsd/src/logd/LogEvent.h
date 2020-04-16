@@ -145,7 +145,7 @@ public:
     }
 
     // Default value = false
-    inline bool shouldTruncateTimestamp() {
+    inline bool shouldTruncateTimestamp() const {
         return mTruncateTimestamp;
     }
 
