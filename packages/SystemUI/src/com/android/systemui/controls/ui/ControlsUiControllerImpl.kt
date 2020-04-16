@@ -209,6 +209,20 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
+    override fun onFocusChanged(focusedControl: ControlWithState?) {
+        controlViewsById.forEach { key: ControlKey, viewHolder: ControlViewHolder ->
+            val state = controlsById.get(key) ?: return@forEach
+            val shouldBeDimmed = focusedControl != null && state != focusedControl
+            if (viewHolder.dimmed == shouldBeDimmed) {
+                return@forEach
+            }
+
+            uiExecutor.execute {
+                viewHolder.dimmed = shouldBeDimmed
+            }
+        }
+    }
+
     private fun startFavoritingActivity(context: Context, si: StructureInfo) {
         startTargetedActivity(context, si, ControlsFavoritingActivity::class.java)
     }
