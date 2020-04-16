@@ -956,6 +956,8 @@ public class BubbleStackView extends FrameLayout {
         mVerticalPosPercentBeforeRotation =
                 (mStackAnimationController.getStackPosition().y - allowablePos.top)
                         / (allowablePos.bottom - allowablePos.top);
+        mVerticalPosPercentBeforeRotation =
+                Math.max(0f, Math.min(1f, mVerticalPosPercentBeforeRotation));
         addOnLayoutChangeListener(mOrientationChangedListener);
         hideFlyoutImmediate();
     }
