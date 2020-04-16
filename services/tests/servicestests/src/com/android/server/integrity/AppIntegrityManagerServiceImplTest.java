@@ -489,8 +489,17 @@ public class AppIntegrityManagerServiceImplTest {
     }
 
     @Test
+    public void getWhitelistedRuleProviders_returnsEmptyForNonSystemApps() throws Exception {
+        whitelistUsAsRuleProvider();
+        makeUsSystemApp(false);
+
+        assertThat(mService.getWhitelistedRuleProviders()).isEmpty();
+    }
+
+    @Test
     public void getWhitelistedRuleProviders() throws Exception {
         whitelistUsAsRuleProvider();
+        makeUsSystemApp();
 
         assertThat(mService.getWhitelistedRuleProviders()).containsExactly(TEST_FRAMEWORK_PACKAGE);
     }
