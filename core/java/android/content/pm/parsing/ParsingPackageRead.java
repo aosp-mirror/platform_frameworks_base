@@ -41,6 +41,7 @@ import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.R;
 
@@ -607,6 +608,13 @@ public interface ParsingPackageRead extends Parcelable {
      */
     @Nullable
     String getManageSpaceActivityName();
+
+    /**
+     * @see ApplicationInfo#minExtensionVersions
+     * @see R.styleable#AndroidManifestExtensionSdk
+     */
+    @Nullable
+    SparseIntArray getMinExtensionVersions();
 
     /**
      * @see ApplicationInfo#minSdkVersion
