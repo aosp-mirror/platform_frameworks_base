@@ -123,7 +123,7 @@ public final class ImeFocusController {
         }
         // Update mNextServedView when focusedView changed.
         final View viewForWindowFocus = focusedView != null ? focusedView : mViewRootImpl.mView;
-        onViewFocusChanged(viewForWindowFocus, viewForWindowFocus.hasFocus());
+        onViewFocusChanged(viewForWindowFocus, true);
 
         immDelegate.startInputAsyncOnWindowFocusGain(viewForWindowFocus,
                 windowAttribute.softInputMode, windowAttribute.flags, forceFocus);
