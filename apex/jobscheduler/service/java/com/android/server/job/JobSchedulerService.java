@@ -2182,17 +2182,18 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         final boolean jobExists = mJobs.containsJob(job);
-
         final boolean userStarted = areUsersStartedLocked(job);
+        final boolean backingUp = mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0;
 
         if (DEBUG) {
             Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
-                    + " exists=" + jobExists + " userStarted=" + userStarted);
+                    + " exists=" + jobExists + " userStarted=" + userStarted
+                    + " backingUp=" + backingUp);
         }
 
         // These are also fairly cheap to check, though they typically will not
         // be conditions we fail.
-        if (!jobExists || !userStarted) {
+        if (!jobExists || !userStarted || backingUp) {
             return false;
         }
 
@@ -2265,15 +2266,17 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         final boolean jobExists = mJobs.containsJob(job);
         final boolean userStarted = areUsersStartedLocked(job);
+        final boolean backingUp = mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0;
 
         if (DEBUG) {
             Slog.v(TAG, "areComponentsInPlaceLocked: " + job.toShortString()
-                    + " exists=" + jobExists + " userStarted=" + userStarted);
+                    + " exists=" + jobExists + " userStarted=" + userStarted
+                    + " backingUp=" + backingUp);
         }
 
         // These are also fairly cheap to check, though they typically will not
         // be conditions we fail.
-        if (!jobExists || !userStarted) {
+        if (!jobExists || !userStarted || backingUp) {
             return false;
         }
 
