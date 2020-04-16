@@ -80,7 +80,6 @@ public final class DataCallResponse implements Parcelable {
     private final int mMtu;
     private final int mMtuV4;
     private final int mMtuV6;
-    private final int mVersion;
 
     /**
      * @param cause Data call fail cause. {@link DataFailCause#NONE} indicates no error.
@@ -126,9 +125,7 @@ public final class DataCallResponse implements Parcelable {
                 ? new ArrayList<>() : new ArrayList<>(gatewayAddresses);
         mPcscfAddresses = (pcscfAddresses == null)
                 ? new ArrayList<>() : new ArrayList<>(pcscfAddresses);
-        mMtu = mtu;
-        mMtuV4 = mMtuV6 = 0;
-        mVersion = 0;
+        mMtu = mMtuV4 = mMtuV6 = mtu;
     }
 
     /** @hide */
@@ -136,7 +133,7 @@ public final class DataCallResponse implements Parcelable {
             @LinkStatus int linkStatus, @ProtocolType int protocolType,
             @Nullable String interfaceName, @Nullable List<LinkAddress> addresses,
             @Nullable List<InetAddress> dnsAddresses, @Nullable List<InetAddress> gatewayAddresses,
-            @Nullable List<InetAddress> pcscfAddresses, int mtuV4, int mtuV6, int version) {
+            @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
         mId = id;
@@ -151,10 +148,9 @@ public final class DataCallResponse implements Parcelable {
                 ? new ArrayList<>() : new ArrayList<>(gatewayAddresses);
         mPcscfAddresses = (pcscfAddresses == null)
                 ? new ArrayList<>() : new ArrayList<>(pcscfAddresses);
-        mMtu = 0;
+        mMtu = mtu;
         mMtuV4 = mtuV4;
         mMtuV6 = mtuV6;
-        mVersion = version;
     }
 
     /** @hide */
@@ -177,7 +173,6 @@ public final class DataCallResponse implements Parcelable {
         mMtu = source.readInt();
         mMtuV4 = source.readInt();
         mMtuV6 = source.readInt();
-        mVersion = source.readInt();
     }
 
     /**
@@ -247,7 +242,7 @@ public final class DataCallResponse implements Parcelable {
      */
     @Deprecated
     public int getMtu() {
-        return mVersion < 5 ? mMtu : 0;
+        return mMtu;
     }
 
     /**
@@ -256,7 +251,7 @@ public final class DataCallResponse implements Parcelable {
      * Zero or negative values means network has either not sent a value or sent an invalid value.
      */
     public int getMtuV4() {
-        return mVersion < 5 ? 0 : mMtuV4;
+        return mMtuV4;
     }
 
     /**
@@ -264,7 +259,7 @@ public final class DataCallResponse implements Parcelable {
      * Zero or negative values means network has either not sent a value or sent an invalid value.
      */
     public int getMtuV6() {
-        return mVersion < 5 ? 0 : mMtuV6;
+        return mMtuV6;
     }
 
     @NonNull
@@ -282,10 +277,9 @@ public final class DataCallResponse implements Parcelable {
            .append(" dnses=").append(mDnsAddresses)
            .append(" gateways=").append(mGatewayAddresses)
            .append(" pcscf=").append(mPcscfAddresses)
-           .append(" mtu=").append(mMtu)
-           .append(" mtuV4=").append(mMtuV4)
-           .append(" mtuV6=").append(mMtuV6)
-           .append(" version=").append(mVersion)
+           .append(" mtu=").append(getMtu())
+           .append(" mtuV4=").append(getMtuV4())
+           .append(" mtuV6=").append(getMtuV6())
            .append("}");
         return sb.toString();
     }
@@ -315,15 +309,14 @@ public final class DataCallResponse implements Parcelable {
                 && mPcscfAddresses.containsAll(other.mPcscfAddresses)
                 && mMtu == other.mMtu
                 && mMtuV4 == other.mMtuV4
-                && mMtuV6 == other.mMtuV6
-                && mVersion == other.mVersion;
+                && mMtuV6 == other.mMtuV6;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mCause, mSuggestedRetryTime, mId, mLinkStatus, mProtocolType,
                 mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses, mPcscfAddresses,
-                mMtu, mMtuV4, mMtuV6, mVersion);
+                mMtu, mMtuV4, mMtuV6);
     }
 
     @Override
@@ -346,7 +339,6 @@ public final class DataCallResponse implements Parcelable {
         dest.writeInt(mMtu);
         dest.writeInt(mMtuV4);
         dest.writeInt(mMtuV6);
-        dest.writeInt(mVersion);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<DataCallResponse> CREATOR =
@@ -402,8 +394,6 @@ public final class DataCallResponse implements Parcelable {
         private int mMtuV4;
 
         private int mMtuV6;
-
-        private int mVersion;
 
         /**
          * Default constructor for Builder.
@@ -563,29 +553,14 @@ public final class DataCallResponse implements Parcelable {
         }
 
         /**
-         * Set the IRadio version for this DataCallResponse
-         * @hide
-         */
-        public @NonNull Builder setVersion(int version) {
-            mVersion = version;
-            return this;
-        }
-
-        /**
          * Build the DataCallResponse.
          *
          * @return the DataCallResponse object.
          */
         public @NonNull DataCallResponse build() {
-            if (mVersion >= 5) {
-                return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
-                        mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
-                        mPcscfAddresses, mMtuV4, mMtuV6, mVersion);
-            } else {
-                return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
-                        mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
-                        mPcscfAddresses, mMtu);
-            }
+            return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
+                    mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
+                    mPcscfAddresses, mMtu, mMtuV4, mMtuV6);
         }
     }
 }
