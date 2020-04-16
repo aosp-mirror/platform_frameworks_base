@@ -539,4 +539,11 @@ public final class DumpUtils {
         // Pack screen & process state using bit shifting
         return (procStateIndex << 8) | screenStateIndex;
     }
+
+    /** Print aggregated tags generated via {@code #aggregateCurrentProcessState}. */
+    public static void printAggregatedProcStateTagProto(ProtoOutputStream proto, long screenId,
+            long stateId, int state) {
+        proto.write(screenId, ADJ_SCREEN_PROTO_ENUMS[state >> 8]);
+        proto.write(stateId, STATE_PROTO_ENUMS[state]);
+    }
 }
