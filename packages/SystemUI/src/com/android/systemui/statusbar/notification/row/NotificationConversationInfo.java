@@ -23,6 +23,7 @@ import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.provider.Settings.Global.NOTIFICATION_BUBBLES;
 
 import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
 
@@ -45,6 +46,7 @@ import android.graphics.drawable.Icon;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.transition.ChangeBounds;
@@ -53,7 +55,7 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Slog;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
@@ -63,6 +65,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Dependency;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -70,6 +73,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.lang.annotation.Retention;
 import java.util.List;
+
+import javax.inject.Provider;
 
 /**
  * The guts of a conversation notification revealed when performing a long press.
@@ -93,6 +98,9 @@ public class NotificationConversationInfo extends LinearLayout implements
     private ShortcutInfo mShortcutInfo;
     private String mConversationId;
     private StatusBarNotification mSbn;
+    private Notification.BubbleMetadata mBubbleMetadata;
+    private Context mUserContext;
+    private Provider<PriorityOnboardingDialogController.Builder> mBuilderProvider;
     private boolean mIsDeviceProvisioned;
     private int mAppBubble;
 
@@ -136,17 +144,17 @@ public class NotificationConversationInfo extends LinearLayout implements
     */
 
     private OnClickListener mOnFavoriteClick = v -> {
-        mSelectedAction = ACTION_FAVORITE;
+        setSelectedAction(ACTION_FAVORITE);
         updateToggleActions(mSelectedAction, true);
     };
 
     private OnClickListener mOnDefaultClick = v -> {
-        mSelectedAction = ACTION_DEFAULT;
+        setSelectedAction(ACTION_DEFAULT);
         updateToggleActions(mSelectedAction, true);
     };
 
     private OnClickListener mOnMuteClick = v -> {
-        mSelectedAction = ACTION_MUTE;
+        setSelectedAction(ACTION_MUTE);
         updateToggleActions(mSelectedAction, true);
     };
 
@@ -170,6 +178,23 @@ public class NotificationConversationInfo extends LinearLayout implements
         void onClick(View v, int hoursToSnooze);
     }
 
+    @VisibleForTesting
+    void setSelectedAction(int selectedAction) {
+        if (mSelectedAction == selectedAction) {
+            return;
+        }
+
+        mSelectedAction = selectedAction;
+        onSelectedActionChanged();
+    }
+
+    private void onSelectedActionChanged() {
+        // If the user selected Priority, maybe show the priority onboarding
+        if (mSelectedAction == ACTION_FAVORITE && shouldShowPriorityOnboarding()) {
+            showPriorityOnboarding();
+        }
+    }
+
     public void bindNotification(
             ShortcutManager shortcutManager,
             PackageManager pm,
@@ -181,6 +206,8 @@ public class NotificationConversationInfo extends LinearLayout implements
             OnSettingsClickListener onSettingsClick,
             OnSnoozeClickListener onSnoozeClickListener,
             ConversationIconFactory conversationIconFactory,
+            Context userContext,
+            Provider<PriorityOnboardingDialogController.Builder> builderProvider,
             boolean isDeviceProvisioned) {
         mSelectedAction = -1;
         mINotificationManager = iNotificationManager;
@@ -196,6 +223,9 @@ public class NotificationConversationInfo extends LinearLayout implements
         mIsDeviceProvisioned = isDeviceProvisioned;
         mOnSnoozeClickListener = onSnoozeClickListener;
         mIconFactory = conversationIconFactory;
+        mUserContext = userContext;
+        mBubbleMetadata = entry.getBubbleMetadata();
+        mBuilderProvider = builderProvider;
 
         mShortcutManager = shortcutManager;
         mConversationId = mNotificationChannel.getConversationId();
@@ -213,7 +243,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         try {
             mAppBubble = mINotificationManager.getBubblePreferenceForPackage(mPackageName, mAppUid);
         } catch (RemoteException e) {
-            Slog.e(TAG, "can't reach OS", e);
+            Log.e(TAG, "can't reach OS", e);
             mAppBubble = BUBBLE_PREFERENCE_SELECTED;
         }
 
@@ -489,6 +519,38 @@ public class NotificationConversationInfo extends LinearLayout implements
         bgHandler.post(
                 new UpdateChannelRunnable(mINotificationManager, mPackageName,
                         mAppUid, mSelectedAction, mNotificationChannel));
+    }
+
+    private boolean shouldShowPriorityOnboarding() {
+        return !Prefs.getBoolean(mUserContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, false);
+    }
+
+    private void showPriorityOnboarding() {
+        View onboardingView = LayoutInflater.from(mContext)
+                .inflate(R.layout.priority_onboarding_half_shell, null);
+
+        boolean ignoreDnd = false;
+        try {
+            ignoreDnd = (mINotificationManager
+                    .getConsolidatedNotificationPolicy().priorityConversationSenders
+                    & NotificationManager.Policy.CONVERSATION_SENDERS_IMPORTANT) != 0;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not check conversation senders", e);
+        }
+
+        boolean showAsBubble = mBubbleMetadata.getAutoExpandBubble()
+                && Settings.Global.getInt(mContext.getContentResolver(),
+                        NOTIFICATION_BUBBLES, 0) == 1;
+
+        PriorityOnboardingDialogController controller = mBuilderProvider.get()
+                .setContext(mUserContext)
+                .setView(onboardingView)
+                .setIgnoresDnd(ignoreDnd)
+                .setShowsAsBubble(showAsBubble)
+                .build();
+
+        controller.init();
+        controller.show();
     }
 
     /**

@@ -16,15 +16,12 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.print.PrintManager.PRINT_SPOOLER_PACKAGE_NAME;
-import static android.provider.Settings.Global.NOTIFICATION_BUBBLES;
-import static android.provider.Settings.Secure.BUBBLE_IMPORTANT_CONVERSATIONS;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -38,8 +35,10 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,6 +50,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
@@ -61,20 +61,19 @@ import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Dependency;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
@@ -89,6 +88,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
@@ -98,6 +98,8 @@ import org.mockito.stubbing.Answer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+
+import javax.inject.Provider;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -145,6 +147,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     private ShadeController mShadeController;
     @Mock
     private ConversationIconFactory mIconFactory;
+    @Mock
+    private Context mUserContext;
+    @Mock(answer = Answers.RETURNS_SELF)
+    private PriorityOnboardingDialogController.Builder mBuilder;
+    private Provider<PriorityOnboardingDialogController.Builder> mBuilderProvider = () -> mBuilder;
 
     @Before
     public void setUp() throws Exception {
@@ -236,6 +243,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
         final ImageView view = mNotificationInfo.findViewById(R.id.conversation_icon);
         assertEquals(mIconDrawable, view.getDrawable());
@@ -255,6 +264,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
         final TextView textView = mNotificationInfo.findViewById(R.id.pkg_name);
         assertTrue(textView.getText().toString().contains("App Name"));
@@ -300,6 +311,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
         assertTrue(textView.getText().toString().contains(group.getName()));
@@ -321,6 +334,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
@@ -341,6 +356,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(GONE, nameView.getVisibility());
@@ -368,6 +385,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(VISIBLE, nameView.getVisibility());
@@ -391,6 +410,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 },
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
@@ -412,6 +433,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertTrue(settingsButton.getVisibility() != View.VISIBLE);
@@ -434,6 +457,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 },
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 false);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertTrue(settingsButton.getVisibility() != View.VISIBLE);
@@ -454,6 +479,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
         View view = mNotificationInfo.findViewById(R.id.silence);
         assertThat(view.isSelected()).isTrue();
@@ -477,6 +504,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
         View view = mNotificationInfo.findViewById(R.id.default_behavior);
         assertThat(view.isSelected()).isTrue();
@@ -503,6 +532,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
         View view = mNotificationInfo.findViewById(R.id.default_behavior);
         assertThat(view.isSelected()).isTrue();
@@ -528,6 +559,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         View fave = mNotificationInfo.findViewById(R.id.priority);
@@ -566,6 +599,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
@@ -603,6 +638,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         View silence = mNotificationInfo.findViewById(R.id.silence);
@@ -641,6 +678,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         View fave = mNotificationInfo.findViewById(R.id.priority);
@@ -673,6 +712,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         View fave = mNotificationInfo.findViewById(R.id.priority);
@@ -703,6 +744,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
@@ -734,6 +777,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
@@ -765,6 +810,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
@@ -795,6 +842,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         View silence = mNotificationInfo.findViewById(R.id.silence);
@@ -824,6 +873,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         verify(mMockINotificationManager, times(1)).createConversationNotificationChannelForPackage(
@@ -844,9 +895,81 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 mIconFactory,
+                mUserContext,
+                mBuilderProvider,
                 true);
 
         verify(mMockINotificationManager, never()).createConversationNotificationChannelForPackage(
                 anyString(), anyInt(), anyString(), any(), eq(CONVERSATION_ID));
+    }
+
+    @Test
+    public void testSelectPriorityPresentsOnboarding_firstTime() {
+        // GIVEN pref is false
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, false);
+
+        // GIVEN the priority onboarding screen is present
+        PriorityOnboardingDialogController.Builder b =
+                new PriorityOnboardingDialogController.Builder();
+        PriorityOnboardingDialogController controller =
+                mock(PriorityOnboardingDialogController.class);
+        when(b.build()).thenReturn(controller);
+
+        // GIVEN the user is changing conversation settings
+        when(mBuilderProvider.get()).thenReturn(b);
+        mNotificationInfo.bindNotification(
+                mShortcutManager,
+                mMockPackageManager,
+                mMockINotificationManager,
+                mVisualStabilityManager,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                null,
+                null,
+                mIconFactory,
+                mUserContext,
+                mBuilderProvider,
+                true);
+
+        // WHEN user clicks "priority"
+        mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
+
+        // THEN the user is presented with the priority onboarding screen
+        verify(controller, atLeastOnce()).show();
+    }
+
+    @Test
+    public void testSelectPriorityDoesNotShowOnboarding_secondTime() {
+        //WHEN pref is true
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, true);
+
+        PriorityOnboardingDialogController.Builder b =
+                new PriorityOnboardingDialogController.Builder();
+        PriorityOnboardingDialogController controller =
+                mock(PriorityOnboardingDialogController.class);
+        when(b.build()).thenReturn(controller);
+
+        when(mBuilderProvider.get()).thenReturn(b);
+        mNotificationInfo.bindNotification(
+                mShortcutManager,
+                mMockPackageManager,
+                mMockINotificationManager,
+                mVisualStabilityManager,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                null,
+                null,
+                mIconFactory,
+                mUserContext,
+                mBuilderProvider,
+                true);
+
+        // WHEN user clicks "priority"
+        mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
+
+        // THEN the user is presented with the priority onboarding screen
+        verify(controller, never()).show();
     }
 }
