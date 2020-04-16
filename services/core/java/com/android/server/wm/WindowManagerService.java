@@ -6113,15 +6113,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print("  mInputMethodInputTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(inputMethodInputTarget);
             }
-            if (mAccessibilityController != null) {
-                final Region magnificationRegion = new Region();
-                mAccessibilityController.getMagnificationRegionLocked(displayId,
-                        magnificationRegion);
-                pw.print("  mMagnificationRegion in display# ");
-                pw.print(displayId);
-                pw.print(' ');
-                pw.println(magnificationRegion);
-            }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
         pw.print("  mLastDisplayFreezeDuration=");
@@ -6137,6 +6128,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputManagerCallback.dump(pw, "  ");
         mTaskSnapshotController.dump(pw, "  ");
+        if (mAccessibilityController != null) {
+            mAccessibilityController.dump(pw, "  ");
+        }
 
         if (dumpAll) {
             final WindowState imeWindow = mRoot.getCurrentInputMethodWindow();

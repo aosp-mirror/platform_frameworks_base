@@ -66,6 +66,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
 import com.android.server.wm.WindowManagerInternal.WindowsForAccessibilityCallback;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -341,6 +342,16 @@ final class AccessibilityController {
         windowState.getTransformationMatrix(sTempFloats, outMatrix);
     }
 
+    void dump(PrintWriter pw, String prefix) {
+        for (int i = 0; i < mDisplayMagnifiers.size(); i++) {
+            final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.valueAt(i);
+            if (displayMagnifier != null) {
+                displayMagnifier.dump(pw, prefix
+                        + "Magnification display# " + mDisplayMagnifiers.keyAt(i));
+            }
+        }
+    }
+
     /**
      * This class encapsulates the functionality related to display magnification.
      */
@@ -549,6 +560,10 @@ final class AccessibilityController {
 
         public void drawMagnifiedRegionBorderIfNeededLocked(SurfaceControl.Transaction t) {
             mMagnifedViewport.drawWindowIfNeededLocked(t);
+        }
+
+        void dump(PrintWriter pw, String prefix) {
+            mMagnifedViewport.dump(pw, prefix);
         }
 
         private final class MagnifiedViewport {
@@ -820,6 +835,10 @@ final class AccessibilityController {
                 }, false /* traverseTopToBottom */ );
             }
 
+            void dump(PrintWriter pw, String prefix) {
+                mWindow.dump(pw, prefix);
+            }
+
             private final class ViewportWindow {
                 private static final String SURFACE_TITLE = "Magnification Overlay";
 
@@ -983,6 +1002,14 @@ final class AccessibilityController {
                 public void releaseSurface() {
                     mService.mTransactionFactory.get().remove(mSurfaceControl).apply();
                     mSurface.release();
+                }
+
+                void dump(PrintWriter pw, String prefix) {
+                    pw.println(prefix
+                            + " mBounds= " + mBounds
+                            + " mDirtyRect= " + mDirtyRect
+                            + " mWidth= " + mSurfaceControl.getWidth()
+                            + " mHeight= " + mSurfaceControl.getHeight());
                 }
 
                 private final class AnimationController extends Handler {
