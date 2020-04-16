@@ -310,27 +310,6 @@ public class WindowFrameTests extends WindowTestsBase {
         assertContentFrame(w, new Rect(resolvedTaskBounds.left, resolvedTaskBounds.top,
                 resolvedTaskBounds.right - contentInsetRight,
                 resolvedTaskBounds.bottom - contentInsetBottom));
-
-        pf.set(0, 0, logicalWidth, logicalHeight);
-        // If we set displayed bounds, the insets will be computed with the main task bounds
-        // but the frame will be positioned according to the displayed bounds.
-        final int insetLeft = logicalWidth / 5;
-        final int insetTop = logicalHeight / 5;
-        final int insetRight = insetLeft + (resolvedTaskBounds.right - resolvedTaskBounds.left);
-        final int insetBottom = insetTop + (resolvedTaskBounds.bottom - resolvedTaskBounds.top);
-        task.setOverrideDisplayedBounds(resolvedTaskBounds);
-        task.setBounds(insetLeft, insetTop, insetRight, insetBottom);
-        windowFrames.setFrames(pf, pf, cf, cf, pf, cf);
-        w.computeFrameLw();
-        assertEquals(resolvedTaskBounds, w.getFrameLw());
-        assertEquals(0, w.getRelativeFrameLw().left);
-        assertEquals(0, w.getRelativeFrameLw().top);
-        contentInsetRight = insetRight - cfRight;
-        contentInsetBottom = insetBottom - cfBottom;
-        assertContentInset(w, 0, 0, contentInsetRight, contentInsetBottom);
-        assertContentFrame(w, new Rect(resolvedTaskBounds.left, resolvedTaskBounds.top,
-                resolvedTaskBounds.right - contentInsetRight,
-                resolvedTaskBounds.bottom - contentInsetBottom));
     }
 
     @Test
@@ -443,33 +422,6 @@ public class WindowFrameTests extends WindowTestsBase {
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
         final Rect pf = new Rect(0, 0, 1000, 2000);
-        // Create a display cutout of size 50x50, aligned top-center
-        final WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(500, 0, 550, 50, BOUNDS_POSITION_TOP),
-                pf.width(), pf.height());
-
-        final WindowFrames windowFrames = w.getWindowFrames();
-        windowFrames.setFrames(pf, pf, pf, pf, pf, pf);
-        windowFrames.setDisplayCutout(cutout);
-        w.computeFrameLw();
-
-        assertEquals(w.getWmDisplayCutout().getDisplayCutout().getSafeInsetTop(), 50);
-        assertEquals(w.getWmDisplayCutout().getDisplayCutout().getSafeInsetBottom(), 0);
-        assertEquals(w.getWmDisplayCutout().getDisplayCutout().getSafeInsetLeft(), 0);
-        assertEquals(w.getWmDisplayCutout().getDisplayCutout().getSafeInsetRight(), 0);
-    }
-
-    @Test
-    @FlakyTest(bugId = 130388666)
-    public void testDisplayCutout_tempDisplayedBounds() {
-        // Regular fullscreen task and window
-        WindowState w = createWindow();
-        final Task task = w.getTask();
-        task.setBounds(new Rect(0, 0, 1000, 2000));
-        task.setOverrideDisplayedBounds(new Rect(0, -500, 1000, 1500));
-        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
-
-        final Rect pf = new Rect(0, -500, 1000, 1500);
         // Create a display cutout of size 50x50, aligned top-center
         final WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
                 fromBoundingRect(500, 0, 550, 50, BOUNDS_POSITION_TOP),
