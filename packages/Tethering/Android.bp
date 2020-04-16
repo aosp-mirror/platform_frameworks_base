@@ -34,7 +34,6 @@ java_defaults {
     ],
     libs: [
         "framework-tethering",
-        "framework-telephony-stubs",
         "framework-wifi-stubs-systemapi",
         "unsupportedappusage",
     ],
