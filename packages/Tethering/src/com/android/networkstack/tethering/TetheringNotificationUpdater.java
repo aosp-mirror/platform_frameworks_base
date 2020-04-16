@@ -50,9 +50,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * A class to display tethering-related notifications.
  *
@@ -89,6 +86,9 @@ public class TetheringNotificationUpdater {
     static final int NO_ICON_ID = 0;
     @VisibleForTesting
     static final int DOWNSTREAM_NONE = 0;
+    // Refer to TelephonyManager#getSimCarrierId for more details about carrier id.
+    @VisibleForTesting
+    static final int VERIZON_CARRIER_ID = 1839;
     private final Context mContext;
     private final NotificationManager mNotificationManager;
     private final NotificationChannel mChannel;
@@ -114,11 +114,11 @@ public class TetheringNotificationUpdater {
     @interface NotificationId {}
 
     private static final class MccMncOverrideInfo {
-        public final List<String> visitedMccMncs;
+        public final String visitedMccMnc;
         public final int homeMcc;
         public final int homeMnc;
-        MccMncOverrideInfo(List<String> visitedMccMncs, int mcc, int mnc) {
-            this.visitedMccMncs = visitedMccMncs;
+        MccMncOverrideInfo(String visitedMccMnc, int mcc, int mnc) {
+            this.visitedMccMnc = visitedMccMnc;
             this.homeMcc = mcc;
             this.homeMnc = mnc;
         }
@@ -127,9 +127,7 @@ public class TetheringNotificationUpdater {
     private static final SparseArray<MccMncOverrideInfo> sCarrierIdToMccMnc = new SparseArray<>();
 
     static {
-        // VZW
-        sCarrierIdToMccMnc.put(
-                1839, new MccMncOverrideInfo(Arrays.asList(new String[] {"20404"}), 311, 480));
+        sCarrierIdToMccMnc.put(VERIZON_CARRIER_ID, new MccMncOverrideInfo("20404", 311, 480));
     }
 
     public TetheringNotificationUpdater(@NonNull final Context context,
@@ -200,7 +198,7 @@ public class TetheringNotificationUpdater {
         final int carrierId = tm.getSimCarrierId();
         final String mccmnc = tm.getSimOperator();
         final MccMncOverrideInfo overrideInfo = sCarrierIdToMccMnc.get(carrierId);
-        if (overrideInfo != null && overrideInfo.visitedMccMncs.contains(mccmnc)) {
+        if (overrideInfo != null && overrideInfo.visitedMccMnc.equals(mccmnc)) {
             // Re-configure MCC/MNC value to specific carrier to get right resources.
             final Configuration config = res.getConfiguration();
             config.mcc = overrideInfo.homeMcc;
