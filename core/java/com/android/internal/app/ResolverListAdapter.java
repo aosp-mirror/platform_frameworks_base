@@ -165,8 +165,9 @@ public class ResolverListAdapter extends BaseAdapter {
         mResolverListController.updateModel(componentName);
     }
 
-    public void updateChooserCounts(String packageName, int userId, String action) {
-        mResolverListController.updateChooserCounts(packageName, userId, action);
+    public void updateChooserCounts(String packageName, String action) {
+        mResolverListController.updateChooserCounts(
+                packageName, getUserHandle().getIdentifier(), action);
     }
 
     List<ResolvedComponentInfo> getUnfilteredResolveList() {
