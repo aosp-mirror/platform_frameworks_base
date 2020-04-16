@@ -1780,7 +1780,13 @@ public class NotificationPanelViewController extends PanelViewController {
         });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
+            public void onAnimationStart(Animator animation) {
+                notifyExpandingStarted();
+            }
+
+            @Override
             public void onAnimationEnd(Animator animation) {
+                notifyExpandingFinished();
                 mNotificationStackScroller.resetCheckSnoozeLeavebehind();
                 mQsExpansionAnimator = null;
                 if (onFinishRunnable != null) {
