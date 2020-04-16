@@ -52,7 +52,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE_DEPRECATED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
-import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
@@ -352,10 +351,6 @@ class Task extends WindowContainer<WindowContainer> {
 
     final Rect mPreparedFrozenBounds = new Rect();
     final Configuration mPreparedFrozenMergedConfig = new Configuration();
-
-    // If non-empty, bounds used to display the task during animations/interactions.
-    // TODO(b/119687367): This member is temporary.
-    private final Rect mOverrideDisplayedBounds = new Rect();
 
     // Id of the previous display the stack was on.
     int mPrevDisplayId = INVALID_DISPLAY;
@@ -2795,29 +2790,6 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    /**
-     * Displayed bounds are used to set where the task is drawn at any given time. This is
-     * separate from its actual bounds so that the app doesn't see any meaningful configuration
-     * changes during transitionary periods.
-     */
-    void setOverrideDisplayedBounds(Rect overrideDisplayedBounds) {
-        if (overrideDisplayedBounds != null) {
-            adjustForMinimalTaskDimensions(overrideDisplayedBounds, mOverrideDisplayedBounds);
-            mOverrideDisplayedBounds.set(overrideDisplayedBounds);
-        } else {
-            mOverrideDisplayedBounds.setEmpty();
-        }
-        updateSurfacePosition();
-    }
-
-    /**
-     * Gets the bounds that override where the task is displayed. See
-     * {@link android.app.IActivityTaskManager#resizeDockedStack} why this is needed.
-     */
-    Rect getOverrideDisplayedBounds() {
-        return mOverrideDisplayedBounds;
-    }
-
     boolean isResizeable(boolean checkSupportsPip) {
         return (mAtmService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
                 || (checkSupportsPip && mSupportsPictureInPicture));
@@ -2849,49 +2821,6 @@ class Task extends WindowContainer<WindowContainer> {
     void prepareFreezingBounds() {
         mPreparedFrozenBounds.set(getBounds());
         mPreparedFrozenMergedConfig.setTo(getConfiguration());
-    }
-
-    /**
-     * Align the task to the adjusted bounds.
-     *
-     * @param adjustedBounds Adjusted bounds to which the task should be aligned.
-     * @param tempInsetBounds Insets bounds for the task.
-     * @param alignBottom True if the task's bottom should be aligned to the adjusted
-     *                    bounds's bottom; false if the task's top should be aligned
-     *                    the adjusted bounds's top.
-     */
-    void alignToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds, boolean alignBottom) {
-        if (!isResizeable() || EMPTY.equals(getRequestedOverrideConfiguration())) {
-            return;
-        }
-
-        getBounds(mTmpRect2);
-        if (alignBottom) {
-            int offsetY = adjustedBounds.bottom - mTmpRect2.bottom;
-            mTmpRect2.offset(0, offsetY);
-        } else {
-            mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
-        }
-        if (tempInsetBounds == null || tempInsetBounds.isEmpty()) {
-            setOverrideDisplayedBounds(null);
-            setBounds(mTmpRect2);
-        } else {
-            setOverrideDisplayedBounds(mTmpRect2);
-            setBounds(tempInsetBounds);
-        }
-    }
-
-    /**
-     * Gets the current overridden displayed bounds. These will be empty if the task is not
-     * currently overriding where it is displayed.
-     */
-    @Override
-    public Rect getDisplayedBounds() {
-        if (mOverrideDisplayedBounds.isEmpty()) {
-            return super.getDisplayedBounds();
-        } else {
-            return mOverrideDisplayedBounds;
-        }
     }
 
     @Override
@@ -3431,7 +3360,6 @@ class Task extends WindowContainer<WindowContainer> {
         pw.println(prefix + "taskId=" + mTaskId);
         pw.println(doublePrefix + "mBounds=" + getBounds().toShortString());
         pw.println(doublePrefix + "appTokens=" + mChildren);
-        pw.println(doublePrefix + "mDisplayedBounds=" + mOverrideDisplayedBounds.toShortString());
 
         final String triplePrefix = doublePrefix + "  ";
         final String quadruplePrefix = triplePrefix + "  ";

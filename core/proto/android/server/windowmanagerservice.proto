@@ -250,7 +250,7 @@ message TaskProto {
     reserved 3; // activity
     optional bool fills_parent = 4;
     optional .android.graphics.RectProto bounds = 5;
-    optional .android.graphics.RectProto displayed_bounds = 6;
+    optional .android.graphics.RectProto displayed_bounds = 6 [deprecated=true];
     optional bool defer_removal = 7;
     optional int32 surface_width = 8;
     optional int32 surface_height = 9;

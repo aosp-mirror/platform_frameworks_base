@@ -1374,8 +1374,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final Rect spaceToFill = transformedBounds != null
                     ? transformedBounds
                     : inMultiWindowMode()
-                            ? task.getDisplayedBounds()
-                            : getRootTask().getParent().getDisplayedBounds();
+                            ? task.getBounds()
+                            : getRootTask().getParent().getBounds();
             mLetterbox.layout(spaceToFill, w.getFrameLw(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
@@ -6661,17 +6661,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return mSizeCompatBounds;
         }
         return super.getBounds();
-    }
-
-    @Override
-    Rect getDisplayedBounds() {
-        if (task != null) {
-            final Rect overrideDisplayedBounds = task.getOverrideDisplayedBounds();
-            if (!overrideDisplayedBounds.isEmpty()) {
-                return overrideDisplayedBounds;
-            }
-        }
-        return getBounds();
     }
 
     @VisibleForTesting
