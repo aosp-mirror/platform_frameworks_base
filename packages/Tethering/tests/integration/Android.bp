@@ -13,18 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
-android_test {
-    name: "TetheringIntegrationTests",
-    certificate: "platform",
-    platform_apis: true,
+java_defaults {
+    name: "TetheringIntegrationTestsDefaults",
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
-    ],
-    test_suites: [
-        "device-tests",
-        "mts",
     ],
     static_libs: [
         "NetworkStackApiStableLib",
@@ -44,4 +37,49 @@ android_test {
         "libdexmakerjvmtiagent",
         "libstaticjvmtiagent",
     ],
+    jarjar_rules: ":NetworkStackJarJarRules",
+}
+
+android_library {
+    name: "TetheringIntegrationTestsLib",
+    platform_apis: true,
+    defaults: ["TetheringIntegrationTestsDefaults"],
+    visibility: ["//cts/tests/tests/tethering"]
+}
+
+android_test {
+    name: "TetheringIntegrationTests",
+    platform_apis: true,
+    defaults: ["TetheringIntegrationTestsDefaults"],
+    test_suites: [
+        "device-tests",
+        "mts",
+    ],
+    compile_multilib: "both",
+}
+
+// Special version of the tethering tests that includes all tests necessary for code coverage
+// purposes. This is currently the union of TetheringTests, TetheringIntegrationTests and
+// NetworkStackTests.
+android_test {
+    name: "TetheringCoverageTests",
+    certificate: "platform",
+    platform_apis: true,
+    test_suites: ["device-tests", "mts"],
+    test_config: "AndroidTest_Coverage.xml",
+    defaults: ["libnetworkstackutilsjni_deps"],
+    static_libs: [
+        "NetworkStackTestsLib",
+        "TetheringTestsLib",
+        "TetheringIntegrationTestsLib",
+    ],
+    jni_libs: [
+        // For mockito extended
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+        // For NetworkStackUtils included in NetworkStackBase
+        "libnetworkstackutilsjni",
+    ],
+    compile_multilib: "both",
+    manifest: "AndroidManifest_coverage.xml",
 }

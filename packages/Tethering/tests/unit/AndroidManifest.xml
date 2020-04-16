@@ -16,16 +16,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.networkstack.tethering.tests.unit">
 
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.TETHER_PRIVILEGED"/>
 
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
         <service
-            android:name="com.android.server.connectivity.tethering.MockTetheringService"
+            android:name="com.android.networkstack.tethering.MockTetheringService"
             android:permission="android.permission.TETHER_PRIVILEGED"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.android.server.connectivity.tethering.TetheringService"/>
+                <action android:name="com.android.networkstack.tethering.TetheringService"/>
             </intent-filter>
         </service>
     </application>

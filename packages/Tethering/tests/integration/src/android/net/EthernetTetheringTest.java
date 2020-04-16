@@ -18,6 +18,7 @@ package android.net;
 
 import static android.Manifest.permission.MANAGE_TEST_NETWORKS;
 import static android.Manifest.permission.NETWORK_SETTINGS;
+import static android.Manifest.permission.TETHER_PRIVILEGED;
 import static android.net.TetheringManager.TETHERING_ETHERNET;
 
 import static org.junit.Assert.assertEquals;
@@ -109,7 +110,8 @@ public class EthernetTetheringTest {
         mTetheredInterfaceRequester = new TetheredInterfaceRequester(mHandler, mEm);
         // Needed to create a TestNetworkInterface, to call requestTetheredInterface, and to receive
         // tethered client callbacks.
-        mUiAutomation.adoptShellPermissionIdentity(MANAGE_TEST_NETWORKS, NETWORK_SETTINGS);
+        mUiAutomation.adoptShellPermissionIdentity(
+                MANAGE_TEST_NETWORKS, NETWORK_SETTINGS, TETHER_PRIVILEGED);
     }
 
     private void cleanUp() throws Exception {

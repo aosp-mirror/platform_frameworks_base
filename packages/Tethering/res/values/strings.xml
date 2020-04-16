@@ -40,13 +40,13 @@
     <string name="no_upstream_notification_title"></string>
     <!-- String for no upstream notification message [CHAR LIMIT=200] -->
     <string name="no_upstream_notification_message"></string>
-    <!-- String for cellular roaming notification disable button [CHAR LIMIT=200]  -->
+    <!-- String for no upstream notification disable button [CHAR LIMIT=200] -->
     <string name="no_upstream_notification_disable_button"></string>
 
-    <!-- String for cellular roaming notification title [CHAR LIMIT=200]  -->
+    <!-- String for cellular roaming notification title [CHAR LIMIT=200] -->
     <string name="upstream_roaming_notification_title"></string>
-    <!-- String for cellular roaming notification message [CHAR LIMIT=500]  -->
+    <!-- String for cellular roaming notification message [CHAR LIMIT=500] -->
     <string name="upstream_roaming_notification_message"></string>
-    <!-- String for cellular roaming notification continue button [CHAR LIMIT=200]  -->
+    <!-- String for cellular roaming notification continue button [CHAR LIMIT=200] -->
     <string name="upstream_roaming_notification_continue_button"></string>
 </resources>
