@@ -261,8 +261,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     .build();
             builder.addSelectedRoute(mSelectedRouteId);
 
-            for (MediaRoute2Info route : mBtRouteProvider.getTransferableRoutes()) {
-                builder.addTransferableRoute(route.getId());
+            if (mBtRouteProvider != null) {
+                for (MediaRoute2Info route : mBtRouteProvider.getTransferableRoutes()) {
+                    builder.addTransferableRoute(route.getId());
+                }
             }
 
             RoutingSessionInfo newSessionInfo = builder.setProviderId(mUniqueId).build();
