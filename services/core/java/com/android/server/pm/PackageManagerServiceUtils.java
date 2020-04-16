@@ -32,7 +32,6 @@ import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -40,7 +39,6 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Build;
 import android.os.Debug;
 import android.os.Environment;
@@ -50,6 +48,9 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
+import android.os.incremental.IncrementalManager;
+import android.os.incremental.V4Signature;
+import android.os.incremental.V4Signature.HashingInfo;
 import android.service.pm.PackageServiceDumpProto;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -62,6 +63,7 @@ import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.HexDump;
 import com.android.server.EventLogTags;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -94,8 +96,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
 
@@ -942,5 +942,72 @@ public class PackageManagerServiceUtils {
             Os.mkdir(currentDir.getAbsolutePath(), mode);
             Os.chmod(currentDir.getAbsolutePath(), mode);
         }
+    }
+
+    /**
+     * Returns a string that's compatible with the verification root hash extra.
+     * @see PackageManager#EXTRA_VERIFICATION_ROOT_HASH
+     */
+    @NonNull
+    public static String buildVerificationRootHashString(@NonNull String baseFilename,
+            @Nullable String[] splitFilenameArray) {
+        final StringBuilder sb = new StringBuilder();
+        final String baseFilePath =
+                baseFilename.substring(baseFilename.lastIndexOf(File.separator) + 1);
+        sb.append(baseFilePath).append(":");
+        final byte[] baseRootHash = getRootHash(baseFilename);
+        if (baseRootHash == null) {
+            sb.append("0");
+        } else {
+            sb.append(HexDump.toHexString(baseRootHash));
+        }
+        if (splitFilenameArray == null || splitFilenameArray.length == 0) {
+            return sb.toString();
+        }
+
+        for (int i = splitFilenameArray.length - 1; i >= 0; i--) {
+            final String splitFilename = splitFilenameArray[i];
+            final String splitFilePath =
+                    splitFilename.substring(splitFilename.lastIndexOf(File.separator) + 1);
+            final byte[] splitRootHash = getRootHash(splitFilename);
+            sb.append(";").append(splitFilePath).append(":");
+            if (splitRootHash == null) {
+                sb.append("0");
+            } else {
+                sb.append(HexDump.toHexString(splitRootHash));
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Returns the root has for the given file.
+     * <p>Otherwise, returns {@code null} if the root hash could not be found or calculated.
+     * <p>NOTE: This currently only works on files stored on the incremental file system. The
+     * eventual goal is that this hash [among others] can be retrieved for any file.
+     */
+    @Nullable
+    private static byte[] getRootHash(String filename) {
+        try {
+            final byte[] baseFileSignature =
+                    IncrementalManager.unsafeGetFileSignature(filename);
+            if (baseFileSignature == null) {
+                throw new IOException("File signature not present");
+            }
+            final V4Signature signature =
+                    V4Signature.readFrom(baseFileSignature);
+            if (signature.hashingInfo == null) {
+                throw new IOException("Hashing info not present");
+            }
+            final HashingInfo hashInfo =
+                    HashingInfo.fromByteArray(signature.hashingInfo);
+            if (ArrayUtils.isEmpty(hashInfo.rawRootHash)) {
+                throw new IOException("Root has not present");
+            }
+            return hashInfo.rawRootHash;
+        } catch (IOException ignore) {
+            Slog.e(TAG, "ERROR: could not load root hash from incremental install");
+        }
+        return null;
     }
 }
