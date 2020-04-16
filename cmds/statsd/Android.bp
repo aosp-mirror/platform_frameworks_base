@@ -291,7 +291,14 @@ cc_binary {
 cc_test {
     name: "statsd_test",
     defaults: ["statsd_defaults"],
-    test_suites: ["device-tests"],
+    test_suites: ["device-tests", "mts"],
+
+    //TODO(b/153588990): Remove when the build system properly separates 
+    //32bit and 64bit architectures.
+    multilib: {
+        lib32: { suffix: "32", },
+        lib64: { suffix: "64", },
+    },
 
     cflags: [
         "-Wall",
