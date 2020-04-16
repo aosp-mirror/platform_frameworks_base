@@ -1253,6 +1253,7 @@
     <dimen name="control_base_item_margin">2dp</dimen>
     <dimen name="control_status_padding">3dp</dimen>
     <fraction name="controls_toggle_bg_intensity">5%</fraction>
+    <fraction name="controls_dimmed_alpha">40%</fraction>
 
     <!-- Home Controls activity view detail panel-->
     <dimen name="controls_activity_view_top_padding">25dp</dimen>
