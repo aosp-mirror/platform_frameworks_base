@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.row.wrapper;
 
 import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
 
-import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.app.Notification;
 import android.content.Context;
@@ -132,15 +131,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         }
         if (mAppOps != null) {
             mAppOps.setOnClickListener(listener);
-        }
-        if (mCameraIcon != null) {
-            mCameraIcon.setOnClickListener(listener);
-        }
-        if (mMicIcon != null) {
-            mMicIcon.setOnClickListener(listener);
-        }
-        if (mOverlayIcon != null) {
-            mOverlayIcon.setOnClickListener(listener);
         }
     }
 
