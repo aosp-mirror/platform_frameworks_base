@@ -38,8 +38,6 @@ import android.content.IntentFilter;
 import android.net.util.SharedLog;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.ResultReceiver;
@@ -75,11 +73,6 @@ public class EntitlementManager {
 
     private final ComponentName mSilentProvisioningService;
     private static final int MS_PER_HOUR = 60 * 60 * 1000;
-    private static final int EVENT_START_PROVISIONING = 0;
-    private static final int EVENT_STOP_PROVISIONING = 1;
-    private static final int EVENT_UPSTREAM_CHANGED = 2;
-    private static final int EVENT_MAYBE_RUN_PROVISIONING = 3;
-    private static final int EVENT_GET_ENTITLEMENT_VALUE = 4;
 
     // The ArraySet contains enabled downstream types, ex:
     // {@link TetheringManager.TETHERING_WIFI}
@@ -90,7 +83,7 @@ public class EntitlementManager {
     private final int mPermissionChangeMessageCode;
     private final SharedLog mLog;
     private final SparseIntArray mEntitlementCacheValue;
-    private final EntitlementHandler mHandler;
+    private final Handler mHandler;
     private final StateMachine mTetherMasterSM;
     // Key: TetheringManager.TETHERING_*(downstream).
     // Value: TetheringManager.TETHER_ERROR_{NO_ERROR or PROVISION_FAILED}(provisioning result).
@@ -112,10 +105,7 @@ public class EntitlementManager {
         mEntitlementCacheValue = new SparseIntArray();
         mTetherMasterSM = tetherMasterSM;
         mPermissionChangeMessageCode = permissionChangeMessageCode;
-        final Handler masterHandler = tetherMasterSM.getHandler();
-        // Create entitlement's own handler which is associated with TetherMaster thread
-        // let all entitlement processes run in the same thread.
-        mHandler = new EntitlementHandler(masterHandler.getLooper());
+        mHandler = tetherMasterSM.getHandler();
         mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_PROVISIONING_ALARM),
                 null, mHandler);
         mSilentProvisioningService = ComponentName.unflattenFromString(
@@ -172,14 +162,9 @@ public class EntitlementManager {
      *        provisioning app UI if there is one.
      */
     public void startProvisioningIfNeeded(int downstreamType, boolean showProvisioningUi) {
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_START_PROVISIONING,
-                downstreamType, encodeBool(showProvisioningUi)));
-    }
+        if (!isValidDownstreamType(downstreamType)) return;
 
-    private void handleStartProvisioningIfNeeded(int type, boolean showProvisioningUi) {
-        if (!isValidDownstreamType(type)) return;
-
-        if (!mCurrentTethers.contains(type)) mCurrentTethers.add(type);
+        if (!mCurrentTethers.contains(downstreamType)) mCurrentTethers.add(downstreamType);
 
         final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
         if (isTetherProvisioningRequired(config)) {
@@ -192,9 +177,9 @@ public class EntitlementManager {
             // till upstream change to cellular.
             if (mUsingCellularAsUpstream) {
                 if (showProvisioningUi) {
-                    runUiTetherProvisioning(type, config.activeDataSubId);
+                    runUiTetherProvisioning(downstreamType, config.activeDataSubId);
                 } else {
-                    runSilentTetherProvisioning(type, config.activeDataSubId);
+                    runSilentTetherProvisioning(downstreamType, config.activeDataSubId);
                 }
                 mNeedReRunProvisioningUi = false;
             } else {
@@ -211,10 +196,6 @@ public class EntitlementManager {
      * @param type tethering type from TetheringManager.TETHERING_{@code *}
      */
     public void stopProvisioningIfNeeded(int type) {
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_STOP_PROVISIONING, type, 0));
-    }
-
-    private void handleStopProvisioningIfNeeded(int type) {
         if (!isValidDownstreamType(type)) return;
 
         mCurrentTethers.remove(type);
@@ -230,11 +211,6 @@ public class EntitlementManager {
      * @param isCellular whether tethering upstream is cellular.
      */
     public void notifyUpstream(boolean isCellular) {
-        mHandler.sendMessage(mHandler.obtainMessage(
-                EVENT_UPSTREAM_CHANGED, encodeBool(isCellular), 0));
-    }
-
-    private void handleNotifyUpstream(boolean isCellular) {
         if (DBG) {
             mLog.i("notifyUpstream: " + isCellular
                     + ", mCellularUpstreamPermitted: " + mCellularUpstreamPermitted
@@ -244,16 +220,17 @@ public class EntitlementManager {
 
         if (mUsingCellularAsUpstream) {
             final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
-            handleMaybeRunProvisioning(config);
+            maybeRunProvisioning(config);
         }
     }
 
     /** Run provisioning if needed */
     public void maybeRunProvisioning() {
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_MAYBE_RUN_PROVISIONING));
+        final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
+        maybeRunProvisioning(config);
     }
 
-    private void handleMaybeRunProvisioning(final TetheringConfiguration config) {
+    private void maybeRunProvisioning(final TetheringConfiguration config) {
         if (mCurrentTethers.size() == 0 || !isTetherProvisioningRequired(config)) {
             return;
         }
@@ -319,7 +296,7 @@ public class EntitlementManager {
         }
 
         if (mUsingCellularAsUpstream) {
-            handleMaybeRunProvisioning(config);
+            maybeRunProvisioning(config);
         }
     }
 
@@ -494,46 +471,6 @@ public class EntitlementManager {
         }
     };
 
-    private class EntitlementHandler extends Handler {
-        EntitlementHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case EVENT_START_PROVISIONING:
-                    handleStartProvisioningIfNeeded(msg.arg1, toBool(msg.arg2));
-                    break;
-                case EVENT_STOP_PROVISIONING:
-                    handleStopProvisioningIfNeeded(msg.arg1);
-                    break;
-                case EVENT_UPSTREAM_CHANGED:
-                    handleNotifyUpstream(toBool(msg.arg1));
-                    break;
-                case EVENT_MAYBE_RUN_PROVISIONING:
-                    final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
-                    handleMaybeRunProvisioning(config);
-                    break;
-                case EVENT_GET_ENTITLEMENT_VALUE:
-                    handleRequestLatestTetheringEntitlementValue(msg.arg1,
-                            (ResultReceiver) msg.obj, toBool(msg.arg2));
-                    break;
-                default:
-                    mLog.log("Unknown event: " + msg.what);
-                    break;
-            }
-        }
-    }
-
-    private static boolean toBool(int encodedBoolean) {
-        return encodedBoolean != 0;
-    }
-
-    private static int encodeBool(boolean b) {
-        return b ? 1 : 0;
-    }
-
     private static boolean isValidDownstreamType(int type) {
         switch (type) {
             case TETHERING_BLUETOOTH:
@@ -644,13 +581,6 @@ public class EntitlementManager {
     /** Get the last value of the tethering entitlement check. */
     public void requestLatestTetheringEntitlementResult(int downstream, ResultReceiver receiver,
             boolean showEntitlementUi) {
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_GET_ENTITLEMENT_VALUE,
-                downstream, encodeBool(showEntitlementUi), receiver));
-
-    }
-
-    private void handleRequestLatestTetheringEntitlementValue(int downstream,
-            ResultReceiver receiver, boolean showEntitlementUi) {
         if (!isValidDownstreamType(downstream)) {
             receiver.send(TETHER_ERROR_ENTITLEMENT_UNKNOWN, null);
             return;
