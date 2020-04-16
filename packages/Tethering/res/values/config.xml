@@ -202,4 +202,10 @@
     <string name="tethering_notification_title">@string/tethered_notification_title</string>
     <!-- String for tether enable notification message. -->
     <string name="tethering_notification_message">@string/tethered_notification_message</string>
+
+    <!-- No upstream notification is shown when there is a downstream but no upstream that is able
+         to do the tethering. -->
+    <!-- Delay(millisecond) to show no upstream notification after there's no Backhaul. Set delay to
+         "-1" for disable this feature. -->
+    <integer name="delay_to_show_no_upstream_after_no_backhaul">-1</integer>
 </resources>
