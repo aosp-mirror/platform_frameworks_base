@@ -2445,8 +2445,17 @@ public class WindowManagerService extends IWindowManager.Stub
             if (controls != null) {
                 final int length = Math.min(controls.length, outControls.length);
                 for (int i = 0; i < length; i++) {
-                    outControls[i] = win.isClientLocal()
-                            ? new InsetsSourceControl(controls[i]) : controls[i];
+                    final InsetsSourceControl control = controls[i];
+
+                    // Check if we are sending invalid leashes.
+                    final SurfaceControl leash = control != null ? control.getLeash() : null;
+                    if (leash != null && !leash.isValid()) {
+                        Slog.wtf(TAG, leash + " is not valid before sending to " + win,
+                                leash.getReleaseStack());
+                    }
+
+                    outControls[i] = win.isClientLocal() && control != null
+                            ? new InsetsSourceControl(control) : control;
                 }
             }
         }
