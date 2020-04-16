@@ -1,14 +1,41 @@
-# used by wifi-service
-# TODO (b/153596226): Find a solution for networkstack's AIDL parcelables & interfaces.
-# Parcelable class names are serialized in the wire, so renaming them
-# will result in the class not being found for any parcelable received/sent from the
-# wifi-service jar.
+## used by service-wifi ##
 
-# Note: This rule is needed to ensure the rule below does not rename a Parcelable (see TODO above).
-rule android.net.DhcpResultsParcelable* @0
+# Network Stack AIDL interface.
+rule android.net.DhcpResultsParcelable* com.android.wifi.x.@0
+rule android.net.IIpMemoryStore* com.android.wifi.x.@0
+rule android.net.IIpMemoryStoreCallbacks* com.android.wifi.x.@0
+rule android.net.INetd* com.android.wifi.x.@0
+rule android.net.INetdUnsolicitedEventListener* com.android.wifi.x.@0
+rule android.net.INetworkStackConnector* com.android.wifi.x.@0
+rule android.net.InformationElementParcelable* com.android.wifi.x.@0
+rule android.net.InitialConfigurationParcelable* com.android.wifi.x.@0
+rule android.net.InterfaceConfigurationParcel* com.android.wifi.x.@0
+rule android.net.Layer2InformationParcelable* com.android.wifi.x.@0
+rule android.net.Layer2PacketParcelable* com.android.wifi.x.@0
+rule android.net.MarkMaskParcel* com.android.wifi.x.@0
+rule android.net.NattKeepalivePacketDataParcelable* com.android.wifi.x.@0
+rule android.net.PrivateDnsConfigParcel* com.android.wifi.x.@0
+rule android.net.ProvisioningConfigurationParcelable* com.android.wifi.x.@0
+rule android.net.ResolverParamsParcel* com.android.wifi.x.@0
+rule android.net.RouteInfoParcel* com.android.wifi.x.@0
+rule android.net.ScanResultInfoParcelable* com.android.wifi.x.@0
+rule android.net.TetherConfigParcel* com.android.wifi.x.@0
+rule android.net.TetherOffloadRuleParcel* com.android.wifi.x.@0
+rule android.net.TetherStatsParcel* com.android.wifi.x.@0
+rule android.net.UidRangeParcel* com.android.wifi.x.@0
+rule android.net.dhcp.DhcpLeaseParcelable* com.android.wifi.x.@0
+rule android.net.dhcp.DhcpServingParamsParcel* com.android.wifi.x.@0
+rule android.net.ip.IIpClient* com.android.wifi.x.@0
+rule android.net.ip.IIpClientCallbacks* com.android.wifi.x.@0
+rule android.net.ipmemorystore.Blob* com.android.wifi.x.@0
+rule android.net.ipmemorystore.IOnBlobRetrievedListener* com.android.wifi.x.@0
+rule android.net.ipmemorystore.IOnStatusListener* com.android.wifi.x.@0
+rule android.net.ipmemorystore.NetworkAttributesParcelable* com.android.wifi.x.@0
+rule android.net.ipmemorystore.SameL3NetworkResponseParcelable* com.android.wifi.x.@0
+rule android.net.ipmemorystore.StatusParcelable* com.android.wifi.x.@0
+
+# Net utils (includes Network Stack helper classes).
 rule android.net.DhcpResults* com.android.wifi.x.@0
-# Note: This rule is needed to ensure the rule below does not rename a Parcelable (see TODO above).
-rule android.net.InterfaceConfigurationParcel* @0
 rule android.net.InterfaceConfiguration* com.android.wifi.x.@0
 rule android.net.IpMemoryStore* com.android.wifi.x.@0
 rule android.net.NetworkMonitorManager* com.android.wifi.x.@0
@@ -19,8 +46,6 @@ rule android.net.ip.IpClientManager* com.android.wifi.x.@0
 rule android.net.ip.IpClientUtil* com.android.wifi.x.@0
 rule android.net.ipmemorystore.OnBlobRetrievedListener* com.android.wifi.x.@0
 rule android.net.ipmemorystore.OnStatusListener* com.android.wifi.x.@0
-# Note: This rule is needed to ensure the rule below does not rename a Parcelable (see TODO above).
-rule android.net.ipmemorystore.StatusParcelable* @0
 rule android.net.ipmemorystore.Status* com.android.wifi.x.@0
 rule android.net.networkstack.ModuleNetworkStackClient* com.android.wifi.x.@0
 rule android.net.networkstack.NetworkStackClientBase* com.android.wifi.x.@0
@@ -81,7 +106,7 @@ rule org.ksoap2.** com.android.wifi.x.@0
 # Use our statically linked nanohttpd
 rule fi.iki.elonen.** com.android.wifi.x.@0
 
-# used by both framework-wifi and wifi-service
+## used by both framework-wifi and service-wifi ##
 rule android.content.pm.BaseParceledListSlice* com.android.wifi.x.@0
 rule android.content.pm.ParceledListSlice* com.android.wifi.x.@0
 rule android.net.shared.Inet4AddressUtils* com.android.wifi.x.@0
