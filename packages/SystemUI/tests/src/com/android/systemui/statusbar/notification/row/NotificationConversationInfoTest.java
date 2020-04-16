@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
@@ -458,7 +460,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBindNotification_defaultSelected_notFave_notSilent() {
+    public void testBindNotification_defaultSelected_notFave_notSilent() throws Exception {
+        when(mMockINotificationManager.getBubblePreferenceForPackage(anyString(), anyInt()))
+                .thenReturn(BUBBLE_PREFERENCE_SELECTED);
         mConversationChannel.setImportance(IMPORTANCE_HIGH);
         mConversationChannel.setImportantConversation(false);
         mConversationChannel.setAllowBubbles(true);
@@ -476,6 +480,35 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 true);
         View view = mNotificationInfo.findViewById(R.id.default_behavior);
         assertThat(view.isSelected()).isTrue();
+        assertThat(((TextView) view.findViewById(R.id.default_summary)).getText()).isEqualTo(
+                mContext.getString(R.string.notification_channel_summary_default));
+    }
+
+    @Test
+    public void testBindNotification_default_allCanBubble() throws Exception {
+        when(mMockINotificationManager.getBubblePreferenceForPackage(anyString(), anyInt()))
+                .thenReturn(BUBBLE_PREFERENCE_ALL);
+        when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
+        mConversationChannel.setImportance(IMPORTANCE_HIGH);
+        mConversationChannel.setImportantConversation(false);
+        mConversationChannel.setAllowBubbles(true);
+        mNotificationInfo.bindNotification(
+                mShortcutManager,
+                mMockPackageManager,
+                mMockINotificationManager,
+                mVisualStabilityManager,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                null,
+                null,
+                mIconFactory,
+                true);
+        View view = mNotificationInfo.findViewById(R.id.default_behavior);
+        assertThat(view.isSelected()).isTrue();
+        assertThat(((TextView) view.findViewById(R.id.default_summary)).getText()).isEqualTo(
+                mContext.getString(R.string.notification_channel_summary_default_with_bubbles,
+                        "App Name"));
     }
 
     @Test
