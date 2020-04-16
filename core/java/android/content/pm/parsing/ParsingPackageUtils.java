@@ -95,6 +95,7 @@ import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.util.apk.ApkSignatureVerifier;
 
@@ -1255,6 +1256,7 @@ public class ParsingPackageUtils {
 
                 int type;
                 final int innerDepth = parser.getDepth();
+                SparseIntArray minExtensionVersions = null;
                 while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                         && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
                     if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -1263,7 +1265,10 @@ public class ParsingPackageUtils {
 
                     final ParseResult result;
                     if (parser.getName().equals("extension-sdk")) {
-                        result = parseExtensionSdk(input, pkg, res, parser);
+                        if (minExtensionVersions == null) {
+                            minExtensionVersions = new SparseIntArray();
+                        }
+                        result = parseExtensionSdk(input, res, parser, minExtensionVersions);
                         XmlUtils.skipCurrentTag(parser);
                     } else {
                         result = ParsingUtils.unknownTag("<uses-sdk>", pkg, parser, input);
@@ -1273,6 +1278,7 @@ public class ParsingPackageUtils {
                         return input.error(result);
                     }
                 }
+                pkg.setMinExtensionVersions(exactSizedCopyOfSparseArray(minExtensionVersions));
             } finally {
                 sa.recycle();
             }
@@ -1280,8 +1286,21 @@ public class ParsingPackageUtils {
         return input.success(pkg);
     }
 
-    private static ParseResult parseExtensionSdk(ParseInput input, ParsingPackage pkg,
-            Resources res, XmlResourceParser parser) {
+    @Nullable
+    private static SparseIntArray exactSizedCopyOfSparseArray(@Nullable SparseIntArray input) {
+        if (input == null) {
+            return null;
+        }
+        SparseIntArray output = new SparseIntArray(input.size());
+        for (int i = 0; i < input.size(); i++) {
+            output.put(input.keyAt(i), input.valueAt(i));
+        }
+        return output;
+    }
+
+    private static ParseResult<SparseIntArray> parseExtensionSdk(
+            ParseInput input, Resources res, XmlResourceParser parser,
+            SparseIntArray minExtensionVersions) {
         int sdkVersion;
         int minVersion;
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestExtensionSdk);
@@ -1316,7 +1335,8 @@ public class ParsingPackageUtils {
                     PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                     "Specified sdkVersion " + sdkVersion + " is not valid");
         }
-        return input.success(pkg);
+        minExtensionVersions.put(sdkVersion, minVersion);
+        return input.success(minExtensionVersions);
     }
 
     /**
