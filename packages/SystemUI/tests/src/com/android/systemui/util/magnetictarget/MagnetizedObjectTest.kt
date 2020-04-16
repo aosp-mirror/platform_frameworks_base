@@ -186,8 +186,8 @@ class MagnetizedObjectTest : SysuiTestCase() {
 
     @Test
     fun testMotionEventConsumption_downInMagneticField() {
-        // We should consume DOWN events if they occur in the field.
-        assertTrue(magnetizedObject.maybeConsumeMotionEvent(getMotionEvent(
+        // We should not consume DOWN events even if they occur in the field.
+        assertFalse(magnetizedObject.maybeConsumeMotionEvent(getMotionEvent(
                 x = targetCenterX, y = targetCenterY, action = MotionEvent.ACTION_DOWN)))
     }
 
@@ -342,9 +342,13 @@ class MagnetizedObjectTest : SysuiTestCase() {
         // Trigger the magnet animation, and block the test until it ends.
         PhysicsAnimatorTestUtils.setAllAnimationsBlock(true)
         magnetizedObject.maybeConsumeMotionEvent(getMotionEvent(
-                x = targetCenterX,
-                y = targetCenterY,
+                x = targetCenterX - 250,
+                y = targetCenterY - 250,
                 action = MotionEvent.ACTION_DOWN))
+
+        magnetizedObject.maybeConsumeMotionEvent(getMotionEvent(
+                x = targetCenterX,
+                y = targetCenterY))
 
         // The object's (top-left) position should now position it centered over the target.
         assertEquals(targetCenterX - objectSize / 2, objectX)
