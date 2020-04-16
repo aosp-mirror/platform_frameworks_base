@@ -552,7 +552,8 @@ public final class DisplayManagerService extends SystemService {
         }
         if (state == Display.STATE_OFF) {
             brightnessState = PowerManager.BRIGHTNESS_OFF_FLOAT;
-        } else if (brightnessState < PowerManager.BRIGHTNESS_MIN || Float.isNaN(brightnessState)) {
+        } else if (brightnessState != PowerManager.BRIGHTNESS_OFF_FLOAT
+                && brightnessState < PowerManager.BRIGHTNESS_MIN) {
             brightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         } else if (brightnessState > PowerManager.BRIGHTNESS_MAX) {
             brightnessState = PowerManager.BRIGHTNESS_MAX;
