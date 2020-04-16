@@ -5330,7 +5330,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // this promotion.
             final WindowState imeTarget = getDisplayContent().mInputMethodTarget;
             boolean inTokenWithAndAboveImeTarget = imeTarget != null && imeTarget != this
-                    && imeTarget.mToken == mToken && imeTarget.compareTo(this) <= 0;
+                    && imeTarget.mToken == mToken
+                    && getParent() != null
+                    && imeTarget.compareTo(this) <= 0;
             return inTokenWithAndAboveImeTarget;
         }
         return false;
