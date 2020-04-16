@@ -66,6 +66,8 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE
 import static android.content.pm.PackageManager.INSTALL_INTERNAL;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
+import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
+import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
@@ -16709,10 +16711,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 // method because `pkg` may not be in `mPackages` yet.
                 //
                 // Also, don't fail application installs if the dexopt step fails.
+                int flags = DexoptOptions.DEXOPT_BOOT_COMPLETE
+                        | DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE;
+                if (reconciledPkg.installArgs.installReason == INSTALL_REASON_DEVICE_RESTORE
+                        || reconciledPkg.installArgs.installReason == INSTALL_REASON_DEVICE_SETUP) {
+                    flags |= DexoptOptions.DEXOPT_FOR_RESTORE;
+                }
                 DexoptOptions dexoptOptions = new DexoptOptions(packageName,
                         REASON_INSTALL,
-                        DexoptOptions.DEXOPT_BOOT_COMPLETE
-                                | DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE);
+                        flags);
                 ScanResult result = reconciledPkg.scanResult;
 
                 // This mirrors logic from commitReconciledScanResultLocked, where the library files
