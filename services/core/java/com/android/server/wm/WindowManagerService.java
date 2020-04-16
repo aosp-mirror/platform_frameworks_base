@@ -2797,18 +2797,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return mRecentsAnimationController;
     }
 
-    /**
-     * @return Whether the next recents animation can continue to start. Called from
-     *         {@link RecentsAnimation#startRecentsActivity}.
-     */
-    boolean canStartRecentsAnimation() {
-        // TODO(multi-display): currently only default display support recent activity
-        if (getDefaultDisplayContentLocked().mAppTransition.isTransitionSet()) {
-            return false;
-        }
-        return true;
-    }
-
     void cancelRecentsAnimation(
             @RecentsAnimationController.ReorderMode int reorderMode, String reason) {
         if (mRecentsAnimationController != null) {
