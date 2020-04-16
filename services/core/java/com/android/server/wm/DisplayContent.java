@@ -3373,7 +3373,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private boolean isImeControlledByApp() {
-        return mInputMethodTarget != null && WindowConfiguration.isSplitScreenWindowingMode(
+        return mInputMethodTarget != null && !WindowConfiguration.isSplitScreenWindowingMode(
                 mInputMethodTarget.getWindowingMode());
     }
 
@@ -3442,7 +3442,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void updateImeControlTarget() {
-        mInputMethodControlTarget = computeImeControlTarget(mInputMethodInputTarget);
+        mInputMethodControlTarget = computeImeControlTarget();
         mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
     }
 
@@ -3458,12 +3458,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Computes the window where we hand IME control to.
      */
     @VisibleForTesting
-    InsetsControlTarget computeImeControlTarget(InsetsControlTarget target) {
+    InsetsControlTarget computeImeControlTarget() {
         if (!isImeControlledByApp() && mRemoteInsetsControlTarget != null) {
             return mRemoteInsetsControlTarget;
         } else {
-            // Otherwise, we just use the ime target
-            return target;
+            // Otherwise, we just use the ime target as received from IME.
+            return mInputMethodInputTarget;
         }
     }
 

@@ -286,6 +286,7 @@ public abstract class AuthCredentialView extends LinearLayout {
 
         if (matched) {
             mClearErrorRunnable.run();
+            mLockPatternUtils.userPresent(mEffectiveUserId);
             mCallback.onCredentialMatched(attestation);
         } else {
             if (timeoutMs > 0) {

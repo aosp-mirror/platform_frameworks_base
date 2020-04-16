@@ -94,6 +94,7 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl.Transaction;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.test.InsetsModeSession;
@@ -842,7 +843,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testComputeImeParent_noApp() throws Exception {
         final DisplayContent dc = createNewDisplay();
         dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "statusBar");
-         assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
     }
 
     @Test
@@ -850,7 +851,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.setRemoteInsetsController(createDisplayWindowInsetsController());
         dc.mInputMethodInputTarget = createWindow(null, TYPE_BASE_APPLICATION, "app");
-        assertEquals(dc.mInputMethodInputTarget, dc.computeImeControlTarget(dc.mInputMethodTarget));
+        dc.mInputMethodTarget = dc.mInputMethodInputTarget;
+        assertEquals(dc.mInputMethodInputTarget, dc.computeImeControlTarget());
     }
 
     @Test
@@ -859,9 +861,9 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.mInputMethodInputTarget = createWindow(null, TYPE_BASE_APPLICATION, "app");
         dc.mInputMethodInputTarget.setWindowingMode(
                 WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        dc.mInputMethodTarget = dc.mInputMethodInputTarget;
         dc.setRemoteInsetsController(createDisplayWindowInsetsController());
-        assertNotEquals(dc.mInputMethodInputTarget,
-                dc.computeImeControlTarget(dc.mInputMethodTarget));
+        assertNotEquals(dc.mInputMethodInputTarget, dc.computeImeControlTarget());
     }
 
     @Test
@@ -869,8 +871,9 @@ public class DisplayContentTests extends WindowTestsBase {
         spyOn(mAppWindow.mActivityRecord);
         doReturn(false).when(mAppWindow.mActivityRecord).matchParentBounds();
         mDisplayContent.mInputMethodInputTarget = mAppWindow;
+        mDisplayContent.mInputMethodTarget = mDisplayContent.mInputMethodInputTarget;
         mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
-        assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget(mAppWindow));
+        assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget());
     }
 
     private IDisplayWindowInsetsController createDisplayWindowInsetsController() {
@@ -1085,12 +1088,25 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(config90.orientation, app.getConfiguration().orientation);
         assertEquals(config90.windowConfiguration.getBounds(), app.getBounds());
 
+        // Make wallaper laid out with the fixed rotation transform.
+        final WindowToken wallpaperToken = mWallpaperWindow.mToken;
+        wallpaperToken.linkFixedRotationTransform(app);
+        mWallpaperWindow.mLayoutNeeded = true;
+        performLayout(mDisplayContent);
+
         // Force the negative offset to verify it can be updated.
         mWallpaperWindow.mWinAnimator.mXOffset = mWallpaperWindow.mWinAnimator.mYOffset = -1;
         assertTrue(mDisplayContent.mWallpaperController.updateWallpaperOffset(mWallpaperWindow,
                 false /* sync */));
         assertThat(mWallpaperWindow.mWinAnimator.mXOffset).isGreaterThan(-1);
         assertThat(mWallpaperWindow.mWinAnimator.mYOffset).isGreaterThan(-1);
+
+        // The wallpaper need to animate with transformed position, so its surface position should
+        // not be reset.
+        final Transaction t = wallpaperToken.getPendingTransaction();
+        spyOn(t);
+        mWallpaperWindow.mToken.onAnimationLeashCreated(t, null /* leash */);
+        verify(t, never()).setPosition(any(), eq(0), eq(0));
 
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
 

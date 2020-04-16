@@ -51,6 +51,7 @@ import com.google.android.exoplayer2.extractor.ts.DefaultTsPayloadReaderFactory;
 import com.google.android.exoplayer2.extractor.ts.PsExtractor;
 import com.google.android.exoplayer2.extractor.ts.TsExtractor;
 import com.google.android.exoplayer2.extractor.wav.WavExtractor;
+import com.google.android.exoplayer2.upstream.DataReader;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.TransferListener;
@@ -60,7 +61,6 @@ import com.google.android.exoplayer2.video.ColorInfo;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
@@ -848,9 +848,9 @@ public final class MediaParser {
     private final String[] mParserNamesPool;
     private final PositionHolder mPositionHolder;
     private final InputReadingDataSource mDataSource;
-    private final ExtractorInputAdapter mScratchExtractorInputAdapter;
+    private final DataReaderAdapter mScratchDataReaderAdapter;
     private final ParsableByteArrayAdapter mScratchParsableByteArrayAdapter;
-    private String mExtractorName;
+    private String mParserName;
     private Extractor mExtractor;
     private ExtractorInput mExtractorInput;
     private long mPendingSeekPosition;
@@ -924,7 +924,7 @@ public final class MediaParser {
     @NonNull
     @ParserName
     public String getParserName() {
-        return mExtractorName;
+        return mParserName;
     }
 
     /**
@@ -958,25 +958,21 @@ public final class MediaParser {
 
         // TODO: Apply parameters when creating extractor instances.
         if (mExtractor == null) {
-            if (!mExtractorName.equals(PARSER_NAME_UNKNOWN)) {
-                mExtractor = EXTRACTOR_FACTORIES_BY_NAME.get(mExtractorName).createInstance();
+            if (!mParserName.equals(PARSER_NAME_UNKNOWN)) {
+                mExtractor = createExtractor(mParserName);
                 mExtractor.init(new ExtractorOutputAdapter());
             } else {
                 for (String parserName : mParserNamesPool) {
                     Extractor extractor = createExtractor(parserName);
                     try {
                         if (extractor.sniff(mExtractorInput)) {
-                            mExtractorName = parserName;
+                            mParserName = parserName;
                             mExtractor = extractor;
                             mExtractor.init(new ExtractorOutputAdapter());
                             break;
                         }
                     } catch (EOFException e) {
                         // Do nothing.
-                    } catch (InterruptedException e) {
-                        // TODO: Remove this exception replacement once we update the ExoPlayer
-                        // version.
-                        throw new InterruptedIOException();
                     } finally {
                         mExtractorInput.resetPeekPosition();
                     }
@@ -999,9 +995,6 @@ public final class MediaParser {
             result = mExtractor.read(mExtractorInput, mPositionHolder);
         } catch (ParserException e) {
             throw new ParsingException(e);
-        } catch (InterruptedException e) {
-            // TODO: Remove this exception replacement once we update the ExoPlayer version.
-            throw new InterruptedIOException();
         }
         if (result == Extractor.RESULT_END_OF_INPUT) {
             return false;
@@ -1051,11 +1044,11 @@ public final class MediaParser {
         mParserParameters = new HashMap<>();
         mOutputConsumer = outputConsumer;
         mParserNamesPool = parserNamesPool;
-        mExtractorName = sniff ? PARSER_NAME_UNKNOWN : parserNamesPool[0];
+        mParserName = sniff ? PARSER_NAME_UNKNOWN : parserNamesPool[0];
         mPositionHolder = new PositionHolder();
         mDataSource = new InputReadingDataSource();
         removePendingSeek();
-        mScratchExtractorInputAdapter = new ExtractorInputAdapter();
+        mScratchDataReaderAdapter = new DataReaderAdapter();
         mScratchParsableByteArrayAdapter = new ParsableByteArrayAdapter();
     }
 
@@ -1097,7 +1090,7 @@ public final class MediaParser {
                         getBooleanParameter(PARAMETER_MP4_IGNORE_EDIT_LISTS)
                                 ? Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS
                                 : 0;
-                return new Mp4Extractor();
+                return new Mp4Extractor(flags);
             case PARSER_NAME_MP3:
                 flags |=
                         getBooleanParameter(PARAMETER_MP3_DISABLE_ID3)
@@ -1270,12 +1263,12 @@ public final class MediaParser {
         }
 
         @Override
-        public int sampleData(ExtractorInput input, int length, boolean allowEndOfInput)
+        public int sampleData(DataReader input, int length, boolean allowEndOfInput)
                 throws IOException {
-            mScratchExtractorInputAdapter.setExtractorInput(input, length);
-            long positionBeforeReading = mScratchExtractorInputAdapter.getPosition();
-            mOutputConsumer.onSampleDataFound(mTrackIndex, mScratchExtractorInputAdapter);
-            return (int) (mScratchExtractorInputAdapter.getPosition() - positionBeforeReading);
+            mScratchDataReaderAdapter.setDataReader(input, length);
+            long positionBeforeReading = mScratchDataReaderAdapter.getPosition();
+            mOutputConsumer.onSampleDataFound(mTrackIndex, mScratchDataReaderAdapter);
+            return (int) (mScratchDataReaderAdapter.getPosition() - positionBeforeReading);
         }
 
         @Override
@@ -1297,14 +1290,14 @@ public final class MediaParser {
         }
     }
 
-    private static final class ExtractorInputAdapter implements InputReader {
+    private static final class DataReaderAdapter implements InputReader {
 
-        private ExtractorInput mExtractorInput;
+        private DataReader mDataReader;
         private int mCurrentPosition;
         private long mLength;
 
-        public void setExtractorInput(ExtractorInput extractorInput, long length) {
-            mExtractorInput = extractorInput;
+        public void setDataReader(DataReader dataReader, long length) {
+            mDataReader = dataReader;
             mCurrentPosition = 0;
             mLength = length;
         }
@@ -1314,12 +1307,7 @@ public final class MediaParser {
         @Override
         public int read(byte[] buffer, int offset, int readLength) throws IOException {
             int readBytes = 0;
-            try {
-                readBytes = mExtractorInput.read(buffer, offset, readLength);
-            } catch (InterruptedException e) {
-                // TODO: Remove this exception replacement once we update the ExoPlayer version.
-                throw new InterruptedIOException();
-            }
+            readBytes = mDataReader.read(buffer, offset, readLength);
             mCurrentPosition += readBytes;
             return readBytes;
         }

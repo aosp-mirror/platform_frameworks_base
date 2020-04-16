@@ -390,6 +390,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private ObjectAnimator mColorFadeOffAnimator;
     private RampAnimator<DisplayPowerState> mScreenBrightnessRampAnimator;
 
+    // The brightness synchronizer to allow changes in the int brightness value to be reflected in
+    // the float brightness value and vice versa.
+    @Nullable
+    private final BrightnessSynchronizer mBrightnessSynchronizer;
 
     /**
      * Creates the display power controller.
@@ -406,6 +410,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mWindowManagerPolicy = LocalServices.getService(WindowManagerPolicy.class);
         mBlanker = blanker;
         mContext = context;
+        mBrightnessSynchronizer = new BrightnessSynchronizer(context);
         mDisplayDevice = displayDevice;
 
         PowerManager pm =  context.getSystemService(PowerManager.class);

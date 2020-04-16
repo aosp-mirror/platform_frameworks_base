@@ -292,6 +292,18 @@ public class StatusBarNotification implements Parcelable {
         return this.user.getIdentifier();
     }
 
+    /**
+     * Like {@link #getUserId()} but handles special users.
+     * @hide
+     */
+    public int getNormalizedUserId() {
+        int userId = getUserId();
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_SYSTEM;
+        }
+        return userId;
+    }
+
     /** The package that the notification belongs to. */
     public String getPackageName() {
         return pkg;
