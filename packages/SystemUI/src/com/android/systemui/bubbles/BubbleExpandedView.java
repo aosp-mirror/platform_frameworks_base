@@ -193,7 +193,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                         + " mActivityViewStatus=" + mActivityViewStatus
                         + " bubble=" + getBubbleKey());
             }
-            if (mBubble != null && !mBubbleController.isUserCreatedBubble(mBubble.getKey())) {
+            if (mBubble != null) {
                 // Must post because this is called from a binder thread.
                 post(() -> mBubbleController.removeBubble(mBubble.getEntry(),
                         BubbleController.DISMISS_TASK_FINISHED));
