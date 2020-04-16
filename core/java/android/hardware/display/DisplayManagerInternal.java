@@ -73,6 +73,15 @@ public abstract class DisplayManagerInternal {
     public abstract SurfaceControl.ScreenshotHardwareBuffer screenshot(int displayId);
 
     /**
+     * Take a screenshot without secure layer of the specified display and return a buffer.
+     *
+     * @param displayId The display id to take the screenshot of.
+     * @return The buffer or null if we have failed.
+     */
+    public abstract SurfaceControl.ScreenshotHardwareBuffer screenshotWithoutSecureLayers(
+            int displayId);
+
+    /**
      * Returns information about the specified logical display.
      *
      * @param displayId The logical display id.
