@@ -118,8 +118,10 @@ public class LegacyResultMapper {
 
         Rect activeArraySize = characteristics.get(
                 CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-        ZoomData zoomData = ParameterUtils.convertScalerCropRegion(activeArraySize,
-                request.get(CaptureRequest.SCALER_CROP_REGION), previewSize, params);
+        ZoomData zoomData = ParameterUtils.convertToLegacyZoom(activeArraySize,
+                request.get(CaptureRequest.SCALER_CROP_REGION),
+                request.get(CaptureRequest.CONTROL_ZOOM_RATIO),
+                previewSize, params);
 
         /*
          * colorCorrection
@@ -515,6 +517,13 @@ public class LegacyResultMapper {
          */
         {
             m.set(SCALER_CROP_REGION, zoomData.reportedCrop);
+        }
+
+        /*
+         * control.zoomRatio
+         */
+        {
+            m.set(CONTROL_ZOOM_RATIO, zoomData.reportedZoomRatio);
         }
     }
 }
