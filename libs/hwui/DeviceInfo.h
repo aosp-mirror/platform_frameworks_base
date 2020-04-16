@@ -36,10 +36,13 @@ public:
     static float getMaxRefreshRate() { return get()->mMaxRefreshRate; }
     static int32_t getWidth() { return get()->mWidth; }
     static int32_t getHeight() { return get()->mHeight; }
-    static float getDensity() { return get()->mDensity; }
+    // Gets the density in density-independent pixels
+    static float getDensity() { return sDensity.load(); }
     static int64_t getVsyncPeriod() { return get()->mVsyncPeriod; }
     static int64_t getCompositorOffset() { return get()->mCompositorOffset; }
     static int64_t getAppOffset() { return get()->mAppOffset; }
+    // Sets the density in density-independent pixels
+    static void setDensity(float density) { sDensity.store(density); }
 
     // this value is only valid after the GPU has been initialized and there is a valid graphics
     // context or if you are using the HWUI_NULL_GPU
@@ -68,10 +71,14 @@ private:
     float mMaxRefreshRate = 60.0;
     int32_t mWidth = 1080;
     int32_t mHeight = 1920;
-    float mDensity = 2.0;
     int64_t mVsyncPeriod = 16666666;
     int64_t mCompositorOffset = 0;
     int64_t mAppOffset = 0;
+
+    // Density is not retrieved from the ADisplay apis, so this may potentially
+    // be called on multiple threads.
+    // Unit is density-independent pixels
+    static std::atomic<float> sDensity;
 };
 
 } /* namespace uirenderer */
