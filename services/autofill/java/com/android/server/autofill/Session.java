@@ -2653,6 +2653,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         } else if (viewState.id.equals(this.mCurrentViewId)
                 && (viewState.getState() & ViewState.STATE_INLINE_SHOWN) != 0) {
             requestShowInlineSuggestionsLocked(viewState.getResponse(), filterText);
+        } else if (viewState.id.equals(this.mCurrentViewId)
+                && (viewState.getState() & ViewState.STATE_TRIGGERED_AUGMENTED_AUTOFILL) != 0) {
+            if (!TextUtils.isEmpty(filterText)) {
+                mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
+            }
         }
 
         viewState.setState(ViewState.STATE_CHANGED);
