@@ -22,13 +22,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.util.TimeUtils;
+import android.view.Display;
+import android.view.Display.Mode;
 import android.view.IGraphicsStats;
 import android.view.IGraphicsStatsCallback;
 import android.view.NativeVectorDrawableAnimator;
@@ -42,7 +46,10 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 import sun.misc.Cleaner;
 
@@ -907,6 +914,7 @@ public class HardwareRenderer {
      */
     public static void setIsolatedProcess(boolean isIsolated) {
         nSetIsolatedProcess(isIsolated);
+        ProcessInitializer.sInstance.setIsolated(isIsolated);
     }
 
     /**
@@ -991,6 +999,17 @@ public class HardwareRenderer {
         ProcessInitializer.sInstance.setPackageName(packageName);
     }
 
+    /**
+     * Gets a context for process initialization
+     *
+     * TODO: Remove this once there is a static method for retrieving an application's context.
+     *
+     * @hide
+     */
+    public static void setContextForInit(Context context) {
+        ProcessInitializer.sInstance.setContext(context);
+    }
+
     private static final class DestroyContextRunnable implements Runnable {
         private final long mNativeInstance;
 
@@ -1007,8 +1026,34 @@ public class HardwareRenderer {
     private static class ProcessInitializer {
         static ProcessInitializer sInstance = new ProcessInitializer();
 
+        // Magic values from android/data_space.h
+        private static final int INTERNAL_DATASPACE_SRGB = 142671872;
+        private static final int INTERNAL_DATASPACE_DISPLAY_P3 = 143261696;
+        private static final int INTERNAL_DATASPACE_SCRGB = 411107328;
+
+        private enum Dataspace {
+            DISPLAY_P3(ColorSpace.Named.DISPLAY_P3, INTERNAL_DATASPACE_DISPLAY_P3),
+            SCRGB(ColorSpace.Named.EXTENDED_SRGB, INTERNAL_DATASPACE_SCRGB),
+            SRGB(ColorSpace.Named.SRGB, INTERNAL_DATASPACE_SRGB);
+
+            private final ColorSpace.Named mColorSpace;
+            private final int mNativeDataspace;
+            Dataspace(ColorSpace.Named colorSpace, int nativeDataspace) {
+                this.mColorSpace = colorSpace;
+                this.mNativeDataspace = nativeDataspace;
+            }
+
+            static Optional<Dataspace> find(ColorSpace colorSpace) {
+                return Stream.of(Dataspace.values())
+                        .filter(d -> ColorSpace.get(d.mColorSpace).equals(colorSpace))
+                        .findFirst();
+            }
+        }
+
         private boolean mInitialized = false;
 
+        private boolean mIsolated = false;
+        private Context mContext;
         private String mPackageName;
         private IGraphicsStats mGraphicsStatsService;
         private IGraphicsStatsCallback mGraphicsStatsCallback = new IGraphicsStatsCallback.Stub() {
@@ -1026,12 +1071,23 @@ public class HardwareRenderer {
             mPackageName = name;
         }
 
+        synchronized void setIsolated(boolean isolated) {
+            if (mInitialized) return;
+            mIsolated = isolated;
+        }
+
+        synchronized void setContext(Context context) {
+            if (mInitialized) return;
+            mContext = context;
+        }
+
         synchronized void init(long renderProxy) {
             if (mInitialized) return;
             mInitialized = true;
 
             initSched(renderProxy);
             initGraphicsStats();
+            initDisplayInfo();
         }
 
         private void initSched(long renderProxy) {
@@ -1054,6 +1110,58 @@ public class HardwareRenderer {
             } catch (Throwable t) {
                 Log.w(LOG_TAG, "Could not acquire gfx stats buffer", t);
             }
+        }
+
+        private void initDisplayInfo() {
+            if (mContext == null) return;
+
+            // If we're in an isolated sandbox mode then we shouldn't try to communicate with DMS
+            if (mIsolated) {
+                // Defensively clear out the context in case we were passed a context that can leak
+                // if we live longer than it, e.g. an activity context.
+                mContext = null;
+                return;
+            }
+
+            DisplayManager dm = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
+            if (dm == null) {
+                Log.d(LOG_TAG, "Failed to find DisplayManager for display-based configuration");
+                return;
+            }
+
+            Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
+            if (display == null) {
+                Log.d(LOG_TAG, "Failed to find default display for display-based configuration");
+                return;
+            }
+
+            Dataspace wideColorDataspace =
+                    Optional.ofNullable(display.getPreferredWideGamutColorSpace())
+                            .flatMap(Dataspace::find)
+                            // Default to SRGB if the display doesn't support wide color
+                            .orElse(Dataspace.SRGB);
+
+            float maxRefreshRate =
+                    (float) Arrays.stream(display.getSupportedModes())
+                            .mapToDouble(Mode::getRefreshRate)
+                            .max()
+                            .orElseGet(() -> {
+                                Log.i(LOG_TAG, "Failed to find the maximum display refresh rate");
+                                // Assume that the max refresh rate is 60hz if we can't find one.
+                                return 60.0;
+                            });
+            // Grab the physical screen dimensions from the active display mode
+            // Strictly speaking the screen resolution may not always be constant - it is for
+            // sizing the font cache for the underlying rendering thread. Since it's a
+            // heuristic we don't need to be always 100% correct.
+            Mode activeMode = display.getMode();
+            nInitDisplayInfo(activeMode.getPhysicalWidth(), activeMode.getPhysicalHeight(),
+                    activeMode.getRefreshRate(), maxRefreshRate,
+                    wideColorDataspace.mNativeDataspace, display.getAppVsyncOffsetNanos(),
+                    display.getPresentationDeadlineNanos());
+
+            // Defensively clear out the context
+            mContext = null;
         }
 
         private void rotateBuffer() {
@@ -1207,4 +1315,8 @@ public class HardwareRenderer {
     private static native void nSetForceDark(long nativeProxy, boolean enabled);
 
     private static native void nSetDisplayDensityDpi(int densityDpi);
+
+    private static native void nInitDisplayInfo(int width, int height, float refreshRate,
+            float maxRefreshRate, int wideColorDataspace, long appVsyncOffsetNanos,
+            long presentationDeadlineNanos);
 }
