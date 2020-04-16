@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Kablosuz hata ayıklama"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Mevcut cihazları görmek ve kullanmak için kablosuz hata ayıklamayı açın"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Cihazı QR kodu ile eşle"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Yeni cihazları QR kodu tarayıcıyı kullanarak eşleyin"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Eşleme kodu ile cihaz eşleme"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Yeni cihazları altı basamaklı kodu kullanarak eşleyin"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Eşlenen cihazlar"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Cihaz eşlenemedi. QR kodu hatalı ya da cihaz aynı ağa bağlı değil."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP adresi ve Bağlantı noktası"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR kodunu tara"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR kodu tarayarak kablosuz ağ üzerinden cihaz eşleyin"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Lütfen Kablosuz bir ağa bağlanın"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, hata ayıklama, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Hata raporu kısayolu"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Kablosuz ekran sertifikası"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Kablosuz Ayrıntılı Günlük Kaydını etkinleştir"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Kablosuz ağ taramasını kısma"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Kablosuz için geliştirilmiş MAC rastgele seçimi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobil veri her zaman etkin"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering donanım hızlandırıcısı"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Adsız Bluetooth cihazlarını göster"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Kablosuz ekran sertifikası seçeneklerini göster"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Kablosuz günlük kaydı seviyesini artır. Kablosuz Seçici\'de her bir SSID RSSI için göster."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Pili daha az harcar ve ağ performansını iyileştirir"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Bu geçiş, yalnızca istemci modu için MAC rastgele hale getirme davranışını etkiler.\nBu mod etkinleştirildiğinde, MAC rastgele seçimi etkin olan tüm ağların MAC adresleri, istemcinin ağla bağlantısının en son kesildiği zamana bağlı olarak ilişkilendirme sırasında yeniden rastgele seçilebilir. Cihaz 4 saat veya daha kısa süre içinde tekrar bağlanırsa yeniden rastgele hale getirme gerçekleşmez."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sayaçlı"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sayaçsız"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Günlük Kaydedici arabellek boyutları"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor mesajını göster"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Bildirim kanalı uyarılarını göster"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bir uygulama geçerli kanal olmadan bildirim yayınladığında ekranda uyarı gösterir"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Görüşme bildirimleri için kısayolları zorunlu kıl"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Bildirimlerin, görüşme bölümünde görünebilmesi için uzun ömürlü paylaşma kısayolu ile desteklenmesini gerektir"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Harici birimdeki uygulamalara izin vermeye zorla"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Manifest değerlerinden bağımsız olarak uygulamaları harici depolamaya yazmak için uygun hale getirir"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Etkinlikleri yeniden boyutlandırılabilmeye zorla"</string>
@@ -419,9 +417,9 @@
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB\'yi kullan"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Devre dışı"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Tam renk körlüğü"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Yeşil renk körlüğü (kırmızı-yeşil)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Kırmızı renk körlüğü (kırmızı-yeşil)"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Mavi renk körlüğü (mavi-sarı)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Döteranomali (kırmızı-yeşil)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (kırmızı-yeşil)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (mavi-sarı)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Renk düzeltme"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Renk düzeltme, renklerin cihazınızda nasıl görüntüleneceğini düzenlemenize olanak sağlar."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> tarafından geçersiz kılındı"</string>

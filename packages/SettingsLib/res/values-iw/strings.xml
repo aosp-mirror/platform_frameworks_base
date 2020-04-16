@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ניפוי באגים אלחוטי"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"כדי להציג את המכשירים הזמינים ולהשתמש בהם, יש להפעיל ניפוי באגים אלחוטי"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"‏התאמת מכשיר באמצעות קוד QR"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"‏התאמת מכשירים חדשים באמצעות סורק של קודי QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"התאמת מכשיר באמצעות קוד התאמה"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"התאמת מכשירים חדשים באמצעות קוד בן שש ספרות"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"מכשירים מותאמים"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"‏התאמת המכשיר נכשלה. קוד ה-QR היה שגוי או שהמכשיר לא מחובר לאותה רשת."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏יציאה וכתובת IP"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"‏סריקת קוד QR"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏יש לסרוק קוד QR כדי להתאים מכשיר באמצעות Wi‑Fi"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏יש להתחבר לרשת Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb, ניפוי באגים, פיתוח"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"קיצור של דוח באגים"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"‏אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏הפעלת רישום מפורט של Wi‑Fi ביומן"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏ויסות סריקה לנקודות Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏רנדומיזציה משופרת של כתובות MAC ב-Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"חבילת הגלישה פעילה תמיד"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"שיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"‏הצגת מכשירי Bluetooth ללא שמות"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"‏הצג אפשרויות עבור אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏העלה את רמת הרישום של Wi‑Fi ביומן, הצג לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"מפחית את קצב התרוקנות הסוללה ומשפר את ביצועי הרשת"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"‏לחצן החלפת המצב משפיע על התנהגות הרנדומיזציה של כתובות MAC במצב לקוח בלבד.\nכשמצב זה מופעל, ברשת שבה מופעלת רנדומיזציה של כתובות MAC, ייתכן שתתבצע רנדומיזציה מחדש של כתובות ה-MAC במהלך השיוך, בהתאם למועד הניתוק האחרון של הלקוח מהרשת. לא תתבצע רנדומיזציה מחדש אם המכשיר מתחבר מחדש תוך ארבע שעות או פחות."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"נמדדת"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"לא נמדדת"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"גדלי מאגר של יומן רישום"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"הצגת תיבת דו-שיח של \'אפליקציה לא מגיבה\' עבור אפליקציות שפועלות ברקע"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"אזהרות לגבי ערוץ התראות"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"הצגת אזהרה כשאפליקציה שולחת התראה ללא ערוץ חוקי"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"אילוץ קיצורי דרך להתראות על שיחות"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"כדי שההודעות יופיעו בקטע השיחות, יש צורך בגיבוי שלהן באמצעות קיצור דרך לשיתוף בעל מחזור חיים ארוך"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"אילוץ הרשאת אפליקציות באחסון חיצוני"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"מאפשר כתיבה של כל אפליקציה באחסון חיצוני, ללא התחשבות בערכי המניפסט"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"אלץ יכולת קביעת גודל של הפעילויות"</string>
@@ -423,7 +421,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"פרוטנומליה (אדום-ירוק)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"טריטנומליה (כחול-צהוב)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"תיקון צבע"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"תיקון צבעים מאפשר לשנות את האופן שבו צבעים מוצגים במכשיר שלך"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"תיקון צבע מאפשר לשנות את האופן שבו צבעים מוצגים במכשיר שלך"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"נעקף על ידי <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"הזמן הנותר: בערך <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>

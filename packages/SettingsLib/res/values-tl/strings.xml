@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Ginagamit para sa paglilipat ng file"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Gamitin para sa input"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gamitin para sa Mga Hearing Aid"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Pares"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Ipares"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"IPARES"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Kanselahin"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Nagbibigay ang pagpapares ng access sa iyong mga contact at history ng tawag kapag nakakonekta."</string>
@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Wireless na pag-debug"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para makita at magamit ang mga available na device, i-on ang wireless na pag-debug"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Magpares ng device gamit ang QR code"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Magpares ng mga bagong device gamit ang pang-scan ng QR code"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Pinapares ang device gamit ang code ng pagpapares"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Magpares ng mga bagong device gamit ang six digit na code"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Mga nakapares na device"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Hindi nagawang ipares ang device. Hindi tama ang QR code, o hindi nakakonekta ang device sa parehong network."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP address at Port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"I-scan ang QR code"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Magpares ng device gamit ang Wi‑Fi sa pamamagitan ng pag-scan ng isang QR code"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Kumonekta sa Wi-Fi network"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Shortcut ng ulat sa bug"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certification ng wireless display"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"I-enable ang Pagla-log sa Wi‑Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pag-throttle ng pag-scan ng Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"MAC randomization na pinahusay ng Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Palaging aktibo ang mobile data"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardware acceleration para sa pag-tether"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Ipakita ang mga Bluetooth device na walang pangalan"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Ipakita ang mga opsyon para sa certification ng wireless display"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Pataasin ang antas ng Wi‑Fi logging, ipakita sa bawat SSID RSSI sa Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Binabawasan ang pagkaubos ng baterya at pinapahusay ang performance ng network"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Nakakaapekto ang toggle na ito sa pag-kilos ng pag-randomize ng MAC para lang sa client mode.\nKapag na-activate ang mode na ito, baka ma-randomize ulit ang MAC address ng anumang network na naka-enable ang pag-randomize sa MAC habang nagaganap ang pag-uugnay, depende kung kailan huling nadiskonekta ang client sa network. Hindi nangyayari ang pag-randomize ulit kung kumonekta ulit ang device sa loob ng 4 na oras o mas maaga."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Nakametro"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Hindi Nakametro"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Mga laki ng buffer ng Logger"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Ipakita ang dialog na Hindi Tumutugon ang App para sa mga app sa background"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Ipakita ang mga babala sa notification channel"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Nagpapakita ng babala sa screen kapag nag-post ang app ng notification nang walang wastong channel"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Magpatupad ng mga shortcut para sa mga notification ng pag-uusap"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Ipa-back up ang mga notification gamit ang long-lived na shortcut sa pagbabahagi para lumabas sa seksyong pag-uusap"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Puwersahang payagan ang mga app sa external"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Ginagawang kwalipikado ang anumang app na mailagay sa external na storage, anuman ang mga value ng manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Sapilitang gawing resizable ang mga aktibidad"</string>

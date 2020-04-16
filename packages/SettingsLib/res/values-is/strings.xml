@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Þráðlaus villuleit"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Til að sjá og nota tiltæk tæki skal kveikja á þráðlausri villuleit"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Para tæki með QR-kóða"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Para ný tæki með QR-kóðaskanna"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Para tæki með pörunarkóða"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Para ný tæki með sex tölustafa kóða"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Pöruð tæki"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Ekki tókst að para við tækið. Annað hvort var QR-kóðinn rangur eða tækið ekki tengt sama neti."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-tala og gátt"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skanna QR-kóða"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Tengja tæki með Wi-Fi með því að skanna QR-kóða"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Tengstu Wi-Fi neti"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, villuleit, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Flýtileið í villutilkynningu"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Kveikja á ítarlegri skráningu Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Hægja á Wi‑Fi leit"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Slembival MAC-vistfanga með Wi-Fi styrk"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Alltaf kveikt á farsímagögnum"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Vélbúnaðarhröðun fyrir tjóðrun"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Sýna Bluetooth-tæki án heita"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Sýna valkosti fyrir vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Auka skráningarstig Wi-Fi, sýna RSSI fyrir hvert SSID í Wi-Fi vali"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Dregur úr rafhlöðunotkun og eykur netafköst"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Þessi rofi hefur eingöngu áhrif á slembival MAC-vistfanga fyrir biðlarastillingu.\nÞegar þessi stilling er virk geta öll netkerfi sem eru með slembival MAC-vistfanga virkt látið slembiraða MAC-vistföngum aftur við tengingu, allt eftir því hvenær biðlarinn aftengdist netinu síðast. Endurslembiröðun á sér ekki stað ef tækið tengist aftur innan fjögurra klukkustunda."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mæld notkun"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Notkun ekki mæld"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Annálsritastærðir biðminna"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Sýna „Forrit svarar ekki“ fyrir bakgrunnsforrit"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Sýna viðvaranir tilkynningarásar"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Birtir viðvörun á skjánum þegar forrit birtir tilkynningu án gildrar rásar"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Þvinga flýtileiðir fyrir tilkynningar um samtöl"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Krefjast þess að flýtileiðir séu studdar af langvarandi deilingarflýtileið fyrir birtingu í samtalshluta"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Þvinga fram leyfi forrita í ytri geymslu"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Gerir öll forrit skrifanleg í ytra geymslurými, óháð gildum í upplýsingaskrá"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Þvinga breytanlega stærð virkni"</string>
@@ -546,7 +544,7 @@
     <string name="user_new_user_name" msgid="60979820612818840">"Nýr notandi"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Nýtt snið"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"Notandaupplýsingar"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"Upplýsingar um snið"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Notandaupplýsingar"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Áður en þú getur búið til takmarkað snið þarftu að setja upp skjálás til að vernda forritin þín og persónuleg gögn."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Velja lás"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Skipta yfir í <xliff:g id="USER_NAME">%s</xliff:g>"</string>

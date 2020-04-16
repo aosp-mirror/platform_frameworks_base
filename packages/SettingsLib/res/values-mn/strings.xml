@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Wireless debugging"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Боломжтой төхөөрөмжүүдийг харах болох ашиглахын тулд wireless debugging-г асаана уу"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Хурдан хариу үйлдлийн кодоор төхөөрөмжийг хослуул"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Хурдан хариу үйлдлийн кодын сканнер ашиглан шинэ төхөөрөмжүүдийг хослуулна уу"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Хослуулах кодоор төхөөрөмжийг хослуулна уу"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Зургаан оронтой кодыг ашиглан шинэ төхөөрөмжүүдийг хослуулна уу"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Хослуулсан төхөөрөмжүүд"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Төхөөрөмжийг хослуулж чадсангүй. Хурдан хариу үйлдлийн код буруу эсвэл төхөөрөмжийг ижил сүлжээнд холбоогүй байна."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP хаяг ба порт"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Хурдан хариу үйлдлийн кодыг скан хийх"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Хурдан хариу үйлдлийн кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi сүлжээнд холбогдоно уу"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, дебаг хийх, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Алдаа мэдээлэх товчлол"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Утасгүй дэлгэцийн сертификат"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi дэлгэрэнгүй лог-г идэвхжүүлэх"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi скан бууруулалт"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"MAC-г санамсаргүй байдлаар Wi‑Fi‑н сайжруулалттай эмхлэх"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобайл дата байнга идэвхтэй"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Модем болгох техник хангамжийн хурдасгуур"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Нэргүй Bluetooth төхөөрөмжийг харуулах"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Утасгүй дэлгэцийн сертификатын сонголтыг харуулах"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi лог-н түвшинг нэмэгдүүлэх, Wi‑Fi Сонгогч дээрх SSID-д ногдох RSSI-г харуулах"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батарей зарцуулалтыг бууруулж, сүлжээний гүйцэтгэлийг сайжруулдаг"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Унтраах эсвэл асаах нь зөвхөн клиент горимын MAC-г санамсаргүй байдлаар эмхлэх төлөвт нөлөөлнө.\nЭнэ горимыг идэвхжүүлсэн тохиолдолд клиентийг сүлжээнээс хамгийн сүүлд хэзээ салгаснаас хамаараад, холбоотой байх үеэр MAC-г санамсаргүй байдлаар эмхлэхийг идэвхжүүлсэн дурын сүлжээний MAC хаягуудыг санамсаргүй байдлаар дахин эмхэлж болзошгүй. Төхөөрөмж 4 цаг буюу түүнээс бага хугацаанд дахин холбогдвол санамсаргүй байдлаар дахин эмхлэх төлөв хэрэгжихгүй."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Хязгаартай"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Хязгааргүй"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Логгерын буферын хэмжээ"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Апп хариу өгөхгүй байна гэсэн харилцах цонхыг цаана байгаа аппад харуулах"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Мэдэгдлийн сувгийн анхааруулгыг харуулах"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Апп хүчинтэй суваггүйгээр мэдэгдэл гаргах үед дэлгэцэд сануулга харуулна"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Харилцан ярианы мэдэгдлийн товчлолыг хэрэгжүүлэх"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Харилцан ярианы хэсэгт харуулахын тулд санах ойд хадгалсан хуваалцах товчлолоор мэдэгдлийг нөөцлөхийг шаардах"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Аппыг гадаад санах ойд хадгалахыг зөвшөөрөх"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Манифест утгыг нь үл хамааран дурын апп-г гадаад санах ойд бичих боломжтой болгодог"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Үйл ажиллагааны хэмжээг өөрчилж болохуйц болгох"</string>

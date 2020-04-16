@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"وائرلیس ڈیبگنگ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"دستیاب آلات کو دیکھنے اور استعمال کرنے کے لیے، وائرلیس ڈیبگنگ آن کریں"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"‏QR کوڈ کے ذریعے آلہ کا جوڑا بنائیں"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"‏QR کوڈ اسکینر کا استعمال کر کے نئے آلات کا جوڑا بنائیں"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"جوڑا بنانے کے کوڈ کے ذریعے آلہ کا جوڑا بنائیں"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"چھ ہندسوں کا کوڈ استعمال کر کے نئے آلات کا جوڑا بنائیں"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"جوڑا بنائے گئے آلات"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"‏آلہ کا جوڑا بنانے میں ناکام۔ یا تو QR کوڈ غلط تھا، یا آلہ اسی نیٹ ورک سے منسلک نہیں ہے۔"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏IP پتہ اور پورٹ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"‏QR کوڈ اسکین کریں"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏QR کوڈ اسکین کر کے Wi-Fi پر آلہ کا جوڑا بنائیں"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏براہ کرم ایک Wi-Fi نیٹ ورک سے منسلک ہوں"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb، ڈیبگ، dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"بگ رپورٹ کا شارٹ کٹ"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"وائرلیس ڈسپلے سرٹیفیکیشن"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏Wi‑Fi وربوس لاگنگ فعال کریں"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏Wi‑Fi اسکین کو زبردستی روکا جا رہا ہے"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏بہتر Wi-Fi ‏ MAC رینڈمائزیشن"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"موبائل ڈیٹا ہمیشہ فعال رکھیں"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ٹیدرنگ ہارڈویئر سرعت کاری"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"بغیر نام والے بلوٹوتھ آلات دکھائیں"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"بیٹری ڈرین کم کرتا ہے اور نیٹ ورک کارکردگی کو بہتر بناتا ہے"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"‏یہ ٹوگل صرف کلائنٹ وضع کے لئے MAC کی رینڈمائزیشن کو متاثر کرتا ہے۔\nجب یہ وضع فعال کی جاتی ہے، تو کسی بھی نیٹ ورکس میں جو MAC رینڈمائزیشن کو فعال کرتا ہے ان کے MAC ایڈریسز ایسوسی ایشن کے دوران دوبارہ رینڈمائز ہو سکتے ہیں، اس پر منحصر ہے کہ کلائنٹ کب آخری بار نیٹ ورک سے غیر منسلک ہوا۔ اگر آلہ 4 گھنٹوں یا اس سے کم وقت میں دوبارہ منسلک ہو، تو پھر دوبارہ رینڈمائزیشن کا امکان نہیں ہوتا ہے۔"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"میٹرڈ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"غیر میٹر شدہ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"لاگر بفر کے سائز"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"پس منظر کی ایپس کیلئے \'ایپ جواب نہیں دے رہی ہے\' ڈائلاگ ڈسپلے کریں"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"چینل کی اطلاعی تنبیہات دکھائیں"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"کسی ایپ کی طرف سے درست چینل کے بغیر اطلاع پوسٹ ہونے پر آن اسکرین تنبیہ ڈسپلے کرتا ہے"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"بات چیت کی اطلاعات کے لیے شارٹ کٹس نافذ کریں"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"بات چیت کے سیکشن میں ظاہر ہونے کے لئے اطلاعات کو طویل مدت والے شیئرنگ شارٹ کٹ کے ذریعے حمایت کی ضرورت ہے"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"بیرونی پر ایپس کو زبردستی اجازت دیں"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"‏manifest اقدار سے قطع نظر، کسی بھی ایپ کو بیرونی اسٹوریج پر لکھے جانے کا اہل بناتا ہے"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"سرگرمیوں کو ری سائز ایبل بنائیں"</string>
@@ -540,7 +538,7 @@
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"صارف کو ابھی سیٹ اپ کریں؟"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"یقینی بنائیں کہ وہ شخص آلہ لینے اور اپنی جگہ کو سیٹ اپ کرنے کیلئے دستیاب ہے"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"پروفائل کو ابھی ترتیب دیں؟"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ابھی ترتیب دیں"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ابھی سیٹ اپ کریں"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ابھی نہیں"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"شامل کریں"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"نیا صارف"</string>

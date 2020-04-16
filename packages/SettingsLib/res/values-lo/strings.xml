@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ການດີບັກໄຮ້ສາຍ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ເພື່ອເບິ່ງ ແລະ ໃຊ້ອຸປະກອນທີ່ມີຢູ່, ກະລຸນາເປີດການດີບັກໄຮ້ສາຍ"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"ຈັບຄູ່ອຸປະກອນດ້ວຍລະຫັດ QR"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"ຈັບຄູ່ອຸປະກອນໃໝ່ໂດຍໃຊ້ຕົວສະແກນລະຫັດ QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ຈັບຄູ່ອຸປະກອນໂດຍໃຊ້ລະຫັດການຈັບຄູ່"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ຈັບຄູ່ອຸປະກອນໃໝ່ໂດຍໃຊ້ລະຫັດຫົກຕົວເລກ"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"ອຸປະກອນທີ່ຈັບຄູ່ແລ້ວ"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ຈັບຄູ່ອຸປະກອນບໍ່ສຳເລັດ. ລະຫັດ QR ບໍ່ຖືກຕ້ອງ ຫຼື ອຸປະກອນບໍ່ໄດ້ເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍດຽວກັນ."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"ທີ່ຢູ່ IP ແລະ ຜອດ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"ສະແກນລະຫັດ QR"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"ຈັບຄູ່ອຸປະກອນຜ່ານ Wi‑Fi ໂດຍການສະແກນລະຫັດ QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ກະ​ລຸ​ນາ​ເຊື່ອມ​ຕໍ່​ກັບ​ເຄືອ​ຂ່າຍ Wi​-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ທາງ​ລັດລ​າຍງານ​ຂໍ້​ຜິດພາດ"</string>
@@ -253,6 +251,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ສະແດງການຮັບຮອງຂອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"​ເປີດ​ນຳ​ໃຊ້ການ​ເກັບ​ປະ​ຫວັດ​ Verbose Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ການຈຳກັດການສະແກນ Wi‑Fi"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືຕະຫຼອດເວລາ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ສະແດງອຸປະກອນ Bluetooth ທີ່ບໍ່ມີຊື່"</string>
@@ -285,6 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ສະແດງໂຕເລືອກສຳລັບການສະແດງການຮັບຮອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ເພີ່ມ​ລະ​ດັບ​ການ​ເກັບ​ປະ​ຫວັດ Wi‑Fi, ສະ​ແດງ​ຕໍ່ SSID RSSI ​ໃນ​ Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ຫຼຸດການໃຊ້ແບັດເຕີຣີ ແລະ ປັບປຸງປະສິດທິພາບເຄືອຂ່າຍ"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"ມີການວັດແທກ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ບໍ່ໄດ້ວັດແທກ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ຂະໜາດບັບເຟີຕົວບັນທຶກ"</string>
@@ -373,10 +375,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ສະແດງກ່ອງຂໍ້ຄວາມບໍ່ຕອບສະໜອງແອັບສຳລັບແອັບພື້ນຫຼັງ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ສະແດງຄຳເຕືອນຊ່ອງການແຈ້ງເຕືອນ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ສະແດງຄຳເຕືອນໃນໜ້າຈໍເມື່ອແອັບໂພສການແຈ້ງເຕືອນໂດຍບໍ່ມີຊ່ອງທີ່ຖືກຕ້ອງ"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ບັງຄັບໃຊ້ທາງລັດສຳລັບການແຈ້ງເຕືອນການສົນທະນາ"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ຕ້ອງໃຊ້ການແຈ້ງເຕືອນເພື່ອຮັບການສະໜັບສະໜຸນໂດຍທາງລັດການແບ່ງປັນທີ່ຢູ່ດົນເພື່ອໃຫ້ປາກົດໃນພາກສ່ວນການສົນທະນາ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ບັງຄັບອະນຸຍາດແອັບ​ຢູ່​ພາຍນອກ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ເຮັດໃຫ້ທຸກແອັບມີສິດໄດ້ຮັບການຂຽນໃສ່ພື້ນທີ່ຈັດເກັບຂໍ້ມູນພາຍນອກ, ໂດຍບໍ່ຄຳນຶງເຖິງຄ່າ manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ບັງ​ຄັງ​ໃຫ້​ການ​ເຄື່ອນ​ໄຫວ​ປ່ຽນ​ຂະ​ໜາດ​ໄດ້"</string>

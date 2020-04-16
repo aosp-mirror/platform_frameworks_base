@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Vezeték nélküli hibakeresés"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"A rendelkezésre álló eszközök megtekintéséhez és használatához kapcsolja be a vezeték nélküli hibakeresést"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Eszköz párosítása QR-kóddal"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Párosítsa az új eszközöket QR-kód-szkennelő használatával"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Eszköz párosítása párosítókóddal"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Párosítsa az új eszközöket hatjegyű kód használatával"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Párosított eszközök"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Nem sikerült az eszközzel való párosítás. Vagy helytelen volt a QR-kód, vagy az eszköz másik hálózathoz csatlakozott."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-cím és port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR-kód beolvasása"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Párosítsa az eszközt Wi-Fi-n keresztül QR-kód beolvasásával"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Csatlakozzon Wi-Fi-hálózathoz"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Hibabejelentési gomb"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Vezeték nélküli kijelző tanúsítványa"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Részletes Wi-Fi-naplózás engedélyezése"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi-Fi-hálózat szabályozása"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑re kiterjesztett, randomizált MAC"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"A mobilhálózati kapcsolat mindig aktív"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Internetmegosztás hardveres gyorsítása"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Név nélküli Bluetooth-eszközök megjelenítése"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vezeték nélküli kijelző tanúsítványával kapcsolatos lehetőségek megjelenítése"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi-naplózási szint növelése, RSSI/SSID megjelenítése a Wi‑Fi-választóban"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Csökkenti az akkumulátorhasználatot, és javítja a hálózat teljesítményét"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Kizárólag ügyfélmód esetében be- vagy kikapcsolja a MAC-címet randomizáló viselkedést.\nHa a mód aktív, az olyan hálózatokon, amelyeken engedélyezve van a MAC-címek randomizálása, a társítás során újra megtörténhet a randomizálás, attól függően, hogy az ügyfél mikor bontotta utoljára a kapcsolatot a hálózattal. Az ismételt randomizálás nem következik be, ha az eszköz négy órán belül újracsatlakozik."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Forgalomkorlátos"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Nem forgalomkorlátos"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Naplózási puffer mérete"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Az Alkalmazás nem válaszol ablak megjelenítése a háttérben futó alkalmazásoknál"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Értesítő csatorna figyelmeztetései"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Figyelmeztet, ha egy alkalmazás érvényes csatorna nélkül küld értesítést"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Gyorsparancsok kényszerítése beszélgetésértesítésekhez"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Megköveteli, hogy az értesítéseket hosszú életű megosztási gyorsparancs támogassa, hogy megjelenhessenek a beszélgetési szakaszban"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Külső tárhely alkalmazásainak engedélyezése"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Lehetővé teszi bármely alkalmazás külső tárhelyre való írását a jegyzékértékektől függetlenül"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Tevékenységek átméretezésének kényszerítése"</string>
@@ -432,10 +430,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"Körülbelül <xliff:g id="TIME_REMAINING">%1$s</xliff:g> maradt hátra az eszköz használata alapján (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"A használat alapján nagyjából még ennyit bír: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"A használat alapján nagyjából még ennyit bír: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"Nagyjából még ennyit bír: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Nagyjából még ennyit bír: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"A használat alapján nagyjából eddig bírja: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"A használat alapján nagyjából eddig bírja: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"Nagyjából eddig bírja: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Nagyjából eddig bírja: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Eddig: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Az akkumulátor lemerülhet a következő időpontig: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Kevesebb mint <xliff:g id="THRESHOLD">%1$s</xliff:g> van hátra"</string>
@@ -449,7 +447,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Előfordulhat, hogy a táblagép hamarosan kikapcsol (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Előfordulhat, hogy az eszköz hamarosan kikapcsol (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> van hátra a feltöltésig"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> van hátra a feltöltésből"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> a feltöltésig"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ismeretlen"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Töltés"</string>

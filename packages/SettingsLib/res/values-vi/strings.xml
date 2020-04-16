@@ -86,8 +86,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Chuyển tệp"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Thiết bị đầu vào"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Truy cập Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Chia sẻ liên hệ"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Sử dụng để chia sẻ liên hệ"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Chia sẻ người liên hệ"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Sử dụng để chia sẻ người liên hệ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Chia sẻ kết nối internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Tin nhắn văn bản"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Truy cập SIM"</string>
@@ -99,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Đã kết nối với âm thanh điện thoại"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Đã kết nối với máy chủ chuyển tệp"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Đã kết nối với bản đồ"</string>
-    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Được kết nối với SAP"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Đã kết nối với SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Chưa kết nối với máy chủ chuyển tệp"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Đã kết nối với thiết bị nhập"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Đã kết nối với thiết bị để truy cập Internet"</string>
@@ -143,11 +143,11 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Ứng dụng đã xóa"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Ứng dụng và người dùng bị xóa"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Bản cập nhật hệ thống"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Chia sẻ kết nối Internet qua USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Chia sẻ Internet qua USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Điểm phát sóng di động"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Chia sẻ kết nối Internet qua Bluetooth"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Đang dùng làm điểm truy cập Internet"</string>
-    <string name="tether_settings_title_all" msgid="8910259483383010470">"USB Internet &amp; điểm truy cập di động"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Chia sẻ Internet qua Bluetooth"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Chia sẻ Internet"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"Chia sẻ Internet và điểm phát sóng di động"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Tất cả ứng dụng làm việc"</string>
     <string name="user_guest" msgid="6939192779649870792">"Khách"</string>
     <string name="unknown" msgid="3544487229740637809">"Không xác định"</string>
@@ -201,7 +201,7 @@
     <string name="development_settings_summary" msgid="8718917813868735095">"Đặt tùy chọn cho phát triển ứng dụng"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Tùy chọn dành cho nhà phát triển không khả dụng cho người dùng này"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Cài đặt VPN không khả dụng cho người dùng này"</string>
-    <string name="tethering_settings_not_available" msgid="266821736434699780">"Cài đặt cách chia sẻ kết nối không khả dụng cho người dùng này"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"Các tùy chọn cài đặt của tính năng chia sẻ Internet không có sẵn cho người dùng này"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Cài đặt tên điểm truy cập không khả dụng cho người dùng này"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Gỡ lỗi qua USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Bật chế độ gỡ lỗi khi kết nối USB"</string>
@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Gỡ lỗi qua Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Để xem và sử dụng các thiết bị có sẵn, hãy bật tính năng gỡ lỗi qua Wi-Fi"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Ghép nối thiết bị bằng mã QR"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Ghép nối các thiết bị mới bằng trình quét mã QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Ghép nối thiết bị bằng mã ghép nối"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Ghép nối các thiết bị mới bằng mã gồm 6 chữ số"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Thiết bị được ghép nối"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Không ghép nối được thiết bị. Mã QR không chính xác hoặc bạn không kết nối thiết bị với cùng một mạng."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Địa chỉ IP và cổng"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Quét mã QR"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Ghép nối thiết bị qua Wi-Fi bằng cách quét mã QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Hãy kết nối mạng Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, gỡ lỗi, nhà phát triển"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Phím tắt báo cáo lỗi"</string>
@@ -253,8 +251,9 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Bật ghi nhật ký chi tiết Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Hạn chế quét tìm Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Sử dụng địa chỉ MAC Wi‑Fi ngẫu nhiên"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dữ liệu di động luôn hoạt động"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tăng tốc phần cứng khi chia sẻ kết nối"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tăng tốc phần cứng khi chia sẻ Internet"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Hiển thị các thiết bị Bluetooth không có tên"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Vô hiệu hóa âm lượng tuyệt đối"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Bật tính năng Gabeldorsche"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Hiển thị tùy chọn chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tăng mức ghi nhật ký Wi‑Fi, hiển thị mỗi SSID RSSI trong bộ chọn Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Giảm hao pin và cải thiện hiệu suất mạng"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Thao tác bật/tắt này chỉ ảnh hưởng đến hành vi tạo địa chỉ MAC ngẫu nhiên ở chế độ máy khách.\nKhi bạn kích hoạt chế độ này, tất cả các mạng đã bật tính năng tạo địa chỉ MAC ngẫu nhiên có thể tạo lại địa chỉ MAC ngẫu nhiên của chúng trong quá trình liên kết, tùy thuộc vào lần gần đây nhất máy khách ngắt kết nối với mạng. Các mạng này sẽ không thể tạo ngẫu nhiên lại nếu thiết bị kết nối lại trong vòng 4 giờ."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Đo lượng dữ liệu"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Không đo lượng dữ liệu"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Kích thước bộ đệm của trình ghi nhật ký"</string>
@@ -299,7 +299,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Cho phép vị trí mô phỏng"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Cho phép kiểm tra thuộc tính của chế độ xem"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Luôn bật dữ liệu di động ngay cả khi Wi-Fi đang hoạt động (để chuyển đổi mạng nhanh)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Sử dụng tính năng tăng tốc phần cứng khi chia sẻ kết nối nếu có"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Sử dụng tính năng tăng tốc phần cứng khi chia sẻ Internet nếu có"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Cho phép gỡ lỗi qua USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Gỡ lỗi USB chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị của bạn mà không thông báo và đọc dữ liệu nhật ký."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Bật tính năng gỡ lỗi qua Wi-Fi?"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Hiện hộp thoại Ứng dụng không phản hồi cho các ứng dụng nền"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Hiện cảnh báo kênh thông báo"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Hiện cảnh báo trên màn hình khi ứng dụng đăng thông báo mà không có kênh hợp lệ"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Áp dụng lối tắt cho thông báo của cuộc trò chuyện"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Để xuất hiện trong phần cuộc trò chuyện, thông báo phải có sự hỗ trợ của lối tắt chia sẻ lâu dài"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Buộc cho phép các ứng dụng trên bộ nhớ ngoài"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Cho phép ghi mọi ứng dụng đủ điều kiện vào bộ nhớ ngoài, bất kể giá trị tệp kê khai là gì"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Buộc các hoạt động có thể thay đổi kích thước"</string>
@@ -432,10 +430,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g> dựa trên mức sử dụng của bạn (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Pin sẽ hết vào khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Pin sẽ hết vào khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"Pin sẽ hết vào khoảng <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Pin sẽ hết vào khoảng <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Cho đến <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Điện thoại có thể hết pin vào <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Còn lại không đến <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
@@ -449,8 +447,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Máy tính bảng có thể sắp tắt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Thiết bị có thể sắp tắt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Còn <xliff:g id="TIME">%1$s</xliff:g> nữa là sạc xong"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> nữa là sạc xong"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Còn <xliff:g id="TIME">%1$s</xliff:g> nữa là sạc đầy"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> nữa là sạc đầy"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Không xác định"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Đang sạc"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Đang sạc nhanh"</string>

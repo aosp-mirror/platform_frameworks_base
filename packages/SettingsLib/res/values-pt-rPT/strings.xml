@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuração sem fios"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e utilizar dispositivos disponíveis, ative a depuração sem fios."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Sincronize o dispositivo com o código QR"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Sincronize novos dispositivos com o leitor de códigos QR."</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Sincronize dispositivo com código de sincronização"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Sincronize novos dispositivos através do código de seis dígitos."</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositivos sincronizados"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Falha ao sincronizar o dispositivo. O código QR estava incorreto ou o dispositivo não está ligado à mesma rede."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Porta e endereço IP"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Leia o código QR"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Sincronize o dispositivo através de Wi-Fi ao ler um código QR."</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Estabeleça ligação a uma rede Wi-Fi."</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depurar, programador"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Atalho para relatório de erro"</string>
@@ -244,7 +242,7 @@
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar os pacotes Bluetooth (ative/desative o Bluetooth após alterar esta definição)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueio de OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Permitir o desbloqueio do carregador de arranque"</string>
-    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Pretende permitir o desbloqueio de OEM?"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permitir o desbloqueio de OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"AVISO: as funcionalidades de proteção do dispositivo não funcionam neste dispositivo enquanto esta definição estiver ativada."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Selecionar aplicação de localização fictícia"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aplicação de localização fictícia não definida"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificação de display sem fios"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Ativar o registo verboso de Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Controlo da procura de Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Seleção aleatória do MAC otimizado Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dados móveis sempre ativos"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleração de hardware para ligação (à Internet) via telemóvel"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostrar dispositivos Bluetooth sem nomes"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opções da certificação de display sem fios"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar o nível de reg. de Wi-Fi, mostrar por RSSI de SSID no Selec. de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduz o consumo rápido da bateria e melhora o desempenho da rede"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Este botão ativar/desativar afeta o comportamento da seleção aleatória do MAC apenas para o modo de cliente.\nQuando este modo está ativado, qualquer rede que tenha a seleção aleatória do MAC ativa pode fazer com que os seus endereços MAC sejam novamente selecionados de forma aleatória durante a associação, dependendo de quando o cliente se desligou da rede pela última vez. A nova seleção aleatória não ocorre se a ligação do dispositivo for restabelecida em 4 horas ou menos."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Acesso limitado"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Acesso ilimitado"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamanhos da memória intermédia do registo"</string>
@@ -302,7 +302,7 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Se disponível, utilizar a aceleração de hardware para ligação (à Internet) via telemóvel"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Permitir depuração USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"A depuração USB é utilizada apenas para fins de programação. Utilize-a para copiar dados entre o computador e o aparelho, instalar aplicações no aparelho sem notificação e ler dados de registo."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Pretende permitir a depuração sem fios?"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Permitir a depuração sem fios?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"A depuração sem fios é utilizada apenas para fins de programação. Utilize-a para copiar dados entre o computador e o dispositivo, instalar apps no dispositivo sem notificação e ler dados de registo."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Revogar acesso à depuração USB de todos os computadores anteriormente autorizados?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Permitir definições de programação?"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostrar caixa de diálogo A aplicação não está a responder para aplicações em segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostrar avisos do canal de notificações"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostra um aviso no ecrã quando uma aplicação publica uma notificação sem o canal ser válido"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Aplicar atalhos para notificações de conversas"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Solicitar cópia de seg. das notif. por atalho de partilha de longa duração p/ apresentação na secção de conversas"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forçar permissão de apps no armazenamento externo"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Torna qualquer aplicação elegível para ser gravada no armazenamento externo, independentemente dos valores do manifesto"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forçar as atividades a serem redimensionáveis"</string>
@@ -457,7 +455,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carregamento lento"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Não está a carregar"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Ligada à corrente, não é possível carregar neste momento"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Completo"</string>
+    <string name="battery_info_status_full" msgid="4443168946046847468">"Carregada"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlado pelo gestor"</string>
     <string name="disabled" msgid="8017887509554714950">"Desativada"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Autorizada"</string>
