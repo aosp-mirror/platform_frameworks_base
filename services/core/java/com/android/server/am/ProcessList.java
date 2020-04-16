@@ -1668,6 +1668,33 @@ public final class ProcessList {
         return gidArray;
     }
 
+    private boolean shouldEnableTaggedPointers(ProcessRecord app) {
+        // Ensure we have platform + kernel support for TBI.
+        if (!Zygote.nativeSupportsTaggedPointers()) {
+            return false;
+        }
+
+        // Check to ensure the app hasn't explicitly opted-out of TBI via. the manifest attribute.
+        if (!app.info.allowsNativeHeapPointerTagging()) {
+            return false;
+        }
+
+        // Check to see that the compat feature for TBI is enabled.
+        if (!mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private int decideTaggingLevel(ProcessRecord app) {
+        if (shouldEnableTaggedPointers(app)) {
+            return Zygote.MEMORY_TAG_LEVEL_TBI;
+        }
+
+        return 0;
+    }
+
     private int decideGwpAsanLevel(ProcessRecord app) {
         // Look at the process attribute first.
        if (app.processInfo != null
@@ -1856,15 +1883,6 @@ public final class ProcessList {
                 runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
             }
 
-            if (Zygote.nativeSupportsTaggedPointers()) {
-                // Enable heap pointer tagging if supported by the kernel, unless disabled by the
-                // app manifest, target sdk level, or compat feature.
-                if (app.info.allowsNativeHeapPointerTagging()
-                        && mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
-                    runtimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
-                }
-            }
-
             runtimeFlags |= decideGwpAsanLevel(app);
 
             String invokeWith = null;
@@ -1894,6 +1912,20 @@ public final class ProcessList {
             app.gids = gids;
             app.setRequiredAbi(requiredAbi);
             app.instructionSet = instructionSet;
+
+            // If instructionSet is non-null, this indicates that the system_server is spawning a
+            // process with an ISA that may be different from its own. System (kernel and hardware)
+            // compatililty for these features is checked in the decideTaggingLevel in the
+            // system_server process (not the child process). As TBI is only supported in aarch64,
+            // we can simply ensure that the new process is also aarch64. This prevents the mismatch
+            // where a 64-bit system server spawns a 32-bit child that thinks it should enable some
+            // tagging variant. Theoretically, a 32-bit system server could exist that spawns 64-bit
+            // processes, in which case the new process won't get any tagging. This is fine as we
+            // haven't seen this configuration in practice, and we can reasonable assume that if
+            // tagging is desired, the system server will be 64-bit.
+            if (instructionSet == null || instructionSet.equals("arm64")) {
+                runtimeFlags |= decideTaggingLevel(app);
+            }
 
             // the per-user SELinux context must be set
             if (TextUtils.isEmpty(app.info.seInfoUser)) {

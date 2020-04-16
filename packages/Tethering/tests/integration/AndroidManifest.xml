@@ -17,7 +17,6 @@
           package="com.android.networkstack.tethering.tests.integration">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.TETHER_PRIVILEGED"/>
 
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />

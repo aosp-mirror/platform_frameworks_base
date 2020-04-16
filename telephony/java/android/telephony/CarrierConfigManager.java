@@ -505,6 +505,15 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_VT_AVAILABLE_BOOL = "carrier_vt_available_bool";
 
     /**
+     * Flag specifying whether to show an alert dialog for 5G disable when the user disables VoLTE.
+     * By default this value is {@code false}.
+     *
+     * @hide
+     */
+    public static final String KEY_VOLTE_5G_LIMITED_ALERT_DIALOG_BOOL =
+            "volte_5g_limited_alert_dialog_bool";
+
+    /**
      * Flag specifying whether the carrier wants to notify the user when a VT call has been handed
      * over from WIFI to LTE.
      * <p>
@@ -3084,6 +3093,16 @@ public class CarrierConfigManager {
     public static final String KEY_UNMETERED_NR_NSA_SUB6_BOOL = "unmetered_nr_nsa_sub6_bool";
 
     /**
+     * Whether NR (non-standalone) should be unmetered when the device is roaming.
+     * If false, then the values for {@link #KEY_UNMETERED_NR_NSA_BOOL},
+     * {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL}, {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL},
+     * and unmetered {@link SubscriptionPlan} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL =
+            "unmetered_nr_nsa_when_roaming_bool";
+
+    /**
      * Whether NR (standalone) should be unmetered for all frequencies.
      * If either {@link #KEY_UNMETERED_NR_SA_MMWAVE_BOOL} or
      * {@link #KEY_UNMETERED_NR_SA_SUB6_BOOL} are true, then this value will be ignored.
@@ -3703,6 +3722,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_SETTINGS_ENABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_VOLTE_5G_LIMITED_ALERT_DIALOG_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_WIFI_TO_LTE_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_MERGING_RTT_CALLS_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_LTE_TO_WIFI_BOOL, false);
@@ -4134,6 +4154,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_SA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_SA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_SA_SUB6_BOOL, false);

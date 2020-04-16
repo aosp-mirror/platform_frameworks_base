@@ -350,7 +350,7 @@ public final class PasswordMetrics implements Parcelable {
      *
      * TODO: move to PasswordPolicy
      */
-    private void maxWith(PasswordMetrics other) {
+    public void maxWith(PasswordMetrics other) {
         credType = Math.max(credType, other.credType);
         if (credType != CREDENTIAL_TYPE_PASSWORD) {
             return;

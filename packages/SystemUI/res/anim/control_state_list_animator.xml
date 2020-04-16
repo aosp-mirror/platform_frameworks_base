@@ -18,11 +18,13 @@
     <item android:state_pressed="true">
         <set>
             <objectAnimator
+                android:interpolator="@interpolator/control_state"
                 android:duration="50"
                 android:propertyName="scaleX"
                 android:valueTo="0.97"
                 android:valueType="floatType" />
             <objectAnimator
+                android:interpolator="@interpolator/control_state"
                 android:duration="50"
                 android:propertyName="scaleY"
                 android:valueTo="0.97"
@@ -33,11 +35,13 @@
     <item>
         <set>
             <objectAnimator
+                android:interpolator="@interpolator/control_state"
                 android:duration="250"
                 android:propertyName="scaleX"
                 android:valueTo="1"
                 android:valueType="floatType" />
             <objectAnimator
+                android:interpolator="@interpolator/control_state"
                 android:duration="250"
                 android:propertyName="scaleY"
                 android:valueTo="1"
