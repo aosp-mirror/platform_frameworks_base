@@ -398,6 +398,13 @@ message SecureSettingsProto {
     }
     optional ParentalControl parental_control = 43;
 
+    message PowerMenuPrivacy {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto show = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional PowerMenuPrivacy power_menu_privacy = 81;
+
     message PrintService {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -598,5 +605,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 81;
+    // Next tag = 82;
 }

@@ -3337,7 +3337,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 189;
+            private static final int SETTINGS_VERSION = 190;
 
             private final int mUserId;
 
@@ -4675,6 +4675,28 @@ public class SettingsProvider extends ContentProvider {
                     }
                     secureSettings.deleteSettingLocked("accessibility_shortcut_enabled");
                     currentVersion = 189;
+                }
+
+                if (currentVersion == 189) {
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting showNotifications = secureSettings.getSettingLocked(
+                            Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS);
+                    final Setting allowPrivateNotifications = secureSettings.getSettingLocked(
+                            Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+                    if ("1".equals(showNotifications.getValue())
+                            && "1".equals(allowPrivateNotifications.getValue())) {
+                        secureSettings.insertSettingLocked(
+                                Secure.POWER_MENU_LOCKED_SHOW_CONTENT,
+                                "1", null /* tag */, false /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    } else if ("0".equals(showNotifications.getValue())
+                            || "0".equals(allowPrivateNotifications.getValue())) {
+                        secureSettings.insertSettingLocked(
+                                Secure.POWER_MENU_LOCKED_SHOW_CONTENT,
+                                "0", null /* tag */, false /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 190;
                 }
 
                 // vXXX: Add new settings above this point.

@@ -3082,6 +3082,7 @@ package android.provider {
     field public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
     field public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
     field public static final String NOTIFICATION_BADGING = "notification_badging";
+    field public static final String POWER_MENU_LOCKED_SHOW_CONTENT = "power_menu_locked_show_content";
     field @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
