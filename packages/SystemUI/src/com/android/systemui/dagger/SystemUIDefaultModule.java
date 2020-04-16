@@ -24,6 +24,7 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 
 import com.android.keyguard.KeyguardViewController;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.plugins.qs.QSFactory;
@@ -33,6 +34,7 @@ import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
+import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.stackdivider.DividerModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -135,4 +137,15 @@ public abstract class SystemUIDefaultModule {
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(
             StatusBarKeyguardViewManager statusBarKeyguardViewManager);
+
+    @Singleton
+    @Provides
+    static CurrentUserContextTracker provideCurrentUserContextTracker(
+            Context context,
+            BroadcastDispatcher broadcastDispatcher) {
+        CurrentUserContextTracker tracker =
+                new CurrentUserContextTracker(context, broadcastDispatcher);
+        tracker.initialize();
+        return tracker;
+    }
 }
