@@ -82,6 +82,7 @@ public class MediaControlPanel {
     protected ComponentName mRecvComponent;
     private MediaDevice mDevice;
     private boolean mIsRegistered = false;
+    private String mKey;
 
     private final int[] mActionIds;
 
@@ -203,14 +204,15 @@ public class MediaControlPanel {
      * @param bgColor
      * @param contentIntent
      * @param appNameString
-     * @param device
+     * @param key
      */
     public void setMediaSession(MediaSession.Token token, Icon icon, int iconColor,
-            int bgColor, PendingIntent contentIntent, String appNameString) {
+            int bgColor, PendingIntent contentIntent, String appNameString, String key) {
         mToken = token;
         mForegroundColor = iconColor;
         mBackgroundColor = bgColor;
         mController = new MediaController(mContext, mToken);
+        mKey = key;
 
         MediaMetadata mediaMetadata = mController.getMetadata();
 
@@ -323,6 +325,14 @@ public class MediaControlPanel {
      */
     public String getMediaPlayerPackage() {
         return mController.getPackageName();
+    }
+
+    /**
+     * Return the original notification's key
+     * @return The notification key
+     */
+    public String getKey()  {
+        return mKey;
     }
 
     /**
