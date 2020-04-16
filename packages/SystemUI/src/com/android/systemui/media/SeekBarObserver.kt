@@ -61,6 +61,7 @@ class SeekBarObserver(view: View) : Observer<SeekBarViewModel.Progress> {
         if (!data.enabled) {
             seekBarView.setEnabled(false)
             seekBarView.getThumb().setAlpha(0)
+            seekBarView.setProgress(0)
             elapsedTimeView.setText("")
             totalTimeView.setText("")
             return
