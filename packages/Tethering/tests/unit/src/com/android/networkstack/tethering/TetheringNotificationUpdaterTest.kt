@@ -39,6 +39,7 @@ import com.android.networkstack.tethering.TetheringNotificationUpdater.ENABLE_NO
 import com.android.networkstack.tethering.TetheringNotificationUpdater.EVENT_SHOW_NO_UPSTREAM
 import com.android.networkstack.tethering.TetheringNotificationUpdater.NO_UPSTREAM_NOTIFICATION_ID
 import com.android.networkstack.tethering.TetheringNotificationUpdater.RESTRICTED_NOTIFICATION_ID
+import com.android.networkstack.tethering.TetheringNotificationUpdater.VERIZON_CARRIER_ID
 import com.android.testutils.waitForIdle
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -417,7 +418,7 @@ class TetheringNotificationUpdaterTest {
         assertEquals(config.mcc, res.configuration.mcc)
         assertEquals(config.mnc, res.configuration.mnc)
 
-        doReturn(1839).`when`(telephonyManager).getSimCarrierId()
+        doReturn(VERIZON_CARRIER_ID).`when`(telephonyManager).getSimCarrierId()
         res = notificationUpdater.getResourcesForSubId(context, subId)
         assertEquals(config.mcc, res.configuration.mcc)
         assertEquals(config.mnc, res.configuration.mnc)
