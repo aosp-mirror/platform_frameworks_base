@@ -2830,7 +2830,6 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private int checkOperationImpl(int code, int uid, String packageName,
                 boolean raw) {
-        verifyIncomingUid(uid);
         verifyIncomingOp(code);
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
