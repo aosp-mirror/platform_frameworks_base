@@ -108,7 +108,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -161,14 +160,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     // Used when ranking updates occur and we check if things should bubble / unbubble
     private NotificationListenerService.Ranking mTmpRanking;
-
-    // Saves notification keys of user created "fake" bubbles so that we can allow notifications
-    // like these to bubble by default. Doesn't persist across reboots, not a long-term solution.
-    private final HashSet<String> mUserCreatedBubbles;
-    // If we're auto-bubbling bubbles via a whitelist, we need to track which notifs from that app
-    // have been "demoted" back to a notification so that we don't auto-bubbles those again.
-    // Doesn't persist across reboots, not a long-term solution.
-    private final HashSet<String> mUserBlockedBubbles;
 
     // Bubbles get added to the status bar view
     private final NotificationShadeWindowController mNotificationShadeWindowController;
@@ -412,9 +403,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                 });
 
-        mUserCreatedBubbles = new HashSet<>();
-        mUserBlockedBubbles = new HashSet<>();
-
         mBubbleIconFactory = new BubbleIconFactory(context);
     }
 
@@ -474,8 +462,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                                 (entry != null && entry.isRowDismissed() && !isAppCancel)
                                 || isClearAll || isUserDimiss || isSummaryCancel;
 
-                        if (userRemovedNotif || isUserCreatedBubble(key)
-                                || isSummaryOfUserCreatedBubble(entry)) {
+                        if (userRemovedNotif) {
                             return handleDismissalInterception(entry);
                         }
 
@@ -860,27 +847,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     /**
-     * Whether this bubble was explicitly created by the user via a SysUI affordance.
-     */
-    boolean isUserCreatedBubble(String key) {
-        return mUserCreatedBubbles.contains(key);
-    }
-
-    boolean isSummaryOfUserCreatedBubble(NotificationEntry entry) {
-        if (isSummaryOfBubbles(entry)) {
-            List<Bubble> bubbleChildren =
-                    mBubbleData.getBubblesInGroup(entry.getSbn().getGroupKey());
-            for (int i = 0; i < bubbleChildren.size(); i++) {
-                // Check if any are user-created (i.e. experimental bubbles)
-                if (isUserCreatedBubble(bubbleChildren.get(i).getKey())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Removes the bubble with the given NotificationEntry.
      * <p>
      * Must be called from the main thread.
@@ -893,37 +859,19 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     private void onEntryAdded(NotificationEntry entry) {
-        boolean previouslyUserCreated = mUserCreatedBubbles.contains(entry.getKey());
-        boolean userBlocked = mUserBlockedBubbles.contains(entry.getKey());
-        boolean wasAdjusted = BubbleExperimentConfig.adjustForExperiments(
-                mContext, entry, previouslyUserCreated, userBlocked);
-
         if (mNotificationInterruptStateProvider.shouldBubbleUp(entry)
-                && (canLaunchInActivityView(mContext, entry) || wasAdjusted)) {
-            if (wasAdjusted && !previouslyUserCreated) {
-                // Gotta treat the auto-bubbled / whitelisted packaged bubbles as usercreated
-                mUserCreatedBubbles.add(entry.getKey());
-            }
+                && canLaunchInActivityView(mContext, entry)) {
             updateBubble(entry);
         }
     }
 
     private void onEntryUpdated(NotificationEntry entry) {
-        boolean previouslyUserCreated = mUserCreatedBubbles.contains(entry.getKey());
-        boolean userBlocked = mUserBlockedBubbles.contains(entry.getKey());
-        boolean wasAdjusted = BubbleExperimentConfig.adjustForExperiments(
-                mContext, entry, previouslyUserCreated, userBlocked);
-
         boolean shouldBubble = mNotificationInterruptStateProvider.shouldBubbleUp(entry)
-                && (canLaunchInActivityView(mContext, entry) || wasAdjusted);
+                && canLaunchInActivityView(mContext, entry);
         if (!shouldBubble && mBubbleData.hasBubbleWithKey(entry.getKey())) {
             // It was previously a bubble but no longer a bubble -- lets remove it
             removeBubble(entry, DISMISS_NO_LONGER_BUBBLE);
         } else if (shouldBubble) {
-            if (wasAdjusted && !previouslyUserCreated) {
-                // Gotta treat the auto-bubbled / whitelisted packaged bubbles as usercreated
-                mUserCreatedBubbles.add(entry.getKey());
-            }
             updateBubble(entry);
         }
     }
