@@ -34,6 +34,7 @@ import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
 import android.os.Bundle;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import java.security.PublicKey;
 import java.util.Map;
@@ -257,6 +258,8 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setLogo(int logo);
 
     ParsingPackage setManageSpaceActivityName(String manageSpaceActivityName);
+
+    ParsingPackage setMinExtensionVersions(@Nullable SparseIntArray minExtensionVersions);
 
     ParsingPackage setMinSdkVersion(int minSdkVersion);
 
