@@ -2250,7 +2250,7 @@ public final class Bitmap implements Parcelable {
     public @NonNull HardwareBuffer getHardwareBuffer() {
         checkRecycled("Can't getHardwareBuffer from a recycled bitmap");
         HardwareBuffer hardwareBuffer = mHardwareBuffer == null ? null : mHardwareBuffer.get();
-        if (hardwareBuffer == null) {
+        if (hardwareBuffer == null || hardwareBuffer.isClosed()) {
             hardwareBuffer = nativeGetHardwareBuffer(mNativePtr);
             mHardwareBuffer = new WeakReference<HardwareBuffer>(hardwareBuffer);
         }
