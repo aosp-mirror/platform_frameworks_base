@@ -68,8 +68,9 @@ public class LegacyRequestMapper {
          */
         ParameterUtils.ZoomData zoomData;
         {
-            zoomData = ParameterUtils.convertScalerCropRegion(activeArray,
+            zoomData = ParameterUtils.convertToLegacyZoom(activeArray,
                     request.get(SCALER_CROP_REGION),
+                    request.get(CONTROL_ZOOM_RATIO),
                     previewSize,
                     params);
 
