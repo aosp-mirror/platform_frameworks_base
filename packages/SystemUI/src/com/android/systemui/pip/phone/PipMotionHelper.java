@@ -168,6 +168,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     void synchronizePinnedStackBounds() {
         cancelAnimations();
         mBounds.set(mPipTaskOrganizer.getLastReportedBounds());
+        mFloatingContentCoordinator.onContentMoved(this);
     }
 
     /**
