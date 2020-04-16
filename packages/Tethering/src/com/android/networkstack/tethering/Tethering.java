@@ -1946,10 +1946,12 @@ public class Tethering {
     /** Get the latest value of the tethering entitlement check. */
     void requestLatestTetheringEntitlementResult(int type, ResultReceiver receiver,
             boolean showEntitlementUi) {
-        if (receiver != null) {
+        if (receiver == null) return;
+
+        mHandler.post(() -> {
             mEntitlementMgr.requestLatestTetheringEntitlementResult(type, receiver,
                     showEntitlementUi);
-        }
+        });
     }
 
     /** Register tethering event callback */
