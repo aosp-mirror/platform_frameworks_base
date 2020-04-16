@@ -378,6 +378,7 @@ public final class NotificationEntry extends ListEntry {
     /**
      * Returns the data needed for a bubble for this notification, if it exists.
      */
+    @Nullable
     public Notification.BubbleMetadata getBubbleMetadata() {
         return mBubbleMetadata;
     }
@@ -385,7 +386,7 @@ public final class NotificationEntry extends ListEntry {
     /**
      * Sets bubble metadata for this notification.
      */
-    public void setBubbleMetadata(Notification.BubbleMetadata metadata) {
+    public void setBubbleMetadata(@Nullable Notification.BubbleMetadata metadata) {
         mBubbleMetadata = metadata;
     }
 
