@@ -51,6 +51,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -340,6 +341,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private String manageSpaceActivityName;
     private float maxAspectRatio;
     private float minAspectRatio;
+    @Nullable
+    private SparseIntArray minExtensionVersions;
     private int minSdkVersion;
     private int networkSecurityConfigRes;
     @Nullable
@@ -1106,6 +1109,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeBoolean(this.preserveLegacyExternalStorage);
         dest.writeArraySet(this.mimeGroups);
         dest.writeInt(this.gwpAsanMode);
+        dest.writeSparseIntArray(this.minExtensionVersions);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1265,6 +1269,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.preserveLegacyExternalStorage = in.readBoolean();
         this.mimeGroups = (ArraySet<String>) in.readArraySet(boot);
         this.gwpAsanMode = in.readInt();
+        this.minExtensionVersions = in.readSparseIntArray();
     }
 
     public static final Parcelable.Creator<ParsingPackageImpl> CREATOR =
@@ -1773,6 +1778,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return minAspectRatio;
     }
 
+    @Nullable
+    @Override
+    public SparseIntArray getMinExtensionVersions() {
+        return minExtensionVersions;
+    }
+
     @Override
     public int getMinSdkVersion() {
         return minSdkVersion;
@@ -2217,6 +2228,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl setMinAspectRatio(float value) {
         minAspectRatio = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setMinExtensionVersions(@Nullable SparseIntArray value) {
+        minExtensionVersions = value;
         return this;
     }
 
