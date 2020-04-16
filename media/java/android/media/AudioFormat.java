@@ -235,9 +235,9 @@ public final class AudioFormat implements Parcelable {
     public static final int ENCODING_PCM_8BIT = 3;
     /** Audio data format: single-precision floating-point per sample */
     public static final int ENCODING_PCM_FLOAT = 4;
-    /** Audio data format: AC-3 compressed */
+    /** Audio data format: AC-3 compressed, also known as Dolby Digital */
     public static final int ENCODING_AC3 = 5;
-    /** Audio data format: E-AC-3 compressed */
+    /** Audio data format: E-AC-3 compressed, also known as Dolby Digital Plus or DD+ */
     public static final int ENCODING_E_AC3 = 6;
     /** Audio data format: DTS compressed */
     public static final int ENCODING_DTS = 7;
