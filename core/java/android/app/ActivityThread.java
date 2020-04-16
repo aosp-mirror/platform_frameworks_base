@@ -5701,6 +5701,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             configDiff = mConfiguration.updateFrom(config);
             config = applyCompatConfiguration(mCurDefaultDisplayDpi);
+            HardwareRenderer.sendDeviceConfigurationForDebugging(config);
 
             if ((systemTheme.getChangingConfigurations() & configDiff) != 0) {
                 systemTheme.rebase();
