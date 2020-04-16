@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
 import android.app.Notification;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -27,7 +26,6 @@ import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -396,6 +394,7 @@ public class NotificationHeaderView extends ViewGroup {
             addRectAroundView(mIcon);
             mExpandButtonRect = addRectAroundView(mExpandButton);
             mAppOpsRect = addRectAroundView(mAppOps);
+            setTouchDelegate(new TouchDelegate(mAppOpsRect, mAppOps));
             addWidthRect();
             mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         }
