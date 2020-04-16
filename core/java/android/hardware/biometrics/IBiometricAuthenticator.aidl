@@ -16,7 +16,7 @@
 
 package android.hardware.biometrics;
 
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
@@ -34,7 +34,7 @@ interface IBiometricAuthenticator {
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
     void prepareForAuthentication(boolean requireConfirmation, IBinder token, long operationId,
-            int userId, IBiometricServiceReceiverInternal wrapperReceiver, String opPackageName,
+            int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
             int cookie, int callingUid, int callingPid, int callingUserId);
 
     // Starts authentication with the previously prepared client.

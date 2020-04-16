@@ -20,8 +20,8 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 
 import android.annotation.IntDef;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -93,7 +93,7 @@ final class AuthSession {
     final IBinder mToken;
     final long mOperationId;
     final int mUserId;
-    final IBiometricServiceReceiverInternal mInternalReceiver;
+    final IBiometricSensorReceiver mSensorReceiver;
     // Original receiver from BiometricPrompt.
     final IBiometricServiceReceiver mClientReceiver;
     final String mOpPackageName;
@@ -120,7 +120,7 @@ final class AuthSession {
     long mAuthenticatedTimeMs;
 
     AuthSession(Random random, PreAuthInfo preAuthInfo, IBinder token, long operationId,
-            int userId, IBiometricServiceReceiverInternal internalReceiver,
+            int userId, IBiometricSensorReceiver sensorReceiver,
             IBiometricServiceReceiver clientReceiver, String opPackageName,
             Bundle bundle, int callingUid, int callingPid, int callingUserId,
             boolean requireConfirmation) {
@@ -129,7 +129,7 @@ final class AuthSession {
         mToken = token;
         mOperationId = operationId;
         mUserId = userId;
-        mInternalReceiver = internalReceiver;
+        mSensorReceiver = sensorReceiver;
         mClientReceiver = clientReceiver;
         mOpPackageName = opPackageName;
         mBundle = bundle;
@@ -163,7 +163,7 @@ final class AuthSession {
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
             final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
             sensor.goToStateWaitingForCookie(mRequireConfirmation, mToken, mOperationId, mUserId,
-                    mInternalReceiver, mOpPackageName, cookie, mCallingUid, mCallingPid,
+                    mSensorReceiver, mOpPackageName, cookie, mCallingUid, mCallingPid,
                     mCallingUserId);
         }
     }

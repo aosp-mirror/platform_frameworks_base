@@ -33,9 +33,9 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.Binder;
 import android.os.Bundle;
@@ -461,13 +461,13 @@ public abstract class BiometricServiceBase extends SystemService
      * Wraps the callback interface from Service -> BiometricPrompt
      */
     protected abstract class BiometricServiceListener implements ServiceListener {
-        private IBiometricServiceReceiverInternal mWrapperReceiver;
+        private IBiometricSensorReceiver mWrapperReceiver;
 
-        public BiometricServiceListener(IBiometricServiceReceiverInternal wrapperReceiver) {
+        public BiometricServiceListener(IBiometricSensorReceiver wrapperReceiver) {
             mWrapperReceiver = wrapperReceiver;
         }
 
-        public IBiometricServiceReceiverInternal getWrapperReceiver() {
+        public IBiometricSensorReceiver getWrapperReceiver() {
             return mWrapperReceiver;
         }
 

@@ -17,7 +17,7 @@
 package com.android.server.biometrics.iris;
 
 import android.hardware.biometrics.IBiometricAuthenticator;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.iris.IIrisService;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -37,7 +37,7 @@ public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
 
     @Override
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
-            long sessionId, int userId, IBiometricServiceReceiverInternal wrapperReceiver,
+            long sessionId, int userId, IBiometricSensorReceiver sensorReceiver,
             String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
     }
