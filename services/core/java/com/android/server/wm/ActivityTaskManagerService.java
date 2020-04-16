@@ -2786,6 +2786,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         final int prevMode = task.getWindowingMode();
+        if (prevMode == windowingMode) {
+            // The task is already in split-screen and with correct windowing mode.
+            return true;
+        }
+
         moveTaskToSplitScreenPrimaryTask(task, toTop);
         return prevMode != task.getWindowingMode();
     }
