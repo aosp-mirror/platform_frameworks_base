@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ಫೈಲ್‌ ವರ್ಗಾವಣೆಗಾಗಿ ಬಳಸು"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ಇನ್‌ಪುಟ್‌ಗಾಗಿ ಬಳಸು"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"ಶ್ರವಣ ಸಾಧನಗಳಿಗಾಗಿ ಬಳಸಿ"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"ಜೋಡಿ"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"ಜೋಡಿಸಿ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ಜೋಡಿ ಮಾಡು"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ರದ್ದುಮಾಡಿ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ಸಂಪರ್ಕಗೊಳಿಸಿದಾಗ, ಜೋಡಿಸುವಿಕೆಯು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಕರೆ ಇತಿಹಾಸಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ಲಭ್ಯವಿರುವ ಸಾಧನಗಳನ್ನು ನೋಡಲು ಮತ್ತು ಬಳಸಲು, ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR ಕೋಡ್ ಬಳಸಿ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR ಕೋಡ್ ಸ್ಕ್ಯಾನರ್ ಬಳಸಿ ಹೊಸ ಸಾಧನಗಳನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ಜೋಡಿಸುವ ಕೋಡ್ ಬಳಸಿ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ಆರು ಅಂಕಿಯ ಕೋಡ್ ಬಳಸಿ ಹೊಸ ಸಾಧನಗಳನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"ಜೋಡಿಸಲಾದ ಸಾಧನಗಳು"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ಸಾಧನವನ್ನು ಜೋಡಿಸಲು ವಿಫಲವಾಗಿದೆ. QR ಕೋಡ್ ತಪ್ಪಾಗಿದೆ ಅಥವಾ ಸಾಧನವು ಒಂದೇ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಆಗಿಲ್ಲ."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ವಿಳಾಸ ಮತ್ತು ಪೋರ್ಟ್"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡುವ ಮೂಲಕ ವೈ-ಫೈನಲ್ಲಿ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ಡೀಬಗ್, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ದೋಷ ವರದಿಯ ಶಾರ್ಟ್‌ಕಟ್‌‌"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ವೈರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi ವೆರ್ಬೋಸ್ ಲಾಗಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ವೈ-ಫೈ ಸ್ಕ್ಯಾನ್ ನಿರ್ಬಂಧಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑ವರ್ಧಿತ MAC ಯಾದೃಚ್ಛಿಕರಣ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ಮೊಬೈಲ್ ಡೇಟಾ ಯಾವಾಗಲೂ ಸಕ್ರಿಯ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ಟೆಥರಿಂಗ್‍‍ಗಾಗಿ ಹಾರ್ಡ್‍ವೇರ್ ವೇಗವರ್ಧನೆ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ಹೆಸರುಗಳಿಲ್ಲದ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ತೋರಿಸಿ"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ವೈರ್‌ಲೆಸ್‌‌‌ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ಬ್ಯಾಟರಿ ಹೆಚ್ಚು ಬಾಳಿಕೆ ಬರುವಂತೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ನೆಟ್‌ವರ್ಕ್‌ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಸುಧಾರಿಸುತ್ತದೆ"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ಈ ಟಾಗಲ್, ಕ್ಲೈಂಟ್‌ ಮೋಡ್‌ಗಾಗಿ ಮಾತ್ರ MAC ಯಾದೃಚ್ಛಿಕರಣ ವರ್ತನೆಯ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುತ್ತದೆ.\nಈ ಮೋಡ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, MAC ಯಾದೃಚ್ಛಿಕರಣವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ ಯಾವುದೇ ನೆಟ್‌ವರ್ಕ್ ಸಂಯೋಜನೆಯನ್ನು ಸ್ಥಾಪಿಸುವಾಗ MAC ವಿಳಾಸವನ್ನು ಮರು-ಯಾದೃಚ್ಛಿಕರಣಗೊಳಿಸಬಹುದು (ಕ್ಲೈಂಟ್ ಕೊನೆಯದಾಗಿ ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಿರುವುದನ್ನು ಅವಲಂಬಿಸಿರುತ್ತದೆ). ಸಾಧನವು 4 ಗಂಟೆಗಳು ಅಥವಾ ಕಡಿಮೆ ಸಮಯದಲ್ಲಿ ಮರುಸಂಪರ್ಕಿಸಿದರೆ, ಯಾವುದೇ ಮರು-ಯಾದೃಚ್ಛಿಕರಣ ಸಂಭವಿಸುವುದಿಲ್ಲ."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"ಮೀಟರ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ಮೀಟರ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ಲಾಗರ್ ಬಫರ್ ಗಾತ್ರಗಳು"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ಹಿನ್ನೆಲೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತಿಲ್ಲ ಎಂಬ ಸಂಭಾಷಣೆ ತೋರಿಸಿ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ಅಧಿಸೂಚನೆ ಎಚ್ಚರಿಕೆ ತೋರಿಸಿ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ಅಮಾನ್ಯ ಚಾನಲ್ ಅಧಿಸೂಚನೆಗಾಗಿ ಪರದೆಯಲ್ಲಿ ಎಚ್ಚರಿಕೆ"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳಿಗಾಗಿ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಜಾರಿಗೊಳಿಸಿ"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ಸಂಭಾಷಣೆ ವಿಭಾಗದಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳಲು, ಅಧಿಸೂಚನೆಗಳನ್ನು ದೀರ್ಘಕಾಲದ ಹಂಚಿಕೆ ಶಾರ್ಟ್‌ಕಟ್ ಮೂಲಕ ಬೆಂಬಲಿಸುವ ಅಗತ್ಯವಿದೆ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ಬಾಹ್ಯವಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಒತ್ತಾಯವಾಗಿ ಅನುಮತಿಸಿ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳು ಯಾವುದೇ ಆಗಿದ್ದರೂ, ಬಾಹ್ಯ ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅರ್ಹಗೊಳಿಸುತ್ತದೆ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಒತ್ತಾಯ ಮಾಡಿ"</string>

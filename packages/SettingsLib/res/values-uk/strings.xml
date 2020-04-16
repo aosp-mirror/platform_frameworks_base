@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Налагодження через Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Щоб переглядати та використовувати доступні пристрої, увімкніть налагодження через Wi-Fi"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Підключати пристрій за допомогою QR-коду"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Підключати нові пристрої за допомогою сканера QR-кодів"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Підключати пристрій за допомогою коду підключення"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Підключати нові пристрої за допомогою шестизначного коду"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Підключені пристрої"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Не вдалося підключитися до пристрою. Надано неправильний QR-код або пристрій не підключено до тієї ж мережі."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-адреса та порт"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Сканувати QR-код"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Підключати пристрій через Wi‑Fi за допомогою QR-коду"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Підключіть пристрій до мережі Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, налагодження, розробка"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Ярлик звіту про помилки"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сертифікація бездрот. екрана"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Докладний запис у журнал Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Зменшити радіус пошуку мереж Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Довільний вибір MAC-адрес із Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Не вимикати мобільне передавання даних"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Апаратне прискорення під час використання телефона в режимі модема"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Показувати пристрої Bluetooth без назв"</string>
@@ -275,16 +274,17 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Кодек для аудіо Bluetooth LDAC: якість відтворення"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Активувати LDAC для аудіо Bluetooth\nВибір кодека: якість відтворення"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Трансляція: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Приватна DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Режим приватної системи DNS"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Приватний DNS-сервер"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Режим приватного DNS-сервера"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Вимкнено"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Автоматично"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Ім’я хосту приватного постачальника послуг DNS"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Ім’я хосту постачальника приватного DNS-сервера"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Введіть ім’я хосту постачальника послуг DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Не вдалося під’єднатися"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показати параметри сертифікації бездротового екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Показувати в журналі RSSI для кожного SSID під час вибору Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Зменшує споживання заряду акумулятора й підвищує ефективність роботи мережі"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Цей перемикач впливає на поведінку довільного вибору MAC-адрес лише для клієнтського режиму.\nКоли цей режим активовано, MAC-адреси мереж із довільним вибором цих адрес переназначаються під час зв\'язування залежно від часу останнього відключення клієнта від мережі. Повторний довільний вибір адрес не відбувається, якщо пристрій знову підключається протягом 4 годин."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"З тарифікацією трафіку"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без тарифікації трафіку"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Розміри буфера журналу"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Показувати вікно \"Додаток не відповідає\" для додатків у фоновому режимі"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Показувати застереження про канал"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"З’являється застереження, коли додаток надсилає сповіщення через недійсний канал"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Використовувати ярлики для сповіщень про чати"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Вимагати для сповіщень постійних ярликів доступу, щоб показувати їх у розділі чатів"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Примусово записувати додатки в зовнішню пам’ять"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Можна записувати додатки в зовнішню пам’ять, незалежно від значень у маніфесті"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Примусово масштабувати активність"</string>

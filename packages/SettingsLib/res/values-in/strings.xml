@@ -112,8 +112,8 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Gunakan untuk transfer file"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Gunakan untuk masukan"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gunakan untuk Alat Bantu Dengar"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sandingkan"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SANDINGKAN"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sambungkan"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SAMBUNGKAN"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Batal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Penyandingan memberi akses ke kontak dan histori panggilan saat tersambung"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Tidak dapat menyandingkan dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Proses debug nirkabel"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Untuk melihat dan menggunakan perangkat yang tersedia, aktifkan proses debug nirkabel"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Sambungkan perangkat dengan kode QR"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Sambungkan perangkat baru menggunakan pemindai kode QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Sambungkan perangkat dengan kode penghubung"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Sambungkan perangkat baru menggunakan kode enam digit"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Perangkat disambungkan"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Gagal menyambungkan perangkat. Kode QR salah, atau perangkat tidak tersambung ke jaringan yang sama."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Alamat IP &amp; Port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Memindai kode QR"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Menyambungkan perangkat melalui Wi‑Fi dengan memindai Kode QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Harap sambungkan ke jaringan Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Pintasan laporan bug"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktifkan Pencatatan Log Panjang Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pembatasan pemindaian Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Pengacakan MAC yang ditingkatkan Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Kuota selalu aktif"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Akselerasi hardware tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Tampilkan perangkat Bluetooth tanpa nama"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Tampilkan opsi untuk sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tingkatkan level pencatatan log Wi-Fi, tampilkan per SSID RSSI di Pemilih Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Memperlambat kehabisan baterai &amp; meningkatkan performa jaringan"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Pengaktifan mode ini memengaruhi perilaku pengacakan MAC hanya untuk mode klien.\nSaat mode ini diaktifkan, jaringan yang mengaktifkan pengacakan MAC mungkin mengalami pengacakan ulang alamat MAC selama terhubung, bergantung pada kapan klien terakhir kali terputus dari jaringan. Pengacakan ulang tidak terjadi jika perangkat terhubung kembali dalam 4 jam atau kurang."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Berbayar"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Tidak berbayar"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Ukuran buffer pencatat log"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang berjalan di background"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Tampilkan peringatan saluran notifikasi"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Menampilkan peringatan di layar saat aplikasi memposting notifikasi tanpa channel yang valid"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Terapkan pintasan untuk notifikasi percakapan"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Mengharuskan notifikasi didukung oleh pintasan berbagi yang berdurasi panjang untuk muncul di bagian percakapan"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Paksa izinkan aplikasi di eksternal"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Membuat semua aplikasi dapat ditulis ke penyimpanan eksternal, terlepas dari nilai manifes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Paksa aktivitas agar ukurannya dapat diubah"</string>
@@ -489,7 +487,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Status pendaftaran IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Terdaftar"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Tidak terdaftar"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Tidak Tersedia"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Tidak tersedia"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC diacak"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="other">%1$d perangkat terhubung</item>
@@ -535,7 +533,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Pengguna"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profil dibatasi"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Tambahkan pengguna baru?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Anda dapat berbagi penggunaan perangkat ini dengan orang lain dengan membuat pengguna tambahan. Setiap pengguna memiliki ruang sendiri, yang dapat disesuaikan dengan aplikasi, wallpaper, dan lainnya.\n\nSaat Anda menambahkan pengguna baru, pengguna tersebut perlu menyiapkan ruangnya.\n\nPengguna mana pun dapat mengupdate aplikasi untuk semua pengguna lainnya. Layanan dan setelan aksesibilitas mungkin tidak ditransfer ke pengguna baru."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Anda dapat menggunakan perangkat ini bersama orang lain dengan membuat pengguna tambahan. Setiap pengguna memiliki ruang sendiri, yang dapat disesuaikan dengan aplikasi, wallpaper, dan lainnya.\n\nSaat Anda menambahkan pengguna baru, pengguna tersebut perlu menyiapkan ruangnya.\n\nPengguna mana pun dapat mengupdate aplikasi untuk semua pengguna lainnya. Layanan dan setelan aksesibilitas mungkin tidak ditransfer ke pengguna baru."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruang mereka sendiri.\n\nPengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Siapkan pengguna sekarang?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Pastikan orang tersebut ada untuk mengambil perangkat dan menyiapkan ruangnya"</string>

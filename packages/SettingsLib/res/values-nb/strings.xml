@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Bruk til filoverføring"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Bruk for inndata"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Bruk for høreapparater"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sammenkoble"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Koble til"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"KOBLE TIL"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Avbryt"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Med sammenkobling får den andre enheten tilgang til kontaktene og anropsloggen din når den er tilkoblet."</string>
@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Trådløs feilsøking"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"For å se og bruke tilgjengelige enheter, slå på trådløs feilsøking"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Koble til enheten med en QR-kode"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Koble til nye enheter med en QR-kodeskanner"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Koble til enheten med en tilkoblingskode"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Koble til nye enheter med en sekssifret kode"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Tilkoblede enheter"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Kunne ikke koble til enheten. Enten var QR-koden feil, eller enheten er ikke koblet til samme nettverk."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adresse og port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skann QR-koden"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Koble til enheten via Wi-Fi ved å skanne en QR-kode"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Koble til et Wi-Fi-nettverk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, feilsøking, utvikler"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Snarvei til feilrapport"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjermsertifisering"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert Wi-Fi-loggføring"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrensning av Wi‑Fi-skanning"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑forbedret MAC-tilfeldiggjøring"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvareakselerasjon for internettdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheter uten navn"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduserer batteriforbruket og forbedrer nettverksytelsen"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Denne av/på-bryteren påvirker bare atferden til MAC-tilfeldiggjøring for klientmodus.\nNår denne modusen er aktivert, kan nettverk som har tilfeldig valgt MAC, få MAC-adressen tilfeldig valgt på nytt under tilknytning, avhengig av når klienten sist ble koblet fra nettverket. Ny tilfeldiggjøring oppstår ikke hvis enheten kobler seg til igjen innen fire timer."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datamåling"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Uten datamåling"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Bufferstørrelser for logg"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Vis Appen svarer ikke-dialog for bakgrunnsapper"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Vis varselskanaladvarsler"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Viser advarsler på skjermen når apper publiserer varsler uten en gyldig kanal"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Håndhev snarveier for samtalevarsler"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Krev at varsler støttes av en langvarig delingssnarvei for å vises i samtaledelen"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Tving frem tillatelse for ekstern lagring av apper"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Dette gjør at alle apper kan lagres på eksterne lagringsmedier – uavhengig av manifestverdier"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Tving aktiviteter til å kunne endre størrelse"</string>

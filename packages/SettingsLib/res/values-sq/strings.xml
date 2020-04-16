@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Korrigjimi përmes Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Për të parë dhe përdorur pajisjet e disponueshme, aktivizo korrigjimin përmes Wi-Fi"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Çifto pajisjen me kod QR"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Çifto pajisjet e reja duke përdorur skanerin e kodeve QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Çifto pajisjen me kodin e çiftimit"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Çifto pajisjet e reja duke përdorur kodin me gjashtë shifra"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Pajisjet e çiftuara"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Çiftimi i pajisjes dështoi. Ose kodi QR nuk ishte i saktë, ose pajisja nuk është e lidhur me të njëjtin rrjet."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa e IP-së dhe porta"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skano kodin QR"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Çifto pajisjen përmes Wi‑Fi duke skanuar një kod QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Lidhu me një rrjet Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, korrigjimi, zhvilluesi"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Shkurtorja e raportit të defektit në kod"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikimi i ekranit valor"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivizo hyrjen Wi-Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Përshpejtimi i skanimit të Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Renditja e rastësishme e adresave MAC të përmirësuara me Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Të dhënat celulare gjithmonë aktive"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Përshpejtimi i harduerit për ndarjen e lidhjes (internet)"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Shfaq pajisjet me Bluetooth pa emra"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Shfaq opsionet për certifikimin e ekranit valor"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zvogëlon shkarkimin e baterisë dhe përmirëson cilësinë e funksionimit të rrjetit"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ky ndryshim ndikon te sjellja e renditjes së rastësishme të adresave MAC vetëm për modalitetin e klientit.\nKur aktivizohet ky modalitet, çdo rrjet që ka të aktivizuar renditjen e rastësishme të adresave MAC mund t\'i rirendisë adresat e veta MAC gjatë shoqërimit, në varësi të kohës kur është shkëputur klienti për herë të fundit nga rrjeti. Rirenditja e rastësishme nuk ndodh nëse pajisja lidhet brenda 4 orëve ose më pak."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Me matje"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Pa matje"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Madhësitë e regjistruesit"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Shfaq raportet ANR (Aplikacioni nuk përgjigjet) për aplikacionet në sfond"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Shfaq paralajmërimet e kanalit të njoftimeve"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Shfaq paralajmërimin në ekran kur një aplikacion poston një njoftim pa një kanal të vlefshëm"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Zbato shkurtoret për njoftimet e bisedave"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Kërko që informacionet të mbështeten nga një shkurtore ndarjeje afatgjatë që ato të shfaqen në seksionin e bashkëbisedimit"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Detyro lejimin në hapësirën e jashtme"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Bën që çdo aplikacion të jetë i përshtatshëm për t\'u shkruar në hapësirën ruajtëse të jashtme, pavarësisht nga vlerat e manifestit"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Detyro madhësinë e ndryshueshme për aktivitetet"</string>
@@ -449,7 +447,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tableti mund të fiket së shpejti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Pajisja mund të fiket së shpejti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura për karikimin"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura deri në karikim"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> deri sa të karikohen"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"I panjohur"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Po karikohet"</string>
