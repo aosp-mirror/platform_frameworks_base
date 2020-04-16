@@ -19,7 +19,6 @@ package android.service.autofill;
 import android.annotation.NonNull;
 import android.annotation.Size;
 import android.app.slice.Slice;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.inline.InlinePresentationSpec;
@@ -65,18 +64,6 @@ public final class InlinePresentation implements Parcelable {
     public String[] getAutofillHints() {
         List<String> hints = mSlice.getHints();
         return hints.toArray(new String[hints.size()]);
-    }
-
-    /**
-     * @hide
-     * @removed
-     */
-    @UnsupportedAppUsage
-    public InlinePresentation(
-            @NonNull Slice slice,
-            @NonNull android.view.inline.InlinePresentationSpec inlinePresentationSpec,
-            boolean pinned) {
-        this(slice, inlinePresentationSpec.toWidget(), pinned);
     }
 
 
@@ -245,7 +232,7 @@ public final class InlinePresentation implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1585633564226L,
+            time = 1586992400667L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/service/autofill/InlinePresentation.java",
             inputSignatures = "private final @android.annotation.NonNull android.app.slice.Slice mSlice\nprivate final @android.annotation.NonNull android.widget.inline.InlinePresentationSpec mInlinePresentationSpec\nprivate final  boolean mPinned\npublic @android.annotation.NonNull @android.annotation.Size(min=0L) java.lang.String[] getAutofillHints()\nclass InlinePresentation extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstDefs=true, genEqualsHashCode=true)")
