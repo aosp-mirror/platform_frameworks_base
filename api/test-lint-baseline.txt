@@ -7,16 +7,14 @@ AcronymName: android.app.NotificationChannel#setImportanceLockedByOEM(boolean):
 
 ActionValue: android.location.Location#EXTRA_NO_GPS_LOCATION:
     
-// Tethering broadcast action / extras cannot change name for backwards compatibility
 ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
-    Inconsistent action value; expected `android.net.action.TETHER_STATE_CHANGED`, was `android.net.conn.TETHER_STATE_CHANGED`
+    
 ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
-    Inconsistent extra value; expected `android.net.extra.ACTIVE_TETHER`, was `tetherArray`
+    
 ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
-    Inconsistent extra value; expected `android.net.extra.AVAILABLE_TETHER`, was `availableArray`
+    
 ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
-    Inconsistent extra value; expected `android.net.extra.ERRORED_TETHER`, was `erroredArray`
-
+    
 ActionValue: android.telephony.ims.ImsCallProfile#EXTRA_ADDITIONAL_CALL_INFO:
     
 ActionValue: android.telephony.ims.ImsCallProfile#EXTRA_CALL_RAT_TYPE:
@@ -117,6 +115,8 @@ ArrayReturn: android.telephony.ims.ImsUtListener#onUtConfigurationCallWaitingQue
     
 ArrayReturn: android.telephony.ims.stub.ImsRegistrationImplBase#onSubscriberAssociatedUriChanged(android.net.Uri[]) parameter #0:
     
+ArrayReturn: android.view.Display#getSupportedWideColorGamut():
+    Method should return Collection<ColorSpace> (or subclass) instead of raw array; was `android.graphics.ColorSpace[]`
 ArrayReturn: android.view.FocusFinder#sort(android.view.View[], int, int, android.view.ViewGroup, boolean) parameter #0:
     
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
@@ -406,13 +406,13 @@ GetterSetterNames: android.location.GnssClock#setElapsedRealtimeUncertaintyNanos
 GetterSetterNames: android.location.GnssClock#setFullBiasNanos(long):
     
 GetterSetterNames: android.location.GnssClock#setLeapSecond(int):
-
-GetterSetterNames: android.location.GnssClock#setReferenceConstellationTypeForIsb(int):
-
+    
 GetterSetterNames: android.location.GnssClock#setReferenceCarrierFrequencyHzForIsb(double):
-
+    
 GetterSetterNames: android.location.GnssClock#setReferenceCodeTypeForIsb(String):
-
+    
+GetterSetterNames: android.location.GnssClock#setReferenceConstellationTypeForIsb(int):
+    
 GetterSetterNames: android.location.GnssClock#setTimeUncertaintyNanos(double):
     
 GetterSetterNames: android.location.GnssMeasurement#setBasebandCn0DbHz(double):
@@ -420,15 +420,15 @@ GetterSetterNames: android.location.GnssMeasurement#setBasebandCn0DbHz(double):
 GetterSetterNames: android.location.GnssMeasurement#setCarrierFrequencyHz(float):
     
 GetterSetterNames: android.location.GnssMeasurement#setCodeType(String):
-
+    
 GetterSetterNames: android.location.GnssMeasurement#setFullInterSignalBiasNanos(double):
-
+    
 GetterSetterNames: android.location.GnssMeasurement#setFullInterSignalBiasUncertaintyNanos(double):
-
+    
 GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasNanos(double):
-
+    
 GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasUncertaintyNanos(double):
-
+    
 GetterSetterNames: android.location.GnssMeasurement#setSnrInDb(double):
     
 GetterSetterNames: android.location.LocationRequest#isLocationSettingsIgnored():
@@ -2301,6 +2301,8 @@ NotCloseable: android.app.ActivityView:
     
 NotCloseable: android.app.prediction.AppPredictor:
     
+NotCloseable: android.net.EthernetManager.TetheredInterfaceRequest:
+    Classes that release resources (release()) should implement AutoClosable and CloseGuard: class android.net.EthernetManager.TetheredInterfaceRequest
 NotCloseable: android.os.HwParcel:
     
 NotCloseable: android.telephony.ims.stub.ImsUtImplBase:
@@ -2532,7 +2534,7 @@ SamShouldBeLast: android.database.sqlite.SQLiteDebug#dump(android.util.Printer, 
 SamShouldBeLast: android.database.sqlite.SQLiteDirectCursorDriver#query(android.database.sqlite.SQLiteDatabase.CursorFactory, String[]):
     
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+    
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, java.util.concurrent.Executor, android.location.LocationListener):
     
 SamShouldBeLast: android.os.BugreportManager#startBugreport(android.os.ParcelFileDescriptor, android.os.ParcelFileDescriptor, android.os.BugreportParams, java.util.concurrent.Executor, android.os.BugreportManager.BugreportCallback):
@@ -2614,7 +2616,7 @@ UseParcelFileDescriptor: android.util.proto.ProtoOutputStream#ProtoOutputStream(
 
 
 UserHandle: android.app.ActivityManager#switchUser(android.os.UserHandle):
-    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
+    
 UserHandle: android.app.admin.DevicePolicyManager#getOwnerInstalledCaCerts(android.os.UserHandle):
     
 UserHandle: android.app.role.RoleManager#addOnRoleHoldersChangedListenerAsUser(java.util.concurrent.Executor, android.app.role.OnRoleHoldersChangedListener, android.os.UserHandle):
@@ -2630,11 +2632,13 @@ UserHandle: android.app.role.RoleManager#removeOnRoleHoldersChangedListenerAsUse
 UserHandle: android.app.role.RoleManager#removeRoleHolderAsUser(String, String, int, android.os.UserHandle, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Boolean>):
     
 UserHandle: android.app.usage.StorageStatsManager#queryCratesForPackage(java.util.UUID, String, android.os.UserHandle):
-    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
+    
 UserHandle: android.app.usage.StorageStatsManager#queryCratesForUser(java.util.UUID, android.os.UserHandle):
-    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
+    
 UserHandle: android.companion.CompanionDeviceManager#isDeviceAssociated(String, android.net.MacAddress, android.os.UserHandle):
     
+UserHandle: android.companion.CompanionDeviceManager#isDeviceAssociatedForWifiConnection(String, android.net.MacAddress, android.os.UserHandle):
+    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
 UserHandle: android.content.pm.PackageManager#getInstallReason(String, android.os.UserHandle):
     
 UserHandle: android.content.pm.PackageManager#getPermissionFlags(String, String, android.os.UserHandle):
@@ -2643,6 +2647,8 @@ UserHandle: android.content.pm.PackageManager#grantRuntimePermission(String, Str
     
 UserHandle: android.content.pm.PackageManager#revokeRuntimePermission(String, String, android.os.UserHandle):
     
+UserHandle: android.content.pm.PackageManager#revokeRuntimePermission(String, String, android.os.UserHandle, String):
+    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
 UserHandle: android.content.pm.PackageManager#updatePermissionFlags(String, String, int, int, android.os.UserHandle):
     
 UserHandle: android.location.LocationManager#setLocationEnabledForUser(boolean, android.os.UserHandle):
@@ -2653,6 +2659,8 @@ UserHandle: android.permission.PermissionControllerManager#getRuntimePermissionB
     
 UserHandle: android.permission.PermissionControllerManager#stageAndApplyRuntimePermissionsBackup(byte[], android.os.UserHandle):
     
+UserHandle: android.telecom.TelecomManager#getDefaultDialerPackage(android.os.UserHandle):
+    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
 
 
 UserHandleName: android.app.ActivityView#startActivity(android.content.Intent, android.os.UserHandle):
