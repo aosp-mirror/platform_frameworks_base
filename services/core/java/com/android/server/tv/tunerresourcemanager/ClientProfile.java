@@ -131,7 +131,7 @@ public final class ClientProfile {
         mUsingFrontendIds.add(frontendId);
     }
 
-    public Iterable<Integer> getInUseFrontendIds() {
+    public Set<Integer> getInUseFrontendIds() {
         return mUsingFrontendIds;
     }
 
