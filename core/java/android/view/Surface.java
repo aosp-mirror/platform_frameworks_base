@@ -25,7 +25,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
 import android.graphics.HardwareRenderer;
 import android.graphics.Matrix;
 import android.graphics.RecordingCanvas;
@@ -87,7 +86,7 @@ public class Surface implements Parcelable {
     private static native int nativeSetScalingMode(long nativeObject, int scalingMode);
     private static native int nativeForceScopedDisconnect(long nativeObject);
     private static native int nativeAttachAndQueueBufferWithColorSpace(long nativeObject,
-            GraphicBuffer buffer, int colorSpaceId);
+            HardwareBuffer buffer, int colorSpaceId);
 
     private static native int nativeSetSharedBufferModeEnabled(long nativeObject, boolean enabled);
     private static native int nativeSetAutoRefreshEnabled(long nativeObject, boolean enabled);
@@ -736,7 +735,7 @@ public class Surface implements Parcelable {
      * treated as SRGB.
      * @hide
      */
-    public void attachAndQueueBufferWithColorSpace(GraphicBuffer buffer, ColorSpace colorSpace) {
+    public void attachAndQueueBufferWithColorSpace(HardwareBuffer buffer, ColorSpace colorSpace) {
         synchronized (mLock) {
             checkNotReleasedLocked();
             if (colorSpace == null) {
@@ -750,24 +749,6 @@ public class Surface implements Parcelable {
                         + "native error: " + err);
             }
         }
-    }
-
-    /**
-     * @hide
-     */
-    public void attachAndQueueBufferWithColorSpace(HardwareBuffer buffer, ColorSpace colorSpace) {
-        attachAndQueueBufferWithColorSpace(GraphicBuffer.createFromHardwareBuffer(buffer),
-                colorSpace);
-    }
-
-    /**
-     * Deprecated, use attachAndQueueBufferWithColorSpace instead.
-     * Transfer ownership of buffer and present it on the Surface.
-     * The color space of the buffer is treated as SRGB.
-     * @hide
-     */
-    public void attachAndQueueBuffer(GraphicBuffer buffer) {
-        attachAndQueueBufferWithColorSpace(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
     }
 
     /**
