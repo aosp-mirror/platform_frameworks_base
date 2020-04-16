@@ -5440,6 +5440,9 @@ public class Editor {
 
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
+            if (!mTextView.isFromPrimePointer(ev, true)) {
+                return true;
+            }
             if (mFlagInsertionHandleGesturesEnabled && mFlagCursorDragFromAnywhereEnabled) {
                 // Should only enable touch through when cursor drag is enabled.
                 // Otherwise the insertion handle view cannot be moved.
@@ -5908,6 +5911,9 @@ public class Editor {
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
+            if (!mTextView.isFromPrimePointer(event, true)) {
+                return true;
+            }
             boolean superResult = super.onTouchEvent(event);
 
             switch (event.getActionMasked()) {
