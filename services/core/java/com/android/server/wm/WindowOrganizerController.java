@@ -186,12 +186,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return syncId;
     }
 
-    private int sanitizeAndApplyChange(WindowContainer container,
-            WindowContainerTransaction.Change change) {
-        if (!(container instanceof Task)) {
-            throw new RuntimeException("Invalid token in task transaction");
-        }
-        final Task task = (Task) container;
+    private int applyChanges(WindowContainer container, WindowContainerTransaction.Change change) {
         // The "client"-facing API should prevent bad changes; however, just in case, sanitize
         // masks here.
         final int configMask = change.getConfigSetMask() & CONTROLLABLE_CONFIGS;
@@ -211,11 +206,38 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
             }
         }
-        if ((change.getChangeMask() & WindowContainerTransaction.Change.CHANGE_HIDDEN) != 0) {
-            if (task.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, change.getHidden())) {
-                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+
+        final int windowingMode = change.getWindowingMode();
+        if (windowingMode > -1) {
+            container.setWindowingMode(windowingMode);
+        }
+        return effects;
+    }
+
+    private int applyTaskChanges(Task tr, WindowContainerTransaction.Change c) {
+        int effects = 0;
+        final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
+
+        if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_HIDDEN) != 0) {
+            if (tr.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, c.getHidden())) {
+                effects = TRANSACT_EFFECTS_LIFECYCLE;
             }
         }
+
+        final int childWindowingMode = c.getActivityWindowingMode();
+        if (childWindowingMode > -1) {
+            tr.setActivityWindowingMode(childWindowingMode);
+        }
+
+        if (t != null) {
+            tr.setMainWindowSizeChangeTransaction(t);
+        }
+
+        Rect enterPipBounds = c.getEnterPipBounds();
+        if (enterPipBounds != null) {
+            mService.mStackSupervisor.updatePictureInPictureMode(tr, enterPipBounds, true);
+        }
+
         return effects;
     }
 
@@ -283,30 +305,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
 
+    private void sanitizeWindowContainer(WindowContainer wc) {
+        if (!(wc instanceof Task) && !(wc instanceof DisplayArea)) {
+            throw new RuntimeException("Invalid token in task or displayArea transaction");
+        }
+    }
+
     private int applyWindowContainerChange(WindowContainer wc,
             WindowContainerTransaction.Change c) {
-        int effects = sanitizeAndApplyChange(wc, c);
+        sanitizeWindowContainer(wc);
 
-        final Task tr = wc.asTask();
+        int effects = applyChanges(wc, c);
 
-        final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
-        if (t != null) {
-            tr.setMainWindowSizeChangeTransaction(t);
-        }
-
-        Rect enterPipBounds = c.getEnterPipBounds();
-        if (enterPipBounds != null) {
-            mService.mStackSupervisor.updatePictureInPictureMode(tr,
-                    enterPipBounds, true);
-        }
-
-        final int windowingMode = c.getWindowingMode();
-        if (windowingMode > -1) {
-            tr.setWindowingMode(windowingMode);
-        }
-        final int childWindowingMode = c.getActivityWindowingMode();
-        if (childWindowingMode > -1) {
-            tr.setActivityWindowingMode(childWindowingMode);
+        if (wc instanceof Task) {
+            effects |= applyTaskChanges(wc.asTask(), c);
         }
 
         return effects;
