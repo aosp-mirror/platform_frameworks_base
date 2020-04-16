@@ -27,6 +27,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Log;
 import android.util.Slog;
 
@@ -34,6 +35,8 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Watches for emote provider services to be installed.
@@ -51,8 +54,8 @@ final class TvRemoteProviderWatcher {
     private final PackageManager mPackageManager;
     private final ArrayList<TvRemoteProviderProxy> mProviderProxies = new ArrayList<>();
     private final int mUserId;
-    private final String mUnbundledServicePackage;
     private final Object mLock;
+    private final Set<String> mUnbundledServicePackages = new HashSet<>();
 
     private boolean mRunning;
 
@@ -61,9 +64,19 @@ final class TvRemoteProviderWatcher {
         mHandler = new Handler(true);
         mUserId = UserHandle.myUserId();
         mPackageManager = context.getPackageManager();
-        mUnbundledServicePackage = context.getString(
-                com.android.internal.R.string.config_tvRemoteServicePackage);
         mLock = lock;
+
+        // Unbundled package names supports a comma-separated list
+        SimpleStringSplitter splitter = new SimpleStringSplitter(',');
+        splitter.setString(context.getString(
+                com.android.internal.R.string.config_tvRemoteServicePackage));
+
+        splitter.forEach(packageName -> {
+            packageName = packageName.trim();
+            if (!packageName.isEmpty()) {
+                mUnbundledServicePackages.add(packageName);
+            }
+        });
     }
 
     public void start() {
@@ -157,7 +170,7 @@ final class TvRemoteProviderWatcher {
         }
 
         // Check if package name is white-listed here.
-        if (!serviceInfo.packageName.equals(mUnbundledServicePackage)) {
+        if (!mUnbundledServicePackages.contains(serviceInfo.packageName)) {
             Slog.w(TAG, "Ignoring atv remote provider service because the package has not "
                     + "been set and/or whitelisted: "
                     + serviceInfo.packageName + "/" + serviceInfo.name);
