@@ -1550,22 +1550,15 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
 static void BindMountStorageToLowerFs(const userid_t user_id, const char* dir_name,
     const char* package, fail_fn_t fail_fn) {
 
-  bool hasPackage = (package != nullptr);
   bool hasSdcardFs = IsFilesystemSupported("sdcardfs");
   std::string source;
   if (hasSdcardFs) {
-    source = hasPackage ?
-        StringPrintf("/mnt/runtime/default/emulated/%d/%s/%s", user_id, dir_name, package) :
-        StringPrintf("/mnt/runtime/default/emulated/%d/%s", user_id, dir_name);
+    source = StringPrintf("/mnt/runtime/default/emulated/%d/%s/%s", user_id, dir_name, package);
   } else {
-    source = hasPackage ?
-        StringPrintf("/mnt/pass_through/%d/emulated/%d/%s/%s",
-            user_id, user_id, dir_name, package) :
-        StringPrintf("/mnt/pass_through/%d/emulated/%d/%s", user_id, user_id, dir_name);
+    source = StringPrintf("/mnt/pass_through/%d/emulated/%d/%s/%s",
+        user_id, user_id, dir_name, package);
   }
-  std::string target = hasPackage ?
-      StringPrintf("/storage/emulated/%d/%s/%s", user_id, dir_name, package) :
-      StringPrintf("/storage/emulated/%d/%s", user_id, dir_name);
+  std::string target = StringPrintf("/storage/emulated/%d/%s/%s", user_id, dir_name, package);
 
   if (access(source.c_str(), F_OK) != 0) {
     fail_fn(CREATE_ERROR("Error accessing %s: %s", source.c_str(), strerror(errno)));
@@ -1589,10 +1582,7 @@ static void BindMountStorageDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
   int size = (pkg_data_info_list != nullptr) ? env->GetArrayLength(pkg_data_info_list) : 0;
 
   if (size == 0) {
-    // App data isolation is not enabled for this process, so we bind mount to whole obb/ dir.
-    BindMountStorageToLowerFs(user_id, "Android/obb", /* package */ nullptr, fail_fn);
-    BindMountStorageToLowerFs(user_id, "Android/data", /* package */ nullptr, fail_fn);
-    return;
+    fail_fn(CREATE_ERROR("Data package list cannot be empty"));
   }
 
   // Bind mount each package obb directory
