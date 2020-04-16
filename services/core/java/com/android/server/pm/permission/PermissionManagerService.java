@@ -3210,16 +3210,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private OneTimePermissionUserManager getOneTimePermissionUserManager(@UserIdInt int userId) {
+        OneTimePermissionUserManager oneTimePermissionUserManager;
         synchronized (mLock) {
-            OneTimePermissionUserManager oneTimePermissionUserManager =
+            oneTimePermissionUserManager =
                     mOneTimePermissionUserManagers.get(userId);
-            if (oneTimePermissionUserManager == null) {
-                oneTimePermissionUserManager = new OneTimePermissionUserManager(
-                        mContext.createContextAsUser(UserHandle.of(userId), /*flags*/ 0));
-                mOneTimePermissionUserManagers.put(userId, oneTimePermissionUserManager);
+            if (oneTimePermissionUserManager != null) {
+                return oneTimePermissionUserManager;
             }
-            return oneTimePermissionUserManager;
+            oneTimePermissionUserManager = new OneTimePermissionUserManager(
+                    mContext.createContextAsUser(UserHandle.of(userId), /*flags*/ 0));
+            mOneTimePermissionUserManagers.put(userId, oneTimePermissionUserManager);
         }
+        oneTimePermissionUserManager.registerUninstallListener();
+        return oneTimePermissionUserManager;
     }
 
     @Override
