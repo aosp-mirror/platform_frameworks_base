@@ -726,8 +726,7 @@ final class AccessibilityController {
                     } else {
                         final Region dirtyRegion = mTempRegion3;
                         dirtyRegion.set(mMagnificationRegion);
-                        dirtyRegion.op(mOldMagnificationRegion, Region.Op.UNION);
-                        dirtyRegion.op(nonMagnifiedBounds, Region.Op.INTERSECT);
+                        dirtyRegion.op(mOldMagnificationRegion, Region.Op.XOR);
                         dirtyRegion.getBounds(dirtyRect);
                         mWindow.invalidate(dirtyRect);
                     }
