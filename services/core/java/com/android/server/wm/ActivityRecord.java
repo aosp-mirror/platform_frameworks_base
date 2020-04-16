@@ -950,7 +950,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(" startingSurface="); pw.print(startingSurface);
             pw.print(" startingDisplayed="); pw.print(startingDisplayed);
             pw.print(" startingMoved="); pw.print(startingMoved);
-            pw.println(" mHiddenSetFromTransferredStartingWindow="
+            pw.println(" mVisibleSetFromTransferredStartingWindow="
                     + mVisibleSetFromTransferredStartingWindow);
         }
         if (!mFrozenBounds.isEmpty()) {
@@ -4166,7 +4166,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @param performLayout if {@code true}, perform surface placement after committing visibility.
      */
     void commitVisibility(boolean visible, boolean performLayout) {
-        // Reset the state of mHiddenSetFromTransferredStartingWindow since visibility is actually
+        // Reset the state of mVisibleSetFromTransferredStartingWindow since visibility is actually
         // been set by the app now.
         mVisibleSetFromTransferredStartingWindow = false;
         if (visible == isVisible()) {
