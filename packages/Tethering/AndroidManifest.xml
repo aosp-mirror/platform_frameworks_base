@@ -34,10 +34,13 @@
     <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.READ_NETWORK_USAGE_HISTORY" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.TETHER_PRIVILEGED" />
     <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+
+    <protected-broadcast android:name="com.android.server.connectivity.tethering.DISABLE_TETHERING" />
 
     <application
         android:process="com.android.networkstack.process"

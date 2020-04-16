@@ -106,8 +106,9 @@ public abstract class TetheringDependencies {
     /**
      * Get a reference to the TetheringNotificationUpdater to be used by tethering.
      */
-    public TetheringNotificationUpdater getNotificationUpdater(@NonNull final Context ctx) {
-        return new TetheringNotificationUpdater(ctx);
+    public TetheringNotificationUpdater getNotificationUpdater(@NonNull final Context ctx,
+            @NonNull final Looper looper) {
+        return new TetheringNotificationUpdater(ctx, looper);
     }
 
     /**
