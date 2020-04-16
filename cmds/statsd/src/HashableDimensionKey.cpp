@@ -180,6 +180,23 @@ bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>
     return num_matches > 0;
 }
 
+bool filterPrimaryKey(const std::vector<FieldValue>& values, HashableDimensionKey* output) {
+    size_t num_matches = 0;
+    const int32_t simpleFieldMask = 0xff7f0000;
+    const int32_t attributionUidFieldMask = 0xff7f7f7f;
+    for (const auto& value : values) {
+        if (value.mAnnotations.isPrimaryField()) {
+            output->addValue(value);
+            output->mutableValue(num_matches)->mField.setTag(value.mField.getTag());
+            const int32_t mask =
+                    isAttributionUidField(value) ? attributionUidFieldMask : simpleFieldMask;
+            output->mutableValue(num_matches)->mField.setField(value.mField.getField() & mask);
+            num_matches++;
+        }
+    }
+    return num_matches > 0;
+}
+
 void filterGaugeValues(const std::vector<Matcher>& matcherFields,
                        const std::vector<FieldValue>& values, std::vector<FieldValue>* output) {
     for (const auto& field : matcherFields) {

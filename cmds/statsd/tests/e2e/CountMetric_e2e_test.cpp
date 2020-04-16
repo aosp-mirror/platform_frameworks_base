@@ -232,7 +232,7 @@ TEST(CountMetricE2eTest, TestSlicedStateWithMap) {
     StateMap map = state.map();
     for (auto group : map.group()) {
         for (auto value : group.value()) {
-            EXPECT_EQ(metricProducer->mStateGroupMap[SCREEN_STATE_ATOM_ID][value],
+            EXPECT_EQ(metricProducer->mStateGroupMap.at(SCREEN_STATE_ATOM_ID).at(value),
                       group.group_id());
         }
     }
@@ -614,7 +614,7 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     StateMap map = state1.map();
     for (auto group : map.group()) {
         for (auto value : group.value()) {
-            EXPECT_EQ(metricProducer->mStateGroupMap[SCREEN_STATE_ATOM_ID][value],
+            EXPECT_EQ(metricProducer->mStateGroupMap.at(SCREEN_STATE_ATOM_ID).at(value),
                       group.group_id());
         }
     }
