@@ -270,11 +270,9 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     protoOutput->end(atomsToken);
                 }
                 for (const auto& atom : bucket.mGaugeAtoms) {
-                    const int64_t elapsedTimestampNs =
-                            truncateTimestampIfNecessary(mAtomId, atom.mElapsedTimestamps);
-                    protoOutput->write(
-                        FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_ELAPSED_ATOM_TIMESTAMP,
-                        (long long)elapsedTimestampNs);
+                    protoOutput->write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED |
+                                               FIELD_ID_ELAPSED_ATOM_TIMESTAMP,
+                                       (long long)atom.mElapsedTimestampNs);
                 }
             }
             protoOutput->end(bucketInfoToken);
@@ -477,7 +475,9 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
     if ((*mCurrentSlicedBucket)[eventKey].size() >= mGaugeAtomsPerDimensionLimit) {
         return;
     }
-    GaugeAtom gaugeAtom(getGaugeFields(event), eventTimeNs);
+
+    const int64_t truncatedElapsedTimestampNs = truncateTimestampIfNecessary(event);
+    GaugeAtom gaugeAtom(getGaugeFields(event), truncatedElapsedTimestampNs);
     (*mCurrentSlicedBucket)[eventKey].push_back(gaugeAtom);
     // Anomaly detection on gauge metric only works when there is one numeric
     // field specified.
