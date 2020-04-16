@@ -20,7 +20,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_NonPlatformSignatureOverlay
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := device-tests
+LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_bad
 include $(BUILD_PACKAGE)
 
@@ -28,8 +28,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_PlatformSignatureStaticOverlay
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := device-tests
-LOCAL_CERTIFICATE := platform
+LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_MANIFEST_FILE := static/AndroidManifest.xml
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_static
 include $(BUILD_PACKAGE)
@@ -38,7 +37,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_PlatformSignatureOverlay
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := device-tests
+LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v1
 LOCAL_AAPT_FLAGS += --version-code 1 --version-name v1
