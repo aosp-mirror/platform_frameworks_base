@@ -51,5 +51,6 @@ public interface NotificationRowBinder {
             NotificationEntry entry,
             @Nullable Integer oldImportance,
             NotificationUiAdjustment oldAdjustment,
-            NotificationUiAdjustment newAdjustment);
+            NotificationUiAdjustment newAdjustment,
+            NotificationRowContentBinder.InflationCallback callback);
 }
