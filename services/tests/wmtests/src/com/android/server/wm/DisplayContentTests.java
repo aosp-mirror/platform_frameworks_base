@@ -90,6 +90,7 @@ import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl.Transaction;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.test.InsetsModeSession;
@@ -1040,12 +1041,25 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(config90.orientation, app.getConfiguration().orientation);
         assertEquals(config90.windowConfiguration.getBounds(), app.getBounds());
 
+        // Make wallaper laid out with the fixed rotation transform.
+        final WindowToken wallpaperToken = mWallpaperWindow.mToken;
+        wallpaperToken.linkFixedRotationTransform(app);
+        mWallpaperWindow.mLayoutNeeded = true;
+        performLayout(mDisplayContent);
+
         // Force the negative offset to verify it can be updated.
         mWallpaperWindow.mWinAnimator.mXOffset = mWallpaperWindow.mWinAnimator.mYOffset = -1;
         assertTrue(mDisplayContent.mWallpaperController.updateWallpaperOffset(mWallpaperWindow,
                 false /* sync */));
         assertThat(mWallpaperWindow.mWinAnimator.mXOffset).isGreaterThan(-1);
         assertThat(mWallpaperWindow.mWinAnimator.mYOffset).isGreaterThan(-1);
+
+        // The wallpaper need to animate with transformed position, so its surface position should
+        // not be reset.
+        final Transaction t = wallpaperToken.getPendingTransaction();
+        spyOn(t);
+        mWallpaperWindow.mToken.onAnimationLeashCreated(t, null /* leash */);
+        verify(t, never()).setPosition(any(), eq(0), eq(0));
 
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
 

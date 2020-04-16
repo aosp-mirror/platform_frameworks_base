@@ -230,6 +230,13 @@ public final class AppSearchImpl {
         return mFakeIcing.delete(uri);
     }
 
+    /** Deletes all documents having the given {@code schemaType}. */
+    public boolean deleteByType(int callingUid, @NonNull String schemaType) {
+        String typePrefix = getTypePrefix(callingUid);
+        String qualifiedType = typePrefix + schemaType;
+        return mFakeIcing.deleteByType(qualifiedType);
+    }
+
     /**
      * Deletes all documents owned by the calling app.
      *

@@ -266,6 +266,10 @@ public class PipTouchHandler {
 
         mMagnetizedPip = mMotionHelper.getMagnetizedPip();
         mMagneticTarget = mMagnetizedPip.addTarget(mTargetView, 0);
+
+        // Set the magnetic field radius equal to twice the size of the target.
+        mMagneticTarget.setMagneticFieldRadiusPx(targetSize * 2);
+
         mMagnetizedPip.setPhysicsAnimatorUpdateListener(mMotionHelper.mResizePipUpdateListener);
         mMagnetizedPip.setMagnetListener(new MagnetizedObject.MagnetListener() {
             @Override
@@ -503,9 +507,6 @@ public class PipTouchHandler {
 
             mTargetView.setTranslationY(mTargetViewContainer.getHeight());
             mTargetViewContainer.setVisibility(View.VISIBLE);
-
-            // Set the magnetic field radius to half of PIP's width.
-            mMagneticTarget.setMagneticFieldRadiusPx(mMotionHelper.getBounds().width());
 
             // Cancel in case we were in the middle of animating it out.
             mMagneticTargetAnimator.cancel();

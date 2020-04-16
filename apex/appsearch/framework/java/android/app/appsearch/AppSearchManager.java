@@ -354,6 +354,27 @@ public class AppSearchManager {
         return getFutureOrThrow(future);
     }
 
+    /**
+     * Deletes {@link android.app.appsearch.AppSearch.Document}s by schema type.
+     *
+     * <p>You should not call this method directly; instead, use the
+     * {@code AppSearch#deleteByType()} API provided by JetPack.
+     *
+     * @param schemaTypes Schema types whose documents to delete.
+     * @return An {@link AppSearchBatchResult} mapping each schema type to a {@code null} success if
+     *     deletion was successful, to a {@code null} failure if the type did not exist, or to a
+     *     {@code throwable} failure if deletion failed for another reason.
+     */
+    public AppSearchBatchResult<String, Void> deleteByTypes(@NonNull List<String> schemaTypes) {
+        AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
+        try {
+            mService.deleteByTypes(schemaTypes, future);
+        } catch (RemoteException e) {
+            future.completeExceptionally(e);
+        }
+        return getFutureOrThrow(future);
+    }
+
     /** Deletes all documents owned by the calling app. */
     public AppSearchResult<Void> deleteAll() {
         AndroidFuture<AppSearchResult> future = new AndroidFuture<>();

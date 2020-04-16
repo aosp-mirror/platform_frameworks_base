@@ -4733,33 +4733,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!parent && isSeparateProfileChallengeEnabled(userHandle)) {
             // If this user has a separate challenge, only return its restrictions.
             return getUserDataUnchecked(userHandle).mAdminList;
-        } else {
-            // Return all admins for this user and the profiles that are visible from this
-            // user that do not use a separate work challenge.
-            ArrayList<ActiveAdmin> admins = new ArrayList<ActiveAdmin>();
-            for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
-                DevicePolicyData policy = getUserData(userInfo.id);
-                if (!userInfo.isManagedProfile()) {
-                    admins.addAll(policy.mAdminList);
-                } else {
-                    // For managed profiles, we always include the policies set on the parent
-                    // profile. Additionally, we include the ones set on the managed profile
-                    // if no separate challenge is in place.
-                    boolean hasSeparateChallenge = isSeparateProfileChallengeEnabled(userInfo.id);
-                    final int N = policy.mAdminList.size();
-                    for (int i = 0; i < N; i++) {
-                        ActiveAdmin admin = policy.mAdminList.get(i);
-                        if (admin.hasParentActiveAdmin()) {
-                            admins.add(admin.getParentActiveAdmin());
-                        }
-                        if (!hasSeparateChallenge) {
-                            admins.add(admin);
-                        }
-                    }
-                }
-            }
-            return admins;
         }
+        // Either parent == true, or isSeparateProfileChallengeEnabled == false
+        // If parent is true, query the parent user of userHandle by definition,
+        // If isSeparateProfileChallengeEnabled is false, userHandle points to a managed profile
+        // with unified challenge so also need to query the parent user who owns the credential.
+        return getActiveAdminsForUserAndItsManagedProfilesLocked(getProfileParentId(userHandle),
+                (user) -> !mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id));
     }
 
     /**
@@ -4777,6 +4757,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (isManagedProfile(userHandle)) {
             return getUserDataUnchecked(userHandle).mAdminList;
         }
+        return getActiveAdminsForUserAndItsManagedProfilesLocked(userHandle,
+                /* shouldIncludeProfileAdmins */ (user) -> false);
+    }
+
+    /**
+     * Returns the list of admins on the given user, as well as parent admins for each managed
+     * profile associated with the given user. Optionally also include the admin of each managed
+     * profile.
+     * <p> Should not be called on a profile user.
+     */
+    @GuardedBy("getLockObject()")
+    private List<ActiveAdmin> getActiveAdminsForUserAndItsManagedProfilesLocked(int userHandle,
+            Predicate<UserInfo> shouldIncludeProfileAdmins) {
         ArrayList<ActiveAdmin> admins = new ArrayList<>();
         mInjector.binderWithCleanCallingIdentity(() -> {
             for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
@@ -4784,11 +4777,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (userInfo.id == userHandle) {
                     admins.addAll(policy.mAdminList);
                 } else if (userInfo.isManagedProfile()) {
-                    // For managed profiles, policies set on the parent profile will be included
                     for (int i = 0; i < policy.mAdminList.size(); i++) {
                         ActiveAdmin admin = policy.mAdminList.get(i);
                         if (admin.hasParentActiveAdmin()) {
                             admins.add(admin.getParentActiveAdmin());
+                        }
+                        if (shouldIncludeProfileAdmins.test(userInfo)) {
+                            admins.add(admin);
                         }
                     }
                 } else {
@@ -5363,6 +5358,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
             return isActivePasswordSufficientForUserLocked(
                     policy.mPasswordValidAtLastCheckpoint, metrics, targetUser, false);
+        }
+    }
+
+    @Override
+    public boolean isPasswordSufficientAfterProfileUnification(int userHandle, int profileUser) {
+        if (!mHasFeature) {
+            return true;
+        }
+        enforceFullCrossUsersPermission(userHandle);
+        enforceNotManagedProfile(userHandle, "check password sufficiency");
+        enforceUserUnlocked(userHandle);
+
+        synchronized (getLockObject()) {
+            PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(userHandle);
+
+            // Combine password policies across the user and its profiles. Profile admins are
+            // included if the profile is to be unified or currently has unified challenge
+            List<ActiveAdmin> admins = getActiveAdminsForUserAndItsManagedProfilesLocked(userHandle,
+                    /* shouldIncludeProfileAdmins */ (user) -> user.id == profileUser
+                    || !mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id));
+            ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>(admins.size());
+            for (ActiveAdmin admin : admins) {
+                adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
+            }
+            return PasswordMetrics.validatePasswordMetrics(PasswordMetrics.merge(adminMetrics),
+                    PASSWORD_COMPLEXITY_NONE, false, metrics).isEmpty();
         }
     }
 

@@ -113,6 +113,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -233,6 +234,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private AudioManager mAudioManager;
     @Mock
     private LauncherApps mLauncherApps;
+    @Mock
+    private ShortcutServiceInternal mShortcutServiceInternal;
     @Mock
     ActivityManager mActivityManager;
     @Mock
@@ -466,6 +469,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mShortcutHelper = mService.getShortcutHelper();
         mShortcutHelper.setLauncherApps(mLauncherApps);
+        mShortcutHelper.setShortcutServiceInternal(mShortcutServiceInternal);
 
         // Set the testable bubble extractor
         RankingHelper rankingHelper = mService.getRankingHelper();
@@ -6088,8 +6092,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
         ShortcutInfo info = mock(ShortcutInfo.class);
         when(info.isLongLived()).thenReturn(true);
+        when(info.isEnabled()).thenReturn(true);
         shortcutInfos.add(info);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
+        when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any())).thenReturn(true);
 
         // Test: Send the bubble notification
         mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
@@ -6148,8 +6155,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
         ShortcutInfo info = mock(ShortcutInfo.class);
         when(info.isLongLived()).thenReturn(true);
+        when(info.isEnabled()).thenReturn(true);
         shortcutInfos.add(info);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
+        when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any())).thenReturn(true);
 
         // Test: Send the bubble notification
         mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
@@ -6492,7 +6502,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ShortcutInfo si = mock(ShortcutInfo.class);
         when(si.getShortLabel()).thenReturn("Hello");
         when(si.isLongLived()).thenReturn(true);
+        when(si.isEnabled()).thenReturn(true);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(Arrays.asList(si));
+        when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any())).thenReturn(true);
 
         List<ConversationChannelWrapper> conversations =
                 mBinderService.getConversationsForPackage(PKG_P, mUid).getList();
