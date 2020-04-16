@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.platform.test.annotations.Presubmit;
+import android.util.SparseIntArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -542,7 +543,12 @@ public class PackageParserLegacyCoreTest {
 
     @Test
     public void testUsesSdk() throws Exception {
-        parsePackage("install_uses_sdk.apk_r0", R.raw.install_uses_sdk_r0, x -> x);
+        ParsedPackage pkg =
+                parsePackage("install_uses_sdk.apk_r0", R.raw.install_uses_sdk_r0, x -> x);
+        SparseIntArray minExtVers = pkg.getMinExtensionVersions();
+        assertEquals(1, minExtVers.size());
+        assertEquals(0, minExtVers.get(10000, -1));
+
         try {
             parsePackage("install_uses_sdk.apk_r5", R.raw.install_uses_sdk_r5, x -> x);
             fail("Expected parsing exception due to incompatible extension SDK version");
