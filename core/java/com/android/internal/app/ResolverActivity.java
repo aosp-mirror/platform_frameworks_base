@@ -179,6 +179,7 @@ public class ResolverActivity extends Activity implements
     public static final String EXTRA_IS_AUDIO_CAPTURE_DEVICE = "is_audio_capture_device";
 
     private BroadcastReceiver mWorkProfileStateReceiver;
+    private boolean mIsHeaderCreated;
 
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
@@ -479,13 +480,42 @@ public class ResolverActivity extends Activity implements
                         == workProfileUserHandle.getIdentifier()),
                 mUseLayoutForBrowsables,
                 /* userHandle */ workProfileUserHandle);
+        // In the edge case when we have 0 apps in the current profile and >1 apps in the other,
+        // the intent resolver is started in the other profile. Since this is the only case when
+        // this happens, we check for it here and set the current profile's tab.
+        int selectedProfile = getCurrentProfile();
+        UserHandle intentUser = UserHandle.of(getLaunchingUserId());
+        if (!getUser().equals(intentUser)) {
+            if (getPersonalProfileUserHandle().equals(intentUser)) {
+                selectedProfile = PROFILE_PERSONAL;
+            } else if (getWorkProfileUserHandle().equals(intentUser)) {
+                selectedProfile = PROFILE_WORK;
+            }
+        }
         return new ResolverMultiProfilePagerAdapter(
                 /* context */ this,
                 personalAdapter,
                 workAdapter,
-                /* defaultProfile */ getCurrentProfile(),
+                selectedProfile,
                 getPersonalProfileUserHandle(),
-                getWorkProfileUserHandle());
+                getWorkProfileUserHandle(),
+                /* shouldShowNoCrossProfileIntentsEmptyState= */ getUser().equals(intentUser));
+    }
+
+    /**
+     * Returns the user id of the user that the starting intent originated from.
+     * <p>This is not necessarily equal to {@link #getUserId()} or {@link UserHandle#myUserId()},
+     * as there are edge cases when the intent resolver is launched in the other profile.
+     * For example, when we have 0 resolved apps in current profile and multiple resolved apps
+     * in the other profile, opening a link from the current profile launches the intent resolver
+     * in the other one. b/148536209 for more info.
+     */
+    private int getLaunchingUserId() {
+        int contentUserHint = getIntent().getContentUserHint();
+        if (contentUserHint == UserHandle.USER_CURRENT) {
+            return UserHandle.myUserId();
+        }
+        return contentUserHint;
     }
 
     protected @Profile int getCurrentProfile() {
@@ -856,7 +886,7 @@ public class ResolverActivity extends Activity implements
 
     private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos,
             boolean filtered) {
-        if (mMultiProfilePagerAdapter.getCurrentUserHandle() != getUser()) {
+        if (!mMultiProfilePagerAdapter.getCurrentUserHandle().equals(getUser())) {
             // Never allow the inactive profile to always open an app.
             mAlwaysButton.setEnabled(false);
             return;
@@ -995,10 +1025,7 @@ public class ResolverActivity extends Activity implements
             mMultiProfilePagerAdapter.showListView(listAdapter);
         }
         if (doPostProcessing) {
-            if (mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
-                    == UserHandle.myUserId()) {
-                setHeader();
-            }
+            maybeCreateHeader(listAdapter);
             resetButtonBar();
             onListRebuilt(listAdapter);
         }
@@ -1679,10 +1706,15 @@ public class ResolverActivity extends Activity implements
 
     /**
      * Configure the area above the app selection list (title, content preview, etc).
+     * <p>The header is created once when first launching the activity and whenever a package is
+     * installed or uninstalled.
      */
-    public void setHeader() {
-        if (mMultiProfilePagerAdapter.getActiveListAdapter().getCount() == 0
-                && mMultiProfilePagerAdapter.getActiveListAdapter().getPlaceholderCount() == 0) {
+    private void maybeCreateHeader(ResolverListAdapter listAdapter) {
+        if (mIsHeaderCreated) {
+            return;
+        }
+        if (!shouldShowTabs()
+                && listAdapter.getCount() == 0 && listAdapter.getPlaceholderCount() == 0) {
             final TextView titleView = findViewById(R.id.title);
             if (titleView != null) {
                 titleView.setVisibility(View.GONE);
@@ -1703,8 +1735,9 @@ public class ResolverActivity extends Activity implements
 
         final ImageView iconView = findViewById(R.id.icon);
         if (iconView != null) {
-            mMultiProfilePagerAdapter.getActiveListAdapter().loadFilteredItemIconTaskAsync(iconView);
+            listAdapter.loadFilteredItemIconTaskAsync(iconView);
         }
+        mIsHeaderCreated = true;
     }
 
     protected void resetButtonBar() {
@@ -1804,6 +1837,7 @@ public class ResolverActivity extends Activity implements
                 // turning on.
                 return;
             }
+            mIsHeaderCreated = false;
             boolean listRebuilt = mMultiProfilePagerAdapter.rebuildActiveTab(true);
             if (listRebuilt) {
                 ResolverListAdapter activeListAdapter =
