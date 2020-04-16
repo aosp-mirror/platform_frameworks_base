@@ -41,6 +41,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
@@ -53,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+@Presubmit
 @SmallTest
 public class AuthSessionTest {
 

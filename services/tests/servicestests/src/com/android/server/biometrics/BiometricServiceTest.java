@@ -54,6 +54,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 import android.security.KeyStore;
 
 import androidx.test.InstrumentationRegistry;
@@ -71,6 +72,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Random;
 
+@Presubmit
 @SmallTest
 public class BiometricServiceTest {
 

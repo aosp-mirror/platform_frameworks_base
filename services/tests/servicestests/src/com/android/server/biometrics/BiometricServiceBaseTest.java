@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
@@ -34,6 +35,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
+@Presubmit
 @SmallTest
 public class BiometricServiceBaseTest {
     private static class TestableBiometricServiceBase extends BiometricServiceBase {

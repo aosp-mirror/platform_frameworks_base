@@ -39,6 +39,7 @@ import android.hardware.iris.IIrisService;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -48,6 +49,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@Presubmit
 @SmallTest
 public class AuthServiceTest {
 
