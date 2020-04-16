@@ -84,6 +84,22 @@ public class TvRemoteProviderWatcherTest {
     }
 
     @Test
+    public void acceptsValidCsvPackageName() {
+        // Test intentionally includes empty spacing for a more complex test
+        when(mMockResources.getString(com.android.internal.R.string.config_tvRemoteServicePackage))
+            .thenReturn(",,foo,  " + TV_REMOTE_SERVICE_PACKAGE_NAME + ",bar, baz,,");
+        assertTrue(mTvRemoteProviderWatcher.verifyServiceTrusted(createTvServiceInfo()));
+    }
+
+    @Test
+    public void rejectsInvalidCsvPackageName() {
+        // Checks include empty strings to validate that processing as well
+        when(mMockResources.getString(com.android.internal.R.string.config_tvRemoteServicePackage))
+            .thenReturn(",,foo,,  ,bar,   baz,,");
+        assertFalse(mTvRemoteProviderWatcher.verifyServiceTrusted(createTvServiceInfo()));
+    }
+
+    @Test
     public void tvServiceIsTrusted() {
         assertTrue(mTvRemoteProviderWatcher.verifyServiceTrusted(createTvServiceInfo()));
     }
