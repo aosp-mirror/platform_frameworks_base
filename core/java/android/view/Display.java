@@ -1244,10 +1244,8 @@ public final class Display {
             }
         }
 
-        // TODO(b/147213487): Replace the condition with per-resources state.
-        mMayAdjustByFixedRotation = mIsValid && mResources != null
-                && mResources.getConfiguration().windowConfiguration.getRotation()
-                != mDisplayInfo.rotation;
+        mMayAdjustByFixedRotation = mResources != null
+                && mResources.hasOverrideDisplayAdjustments();
     }
 
     private void updateCachedAppSizeIfNeededLocked() {

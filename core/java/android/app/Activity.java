@@ -7150,6 +7150,11 @@ public class Activity extends ContextThemeWrapper
                 writer.println(mChangingConfigurations);
         writer.print(innerPrefix); writer.print("mCurrentConfig=");
                 writer.println(mCurrentConfig);
+        if (getResources().hasOverrideDisplayAdjustments()) {
+            writer.print(innerPrefix);
+            writer.print("FixedRotationAdjustments=");
+            writer.println(getResources().getDisplayAdjustments().getFixedRotationAdjustments());
+        }
 
         mFragments.dumpLoaders(innerPrefix, fd, writer, args);
         mFragments.getFragmentManager().dump(innerPrefix, fd, writer, args);
