@@ -257,7 +257,7 @@ public class Tethering {
         mContext = mDeps.getContext();
         mNetd = mDeps.getINetd(mContext);
         mLooper = mDeps.getTetheringLooper();
-        mNotificationUpdater = mDeps.getNotificationUpdater(mContext);
+        mNotificationUpdater = mDeps.getNotificationUpdater(mContext, mLooper);
 
         mPublicSync = new Object();
 
@@ -336,6 +336,11 @@ public class Tethering {
         filter.addAction(UserManager.ACTION_USER_RESTRICTIONS_CHANGED);
         filter.addAction(ACTION_RESTRICT_BACKGROUND_CHANGED);
         mContext.registerReceiver(mStateReceiver, filter, null, mHandler);
+
+        final IntentFilter noUpstreamFilter = new IntentFilter();
+        noUpstreamFilter.addAction(TetheringNotificationUpdater.ACTION_DISABLE_TETHERING);
+        mContext.registerReceiver(
+                mStateReceiver, noUpstreamFilter, PERMISSION_MAINLINE_NETWORK_STACK, mHandler);
 
         final WifiManager wifiManager = getWifiManager();
         if (wifiManager != null) {
@@ -855,6 +860,8 @@ public class Tethering {
             } else if (action.equals(ACTION_RESTRICT_BACKGROUND_CHANGED)) {
                 mLog.log("OBSERVED data saver changed");
                 handleDataSaverChanged();
+            } else if (action.equals(TetheringNotificationUpdater.ACTION_DISABLE_TETHERING)) {
+                untetherAll();
             }
         }
 
@@ -2013,6 +2020,7 @@ public class Tethering {
         } finally {
             mTetheringEventCallbacks.finishBroadcast();
         }
+        mNotificationUpdater.onUpstreamNetworkChanged(network);
     }
 
     private void reportConfigurationChanged(TetheringConfigurationParcel config) {
