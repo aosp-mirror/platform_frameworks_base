@@ -26,6 +26,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardViewController;
@@ -330,6 +332,11 @@ public class CarKeyguardViewController extends OverlayViewController implements
      */
     public void hideKeyguardToPrepareBouncer() {
         getLayout().setVisibility(View.INVISIBLE);
+    }
+
+    @VisibleForTesting
+    void setKeyguardBouncer(KeyguardBouncer keyguardBouncer) {
+        mBouncer = keyguardBouncer;
     }
 
     private void revealKeyguardIfBouncerPrepared() {

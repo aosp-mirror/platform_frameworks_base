@@ -65,6 +65,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -84,12 +85,16 @@ import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
 import android.view.Gravity;
+import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
+import android.view.InsetsSourceControl;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl.Transaction;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.test.InsetsModeSession;
@@ -809,25 +814,19 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testComputeImeParent_app() throws Exception {
-        try (final InsetsModeSession session =
-                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_IME)) {
-            final DisplayContent dc = createNewDisplay();
-            dc.mInputMethodTarget = createWindow(null, TYPE_BASE_APPLICATION, "app");
-            assertEquals(dc.mInputMethodTarget.mActivityRecord.getSurfaceControl(),
-                    dc.computeImeParent());
-        }
+        final DisplayContent dc = createNewDisplay();
+        dc.mInputMethodTarget = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        assertEquals(dc.mInputMethodTarget.mActivityRecord.getSurfaceControl(),
+                dc.computeImeParent());
     }
 
     @Test
     public void testComputeImeParent_app_notFullscreen() throws Exception {
-        try (final InsetsModeSession session =
-                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_IME)) {
-            final DisplayContent dc = createNewDisplay();
-            dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "app");
-            dc.mInputMethodTarget.setWindowingMode(
-                    WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-            assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
-        }
+        final DisplayContent dc = createNewDisplay();
+        dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "app");
+        dc.mInputMethodTarget.setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
     }
 
     @Test
@@ -842,12 +841,61 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testComputeImeParent_noApp() throws Exception {
-        try (final InsetsModeSession session =
-                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_IME)) {
-            final DisplayContent dc = createNewDisplay();
-            dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "statusBar");
-            assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
-        }
+        final DisplayContent dc = createNewDisplay();
+        dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "statusBar");
+        assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
+    }
+
+    @Test
+    public void testComputeImeControlTarget() throws Exception {
+        final DisplayContent dc = createNewDisplay();
+        dc.setRemoteInsetsController(createDisplayWindowInsetsController());
+        dc.mInputMethodInputTarget = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        dc.mInputMethodTarget = dc.mInputMethodInputTarget;
+        assertEquals(dc.mInputMethodInputTarget, dc.computeImeControlTarget());
+    }
+
+    @Test
+    public void testComputeImeControlTarget_splitscreen() throws Exception {
+        final DisplayContent dc = createNewDisplay();
+        dc.mInputMethodInputTarget = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        dc.mInputMethodInputTarget.setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        dc.mInputMethodTarget = dc.mInputMethodInputTarget;
+        dc.setRemoteInsetsController(createDisplayWindowInsetsController());
+        assertNotEquals(dc.mInputMethodInputTarget, dc.computeImeControlTarget());
+    }
+
+    @Test
+    public void testComputeImeControlTarget_notMatchParentBounds() throws Exception {
+        spyOn(mAppWindow.mActivityRecord);
+        doReturn(false).when(mAppWindow.mActivityRecord).matchParentBounds();
+        mDisplayContent.mInputMethodInputTarget = mAppWindow;
+        mDisplayContent.mInputMethodTarget = mDisplayContent.mInputMethodInputTarget;
+        mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
+        assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget());
+    }
+
+    private IDisplayWindowInsetsController createDisplayWindowInsetsController() {
+        return new IDisplayWindowInsetsController.Stub() {
+
+            @Override
+            public void insetsChanged(InsetsState insetsState) throws RemoteException {
+            }
+
+            @Override
+            public void insetsControlChanged(InsetsState insetsState,
+                    InsetsSourceControl[] insetsSourceControls) throws RemoteException {
+            }
+
+            @Override
+            public void showInsets(int i, boolean b) throws RemoteException {
+            }
+
+            @Override
+            public void hideInsets(int i, boolean b) throws RemoteException {
+            }
+        };
     }
 
     @Test
@@ -1040,12 +1088,25 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(config90.orientation, app.getConfiguration().orientation);
         assertEquals(config90.windowConfiguration.getBounds(), app.getBounds());
 
+        // Make wallaper laid out with the fixed rotation transform.
+        final WindowToken wallpaperToken = mWallpaperWindow.mToken;
+        wallpaperToken.linkFixedRotationTransform(app);
+        mWallpaperWindow.mLayoutNeeded = true;
+        performLayout(mDisplayContent);
+
         // Force the negative offset to verify it can be updated.
         mWallpaperWindow.mWinAnimator.mXOffset = mWallpaperWindow.mWinAnimator.mYOffset = -1;
         assertTrue(mDisplayContent.mWallpaperController.updateWallpaperOffset(mWallpaperWindow,
                 false /* sync */));
         assertThat(mWallpaperWindow.mWinAnimator.mXOffset).isGreaterThan(-1);
         assertThat(mWallpaperWindow.mWinAnimator.mYOffset).isGreaterThan(-1);
+
+        // The wallpaper need to animate with transformed position, so its surface position should
+        // not be reset.
+        final Transaction t = wallpaperToken.getPendingTransaction();
+        spyOn(t);
+        mWallpaperWindow.mToken.onAnimationLeashCreated(t, null /* leash */);
+        verify(t, never()).setPosition(any(), eq(0), eq(0));
 
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
 

@@ -57,16 +57,13 @@ import java.util.List;
 public class BubbleExperimentConfig {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
-    private static final String SHORTCUT_DUMMY_INTENT = "bubble_experiment_shortcut_intent";
-    private static PendingIntent sDummyShortcutIntent;
-
     private static final int BUBBLE_HEIGHT = 10000;
 
     private static final String ALLOW_ANY_NOTIF_TO_BUBBLE = "allow_any_notif_to_bubble";
     private static final boolean ALLOW_ANY_NOTIF_TO_BUBBLE_DEFAULT = false;
 
     private static final String ALLOW_MESSAGE_NOTIFS_TO_BUBBLE = "allow_message_notifs_to_bubble";
-    private static final boolean ALLOW_MESSAGE_NOTIFS_TO_BUBBLE_DEFAULT = true;
+    private static final boolean ALLOW_MESSAGE_NOTIFS_TO_BUBBLE_DEFAULT = false;
 
     private static final String ALLOW_SHORTCUTS_TO_BUBBLE = "allow_shortcuts_to_bubble";
     private static final boolean ALLOW_SHORTCUT_TO_BUBBLE_DEFAULT = false;

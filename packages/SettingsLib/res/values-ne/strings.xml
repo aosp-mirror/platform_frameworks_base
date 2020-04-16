@@ -161,7 +161,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"संश्लेषित बोलीको टोनमा प्रभाव पार्छ"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"भाषा"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"प्रणाली भाषा प्रयोग गर्नुहोस्"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"प्रणालीको भाषा प्रयोग गर्नुहोस्"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"भाषा चयन गरिएको छैन"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"बोली पाठका लागि भाषा-विशेष आवाज सेट गर्दछ"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"एउटा उदाहरणलाई सुन्नुहोस्"</string>
@@ -206,13 +206,13 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB डिबग गर्दै"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB जडित हुँदा डिबग मोड"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB डिबग गर्ने प्राधिकरणहरू उल्टाउनुहोस्"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"वायरलेस डिबग गर्ने प्रक्रिया"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"वायरलेस डिबगिङ"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi मा जोडिँदा डिबग मोड सक्षम पार्ने कि नपार्ने"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"त्रुटि"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"वायरलेस डिबग गर्ने प्रक्रिया"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"उपलब्ध यन्त्रहरू हेर्न र प्रयोग गर्न वायरलेस डिबग गर्ने प्रक्रिया सक्रिय गर्नुहोस्"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"वायरलेस डिबगिङ"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"उपलब्ध यन्त्रहरू हेर्न र प्रयोग गर्न वायरलेस डिबगिङ सेवा सक्रिय गर्नुहोस्"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR कोडमार्फत यन्त्रको जोडा बनाउनुहोस्"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR कोड स्क्यानर प्रयोग गरी नयाँ यन्त्रहरूको जोडा बनाउनुहोस्"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR कोड स्क्यानर प्रयोग गरी नयाँ यन्त्रहरूको जोडा बनाउनुहोस्"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"जोडा मिलाउने कोडमार्फत यन्त्रको जोडा बनाउनुहोस्"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"छ अङ्कको कोड प्रयोग गरी नयाँ यन्त्रहरूको जोडा बनाउनुहोस्"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"जोडा बनाइएका यन्त्रहरू"</string>
@@ -231,9 +231,8 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"यन्त्रसँग जोडा बनाउन सकिएन। कि त QR कोड गलत छ कि यन्त्र उही नेटवर्कमा जोडिएको छैन।"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ठेगाना र पोर्ट"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR कोड स्क्यान गर्नुहोस्"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR कोड स्क्यान गरेर Wi‑Fi प्रयोग गरी यन्त्रको जोडा बनाउनुहोस्"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR कोड स्क्यान गरी Wi‑Fi मार्फत यन्त्रको जोडा बनाउनुहोस्"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"कृपया कुनै Wi-Fi मा कनेक्ट गर्नुहोस्"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"बग प्रतिवेदन सर्टकट"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"बग रिपोर्ट लिनका लागि पावर मेनुमा बटन देखाउनुहोस्"</string>
@@ -252,6 +251,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ताररहित प्रदर्शन प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi वर्बोज लग सक्षम पार्नुहोस्"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi स्क्यान थ्रोटलिङ"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा सधैँ सक्रिय राख्नुहोस्"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिङको लागि हार्डवेयरको प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू देखाउनुहोस्"</string>
@@ -284,6 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi लग स्तर बढाउनुहोस्, Wi-Fi चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ब्याट्रीको खपत कम गरी नेटवर्कको कार्यसम्पादनमा सुधार गर्दछ"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"सशुल्क वाइफाइ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"मिटर नगरिएको"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लगर बफर आकारहरू"</string>
@@ -301,8 +304,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"उपलब्ध भएमा टेदरिङको लागि हार्डवेयरको प्रवेग प्रयोग गर्नुहोस्"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB डिबग गर्न लागि अनुमति दिने हो?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"युएसबी डिबगिङ विकास प्रयोजनका लागि मात्र निर्मित हुन्छ। यसलाई तपाईँको कम्प्युटर र तपाईँको उपकरणका बीच डेटा प्रतिलिपि गर्न, बिना सूचना तपाईँको उपकरणमा अनुप्रयोगहरू स्थापना गर्न र लग डेटा पढ्नका लागि प्रयोग गर्नुहोस्।"</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"वायरलेस डिबग गर्ने प्रक्रिया सक्षम पार्ने हो?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"वायरलेस डिबग गर्ने प्रक्रिया विकास प्रयोजनका लागि मात्रै हो। यसलाई आफ्ना कम्प्युटर र उपकरणका बिच डेटा प्रतिलिपि गर्न, सूचना नदिई आफ्नो उपकरणमा अनुप्रयोगहरू स्थापना गर्न र लगसम्बन्धी डेटा रिड गर्नका लागि प्रयोग गर्नुहोस्।"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"वायरलेस डिबगिङ सेवा सक्षम पार्ने हो?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"वायरलेस डिबगिङ डिभलपमेन्ट प्रयोजनका लागि मात्रै हो। यसलाई आफ्ना कम्प्युटर र उपकरणका बिच डेटा प्रतिलिपि गर्न, सूचना नदिई आफ्नो उपकरणमा अनुप्रयोगहरू स्थापना गर्न र लग डेटा पढ्न प्रयोग गर्नुहोस्।"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"तपाईं पहिले नै अधिकृत गर्नुभएका सबै कम्प्यूटरबाट USB डिबग गर्नको लागि पहुँच रद्द गर्ने हो?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"विकास सेटिङहरू अनुमति दिने हो?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"यी सेटिङहरू केवल विकास प्रयोगको लागि विचार गरिएको हो। तिनीहरूले तपाईंको उपकरण र अनुप्रयोगहरूलाई विच्छेदन गर्न वा दुर्व्यवहार गर्न सक्दछ।"</string>
@@ -372,6 +375,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"पृष्ठभूमिका अनुप्रयोगहरूको संवादको प्रतिक्रिया नदिइरहेका अनुप्रयोगहरू प्रदर्शन गर्नुहोस्"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना च्यानलका चेतावनी देखाउनुहोस्"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"अनुप्रयोगले कुनै मान्य च्यानल बिना सूचना पोस्ट गर्दा स्क्रिनमा चेतावनी देखाउँछ"</string>
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"कुराकानी नामक स्थानमा मान्य सर्टकटसँग पनि लिंक गरिएका सूचनाहरू मात्र देखाइयोस्"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"कुराकानी नामक स्थानमा सूचनाहरू देखिन सकून् भन्नाका खातिर ती सूचनामा सधैँ सक्रिय रहने (long-lived) सेयरिङ सर्टकट समावेश भएको हुनु पर्छ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"बाह्यमा बल प्रयोगको अनुमति प्राप्त अनुप्रयोगहरू"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"म्यानिफेेस्टका मानहरूको ख्याल नगरी कुनै पनि अनुप्रयोगलाई बाह्य भण्डारणमा लेख्न सकिने खाले बनाउँछ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"आकार बदल्न योग्य हुने बनाउन गतिविधिहरूलाई बाध्यात्मक बनाउनुहोस्।"</string>
@@ -418,7 +423,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"प्रोटानेमली (रातो, हरियो)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ट्रिटानोमेली (निलो-पंहेलो)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रङ्ग सुधार"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"रङ सच्याउने सुविधाले तपाईंलाई आफ्नो यन्त्रमा रङहरू कस्ता देखिन्छन् भन्ने कुरा समायोजन गर्न दिन्छ"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"रंङ सच्याउने सुविधाले तपाईंलाई आफ्नो यन्त्रमा रंङहरू कसरी देखाउने भन्ने कुरा निर्धारण गर्न दिन्छ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारा अधिरोहित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ"</string>
@@ -432,8 +437,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"ब्याट्री लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> सम्म"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ब्याट्री <xliff:g id="TIME">%1$s</xliff:g> बजेसम्ममा सकिन सक्छ"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी छ"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -469,9 +473,9 @@
     <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> बाँकी"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"सानो"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"पूर्वनिर्धारित"</string>
-    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"ठूलो"</string>
-    <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"अझ ठूलो"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"सबैभन्दा ठूलो"</string>
+    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"ठुलो"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"अझ ठुलो"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"सबैभन्दा ठुलो"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"आफू अनुकूल (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"मेनु"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"डेमो मोडमा फ्याक्ट्री रिसेट गर्न पासवर्ड प्रविष्टि गर्नुहोस्"</string>
@@ -511,37 +515,30 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"फोनको स्पिकर"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"जोड्ने क्रममा समस्या भयो। यन्त्रलाई निष्क्रिय पारेर फेरि सक्रिय गर्नुहोस्"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"तारयुक्त अडियो यन्त्र"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"मद्दत र प्रतिक्रिया"</string>
+    <string name="storage_category" msgid="2287342585424631813">"भण्डारण"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"साझा डेटा"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"साझा डेटा हेर्नुहोस् र परिमार्जन गर्नुहोस्"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"यो प्रयोगकर्तासँग कुनै पनि डेटा सेयर गरिएको छैन।"</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"सेयर गरिएको डेटा प्राप्त गर्ने क्रममा कुनै त्रुटि भयो। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"साझा डेटाको ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"<xliff:g id="DATE">%s</xliff:g> मा म्याद सकिन्छ"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"सेयर गरिएको डेटा मेट्ने क्रममा त्रुटि भयो।"</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"सेयर गरिएको यो डेटाका लागि कुनै ठेक्का पट्टा लिएको छैन। तपाईं यसलाई मेट्न चाहनुहुन्छ?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"साझा डेटा प्रयोग गर्ने अनुप्रयोगहरू"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"यो अनुप्रयोगले कुनै विवरण प्रदान गरेको छैन।"</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"लिजको म्याद <xliff:g id="DATE">%s</xliff:g> मा सकिन्छ"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"साझा डेटा मेट्नुहोस्"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"तपाईंले यो साझा डेटा मेटाउन खोज्नुभएकै हो?"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"प्रयोगकर्ताहरूसँग आफ्नै अनुप्रयोगहरू र सामग्री हुन्छ"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"तपाईं आफ्नो खाताबाट अनुप्रयोगहरू र सामग्रीहरूको पहुँचलाई प्रतिबन्ध गर्न सक्नुहुन्छ"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"प्रयोगकर्ता"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबन्धित प्रोफाइल"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"नयाँ प्रयोगकर्ता थप्ने हो?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"तपाईं थप प्रयोगकर्ताहरू सिर्जना गरेर यो यन्त्र अन्य मान्छेहरूसँग साझा रूपमा प्रयोग गर्न सक्नुहुन्छ। हरेक प्रयोगकर्ताको आफ्नै ठाउँ हुन्छ, जसलाई उनीहरू अनुप्रयोग, वालपेपर इत्यादिमार्फत आफू अनुकूल पार्न सक्छन्। प्रयोगकर्ताहरू सबैजनालाई असर पार्ने Wi-Fi जस्ता यन्त्रका सेटिङहरू पनि समायोजन गर्न सक्छन्।\n\nतपाईंले नयाँ प्रयोगकर्ता थप्दा उक्त व्यक्तिले आफ्नो ठाउँ सेटअप गर्नु पर्ने हुन्छ।\n\nकुनै पनि प्रयोगकर्ताले अन्य सबै प्रयोगकर्ताहरूका लागि अनुप्रयोगहरू अद्यावधिक गर्न सक्छन्। पहुँचसम्बन्धी सेटिङ तथा सेवाहरू नयाँ प्रयोगकर्तामा स्थानान्तरण नहुन सक्छन्।"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"तपाईं थप प्रयोगकर्ताहरू सिर्जना गरेर ती प्रयोगकर्तालाई यो यन्त्र प्रयोग गर्न दिन सक्नुहुन्छ। हरेक प्रयोगकर्ताको आफ्नै ठाउँ हुन्छ। उनीहरू यो ठाउँमा आफ्नै अनुप्रयोग, वालपेपर आदिका लागि प्रयोग गर्न सक्छन्। उनीहरू सबैजनालाई असर पार्ने Wi-Fi जस्ता यन्त्रका सेटिङहरू पनि परिवर्तन गर्न सक्छन्।\n\nतपाईंले नयाँ प्रयोगकर्ता थप्दा उक्त व्यक्तिले आफ्नो ठाउँ सेटअप गर्नु पर्ने हुन्छ।\n\nसबै प्रयोगकर्ता अन्य सबै प्रयोगकर्ताले प्रयोग गर्ने अनुप्रयोगहरू अद्यावधिक गर्न सक्छन्। तर पहुँचसम्बन्धी सेटिङ तथा सेवाहरू नयाँ प्रयोगकर्तामा नसर्न सक्छ।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"जब तपाईंले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यो व्यक्तिले आफ्नो ठाउँ सेट गर्न आवश्यक छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि अनुप्रयोगहरू अद्यावधिक गर्न सक्छन्।"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"अहिले प्रयोगकर्ता सेटअप गर्ने हो?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"यन्त्र लिन र आफ्नो ठाउँ बनाउन व्यक्ति उपलब्ध छ भन्ने कुराको निश्चित गर्नुहोस्"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"यी व्यक्ति यन्त्र यो यन्त्र चलाउन र आफ्नो ठाउँ सेट गर्न उपलब्ध छन् भन्ने कुरा सुनिश्चित गर्नुहोस्"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"अहिले प्रोफाइल सेटअप गर्ने हो?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"अब सेटअप गर्नुहोस्"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"अहिले होइन"</string>
@@ -549,7 +546,11 @@
     <string name="user_new_user_name" msgid="60979820612818840">"नयाँ प्रयोगकर्ता"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"नयाँ प्रोफाइल"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"प्रयोगकर्ता जानकारी"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफाइल जानकारी"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफाइलको जानकारी"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"निषेधयुक्त प्रोफाइल बनाउनु अघि तपाईँको अनुप्रयोग र व्यक्तिगत डेटा सुरक्षा गर्नाका लागि तपाईँले स्क्रिन लक सेटअप गर्नु पर्दछ ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"लक सेट गर्नुहोस्"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"प्रयोगकर्ता बदलेर <xliff:g id="USER_NAME">%s</xliff:g> पार्नुहोस्"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि थप्नुहोस्"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथि हटाउनुहोस्"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"अतिथि"</string>
 </resources>

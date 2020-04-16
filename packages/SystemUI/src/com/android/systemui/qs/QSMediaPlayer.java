@@ -99,15 +99,14 @@ public class QSMediaPlayer extends MediaControlPanel {
      * @param bgColor background color
      * @param actionsContainer a LinearLayout containing the media action buttons
      * @param notif reference to original notification
-     * @param device current playback device
+     * @param key original notification's key
      */
     public void setMediaSession(MediaSession.Token token, Icon icon, int iconColor,
-            int bgColor, View actionsContainer, Notification notif) {
+            int bgColor, View actionsContainer, Notification notif, String key) {
 
         String appName = Notification.Builder.recoverBuilder(getContext(), notif)
                 .loadHeaderAppName();
-        super.setMediaSession(token, icon, iconColor, bgColor, notif.contentIntent,
-                appName);
+        super.setMediaSession(token, icon, iconColor, bgColor, notif.contentIntent, appName, key);
 
         // Media controls
         LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
@@ -170,6 +169,8 @@ public class QSMediaPlayer extends MediaControlPanel {
     @Override
     public void clearControls() {
         super.clearControls();
+
+        mSeekBarViewModel.clearController();
 
         View guts = mMediaNotifView.findViewById(R.id.media_guts);
         View options = mMediaNotifView.findViewById(R.id.qs_media_controls_options);

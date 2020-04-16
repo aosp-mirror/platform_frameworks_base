@@ -206,13 +206,13 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB debaq prosesi"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB qoşulu olan zaman debaq rejimi"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB debaq avtorizasiyasını ləğv edin"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Simsiz sazlama"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"WiFi sazlaması"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi qoşulduqda sazlama rejimi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Xəta"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"Simsiz sazlama"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Əlçatan cihazları görmək və onlardan istifadə etmək üçün simsiz sazlamanı yandırın"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"WiFi sazlaması"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Əlçatan cihazları görmək və onlardan istifadə etmək üçün WiFi sazlamasını yandırın"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR kodu ilə cihazı cütləşdirin"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR kod Skanerindən istifadə etməklə yeni cihazları cütləşdirin"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR kod skanerindən istifadə etməklə yeni cihazları birləşdirin"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Cütləşdirmə kodu ilə cihazı cütləşdirin"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Altı rəqəmli koddan istifadə etməklə yeni cihazları cütləşdirin"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Cütləşdirilmiş cihazlar"</string>
@@ -231,7 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Cihazı cütləşdirmək alınmadı. Ya QR kodu yanlış idi, ya da cihaz eyni şəbəkəyə qoşulmayıb."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ünvanı və Port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR kodu skanlayın"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR Kodu skanlamaqla cihazı Wi‑Fi vasitəsilə cütləşdirin"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR kodu skanlamaqla cihazı Wi‑Fi vasitəsilə birləşdirin"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi şəbəkəsinə qoşulun"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Baq raportu qısa yolu"</string>
@@ -251,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Simsiz displey sertifikatlaşması"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi Çoxsözlü Girişə icazə verin"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi skanlamasının tənzimlənməsi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi ilə qabaqcıl MAC randomizasiyası"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobil data həmişə aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Birləşmə üçün avadanlıq akselerasiyası"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth cihazlarını adsız göstərin"</string>
@@ -283,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Simsiz displey sertifikatlaşması üçün seçimləri göstərir"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi giriş səviyyəsini qaldırın, Wi‑Fi seçəndə hər SSID RSSI üzrə göstərin"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Batareya istifadəsini azaldır &amp; şəbəkə performansını yaxşılaşdırır"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Bu keçid yalnız müştəri rejimi üçün MAC randomizasiyasına təsir edir.\nBu rejim aktivləşdirildikdə müştərinin şəbəkədən sonuncu dəfə ayrıldığı vaxtdan asılı olaraq, əlaqələndirmə zamanı MAC randomizasiyası aktivləşdirilmiş istənilən şəbəkənin MAC ünvanı təkrar randomizasiya olunacaq. Cihaz 4 saat və ya daha qısa zaman sonra təkrar qoşularsa, təkrar randomizasiya baş vermir."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Ödənişli"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Limitsiz"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger bufer ölçüləri"</string>
@@ -300,8 +302,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Əlçatan oldarsa, birləşmə üçün avadanlıq akselerasiyasından istifadə edin"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB debaq funksiyasına icazə verilsin?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB sazlanması yalnız inkişaf məqsədlidir. Kompüteriniz və cihazınız arasında datanı kopyalamaq üçün ondan istifadə edin, bildiriş olmadan tətbiqləri cihazınıza quraşdırın və qeydiyyat datasını oxuyun."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Simsiz sazlamaya icazə verilsin?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Simsiz sazlama yalnız inkişaf məqsədlidir. Ondan kompüteriniz və cihazınız arasında datanı kopyalamaq, cihazınızda bildiriş olmadan tətbiqləri quraşdırmaq və qeydiyyat datasını oxumaq üçün istifadə edin."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"WiFi sazlamasına icazə verilsin?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"WiFi sazlaması yalnız inkişaf məqsədlidir. Ondan kompüteriniz və cihazınız arasında datanı kopyalamaq, cihazınızda bildiriş olmadan tətbiqləri quraşdırmaq və qeydiyyat datasını oxumaq üçün istifadə edin."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Əvvəl icazə verdiyiniz kompüterlərdən USB debaq əməliyyatına giriş ləğv olunsun?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"İnkişaf ayarlarına icazə verilsin mi?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Bu parametrlər yalnız inkişafetdirici istifadə üçün nəzərdə tutulub. Onlar cihaz və tətbiqlərinizin sınması və ya pis işləməsinə səbəb ola bilər."</string>
@@ -371,6 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arxa fon tətbiqləri üçün Tətbiq Cavab Vermir dialoqunu göstərin"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Xəbərdarlıqları göstərin"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bildiriş paylaşıldıqda xəbərdarlıq göstərir"</string>
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Söhbət bildirişləri üçün qısayolları tətbiq edin"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Söhbət bölməsində görünmək üçün bildirişlərin uzunmüddətli paylaşım qısayolu ilə dəstəklənməsini tələb edin"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Tətbiqlərə xaricdən məcburi icazə"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Seçilmiş hər hansı tətbiqi bəyannamə dəyərlərindən aslı olmayaraq xarici yaddaşa yazılabilən edir."</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Ölçü dəyişdirmək üçün məcburi fəaliyyətlər"</string>
@@ -513,8 +517,12 @@
     <string name="storage_category" msgid="2287342585424631813">"Yaddaş"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Paylaşılan data"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Paylaşılan dataya baxın və ona dəyişiklik edin"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Bu istifadəçi üçün paylaşılan data yoxdur."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Paylaşılan datanı əldə edərkən xəta oldu. Yenidən cəhd edin."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Paylaşılan data ID\'si: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"<xliff:g id="DATE">%s</xliff:g> tarixində müddəti bitir"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Paylaşılan datanı silərkən xəta oldu."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Bu paylaşılan data üçün lizinq əldə edilməyib. Onu silmək istərdiniz?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Data paylaşan tətbiqlər"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"Tətbiq tərəfindən heç bir təsvir təmin edilməyib."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"İcarə müddəti <xliff:g id="DATE">%s</xliff:g> tarixində bitir"</string>
@@ -539,4 +547,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profil info"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Məhdudlaşdırılmış profil yaratmadan öncə, Siz tətbiqlərinizi və şəxsi datanızı qorumaq üçün ekran kilidi quraşdırmalısınız."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Kilid ayarlayın"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> adlı istifadəçiyə keçin"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Qonaq əlavə edin"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Qonağı silin"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Qonaq"</string>
 </resources>
