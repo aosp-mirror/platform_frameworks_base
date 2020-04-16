@@ -35,6 +35,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -1833,6 +1834,9 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (request == null) {
             request = DEFAULT_LOCATION_REQUEST;
         }
+        if (listenerId == null && intent != null) {
+            listenerId = AppOpsManager.toReceiverId(intent);
+        }
 
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 listenerId);
@@ -2102,7 +2106,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             request = DEFAULT_LOCATION_REQUEST;
         }
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
+                AppOpsManager.toReceiverId(intent));
         identity.enforceLocationPermission(PERMISSION_COARSE);
 
         Objects.requireNonNull(intent);
