@@ -27,6 +27,7 @@ import android.provider.Settings
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
+import android.view.ViewConfiguration
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
@@ -145,6 +146,10 @@ abstract class MagnetizedObject<T : Any>(
 
     private val velocityTracker: VelocityTracker = VelocityTracker.obtain()
     private val vibrator: Vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+    private var touchDown = PointF()
+    private var touchSlop = 0
+    private var movedBeyondSlop = false
 
     /** Whether touch events are presently occurring within the magnetic field area of a target. */
     val objectStuckToTarget: Boolean
@@ -324,14 +329,31 @@ abstract class MagnetizedObject<T : Any>(
         // When a gesture begins, recalculate target views' positions on the screen in case they
         // have changed. Also, clear state.
         if (ev.action == MotionEvent.ACTION_DOWN) {
-            updateTargetViewLocations()
+            updateTargetViews()
 
-            // Clear the velocity tracker and assume we're not stuck to a target yet.
+            // Clear the velocity tracker and stuck target.
             velocityTracker.clear()
             targetObjectIsStuckTo = null
+
+            // Set the touch down coordinates and reset movedBeyondSlop.
+            touchDown.set(ev.rawX, ev.rawY)
+            movedBeyondSlop = false
         }
 
+        // Always pass events to the VelocityTracker.
         addMovement(ev)
+
+        // If we haven't yet moved beyond the slop distance, check if we have.
+        if (!movedBeyondSlop) {
+            val dragDistance = hypot(ev.rawX - touchDown.x, ev.rawY - touchDown.y)
+            if (dragDistance > touchSlop) {
+                // If we're beyond the slop distance, save that and continue.
+                movedBeyondSlop = true
+            } else {
+                // Otherwise, don't do anything yet.
+                return false
+            }
+        }
 
         val targetObjectIsInMagneticFieldOf = associatedTargets.firstOrNull { target ->
             val distanceFromTargetCenter = hypot(
@@ -559,8 +581,14 @@ abstract class MagnetizedObject<T : Any>(
     }
 
     /** Updates the locations on screen of all of the [associatedTargets]. */
-    internal fun updateTargetViewLocations() {
+    internal fun updateTargetViews() {
         associatedTargets.forEach { it.updateLocationOnScreen() }
+
+        // Update the touch slop, since the configuration may have changed.
+        if (associatedTargets.size > 0) {
+            touchSlop =
+                    ViewConfiguration.get(associatedTargets[0].targetView.context).scaledTouchSlop
+        }
     }
 
     /**
