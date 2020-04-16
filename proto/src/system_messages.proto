@@ -256,6 +256,10 @@ message SystemMessage {
     // Package: android
     NOTE_ADB_WIFI_ACTIVE = 62;
 
+    // Notify user there was a non-framework gnss location access during an emergency
+    // Package: android
+    NOTE_GNSS_NFW_LOCATION_ACCESS = 63;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
