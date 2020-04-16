@@ -397,7 +397,7 @@ public class IorapWorkFlowTest {
     public LogcatTimestamp() throws Exception{
       long currentTimeMillis = System.currentTimeMillis();
       epochTime = String.format(
-          "%d.%d", currentTimeMillis/1000, currentTimeMillis%1000);
+          "%d.%03d", currentTimeMillis/1000, currentTimeMillis%1000);
       Log.i(TAG, "Current logcat timestamp is " + epochTime);
     }
 
