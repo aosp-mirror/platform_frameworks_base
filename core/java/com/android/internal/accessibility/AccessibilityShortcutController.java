@@ -232,9 +232,8 @@ public class AccessibilityShortcutController {
     }
 
     /**
-     * Show toast if current assigned shortcut target is an accessibility service and its target
-     * sdk version is less than or equal to Q, or greater than Q and does not request
-     * accessibility button.
+     * Show toast to alert the user that the accessibility shortcut turned on or off an
+     * accessibility service.
      */
     private void showToast() {
         final AccessibilityServiceInfo serviceInfo = getInfoForTargetService();
@@ -247,12 +246,15 @@ public class AccessibilityShortcutController {
         }
         final boolean requestA11yButton = (serviceInfo.flags
                 & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
-        if (serviceInfo.getResolveInfo().serviceInfo.applicationInfo
-                .targetSdkVersion > Build.VERSION_CODES.Q && requestA11yButton) {
+        final boolean isServiceEnabled = isServiceEnabled(serviceInfo);
+        if (serviceInfo.getResolveInfo().serviceInfo.applicationInfo.targetSdkVersion
+                > Build.VERSION_CODES.Q && requestA11yButton && isServiceEnabled) {
+            // An accessibility button callback is sent to the target accessibility service.
+            // No need to show up a toast in this case.
             return;
         }
         // For accessibility services, show a toast explaining what we're doing.
-        String toastMessageFormatString = mContext.getString(isServiceEnabled(serviceInfo)
+        String toastMessageFormatString = mContext.getString(isServiceEnabled
                 ? R.string.accessibility_shortcut_disabling_service
                 : R.string.accessibility_shortcut_enabling_service);
         String toastMessage = String.format(toastMessageFormatString, serviceName);
