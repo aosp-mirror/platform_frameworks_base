@@ -293,7 +293,8 @@ void LogEvent::parseExclusiveStateAnnotation(uint8_t annotationType) {
     }
 
     const bool exclusiveState = readNextValue<uint8_t>();
-    mValues[mValues.size() - 1].mAnnotations.setExclusiveState(exclusiveState);
+    mExclusiveStateFieldIndex = mValues.size() - 1;
+    mValues[getExclusiveStateFieldIndex()].mAnnotations.setExclusiveState(exclusiveState);
 }
 
 void LogEvent::parseTriggerStateResetAnnotation(uint8_t annotationType) {
