@@ -383,7 +383,7 @@ public class TetheringTest {
         }
 
         @Override
-        public TetheringNotificationUpdater getNotificationUpdater(Context ctx) {
+        public TetheringNotificationUpdater getNotificationUpdater(Context ctx, Looper looper) {
             return mNotificationUpdater;
         }
     }
@@ -1689,6 +1689,18 @@ public class TetheringTest {
         assertEquals(serverAddr, intToInet4AddressHTH(params.serverAddr).getHostAddress());
         assertEquals(24, params.serverAddrPrefixLength);
         assertEquals(clientAddrParceled, params.clientAddr);
+    }
+
+    @Test
+    public void testUpstreamNetworkChanged() {
+        final Tethering.TetherMasterSM stateMachine = (Tethering.TetherMasterSM)
+                mTetheringDependencies.mUpstreamNetworkMonitorMasterSM;
+        final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
+        when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any())).thenReturn(upstreamState);
+        stateMachine.chooseUpstreamType(true);
+
+        verify(mUpstreamNetworkMonitor, times(1)).setCurrentUpstream(eq(upstreamState.network));
+        verify(mNotificationUpdater, times(1)).onUpstreamNetworkChanged(eq(upstreamState.network));
     }
 
     // TODO: Test that a request for hotspot mode doesn't interfere with an
