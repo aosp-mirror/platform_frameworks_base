@@ -3425,7 +3425,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mInputMethodTarget = target;
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
-        assignWindowLayers(false /* setLayoutNeeded */);
+        assignWindowLayers(true /* setLayoutNeeded */);
         updateImeParent();
         updateImeControlTarget();
     }
