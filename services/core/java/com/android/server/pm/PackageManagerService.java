@@ -3581,7 +3581,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // Prepare a supplier of package parser for the staging manager to parse apex file
             // during the staging installation.
             final Supplier<PackageParser2> apexParserSupplier = () -> new PackageParser2(
-                    mSeparateProcesses, mOnlyCore, mMetrics, mCacheDir, mPackageParserCallback);
+                    mSeparateProcesses, mOnlyCore, mMetrics, null /* cacheDir */,
+                    mPackageParserCallback);
             mInstallerService = new PackageInstallerService(mContext, this, apexParserSupplier);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
