@@ -139,21 +139,10 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             StatusBarNotification sbn = b.getEntry().getSbn();
             String packageName = sbn.getPackageName();
 
-            // Real shortcut info for this bubble
             String bubbleShortcutId =  b.getEntry().getBubbleMetadata().getShortcutId();
             if (bubbleShortcutId != null) {
-                info.shortcutInfo = BubbleExperimentConfig.getShortcutInfo(c, packageName,
-                        sbn.getUser(), bubbleShortcutId);
-            } else {
-                // Check for experimental shortcut
-                String shortcutId = sbn.getNotification().getShortcutId();
-                if (BubbleExperimentConfig.useShortcutInfoToBubble(c) && shortcutId != null) {
-                    info.shortcutInfo = BubbleExperimentConfig.getShortcutInfo(c,
-                            packageName,
-                            sbn.getUser(), shortcutId);
-                }
+                info.shortcutInfo = b.getEntry().getRanking().getShortcutInfo();
             }
-
 
             // App name & app icon
             PackageManager pm = c.getPackageManager();
