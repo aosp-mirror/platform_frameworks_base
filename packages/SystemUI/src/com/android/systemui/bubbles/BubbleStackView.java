@@ -374,8 +374,9 @@ public class BubbleStackView extends FrameLayout {
                 @Override
                 public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
                     mExpandedAnimationController.dismissDraggedOutBubble(
-                            mExpandedAnimationController.getDraggedOutBubble(),
-                            BubbleStackView.this::dismissMagnetizedObject);
+                            mExpandedAnimationController.getDraggedOutBubble() /* bubble */,
+                            mDismissTargetContainer.getHeight() /* translationYBy */,
+                            BubbleStackView.this::dismissMagnetizedObject /* after */);
                     hideDismissTarget();
                 }
             };
@@ -405,7 +406,8 @@ public class BubbleStackView extends FrameLayout {
 
                 @Override
                 public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                    mStackAnimationController.implodeStack(
+                    mStackAnimationController.animateStackDismissal(
+                            mDismissTargetContainer.getHeight() /* translationYBy */,
                             () -> {
                                 resetDesaturationAndDarken();
                                 dismissMagnetizedObject();
