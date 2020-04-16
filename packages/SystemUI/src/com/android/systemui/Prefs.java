@@ -21,11 +21,25 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
+import com.android.systemui.settings.CurrentUserContextTracker;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A helper class to store simple preferences for SystemUI. Its main use case is things such as
+ * feature education, e.g. "has the user seen this tooltip".
+ *
+ * As of this writing, feature education settings are *intentionally exempted* from backup and
+ * restore because there is not a great way to know which subset of features the user _should_ see
+ * again if, for instance, they are coming from multiple OSes back or switching OEMs.
+ *
+ * NOTE: Clients of this class should take care to pass in the correct user context when querying
+ * settings, otherwise you will always read/write for user 0 which is almost never what you want.
+ * See {@link CurrentUserContextTracker} for a simple way to get the current context
+ */
 public final class Prefs {
     private Prefs() {} // no instantation
 
@@ -109,6 +123,8 @@ public final class Prefs {
         String HAS_SEEN_BUBBLES_EDUCATION = "HasSeenBubblesOnboarding";
         String HAS_SEEN_BUBBLES_MANAGE_EDUCATION = "HasSeenBubblesManageOnboarding";
         String CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT = "ControlsStructureSwipeTooltipCount";
+        /** Tracks whether the user has seen the onboarding screen for priority conversations */
+        String HAS_SEEN_PRIORITY_ONBOARDING = "HasSeenPriorityOnboarding";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {
