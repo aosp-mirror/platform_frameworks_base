@@ -25,6 +25,7 @@ import android.service.controls.actions.CommandAction
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import com.android.systemui.R
+import com.android.systemui.controls.controller.ControlsController
 
 object ControlActionCoordinator {
     const val MIN_LEVEL = 0
@@ -75,5 +76,9 @@ object ControlActionCoordinator {
             it.setOnDismissListener { _ -> dialog = null }
             it.show()
         }
+    }
+
+    fun setFocusedElement(cvh: ControlViewHolder?, controlsController: ControlsController) {
+        controlsController.onFocusChanged(cvh?.cws)
     }
 }
