@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
@@ -379,7 +380,7 @@ public class ActivityOptions {
      */
     public static ActivityOptions makeCustomAnimation(Context context,
             int enterResId, int exitResId) {
-        return makeCustomAnimation(context, enterResId, exitResId, null, null);
+        return makeCustomAnimation(context, enterResId, exitResId, null, null, null);
     }
 
     /**
@@ -410,6 +411,38 @@ public class ActivityOptions {
         opts.mCustomEnterResId = enterResId;
         opts.mCustomExitResId = exitResId;
         opts.setOnAnimationStartedListener(handler, listener);
+        return opts;
+    }
+
+    /**
+     * Create an ActivityOptions specifying a custom animation to run when
+     * the activity is displayed.
+     *
+     * @param context Who is defining this.  This is the application that the
+     * animation resources will be loaded from.
+     * @param enterResId A resource ID of the animation resource to use for
+     * the incoming activity.  Use 0 for no animation.
+     * @param exitResId A resource ID of the animation resource to use for
+     * the outgoing activity.  Use 0 for no animation.
+     * @param handler If <var>listener</var> is non-null this must be a valid
+     * Handler on which to dispatch the callback; otherwise it should be null.
+     * @param startedListener Optional OnAnimationStartedListener to find out when the
+     * requested animation has started running.  If for some reason the animation
+     * is not executed, the callback will happen immediately.
+     * @param finishedListener Optional OnAnimationFinishedListener when the animation
+     * has finished running.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     * @hide
+     */
+    @TestApi
+    public static @NonNull ActivityOptions makeCustomAnimation(@NonNull Context context,
+            int enterResId, int exitResId, @Nullable Handler handler,
+            @Nullable OnAnimationStartedListener startedListener,
+            @Nullable OnAnimationFinishedListener finishedListener) {
+        ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, handler,
+                startedListener);
+        opts.setOnAnimationFinishedListener(handler, finishedListener);
         return opts;
     }
 
@@ -458,6 +491,7 @@ public class ActivityOptions {
      * to find out when the given animation has started running.
      * @hide
      */
+    @TestApi
     public interface OnAnimationStartedListener {
         void onAnimationStarted();
     }
@@ -484,6 +518,7 @@ public class ActivityOptions {
      * to find out when the given animation has drawn its last frame.
      * @hide
      */
+    @TestApi
     public interface OnAnimationFinishedListener {
         void onAnimationFinished();
     }
@@ -1100,7 +1135,7 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public IRemoteCallback getOnAnimationStartListener() {
+    public IRemoteCallback getAnimationStartedListener() {
         return mAnimationStartedListener;
     }
 
