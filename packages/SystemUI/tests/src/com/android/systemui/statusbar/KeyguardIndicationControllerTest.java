@@ -192,7 +192,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(R.string.dock_alignment_slow_charging));
-        assertThat(mTextView.getCurrentTextColor()).isEqualTo(Color.WHITE);
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
+                Utils.getColorError(mContext).getDefaultColor());
     }
 
     @Test
@@ -209,7 +210,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(R.string.dock_alignment_not_charging));
-        assertThat(mTextView.getCurrentTextColor()).isEqualTo(Color.WHITE);
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
+                Utils.getColorError(mContext).getDefaultColor());
     }
 
     @Test
