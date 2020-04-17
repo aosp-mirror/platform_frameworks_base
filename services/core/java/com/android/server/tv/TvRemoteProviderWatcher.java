@@ -59,9 +59,9 @@ final class TvRemoteProviderWatcher {
 
     private boolean mRunning;
 
-    TvRemoteProviderWatcher(Context context, Object lock) {
+    TvRemoteProviderWatcher(Context context, Object lock, Handler handler) {
         mContext = context;
-        mHandler = new Handler(true);
+        mHandler = handler;
         mUserId = UserHandle.myUserId();
         mPackageManager = context.getPackageManager();
         mLock = lock;
@@ -77,6 +77,10 @@ final class TvRemoteProviderWatcher {
                 mUnbundledServicePackages.add(packageName);
             }
         });
+    }
+
+    TvRemoteProviderWatcher(Context context, Object lock) {
+        this(context, lock, new Handler(true));
     }
 
     public void start() {
