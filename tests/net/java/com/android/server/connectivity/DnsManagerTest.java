@@ -18,6 +18,8 @@ package com.android.server.connectivity;
 
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
+import static android.net.NetworkCapabilities.MAX_TRANSPORT;
+import static android.net.NetworkCapabilities.MIN_TRANSPORT;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
@@ -30,6 +32,7 @@ import static com.android.testutils.MiscAssertsKt.assertFieldCountEquals;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.reset;
@@ -44,16 +47,19 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.ResolverOptionsParcel;
 import android.net.ResolverParamsParcel;
 import android.net.RouteInfo;
 import android.net.shared.PrivateDnsConfig;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
+import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.MessageUtils;
 import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.Before;
@@ -353,5 +359,24 @@ public class DnsManagerTest {
         expectedParams.transportTypes = TEST_TRANSPORT_TYPES;
         expectedParams.resolverOptions = new ResolverOptionsParcel();
         assertResolverParamsEquals(actualParams, expectedParams);
+    }
+
+    @Test
+    public void testTransportTypesEqual() throws Exception {
+        SparseArray<String> ncTransTypes = MessageUtils.findMessageNames(
+                new Class[] { NetworkCapabilities.class }, new String[]{ "TRANSPORT_" });
+        SparseArray<String> dnsTransTypes = MessageUtils.findMessageNames(
+                new Class[] { IDnsResolver.class }, new String[]{ "TRANSPORT_" });
+        assertEquals(0, MIN_TRANSPORT);
+        assertEquals(MAX_TRANSPORT + 1, ncTransTypes.size());
+        // TRANSPORT_UNKNOWN in IDnsResolver is defined to -1 and only for resolver.
+        assertEquals("TRANSPORT_UNKNOWN", dnsTransTypes.get(-1));
+        assertEquals(ncTransTypes.size(), dnsTransTypes.size() - 1);
+        for (int i = MIN_TRANSPORT; i < MAX_TRANSPORT; i++) {
+            String name = ncTransTypes.get(i, null);
+            assertNotNull("Could not find NetworkCapabilies.TRANSPORT_* constant equal to "
+                    + i, name);
+            assertEquals(name, dnsTransTypes.get(i));
+        }
     }
 }
