@@ -2272,7 +2272,11 @@ package android.os {
 
   public class Environment {
     method public static java.io.File buildPath(java.io.File, java.lang.String...);
+    method @NonNull public static java.io.File getOdmDirectory();
+    method @NonNull public static java.io.File getOemDirectory();
     method @NonNull public static java.io.File getProductDirectory();
+    method @NonNull public static java.io.File getSystemExtDirectory();
+    method @NonNull public static java.io.File getVendorDirectory();
   }
 
   public final class FileUtils {
