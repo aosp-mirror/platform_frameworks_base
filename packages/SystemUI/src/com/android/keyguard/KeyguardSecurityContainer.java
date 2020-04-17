@@ -19,6 +19,7 @@ import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
@@ -30,12 +31,14 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -44,6 +47,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowInsets;
+import android.view.WindowInsetsAnimation;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -62,6 +66,8 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.InjectionInflationController;
+
+import java.util.List;
 
 public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSecurityView {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -114,6 +120,47 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private boolean mIsDragging;
     private float mStartTouchY = -1;
 
+    private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
+            new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
+
+                private final Rect mInitialBounds = new Rect();
+                private final Rect mFinalBounds = new Rect();
+
+                @Override
+                public void onPrepare(WindowInsetsAnimation animation) {
+                    mSecurityViewFlipper.getBoundsOnScreen(mInitialBounds);
+                }
+
+                @Override
+                public WindowInsetsAnimation.Bounds onStart(WindowInsetsAnimation animation,
+                        WindowInsetsAnimation.Bounds bounds) {
+                    mSecurityViewFlipper.getBoundsOnScreen(mFinalBounds);
+                    return bounds;
+                }
+
+                @Override
+                public WindowInsets onProgress(WindowInsets windowInsets,
+                        List<WindowInsetsAnimation> list) {
+                    int translationY = 0;
+                    for (WindowInsetsAnimation animation : list) {
+                        if ((animation.getTypeMask() & WindowInsets.Type.ime()) == 0) {
+                            continue;
+                        }
+                        final int paddingBottom = (int) MathUtils.lerp(
+                                mInitialBounds.bottom - mFinalBounds.bottom, 0,
+                                animation.getInterpolatedFraction());
+                        translationY += paddingBottom;
+                    }
+                    mSecurityViewFlipper.setTranslationY(translationY);
+                    return windowInsets;
+                }
+
+                @Override
+                public void onEnd(WindowInsetsAnimation animation) {
+                    mSecurityViewFlipper.setTranslationY(0);
+                }
+            };
+
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
         public boolean dismiss(boolean authenticated, int targetUserId,
@@ -162,6 +209,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (mCurrentSecuritySelection != SecurityMode.None) {
             getSecurityView(mCurrentSecuritySelection).onResume(reason);
         }
+        mSecurityViewFlipper.setWindowInsetsAnimationCallback(mWindowInsetsAnimationCallback);
         updateBiometricRetry();
     }
 
@@ -175,6 +223,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (mCurrentSecuritySelection != SecurityMode.None) {
             getSecurityView(mCurrentSecuritySelection).onPause();
         }
+        mSecurityViewFlipper.setWindowInsetsAnimationCallback(null);
     }
 
     @Override
@@ -333,7 +382,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
     }
 
-    protected void onFinishInflate() {
+    @Override
+    public void onFinishInflate() {
+        super.onFinishInflate();
         mSecurityViewFlipper = findViewById(R.id.view_flipper);
         mSecurityViewFlipper.setLockPatternUtils(mLockPatternUtils);
     }
