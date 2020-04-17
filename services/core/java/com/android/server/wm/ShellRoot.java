@@ -23,12 +23,14 @@ import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 
 import android.annotation.NonNull;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.IWindow;
 import android.view.SurfaceControl;
+import android.view.WindowInfo;
 import android.view.animation.Animation;
 
 /**
@@ -101,6 +103,28 @@ public class ShellRoot {
                 mDisplayContent.mWmService.mSurfaceAnimationRunner);
         mToken.startAnimation(mToken.getPendingTransaction(), adapter, false /* hidden */,
                 ANIMATION_TYPE_WINDOW_ANIMATION, null /* animationFinishedCallback */);
+    }
+
+    WindowInfo getWindowInfo() {
+        if (mToken.windowType != TYPE_DOCK_DIVIDER) {
+            return null;
+        }
+        if (!mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
+            return null;
+        }
+        WindowInfo windowInfo = WindowInfo.obtain();
+        windowInfo.displayId = mToken.getDisplayArea().getDisplayContent().mDisplayId;
+        windowInfo.type = mToken.windowType;
+        windowInfo.layer = mToken.getWindowLayerFromType();
+        windowInfo.token = mClient.asBinder();
+        windowInfo.title = "Splitscreen Divider";
+        windowInfo.focused = false;
+        windowInfo.inPictureInPicture = false;
+        windowInfo.hasFlagWatchOutsideTouch = false;
+        final Rect regionRect = new Rect();
+        mDisplayContent.getDockedDividerController().getTouchRegion(regionRect);
+        windowInfo.regionInScreen.set(regionRect);
+        return windowInfo;
     }
 }
 
