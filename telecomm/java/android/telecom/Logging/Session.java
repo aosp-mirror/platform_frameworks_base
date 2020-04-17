@@ -427,7 +427,7 @@ public class Session {
             StringBuilder methodName = new StringBuilder();
             methodName.append(getFullMethodPath(false /*truncatePath*/));
             if (mOwnerInfo != null && !mOwnerInfo.isEmpty()) {
-                methodName.append("(InCall package: ");
+                methodName.append("(");
                 methodName.append(mOwnerInfo);
                 methodName.append(")");
             }
