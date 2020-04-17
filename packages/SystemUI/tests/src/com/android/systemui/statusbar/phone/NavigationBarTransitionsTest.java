@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.phone;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -50,9 +51,11 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
         mDependency.injectMockDependency(IWindowManager.class);
         mDependency.injectMockDependency(AssistManager.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
-        mDependency.injectMockDependency(NavigationModeController.class);
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(KeyguardStateController.class);
+        doReturn(mContext)
+                .when(mDependency.injectMockDependency(NavigationModeController.class))
+                .getCurrentUserContext();
 
         NavigationBarView navBar = spy(new NavigationBarView(mContext, null));
         when(navBar.getCurrentView()).thenReturn(navBar);
