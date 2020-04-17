@@ -930,7 +930,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.handleDismissalInterception(groupSummary.getEntry());
 
         // THEN only the NON-bubble children are dismissed
-        List<ExpandableNotificationRow> childrenRows = groupSummary.getNotificationChildren();
+        List<ExpandableNotificationRow> childrenRows = groupSummary.getAttachedChildren();
         verify(mNotificationEntryManager, times(1)).performRemoveNotification(
                 childrenRows.get(0).getEntry().getSbn(), REASON_GROUP_SUMMARY_CANCELED);
         verify(mNotificationEntryManager, times(1)).performRemoveNotification(
