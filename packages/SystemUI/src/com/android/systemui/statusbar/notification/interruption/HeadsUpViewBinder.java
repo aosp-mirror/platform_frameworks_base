@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.headsup;
+package com.android.systemui.statusbar.notification.interruption;
 
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
@@ -42,7 +42,7 @@ import javax.inject.Singleton;
  * content view.
  *
  * TODO: This should be moved into {@link HeadsUpCoordinator} when the old pipeline is deprecated
- * (i.e. when {@link HeadsUpBindController} is removed).
+ * (i.e. when {@link HeadsUpController} is removed).
  */
 @Singleton
 public class HeadsUpViewBinder {

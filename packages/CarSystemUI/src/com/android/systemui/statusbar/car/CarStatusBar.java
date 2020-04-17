@@ -77,7 +77,6 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.BypassHeadsUpNotifier;
-import com.android.systemui.statusbar.notification.interruption.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -170,7 +169,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             NotificationInterruptStateProvider notificationInterruptStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
             KeyguardViewMediator keyguardViewMediator,
-            NotificationAlertingManager notificationAlertingManager,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
             @UiBackground Executor uiBgExecutor,
@@ -251,7 +249,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 notificationInterruptStateProvider,
                 notificationViewHierarchyManager,
                 keyguardViewMediator,
-                notificationAlertingManager,
                 displayMetrics,
                 metricsLogger,
                 uiBgExecutor,

@@ -253,7 +253,7 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
                 int op = CallerIdentity.asAppOp(identity.permissionLevel);
                 if (op >= 0) {
                     if (mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, identity.uid,
-                            identity.packageName, identity.featureId, null)
+                            identity.packageName, identity.featureId, identity.listenerId)
                             != AppOpsManager.MODE_ALLOWED) {
                         continue;
                     }

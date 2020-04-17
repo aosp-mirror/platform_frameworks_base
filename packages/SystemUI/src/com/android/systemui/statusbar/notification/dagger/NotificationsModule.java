@@ -30,6 +30,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -45,7 +46,6 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
-import com.android.systemui.statusbar.notification.interruption.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -53,13 +53,14 @@ import com.android.systemui.statusbar.notification.logging.NotificationPanelLogg
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
 
 import java.util.concurrent.Executor;
 
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import dagger.Binds;
@@ -109,7 +110,9 @@ public interface NotificationsModule {
             HighPriorityProvider highPriorityProvider,
             INotificationManager notificationManager,
             LauncherApps launcherApps,
-            ShortcutManager shortcutManager) {
+            ShortcutManager shortcutManager,
+            CurrentUserContextTracker contextTracker,
+            Provider<PriorityOnboardingDialogController.Builder> builderProvider) {
         return new NotificationGutsManager(
                 context,
                 visualStabilityManager,
@@ -119,7 +122,9 @@ public interface NotificationsModule {
                 highPriorityProvider,
                 notificationManager,
                 launcherApps,
-                shortcutManager);
+                shortcutManager,
+                contextTracker,
+                builderProvider);
     }
 
     /** Provides an instance of {@link VisualStabilityManager} */
@@ -128,27 +133,6 @@ public interface NotificationsModule {
     static VisualStabilityManager provideVisualStabilityManager(
             NotificationEntryManager notificationEntryManager, Handler handler) {
         return new VisualStabilityManager(notificationEntryManager, handler);
-    }
-
-    /** Provides an instance of {@link NotificationAlertingManager} */
-    @Singleton
-    @Provides
-    static NotificationAlertingManager provideNotificationAlertingManager(
-            NotificationEntryManager notificationEntryManager,
-            NotificationRemoteInputManager remoteInputManager,
-            VisualStabilityManager visualStabilityManager,
-            StatusBarStateController statusBarStateController,
-            NotificationInterruptStateProvider notificationInterruptStateProvider,
-            NotificationListener notificationListener,
-            HeadsUpManager headsUpManager) {
-        return new NotificationAlertingManager(
-                notificationEntryManager,
-                remoteInputManager,
-                visualStabilityManager,
-                statusBarStateController,
-                notificationInterruptStateProvider,
-                notificationListener,
-                headsUpManager);
     }
 
     /** Provides an instance of {@link NotificationLogger} */

@@ -1829,14 +1829,14 @@
     <!-- [CHAR LIMIT=150] Notification Importance title: normal importance level summary -->
     <string name="notification_channel_summary_default">Gets your attention with sound or vibration.</string>
 
+    <!-- [CHAR LIMIT=150] Conversation Notification Importance title: normal conversation level, with bubbling summary -->
+    <string name="notification_channel_summary_default_with_bubbles">Gets your attention with sound or vibration. Conversations from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubble by default.</string>
+
     <!-- [CHAR LIMIT=150] Notification Importance title: bubble level summary -->
     <string name="notification_channel_summary_bubble">Keeps your attention with a floating shortcut to this content.</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level summary -->
     <string name="notification_channel_summary_priority">Shows at top of conversation section and appears as a bubble.</string>
-
-    <!--[CHAR LIMIT=150] Conversation inline controls footer shown when all conversations from the app are allowed to show as bubbles -->
-    <string name="notification_conversation_channel_all_bubble">All conversations from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubble by default. Manage in <xliff:g id="app_name" example="Settings">%2$s</xliff:g>.</string>
 
     <!--[CHAR LIMIT=30] Linkable text to Settings app -->
     <string name="notification_conversation_channel_settings">Settings</string>
@@ -2638,6 +2638,18 @@
 
     <!-- Title of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=25] -->
     <string name="inattentive_sleep_warning_title">Standby</string>
+
+    <!-- Priority conversation onboarding screen -->
+    <!--  Text explaining that priority conversations show at the top of the conversation section [CHAR LIMIT=50]  -->
+    <string name="priority_onboarding_show_at_top_text">Show at top of conversation section</string>
+    <!--  Text explaining that priority conversations show an avatar on the lock screen [CHAR LIMIT=50]  -->
+    <string name="priority_onboarding_show_avatar_text">Show profile picture on lock screen</string>
+    <!--  Text explaining that priority conversations will appear as a bubble [CHAR LIMIT=50]  -->
+    <string name="priority_onboarding_appear_as_bubble_text">Appear as a floating bubble on top of apps</string>
+    <!--  Text explaining that priority conversations can interrupt DnD settings [CHAR LIMIT=50]  -->
+    <string name="priority_onboarding_ignores_dnd_text">Interrupt Do Not Disturb</string>
+    <!--  Title for the affirmative button [CHAR LIMIT=50]  -->
+    <string name="priority_onboarding_done_button_title">Got it</string>
 
     <!-- Window Magnification strings -->
     <!-- Title for Magnification Overlay Window [CHAR LIMIT=NONE] -->

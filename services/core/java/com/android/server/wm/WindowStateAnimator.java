@@ -1030,7 +1030,7 @@ class WindowStateAnimator {
                         mTmpPos.x = 0;
                         mTmpPos.y = 0;
                         if (stack != null) {
-                            stack.getRelativeDisplayedPosition(mTmpPos);
+                            stack.getRelativePosition(mTmpPos);
                         }
 
                         xOffset = -mTmpPos.x;

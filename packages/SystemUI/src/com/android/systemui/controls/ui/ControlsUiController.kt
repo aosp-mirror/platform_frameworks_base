@@ -36,4 +36,5 @@ interface ControlsUiController {
         controlId: String,
         @ControlAction.ResponseResult response: Int
     )
+    fun onFocusChanged(controlWithState: ControlWithState?)
 }

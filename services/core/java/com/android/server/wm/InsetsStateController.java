@@ -171,7 +171,7 @@ class InsetsStateController {
 
         if (aboveIme) {
             state = new InsetsState(state);
-            state.removeSource(ITYPE_IME);
+            state.setSourceVisible(ITYPE_IME, false);
         }
 
         return state;

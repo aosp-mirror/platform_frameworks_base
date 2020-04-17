@@ -208,9 +208,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
      * @param bgColor
      * @param actionsContainer
      * @param notif
+     * @param key
      */
     public void addMediaSession(MediaSession.Token token, Icon icon, int iconColor, int bgColor,
-            View actionsContainer, StatusBarNotification notif) {
+            View actionsContainer, StatusBarNotification notif, String key) {
         if (!useQsMediaPlayer(mContext)) {
             // Shouldn't happen, but just in case
             Log.e(TAG, "Tried to add media session without player!");
@@ -225,13 +226,12 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         String packageName = notif.getPackageName();
         for (QSMediaPlayer p : mMediaPlayers) {
             if (p.getMediaSessionToken().equals(token)) {
-                Log.d(TAG, "a player for this session already exists");
+                Log.d(TAG, "Found matching player by token " + packageName);
                 player = p;
                 break;
-            }
-
-            if (packageName.equals(p.getMediaPlayerPackage())) {
-                Log.d(TAG, "found an old session for this app");
+            } else if (packageName.equals(p.getMediaPlayerPackage()) && key.equals(p.getKey())) {
+                // Also match if it's the same package and notification key
+                Log.d(TAG, "Found matching player by package " + packageName + ", " + key);
                 player = p;
                 break;
             }
@@ -267,7 +267,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         Log.d(TAG, "setting player session");
         player.setMediaSession(token, icon, iconColor, bgColor, actionsContainer,
-                notif.getNotification());
+                notif.getNotification(), key);
 
         if (mMediaPlayers.size() > 0) {
             ((View) mMediaCarousel.getParent()).setVisibility(View.VISIBLE);
