@@ -1488,6 +1488,8 @@
     <string name="biometric_error_canceled">Authentication canceled</string>
     <!-- Message returned to applications if BiometricPrompt setAllowDeviceCredentials is enabled but no pin, pattern, or password is set. [CHAR LIMIT=NONE] -->
     <string name="biometric_error_device_not_secured">No pin, pattern, or password set</string>
+    <!-- Message returned to applications when an unexpected/unknown error occurs. [CHAR LIMIT=50]-->
+    <string name="biometric_error_generic">Error authenticating</string>
 
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Partial fingerprint detected. Please try again.</string>

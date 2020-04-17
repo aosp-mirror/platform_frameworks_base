@@ -34,6 +34,7 @@ import android.app.StatusBarManager.WindowType;
 import android.app.StatusBarManager.WindowVisibleState;
 import android.content.ComponentName;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
@@ -262,7 +263,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         default void onRotationProposal(int rotation, boolean isValid) { }
 
         default void showAuthenticationDialog(Bundle bundle,
-                IBiometricServiceReceiverInternal receiver, int biometricModality,
+                IBiometricServiceReceiverInternal receiver,
+                @BiometricAuthenticator.Modality int biometricModality,
                 boolean requireConfirmation, int userId, String opPackageName,
                 long operationId) { }
         default void onBiometricAuthenticated() { }
@@ -791,8 +793,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
 
     @Override
     public void showAuthenticationDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-            int biometricModality, boolean requireConfirmation, int userId, String opPackageName,
-            long operationId) {
+            @BiometricAuthenticator.Modality int biometricModality, boolean requireConfirmation,
+            int userId, String opPackageName, long operationId) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = bundle;
