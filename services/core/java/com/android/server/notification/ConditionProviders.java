@@ -76,7 +76,8 @@ public class ConditionProviders extends ManagedServices {
     public void addSystemProvider(SystemConditionProviderService service) {
         mSystemConditionProviders.add(service);
         service.attachBase(mContext);
-        registerService(service.asInterface(), service.getComponent(), UserHandle.USER_SYSTEM);
+        registerSystemService(
+                service.asInterface(), service.getComponent(), UserHandle.USER_SYSTEM);
     }
 
     public Iterable<SystemConditionProviderService> getSystemProviders() {
