@@ -43,7 +43,6 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import org.junit.Before;
@@ -84,8 +83,6 @@ public class QSPanelTest extends SysuiTestCase {
     @Mock
     private QSTileView mQSTileView;
     @Mock
-    private NotificationMediaManager mNotificationMediaManager;
-    @Mock
     private Executor mForegroundExecutor;
     @Mock
     private DelayableExecutor mBackgroundExecutor;
@@ -100,7 +97,7 @@ public class QSPanelTest extends SysuiTestCase {
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
             mQsPanel = new QSPanel(mContext, null, mDumpManager, mBroadcastDispatcher,
-                    mQSLogger, mNotificationMediaManager, mForegroundExecutor, mBackgroundExecutor,
+                    mQSLogger, mForegroundExecutor, mBackgroundExecutor,
                     mLocalBluetoothManager);
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
