@@ -49,11 +49,9 @@ using namespace std;
  */
 void mapAndMergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const sp<UidMap>& uidMap,
                                       int tagId, const vector<int>& additiveFieldsVec) {
-    bool hasAttributionChain = (android::util::AtomsInfo::kAtomsWithAttributionChain.find(tagId) !=
-                                android::util::AtomsInfo::kAtomsWithAttributionChain.end());
-    // To check if any LogEvent has a uid field, we can just check the first
-    // LogEvent because all atoms with this tagId should have the uid
-    // annotation.
+    // Check the first LogEvent for attribution chain or a uid field as either all atoms with this
+    // tagId have them or none of them do.
+    const bool hasAttributionChain = data[0]->getAttributionChainIndex() != -1;
     bool hasUidField = (data[0]->getUidFieldIndex() != -1);
 
     if (!hasAttributionChain && !hasUidField) {
@@ -67,8 +65,7 @@ void mapAndMergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const 
             ALOGE("Wrong atom. Expecting %d, got %d", tagId, event->GetTagId());
             return;
         }
-        if (android::util::AtomsInfo::kAtomsWithAttributionChain.find(tagId) !=
-            android::util::AtomsInfo::kAtomsWithAttributionChain.end()) {
+        if (event->getAttributionChainIndex() != -1) {
             for (auto& value : *(event->getMutableValues())) {
                 if (value.mField.getPosAtDepth(0) > kAttributionField) {
                     break;
