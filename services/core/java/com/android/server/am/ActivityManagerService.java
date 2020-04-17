@@ -2683,7 +2683,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         Slog.d("AppOps", "AppOpsService published");
         LocalServices.addService(ActivityManagerInternal.class, mInternal);
         mActivityTaskManager.onActivityManagerInternalAdded();
-        mUgmInternal.onActivityManagerInternalAdded();
         mPendingIntentController.onActivityManagerInternalAdded();
         // Wait for the synchronized block started in mProcessCpuThread,
         // so that any other access to mProcessCpuTracker from main thread
@@ -6412,7 +6411,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
-        return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, false), uid, modeFlags)
+        return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
                 ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
     }
 
@@ -6424,7 +6423,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void grantUriPermission(IApplicationThread caller, String targetPkg, Uri uri,
             final int modeFlags, int userId) {
         enforceNotIsolatedCaller("grantUriPermission");
-        GrantUri grantUri = new GrantUri(userId, uri, false);
+        GrantUri grantUri = new GrantUri(userId, uri, modeFlags);
         synchronized(this) {
             final ProcessRecord r = getRecordForAppLocked(caller);
             if (r == null) {
@@ -6482,8 +6481,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
 
-            mUgmInternal.revokeUriPermission(targetPackage, r.uid, new GrantUri(userId, uri, false),
-                    modeFlags);
+            mUgmInternal.revokeUriPermission(targetPackage, r.uid,
+                    new GrantUri(userId, uri, modeFlags), modeFlags);
         }
     }
 
