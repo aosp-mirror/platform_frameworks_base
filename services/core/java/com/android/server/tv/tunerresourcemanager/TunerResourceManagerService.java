@@ -516,10 +516,12 @@ public class TunerResourceManagerService extends SystemService {
         // When all the resources are occupied, grant the lowest priority resource if the
         // request client has higher priority.
         if (inUseLowestPriorityFrId > -1 && (requestClient.getPriority() > currentLowestPriority)) {
+            if (!reclaimResource(getFrontendResource(inUseLowestPriorityFrId).getOwnerClientId(),
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
+                return false;
+            }
             frontendHandle[0] = generateResourceHandle(
                     TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, inUseLowestPriorityFrId);
-            reclaimResource(getFrontendResource(inUseLowestPriorityFrId).getOwnerClientId(),
-                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND);
             updateFrontendClientMappingOnNewGrant(inUseLowestPriorityFrId, request.getClientId());
             return true;
         }
@@ -572,10 +574,12 @@ public class TunerResourceManagerService extends SystemService {
         // request client has higher priority.
         if (inUseLowestPriorityLnbId > -1
                 && (requestClient.getPriority() > currentLowestPriority)) {
+            if (!reclaimResource(getLnbResource(inUseLowestPriorityLnbId).getOwnerClientId(),
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_LNB)) {
+                return false;
+            }
             lnbHandle[0] = generateResourceHandle(
                     TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, inUseLowestPriorityLnbId);
-            reclaimResource(getLnbResource(inUseLowestPriorityLnbId).getOwnerClientId(),
-                    TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
             updateLnbClientMappingOnNewGrant(inUseLowestPriorityLnbId, request.getClientId());
             return true;
         }
@@ -668,18 +672,21 @@ public class TunerResourceManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    protected void reclaimResource(int reclaimingId,
+    protected boolean reclaimResource(int reclaimingClientId,
             @TunerResourceManager.TunerResourceType int resourceType) {
         if (DEBUG) {
             Slog.d(TAG, "Reclaiming resources because higher priority client request resource type "
                     + resourceType);
         }
         try {
-            mListeners.get(reclaimingId).getListener().onReclaimResources();
+            mListeners.get(reclaimingClientId).getListener().onReclaimResources();
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to reclaim resources on client " + reclaimingId, e);
+            Slog.e(TAG, "Failed to reclaim resources on client " + reclaimingClientId, e);
+            return false;
         }
-        // TODO clean all the client and resources mapping/ownership
+        ClientProfile profile = getClientProfile(reclaimingClientId);
+        reclaimingResourcesFromClient(profile);
+        return true;
     }
 
     @VisibleForTesting
@@ -831,6 +838,16 @@ public class TunerResourceManagerService extends SystemService {
         }
         mClientProfiles.remove(clientId);
         mListeners.remove(clientId);
+    }
+
+    private void reclaimingResourcesFromClient(ClientProfile profile) {
+        for (Integer feId : profile.getInUseFrontendIds()) {
+            getFrontendResource(feId).removeOwner();
+        }
+        for (Integer lnbId : profile.getInUseLnbIds()) {
+            getLnbResource(lnbId).removeOwner();
+        }
+        profile.reclaimAllResources();
     }
 
     @VisibleForTesting
