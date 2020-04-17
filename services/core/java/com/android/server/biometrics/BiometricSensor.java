@@ -159,11 +159,12 @@ public class BiometricSensor {
     @Override
     public String toString() {
         return "ID(" + id + ")"
-                + " oemStrength: " + oemStrength
-                + " updatedStrength: " + mUpdatedStrength
-                + " modality " + modality
-                + " authenticator: " + impl
-                + " state: " + mSensorState
-                + " cookie: " + mCookie;
+                + "\n oemStrength: " + oemStrength
+                + "\n updatedStrength: " + mUpdatedStrength
+                + "\n modality " + modality
+                + "\n state: " + mSensorState
+                + "\n cookie: " + mCookie
+                + "\n authenticator: " + impl
+                + "\n";
     }
 }

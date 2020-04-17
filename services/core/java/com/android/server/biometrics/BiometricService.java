@@ -42,6 +42,7 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -61,9 +62,12 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -679,6 +683,20 @@ public class BiometricService extends SystemService {
             }
             Slog.e(TAG, "Unknown sensorId: " + sensorId);
             return Authenticators.EMPTY_SET;
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
+                return;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                dumpInternal(pw);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
@@ -1395,5 +1413,15 @@ public class BiometricService extends SystemService {
         }
 
         mCurrentAuthSession.cancelAllSensors(fromClient);
+    }
+
+    private void dumpInternal(PrintWriter pw) {
+        pw.println("Sensors:");
+        for (BiometricSensor sensor : mSensors) {
+            pw.println(" " + sensor);
+        }
+
+        pw.println("PendingSession: " + mPendingAuthSession);
+        pw.println("CurrentSession: " + mCurrentAuthSession);
     }
 }

@@ -235,4 +235,11 @@ final class AuthSession {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "State: " + mState
+                + "\nisCrypto: " + isCrypto()
+                + "\nPreAuthInfo: " + mPreAuthInfo;
+    }
 }
