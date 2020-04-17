@@ -77,9 +77,14 @@ stubs_defaults {
     name: "metalava-non-updatable-api-stubs-default",
     defaults: ["metalava-base-api-stubs-default"],
     sdk_version: "core_platform",
-    libs: ["framework-all"],
+    // There are a few classes from modules used as type arguments that
+    // need to be resolved by metalava. For now, we can use a previously
+    // finalized stub library to resolve them. If a new class gets added,
+    // this may be need to be revisited to use a manually maintained stub
+    // library with empty classes in order to resolve those references.
+    libs: ["sdk_system_29_android"],
     aidl: {
-        local_include_dirs: ["apex/media/framework/java"],
+        local_include_dirs: ["apex/media/aidl/stable"],
     },
 }
 
@@ -301,7 +306,7 @@ java_library_static {
     name: "android_module_lib_stubs_current",
     srcs: [ ":module-lib-api-stubs-docs" ],
     defaults: ["android_defaults_stubs_current"],
-    libs: ["android_system_stubs_current"],
+    libs: ["sdk_system_29_android"],
 }
 
 /////////////////////////////////////////////////////////////////////
