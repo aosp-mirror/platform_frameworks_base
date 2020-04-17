@@ -64,20 +64,6 @@ class PackageParsingDeferErrorTest {
         }
     }
 
-    private val parsingCallback = object : ParsingPackageUtils.Callback {
-        override fun hasFeature(feature: String?) = true
-
-        override fun startParsingPackage(
-            packageName: String,
-            baseCodePath: String,
-            codePath: String,
-            manifestArray: TypedArray,
-            isCoreApp: Boolean
-        ): ParsingPackage {
-            return ParsingPackageImpl(packageName, baseCodePath, codePath, manifestArray)
-        }
-    }
-
     @get:Rule
     val tempFolder = TemporaryFolder(context.filesDir)
 
@@ -144,6 +130,7 @@ class PackageParsingDeferErrorTest {
                 input.copyTo(output)
             }
         }
-        return ParsingPackageUtils.parseDefaultOneTime(file, 0, inputCallback, parsingCallback)
+        return ParsingPackageUtils.parseDefaultOneTime(file, 0 /*flags*/,
+                false /*collectCertificates*/)
     }
 }
