@@ -41,6 +41,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
+import com.android.systemui.controls.ui.ControlWithState
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
@@ -502,6 +503,10 @@ class ControlsControllerImpl @Inject constructor (
             Favorites.clear()
             persistenceWrapper.storeFavorites(Favorites.getAllStructures())
         }
+    }
+
+    override fun onFocusChanged(cws: ControlWithState?) {
+        uiController.onFocusChanged(cws)
     }
 
     override fun refreshStatus(componentName: ComponentName, control: Control) {

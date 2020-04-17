@@ -26,6 +26,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -141,6 +142,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
@@ -3370,34 +3372,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    private boolean isImeControlledByApp() {
+        return mInputMethodTarget != null && !WindowConfiguration.isSplitScreenWindowingMode(
+                mInputMethodTarget.getWindowingMode());
+    }
+
     boolean isImeAttachedToApp() {
-        return (mInputMethodTarget != null && mInputMethodTarget.mActivityRecord != null
+        return isImeControlledByApp()
+                && mInputMethodTarget.mActivityRecord != null
                 && mInputMethodTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 // An activity with override bounds should be letterboxed inside its parent bounds,
                 // so it doesn't fill the screen.
-                && mInputMethodTarget.mActivityRecord.matchParentBounds());
-    }
-
-    /**
-     * Get IME target that should host IME when this display that is reparented to another
-     * WindowState.
-     * IME is never displayed in a child display.
-     * Use {@link WindowState#getImeControlTarget()} when IME target window
-     * which originally called
-     * {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} is known.
-     *
-     * @return {@link WindowState} of host that controls IME.
-     *         {@code null} when {@param dc} is not a virtual display.
-     * @see DisplayContent#reparent
-     */
-    @Nullable
-    WindowState getImeControlTarget() {
-        WindowState imeTarget = mInputMethodTarget;
-        if (imeTarget != null) {
-            return imeTarget.getImeControlTarget();
-        }
-
-        return getInsetsStateController().getImeSourceProvider().getControlTarget().getWindow();
+                && mInputMethodTarget.mActivityRecord.matchParentBounds();
     }
 
     /**
@@ -3407,7 +3393,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      *
      * @param target current IME target.
      * @return {@link WindowState} that can host IME.
-     * @see DisplayContent#getImeControlTarget()
      */
     WindowState getImeHostOrFallback(WindowState target) {
         if (target != null && target.getDisplayContent().canShowIme()) {
@@ -3440,7 +3425,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mInputMethodTarget = target;
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
-        assignWindowLayers(false /* setLayoutNeeded */);
+        assignWindowLayers(true /* setLayoutNeeded */);
         updateImeParent();
         updateImeControlTarget();
     }
@@ -3448,8 +3433,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /**
      * The IME input target is the window which receives input from IME. It is also a candidate
      * which controls the visibility and animation of the input method window.
-     *
-     * @param target the window that receives input from IME.
      */
     void setInputMethodInputTarget(WindowState target) {
         if (mInputMethodInputTarget != target) {
@@ -3459,12 +3442,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void updateImeControlTarget() {
-        if (!isImeAttachedToApp() && mRemoteInsetsControlTarget != null) {
-            mInputMethodControlTarget = mRemoteInsetsControlTarget;
-        } else {
-            // Otherwise, we just use the ime input target
-            mInputMethodControlTarget = mInputMethodInputTarget;
-        }
+        mInputMethodControlTarget = computeImeControlTarget();
         mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
     }
 
@@ -3473,6 +3451,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (newParent != null) {
             getPendingTransaction().reparent(mImeWindowsContainers.mSurfaceControl, newParent);
             scheduleAnimation();
+        }
+    }
+
+    /**
+     * Computes the window where we hand IME control to.
+     */
+    @VisibleForTesting
+    InsetsControlTarget computeImeControlTarget() {
+        if (!isImeControlledByApp() && mRemoteInsetsControlTarget != null) {
+            return mRemoteInsetsControlTarget;
+        } else {
+            // Otherwise, we just use the ime target as received from IME.
+            return mInputMethodInputTarget;
         }
     }
 

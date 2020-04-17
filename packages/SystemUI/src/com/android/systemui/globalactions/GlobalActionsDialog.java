@@ -43,7 +43,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Color;
-import android.graphics.Insets;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
@@ -396,6 +395,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         if (preferredComponent == null) {
             Log.i(TAG, "Controls seeding: No preferred component has been set, will not seed");
             mControlsPreferences.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, true).apply();
+            return;
         }
 
         mControlsController.seedFavoritesForComponent(
@@ -2178,8 +2178,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             ViewGroup root = (ViewGroup) mGlobalActionsLayout.getRootView();
             root.setOnApplyWindowInsetsListener((v, windowInsets) -> {
                 if (mControlsUiController != null) {
-                    Insets insets = windowInsets.getInsets(WindowInsets.Type.all());
-                    root.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                    root.setPadding(windowInsets.getStableInsetLeft(),
+                            windowInsets.getStableInsetTop(),
+                            windowInsets.getStableInsetRight(),
+                            windowInsets.getStableInsetBottom());
                 }
                 return WindowInsets.CONSUMED;
             });

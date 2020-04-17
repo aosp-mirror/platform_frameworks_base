@@ -195,35 +195,36 @@
                         android:layout_width="wrap_content"
                         android:paddingTop="3dp"
                         android:layout_marginStart="2dp"
+                        android:background="?android:selectableItemBackgroundBorderless"
                         android:orientation="horizontal" >
-                        <ImageButton
+                        <ImageView
                             android:layout_marginStart="4dp"
                             android:id="@+id/camera"
                             android:layout_width="?attr/notificationHeaderIconSize"
                             android:layout_height="?attr/notificationHeaderIconSize"
                             android:src="@drawable/ic_camera"
-                            android:background="?android:selectableItemBackgroundBorderless"
                             android:visibility="gone"
+                            android:focusable="false"
                             android:contentDescription="@string/notification_appops_camera_active"
                             />
-                        <ImageButton
+                        <ImageView
                             android:id="@+id/mic"
                             android:layout_width="?attr/notificationHeaderIconSize"
                             android:layout_height="?attr/notificationHeaderIconSize"
                             android:src="@drawable/ic_mic"
-                            android:background="?android:selectableItemBackgroundBorderless"
                             android:layout_marginStart="4dp"
                             android:visibility="gone"
+                            android:focusable="false"
                             android:contentDescription="@string/notification_appops_microphone_active"
                             />
-                        <ImageButton
+                        <ImageView
                             android:id="@+id/overlay"
                             android:layout_width="?attr/notificationHeaderIconSize"
                             android:layout_height="?attr/notificationHeaderIconSize"
                             android:src="@drawable/ic_alert_window_layer"
-                            android:background="?android:selectableItemBackgroundBorderless"
                             android:layout_marginStart="4dp"
                             android:visibility="gone"
+                            android:focusable="false"
                             android:contentDescription="@string/notification_appops_overlay_active"
                             />
                     </LinearLayout>

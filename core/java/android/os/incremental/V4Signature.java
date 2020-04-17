@@ -16,6 +16,8 @@
 
 package android.os.incremental;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.ParcelFileDescriptor;
 
 import java.io.ByteArrayInputStream;
@@ -45,8 +47,8 @@ public class V4Signature {
     public static class HashingInfo {
         public final int hashAlgorithm; // only 1 == SHA256 supported
         public final byte log2BlockSize; // only 12 (block size 4096) supported now
-        public final byte[] salt; // used exactly as in fs-verity, 32 bytes max
-        public final byte[] rawRootHash; // salted digest of the first Merkle tree page
+        @Nullable public final byte[] salt; // used exactly as in fs-verity, 32 bytes max
+        @Nullable public final byte[] rawRootHash; // salted digest of the first Merkle tree page
 
         HashingInfo(int hashAlgorithm, byte log2BlockSize, byte[] salt, byte[] rawRootHash) {
             this.hashAlgorithm = hashAlgorithm;
@@ -58,7 +60,8 @@ public class V4Signature {
         /**
          * Constructs HashingInfo from byte array.
          */
-        public static HashingInfo fromByteArray(byte[] bytes) throws IOException {
+        @NonNull
+        public static HashingInfo fromByteArray(@NonNull byte[] bytes) throws IOException {
             ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
             final int hashAlgorithm = buffer.getInt();
             final byte log2BlockSize = buffer.get();
@@ -106,8 +109,18 @@ public class V4Signature {
     }
 
     public final int version; // Always 2 for now.
-    public final byte[] hashingInfo;
-    public final byte[] signingInfo; // Passed as-is to the kernel. Can be retrieved later.
+    /**
+     * Raw byte array containing the IncFS hashing data.
+     * @see HashingInfo#fromByteArray(byte[])
+     */
+    @Nullable public final byte[] hashingInfo;
+
+    /**
+     * Raw byte array containing the V4 signature data.
+     * <p>Passed as-is to the kernel. Can be retrieved later.
+     * @see SigningInfo#fromByteArray(byte[])
+     */
+    @Nullable public final byte[] signingInfo;
 
     /**
      * Construct a V4Signature from .idsig file.
@@ -121,7 +134,8 @@ public class V4Signature {
     /**
      * Construct a V4Signature from a byte array.
      */
-    public static V4Signature readFrom(byte[] bytes) throws IOException {
+    @NonNull
+    public static V4Signature readFrom(@NonNull byte[] bytes) throws IOException {
         try (InputStream stream = new ByteArrayInputStream(bytes)) {
             return readFrom(stream);
         }
@@ -169,7 +183,7 @@ public class V4Signature {
         return this.version == SUPPORTED_VERSION;
     }
 
-    private V4Signature(int version, byte[] hashingInfo, byte[] signingInfo) {
+    private V4Signature(int version, @Nullable byte[] hashingInfo, @Nullable byte[] signingInfo) {
         this.version = version;
         this.hashingInfo = hashingInfo;
         this.signingInfo = signingInfo;

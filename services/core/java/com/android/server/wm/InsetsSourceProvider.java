@@ -266,7 +266,7 @@ class InsetsSourceProvider {
         if (getSource().getType() == ITYPE_IME) {
             setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
         }
-        final Transaction t = mDisplayContent.getPendingTransaction();
+        final Transaction t = mDisplayContent.mWmService.mTransactionFactory.get();
         mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
                 ANIMATION_TYPE_INSETS_CONTROL, null /* animationFinishedCallback */);
         final SurfaceControl leash = mAdapter.mCapturedLeash;
@@ -281,6 +281,9 @@ class InsetsSourceProvider {
             t.deferTransactionUntil(mWin.getSurfaceControl(), barrier, frameNumber);
             t.deferTransactionUntil(leash, barrier, frameNumber);
         }
+        // Applying the transaction here can prevent the client from applying its transaction sooner
+        // than us which makes us overwrite the client's operation to the leash.
+        t.apply();
         mControlTarget = target;
         mControl = new InsetsSourceControl(mSource.getType(), leash,
                 new Point(mWin.getWindowFrames().mFrame.left, mWin.getWindowFrames().mFrame.top));

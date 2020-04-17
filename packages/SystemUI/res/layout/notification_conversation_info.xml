@@ -108,7 +108,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    style="@style/TextAppearance.NotificationImportanceChannel"/>
+                    style="@style/TextAppearance.NotificationImportanceChannelGroup"/>
             </LinearLayout>
             <TextView
                 android:id="@+id/delegate_name"

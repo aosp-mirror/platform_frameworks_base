@@ -56,7 +56,6 @@ public class PipResizeGestureHandler {
 
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     private final PipBoundsHandler mPipBoundsHandler;
-    private final PipTouchHandler mPipTouchHandler;
     private final PipMotionHelper mMotionHelper;
     private final int mDisplayId;
     private final Executor mMainExecutor;
@@ -70,10 +69,10 @@ public class PipResizeGestureHandler {
     private final Rect mTmpBounds = new Rect();
     private final int mDelta;
 
-    private boolean mAllowGesture = false;
+    private boolean mAllowGesture;
     private boolean mIsAttached;
     private boolean mIsEnabled;
-    private boolean mEnablePipResize;
+    private boolean mEnableUserResize;
 
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
@@ -82,21 +81,20 @@ public class PipResizeGestureHandler {
     private int mCtrlType;
 
     public PipResizeGestureHandler(Context context, PipBoundsHandler pipBoundsHandler,
-            PipTouchHandler pipTouchHandler, PipMotionHelper motionHelper,
-            DeviceConfigProxy deviceConfig, PipTaskOrganizer pipTaskOrganizer) {
+            PipMotionHelper motionHelper, DeviceConfigProxy deviceConfig,
+            PipTaskOrganizer pipTaskOrganizer) {
         final Resources res = context.getResources();
         context.getDisplay().getMetrics(mDisplayMetrics);
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
         mPipBoundsHandler = pipBoundsHandler;
-        mPipTouchHandler = pipTouchHandler;
         mMotionHelper = motionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
 
         context.getDisplay().getRealSize(mMaxSize);
         mDelta = res.getDimensionPixelSize(R.dimen.pip_resize_edge_size);
 
-        mEnablePipResize = DeviceConfig.getBoolean(
+        mEnableUserResize = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 PIP_USER_RESIZE,
                 /* defaultValue = */ true);
@@ -105,7 +103,7 @@ public class PipResizeGestureHandler {
                     @Override
                     public void onPropertiesChanged(DeviceConfig.Properties properties) {
                         if (properties.getKeyset().contains(PIP_USER_RESIZE)) {
-                            mEnablePipResize = properties.getBoolean(
+                            mEnableUserResize = properties.getBoolean(
                                     PIP_USER_RESIZE, /* defaultValue = */ true);
                         }
                     }
@@ -134,7 +132,7 @@ public class PipResizeGestureHandler {
     }
 
     private void updateIsEnabled() {
-        boolean isEnabled = mIsAttached && mEnablePipResize;
+        boolean isEnabled = mIsAttached && mEnableUserResize;
         if (isEnabled == mIsEnabled) {
             return;
         }

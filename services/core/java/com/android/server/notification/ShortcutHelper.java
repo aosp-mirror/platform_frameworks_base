@@ -21,11 +21,15 @@ import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 
 import android.annotation.NonNull;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutServiceInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -38,6 +42,7 @@ import java.util.List;
  * Helper for querying shortcuts.
  */
 class ShortcutHelper {
+    private static final String TAG = "ShortcutHelper";
 
     /**
      * Listener to call when a shortcut we're tracking has been removed.
@@ -48,6 +53,8 @@ class ShortcutHelper {
 
     private LauncherApps mLauncherAppsService;
     private ShortcutListener mShortcutListener;
+    private ShortcutServiceInternal mShortcutServiceInternal;
+    private IntentFilter mSharingFilter;
 
     // Key: packageName Value: <shortcutId, notifId>
     private HashMap<String, HashMap<String, String>> mActiveShortcutBubbles = new HashMap<>();
@@ -111,14 +118,27 @@ class ShortcutHelper {
         }
     };
 
-    ShortcutHelper(LauncherApps launcherApps, ShortcutListener listener) {
+    ShortcutHelper(LauncherApps launcherApps, ShortcutListener listener,
+            ShortcutServiceInternal shortcutServiceInternal) {
         mLauncherAppsService = launcherApps;
         mShortcutListener = listener;
+        mSharingFilter = new IntentFilter();
+        try {
+            mSharingFilter.addDataType("*/*");
+        } catch (IntentFilter.MalformedMimeTypeException e) {
+            Slog.e(TAG, "Bad mime type", e);
+        }
+        mShortcutServiceInternal = shortcutServiceInternal;
     }
 
     @VisibleForTesting
     void setLauncherApps(LauncherApps launcherApps) {
         mLauncherAppsService = launcherApps;
+    }
+
+    @VisibleForTesting
+    void setShortcutServiceInternal(ShortcutServiceInternal shortcutServiceInternal) {
+        mShortcutServiceInternal = shortcutServiceInternal;
     }
 
     /**
@@ -141,7 +161,14 @@ class ShortcutHelper {
             ShortcutInfo info = shortcuts != null && shortcuts.size() > 0
                     ? shortcuts.get(0)
                     : null;
-            return info != null && info.isLongLived() ? info : null;
+            if (info == null || !info.isLongLived() || !info.isEnabled()) {
+                return null;
+            }
+            if (mShortcutServiceInternal.isSharingShortcut(user.getIdentifier(),
+                    "android", packageName, shortcutId, user.getIdentifier(), mSharingFilter)) {
+                return info;
+            }
+            return null;
         } finally {
             Binder.restoreCallingIdentity(token);
         }

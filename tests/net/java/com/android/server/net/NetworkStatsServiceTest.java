@@ -106,7 +106,7 @@ import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;
 import com.android.testutils.HandlerUtilsKt;
-import com.android.testutils.TestableNetworkStatsProvider;
+import com.android.testutils.TestableNetworkStatsProviderBinder;
 
 import libcore.io.IoUtils;
 
@@ -1116,7 +1116,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
 
         // Register custom provider and retrieve callback.
-        final TestableNetworkStatsProvider provider = new TestableNetworkStatsProvider();
+        final TestableNetworkStatsProviderBinder provider =
+                new TestableNetworkStatsProviderBinder();
         final INetworkStatsProviderCallback cb =
                 mService.registerNetworkStatsProvider("TEST", provider);
         assertNotNull(cb);
@@ -1174,7 +1175,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states), new VpnInfo[0]);
 
         // Register custom provider and retrieve callback.
-        final TestableNetworkStatsProvider provider = new TestableNetworkStatsProvider();
+        final TestableNetworkStatsProviderBinder provider =
+                new TestableNetworkStatsProviderBinder();
         final INetworkStatsProviderCallback cb =
                 mService.registerNetworkStatsProvider("TEST", provider);
         assertNotNull(cb);

@@ -54,8 +54,10 @@ import android.graphics.Region;
 import android.graphics.drawable.VectorDrawable;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -298,13 +300,15 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                         updateColorInversion(value);
                     }
                 };
+
+                mColorInversionSetting.setListening(true);
+                mColorInversionSetting.onChange(false);
             }
-            mColorInversionSetting.setListening(true);
-            mColorInversionSetting.onChange(false);
 
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_USER_SWITCHED);
-            mBroadcastDispatcher.registerReceiverWithHandler(mIntentReceiver, filter, mHandler);
+            mBroadcastDispatcher.registerReceiver(mUserSwitchIntentReceiver, filter,
+                    new HandlerExecutor(mHandler), UserHandle.ALL);
             mIsRegistered = true;
         } else {
             mMainHandler.post(() -> mTunerService.removeTunable(this));
@@ -313,7 +317,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 mColorInversionSetting.setListening(false);
             }
 
-            mBroadcastDispatcher.unregisterReceiver(mIntentReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mUserSwitchIntentReceiver);
             mIsRegistered = false;
         }
     }
@@ -503,17 +507,16 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         }
     }
 
-    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mUserSwitchIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_USER_SWITCHED)) {
-                int newUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                        ActivityManager.getCurrentUser());
-                // update color inversion setting to the new user
-                mColorInversionSetting.setUserId(newUserId);
-                updateColorInversion(mColorInversionSetting.getValue());
+            int newUserId = ActivityManager.getCurrentUser();
+            if (DEBUG) {
+                Log.d(TAG, "UserSwitched newUserId=" + newUserId);
             }
+            // update color inversion setting to the new user
+            mColorInversionSetting.setUserId(newUserId);
+            updateColorInversion(mColorInversionSetting.getValue());
         }
     };
 
@@ -945,7 +948,12 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             int dw = flipped ? lh : lw;
             int dh = flipped ? lw : lh;
 
-            mBoundingPath.set(DisplayCutout.pathFromResources(getResources(), dw, dh));
+            Path path = DisplayCutout.pathFromResources(getResources(), dw, dh);
+            if (path != null) {
+                mBoundingPath.set(path);
+            } else {
+                mBoundingPath.reset();
+            }
             Matrix m = new Matrix();
             transformPhysicalToLogicalCoordinates(mInfo.rotation, dw, dh, m);
             mBoundingPath.transform(m);

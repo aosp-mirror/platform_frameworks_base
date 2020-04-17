@@ -145,7 +145,7 @@ public:
     }
 
     // Default value = false
-    inline bool shouldTruncateTimestamp() {
+    inline bool shouldTruncateTimestamp() const {
         return mTruncateTimestamp;
     }
 
@@ -168,6 +168,20 @@ public:
     // chain, returns -1.
     inline int getAttributionChainIndex() {
         return mAttributionChainIndex;
+    }
+
+    // Returns the index of the exclusive state field within the FieldValues vector if
+    // an exclusive state exists. If there is no exclusive state field, returns -1.
+    //
+    // If the index within the atom definition is desired, do the following:
+    //    int vectorIndex = LogEvent.getExclusiveStateFieldIndex();
+    //    if (vectorIndex != -1) {
+    //        FieldValue& v = LogEvent.getValues()[vectorIndex];
+    //        int atomIndex = v.mField.getPosAtDepth(0);
+    //    }
+    // Note that atomIndex is 1-indexed.
+    inline int getExclusiveStateFieldIndex() const {
+        return mExclusiveStateFieldIndex;
     }
 
     inline LogEvent makeCopy() {
@@ -297,6 +311,7 @@ private:
     bool mTruncateTimestamp = false;
     int mUidFieldIndex = -1;
     int mAttributionChainIndex = -1;
+    int mExclusiveStateFieldIndex = -1;
 };
 
 void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::vector<uint8_t>* protoOut);

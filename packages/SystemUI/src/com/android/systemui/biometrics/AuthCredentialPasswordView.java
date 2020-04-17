@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
+import android.os.UserHandle;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -68,6 +69,7 @@ public class AuthCredentialPasswordView extends AuthCredentialView
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        mPasswordField.setTextOperationUser(UserHandle.of(mUserId));
         if (mCredentialType == Utils.CREDENTIAL_PIN) {
             mPasswordField.setInputType(
                     InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);

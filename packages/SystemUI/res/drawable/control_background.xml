@@ -17,7 +17,8 @@
 */
 -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-  <item>
+  <item
+      android:id="@+id/background">
     <shape>
       <solid android:color="@color/control_default_background" />
       <corners android:radius="@dimen/control_corner_radius" />

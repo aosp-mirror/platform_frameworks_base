@@ -1258,13 +1258,6 @@ public final class AutofillManager {
                 }
             }
 
-            if (mForAugmentedAutofillOnly) {
-                if (sVerbose) {
-                    Log.v(TAG,  "notifyValueChanged(): not notifying system server on "
-                            + "augmented-only mode");
-                }
-                return;
-            }
             if (!mEnabled || !isActiveLocked()) {
                 if (!startAutofillIfNeededLocked(view)) {
                     if (sVerbose) {
@@ -1299,10 +1292,6 @@ public final class AutofillManager {
             return;
         }
         synchronized (mLock) {
-            if (mForAugmentedAutofillOnly) {
-                if (sVerbose) Log.v(TAG,  "notifyValueChanged(): ignoring on augmented only mode");
-                return;
-            }
             if (!mEnabled || !isActiveLocked()) {
                 if (sVerbose) {
                     Log.v(TAG, "notifyValueChanged(" + view.getAutofillId() + ":" + virtualId

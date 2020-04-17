@@ -1224,7 +1224,7 @@ public class DeviceIdleController extends SystemService
                 IDLE_FACTOR = mParser.getFloat(KEY_IDLE_FACTOR,
                         2f);
                 MIN_TIME_TO_ALARM = mParser.getDurationMillis(KEY_MIN_TIME_TO_ALARM,
-                        !COMPRESS_TIME ? 60 * 60 * 1000L : 6 * 60 * 1000L);
+                        !COMPRESS_TIME ? 30 * 60 * 1000L : 6 * 60 * 1000L);
                 MAX_TEMP_APP_WHITELIST_DURATION = mParser.getDurationMillis(
                         KEY_MAX_TEMP_APP_WHITELIST_DURATION, 5 * 60 * 1000L);
                 MMS_TEMP_APP_WHITELIST_DURATION = mParser.getDurationMillis(

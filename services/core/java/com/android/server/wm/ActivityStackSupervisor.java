@@ -1357,7 +1357,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // still need moveTaskToFrontLocked() below for any transition settings.
             }
             if (stack.shouldResizeStackWithLaunchBounds()) {
-                stack.resize(bounds, null /* configBounds */, !PRESERVE_WINDOWS, !DEFER_RESUME);
+                stack.resize(bounds, !PRESERVE_WINDOWS, !DEFER_RESUME);
             } else {
                 // WM resizeTask must be done after the task is moved to the correct stack,
                 // because Task's setBounds() also updates dim layer's bounds, but that has

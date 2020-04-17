@@ -3666,6 +3666,28 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns whether the given user's credential will be sufficient for all password policy
+     * requirement, once the user's profile has switched to unified challenge.
+     *
+     * <p>This is different from {@link #isActivePasswordSufficient()} since once the profile
+     * switches to unified challenge, policies set explicitly on the profile will start to affect
+     * the parent user.
+     * @param userHandle the user whose password requirement will be checked
+     * @param profileUser the profile user whose lockscreen challenge will be unified.
+     * @hide
+     */
+    public boolean isPasswordSufficientAfterProfileUnification(int userHandle, int profileUser) {
+        if (mService != null) {
+            try {
+                return mService.isPasswordSufficientAfterProfileUnification(userHandle,
+                        profileUser);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+    /**
      * Retrieve the number of times the user has failed at entering a password since that last
      * successful password entry.
      * <p>

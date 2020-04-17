@@ -1986,27 +1986,30 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             Sets.newSet(
                     UserManager.DISALLOW_CONFIG_DATE_TIME,
                     UserManager.DISALLOW_ADD_USER,
-                    UserManager.DISALLOW_BLUETOOTH,
                     UserManager.DISALLOW_BLUETOOTH_SHARING,
-                    UserManager.DISALLOW_CONFIG_BLUETOOTH,
                     UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
-                    UserManager.DISALLOW_CONFIG_LOCATION,
                     UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
                     UserManager.DISALLOW_CONFIG_PRIVATE_DNS,
                     UserManager.DISALLOW_CONFIG_TETHERING,
-                    UserManager.DISALLOW_CONFIG_WIFI,
-                    UserManager.DISALLOW_CONTENT_CAPTURE,
-                    UserManager.DISALLOW_CONTENT_SUGGESTIONS,
                     UserManager.DISALLOW_DATA_ROAMING,
-                    UserManager.DISALLOW_DEBUGGING_FEATURES,
                     UserManager.DISALLOW_SAFE_BOOT,
-                    UserManager.DISALLOW_SHARE_LOCATION,
                     UserManager.DISALLOW_SMS,
                     UserManager.DISALLOW_USB_FILE_TRANSFER,
                     UserManager.DISALLOW_AIRPLANE_MODE,
                     UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
-                    UserManager.DISALLOW_OUTGOING_CALLS,
                     UserManager.DISALLOW_UNMUTE_MICROPHONE
+            );
+
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS =
+            Sets.newSet(
+                    UserManager.DISALLOW_CONFIG_BLUETOOTH,
+                    UserManager.DISALLOW_CONFIG_LOCATION,
+                    UserManager.DISALLOW_CONFIG_WIFI,
+                    UserManager.DISALLOW_CONTENT_CAPTURE,
+                    UserManager.DISALLOW_CONTENT_SUGGESTIONS,
+                    UserManager.DISALLOW_DEBUGGING_FEATURES,
+                    UserManager.DISALLOW_SHARE_LOCATION,
+                    UserManager.DISALLOW_OUTGOING_CALLS
             );
 
     public void testSetUserRestriction_asPoOfOrgOwnedDevice() throws Exception {
@@ -2021,7 +2024,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
 
         for (String restriction : PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS) {
-            addAndRemoveUserRestrictionOnParentDpm(restriction);
+            addAndRemoveGlobalUserRestrictionOnParentDpm(restriction);
+        }
+        for (String restriction : PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS) {
+            addAndRemoveLocalUserRestrictionOnParentDpm(restriction);
         }
 
         parentDpm.setCameraDisabled(admin1, true);
@@ -2047,12 +2053,28 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(getServices().userManagerInternal);
     }
 
-    private void addAndRemoveUserRestrictionOnParentDpm(String restriction) {
+    private void addAndRemoveGlobalUserRestrictionOnParentDpm(String restriction) {
         parentDpm.addUserRestriction(admin1, restriction);
         verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
                 eq(DpmMockContext.CALLER_USER_HANDLE),
                 MockUtils.checkUserRestrictions(restriction),
                 MockUtils.checkUserRestrictions(DpmMockContext.CALLER_USER_HANDLE),
+                eq(false));
+        parentDpm.clearUserRestriction(admin1, restriction);
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(),
+                dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                        .getParentActiveAdmin()
+                        .getEffectiveRestrictions()
+        );
+    }
+
+    private void addAndRemoveLocalUserRestrictionOnParentDpm(String restriction) {
+        parentDpm.addUserRestriction(admin1, restriction);
+        verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(DpmMockContext.CALLER_USER_HANDLE),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions(UserHandle.USER_SYSTEM, restriction),
                 eq(false));
         parentDpm.clearUserRestriction(admin1, restriction);
         DpmTestUtils.assertRestrictions(
@@ -4839,6 +4861,33 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // The active (nonexistent) password doesn't comply with the requirements.
         assertFalse(dpm.isActivePasswordSufficient());
+    }
+
+    public void testIsPasswordSufficientAfterProfileUnification() throws Exception {
+        final int managedProfileUserId = DpmMockContext.CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        doReturn(true).when(getServices().lockPatternUtils)
+                .isSeparateProfileChallengeEnabled(managedProfileUserId);
+
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC);
+        parentDpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
+
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
+                .thenReturn(computeForPassword("1234".getBytes()));
+
+        // Numeric password is compliant with current requirement (QUALITY_NUMERIC set explicitly
+        // on the parent admin)
+        assertTrue(dpm.isPasswordSufficientAfterProfileUnification(UserHandle.USER_SYSTEM,
+                UserHandle.USER_NULL));
+        // Numeric password is not compliant if profile is to be unified: the profile has a
+        // QUALITY_ALPHABETIC policy on itself which will be enforced on the password after
+        // unification.
+        assertFalse(dpm.isPasswordSufficientAfterProfileUnification(UserHandle.USER_SYSTEM,
+                managedProfileUserId));
     }
 
     private void setActivePasswordState(PasswordMetrics passwordMetrics)
