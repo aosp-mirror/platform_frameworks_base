@@ -55,7 +55,6 @@ import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -581,6 +580,8 @@ public final class NotificationRecord {
         pw.println(prefix + "mLight= " + mLight);
         pw.println(prefix + "mShowBadge=" + mShowBadge);
         pw.println(prefix + "mColorized=" + notification.isColorized());
+        pw.println(prefix + "mAllowBubble=" + mAllowBubble);
+        pw.println(prefix + "isBubble=" + notification.isBubbleNotification());
         pw.println(prefix + "mIsInterruptive=" + mIsInterruptive);
         pw.println(prefix + "effectiveNotificationChannel=" + getChannel());
         if (getPeopleOverride() != null) {
