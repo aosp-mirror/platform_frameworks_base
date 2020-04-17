@@ -125,7 +125,6 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
             PeopleHubViewAdapter peopleHubViewAdapter,
-            MediaHierarchyManager mediaHiearchyManager,
             KeyguardMediaController keyguardMediaController,
             NotificationSectionsFeatureManager sectionsFeatureManager) {
         mActivityStarter = activityStarter;

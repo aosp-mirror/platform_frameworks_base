@@ -106,7 +106,6 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     private final NotificationEntryManager mEntryManager;
-    private final MediaDataManager mMediaDataManager;
 
     @Nullable
     private Lazy<NotificationShadeWindowController> mNotificationShadeWindowController;
@@ -206,35 +205,17 @@ public class NotificationMediaManager implements Dumpable {
         mNotificationShadeWindowController = notificationShadeWindowController;
         mEntryManager = notificationEntryManager;
         mMainExecutor = mainExecutor;
-        mMediaDataManager = mediaDataManager;
-        mediaDataManager.setListener(new MediaListener() {
-            @Override
-            public void onMediaDataLoaded(@NonNull String key, @NonNull MediaData metadata) {
-                ArrayList<MediaListener> callbacks = new ArrayList<>(mMediaListeners);
-                for (int i = 0; i < callbacks.size(); i++) {
-                    callbacks.get(i).onMediaDataLoaded(key, metadata);
-                }
-            }
-
-            @Override
-            public void onMediaDataRemoved(@NonNull String key) {
-                ArrayList<MediaListener> callbacks = new ArrayList<>(mMediaListeners);
-                for (int i = 0; i < callbacks.size(); i++) {
-                    callbacks.get(i).onMediaDataRemoved(key);
-                }
-            }
-        });
 
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
 
             @Override
             public void onPendingEntryAdded(NotificationEntry entry) {
-                mMediaDataManager.onNotificationAdded(entry.getKey(), entry.getSbn());
+                mediaDataManager.onNotificationAdded(entry.getKey(), entry.getSbn());
             }
 
             @Override
             public void onPreEntryUpdated(NotificationEntry entry) {
-                mMediaDataManager.onNotificationAdded(entry.getKey(), entry.getSbn());
+                mediaDataManager.onNotificationAdded(entry.getKey(), entry.getSbn());
             }
 
             @Override
@@ -254,7 +235,7 @@ public class NotificationMediaManager implements Dumpable {
                     boolean removedByUser,
                     int reason) {
                 onNotificationRemoved(entry.getKey());
-                mMediaDataManager.onNotificationRemoved(entry.getKey());
+                mediaDataManager.onNotificationRemoved(entry.getKey());
             }
         });
 
@@ -720,13 +701,6 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     /**
-     * Are there any media notifications active?
-     */
-    public boolean hasActiveMedia() {
-        return mMediaDataManager.hasActiveMedia();
-    }
-
-    /**
      * {@link AsyncTask} to prepare album art for use as backdrop on lock screen.
      */
     private static final class ProcessArtworkTask extends AsyncTask<Bitmap, Void, Bitmap> {
@@ -781,15 +755,5 @@ public class NotificationMediaManager implements Dumpable {
          */
         default void onPrimaryMetadataOrStateChanged(MediaMetadata metadata,
                 @PlaybackState.State int state) {}
-
-        /**
-         * Called whenever there's new MediaData Loaded for the consumption in views
-         */
-        default void onMediaDataLoaded(@NonNull String key, @NonNull MediaData data) {}
-
-        /**
-         * Called whenever a previously existing Media notification was removed
-         */
-        default void onMediaDataRemoved(@NonNull String key) {}
     }
 }

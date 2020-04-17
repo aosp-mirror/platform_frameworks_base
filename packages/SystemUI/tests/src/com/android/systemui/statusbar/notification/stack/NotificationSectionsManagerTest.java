@@ -44,6 +44,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -75,7 +76,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private PeopleHubViewAdapter mPeopleHubAdapter;
-    @Mock private MediaHierarchyManager mMediaHierarchyManager;
+    @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private NotificationSectionsFeatureManager mSectionsFeatureManager;
     @Mock private NotificationRowComponent mNotificationRowComponent;
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
@@ -88,15 +89,13 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         when(mNotificationRowComponent.getActivatableNotificationViewController()).thenReturn(
                 mActivatableNotificationViewController
         );
-        when(mMediaHierarchyManager.createMediaHost(any())).thenReturn(
-                new UniqueObjectHost(getContext()));
         mSectionsManager =
                 new NotificationSectionsManager(
                         mActivityStarterDelegate,
                         mStatusBarStateController,
                         mConfigurationController,
                         mPeopleHubAdapter,
-                        mMediaHierarchyManager,
+                        mKeyguardMediaController,
                         mSectionsFeatureManager
                 );
         // Required in order for the header inflation to work properly

@@ -29,7 +29,6 @@ import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.VisualStabilityManager
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -52,12 +51,12 @@ class MediaHierarchyManager @Inject constructor(
     private val visualStabilityManager: VisualStabilityManager,
     private val statusBarStateController: StatusBarStateController,
     private val bypassController: KeyguardBypassController,
-    mediaManager: NotificationMediaManager
+    mediaManager: MediaDataManager
 ) {
     private val mediaCarousel: ViewGroup
     private val mediaContent: ViewGroup
     private val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
-    private val mediaHosts = arrayOfNulls<ViewGroup>(LOCATION_LOCKSCREEN + 1)
+    private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_LOCKSCREEN + 1)
     private val visualStabilityCallback = ::reorderAllPlayers
     private var currentAttachmentLocation = -1
 
@@ -71,8 +70,8 @@ class MediaHierarchyManager @Inject constructor(
 
     init {
         mediaCarousel = inflateMediaCarousel()
-        mediaContent = mediaCarousel.findViewById(R.id.media_carousel)
-        mediaManager.addCallback(object : NotificationMediaManager.MediaListener {
+        mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
+        mediaManager.addListener(object : MediaDataManager.Listener {
             override fun onMediaDataLoaded(key: String, data: MediaData) {
                 updateView(key, data)
             }
@@ -99,6 +98,7 @@ class MediaHierarchyManager @Inject constructor(
                 mediaContent.addView(view, 0)
             }
         }
+        updateMediaPaddings()
     }
 
     private fun updateView(key: String, data: MediaData) {
@@ -114,11 +114,8 @@ class MediaHierarchyManager @Inject constructor(
             existingPlayer = MediaControlPanel(context, mediaContent, routeManager,
                     foregroundExecutor, backgroundExecutor)
             mediaPlayers[key] = existingPlayer
-            val padding = context.resources.getDimensionPixelSize(R.dimen.qs_media_padding)
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
-            lp.marginStart = padding
-            lp.marginEnd = padding
             existingPlayer.view.setLayoutParams(lp)
             existingPlayer.setListening(shouldListen)
             if (existingPlayer.isPlaying) {
@@ -136,39 +133,80 @@ class MediaHierarchyManager @Inject constructor(
             }
         }
         existingPlayer.bind(data)
+        updateMediaPaddings()
+    }
+
+    private fun updateMediaPaddings() {
+        val padding = context.resources.getDimensionPixelSize(R.dimen.qs_media_padding)
+        val childCount = mediaContent.childCount
+        for (i in 0 until childCount) {
+            val mediaView = mediaContent.getChildAt(i)
+            val desiredPaddingEnd = if (i == childCount - 1) 0 else padding
+            val layoutParams = mediaView.layoutParams as ViewGroup.MarginLayoutParams
+            if (layoutParams.marginEnd != desiredPaddingEnd) {
+                layoutParams.marginEnd = desiredPaddingEnd
+                mediaView.layoutParams = layoutParams
+            }
+        }
+
     }
 
     /**
-     * Create a media host view which can be attached to a view hierarchy and where the player
-     * will be placed in when the host is the currently desired state.
+     * Register a media host and create a view can be attached to a view hierarchy
+     * and where the players will be placed in when the host is the currently desired state.
      *
      * @return the hostView associated with this location
      */
-    fun createMediaHost(@MediaLocation location: Int) : ViewGroup {
+    fun register(mediaObject: MediaHost) : ViewGroup {
         val viewHost = UniqueObjectHost(context)
-        mediaHosts[location] = viewHost
-        if (location == currentAttachmentLocation) {
+        mediaObject.hostView = viewHost;
+        mediaHosts[mediaObject.location] = mediaObject
+        if (mediaObject.location == currentAttachmentLocation) {
             // In case we are overriding a view that is already visible, make sure we attach it
             // to this new host view in the below call
             currentAttachmentLocation = -1
         }
-        updateAttachmentLocation(animate = false)
+        updateAttachmentLocation()
         return viewHost
     }
 
-    private fun updateAttachmentLocation(animate: Boolean) {
+    private fun updateAttachmentLocation() {
         var desiredLocation = calculateLocation()
         if (desiredLocation != currentAttachmentLocation) {
             val host = mediaHosts[desiredLocation]
             host?.apply {
-                if (currentAttachmentLocation >= 0) {
-                    val currentHost = mediaHosts[currentAttachmentLocation]
-                    currentHost?.removeView(mediaCarousel)
+                // Remove the carousel from the old host
+                (mediaCarousel.parent as ViewGroup?)?.removeView(mediaCarousel)
+
+                // Add it to the new one
+                host.hostView.addView(mediaCarousel)
+
+                // Let's perform a transition
+                var previousHost = if (currentAttachmentLocation < 0) {
+                    null
+                } else {
+                    mediaHosts[currentAttachmentLocation]
                 }
-                host.addView(mediaCarousel)
-                // TODO: handle animation / repositioning etc
+                performTransition(previousHost, host)
                 currentAttachmentLocation = desiredLocation
             }
+        }
+    }
+
+    private fun performTransition(previousHost: MediaHost?, newHost: MediaHost) {
+        if (previousHost == null) {
+            applyObjectStateImmediately(newHost)
+            return
+        }
+        // TODO: actually transition!
+        applyObjectStateImmediately(newHost)
+    }
+
+    private fun applyObjectStateImmediately(newObject: MediaHost) {
+        val expansion = if (newObject.isExpanded) 1.0f else 0.0f;
+        for (mediaPlayer in mediaPlayers.values) {
+            val view = mediaPlayer.view
+            view.progress = expansion
         }
     }
 
@@ -190,7 +228,7 @@ class MediaHierarchyManager @Inject constructor(
     var qsExpansion: Float = 0.0f
         set(value) {
             field = value
-            updateAttachmentLocation(animate = false)
+            updateAttachmentLocation()
         }
 
     @IntDef(prefix = ["LOCATION_"], value = [LOCATION_QS, LOCATION_QQS, LOCATION_LOCKSCREEN])

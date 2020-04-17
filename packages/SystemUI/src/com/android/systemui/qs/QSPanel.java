@@ -59,6 +59,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaControlPanel;
 import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -69,7 +70,6 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
@@ -97,7 +97,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     private final BroadcastDispatcher mBroadcastDispatcher;
-    protected final MediaHierarchyManager mMediaHiearchyManager;
+    protected final MediaHost mMediaHost;
     private String mCachedSpecs = "";
     protected final View mBrightnessView;
     private final H mHandler = new H();
@@ -147,12 +147,12 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
-            MediaHierarchyManager mediaHierarchyManager,
+            MediaHost mediaHost,
             ActivityStarter activityStarter,
             UiEventLogger uiEventLogger
     ) {
         super(context, attrs);
-        mMediaHiearchyManager = mediaHierarchyManager;
+        mMediaHost = mediaHost;
         mContext = context;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
@@ -180,24 +180,39 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mFooter = new QSSecurityFooter(this, context);
         addView(mFooter.getView());
 
-        // Add media carousel
-        if (useQsMediaPlayer(context)) {
-            addMediaHostView();
-        }
-
         updateResources();
 
         mBrightnessController = new BrightnessController(getContext(),
                 findViewById(R.id.brightness_slider), mBroadcastDispatcher);
     }
 
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        // Add media carousel at the end
+        if (useQsMediaPlayer(getContext())) {
+            addMediaHostView();
+        }
+    }
+
     protected void addMediaHostView() {
-        ViewGroup hostView = mMediaHiearchyManager.createMediaHost(
-                MediaHierarchyManager.LOCATION_QS);
+        mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
+        mMediaHost.setExpanded(true);
+        mMediaHost.setShowsOnlyActiveMedia(false);
+        ViewGroup hostView = mMediaHost.getHostView();
         addView(hostView);
-        ViewGroup.LayoutParams layoutParams = hostView.getLayoutParams();
+        int sidePaddings = getResources().getDimensionPixelSize(
+                R.dimen.quick_settings_side_margins);
+        int bottomPadding = getResources().getDimensionPixelSize(
+                R.dimen.quick_settings_expanded_bottom_margin);
+        MarginLayoutParams layoutParams = (MarginLayoutParams) hostView.getLayoutParams();
         layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        layoutParams.bottomMargin = bottomPadding;
+        hostView.setLayoutParams(layoutParams);
+        hostView.setPadding(sidePaddings, hostView.getPaddingTop(), sidePaddings,
+                hostView.getPaddingBottom());
     }
 
     private final QSMediaBrowser.Callback mMediaBrowserCallback = new QSMediaBrowser.Callback() {
@@ -297,7 +312,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         int numChildren = getChildCount();
         for (int i = 0; i < numChildren; i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE) height += child.getMeasuredHeight();
+            if (child.getVisibility() != View.GONE) {
+                height += child.getMeasuredHeight();
+                MarginLayoutParams layoutParams = (MarginLayoutParams) child.getLayoutParams();
+                height += layoutParams.topMargin + layoutParams.bottomMargin;
+            }
         }
         setMeasuredDimension(getMeasuredWidth(), height);
     }
@@ -529,7 +548,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     public void setListening(boolean listening) {
         if (mListening == listening) return;
-        mMediaHiearchyManager.setShouldListen(listening);
+        mMediaHost.setShouldListen(listening);
         if (mTileLayout != null) {
             mQSLogger.logAllTilesChangeListening(listening, getDumpableTag(), mCachedSpecs);
             mTileLayout.setListening(listening);

@@ -22,11 +22,13 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.media.MediaMetadata
 import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import com.android.internal.util.ContrastColorUtil
+import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -49,7 +51,7 @@ class MediaDataManager @Inject constructor(
     @Main private val foregroundExcecutor: Executor
 ) {
 
-    lateinit var listener: NotificationMediaManager.MediaListener
+    private val listeners: MutableSet<Listener> = mutableSetOf()
     private var albumArtSize: Int = 0
     private var albumArtRadius: Int = 0
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
@@ -59,7 +61,8 @@ class MediaDataManager @Inject constructor(
     }
 
     private fun loadDimens() {
-        albumArtRadius = context.resources.getDimensionPixelSize(R.dimen.qs_media_corner_radius)
+        albumArtRadius = context.resources.getDimensionPixelSize(
+                Utils.getThemeAttr(context, android.R.attr.dialogCornerRadius))
         albumArtSize = context.resources.getDimensionPixelSize(R.dimen.qs_media_album_size)
     }
 
@@ -79,6 +82,16 @@ class MediaDataManager @Inject constructor(
             loadMediaDataInBg(key, sbn)
         }
     }
+
+    /**
+     * Add a listener for changes in this class
+     */
+    fun addListener(listener: Listener) = listeners.add(listener)
+
+    /**
+     * Remove a listener for changes in this class
+     */
+    fun removeListener(listener: Listener) = listeners.remove(listener)
 
     private fun loadMediaDataInBg(key: String, sbn: StatusBarNotification) {
         val token = sbn.notification.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
@@ -164,14 +177,18 @@ class MediaDataManager @Inject constructor(
         if (mediaEntries.containsKey(key)) {
             // Otherwise this was removed already
             mediaEntries.put(key, data)
-            listener.onMediaDataLoaded(key, data)
+            listeners.forEach {
+                it.onMediaDataLoaded(key, data)
+            }
         }
     }
 
     fun onNotificationRemoved(key: String) {
         val removed = mediaEntries.remove(key)
         if (removed != null) {
-            listener.onMediaDataRemoved(key)
+            listeners.forEach {
+                it.onMediaDataRemoved(key)
+            }
         }
     }
 
@@ -200,6 +217,24 @@ class MediaDataManager @Inject constructor(
      * Are there any media notifications active?
      */
     fun hasActiveMedia() = mediaEntries.size > 0
+
+    fun hasAnyMedia(): Boolean {
+        // TODO: implement this when we implemented resumption
+        return hasActiveMedia()
+    }
+
+    interface Listener {
+
+        /**
+         * Called whenever there's new MediaData Loaded for the consumption in views
+         */
+        fun onMediaDataLoaded(key: String, data: MediaData) {}
+
+        /**
+         * Called whenever a previously existing Media notification was removed
+         */
+        fun onMediaDataRemoved(key: String) {}
+    }
 }
 
 private val LOADING = MediaData(false, 0, 0, null, null, null, null, null,

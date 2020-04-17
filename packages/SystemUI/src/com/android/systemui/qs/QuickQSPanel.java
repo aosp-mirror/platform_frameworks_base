@@ -27,21 +27,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import androidx.annotation.NonNull;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.media.MediaData;
 import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils;
@@ -61,7 +59,6 @@ public class QuickQSPanel extends QSPanel {
     private static final String TAG = "QuickQSPanel";
     // Start it at 6 so a non-zero value can be obtained statically.
     private static int sDefaultMaxTiles = 6;
-    private final NotificationMediaManager mNotificationMediaManager;
 
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
@@ -76,19 +73,7 @@ public class QuickQSPanel extends QSPanel {
     private QSTileLayout mHorizontalTileLayout;
     private QSTileLayout mRegularTileLayout;
     private int mLastOrientation = -1;
-    private ViewGroup mMediaHost;
-    private final NotificationMediaManager.MediaListener mMediaCallback
-            = new NotificationMediaManager.MediaListener() {
-        @Override
-        public void onMediaDataLoaded(@NonNull String key, @NonNull MediaData data) {
-            switchTileLayout();
-        }
-
-        @Override
-        public void onMediaDataRemoved(@NonNull String key) {
-            switchTileLayout();
-        }
-    };
+    private int mMediaBottomMargin;
 
     @Inject
     public QuickQSPanel(
@@ -97,14 +82,12 @@ public class QuickQSPanel extends QSPanel {
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
-            MediaHierarchyManager mediaHierarchyManager,
-            NotificationMediaManager notificationMediaManager,
+            MediaHost mediaHost,
             ActivityStarter activityStarter,
             UiEventLogger uiEventLogger
     ) {
-        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger,
-                mediaHierarchyManager, activityStarter, uiEventLogger);
-        mNotificationMediaManager = notificationMediaManager;
+        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, mediaHost, 
+                activityStarter, uiEventLogger);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
@@ -114,59 +97,105 @@ public class QuickQSPanel extends QSPanel {
             }
             removeView((View) mTileLayout);
         }
+        mMediaBottomMargin = getResources().getDimensionPixelSize(
+                R.dimen.quick_settings_media_extra_bottom_margin);
 
         mUsingMediaPlayer = Utils.useQsMediaPlayer(context);
         if (mUsingMediaPlayer) {
-            mNotificationMediaManager.addCallback(mMediaCallback);
             mHorizontalLinearLayout = new LinearLayout(mContext);
             mHorizontalLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
             mHorizontalLinearLayout.setClipChildren(false);
             mHorizontalLinearLayout.setClipToPadding(false);
 
-            mTileLayout = new DoubleLineTileLayout(context, mUiEventLogger);
-            mHorizontalTileLayout = mTileLayout;
+            DoubleLineTileLayout horizontalTileLayout = new DoubleLineTileLayout(context,
+                    mUiEventLogger);
+            horizontalTileLayout.setPaddingRelative(
+                    horizontalTileLayout.getPaddingStart(),
+                    horizontalTileLayout.getPaddingTop(),
+                    horizontalTileLayout.getPaddingEnd(),
+                    mContext.getResources().getDimensionPixelSize(
+                            R.dimen.qqs_horizonal_tile_padding_bottom));
+            mHorizontalTileLayout = horizontalTileLayout;
             mRegularTileLayout = new HeaderTileLayout(context, mUiEventLogger);
-            LayoutParams lp = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
+            LayoutParams lp = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1);
             int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
-            lp.setMarginEnd(0);
-            lp.setMarginStart(marginSize);
-            mHorizontalLinearLayout.addView((View) mTileLayout, lp);
+            lp.setMarginStart(0);
+            lp.setMarginEnd(marginSize);
+            lp.gravity = Gravity.CENTER_VERTICAL;
+            mHorizontalLinearLayout.addView((View) mHorizontalTileLayout, lp);
 
             sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
 
+            boolean useHorizontal = shouldUseHorizontalTileLayout();
+            mTileLayout = useHorizontal ? mHorizontalTileLayout : mRegularTileLayout;
             mTileLayout.setListening(mListening);
             addView(mHorizontalLinearLayout, 0 /* Between brightness and footer */);
-            ((View) mRegularTileLayout).setVisibility(View.GONE);
+            ((View) mRegularTileLayout).setVisibility(!useHorizontal ? View.VISIBLE : View.GONE);
+            mHorizontalLinearLayout.setVisibility(useHorizontal ? View.VISIBLE : View.GONE);
             addView((View) mRegularTileLayout, 0);
             super.setPadding(0, 0, 0, 0);
-            reAttachMediaHost();
+            applySideMargins(mHorizontalLinearLayout);
+            applyBottomMargin((View) mRegularTileLayout);
         } else {
             sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
             mTileLayout = new HeaderTileLayout(context, mUiEventLogger);
             mTileLayout.setListening(mListening);
             addView((View) mTileLayout, 0 /* Between brightness and footer */);
             super.setPadding(0, 0, 0, 0);
+            applyBottomMargin((View) mTileLayout);
         }
     }
 
+    private void applyBottomMargin(View view) {
+        int margin = getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_bottom);
+        MarginLayoutParams layoutParams = (MarginLayoutParams) view.getLayoutParams();
+        layoutParams.bottomMargin = margin;
+        view.setLayoutParams(layoutParams);
+    }
+
+    private void applySideMargins(View view) {
+        int margin = getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_horizontal);
+        MarginLayoutParams layoutParams = (MarginLayoutParams) view.getLayoutParams();
+        layoutParams.setMarginStart(margin);
+        layoutParams.setMarginEnd(margin);
+        view.setLayoutParams(layoutParams);
+    }
+
     private void reAttachMediaHost() {
-        ViewGroup newParent = shouldUseHorizontalTileLayout() ? mHorizontalLinearLayout : this;
-        ViewGroup currentParent = (ViewGroup) mMediaHost.getParent();
+        if (mMediaHost == null) {
+            return;
+        }
+        boolean horizontal = shouldUseHorizontalTileLayout();
+        ViewGroup host = mMediaHost.getHostView();
+        ViewGroup newParent = horizontal ? mHorizontalLinearLayout : this;
+        ViewGroup currentParent = (ViewGroup) host.getParent();
         if (currentParent != newParent) {
             if (currentParent != null) {
-                currentParent.removeView(mMediaHost);
+                currentParent.removeView(host);
             }
-            newParent.addView(mMediaHost);
-            ViewGroup.LayoutParams layoutParams = mMediaHost.getLayoutParams();
+            newParent.addView(host);
+            LinearLayout.LayoutParams layoutParams = (LayoutParams) host.getLayoutParams();
             layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.width = horizontal ? 0 : ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.weight = horizontal ? 1.5f : 0;
+            layoutParams.bottomMargin = mMediaBottomMargin;
+            int marginStart = horizontal
+                    ? getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_horizontal)
+                    : 0;
+            layoutParams.setMarginStart(marginStart);
         }
     }
 
     @Override
     protected void addMediaHostView() {
-        mMediaHost = mMediaHiearchyManager.createMediaHost(
-                MediaHierarchyManager.LOCATION_QQS);
+        mMediaHost.setVisibleChangedListener((visible) -> {
+            switchTileLayout();
+            return null;
+        });
+        mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
+        mMediaHost.setExpanded(false);
+        mMediaHost.setShowsOnlyActiveMedia(true);
+        reAttachMediaHost();
     }
 
     @Override
@@ -188,7 +217,6 @@ public class QuickQSPanel extends QSPanel {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(TunerService.class).removeTunable(mNumTiles);
-        mNotificationMediaManager.removeCallback(mMediaCallback);
     }
 
     @Override
@@ -257,7 +285,7 @@ public class QuickQSPanel extends QSPanel {
     }
 
     private boolean shouldUseHorizontalTileLayout() {
-        return mNotificationMediaManager.hasActiveMedia()
+        return mMediaHost.getVisible()
                 && getResources().getConfiguration().orientation
                         == Configuration.ORIENTATION_LANDSCAPE;
     }
@@ -381,7 +409,7 @@ public class QuickQSPanel extends QSPanel {
             setClipChildren(false);
             setClipToPadding(false);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT);
+                    LayoutParams.WRAP_CONTENT);
             lp.gravity = Gravity.CENTER_HORIZONTAL;
             setLayoutParams(lp);
         }
@@ -394,6 +422,7 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public void onFinishInflate(){
+            super.onFinishInflate();
             updateResources();
         }
 

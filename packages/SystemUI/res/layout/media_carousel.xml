@@ -20,8 +20,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/qs_media_padding"
     android:scrollbars="none"
+    android:fillViewport="true"
     >
     <LinearLayout
         android:id="@+id/media_carousel"

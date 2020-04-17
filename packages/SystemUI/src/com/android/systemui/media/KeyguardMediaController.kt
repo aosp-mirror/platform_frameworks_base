@@ -17,8 +17,6 @@
 package com.android.systemui.media
 
 import android.view.View
-import com.android.internal.util.ContrastColorUtil
-import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import javax.inject.Inject
@@ -30,37 +28,28 @@ import javax.inject.Singleton
  */
 @Singleton
 class KeyguardMediaController @Inject constructor(
-    private val mediaHierarchyManager: MediaHierarchyManager,
-    private val notifMediaManager: NotificationMediaManager,
+    private val mediaHost: MediaHost,
     private val bypassController: KeyguardBypassController
 ) {
     private var view: MediaHeaderView? = null
 
-    init {
-        notifMediaManager.addCallback(object : NotificationMediaManager.MediaListener {
-            override fun onMediaDataLoaded(key: String, data: MediaData) {
-                updateVisibility()
-            }
-
-            override fun onMediaDataRemoved(key: String) {
-                updateVisibility()
-            }
-        })
-    }
-
     /**
      * Attach this controller to a media view, initializing its state
      */
-    fun attach(mediaControlsView: MediaHeaderView) {
-        view = mediaControlsView
-        val hostView = mediaHierarchyManager.createMediaHost(
-                MediaHierarchyManager.LOCATION_LOCKSCREEN)
-        mediaControlsView.setMediaHost(hostView)
-        updateVisibility()
+    fun attach(mediaView: MediaHeaderView) {
+        view = mediaView
+        mediaHost.visibleChangedListener = ::updateVisibility
+        mediaHost.isExpanded = false
+        mediaHost.showsOnlyActiveMedia = true
+        mediaHost.init(MediaHierarchyManager.LOCATION_LOCKSCREEN)
+        mediaView.setMediaHost(mediaHost.hostView)
+    /**
+     * Attach this controller to a media view, initializing its state
+     */
     }
 
-    private fun updateVisibility() {
-        val shouldBeVisible = notifMediaManager.hasActiveMedia() && !bypassController.bypassEnabled
+    private fun updateVisibility(isVisible: Boolean) {
+        val shouldBeVisible = isVisible && !bypassController.bypassEnabled
         view?.visibility = if (shouldBeVisible) View.VISIBLE else View.GONE
     }
 }
