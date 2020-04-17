@@ -208,4 +208,9 @@
     <!-- Delay(millisecond) to show no upstream notification after there's no Backhaul. Set delay to
          "-1" for disable this feature. -->
     <integer name="delay_to_show_no_upstream_after_no_backhaul">-1</integer>
+
+    <!-- Cellular roaming notification is shown when upstream is cellular network and in roaming
+         state. -->
+    <!-- Config for showing upstream roaming notification. -->
+    <bool name="config_upstream_roaming_notification">false</bool>
 </resources>
