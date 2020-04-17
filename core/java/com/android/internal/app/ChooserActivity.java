@@ -2171,7 +2171,7 @@ public class ChooserActivity extends ResolverActivity implements
                         mChooserMultiProfilePagerAdapter.getActiveListAdapter();
                 if (currentListAdapter != null) {
                     currentListAdapter.updateModel(info.getResolvedComponentName());
-                    currentListAdapter.updateChooserCounts(ri.activityInfo.packageName, getUserId(),
+                    currentListAdapter.updateChooserCounts(ri.activityInfo.packageName,
                             targetIntent.getAction());
                 }
                 if (DEBUG) {

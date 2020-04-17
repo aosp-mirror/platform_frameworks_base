@@ -64,6 +64,7 @@ public class TunerResourceManager {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final int INVALID_RESOURCE_HANDLE = -1;
+    public static final int INVALID_OWNER_ID = -1;
     /**
      * Tuner resource type to help generate resource handle
      */
@@ -73,6 +74,7 @@ public class TunerResourceManager {
         TUNER_RESOURCE_TYPE_DESCRAMBLER,
         TUNER_RESOURCE_TYPE_LNB,
         TUNER_RESOURCE_TYPE_CAS_SESSION,
+        TUNER_RESOURCE_TYPE_MAX,
      })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TunerResourceType {}
@@ -82,6 +84,7 @@ public class TunerResourceManager {
     public static final int TUNER_RESOURCE_TYPE_DESCRAMBLER = 2;
     public static final int TUNER_RESOURCE_TYPE_LNB = 3;
     public static final int TUNER_RESOURCE_TYPE_CAS_SESSION = 4;
+    public static final int TUNER_RESOURCE_TYPE_MAX = 5;
 
     private final ITunerResourceManager mService;
     private final int mUserId;
@@ -243,16 +246,16 @@ public class TunerResourceManager {
      * before this request.
      *
      * @param request {@link TunerFrontendRequest} information of the current request.
-     * @param frontendId a one-element array to return the granted frontendId. If
-     *                   no frontend granted, this will return {@link #INVALID_FRONTEND_ID}.
+     * @param frontendHandle a one-element array to return the granted frontendHandle. If
+     *                       no frontend granted, this will return {@link #INVALID_RESOURCE_HANDLE}.
      *
      * @return true if there is frontend granted.
      */
     public boolean requestFrontend(@NonNull TunerFrontendRequest request,
-                @Nullable int[] frontendId) {
+                @Nullable int[] frontendHandle) {
         boolean result = false;
         try {
-            result = mService.requestFrontend(request, frontendId);
+            result = mService.requestFrontend(request, frontendHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -393,15 +396,15 @@ public class TunerResourceManager {
      * <p><strong>Note:</strong> {@link #setLnbInfoList(int[])} must be called before this request.
      *
      * @param request {@link TunerLnbRequest} information of the current request.
-     * @param lnbId a one-element array to return the granted Lnb id.
-     *              If no Lnb granted, this will return {@link #INVALID_LNB_ID}.
+     * @param lnbHandle a one-element array to return the granted Lnb handle.
+     *                  If no Lnb granted, this will return {@link #INVALID_RESOURCE_HANDLE}.
      *
      * @return true if there is Lnb granted.
      */
-    public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbId) {
+    public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbHandle) {
         boolean result = false;
         try {
-            result = mService.requestLnb(request, lnbId);
+            result = mService.requestLnb(request, lnbHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -416,11 +419,11 @@ public class TunerResourceManager {
      * <p><strong>Note:</strong> {@link #setFrontendInfoList(TunerFrontendInfo[])} must be called
      * before this release.
      *
-     * @param frontendId the id of the released frontend.
+     * @param frontendHandle the handle of the released frontend.
      */
-    public void releaseFrontend(int frontendId) {
+    public void releaseFrontend(int frontendHandle) {
         try {
-            mService.releaseFrontend(frontendId);
+            mService.releaseFrontend(frontendHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -481,11 +484,11 @@ public class TunerResourceManager {
      *
      * <p><strong>Note:</strong> {@link #setLnbInfoList(int[])} must be called before this release.
      *
-     * @param lnbId the id of the released Tuner Lnb.
+     * @param lnbHandle the handle of the released Tuner Lnb.
      */
-    public void releaseLnb(int lnbId) {
+    public void releaseLnb(int lnbHandle) {
         try {
-            mService.releaseLnb(lnbId);
+            mService.releaseLnb(lnbHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

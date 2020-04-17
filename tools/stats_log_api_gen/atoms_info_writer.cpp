@@ -26,51 +26,14 @@ namespace android {
 namespace stats_log_api_gen {
 
 static void write_atoms_info_header_body(FILE* out, const Atoms& atoms) {
-    fprintf(out, "static int UNSET_VALUE = INT_MAX;\n");
-    fprintf(out, "static int FIRST_UID_IN_CHAIN = 0;\n");
-
-    fprintf(out, "struct StateAtomFieldOptions {\n");
-    fprintf(out, "  std::vector<int> primaryFields;\n");
-    fprintf(out, "  int exclusiveField;\n");
-    fprintf(out, "  int defaultState = UNSET_VALUE;\n");
-    fprintf(out, "  int resetState = UNSET_VALUE;\n");
-    fprintf(out, "  bool nested;\n");
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
     fprintf(out, "struct AtomsInfo {\n");
-    fprintf(out,
-            "  const static std::set<int> "
-            "kTruncatingTimestampAtomBlackList;\n");
     fprintf(out, "  const static std::set<int> kAtomsWithAttributionChain;\n");
-    fprintf(out,
-            "  const static std::map<int, StateAtomFieldOptions> "
-            "kStateAtomsFieldOptions;\n");
     fprintf(out, "  const static std::set<int> kWhitelistedAtoms;\n");
     fprintf(out, "};\n");
     fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n", atoms.maxPushedAtomId);
 }
 
 static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
-    std::set<string> kTruncatingAtomNames = {"mobile_radio_power_state_changed",
-                                             "audio_state_changed",
-                                             "call_state_changed",
-                                             "phone_signal_strength_changed",
-                                             "mobile_bytes_transfer_by_fg_bg",
-                                             "mobile_bytes_transfer"};
-    fprintf(out,
-            "const std::set<int> "
-            "AtomsInfo::kTruncatingTimestampAtomBlackList = {\n");
-    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
-         atomIt++) {
-        if (kTruncatingAtomNames.find((*atomIt)->name) != kTruncatingAtomNames.end()) {
-            const string constant = make_constant_name((*atomIt)->name);
-            fprintf(out, "    %d, // %s\n", (*atomIt)->code, constant.c_str());
-        }
-    }
-
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
 
     fprintf(out, "const std::set<int> AtomsInfo::kAtomsWithAttributionChain = {\n");
     for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
@@ -100,49 +63,6 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
     fprintf(out, "};\n");
     fprintf(out, "\n");
 
-    fprintf(out,
-            "static std::map<int, StateAtomFieldOptions> "
-            "getStateAtomFieldOptions() {\n");
-    fprintf(out, "    std::map<int, StateAtomFieldOptions> options;\n");
-    fprintf(out, "    StateAtomFieldOptions* opt;\n");
-    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
-         atomIt++) {
-        if ((*atomIt)->primaryFields.size() == 0 && (*atomIt)->exclusiveField == 0) {
-            continue;
-        }
-        fprintf(out,
-                "\n    // Adding primary and exclusive fields for atom "
-                "(%d)%s\n",
-                (*atomIt)->code, (*atomIt)->name.c_str());
-        fprintf(out, "    opt = &(options[%d /* %s */]);\n", (*atomIt)->code,
-                make_constant_name((*atomIt)->name).c_str());
-        fprintf(out, "    opt->primaryFields.reserve(%lu);\n", (*atomIt)->primaryFields.size());
-        for (const auto& field : (*atomIt)->primaryFields) {
-            fprintf(out, "    opt->primaryFields.push_back(%d);\n", field);
-        }
-
-        fprintf(out, "    opt->exclusiveField = %d;\n", (*atomIt)->exclusiveField);
-        if ((*atomIt)->defaultState != INT_MAX) {
-            fprintf(out, "    opt->defaultState = %d;\n", (*atomIt)->defaultState);
-        } else {
-            fprintf(out, "    opt->defaultState = UNSET_VALUE;\n");
-        }
-
-        if ((*atomIt)->triggerStateReset != INT_MAX) {
-            fprintf(out, "    opt->resetState = %d;\n", (*atomIt)->triggerStateReset);
-        } else {
-            fprintf(out, "    opt->resetState = UNSET_VALUE;\n");
-        }
-        fprintf(out, "    opt->nested = %d;\n", (*atomIt)->nested);
-    }
-
-    fprintf(out, "    return options;\n");
-    fprintf(out, "}\n");
-
-    fprintf(out,
-            "const std::map<int, StateAtomFieldOptions> "
-            "AtomsInfo::kStateAtomsFieldOptions = "
-            "getStateAtomFieldOptions();\n");
 }
 
 int write_atoms_info_header(FILE* out, const Atoms& atoms, const string& namespaceStr) {

@@ -257,7 +257,7 @@ public class Tethering {
         mContext = mDeps.getContext();
         mNetd = mDeps.getINetd(mContext);
         mLooper = mDeps.getTetheringLooper();
-        mNotificationUpdater = mDeps.getNotificationUpdater(mContext);
+        mNotificationUpdater = mDeps.getNotificationUpdater(mContext, mLooper);
 
         mPublicSync = new Object();
 
@@ -336,6 +336,11 @@ public class Tethering {
         filter.addAction(UserManager.ACTION_USER_RESTRICTIONS_CHANGED);
         filter.addAction(ACTION_RESTRICT_BACKGROUND_CHANGED);
         mContext.registerReceiver(mStateReceiver, filter, null, mHandler);
+
+        final IntentFilter noUpstreamFilter = new IntentFilter();
+        noUpstreamFilter.addAction(TetheringNotificationUpdater.ACTION_DISABLE_TETHERING);
+        mContext.registerReceiver(
+                mStateReceiver, noUpstreamFilter, PERMISSION_MAINLINE_NETWORK_STACK, mHandler);
 
         final WifiManager wifiManager = getWifiManager();
         if (wifiManager != null) {
@@ -855,6 +860,8 @@ public class Tethering {
             } else if (action.equals(ACTION_RESTRICT_BACKGROUND_CHANGED)) {
                 mLog.log("OBSERVED data saver changed");
                 handleDataSaverChanged();
+            } else if (action.equals(TetheringNotificationUpdater.ACTION_DISABLE_TETHERING)) {
+                untetherAll();
             }
         }
 
@@ -922,8 +929,10 @@ public class Tethering {
                     case WifiManager.WIFI_AP_STATE_ENABLED:
                         enableWifiIpServingLocked(ifname, ipmode);
                         break;
-                    case WifiManager.WIFI_AP_STATE_DISABLED:
                     case WifiManager.WIFI_AP_STATE_DISABLING:
+                        // We can see this state on the way to disabled.
+                        break;
+                    case WifiManager.WIFI_AP_STATE_DISABLED:
                     case WifiManager.WIFI_AP_STATE_FAILED:
                     default:
                         disableWifiIpServingLocked(ifname, curState);
@@ -1944,10 +1953,12 @@ public class Tethering {
     /** Get the latest value of the tethering entitlement check. */
     void requestLatestTetheringEntitlementResult(int type, ResultReceiver receiver,
             boolean showEntitlementUi) {
-        if (receiver != null) {
+        if (receiver == null) return;
+
+        mHandler.post(() -> {
             mEntitlementMgr.requestLatestTetheringEntitlementResult(type, receiver,
                     showEntitlementUi);
-        }
+        });
     }
 
     /** Register tethering event callback */
@@ -2011,6 +2022,7 @@ public class Tethering {
         } finally {
             mTetheringEventCallbacks.finishBroadcast();
         }
+        mNotificationUpdater.onUpstreamNetworkChanged(network);
     }
 
     private void reportConfigurationChanged(TetheringConfigurationParcel config) {

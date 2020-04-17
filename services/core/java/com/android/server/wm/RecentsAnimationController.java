@@ -898,11 +898,11 @@ public class RecentsAnimationController implements DeathRecipient {
         TaskAnimationAdapter(Task task, boolean isRecentTaskInvisible) {
             mTask = task;
             mIsRecentTaskInvisible = isRecentTaskInvisible;
-            mBounds.set(mTask.getDisplayedBounds());
+            mBounds.set(mTask.getBounds());
 
             mLocalBounds.set(mBounds);
             Point tmpPos = new Point();
-            mTask.getRelativeDisplayedPosition(tmpPos);
+            mTask.getRelativePosition(tmpPos);
             mLocalBounds.offsetTo(tmpPos.x, tmpPos.y);
         }
 

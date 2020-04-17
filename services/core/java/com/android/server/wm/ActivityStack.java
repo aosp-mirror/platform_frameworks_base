@@ -91,7 +91,6 @@ import static com.android.server.wm.TaskProto.ANIMATING_BOUNDS;
 import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.CREATED_BY_ORGANIZER;
 import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
-import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
 import static com.android.server.wm.TaskProto.DISPLAY_ID;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.TaskProto.LAST_NON_FULLSCREEN_BOUNDS;
@@ -660,8 +659,7 @@ class ActivityStack extends Task {
                 setBounds(newBounds);
             } else if (overrideWindowingMode != WINDOWING_MODE_PINNED) {
                 // For pinned stack, resize is now part of the {@link WindowContainerTransaction}
-                resize(new Rect(newBounds), null /* configBounds */,
-                        PRESERVE_WINDOWS, true /* deferResume */);
+                resize(new Rect(newBounds), PRESERVE_WINDOWS, true /* deferResume */);
             }
         }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
@@ -835,8 +833,7 @@ class ActivityStack extends Task {
             }
 
             if (!Objects.equals(getRequestedOverrideBounds(), mTmpRect2)) {
-                resize(mTmpRect2, null /*configBounds*/,
-                        false /*preserveWindows*/, true /*deferResume*/);
+                resize(mTmpRect2, false /*preserveWindows*/, true /*deferResume*/);
             }
         } finally {
             mAtmService.continueWindowLayout();
@@ -893,9 +890,6 @@ class ActivityStack extends Task {
             if (mUpdateBoundsDeferredCalled) {
                 setTaskBounds(mDeferredBounds);
                 setBounds(mDeferredBounds);
-            }
-            if (mUpdateDisplayedBoundsDeferredCalled) {
-                setTaskDisplayedBounds(mDeferredDisplayedBounds);
             }
         }
     }
@@ -2966,8 +2960,7 @@ class ActivityStack extends Task {
 
     // TODO: Can only be called from special methods in ActivityStackSupervisor.
     // Need to consolidate those calls points into this resize method so anyone can call directly.
-    void resize(Rect displayedBounds, Rect configBounds, boolean preserveWindows,
-            boolean deferResume) {
+    void resize(Rect displayedBounds, boolean preserveWindows, boolean deferResume) {
         if (!updateBoundsAllowed(displayedBounds)) {
             return;
         }
@@ -2979,7 +2972,7 @@ class ActivityStack extends Task {
             // Update override configurations of all tasks in the stack.
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     ActivityStack::processTaskResizeBounds, PooledLambda.__(Task.class),
-                    displayedBounds, configBounds);
+                    displayedBounds);
             forAllTasks(c, true /* traverseTopToBottom */);
             c.recycle();
 
@@ -3000,17 +2993,10 @@ class ActivityStack extends Task {
         }
     }
 
-    private static void processTaskResizeBounds(
-            Task task, Rect displayedBounds, Rect configBounds) {
+    private static void processTaskResizeBounds(Task task, Rect displayedBounds) {
         if (!task.isResizeable()) return;
 
-        if (configBounds != null && !configBounds.isEmpty()) {
-            task.setOverrideDisplayedBounds(displayedBounds);
-            task.setBounds(configBounds);
-        } else {
-            task.setOverrideDisplayedBounds(null);
-            task.setBounds(displayedBounds);
-        }
+        task.setBounds(displayedBounds);
     }
 
     /**
@@ -3030,22 +3016,6 @@ class ActivityStack extends Task {
 
     private static void setTaskBounds(Task task, Rect bounds) {
         task.setBounds(task.isResizeable() ? bounds : null);
-    }
-
-    /** Helper to setDisplayedBounds on all child tasks */
-    private void setTaskDisplayedBounds(Rect bounds) {
-        if (!updateDisplayedBoundsAllowed(bounds)) {
-            return;
-        }
-
-        final PooledConsumer c = PooledLambda.obtainConsumer(ActivityStack::setTaskDisplayedBounds,
-                PooledLambda.__(Task.class), bounds);
-        forAllLeafTasks(c, true /* traverseTopToBottom */);
-        c.recycle();
-    }
-
-    private static void setTaskDisplayedBounds(Task task, Rect bounds) {
-        task.setOverrideDisplayedBounds(bounds == null || bounds.isEmpty() ? null : bounds);
     }
 
     /**
@@ -3569,8 +3539,8 @@ class ActivityStack extends Task {
     }
 
     @Override
-    void getRelativeDisplayedPosition(Point outPos) {
-        super.getRelativeDisplayedPosition(outPos);
+    void getRelativePosition(Point outPos) {
+        super.getRelativePosition(outPos);
         final int outset = getStackOutset();
         outPos.x -= outset;
         outPos.y -= outset;
@@ -3581,7 +3551,7 @@ class ActivityStack extends Task {
             return;
         }
 
-        final Rect stackBounds = getDisplayedBounds();
+        final Rect stackBounds = getBounds();
         int width = stackBounds.width();
         int height = stackBounds.height();
 
@@ -3776,7 +3746,6 @@ class ActivityStack extends Task {
         proto.write(FILLS_PARENT, matchParentBounds());
         getRawBounds().dumpDebug(proto, BOUNDS);
 
-        getOverrideDisplayedBounds().dumpDebug(proto, DISPLAYED_BOUNDS);
         if (mLastNonFullscreenBounds != null) {
             mLastNonFullscreenBounds.dumpDebug(proto, LAST_NON_FULLSCREEN_BOUNDS);
         }
