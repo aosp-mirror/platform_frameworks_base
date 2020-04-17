@@ -213,8 +213,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mLocalDeviceAddresses = initLocalDeviceAddresses();
         resetSelectRequestBuffer();
         launchDeviceDiscovery();
+        if (!mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildRequestActiveSource(mAddress));
+        }
     }
-
 
     @ServiceThreadOnly
     private List<Integer> initLocalDeviceAddresses() {
