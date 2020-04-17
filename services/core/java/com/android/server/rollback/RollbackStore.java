@@ -21,12 +21,14 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static com.android.server.rollback.Rollback.rollbackStateFromString;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.content.rollback.RollbackInfo;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -171,6 +173,35 @@ class RollbackStore {
         return ceSnapshotInodes;
     }
 
+    private static @Nullable JSONArray extensionVersionsToJson(
+            @Nullable SparseIntArray extensionVersions) throws JSONException {
+        if (extensionVersions == null) {
+            return null;
+        }
+        JSONArray array = new JSONArray();
+        for (int i = 0; i < extensionVersions.size(); i++) {
+            JSONObject entryJson = new JSONObject();
+            entryJson.put("sdkVersion", extensionVersions.keyAt(i));
+            entryJson.put("extensionVersion", extensionVersions.valueAt(i));
+            array.put(entryJson);
+        }
+        return array;
+    }
+
+    private static @Nullable SparseIntArray extensionVersionsFromJson(@Nullable JSONArray json)
+            throws JSONException {
+        if (json == null) {
+            return null;
+        }
+        SparseIntArray extensionVersions = new SparseIntArray(json.length());
+        for (int i = 0; i < json.length(); i++) {
+            JSONObject entry = json.getJSONObject(i);
+            extensionVersions.append(
+                    entry.getInt("sdkVersion"), entry.getInt("extensionVersion"));
+        }
+        return extensionVersions;
+    }
+
     private static JSONObject rollbackInfoToJson(RollbackInfo rollback) throws JSONException {
         JSONObject json = new JSONObject();
         json.put("rollbackId", rollback.getRollbackId());
@@ -195,10 +226,10 @@ class RollbackStore {
      * backupDir assigned.
      */
     Rollback createNonStagedRollback(int rollbackId, int userId, String installerPackageName,
-            int[] packageSessionIds) {
+            int[] packageSessionIds, SparseIntArray extensionVersions) {
         File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
         return new Rollback(rollbackId, backupDir, -1, userId, installerPackageName,
-                packageSessionIds);
+                packageSessionIds, extensionVersions);
     }
 
     /**
@@ -206,10 +237,11 @@ class RollbackStore {
      * backupDir assigned.
      */
     Rollback createStagedRollback(int rollbackId, int stagedSessionId, int userId,
-            String installerPackageName, int[] packageSessionIds) {
+            String installerPackageName, int[] packageSessionIds,
+            SparseIntArray extensionVersions) {
         File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
         return new Rollback(rollbackId, backupDir, stagedSessionId, userId, installerPackageName,
-                packageSessionIds);
+                packageSessionIds, extensionVersions);
     }
 
     /**
@@ -267,6 +299,8 @@ class RollbackStore {
             dataJson.put("restoreUserDataInProgress", rollback.isRestoreUserDataInProgress());
             dataJson.put("userId", rollback.getUserId());
             dataJson.putOpt("installerPackageName", rollback.getInstallerPackageName());
+            dataJson.putOpt(
+                    "extensionVersions", extensionVersionsToJson(rollback.getExtensionVersions()));
 
             PrintWriter pw = new PrintWriter(new File(rollback.getBackupDir(), "rollback.json"));
             pw.println(dataJson.toString());
@@ -311,7 +345,8 @@ class RollbackStore {
                 dataJson.getInt("apkSessionId"),
                 dataJson.getBoolean("restoreUserDataInProgress"),
                 dataJson.optInt("userId", USER_SYSTEM),
-                dataJson.optString("installerPackageName", ""));
+                dataJson.optString("installerPackageName", ""),
+                extensionVersionsFromJson(dataJson.optJSONArray("extensionVersions")));
     }
 
     private static JSONObject toJson(VersionedPackage pkg) throws JSONException {

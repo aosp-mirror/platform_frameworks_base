@@ -38,6 +38,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -173,6 +174,12 @@ class Rollback {
     private int mNumPackageSessionsWithSuccess;
 
     /**
+     * The extension versions supported at the time of rollback creation. May be null if not set
+     * at creation time.
+     */
+    @Nullable private final SparseIntArray mExtensionVersions;
+
+    /**
      * Constructs a new, empty Rollback instance.
      *
      * @param rollbackId the id of the rollback.
@@ -181,9 +188,11 @@ class Rollback {
      * @param userId the user that performed the install with rollback enabled.
      * @param installerPackageName the installer package name from the original install session.
      * @param packageSessionIds the session ids for all packages in the install.
+     * @param extensionVersions the extension versions supported at the time of rollback creation
      */
     Rollback(int rollbackId, File backupDir, int stagedSessionId, int userId,
-            String installerPackageName, int[] packageSessionIds) {
+            String installerPackageName, int[] packageSessionIds,
+            SparseIntArray extensionVersions) {
         this.info = new RollbackInfo(rollbackId,
                 /* packages */ new ArrayList<>(),
                 /* isStaged */ stagedSessionId != -1,
@@ -196,11 +205,12 @@ class Rollback {
         mState = ROLLBACK_STATE_ENABLING;
         mTimestamp = Instant.now();
         mPackageSessionIds = packageSessionIds != null ? packageSessionIds : new int[0];
+        mExtensionVersions = extensionVersions;
     }
 
     Rollback(int rollbackId, File backupDir, int stagedSessionId, int userId,
              String installerPackageName) {
-        this(rollbackId, backupDir, stagedSessionId, userId, installerPackageName, null);
+        this(rollbackId, backupDir, stagedSessionId, userId, installerPackageName, null, null);
     }
 
     /**
@@ -208,7 +218,7 @@ class Rollback {
      */
     Rollback(RollbackInfo info, File backupDir, Instant timestamp, int stagedSessionId,
             @RollbackState int state, int apkSessionId, boolean restoreUserDataInProgress,
-            int userId, String installerPackageName) {
+            int userId, String installerPackageName, SparseIntArray extensionVersions) {
         this.info = info;
         mUserId = userId;
         mInstallerPackageName = installerPackageName;
@@ -218,6 +228,7 @@ class Rollback {
         mState = state;
         mApkSessionId = apkSessionId;
         mRestoreUserDataInProgress = restoreUserDataInProgress;
+        mExtensionVersions = extensionVersions;
         // TODO(b/120200473): Include this field during persistence. This field will be used to
         // decide which rollback to expire when ACTION_PACKAGE_REPLACED is received. Note persisting
         // this field is not backward compatible. We won't fix b/120200473 until S to minimize the
@@ -279,6 +290,14 @@ class Rollback {
      */
     @Nullable String getInstallerPackageName() {
         return mInstallerPackageName;
+    }
+
+    /**
+     * Returns the extension versions that were supported at the time that the rollback was created,
+     * as a mapping from SdkVersion to ExtensionVersion.
+     */
+    @Nullable SparseIntArray getExtensionVersions() {
+        return mExtensionVersions;
     }
 
     /**
