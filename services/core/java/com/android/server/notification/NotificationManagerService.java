@@ -222,7 +222,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseArrayMap;
 import android.util.StatsEvent;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
@@ -290,7 +289,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -3830,7 +3828,7 @@ public class NotificationManagerService extends SystemService {
         public void registerListener(final INotificationListener listener,
                 final ComponentName component, final int userid) {
             enforceSystemOrSystemUI("INotificationManager.registerListener");
-            mListeners.registerService(listener, component, userid);
+            mListeners.registerSystemService(listener, component, userid);
         }
 
         /**
