@@ -27,6 +27,7 @@ import static android.content.integrity.InstallerAllowedByManifestFormula.INSTAL
 import static android.content.integrity.IntegrityUtils.getHexDigest;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 
+import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -183,9 +184,10 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     @Override
+    @BinderThread
     public void updateRuleSet(
             String version, ParceledListSlice<Rule> rules, IntentSender statusReceiver) {
-        String ruleProvider = getCallerPackageNameOrThrow();
+        String ruleProvider = getCallerPackageNameOrThrow(Binder.getCallingUid());
 
         mHandler.post(
                 () -> {
@@ -219,8 +221,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     @Override
+    @BinderThread
     public String getCurrentRuleSetVersion() {
-        getCallerPackageNameOrThrow();
+        getCallerPackageNameOrThrow(Binder.getCallingUid());
 
         RuleMetadata ruleMetadata = mIntegrityFileManager.readMetadata();
         return (ruleMetadata != null && ruleMetadata.getVersion() != null)
@@ -229,8 +232,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     @Override
+    @BinderThread
     public String getCurrentRuleSetProvider() {
-        getCallerPackageNameOrThrow();
+        getCallerPackageNameOrThrow(Binder.getCallingUid());
 
         RuleMetadata ruleMetadata = mIntegrityFileManager.readMetadata();
         return (ruleMetadata != null && ruleMetadata.getRuleProvider() != null)
@@ -366,23 +370,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             return UNKNOWN_INSTALLER;
         }
 
-        try {
-            int actualInstallerUid =
-                    mContext.getPackageManager().getPackageUid(installer, /* flags= */ 0);
-            if (actualInstallerUid != installerUid) {
-                // Installer package name can be faked but the installerUid cannot.
-                Slog.e(
-                        TAG,
-                        "Installer "
-                                + installer
-                                + " has UID "
-                                + actualInstallerUid
-                                + " which doesn't match alleged installer UID "
-                                + installerUid);
-                return UNKNOWN_INSTALLER;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Installer package " + installer + " not found.");
+        // Verify that the installer UID actually contains the package. Note that comparing UIDs
+        // is not safe since context's uid can change in different settings; e.g. Android Auto.
+        if (!getPackageListForUid(installerUid).contains(installer)) {
             return UNKNOWN_INSTALLER;
         }
 
@@ -397,14 +387,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 Slog.e(TAG, "Installer is package installer but originating UID not found.");
                 return UNKNOWN_INSTALLER;
             }
-            String[] installerPackages =
-                    mContext.getPackageManager().getPackagesForUid(originatingUid);
-            if (installerPackages == null || installerPackages.length == 0) {
+            List<String> installerPackages = getPackageListForUid(originatingUid);
+            if (installerPackages.isEmpty()) {
                 Slog.e(TAG, "No package found associated with originating UID " + originatingUid);
                 return UNKNOWN_INSTALLER;
             }
             // In the case of multiple package sharing a UID, we just return the first one.
-            return installerPackages[0];
+            return installerPackages.get(0);
         }
 
         return installer;
@@ -651,8 +640,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         return installationPath;
     }
 
-    private String getCallerPackageNameOrThrow() {
-        String callerPackageName = getCallingRulePusherPackageName();
+    private String getCallerPackageNameOrThrow(int callingUid) {
+        String callerPackageName = getCallingRulePusherPackageName(callingUid);
         if (callerPackageName == null) {
             throw new SecurityException(
                     "Only system packages specified in config_integrityRuleProviderPackages are "
@@ -661,16 +650,14 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         return callerPackageName;
     }
 
-    private String getCallingRulePusherPackageName() {
+    private String getCallingRulePusherPackageName(int callingUid) {
         // Obtain the system apps that are whitelisted in config_integrityRuleProviderPackages.
         List<String> allowedRuleProviders = getAllowedRuleProviderSystemApps();
         Slog.i(TAG, String.format(
                 "Rule provider system app list contains: %s", allowedRuleProviders));
 
         // Identify the package names in the caller list.
-        List<String> callingPackageNames =
-                Arrays.asList(
-                        mContext.getPackageManager().getPackagesForUid(Binder.getCallingUid()));
+        List<String> callingPackageNames = getPackageListForUid(callingUid);
         Slog.i(TAG, String.format("Calling packages are: ", callingPackageNames));
 
         // Find the intersection between the allowed and calling packages. Ideally, we will have
@@ -721,5 +708,14 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                         Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
                         0)
                 == 1;
+    }
+
+    private List<String> getPackageListForUid(int uid) {
+        try {
+            return Arrays.asList(mContext.getPackageManager().getPackagesForUid(uid));
+        } catch (NullPointerException e) {
+            Slog.w(TAG, String.format("No packages were found for uid: %d", uid));
+            return List.of();
+        }
     }
 }
