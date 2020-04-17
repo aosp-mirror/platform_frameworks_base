@@ -257,20 +257,28 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
-        public void releaseFrontend(int frontendHandle) throws RemoteException {
+        public void releaseFrontend(int frontendHandle, int clientId) throws RemoteException {
             enforceTunerAccessPermission("releaseFrontend");
             enforceTrmAccessPermission("releaseFrontend");
             if (!validateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND,
                     frontendHandle)) {
                 throw new RemoteException("frontendHandle can't be invalid");
             }
+            int frontendId = getResourceIdFromHandle(frontendHandle);
+            FrontendResource fe = getFrontendResource(frontendId);
+            if (fe == null) {
+                throw new RemoteException("Releasing frontend does not exist.");
+            }
+            if (fe.getOwnerClientId() != clientId) {
+                throw new RemoteException("Client is not the current owner of the releasing fe.");
+            }
             synchronized (mLock) {
-                releaseFrontendInternal(getResourceIdFromHandle(frontendHandle));
+                releaseFrontendInternal(fe);
             }
         }
 
         @Override
-        public void releaseDemux(int demuxHandle) {
+        public void releaseDemux(int demuxHandle, int clientId) {
             enforceTunerAccessPermission("releaseDemux");
             enforceTrmAccessPermission("releaseDemux");
             if (DEBUG) {
@@ -279,7 +287,7 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
-        public void releaseDescrambler(int descramblerHandle) {
+        public void releaseDescrambler(int descramblerHandle, int clientId) {
             enforceTunerAccessPermission("releaseDescrambler");
             enforceTrmAccessPermission("releaseDescrambler");
             if (DEBUG) {
@@ -288,7 +296,7 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
-        public void releaseCasSession(int sessionResourceId) {
+        public void releaseCasSession(int sessionResourceId, int clientId) {
             enforceTrmAccessPermission("releaseCasSession");
             if (DEBUG) {
                 Slog.d(TAG, "releaseCasSession(sessionResourceId=" + sessionResourceId + ")");
@@ -296,14 +304,22 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
-        public void releaseLnb(int lnbHandle) throws RemoteException {
+        public void releaseLnb(int lnbHandle, int clientId) throws RemoteException {
             enforceTunerAccessPermission("releaseLnb");
             enforceTrmAccessPermission("releaseLnb");
             if (!validateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, lnbHandle)) {
                 throw new RemoteException("lnbHandle can't be invalid");
             }
+            int lnbId = getResourceIdFromHandle(lnbHandle);
+            LnbResource lnb = getLnbResource(lnbId);
+            if (lnb == null) {
+                throw new RemoteException("Releasing lnb does not exist.");
+            }
+            if (lnb.getOwnerClientId() != clientId) {
+                throw new RemoteException("Client is not the current owner of the releasing lnb.");
+            }
             synchronized (mLock) {
-                releaseLnbInternal(getResourceIdFromHandle(lnbHandle));
+                releaseLnbInternal(lnb);
             }
         }
 
@@ -568,19 +584,19 @@ public class TunerResourceManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    void releaseFrontendInternal(int frontendId) {
+    void releaseFrontendInternal(FrontendResource fe) {
         if (DEBUG) {
-            Slog.d(TAG, "releaseFrontend(id=" + frontendId + ")");
+            Slog.d(TAG, "releaseFrontend(id=" + fe.getId() + ")");
         }
-        updateFrontendClientMappingOnRelease(frontendId);
+        updateFrontendClientMappingOnRelease(fe);
     }
 
     @VisibleForTesting
-    void releaseLnbInternal(int lnbId) {
+    void releaseLnbInternal(LnbResource lnb) {
         if (DEBUG) {
-            Slog.d(TAG, "releaseLnb(lnbId=" + lnbId + ")");
+            Slog.d(TAG, "releaseLnb(lnbId=" + lnb.getId() + ")");
         }
-        updateLnbClientMappingOnRelease(lnbId);
+        updateLnbClientMappingOnRelease(lnb);
     }
 
     @VisibleForTesting
@@ -588,6 +604,7 @@ public class TunerResourceManagerService extends SystemService {
         if (DEBUG) {
             Slog.d(TAG, "requestDemux(request=" + request + ")");
         }
+        // There are enough Demux resources, so we don't manage Demux in R.
         demuxHandle[0] = generateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, 0);
         return true;
     }
@@ -597,6 +614,7 @@ public class TunerResourceManagerService extends SystemService {
         if (DEBUG) {
             Slog.d(TAG, "requestDescrambler(request=" + request + ")");
         }
+        // There are enough Descrambler resources, so we don't manage Descrambler in R.
         descramblerHandle[0] =
                 generateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_DESCRAMBLER, 0);
         return true;
@@ -694,11 +712,10 @@ public class TunerResourceManagerService extends SystemService {
         }
     }
 
-    private void updateFrontendClientMappingOnRelease(int frontendId) {
-        FrontendResource releasingFrontend = getFrontendResource(frontendId);
+    private void updateFrontendClientMappingOnRelease(@NonNull FrontendResource releasingFrontend) {
         ClientProfile ownerProfile = getClientProfile(releasingFrontend.getOwnerClientId());
         releasingFrontend.removeOwner();
-        ownerProfile.releaseFrontend(frontendId);
+        ownerProfile.releaseFrontend(releasingFrontend.getId());
         for (int exclusiveGroupMember : releasingFrontend.getExclusiveGroupMemberFeIds()) {
             getFrontendResource(exclusiveGroupMember).removeOwner();
             ownerProfile.releaseFrontend(exclusiveGroupMember);
@@ -712,11 +729,10 @@ public class TunerResourceManagerService extends SystemService {
         ownerProfile.useLnb(grantingId);
     }
 
-    private void updateLnbClientMappingOnRelease(int lnbId) {
-        LnbResource releasingLnb = getLnbResource(lnbId);
+    private void updateLnbClientMappingOnRelease(@NonNull LnbResource releasingLnb) {
         ClientProfile ownerProfile = getClientProfile(releasingLnb.getOwnerClientId());
         releasingLnb.removeOwner();
-        ownerProfile.releaseLnb(lnbId);
+        ownerProfile.releaseLnb(releasingLnb.getId());
     }
 
     /**
@@ -761,7 +777,7 @@ public class TunerResourceManagerService extends SystemService {
     private void removeFrontendResource(int removingId) {
         FrontendResource fe = getFrontendResource(removingId);
         if (fe.isInUse()) {
-            releaseFrontendInternal(removingId);
+            releaseFrontendInternal(fe);
         }
         for (int excGroupmemberFeId : fe.getExclusiveGroupMemberFeIds()) {
             getFrontendResource(excGroupmemberFeId)
@@ -789,7 +805,7 @@ public class TunerResourceManagerService extends SystemService {
     private void removeLnbResource(int removingId) {
         LnbResource lnb = getLnbResource(removingId);
         if (lnb.isInUse()) {
-            releaseLnbInternal(removingId);
+            releaseLnbInternal(lnb);
         }
         mLnbResources.remove(removingId);
     }

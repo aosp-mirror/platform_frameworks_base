@@ -351,12 +351,12 @@ public class Tuner implements AutoCloseable  {
     public void close() {
         if (mFrontendHandle != null) {
             nativeCloseFrontendByHandle(mFrontendHandle);
-            mTunerResourceManager.releaseFrontend(mFrontendHandle);
+            mTunerResourceManager.releaseFrontend(mFrontendHandle, mClientId);
             mFrontendHandle = null;
             mFrontend = null;
         }
         if (mLnb != null) {
-            mTunerResourceManager.releaseLnb(mLnbHandle);
+            mTunerResourceManager.releaseLnb(mLnbHandle, mClientId);
             mLnb = null;
             mLnbHandle = null;
         }
