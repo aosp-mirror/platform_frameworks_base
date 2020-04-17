@@ -118,7 +118,7 @@ abstract public class ManagedServices {
     protected final Context mContext;
     protected final Object mMutex;
     private final UserProfiles mUserProfiles;
-    private final IPackageManager mPm;
+    protected final IPackageManager mPm;
     protected final UserManager mUm;
     private final Config mConfig;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -890,9 +890,10 @@ abstract public class ManagedServices {
         unregisterServiceImpl(service, userid);
     }
 
-    public void registerService(IInterface service, ComponentName component, int userid) {
+    public void registerSystemService(IInterface service, ComponentName component, int userid) {
         checkNotNull(service);
-        ManagedServiceInfo info = registerServiceImpl(service, component, userid);
+        ManagedServiceInfo info = registerServiceImpl(
+                service, component, userid, Build.VERSION_CODES.CUR_DEVELOPMENT);
         if (info != null) {
             onServiceAdded(info);
         }
@@ -1458,9 +1459,9 @@ abstract public class ManagedServices {
     }
 
     private ManagedServiceInfo registerServiceImpl(final IInterface service,
-            final ComponentName component, final int userid) {
+            final ComponentName component, final int userid, int targetSdk) {
         ManagedServiceInfo info = newServiceInfo(service, component, userid,
-                true /*isSystem*/, null /*connection*/, Build.VERSION_CODES.LOLLIPOP);
+                true /*isSystem*/, null /*connection*/, targetSdk);
         return registerServiceImpl(info);
     }
 
