@@ -235,8 +235,9 @@ public class PackageInfoUtils {
         info.primaryCpuAbi = AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting);
         info.secondaryCpuAbi = AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting);
 
-        info.flags |= appInfoFlags(pkg, pkgSetting);
-        info.privateFlags |= appInfoPrivateFlags(pkg, pkgSetting);
+        info.flags |= appInfoFlags(info.flags, pkgSetting);
+        info.privateFlags |= appInfoPrivateFlags(info.privateFlags, pkgSetting);
+
         return info;
     }
 
@@ -455,9 +456,18 @@ public class PackageInfoUtils {
     public static int appInfoFlags(AndroidPackage pkg, @Nullable PackageSetting pkgSetting) {
         // TODO(b/135203078): Add setting related state
         // @formatter:off
-        int flags = PackageInfoWithoutStateUtils.appInfoFlags(pkg)
+        int pkgWithoutStateFlags = PackageInfoWithoutStateUtils.appInfoFlags(pkg)
                 | flag(pkg.isSystem(), ApplicationInfo.FLAG_SYSTEM)
                 | flag(pkg.isFactoryTest(), ApplicationInfo.FLAG_FACTORY_TEST);
+
+        return appInfoFlags(pkgWithoutStateFlags, pkgSetting);
+        // @formatter:on
+    }
+
+    /** @see ApplicationInfo#flags */
+    public static int appInfoFlags(int pkgWithoutStateFlags, @NonNull PackageSetting pkgSetting) {
+        // @formatter:off
+        int flags = pkgWithoutStateFlags;
         if (pkgSetting != null) {
             flags |= flag(pkgSetting.getPkgState().isUpdatedSystemApp(), ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
         }
@@ -467,9 +477,8 @@ public class PackageInfoUtils {
 
     /** @see ApplicationInfo#privateFlags */
     public static int appInfoPrivateFlags(AndroidPackage pkg, @Nullable PackageSetting pkgSetting) {
-        // TODO(b/135203078): Add setting related state
         // @formatter:off
-        return PackageInfoWithoutStateUtils.appInfoPrivateFlags(pkg)
+        int pkgWithoutStateFlags = PackageInfoWithoutStateUtils.appInfoPrivateFlags(pkg)
                 | flag(pkg.isSystemExt(), ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT)
                 | flag(pkg.isPrivileged(), ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
                 | flag(pkg.isOem(), ApplicationInfo.PRIVATE_FLAG_OEM)
@@ -477,6 +486,15 @@ public class PackageInfoUtils {
                 | flag(pkg.isProduct(), ApplicationInfo.PRIVATE_FLAG_PRODUCT)
                 | flag(pkg.isOdm(), ApplicationInfo.PRIVATE_FLAG_ODM)
                 | flag(pkg.isSignedWithPlatformKey(), ApplicationInfo.PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY);
+        return appInfoPrivateFlags(pkgWithoutStateFlags, pkgSetting);
+        // @formatter:on
+    }
+
+    /** @see ApplicationInfo#privateFlags */
+    public static int appInfoPrivateFlags(int pkgWithoutStateFlags, @Nullable PackageSetting pkgSetting) {
+        // @formatter:off
+        // TODO: Add state specific flags
+        return pkgWithoutStateFlags;
         // @formatter:on
     }
 
