@@ -21,6 +21,7 @@ package com.android.server.people;
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/content/locusid.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // On disk data of conversation infos for a user and app package.
 message ConversationInfosProto {
@@ -40,10 +41,10 @@ message ConversationInfoProto {
   optional .android.content.LocusIdProto locus_id_proto = 2;
 
   // The URI of the contact in the conversation.
-  optional string contact_uri = 3;
+  optional string contact_uri = 3 [(.android.privacy).dest = DEST_EXPLICIT];
 
   // The notification channel id of the conversation.
-  optional string notification_channel_id = 4;
+  optional string notification_channel_id = 4 [(.android.privacy).dest = DEST_EXPLICIT];
 
   // Integer representation of shortcut bit flags.
   optional int32 shortcut_flags = 5;
@@ -52,7 +53,7 @@ message ConversationInfoProto {
   optional int32 conversation_flags = 6;
 
   // The phone number of the contact.
-  optional string contact_phone_number = 7;
+  optional string contact_phone_number = 7 [(.android.privacy).dest = DEST_EXPLICIT];
 }
 
 // On disk data of events.

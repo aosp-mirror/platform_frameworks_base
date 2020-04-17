@@ -310,7 +310,7 @@ message ActivityRecordProto {
     optional bool visible = 24;
     reserved 25; // configuration_container
     optional IdentifierProto identifier = 26;
-    optional string state = 27;
+    optional string state = 27 [(.android.privacy).dest = DEST_EXPLICIT];
     optional bool front_of_task = 28;
     optional int32 proc_id = 29;
     optional bool translucent = 30;
