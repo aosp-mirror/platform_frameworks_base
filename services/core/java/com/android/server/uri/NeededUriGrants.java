@@ -16,22 +16,23 @@
 
 package com.android.server.uri;
 
+import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.server.am.NeededUriGrantsProto;
 
-import java.util.ArrayList;
-
 /** List of {@link GrantUri} a process needs. */
-public class NeededUriGrants extends ArrayList<GrantUri> {
+public class NeededUriGrants {
     final String targetPkg;
     final int targetUid;
     final int flags;
+    final ArraySet<GrantUri> uris;
 
     public NeededUriGrants(String targetPkg, int targetUid, int flags) {
         this.targetPkg = targetPkg;
         this.targetUid = targetUid;
         this.flags = flags;
+        this.uris = new ArraySet<>();
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
@@ -40,9 +41,9 @@ public class NeededUriGrants extends ArrayList<GrantUri> {
         proto.write(NeededUriGrantsProto.TARGET_UID, targetUid);
         proto.write(NeededUriGrantsProto.FLAGS, flags);
 
-        final int N = this.size();
+        final int N = uris.size();
         for (int i = 0; i < N; i++) {
-            this.get(i).dumpDebug(proto, NeededUriGrantsProto.GRANTS);
+            uris.valueAt(i).dumpDebug(proto, NeededUriGrantsProto.GRANTS);
         }
         proto.end(token);
     }
