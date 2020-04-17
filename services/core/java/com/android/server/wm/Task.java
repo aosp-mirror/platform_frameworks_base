@@ -433,7 +433,6 @@ class Task extends WindowContainer<WindowContainer> {
     static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
     private int mForceHiddenFlags = 0;
 
-
     SurfaceControl.Transaction mMainWindowSizeChangeTransaction;
 
     private final FindRootHelper mFindRootHelper = new FindRootHelper();
@@ -4263,7 +4262,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     void setActivityWindowingMode(int windowingMode) {
         PooledConsumer c = PooledLambda.obtainConsumer(ActivityRecord::setWindowingMode,
-            PooledLambda.__(ActivityRecord.class), windowingMode);
+                PooledLambda.__(ActivityRecord.class), windowingMode);
         forAllActivities(c);
         c.recycle();
     }
