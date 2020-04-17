@@ -379,7 +379,6 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
         typeInfo = readNextValue<uint8_t>();
         uint8_t typeId = getTypeId(typeInfo);
 
-        // TODO(b/144373276): handle errors passed to the socket
         switch (typeId) {
             case BOOL_TYPE:
                 parseBool(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
@@ -406,8 +405,13 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
                 parseAttributionChain(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 if (mAttributionChainIndex == -1) mAttributionChainIndex = pos[0];
                 break;
+            case ERROR_TYPE:
+                mErrorBitmask = readNextValue<int32_t>();
+                mValid = false;
+                break;
             default:
                 mValid = false;
+                break;
         }
     }
 

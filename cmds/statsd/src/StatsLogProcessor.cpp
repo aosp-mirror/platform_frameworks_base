@@ -404,15 +404,24 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
 void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
 
+    // Tell StatsdStats about new event
+    const int64_t eventElapsedTimeNs = event->GetElapsedTimestampNs();
+    int atomId = event->GetTagId();
+    StatsdStats::getInstance().noteAtomLogged(atomId, eventElapsedTimeNs / NS_PER_SEC);
+    if (!event->isValid()) {
+        StatsdStats::getInstance().noteAtomError(atomId);
+        return;
+    }
+
     // Hard-coded logic to update train info on disk and fill in any information
     // this log event may be missing.
-    if (event->GetTagId() == android::os::statsd::util::BINARY_PUSH_STATE_CHANGED) {
+    if (atomId == android::os::statsd::util::BINARY_PUSH_STATE_CHANGED) {
         onBinaryPushStateChangedEventLocked(event);
     }
 
     // Hard-coded logic to update experiment ids on disk for certain rollback
     // types and fill the rollback atom with experiment ids
-    if (event->GetTagId() == android::os::statsd::util::WATCHDOG_ROLLBACK_OCCURRED) {
+    if (atomId == android::os::statsd::util::WATCHDOG_ROLLBACK_OCCURRED) {
         onWatchdogRollbackOccurredLocked(event);
     }
 
@@ -421,16 +430,11 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
         ALOGI("%s", event->ToString().c_str());
     }
 #endif
-    const int64_t eventElapsedTimeNs = event->GetElapsedTimestampNs();
-
     resetIfConfigTtlExpiredLocked(eventElapsedTimeNs);
-
-    StatsdStats::getInstance().noteAtomLogged(
-        event->GetTagId(), event->GetElapsedTimestampNs() / NS_PER_SEC);
 
     // Hard-coded logic to update the isolated uid's in the uid-map.
     // The field numbers need to be currently updated by hand with atoms.proto
-    if (event->GetTagId() == android::os::statsd::util::ISOLATED_UID_CHANGED) {
+    if (atomId == android::os::statsd::util::ISOLATED_UID_CHANGED) {
         onIsolatedUidChangedEventLocked(*event);
     }
 
@@ -447,7 +451,7 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
     }
 
 
-    if (event->GetTagId() != android::os::statsd::util::ISOLATED_UID_CHANGED) {
+    if (atomId != android::os::statsd::util::ISOLATED_UID_CHANGED) {
         // Map the isolated uid to host uid if necessary.
         mapIsolatedUidToHostUidIfNecessaryLocked(event);
     }

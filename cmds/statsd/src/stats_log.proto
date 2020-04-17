@@ -422,6 +422,7 @@ message StatsdStatsReport {
     message AtomStats {
         optional int32 tag = 1;
         optional int32 count = 2;
+        optional int32 error_count = 3;
     }
 
     repeated AtomStats atom_stats = 7;
@@ -457,6 +458,7 @@ message StatsdStatsReport {
         optional int64 empty_data = 15;
         optional int64 registered_count = 16;
         optional int64 unregistered_count = 17;
+        optional int32 atom_error_count = 18;
     }
     repeated PulledAtomStats pulled_atom_stats = 10;
 

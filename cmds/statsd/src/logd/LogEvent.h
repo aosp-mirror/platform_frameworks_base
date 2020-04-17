@@ -190,6 +190,14 @@ public:
         return BAD_INDEX;
     }
 
+    bool isValid() const {
+        return mValid;
+    }
+
+    int32_t getErrorBitmask() const {
+        return mErrorBitmask;
+    }
+
 private:
     /**
      * Only use this if copy is absolutely needed.
@@ -215,12 +223,13 @@ private:
     void parseStateNestedAnnotation(uint8_t annotationType);
 
     /**
-     * The below three variables are only valid during the execution of
+     * The below two variables are only valid during the execution of
      * parseBuffer. There are no guarantees about the state of these variables
      * before/after.
      */
     uint8_t* mBuf;
     uint32_t mRemainingLen; // number of valid bytes left in the buffer being parsed
+
     bool mValid = true; // stores whether the event we received from the socket is valid
 
     /**
@@ -283,14 +292,18 @@ private:
     // The elapsed timestamp set by statsd log writer.
     int64_t mElapsedTimestampNs;
 
-    // The atom tag of the event.
-    int mTagId;
+    // The atom tag of the event (defaults to 0 if client does not
+    // appropriately set the atom id).
+    int mTagId = 0;
 
     // The uid of the logging client (defaults to -1).
     int32_t mLogUid = -1;
 
     // The pid of the logging client (defaults to -1).
     int32_t mLogPid = -1;
+
+    // Bitmask of errors sent by StatsEvent/AStatsEvent.
+    int32_t mErrorBitmask = 0;
 
     // Annotations
     bool mTruncateTimestamp = false;
