@@ -740,6 +740,9 @@
   <java-symbol type="string" name="gpsNotifTitle" />
   <java-symbol type="string" name="gpsVerifNo" />
   <java-symbol type="string" name="gpsVerifYes" />
+  <java-symbol type="string" name="gnss_nfw_notification_title" />
+  <java-symbol type="string" name="gnss_nfw_notification_message_carrier" />
+  <java-symbol type="string" name="gnss_nfw_notification_message_oem" />
   <java-symbol type="string" name="gsm_alphabet_default_charset" />
   <java-symbol type="string" name="httpError" />
   <java-symbol type="string" name="httpErrorAuth" />
