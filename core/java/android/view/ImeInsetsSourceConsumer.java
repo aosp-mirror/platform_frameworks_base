@@ -49,7 +49,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      * Tracks whether we have an outstanding request from the IME to show, but weren't able to
      * execute it because we didn't have control yet.
      */
-    private boolean mImeRequestedShow;
+    private boolean mIsRequestedVisibleAwaitingControl;
 
     public ImeInsetsSourceConsumer(
             InsetsState state, Supplier<Transaction> transactionSupplier,
@@ -88,15 +88,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public void onWindowFocusLost() {
         super.onWindowFocusLost();
         getImm().unregisterImeConsumer(this);
-        mImeRequestedShow = false;
-    }
-
-    @Override
-    public void show(boolean fromIme) {
-        super.show(fromIme);
-        if (fromIme) {
-            mImeRequestedShow = true;
-        }
+        mIsRequestedVisibleAwaitingControl = false;
     }
 
     @Override
@@ -119,11 +111,14 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         // TODO: ResultReceiver for IME.
         // TODO: Set mShowOnNextImeRender to automatically show IME and guard it with a flag.
 
+        if (getControl() == null) {
+            // If control is null, schedule to show IME when control is available.
+            mIsRequestedVisibleAwaitingControl = true;
+        }
         // If we had a request before to show from IME (tracked with mImeRequestedShow), reaching
         // this code here means that we now got control, so we can start the animation immediately.
         // If client window is trying to control IME and IME is already visible, it is immediate.
-        if (fromIme || mImeRequestedShow || mState.getSource(getType()).isVisible()) {
-            mImeRequestedShow = false;
+        if (fromIme || mState.getSource(getType()).isVisible()) {
             return ShowResult.SHOW_IMMEDIATELY;
         }
 
@@ -148,9 +143,17 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public void setControl(@Nullable InsetsSourceControl control, int[] showTypes,
             int[] hideTypes) {
         super.setControl(control, showTypes, hideTypes);
-        if (control == null) {
+        if (control == getControl()) {
+            return;
+        }
+        if (control == null && !mIsRequestedVisibleAwaitingControl) {
             hide();
         }
+    }
+
+    @Override
+    protected boolean isRequestedVisibleAwaitingControl() {
+        return mIsRequestedVisibleAwaitingControl;
     }
 
     private boolean isDummyOrEmptyEditor(EditorInfo info) {
