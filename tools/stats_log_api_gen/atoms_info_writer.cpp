@@ -27,29 +27,12 @@ namespace stats_log_api_gen {
 
 static void write_atoms_info_header_body(FILE* out, const Atoms& atoms) {
     fprintf(out, "struct AtomsInfo {\n");
-    fprintf(out, "  const static std::set<int> kAtomsWithAttributionChain;\n");
     fprintf(out, "  const static std::set<int> kWhitelistedAtoms;\n");
     fprintf(out, "};\n");
     fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n", atoms.maxPushedAtomId);
 }
 
 static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
-
-    fprintf(out, "const std::set<int> AtomsInfo::kAtomsWithAttributionChain = {\n");
-    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
-         atomIt++) {
-        for (vector<AtomField>::const_iterator field = (*atomIt)->fields.begin();
-             field != (*atomIt)->fields.end(); field++) {
-            if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                const string constant = make_constant_name((*atomIt)->name);
-                fprintf(out, "    %d, // %s\n", (*atomIt)->code, constant.c_str());
-                break;
-            }
-        }
-    }
-
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
 
     fprintf(out, "const std::set<int> AtomsInfo::kWhitelistedAtoms = {\n");
     for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
