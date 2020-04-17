@@ -50,7 +50,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -89,9 +88,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.function.Supplier;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
 public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
@@ -251,8 +250,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     @Override
-    public List<String> getWhitelistedRuleProviders() throws RemoteException {
-        return getAllowedRuleProviders();
+    public List<String> getWhitelistedRuleProviders() {
+        return getAllowedRuleProviderSystemApps();
     }
 
     private void handleIntegrityVerification(Intent intent) {
@@ -653,34 +652,56 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     private String getCallerPackageNameOrThrow() {
-        String callerPackageName = getCallerPackageName();
+        String callerPackageName = getCallingRulePusherPackageName();
         if (callerPackageName == null) {
             throw new SecurityException(
-                    "Only system packages specified in config_integrityRuleProviderPackages are"
-                            + " allowed to call this method.");
+                    "Only system packages specified in config_integrityRuleProviderPackages are "
+                            + "allowed to call this method.");
         }
         return callerPackageName;
     }
 
-    private String getCallerPackageName() {
-        final List<String> allowedRuleProviders = getAllowedRuleProviders();
-        for (String packageName : allowedRuleProviders) {
-            try {
-                // At least in tests, getPackageUid gives "NameNotFound" but getPackagesFromUid
-                // give the correct package name.
-                int uid = mContext.getPackageManager().getPackageUid(packageName, 0);
-                if (uid == Binder.getCallingUid()) {
-                    // Caller is allowed in the config.
-                    if (isSystemApp(packageName)) {
-                        return packageName;
-                    }
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                // Ignore the exception. We don't expect the app to be necessarily installed.
-                Slog.i(TAG, "Rule provider package " + packageName + " not installed.");
-            }
-        }
-        return null;
+    private String getCallingRulePusherPackageName() {
+        // Obtain the system apps that are whitelisted in config_integrityRuleProviderPackages.
+        List<String> allowedRuleProviders = getAllowedRuleProviderSystemApps();
+        Slog.i(TAG, String.format(
+                "Rule provider system app list contains: %s", allowedRuleProviders));
+
+        // Identify the package names in the caller list.
+        List<String> callingPackageNames =
+                Arrays.asList(
+                        mContext.getPackageManager().getPackagesForUid(Binder.getCallingUid()));
+        Slog.i(TAG, String.format("Calling packages are: ", callingPackageNames));
+
+        // Find the intersection between the allowed and calling packages. Ideally, we will have
+        // at most one package name here. But if we have more, it is fine.
+        List<String> allowedCallingPackages =
+                callingPackageNames
+                        .stream()
+                        .filter(packageName -> allowedRuleProviders.contains(packageName))
+                        .collect(Collectors.toList());
+        Slog.i(TAG, String.format("Calling rule pusher packages are: ", allowedCallingPackages));
+
+        return allowedCallingPackages.isEmpty() ? null : allowedCallingPackages.get(0);
+    }
+
+    private boolean isRuleProvider(String installerPackageName) {
+        return getAllowedRuleProviderSystemApps().stream()
+                .anyMatch(ruleProvider -> ruleProvider.equals(installerPackageName));
+    }
+
+    private List<String> getAllowedRuleProviderSystemApps() {
+        List<String> integrityRuleProviders =
+                Arrays.asList(
+                        mContext.getResources()
+                                .getStringArray(R.array.config_integrityRuleProviderPackages));
+
+        Slog.i(TAG, String.format("Rule provider list contains: %s", integrityRuleProviders));
+
+        // Filter out the rule provider packages that are not system apps.
+        return integrityRuleProviders.stream()
+                .filter(this::isSystemApp)
+                .collect(Collectors.toList());
     }
 
     private boolean isSystemApp(String packageName) {
@@ -692,17 +713,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
-    }
-
-    private List<String> getAllowedRuleProviders() {
-        return Arrays.asList(
-                mContext.getResources()
-                        .getStringArray(R.array.config_integrityRuleProviderPackages));
-    }
-
-    private boolean isRuleProvider(String installerPackageName) {
-        return getAllowedRuleProviders().stream()
-                .anyMatch(ruleProvider -> ruleProvider.equals(installerPackageName));
     }
 
     private boolean integrityCheckIncludesRuleProvider() {

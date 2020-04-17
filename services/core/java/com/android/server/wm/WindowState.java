@@ -1000,18 +1000,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         frame.inset(left, top, right, bottom);
     }
 
-    @Override
-    public Rect getDisplayedBounds() {
-        final Task task = getTask();
-        if (task != null) {
-            Rect bounds = task.getOverrideDisplayedBounds();
-            if (!bounds.isEmpty()) {
-                return bounds;
-            }
-        }
-        return super.getDisplayedBounds();
-    }
-
     void computeFrame(DisplayFrames displayFrames) {
         getLayoutingWindowFrames().setDisplayCutout(displayFrames.mDisplayCutout);
         computeFrameLw();
@@ -1066,7 +1054,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutXDiff = 0;
             layoutYDiff = 0;
         } else {
-            windowFrames.mContainingFrame.set(getDisplayedBounds());
+            windowFrames.mContainingFrame.set(getBounds());
             if (mActivityRecord != null && !mActivityRecord.mFrozenBounds.isEmpty()) {
 
                 // If the bounds are frozen, we still want to translate the window freely and only
@@ -1224,7 +1212,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             parentLeft = ((WindowState) parent).mWindowFrames.mFrame.left;
             parentTop = ((WindowState) parent).mWindowFrames.mFrame.top;
         } else if (parent != null) {
-            final Rect parentBounds = parent.getDisplayedBounds();
+            final Rect parentBounds = parent.getBounds();
             parentLeft = parentBounds.left;
             parentTop = parentBounds.top;
         }
@@ -1470,7 +1458,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
-        if (dc != null && mDisplayContent != null
+        if (dc != null && mDisplayContent != null && dc != mDisplayContent
                 && mDisplayContent.mInputMethodInputTarget == this) {
             dc.setInputMethodInputTarget(mDisplayContent.mInputMethodInputTarget);
             mDisplayContent.mInputMethodInputTarget = null;
@@ -5293,7 +5281,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outPoint.offset(-parent.mWindowFrames.mFrame.left + mTmpPoint.x,
                     -parent.mWindowFrames.mFrame.top + mTmpPoint.y);
         } else if (parentWindowContainer != null) {
-            final Rect parentBounds = parentWindowContainer.getDisplayedBounds();
+            final Rect parentBounds = parentWindowContainer.getBounds();
             outPoint.offset(-parentBounds.left, -parentBounds.top);
         }
 
@@ -5345,7 +5333,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // this promotion.
             final WindowState imeTarget = getDisplayContent().mInputMethodTarget;
             boolean inTokenWithAndAboveImeTarget = imeTarget != null && imeTarget != this
-                    && imeTarget.mToken == mToken && imeTarget.compareTo(this) <= 0;
+                    && imeTarget.mToken == mToken
+                    && getParent() != null
+                    && imeTarget.compareTo(this) <= 0;
             return inTokenWithAndAboveImeTarget;
         }
         return false;

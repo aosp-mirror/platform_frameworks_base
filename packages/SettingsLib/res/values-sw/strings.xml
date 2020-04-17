@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Utatuzi usiotumia waya"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Ili kungalia na kutumia vifaa vinavyopatikana, washa utatuzi usiotumia waya"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Oanisha kifaa ukitumia msimbo wa QR"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Oanisha vifaa vipya ukitumia kichanganuzi cha Msimbo wa QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Oanisha kifaa ukitumia msimbo wa kuoanisha"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Oanisha vifaa vipya ukitumia msimbo wa tarakimu sita"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Vifaa vilivyooanishwa"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Imeshindwa kuoanisha kifaa. Huenda msimbo wa QR haukuwa sahihi au kifaa hakijaunganishwa kwenye mtandao mmoja."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Anwani ya IP na Mlango"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Changanua msimbo wa QR"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Oanisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Tafadhali unganisha kwenye mtandao wa Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, tatua, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Njia ya mkato ya kuripoti hitilafu"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Chaguo za cheti cha kuonyesha pasiwaya"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Washa Uwekaji kumbukumbu za WiFi kutumia Sauti"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Kudhibiti utafutaji wa Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Kuweka nasibu kwenye MAC iliyoimarishwa na Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Iendelee kutumia data ya simu"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Kuongeza kasi kwa kutumia maunzi ili kusambaza mtandao"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Onyesha vifaa vya Bluetooth visivyo na majina"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Onyesha chaguo za cheti cha kuonyesha pasiwaya"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Ongeza hatua ya uwekaji kumbukumbu ya Wi-Fi, onyesha kwa kila SSID RSSI kwenye Kichukuzi cha Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Hupunguza matumizi ya chaji ya betri na kuboresha utendaji wa mtandao"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Hali hii ya kugeuza huathiri utendaji wa kuweka nasibu kwenye anwani ya MAC katika hali ya kiteja pekee.\nWakati hali hii imewashwa, mitandao yoyote ambapo kipengele cha unasibu wa MAC kimewashwa inaweza kuruhusu anwani zao za MAC kuwekwa nasibu tena wakati wa ushirikiano, kulingana na mara ya mwisho kiteja kilipoacha kuunganisha kwenye mtandao. Tukio la kuweka unasibu tena halitokei ikiwa kifaa kitaunganisha tena baada ya muda usiozidi saa nne."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mtandao unapima data"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Mtandao usiopima data"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Ukubwa wa kiweka bafa ya kumbukumbu"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Onyesha kidirisha cha Programu Kutorejesha Majibu kwa programu zinazotumika chinichini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Onyesha arifa za maonyo ya kituo"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Huonyesha onyo kwenye skrini programu inapochapisha arifa bila kituo sahihi."</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Tekeleza njia za mkato za arifa za mazungumzo"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Weka mipangilio ili nakala za arifa zihifadhiwe kwa njia ya zamani ya mkato ya kushiriki ili zionekane katika sehemu ya mazungumzo"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Lazima uruhusu programu kwenye hifadhi ya nje"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Huruhusu programu yoyote iwekwe kwenye hifadhi ya nje, bila kujali thamani za faili ya maelezo"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Lazimisha shughuli ziweze kubadilishwa ukubwa"</string>
@@ -449,8 +447,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Huenda kompyuta kibao ikazima hivi karibuni (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Huenda kifaa kikazima hivi karibuni (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Zimesalia <xliff:g id="TIME">%1$s</xliff:g> hadi ijae chaji"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hadi ijae chaji"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Imebakisha <xliff:g id="TIME">%1$s</xliff:g> ijae chaji"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ijae chaji"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Haijulikani"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Inachaji"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Inachaji kwa kasi"</string>
@@ -489,7 +487,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Hali ya usajili wa IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Imesajiliwa"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Haijasajiliwa"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Hapatikani"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Haipatikani"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Imechagua anwani ya MAC kwa nasibu"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="other">Imeunganisha vifaa %1$d</item>
@@ -535,7 +533,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Mtumiaji"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Wasifu uliozuiwa"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Ungependa kuongeza mtumiaji?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Unaweza kutumia kifaa hiki pamoja na watu wengine kwa kuongeza watumiaji wa ziada. Kila mtumiaji ana nafasi yake mwenyewe, ambayo anaweza kuweka programu, mandhari na vipengee vingine anavyopenda. Watumiaji pia wanaweza kurekebisha mipangilio ya kifaa inayoathiri kila mtu kama vile Wi-Fi.\n\nUnapomwongeza mtumiaji mpya, mtu huyo anahitaji kujitayarishia nafasi yake.\n\nMtumiaji yeyote anaweza kuwasasishia watumiaji wengine wote programu. Huenda mipangilio na huduma za walio na matatizo ya kuona na kusikia zisihamishiwe mtumiaji mgeni."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Unaweza kutumia kifaa hiki pamoja na watu wengine kwa kuongeza watumiaji wa ziada. Kila mtumiaji ana nafasi yake mwenyewe, ambayo anaweza kuweka programu, mandhari na vipengee vingine anavyopenda. Watumiaji pia wanaweza kurekebisha mipangilio ya kifaa inayoathiri kila mtu kama vile Wi-Fi.\n\nUnapomwongeza mtumiaji mpya, mtu huyo anahitaji kujitayarishia nafasi yake.\n\nMtumiaji yeyote anaweza kuwasasishia watumiaji wengine wote programu. Huenda mipangilio na huduma za ufikivu zisihamishiwe mtumiaji mgeni."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Mtumiaji mpya utakayemwongeza atahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Mtumiaji aongezwe sasa?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Hakikisha kuwa mtu huyu anaweza kuchukua kifaa na kuweka mapendeleo yake"</string>

@@ -29,9 +29,11 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.spy;
@@ -44,7 +46,6 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.test.InsetsModeSession;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.AfterClass;
@@ -153,22 +154,24 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
     @Test
     public void testStripForDispatch_belowIme() {
+        getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
+
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+        app.mBehindIme = true;
 
-        getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
-
-        assertNotNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_IME));
+        getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
+        assertTrue(getController().getInsetsForDispatch(app).getSource(ITYPE_IME).isVisible());
     }
 
     @Test
     public void testStripForDispatch_aboveIme() {
-        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+        getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
+
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        app.mBehindIme = false;
 
-        getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
-
-        assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_IME));
+        getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
+        assertFalse(getController().getInsetsForDispatch(app).getSource(ITYPE_IME).isVisible());
     }
 
     @Test
@@ -188,11 +191,11 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // Adding FLAG_NOT_FOCUSABLE makes app above IME.
         app.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
         mDisplayContent.computeImeTarget(true);
-        mDisplayContent.setLayoutNeeded();
         mDisplayContent.applySurfaceChangesTransaction();
 
-        // app won't get IME insets while above IME.
-        assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_IME));
+        // app won't get visible IME insets while above IME even when IME is visible.
+        getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
+        assertFalse(getController().getInsetsForDispatch(app).getSource(ITYPE_IME).isVisible());
 
         // Reset invocation counter.
         clearInvocations(app);
@@ -200,49 +203,49 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // Removing FLAG_NOT_FOCUSABLE makes app below IME.
         app.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
         mDisplayContent.computeImeTarget(true);
-        mDisplayContent.setLayoutNeeded();
         mDisplayContent.applySurfaceChangesTransaction();
 
         // Make sure app got notified.
         verify(app, atLeast(1)).notifyInsetsChanged();
 
-        // app will get IME insets while below IME.
-        assertNotNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_IME));
+        // app will get visible IME insets while below IME when IME is visible.
+        getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
+        assertTrue(getController().getInsetsForDispatch(app).getSource(ITYPE_IME).isVisible());
     }
 
     @Test
     public void testStripForDispatch_childWindow_altFocusable() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
 
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         final WindowState child = createWindow(app, TYPE_APPLICATION, "child");
         child.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
 
-        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+        mDisplayContent.computeImeTarget(true);
+        mDisplayContent.setLayoutNeeded();
+        mDisplayContent.applySurfaceChangesTransaction();
 
-        // IME cannot be the IME target.
-        ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
-
-        getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
-
-        assertNull(getController().getInsetsForDispatch(child).peekSource(ITYPE_IME));
+        getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
+        assertTrue(getController().getInsetsForDispatch(app).getSource(ITYPE_IME).isVisible());
+        assertFalse(getController().getInsetsForDispatch(child).getSource(ITYPE_IME).isVisible());
     }
 
     @Test
     public void testStripForDispatch_childWindow_splitScreen() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
 
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         final WindowState child = createWindow(app, TYPE_APPLICATION, "child");
         child.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
         child.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
 
-        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+        mDisplayContent.computeImeTarget(true);
+        mDisplayContent.setLayoutNeeded();
+        mDisplayContent.applySurfaceChangesTransaction();
 
-        // IME cannot be the IME target.
-        ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
-
-        getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
-
-        assertNull(getController().getInsetsForDispatch(child).peekSource(ITYPE_IME));
+        getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
+        assertTrue(getController().getInsetsForDispatch(app).getSource(ITYPE_IME).isVisible());
+        assertFalse(getController().getInsetsForDispatch(child).getSource(ITYPE_IME).isVisible());
     }
 
     @Test

@@ -950,7 +950,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(" startingSurface="); pw.print(startingSurface);
             pw.print(" startingDisplayed="); pw.print(startingDisplayed);
             pw.print(" startingMoved="); pw.print(startingMoved);
-            pw.println(" mHiddenSetFromTransferredStartingWindow="
+            pw.println(" mVisibleSetFromTransferredStartingWindow="
                     + mVisibleSetFromTransferredStartingWindow);
         }
         if (!mFrozenBounds.isEmpty()) {
@@ -1374,8 +1374,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final Rect spaceToFill = transformedBounds != null
                     ? transformedBounds
                     : inMultiWindowMode()
-                            ? task.getDisplayedBounds()
-                            : getRootTask().getParent().getDisplayedBounds();
+                            ? task.getBounds()
+                            : getRootTask().getParent().getBounds();
             mLetterbox.layout(spaceToFill, w.getFrameLw(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
@@ -4166,7 +4166,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @param performLayout if {@code true}, perform surface placement after committing visibility.
      */
     void commitVisibility(boolean visible, boolean performLayout) {
-        // Reset the state of mHiddenSetFromTransferredStartingWindow since visibility is actually
+        // Reset the state of mVisibleSetFromTransferredStartingWindow since visibility is actually
         // been set by the app now.
         mVisibleSetFromTransferredStartingWindow = false;
         if (visible == isVisible()) {
@@ -6661,17 +6661,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return mSizeCompatBounds;
         }
         return super.getBounds();
-    }
-
-    @Override
-    Rect getDisplayedBounds() {
-        if (task != null) {
-            final Rect overrideDisplayedBounds = task.getOverrideDisplayedBounds();
-            if (!overrideDisplayedBounds.isEmpty()) {
-                return overrideDisplayedBounds;
-            }
-        }
-        return getBounds();
     }
 
     @VisibleForTesting

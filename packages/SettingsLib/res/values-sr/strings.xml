@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Бежично отклањање грешака"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Да бисте видели и користили доступне уређаје, укључите бежично отклањање грешака"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Упарите уређај помоћу QR кода"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Упарите нове уређаје помоћу читача QR кода"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Упарите уређај помоћу кода за упаривање"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Упарите нове уређаје помоћу шестоцифреног кода"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Упарени уређаји"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Упаривање уређаја није успело. QR кôд је погрешан или уређај није повезан са истом мрежом."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP адреса и порт"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Скенирај QR кôд"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Упарите уређај помоћу Wi‑Fi мреже тако што ћете скенирати QR кôд"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Повежите се на Wi-Fi мрежу"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, отклањање грешака, програмер"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Пречица за извештај о грешкама"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сертификација бежичног екрана"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Омогући детаљнију евиденцију за Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Успоравање Wi-Fi скенирања"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Насумично MAC разврставање по Wi‑Fi‑ју"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобилни подаци су увек активни"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Хардверско убрзање привезивања"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Прикажи Bluetooth уређаје без назива"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Приказ опција за сертификацију бежичног екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Повећава ниво евидентирања за Wi‑Fi. Приказ по SSID RSSI-у у бирачу Wi‑Fi мреже"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Смањује потрошњу батерије и побољшава учинак мреже"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Овај прекидач утиче на понашање насумичног разврставања MAC адреса само за режим клијента.\nКада се овај режим активира, за мреже на којима је омогућено насумично разврставање MAC адреса може да дође до поновног насумичног разврставања MAC адреса током повезивања, у зависности од тога када се клијент пре тога искључио са мреже. До поновног насумичног разврставања не долази ако се уређај поново повеже за 4 сата или мање."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Са ограничењем"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без ограничења"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Величине бафера података у програму за евидентирање"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Прикажи дијалог Апликација не реагује за апликације у позадини"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Приказуј упозорења због канала за обавештења"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Приказује упозорење на екрану када апликација постави обавештење без важећег канала"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Примењуј пречице за обавештења о конверзацијама"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Захтева да обавештења имају и дугорочну пречицу за дељење како би се појављивала у одељку за конверзације"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Принудно дозволи апликације у спољној"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Омогућава уписивање свих апликација у спољну меморију, без обзира на вредности манифеста"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Принудно омогући промену величине активности"</string>

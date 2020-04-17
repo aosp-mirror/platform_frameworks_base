@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Trådlös felsökning"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Aktivera trådlös felsökning om du vill se tillgängliga enheter"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Parkoppla enheten med en QR-kod"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Parkoppla nya enheter med QR-kodsläsare"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Koppla enheten med en kopplingskod"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Koppla nya enheter med en sexsiffrig kod"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Kopplade enheter"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Det gick inte att parkoppla enheten. Antingen var det fel QR-kod eller är enheten inte ansluten till samma nätverk."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adress och port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skanna QR-kod"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Parkoppla enheten via Wi-Fi genom att skanna en QR-kod"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Anslut till ett Wi-Fi-nätverk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev, felsöka, felsökning"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Genväg till felrapport"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifiering för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivera utförlig loggning för Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begränsning av Wi-Fi-sökning"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑förstärkt MAC-slumpgenerering"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata alltid aktiverad"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvaruacceleration för internetdelning"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Visa namnlösa Bluetooth-enheter"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Sänker batteriförbrukningen och förbättrar nätverksprestandan"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Detta läge påverkar endast MAC-slumpgenereringens beteende för klientläget.\nNär läget aktiveras kan alla nätverk som har MAC-slumpgenerering aktiverat få sina adresser slumpgenererade på nytt under kopplingen, beroende på när klienten senast kopplade från nätverket. Det sker ingen ny slumpgenerering om enheten återansluter inom fyra timmar."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datapriser"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Utan datapriser"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Buffertstorlekar för logg"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Visa dialogrutan om att appen inte svarar för bakgrundsappar"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Visa varningar om aviseringskanal"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Visa varningar på skärmen när en app lägger upp en avisering utan en giltig kanal"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Kräv genvägar för konversationsaviseringar"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Kräv att aviseringar har en långlivad delningsgenväg för att få visas i konversationsavsnittet"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Tillåt appar i externt lagringsutrymme"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Allar appar kan skrivas till extern lagring, oavsett manifestvärden"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Framtvinga storleksanpassning för aktiviteter"</string>
@@ -482,7 +480,7 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Nästa"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Lösenord krävs"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Aktiva inmatningsmetoder"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Använda systemspråk"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Använd systemspråk"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Det gick inte att öppna inställningarna för <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Den här inmatningsmetoden kan samla all text som du skriver, inklusive personliga uppgifter som lösenord och kreditkortsnummer. Den kommer från appen <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Vill du använda inmatningsmetoden?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Obs! När du har startat om enheten måste du låsa upp mobilen innan du kan starta den här appen"</string>
@@ -545,8 +543,8 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Lägg till"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Ny användare"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Ny profil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Användarinfo"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"Profilinfo"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Användarinformation"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profilinformation"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Innan du skapar en begränsad profil måste du konfigurera ett skärmlås för att skydda dina appar och personliga data."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Konfigurera lås"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Byt till <xliff:g id="USER_NAME">%s</xliff:g>"</string>

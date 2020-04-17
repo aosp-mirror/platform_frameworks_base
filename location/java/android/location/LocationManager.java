@@ -35,6 +35,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.AlarmManager;
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.PropertyInvalidatedCache;
 import android.compat.Compatibility;
@@ -2534,7 +2535,7 @@ public class LocationManager {
         }
 
         public String getListenerId() {
-            return mConsumer.getClass().getName() + "@" + System.identityHashCode(mConsumer);
+            return AppOpsManager.toReceiverId(mConsumer);
         }
 
         public synchronized void register(AlarmManager alarmManager,
@@ -2663,7 +2664,7 @@ public class LocationManager {
         }
 
         public String getListenerId() {
-            return mListener.getClass().getName() + "@" + System.identityHashCode(mListener);
+            return AppOpsManager.toReceiverId(mListener);
         }
 
         public void register(@NonNull Executor executor) {

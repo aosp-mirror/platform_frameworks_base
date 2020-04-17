@@ -462,6 +462,7 @@ public class AccessibilityShortcutControllerTest {
         configureValidShortcutService();
         configureApplicationTargetSdkVersion(Build.VERSION_CODES.R);
         configureRequestAccessibilityButton();
+        configureEnabledService();
         Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 1);
         getController().performAccessibilityShortcut();
 
@@ -608,6 +609,11 @@ public class AccessibilityShortcutControllerTest {
             m.getCallback().run();
             return true;
         }).when(mHandler).sendMessageAtTime(any(), anyLong());
+    }
+
+    private void configureEnabledService() throws Exception {
+        when(mAccessibilityManagerService.getEnabledAccessibilityServiceList(anyInt(), anyInt()))
+                .thenReturn(Collections.singletonList(mServiceInfo));
     }
 
     private AccessibilityShortcutController getController() {

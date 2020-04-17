@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"No se pueden buscar las redes."</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Ninguna"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Guardada"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"Desconectada"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Desconectado"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Inhabilitada"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Error de configuración IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"No se estableció conexión debido a la mala calidad de la red"</string>
@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuración inalámbrica"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver y usar los dispositivos disponibles, activa la depuración inalámbrica"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Vincular dispositivo mediante código QR"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Vincular dispositivos nuevos mediante escáner de código QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincular dispositivo mediante código de sincroniz."</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Vincular dispositivos nuevos mediante código de seis dígitos"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositivos vinculados"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Error al vincular el dispositivo. El código QR era incorrecto o el dispositivo no está conectado a la misma red."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Dirección IP y puerto"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escanear código QR"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Escanea un código QR para vincular el dispositivo mediante Wi‑Fi"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Conéctate a una red Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Acceso directo para informes de errores"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Habilitar registro detallado de Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitación de búsqueda de Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Aleatorización de MAC de Wi-Fi Enhanced"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datos móviles siempre activados"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleración de hardware de conexión mediante dispositivo móvil"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostrar dispositivos Bluetooth sin nombre"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar nivel de registro Wi-Fi; mostrar por SSID RSSI en el selector de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce el consumo de batería y mejora el rendimiento de la red"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Esta activación afecta el comportamiento de aleatorización de MAC para el modo de cliente solamente.\nCuando este modo está activado, todas las redes que tienen aleatorización de MAC habilitada pueden volver a establecer de manera aleatoria sus direcciones MAC durante la asociación, según cuándo el cliente se desconectó por última vez de la red. El proceso volver a establecer de manera aleatoria no se produce si el dispositivo se vuelve a conectar en 4 horas o menos."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Con uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sin tarifa plana"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de búfer de Logger"</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostrar diálogo cuando las apps en segundo plano no responden"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Alertas de notificaciones"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Advertencia en pantalla cuando una app publica una notificación sin canal válido"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Acc. dir. notif. de conv."</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Notif. requieren acc. dir. permanente de uso comp."</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forzar permisos en almacenamiento externo"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Cualquier app puede escribirse en un almacenamiento externo, sin importar los valores del manifiesto"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forzar actividades para que cambien de tamaño"</string>
@@ -435,7 +433,7 @@
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Duración aproximada hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Duración aproximada hasta: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Debería durar aproximadamente hasta: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hasta <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Es posible que la batería se agote para las <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
@@ -460,7 +458,7 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"Cargado"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada por el administrador"</string>
     <string name="disabled" msgid="8017887509554714950">"Inhabilitada"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Permitida"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Con permiso"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"No permitida"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Instalar apps desconocidas"</string>
     <string name="home" msgid="973834627243661438">"Pantalla de configuración"</string>

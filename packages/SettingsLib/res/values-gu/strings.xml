@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"વાયરલેસ ડિબગીંગ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ઉપલબ્ધ ડિવાઇસને જોવા અને તેનો ઉપયોગ કરવા માટે, વાયરલેસ ડિબગીંગ ચાલુ કરો"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR કોડ વડે ડિવાઇસનું જોડાણ બનાવો"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR કોડ સ્કૅનરનો ઉપયોગ કરીને નવા ડિવાઇસનું જોડાણ બનાવો"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"જોડાણ કરવાના કોડ વડે ડિવાઇસનું જોડાણ બનાવો"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"છ અંકના કોડનો ઉપયોગ કરીને નવા ડિવાઇસનું જોડાણ બનાવો"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"જોડાણ કરેલા ડિવાઇસ"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ડિવાઇસનું જોડાણ કરવામાં નિષ્ફળ રહ્યાં. કાં તો QR કોડ ખોટો હતો અથવા ડિવાઇસ સમાન નેટવર્ક સાથે કનેક્ટ કરેલું નથી."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ઍડ્રેસ &amp; પોર્ટ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR કોડ સ્કૅન કરો"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR કોડને સ્કૅન કરીને વાઇ-ફાઇ પર ડિવાઇસનું જોડાણ બનાવો"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"કૃપા કરીને વાઇ-ફાઇ નેટવર્કથી કનેક્ટ કરો"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ડિબગ, ડેવ"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"બગ રિપોર્ટ શોર્ટકટ"</string>
@@ -253,6 +251,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"વાયરલેસ ડિસ્પ્લે પ્રમાણન"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"વાઇ-ફાઇ વર્બોઝ લૉગિંગ ચાલુ કરો"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"વાઇ-ફાઇ સ્કૅનની ક્ષમતા મર્યાદિત કરવી"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"મોબાઇલ ડેટા હંમેશાં સક્રિય"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ટિથરિંગ માટે હાર્ડવેર ગતિવૃદ્ધિ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"નામ વિનાના બ્લૂટૂથ ઉપકરણો બતાવો"</string>
@@ -278,13 +278,15 @@
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"ખાનગી DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"ખાનગી DNS મોડને પસંદ કરો"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"બંધ"</string>
-    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"આપમેળે"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"ઑટોમૅટિક"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"ખાનગી DNS પ્રદાતા હોસ્ટનું નામ"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS પ્રદાતાના હોસ્ટનું નામ દાખલ કરો"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"કનેક્ટ કરી શકાયું નથી"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"વાયરલેસ ડિસ્પ્લે પ્રમાણપત્ર માટેના વિકલ્પો બતાવો"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"વાઇ-ફાઇ લોગિંગ સ્તર વધારો, વાઇ-ફાઇ પીકરમાં SSID RSSI દીઠ બતાવો"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"બૅટરીનો ચાર્જ ઝડપથી ઓછો થવાનું ટાળે છે અને નેટવર્કની કાર્યક્ષમતામાં સુધારો કરે છે"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"મીટર કરેલ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"મીટર ન કરેલ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"લોગર બફર કદ"</string>
@@ -373,10 +375,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"બૅકગ્રાઉન્ડ ઍપ માટે \"ઍપ પ્રતિસાદ આપતી નથી\" સંવાદ બતાવો"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"નોટિફિકેશન ચૅનલની ચેતવણી બતાવો"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ઍપ્લિકેશન માન્ય ચૅનલ વિના નોટિફિકેશન પોસ્ટ કરે તો સ્ક્રીન પર ચેતવણી દેખાય છે"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"વાતચીત સૂચનો માટે શૉર્ટકટ"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"વાતચીત વિભાગમાં દેખાવા એક લાંબું ટકતા શેરિંગ શૉર્ટકટ દ્વારા ટેકો મેળવતા નોટિફિકેશન જરૂરી છે"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"બાહ્ય પર એપ્લિકેશનોને મંજૂરી આપવાની ફરજ પાડો"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"મેનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, કોઈપણ ઍપ્લિકેશનને બાહ્ય સ્ટોરેજ પર લખાવા માટે લાયક બનાવે છે"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"પ્રવૃત્તિઓને ફરીથી કદ યોગ્ય થવા માટે ફરજ પાડો"</string>
@@ -535,7 +535,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"વપરાશકર્તા"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"પ્રતિબંધિત પ્રોફાઇલ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"તમે વધારાના વપરાશકર્તાઓ બનાવીને અન્ય લોકો સાથે આ ઉપકરણને શેર કરી શકો છો. દરેક વપરાશકર્તા પાસે તેમની પોતાની સ્પેસ છે, જેને તેઓ ઍપ, વૉલપેપર, વગેરે સાથે કસ્ટમાઇઝ કરી શકે છે. વપરાશકર્તાઓ પ્રત્યેક વ્યક્તિને અસર કરતી હોય તેવી ઉપકરણ સેટિંગ જેમ કે વાઇ-ફાઇને પણ સમાયોજિત કરી શકે છે.\n\nજ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમની સ્પેસ સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા અન્ય બધા વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે. નવા વપરાશકર્તાને ઍક્સેસિબિલિટી સેટિંગ અને સેવાઓ ટ્રાન્સફર ન પણ થાય."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"તમે વધારાના વપરાશકર્તાઓ બનાવીને અન્ય લોકો સાથે આ ડિવાઇસને શેર કરી શકો છો. દરેક વપરાશકર્તા પાસે તેમની પોતાની સ્પેસ છે, જેને તેઓ ઍપ, વૉલપેપર, વગેરે સાથે કસ્ટમાઇઝ કરી શકે છે. વપરાશકર્તાઓ પ્રત્યેક વ્યક્તિને અસર કરતી હોય તેવી ડિવાઇસ સેટિંગ જેમ કે વાઇ-ફાઇને પણ સમાયોજિત કરી શકે છે.\n\nજ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમની સ્પેસ સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા અન્ય બધા વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે. નવા વપરાશકર્તાને ઍક્સેસિબિલિટી સેટિંગ અને સેવાઓ ટ્રાન્સફર ન પણ થાય."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ અપ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે એપ્લિકેશન્સને અપડેટ કરી શકે છે."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"અત્યારે જ વપરાશકર્તાને સેટ અપ કરીએ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ખાતરી કરો કે વ્યક્તિ ઉપકરણ લેવા અને તેમના સ્થાનનું સેટ અપ કરવા માટે ઉપલબ્ધ છે"</string>

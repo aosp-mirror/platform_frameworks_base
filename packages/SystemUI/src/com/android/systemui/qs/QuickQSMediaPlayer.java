@@ -67,9 +67,10 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
      * @param actionsToShow indices of which actions to display in the mini player
      *                      (max 3: Notification.MediaStyle.MAX_MEDIA_BUTTONS_IN_COMPACT)
      * @param contentIntent Intent to send when user taps on the view
+     * @param key original notification's key
      */
     public void setMediaSession(MediaSession.Token token, Icon icon, int iconColor, int bgColor,
-            View actionsContainer, int[] actionsToShow, PendingIntent contentIntent) {
+            View actionsContainer, int[] actionsToShow, PendingIntent contentIntent, String key) {
         // Only update if this is a different session and currently playing
         String oldPackage = "";
         if (getController() != null) {
@@ -84,7 +85,7 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
             return;
         }
 
-        super.setMediaSession(token, icon, iconColor, bgColor, contentIntent, null);
+        super.setMediaSession(token, icon, iconColor, bgColor, contentIntent, null, key);
 
         LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
         int i = 0;

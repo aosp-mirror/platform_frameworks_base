@@ -3447,8 +3447,9 @@
          TODO: move to input HAL once ready. -->
     <string name="config_doubleTouchGestureEnableFile"></string>
 
-    <!-- Package of the unbundled tv remote service which can connect to tv
-         remote provider -->
+    <!-- Comma-separated list of unbundled packages which can connect to the
+         tv remote provider. The tv remote service is an example of such a
+         service. -->
     <string name="config_tvRemoteServicePackage" translatable="false"></string>
 
     <!-- True if the device supports persisting security logs across reboots.

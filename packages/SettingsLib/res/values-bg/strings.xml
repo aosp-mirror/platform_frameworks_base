@@ -210,10 +210,9 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим за отстраняване на грешки при връзка с Wi-Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Грешка"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Безжично отстраняване на грешки"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"За да виждате и използвате наличните устройства, включете функцията за отстраняване на грешки през безжична мрежа"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"За да виждате и използвате наличните устройства, включете функцията за безжично отстраняване на грешки"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Сдвояване на устройството чрез QR код"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Сдвояване на новите устройства чрез скенер за QR кодове"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Сдвояване на устройството чрез код за сдвояване"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Сдвояване на новите устройства чрез шестцифрен код"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Сдвоени устройства"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Сдвояването на устройството не бе успешно. QR кодът е неправилен или устройството не е свързано със същата мрежа."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP адрес и порт"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Сканиране на QR код"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Сдвояване на устройството през Wi‑Fi чрез сканиране на QR код"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Моля, свържете се с Wi-Fi мрежа"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, отстраняване на грешки, програмиране"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Пряк път за сигнал за програмна грешка"</string>
@@ -253,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Безжичен дисплей"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"„Многословно“ регистр. на Wi‑Fi: Актив."</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Ограничаване на сканирането за Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Подобр. рандом. на MAC адреса чрез Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Винаги активни мобилни данни"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Хардуерно ускорение за тетъринга"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Показване на устройствата с Bluetooth без имена"</string>
@@ -285,6 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показване на опциите за сертифициране на безжичния дисплей"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"По-подробно регистр. на Wi‑Fi – данни за RSSI на SSID в инстр. за избор на Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Намалява изразходването на батерията и подобрява ефективността на мрежата"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Този превключвател оказва влияние върху поведението при рандомизиране на MAC адреси само в режим на клиентска програма.\nКогато този режим е активиран, MAC адресът на всяка мрежа, за която функцията за рандомизиране е включена, може да бъде повторно рандомизиран по време на свързването в зависимост от това, кога последно клиентската програма е прекратила връзката си с мрежата. Не възниква повторно рандомизиране, ако устройството отново установи връзка до 4 часа."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"С отчитане"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без отчитане"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Размери на регистрац. буфери"</string>
@@ -302,8 +302,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Да се използва хардуерно ускорение на тетъринга, ако е налице"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Разрешаване на отстраняването на грешки през USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Отстраняването на грешки през USB е предназначено само за програмни цели. Използвайте го за копиране на данни между компютъра и устройството си, за инсталиране на приложения на устройството си без известяване и за четене на регистрационни данни."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Да се разреши ли отстраняването на грешки през безжична мрежа?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Отстраняването на грешки през безжична мрежа е предназначено само за програмни цели. Използвайте го за копиране на данни между компютъра и устройството си, за инсталиране на приложения на устройството си без известяване и за четене на регистрационни данни."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Да се разреши ли безжичното отстраняване на грешки?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Безжичното отстраняване на грешки е предназначено само за програмни цели. Използвайте го за копиране на данни между компютъра и устройството си, за инсталиране на приложения на устройството си без известяване и за четене на регистрационни данни."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Да се отмени ли достъпът до отстраняването на грешки през USB от всички по-рано упълномощени от вас компютри?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Да се разрешат ли настройките за програмиране?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Тези настройки са предназначени само за програмиране. Те могат да доведат до прекъсване на работата или неправилно функциониране на устройството ви и приложенията в него."</string>
@@ -373,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Показване на диалоговия прозорец за грешки от типа ANR за приложенията на заден план"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Предупрежд. за канала за известия"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Показва се предупреждение, когато приложение публикува известие без валиден канал"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Налагане на преки пътища за извест. за разговори"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"За известията да се създава рез. копие чрез постоянен пряк път за споделяне, за да се показват в секцията с разговори"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Външно хран.: принуд. разрешаване на приложенията"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Всички приложения ще отговарят на условията да бъдат записвани във външното хранилище независимо от стойностите в манифеста"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Възможност за преоразмеряване на активностите"</string>

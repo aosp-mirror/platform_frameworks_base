@@ -39,6 +39,7 @@ import dalvik.system.BlockGuard;
 import dalvik.system.VMRuntime;
 
 import java.io.FileDescriptor;
+import java.util.Arrays;
 
 public class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -71,6 +72,8 @@ public class Installer extends SystemService {
     public static final int DEXOPT_GENERATE_COMPACT_DEX = 1 << 11;
     /** Indicates that dexopt should generate an app image */
     public static final int DEXOPT_GENERATE_APP_IMAGE = 1 << 12;
+    /** Indicates that dexopt may be run with different performance / priority tuned for restore */
+    public static final int DEXOPT_FOR_RESTORE = 1 << 13; // TODO(b/135202722): remove
 
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
     public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
@@ -181,6 +184,30 @@ public class Installer extends SystemService {
                     targetSdkVersion);
         } catch (Exception e) {
             throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Batched version of createAppData for use with multiple packages.
+     */
+    public void createAppDataBatched(String[] uuids, String[] packageNames, int userId, int flags,
+            int[] appIds, String[] seInfos, int[] targetSdkVersions) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        final int batchSize = 256;
+        for (int i = 0; i < uuids.length; i += batchSize) {
+            int to = i + batchSize;
+            if (to > uuids.length) {
+                to = uuids.length;
+            }
+
+            try {
+                mInstalld.createAppDataBatched(Arrays.copyOfRange(uuids, i, to),
+                        Arrays.copyOfRange(packageNames, i, to), userId, flags,
+                        Arrays.copyOfRange(appIds, i, to), Arrays.copyOfRange(seInfos, i, to),
+                        Arrays.copyOfRange(targetSdkVersions, i, to));
+            } catch (Exception e) {
+                throw InstallerException.from(e);
+            }
         }
     }
 

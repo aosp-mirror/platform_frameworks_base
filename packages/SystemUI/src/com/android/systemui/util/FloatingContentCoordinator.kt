@@ -187,16 +187,23 @@ class FloatingContentCoordinator @Inject constructor() {
                 // Tell that content to get out of the way, and save the bounds it says it's moving
                 // (or animating) to.
                 .forEach { (content, bounds) ->
-                    content.moveToBounds(
-                            content.calculateNewBoundsOnOverlap(
-                                    conflictingNewBounds,
-                                    // Pass all of the content bounds except the bounds of the
-                                    // content we're asking to move, and the conflicting new bounds
-                                    // (since those are passed separately).
-                                    otherContentBounds = allContentBounds.values
-                                            .minus(bounds)
-                                            .minus(conflictingNewBounds)))
-                    allContentBounds[content] = content.getFloatingBoundsOnScreen()
+                    val newBounds = content.calculateNewBoundsOnOverlap(
+                            conflictingNewBounds,
+                            // Pass all of the content bounds except the bounds of the
+                            // content we're asking to move, and the conflicting new bounds
+                            // (since those are passed separately).
+                            otherContentBounds = allContentBounds.values
+                                    .minus(bounds)
+                                    .minus(conflictingNewBounds))
+
+                    // If the new bounds are empty, it means there's no non-overlapping position
+                    // that is in bounds. Just leave the content where it is. This should normally
+                    // not happen, but sometimes content like PIP reports incorrect bounds
+                    // temporarily.
+                    if (!newBounds.isEmpty) {
+                        content.moveToBounds(newBounds)
+                        allContentBounds[content] = content.getFloatingBoundsOnScreen()
+                    }
                 }
 
         currentlyResolvingConflicts = false
@@ -229,8 +236,8 @@ class FloatingContentCoordinator @Inject constructor() {
          * @param allowedBounds The area within which we're allowed to find new bounds for the
          * content.
          * @return New bounds for the content that don't intersect the exclusion rects or the
-         * newly overlapping rect, and that is within bounds unless no possible in-bounds position
-         * exists.
+         * newly overlapping rect, and that is within bounds - or an empty Rect if no in-bounds
+         * position exists.
          */
         @JvmStatic
         fun findAreaForContentVertically(
@@ -274,7 +281,13 @@ class FloatingContentCoordinator @Inject constructor() {
                             !overlappingContentPushingDown && !positionAboveInBounds
 
             // Return the content rect, but offset to reflect the new position.
-            return if (usePositionBelow) newContentBoundsBelow else newContentBoundsAbove
+            val newBounds = if (usePositionBelow) newContentBoundsBelow else newContentBoundsAbove
+
+            // If the new bounds are within the allowed bounds, return them. If not, it means that
+            // there are no legal new bounds. This can happen if the new content's bounds are too
+            // large (for example, full-screen PIP). Since there is no reasonable action to take
+            // here, return an empty Rect and we will just not move the content.
+            return if (allowedBounds.contains(newBounds)) newBounds else Rect()
         }
 
         /**

@@ -16,6 +16,7 @@
 
 package com.android.systemui.pip.phone;
 
+import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
@@ -56,6 +57,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.systemui.R;
+import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
@@ -229,7 +231,7 @@ public class PipTouchHandler {
         mMotionHelper = new PipMotionHelper(mContext, activityTaskManager, pipTaskOrganizer,
                 mMenuController, mSnapAlgorithm, mFlingAnimationUtils, floatingContentCoordinator);
         mPipResizeGestureHandler =
-                new PipResizeGestureHandler(context, pipBoundsHandler, this, mMotionHelper,
+                new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
                         deviceConfig, pipTaskOrganizer);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
@@ -343,11 +345,16 @@ public class PipTouchHandler {
         mPipResizeGestureHandler.onActivityUnpinned();
     }
 
-    public void onPinnedStackAnimationEnded() {
+    public void onPinnedStackAnimationEnded(
+            @PipAnimationController.TransitionDirection int direction) {
         // Always synchronize the motion helper bounds once PiP animations finish
         mMotionHelper.synchronizePinnedStackBounds();
         updateMovementBounds();
-        mResizedBounds.set(mMotionHelper.getBounds());
+        if (direction == TRANSITION_DIRECTION_TO_PIP) {
+            // updates mResizedBounds only if it's an entering PiP animation
+            // mResized should be otherwise updated in setMenuState.
+            mResizedBounds.set(mMotionHelper.getBounds());
+        }
 
         if (mShowPipMenuOnAnimationEnd) {
             mMenuController.showMenu(MENU_STATE_CLOSE, mMotionHelper.getBounds(),

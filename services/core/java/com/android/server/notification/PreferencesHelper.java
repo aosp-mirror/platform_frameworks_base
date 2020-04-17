@@ -16,7 +16,9 @@
 
 package com.android.server.notification;
 
+import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
@@ -30,6 +32,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -79,7 +82,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PreferencesHelper implements RankingConfig {
     private static final String TAG = "NotificationPrefHelper";
-    private static final int XML_VERSION = 1;
+    private static final int XML_VERSION = 2;
+    /** What version to check to do the upgrade for bubbles. */
+    private static final int XML_VERSION_BUBBLES_UPGRADE = 1;
     private static final int UNKNOWN_UID = UserHandle.USER_NULL;
     private static final String NON_BLOCKABLE_CHANNEL_DELIM = ":";
 
@@ -151,6 +156,7 @@ public class PreferencesHelper implements RankingConfig {
     private final RankingHandler mRankingHandler;
     private final ZenModeHelper mZenModeHelper;
     private final NotificationChannelLogger mNotificationChannelLogger;
+    private final AppOpsManager mAppOps;
 
     private SparseBooleanArray mBadgingEnabled;
     private boolean mBubblesEnabledGlobally = DEFAULT_GLOBAL_ALLOW_BUBBLE;
@@ -167,12 +173,14 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
-            ZenModeHelper zenHelper, NotificationChannelLogger notificationChannelLogger) {
+            ZenModeHelper zenHelper, NotificationChannelLogger notificationChannelLogger,
+            AppOpsManager appOpsManager) {
         mContext = context;
         mZenModeHelper = zenHelper;
         mRankingHandler = rankingHandler;
         mPm = pm;
         mNotificationChannelLogger = notificationChannelLogger;
+        mAppOps = appOpsManager;
 
         // STOPSHIP (b/142218092) this should be removed before ship
         if (!wasBadgingForcedTrue(context)) {
@@ -195,6 +203,15 @@ public class PreferencesHelper implements RankingConfig {
         if (type != XmlPullParser.START_TAG) return;
         String tag = parser.getName();
         if (!TAG_RANKING.equals(tag)) return;
+
+        boolean upgradeForBubbles = false;
+        if (parser.getAttributeCount() > 0) {
+            String attribute = parser.getAttributeName(0);
+            if (ATT_VERSION.equals(attribute)) {
+                int xmlVersion = Integer.parseInt(parser.getAttributeValue(0));
+                upgradeForBubbles = xmlVersion == XML_VERSION_BUBBLES_UPGRADE;
+            }
+        }
         synchronized (mPackagePreferences) {
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 tag = parser.getName();
@@ -220,6 +237,16 @@ public class PreferencesHelper implements RankingConfig {
                                 }
                             }
                             boolean skipWarningLogged = false;
+                            boolean hasSAWPermission = false;
+                            if (upgradeForBubbles) {
+                                hasSAWPermission = mAppOps.noteOpNoThrow(
+                                        OP_SYSTEM_ALERT_WINDOW, uid, name, null,
+                                        "check-notif-bubble") == AppOpsManager.MODE_ALLOWED;
+                            }
+                            int bubblePref = hasSAWPermission
+                                    ? BUBBLE_PREFERENCE_ALL
+                                    : XmlUtils.readIntAttribute(parser, ATT_ALLOW_BUBBLE,
+                                            DEFAULT_BUBBLE_PREFERENCE);
 
                             PackagePreferences r = getOrCreatePackagePreferencesLocked(
                                     name, userId, uid,
@@ -231,8 +258,7 @@ public class PreferencesHelper implements RankingConfig {
                                             parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
                                     XmlUtils.readBooleanAttribute(
                                             parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE),
-                                    XmlUtils.readIntAttribute(
-                                            parser, ATT_ALLOW_BUBBLE, DEFAULT_BUBBLE_PREFERENCE));
+                                    bubblePref);
                             r.importance = XmlUtils.readIntAttribute(
                                     parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
                             r.priority = XmlUtils.readIntAttribute(

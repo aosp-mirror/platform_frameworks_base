@@ -21,6 +21,7 @@ import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.DEVICE_POLICY_SERVICE;
 import static android.os.UserHandle.USER_ALL;
+import static android.os.UserHandle.USER_SYSTEM;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -96,6 +97,8 @@ abstract public class ManagedServices {
 
     private static final int ON_BINDING_DIED_REBIND_DELAY_MS = 10000;
     protected static final String ENABLED_SERVICES_SEPARATOR = ":";
+    private static final String DB_VERSION_1 = "1";
+
 
     /**
      * List of components and apps that can have running {@link ManagedServices}.
@@ -107,7 +110,7 @@ abstract public class ManagedServices {
     static final String ATT_VERSION = "version";
     static final String ATT_DEFAULTS = "defaults";
 
-    static final int DB_VERSION = 1;
+    static final int DB_VERSION = 2;
 
     static final int APPROVAL_BY_PACKAGE = 0;
     static final int APPROVAL_BY_COMPONENT = 1;
@@ -187,16 +190,21 @@ abstract public class ManagedServices {
     protected void addDefaultComponentOrPackage(String packageOrComponent) {
         if (!TextUtils.isEmpty(packageOrComponent)) {
             synchronized (mDefaultsLock) {
-                ComponentName cn = ComponentName.unflattenFromString(packageOrComponent);
-                if (cn == null) {
+                if (mApprovalLevel == APPROVAL_BY_PACKAGE) {
                     mDefaultPackages.add(packageOrComponent);
-                } else {
+                    return;
+                }
+                ComponentName cn = ComponentName.unflattenFromString(packageOrComponent);
+                if (cn != null  && mApprovalLevel == APPROVAL_BY_COMPONENT) {
                     mDefaultPackages.add(cn.getPackageName());
                     mDefaultComponents.add(cn);
+                    return;
                 }
             }
         }
     }
+
+    protected abstract void loadDefaultsFromConfig();
 
     boolean isDefaultComponentOrPackage(String packageOrComponent) {
         synchronized (mDefaultsLock) {
@@ -504,19 +512,19 @@ abstract public class ManagedServices {
 
     void readDefaults(XmlPullParser parser) {
         String defaultComponents = XmlUtils.readStringAttribute(parser, ATT_DEFAULTS);
-        if (defaultComponents == null) {
-            return;
-        }
-        String[] components = defaultComponents.split(ENABLED_SERVICES_SEPARATOR);
-        synchronized (mDefaultsLock) {
-            for (int i = 0; i < components.length; i++) {
-                if (!TextUtils.isEmpty(components[i])) {
-                    ComponentName cn = ComponentName.unflattenFromString(components[i]);
-                    if (cn != null) {
-                        mDefaultPackages.add(cn.getPackageName());
-                        mDefaultComponents.add(cn);
-                    } else {
-                        mDefaultPackages.add(components[i]);
+
+        if (!TextUtils.isEmpty(defaultComponents)) {
+            String[] components = defaultComponents.split(ENABLED_SERVICES_SEPARATOR);
+            synchronized (mDefaultsLock) {
+                for (int i = 0; i < components.length; i++) {
+                    if (!TextUtils.isEmpty(components[i])) {
+                        ComponentName cn = ComponentName.unflattenFromString(components[i]);
+                        if (cn != null) {
+                            mDefaultPackages.add(cn.getPackageName());
+                            mDefaultComponents.add(cn);
+                        } else {
+                            mDefaultPackages.add(components[i]);
+                        }
                     }
                 }
             }
@@ -531,9 +539,11 @@ abstract public class ManagedServices {
             throws XmlPullParserException, IOException {
         // read grants
         int type;
+        String version = "";
         readDefaults(parser);
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             String tag = parser.getName();
+            version = XmlUtils.readStringAttribute(parser, ATT_VERSION);
             if (type == XmlPullParser.END_TAG
                     && getConfig().xmlTag.equals(tag)) {
                 break;
@@ -561,7 +571,36 @@ abstract public class ManagedServices {
                 }
             }
         }
+        boolean isVersionOne = TextUtils.isEmpty(version) || DB_VERSION_1.equals(version);
+        if (isVersionOne) {
+            upgradeToVersionTwo();
+        }
         rebindServices(false, USER_ALL);
+    }
+
+    private void upgradeToVersionTwo() {
+        // check if any defaults are loaded
+        int defaultsSize = mDefaultComponents.size() + mDefaultPackages.size();
+        if (defaultsSize == 0) {
+            // load defaults from current allowed
+            if (this.mApprovalLevel == APPROVAL_BY_COMPONENT) {
+                List<ComponentName> approvedComponents = getAllowedComponents(USER_SYSTEM);
+                for (int i = 0; i < approvedComponents.size(); i++) {
+                    addDefaultComponentOrPackage(approvedComponents.get(i).flattenToString());
+                }
+            }
+            if (this.mApprovalLevel == APPROVAL_BY_PACKAGE) {
+                List<String> approvedPkgs = getAllowedPackages(USER_SYSTEM);
+                for (int i = 0; i < approvedPkgs.size(); i++) {
+                    addDefaultComponentOrPackage(approvedPkgs.get(i));
+                }
+            }
+        }
+        // if no defaults are loaded, then load from config
+        defaultsSize = mDefaultComponents.size() + mDefaultPackages.size();
+        if (defaultsSize == 0) {
+            loadDefaultsFromConfig();
+        }
     }
 
     /**
