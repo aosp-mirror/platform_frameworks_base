@@ -114,7 +114,7 @@ static HalVersion connectPowerHalLocked() {
             gPowerHalAidl_ = waitForVintfService<IPowerAidl>();
         }
         if (gPowerHalAidl_) {
-            ALOGI("Successfully connected to Power HAL AIDL service.");
+            ALOGV("Successfully connected to Power HAL AIDL service.");
             return HalVersion::AIDL;
         } else {
             gPowerHalAidlExists = false;
@@ -123,14 +123,14 @@ static HalVersion connectPowerHalLocked() {
     if (gPowerHalHidlExists && gPowerHalHidlV1_0_ == nullptr) {
         gPowerHalHidlV1_0_ = IPowerV1_0::getService();
         if (gPowerHalHidlV1_0_) {
-            ALOGI("Successfully connected to Power HAL HIDL 1.0 service.");
+            ALOGV("Successfully connected to Power HAL HIDL 1.0 service.");
             // Try cast to powerHAL HIDL V1_1
             gPowerHalHidlV1_1_ = IPowerV1_1::castFrom(gPowerHalHidlV1_0_);
             if (gPowerHalHidlV1_1_) {
-                ALOGI("Successfully connected to Power HAL HIDL 1.1 service.");
+                ALOGV("Successfully connected to Power HAL HIDL 1.1 service.");
             }
         } else {
-            ALOGI("Couldn't load power HAL HIDL service");
+            ALOGV("Couldn't load power HAL HIDL service");
             gPowerHalHidlExists = false;
             return HalVersion::NONE;
         }
