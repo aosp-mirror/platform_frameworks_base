@@ -178,7 +178,15 @@ public class AdbDebuggingManager {
         private String mPairingCode;
         private String mGuid;
         private String mServiceName;
-        private final String mServiceType = "_adb_secure_pairing._tcp.";
+        // From RFC6763 (https://tools.ietf.org/html/rfc6763#section-7.2),
+        // The rules for Service Names [RFC6335] state that they may be no more
+        // than fifteen characters long (not counting the mandatory underscore),
+        // consisting of only letters, digits, and hyphens, must begin and end
+        // with a letter or digit, must not contain consecutive hyphens, and
+        // must contain at least one letter.
+        @VisibleForTesting
+        static final String SERVICE_PROTOCOL = "adb-tls-pairing";
+        private final String mServiceType = String.format("_%s._tcp.", SERVICE_PROTOCOL);
         private int mPort;
 
         private native int native_pairing_start(String guid, String password);
