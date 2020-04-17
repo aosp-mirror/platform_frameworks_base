@@ -24,6 +24,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.sysprop.InitProperties;
 
 public class PowerCommand extends Svc.Command {
     private static final int FORCE_SUSPEND_DELAY_DEFAULT_MILLIS = 0;
@@ -103,6 +104,8 @@ public class PowerCommand extends Svc.Command {
                         pm.reboot(false, mode, true);
                     } catch (RemoteException e) {
                         maybeLogRemoteException("Failed to reboot.");
+                    } catch (Exception e) {
+                        System.err.println("Failed to reboot: " + e.getMessage());
                     }
                     return;
                 } else if ("shutdown".equals(args[1])) {
@@ -138,7 +141,9 @@ public class PowerCommand extends Svc.Command {
     // if it is already in shutdown flow.
     private void maybeLogRemoteException(String msg) {
         String powerProp = SystemProperties.get("sys.powerctl");
-        if (powerProp.isEmpty()) {
+        // Also check if userspace reboot is ongoing, since in case of userspace reboot value of the
+        // sys.powerctl property will be reset.
+        if (powerProp.isEmpty() && !InitProperties.userspace_reboot_in_progress().orElse(false)) {
             System.err.println(msg);
         }
     }

@@ -21,9 +21,11 @@ import android.content.res.Resources;
 import android.telephony.SmsCbCmasInfo;
 import android.telephony.cdma.CdmaSmsCbProgramData;
 import android.telephony.cdma.CdmaSmsCbProgramResults;
+import android.text.TextUtils;
 
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
+import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsConstants;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
@@ -540,8 +542,17 @@ public final class BearerData {
      */
     public static TextEncodingDetails calcTextEncodingDetails(CharSequence msg,
             boolean force7BitEncoding, boolean isEntireMsg) {
+        CharSequence newMsg = null;
+        Resources r = Resources.getSystem();
+        if (r.getBoolean(com.android.internal.R.bool.config_sms_force_7bit_encoding)) {
+            newMsg = Sms7BitEncodingTranslator.translate(msg, true /* isCdmaFormat */);
+        }
+        if (TextUtils.isEmpty(newMsg)) {
+            newMsg = msg;
+        }
+
         TextEncodingDetails ted;
-        int septets = countAsciiSeptets(msg, force7BitEncoding);
+        int septets = countAsciiSeptets(newMsg, force7BitEncoding);
         if (septets != -1 && septets <= SmsConstants.MAX_USER_DATA_SEPTETS) {
             ted = new TextEncodingDetails();
             ted.msgCount = 1;

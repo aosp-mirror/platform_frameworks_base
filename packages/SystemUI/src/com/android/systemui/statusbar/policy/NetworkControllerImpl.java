@@ -23,7 +23,6 @@ import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
-import static android.telephony.TelephonyManager.MODEM_COUNT_DUAL_MODEM;
 
 import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
@@ -607,7 +606,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private void filterMobileSubscriptionInSameGroup(List<SubscriptionInfo> subscriptions) {
-        if (subscriptions.size() == MODEM_COUNT_DUAL_MODEM) {
+        if (subscriptions.size() == 2) {
             SubscriptionInfo info1 = subscriptions.get(0);
             SubscriptionInfo info2 = subscriptions.get(1);
             if (info1.getGroupUuid() != null && info1.getGroupUuid().equals(info2.getGroupUuid())) {

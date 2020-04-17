@@ -2135,6 +2135,13 @@ public class AudioService extends IAudioService.Stub
 
         // For legacy reason, propagate to all streams associated to this volume group
         for (final int groupedStream : vgs.getLegacyStreamTypes()) {
+            try {
+                ensureValidStreamType(groupedStream);
+            } catch (IllegalArgumentException e) {
+                Log.d(TAG, "volume group " + volumeGroup + " has internal streams (" + groupedStream
+                        + "), do not change associated stream volume");
+                continue;
+            }
             setStreamVolume(groupedStream, index, flags, callingPackage, callingPackage,
                             Binder.getCallingUid());
         }
@@ -3350,7 +3357,15 @@ public class AudioService extends IAudioService.Stub
                 hdlr = h;
                 // Remove from client list so that it is re-inserted at top of list
                 iter.remove();
-                hdlr.getBinder().unlinkToDeath(hdlr, 0);
+                try {
+                    hdlr.getBinder().unlinkToDeath(hdlr, 0);
+                    if (cb != hdlr.getBinder()){
+                        hdlr = null;
+                    }
+                } catch (NoSuchElementException e) {
+                    hdlr = null;
+                    Log.w(TAG, "link does not exist ...");
+                }
                 break;
             }
         }

@@ -1101,13 +1101,12 @@
          grants your app this permission. If you don't need this permission, be sure your <a
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
          targetSdkVersion}</a> is 4 or higher.
-         <p>Protection level: dangerous
+         <p>Protection level: normal
     -->
     <permission android:name="android.permission.READ_PHONE_STATE"
-        android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_readPhoneState"
         android:description="@string/permdesc_readPhoneState"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!-- Allows read access to the device's phone number(s). This is a subset of the capabilities
          granted by {@link #READ_PHONE_STATE} but is exposed to instant applications.
@@ -2097,7 +2096,7 @@
     <permission android:name="android.permission.READ_ACTIVE_EMERGENCY_SESSION"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows listen permission to always reported signal strength.
+    <!-- Allows listen permission to always reported signal strength.
          @hide Used internally. -->
     <permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH"
         android:protectionLevel="signature|telephony" />

@@ -35,7 +35,9 @@ public abstract class NetworkSpecifier {
      * @hide
      */
     @SystemApi
-    public abstract boolean satisfiedBy(@Nullable NetworkSpecifier other);
+    public boolean canBeSatisfiedBy(@Nullable NetworkSpecifier other) {
+        return false;
+    }
 
     /**
      * Optional method which can be overridden by concrete implementations of NetworkSpecifier to

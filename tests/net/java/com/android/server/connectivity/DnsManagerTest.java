@@ -18,35 +18,54 @@ package com.android.server.connectivity;
 
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
+import static android.net.NetworkCapabilities.MAX_TRANSPORT;
+import static android.net.NetworkCapabilities.MIN_TRANSPORT;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 
+import static com.android.testutils.MiscAssertsKt.assertContainsExactly;
+import static com.android.testutils.MiscAssertsKt.assertContainsStringsExactly;
+import static com.android.testutils.MiscAssertsKt.assertFieldCountEquals;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.net.IDnsResolver;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.ResolverOptionsParcel;
+import android.net.ResolverParamsParcel;
 import android.net.RouteInfo;
 import android.net.shared.PrivateDnsConfig;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
+import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.MessageUtils;
 import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -66,8 +85,11 @@ public class DnsManagerTest {
     static final int TEST_NETID = 100;
     static final int TEST_NETID_ALTERNATE = 101;
     static final int TEST_NETID_UNTRACKED = 102;
-    final boolean IS_DEFAULT = true;
-    final boolean NOT_DEFAULT = false;
+    static final int TEST_DEFAULT_SAMPLE_VALIDITY_SECONDS = 1800;
+    static final int TEST_DEFAULT_SUCCESS_THRESHOLD_PERCENT = 25;
+    static final int TEST_DEFAULT_MIN_SAMPLES = 8;
+    static final int TEST_DEFAULT_MAX_SAMPLES = 64;
+    static final int[] TEST_TRANSPORT_TYPES = {TRANSPORT_WIFI, TRANSPORT_VPN};
 
     DnsManager mDnsManager;
     MockContentResolver mContentResolver;
@@ -75,6 +97,35 @@ public class DnsManagerTest {
     @Mock Context mCtx;
     @Mock IDnsResolver mMockDnsResolver;
     @Mock MockableSystemProperties mSystemProperties;
+
+    private void assertResolverOptionsEquals(
+            @NonNull ResolverOptionsParcel actual,
+            @NonNull ResolverOptionsParcel expected) {
+        assertEquals(actual.hosts, expected.hosts);
+        assertEquals(actual.tcMode, expected.tcMode);
+        assertFieldCountEquals(2, ResolverOptionsParcel.class);
+    }
+
+    private void assertResolverParamsEquals(@NonNull ResolverParamsParcel actual,
+            @NonNull ResolverParamsParcel expected) {
+        assertEquals(actual.netId, expected.netId);
+        assertEquals(actual.sampleValiditySeconds, expected.sampleValiditySeconds);
+        assertEquals(actual.successThreshold, expected.successThreshold);
+        assertEquals(actual.minSamples, expected.minSamples);
+        assertEquals(actual.maxSamples, expected.maxSamples);
+        assertEquals(actual.baseTimeoutMsec, expected.baseTimeoutMsec);
+        assertEquals(actual.retryCount, expected.retryCount);
+        assertContainsStringsExactly(actual.servers, expected.servers);
+        assertContainsStringsExactly(actual.domains, expected.domains);
+        assertEquals(actual.tlsName, expected.tlsName);
+        assertContainsStringsExactly(actual.tlsServers, expected.tlsServers);
+        assertContainsStringsExactly(actual.tlsFingerprints, expected.tlsFingerprints);
+        assertEquals(actual.caCertificate, expected.caCertificate);
+        assertEquals(actual.tlsConnectTimeoutMs, expected.tlsConnectTimeoutMs);
+        assertResolverOptionsEquals(actual.resolverOptions, expected.resolverOptions);
+        assertContainsExactly(actual.transportTypes, expected.transportTypes);
+        assertFieldCountEquals(16, ResolverParamsParcel.class);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -103,8 +154,13 @@ public class DnsManagerTest {
         lp.addDnsServer(InetAddress.getByName("4.4.4.4"));
 
         // Send a validation event that is tracked on the alternate netId
-        mDnsManager.setDnsConfigurationForNetwork(TEST_NETID, lp, IS_DEFAULT);
-        mDnsManager.setDnsConfigurationForNetwork(TEST_NETID_ALTERNATE, lp, NOT_DEFAULT);
+        mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
+        mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
+        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
+        mDnsManager.flushVmDnsCache();
+        mDnsManager.updateTransportsForNetwork(TEST_NETID_ALTERNATE, TEST_TRANSPORT_TYPES);
+        mDnsManager.noteDnsServersForNetwork(TEST_NETID_ALTERNATE, lp);
+        mDnsManager.flushVmDnsCache();
         mDnsManager.updatePrivateDnsValidation(
                 new DnsManager.PrivateDnsValidationUpdate(TEST_NETID_ALTERNATE,
                 InetAddress.parseNumericAddress("4.4.4.4"), "", true));
@@ -135,7 +191,10 @@ public class DnsManagerTest {
                     InetAddress.parseNumericAddress("6.6.6.6"),
                     InetAddress.parseNumericAddress("2001:db8:66:66::1")
                     }));
-        mDnsManager.setDnsConfigurationForNetwork(TEST_NETID, lp, IS_DEFAULT);
+        mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
+        mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
+        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
+        mDnsManager.flushVmDnsCache();
         fixedLp = new LinkProperties(lp);
         mDnsManager.updatePrivateDnsStatus(TEST_NETID, fixedLp);
         assertTrue(fixedLp.isPrivateDnsActive());
@@ -168,7 +227,10 @@ public class DnsManagerTest {
         // be tracked.
         LinkProperties lp = new LinkProperties();
         lp.addDnsServer(InetAddress.getByName("3.3.3.3"));
-        mDnsManager.setDnsConfigurationForNetwork(TEST_NETID, lp, IS_DEFAULT);
+        mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
+        mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
+        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
+        mDnsManager.flushVmDnsCache();
         mDnsManager.updatePrivateDnsValidation(
                 new DnsManager.PrivateDnsValidationUpdate(TEST_NETID,
                 InetAddress.parseNumericAddress("3.3.3.3"), "", true));
@@ -179,7 +241,10 @@ public class DnsManagerTest {
         // Validation event has untracked netId
         mDnsManager.updatePrivateDns(new Network(TEST_NETID),
                 mDnsManager.getPrivateDnsConfig());
-        mDnsManager.setDnsConfigurationForNetwork(TEST_NETID, lp, IS_DEFAULT);
+        mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
+        mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
+        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
+        mDnsManager.flushVmDnsCache();
         mDnsManager.updatePrivateDnsValidation(
                 new DnsManager.PrivateDnsValidationUpdate(TEST_NETID_UNTRACKED,
                 InetAddress.parseNumericAddress("3.3.3.3"), "", true));
@@ -225,7 +290,10 @@ public class DnsManagerTest {
         Settings.Global.putString(mContentResolver, PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_OFF);
         mDnsManager.updatePrivateDns(new Network(TEST_NETID),
                 mDnsManager.getPrivateDnsConfig());
-        mDnsManager.setDnsConfigurationForNetwork(TEST_NETID, lp, IS_DEFAULT);
+        mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
+        mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
+        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
+        mDnsManager.flushVmDnsCache();
         mDnsManager.updatePrivateDnsValidation(
                 new DnsManager.PrivateDnsValidationUpdate(TEST_NETID,
                 InetAddress.parseNumericAddress("3.3.3.3"), "", true));
@@ -257,5 +325,58 @@ public class DnsManagerTest {
         assertTrue(cfgStrict.useTls);
         assertEquals("strictmode.com", cfgStrict.hostname);
         assertEquals(new InetAddress[0], cfgStrict.ips);
+    }
+
+    @Test
+    public void testSendDnsConfiguration() throws Exception {
+        reset(mMockDnsResolver);
+        mDnsManager.updatePrivateDns(new Network(TEST_NETID),
+                mDnsManager.getPrivateDnsConfig());
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(TEST_IFACENAME);
+        lp.addDnsServer(InetAddress.getByName("3.3.3.3"));
+        lp.addDnsServer(InetAddress.getByName("4.4.4.4"));
+        mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
+        mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
+        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
+        mDnsManager.flushVmDnsCache();
+
+        final ArgumentCaptor<ResolverParamsParcel> resolverParamsParcelCaptor =
+                ArgumentCaptor.forClass(ResolverParamsParcel.class);
+        verify(mMockDnsResolver, times(1)).setResolverConfiguration(
+                resolverParamsParcelCaptor.capture());
+        final ResolverParamsParcel actualParams = resolverParamsParcelCaptor.getValue();
+        final ResolverParamsParcel expectedParams = new ResolverParamsParcel();
+        expectedParams.netId = TEST_NETID;
+        expectedParams.sampleValiditySeconds = TEST_DEFAULT_SAMPLE_VALIDITY_SECONDS;
+        expectedParams.successThreshold = TEST_DEFAULT_SUCCESS_THRESHOLD_PERCENT;
+        expectedParams.minSamples = TEST_DEFAULT_MIN_SAMPLES;
+        expectedParams.maxSamples = TEST_DEFAULT_MAX_SAMPLES;
+        expectedParams.servers = new String[]{"3.3.3.3", "4.4.4.4"};
+        expectedParams.domains = new String[]{};
+        expectedParams.tlsName = "";
+        expectedParams.tlsServers = new String[]{"3.3.3.3", "4.4.4.4"};
+        expectedParams.transportTypes = TEST_TRANSPORT_TYPES;
+        expectedParams.resolverOptions = new ResolverOptionsParcel();
+        assertResolverParamsEquals(actualParams, expectedParams);
+    }
+
+    @Test
+    public void testTransportTypesEqual() throws Exception {
+        SparseArray<String> ncTransTypes = MessageUtils.findMessageNames(
+                new Class[] { NetworkCapabilities.class }, new String[]{ "TRANSPORT_" });
+        SparseArray<String> dnsTransTypes = MessageUtils.findMessageNames(
+                new Class[] { IDnsResolver.class }, new String[]{ "TRANSPORT_" });
+        assertEquals(0, MIN_TRANSPORT);
+        assertEquals(MAX_TRANSPORT + 1, ncTransTypes.size());
+        // TRANSPORT_UNKNOWN in IDnsResolver is defined to -1 and only for resolver.
+        assertEquals("TRANSPORT_UNKNOWN", dnsTransTypes.get(-1));
+        assertEquals(ncTransTypes.size(), dnsTransTypes.size() - 1);
+        for (int i = MIN_TRANSPORT; i < MAX_TRANSPORT; i++) {
+            String name = ncTransTypes.get(i, null);
+            assertNotNull("Could not find NetworkCapabilies.TRANSPORT_* constant equal to "
+                    + i, name);
+            assertEquals(name, dnsTransTypes.get(i));
+        }
     }
 }

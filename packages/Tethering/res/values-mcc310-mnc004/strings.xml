@@ -15,16 +15,16 @@
 -->
 <resources>
     <!-- String for no upstream notification title [CHAR LIMIT=200] -->
-    <string name="no_upstream_notification_title">Hotspot has no internet</string>
+    <string name="no_upstream_notification_title">Tethering has no internet</string>
     <!-- String for no upstream notification title [CHAR LIMIT=200] -->
-    <string name="no_upstream_notification_message">Devices can\u2019t connect to internet</string>
-    <!-- String for cellular roaming notification disable button [CHAR LIMIT=200]  -->
-    <string name="no_upstream_notification_disable_button">Turn off hotspot</string>
+    <string name="no_upstream_notification_message">Devices can\u2019t connect</string>
+    <!-- String for no upstream notification disable button [CHAR LIMIT=200] -->
+    <string name="no_upstream_notification_disable_button">Turn off tethering</string>
 
-    <!-- String for cellular roaming notification title [CHAR LIMIT=200]  -->
-    <string name="upstream_roaming_notification_title">Hotspot is on</string>
-    <!-- String for cellular roaming notification message [CHAR LIMIT=500]  -->
+    <!-- String for cellular roaming notification title [CHAR LIMIT=200] -->
+    <string name="upstream_roaming_notification_title">Hotspot or tethering is on</string>
+    <!-- String for cellular roaming notification message [CHAR LIMIT=500] -->
     <string name="upstream_roaming_notification_message">Additional charges may apply while roaming</string>
-    <!-- String for cellular roaming notification continue button [CHAR LIMIT=200]  -->
+    <!-- String for cellular roaming notification continue button [CHAR LIMIT=200] -->
     <string name="upstream_roaming_notification_continue_button">Continue</string>
 </resources>

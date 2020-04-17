@@ -107,7 +107,9 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final int PROFILE_SAVE_SLEEP_TIMEOUT = 1000; // Allow 1s for the profile to save
     private static final int IORAP_TRACE_DURATION_TIMEOUT = 7000; // Allow 7s for trace to complete.
     private static final int IORAP_TRIAL_LAUNCH_ITERATIONS = 3;  // min 3 launches to merge traces.
-    private static final int IORAP_COMPILE_CMD_TIMEOUT = 600;  // in seconds: 10 minutes
+    private static final int IORAP_COMPILE_CMD_TIMEOUT = 60;  // in seconds: 1 minutes
+    private static final int IORAP_COMPILE_MIN_TRACES = 1;  // configure iorapd to need 1 trace.
+    private static final int IORAP_COMPILE_RETRIES = 3;  // retry compiler 3 times if it fails.
     private static final String LAUNCH_SUB_DIRECTORY = "launch_logs";
     private static final String LAUNCH_FILE = "applaunch.txt";
     private static final String TRACE_SUB_DIRECTORY = "atrace_logs";
@@ -132,9 +134,9 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String LAUNCH_ORDER_CYCLIC = "cyclic";
     private static final String LAUNCH_ORDER_SEQUENTIAL = "sequential";
     private static final String COMPILE_CMD = "cmd package compile -f -m %s %s";
-    private static final String IORAP_COMPILE_CMD = "cmd jobscheduler run -f android 283673059";
+    private static final String IORAP_COMPILE_CMD = "dumpsys iorapd --compile-package %s";
     private static final String IORAP_MAINTENANCE_CMD =
-            "iorap.cmd.maintenance --purge-package %s /data/misc/iorapd/sqlite.db";
+            "dumpsys iorapd --purge-package %s";
     private static final String IORAP_DUMPSYS_CMD = "dumpsys iorapd";
     private static final String SPEED_PROFILE_FILTER = "speed-profile";
     private static final String VERIFY_FILTER = "verify";
@@ -350,9 +352,9 @@ public class AppLaunch extends InstrumentationTestCase {
                     sleep(IORAP_TRACE_DURATION_TIMEOUT);
 
                     if (launch.getLaunchReason().equals(IORAP_TRIAL_LAUNCH_LAST)) {
-                        // run the iorap job scheduler and wait for iorap to compile fully.
-                        assertTrue(String.format("Not able to iorap-compile the app : %s", appPkgName),
-                                compileAppForIorap(appPkgName));
+                        // run the iorap compiler and wait for iorap to compile fully.
+                        // this throws an exception if it fails.
+                        compileAppForIorapWithRetries(appPkgName, IORAP_COMPILE_RETRIES);
                     }
                 }
 
@@ -504,6 +506,22 @@ public class AppLaunch extends InstrumentationTestCase {
     }
 
     /**
+     * Compile the app package using compilerFilter,
+     * retrying if the compilation command fails in between.
+     */
+    private void compileAppForIorapWithRetries(String appPkgName, int retries) throws IOException {
+        for (int i = 0; i < retries; ++i) {
+            if (compileAppForIorap(appPkgName)) {
+                return;
+            }
+            sleep(1000);
+        }
+
+        throw new IllegalStateException("compileAppForIorapWithRetries: timed out after "
+                + retries + " retries");
+    }
+
+    /**
      * Compile the app package using compilerFilter and return true or false
      * based on status of the compilation command.
      */
@@ -511,7 +529,7 @@ public class AppLaunch extends InstrumentationTestCase {
         String logcatTimestamp = getTimeNowForLogcat();
 
         getInstrumentation().getUiAutomation().
-                executeShellCommand(IORAP_COMPILE_CMD);
+                executeShellCommand(String.format(IORAP_COMPILE_CMD, appPkgName));
 
         int i = 0;
         for (i = 0; i < IORAP_COMPILE_CMD_TIMEOUT; ++i) {
@@ -523,7 +541,8 @@ public class AppLaunch extends InstrumentationTestCase {
             } else if (status == IorapCompilationStatus.INSUFFICIENT_TRACES) {
                 Log.e(TAG, "compileAppForIorap: failed due to insufficient traces");
                 logDumpsysIorapd(appPkgName);
-                return false;
+                throw new IllegalStateException(
+                        "compileAppForIorap: failed due to insufficient traces");
             } // else INCOMPLETE. keep asking iorapd if it's done yet.
             sleep(1000);
         }
@@ -534,19 +553,7 @@ public class AppLaunch extends InstrumentationTestCase {
             return false;
         }
 
-        // Wait for the job to finish completely.
-        // Other packages could be compiled in cyclic runs.
-        int currentAttempt = 0;
-        do {
-            String logcatLines = getLogcatSinceTime(logcatTimestamp);
-            if (logcatLines.contains("IorapForwardingService: Finished background job")) {
-                return true;
-            }
-            sleep(1000);
-        } while (currentAttempt++ < IORAP_COMPILE_CMD_TIMEOUT);
-
-        Log.e(TAG, "compileAppForIorap: failed due to jobscheduler timeout.");
-        return false;
+        return true;
     }
 
     /** Save the contents of $(adb shell dumpsys iorapd) to the launch_logs directory. */
@@ -806,11 +813,9 @@ public class AppLaunch extends InstrumentationTestCase {
         }
 
         Log.v(TAG, "Purge iorap package: " + packageName);
-        stopIorapd();
         getInstrumentation().getUiAutomation()
                 .executeShellCommand(String.format(IORAP_MAINTENANCE_CMD, packageName));
         Log.v(TAG, "Executed: " + String.format(IORAP_MAINTENANCE_CMD, packageName));
-        startIorapd();
     }
 
     String executeShellCommandWithTempFile(String cmd) {
@@ -890,12 +895,16 @@ public class AppLaunch extends InstrumentationTestCase {
             throw new AssertionError(e);
         }
 
-        stopIorapd();
         getInstrumentation().getUiAutomation()
                 .executeShellCommand(String.format("setprop iorapd.perfetto.enable %b", enable));
         getInstrumentation().getUiAutomation()
                 .executeShellCommand(String.format("setprop iorapd.readahead.enable %b", enable));
-        startIorapd();
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand(String.format(
+                        "setprop iorapd.maintenance.min_traces %d", IORAP_COMPILE_MIN_TRACES));
+        // this last command blocks until iorapd refreshes its system properties
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand(String.format("dumpsys iorapd --refresh-properties"));
 
         if (enable) {
             mIorapStatus = IorapStatus.ENABLED;
