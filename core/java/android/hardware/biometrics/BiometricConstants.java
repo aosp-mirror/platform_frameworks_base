@@ -18,7 +18,11 @@ package android.hardware.biometrics;
 
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface containing all of the biometric modality agnostic constants.
@@ -151,6 +155,27 @@ public interface BiometricConstants {
      */
     @UnsupportedAppUsage
     int BIOMETRIC_ERROR_VENDOR_BASE = 1000;
+
+    @IntDef({BIOMETRIC_SUCCESS,
+            BIOMETRIC_ERROR_HW_UNAVAILABLE,
+            BIOMETRIC_ERROR_UNABLE_TO_PROCESS,
+            BIOMETRIC_ERROR_TIMEOUT,
+            BIOMETRIC_ERROR_NO_SPACE,
+            BIOMETRIC_ERROR_CANCELED,
+            BIOMETRIC_ERROR_UNABLE_TO_REMOVE,
+            BIOMETRIC_ERROR_LOCKOUT,
+            BIOMETRIC_ERROR_VENDOR,
+            BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
+            BIOMETRIC_ERROR_USER_CANCELED,
+            BIOMETRIC_ERROR_NO_BIOMETRICS,
+            BIOMETRIC_ERROR_HW_NOT_PRESENT,
+            BIOMETRIC_ERROR_NEGATIVE_BUTTON,
+            BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
+            BIOMETRIC_PAUSED_REJECTED,
+            BIOMETRIC_ERROR_VENDOR_BASE})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Errors {}
 
     //
     // Image acquisition messages.

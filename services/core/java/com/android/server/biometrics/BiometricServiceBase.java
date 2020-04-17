@@ -31,7 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
@@ -122,9 +122,9 @@ public abstract class BiometricServiceBase extends SystemService
     private ClientMonitor mCurrentClient;
     private ClientMonitor mPendingClient;
     private PerformanceStats mPerformanceStats;
+    private int mSensorId;
     protected int mCurrentUserId = UserHandle.USER_NULL;
     protected long mHalDeviceId;
-    private int mOEMStrength; // Tracks the OEM configured biometric modality strength
     // Tracks if the current authentication makes use of CryptoObjects.
     protected boolean mIsCrypto;
     // Normal authentications are tracked by mPerformanceMap.
@@ -434,8 +434,8 @@ public abstract class BiometricServiceBase extends SystemService
             throw new UnsupportedOperationException("Stub!");
         }
 
-        default void onAuthenticationSucceededInternal(boolean requireConfirmation, byte[] token,
-                boolean isStrongBiometric) throws RemoteException {
+        default void onAuthenticationSucceededInternal(int sensorId, boolean requireConfirmation,
+                byte[] token) throws RemoteException {
             throw new UnsupportedOperationException("Stub!");
         }
 
@@ -472,11 +472,11 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         @Override
-        public void onAuthenticationSucceededInternal(boolean requireConfirmation, byte[] token,
-                boolean isStrongBiometric) throws RemoteException {
+        public void onAuthenticationSucceededInternal(int sensorId, boolean requireConfirmation,
+                byte[] token) throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAuthenticationSucceeded(requireConfirmation, token,
-                        isStrongBiometric);
+                getWrapperReceiver().onAuthenticationSucceeded(sensorId, requireConfirmation,
+                        token);
             }
         }
 
@@ -687,18 +687,11 @@ public abstract class BiometricServiceBase extends SystemService
                 statsModality(), BiometricsProtoEnums.ISSUE_HAL_DEATH);
     }
 
-    protected void initConfiguredStrengthInternal(int strength) {
+    protected void initializeConfigurationInternal(int sensorId) {
         if (DEBUG) {
-            Slog.d(getTag(), "initConfiguredStrengthInternal(" + strength + ")");
+            Slog.d(getTag(), "initializeConfigurationInternal(" + sensorId + ")");
         }
-        mOEMStrength = strength;
-    }
-
-    protected boolean isStrongBiometric() {
-        // TODO(b/141025588): need to calculate actual strength when downgrading tiers
-        final int biometricBits = mOEMStrength
-                & BiometricManager.Authenticators.BIOMETRIC_MIN_STRENGTH;
-        return biometricBits == BiometricManager.Authenticators.BIOMETRIC_STRONG;
+        mSensorId = sensorId;
     }
 
     protected ClientMonitor getCurrentClient() {
@@ -707,6 +700,22 @@ public abstract class BiometricServiceBase extends SystemService
 
     protected ClientMonitor getPendingClient() {
         return mPendingClient;
+    }
+
+    protected boolean isStrongBiometric() {
+        IBiometricService service = IBiometricService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+        try {
+            return Utils.isAtLeastStrength(service.getCurrentStrength(mSensorId),
+                    Authenticators.BIOMETRIC_STRONG);
+        } catch (RemoteException e) {
+            Slog.e(getTag(), "RemoteException", e);
+            return false;
+        }
+    }
+
+    protected int getSensorId() {
+        return mSensorId;
     }
 
     /**

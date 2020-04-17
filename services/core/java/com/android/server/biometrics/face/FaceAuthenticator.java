@@ -22,22 +22,26 @@ import android.hardware.face.IFaceService;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import com.android.server.biometrics.SensorConfig;
+
 /**
- * TODO(b/141025588): Add JavaDoc.
+ * Shim that converts IFaceService into a common reusable IBiometricAuthenticator interface.
  */
 public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     private final IFaceService mFaceService;
 
-    public FaceAuthenticator(IFaceService faceService) {
+    public FaceAuthenticator(IFaceService faceService, SensorConfig config)
+            throws RemoteException {
         mFaceService = faceService;
+        mFaceService.initializeConfiguration(config.id);
     }
 
     @Override
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
-            long sessionId, int userId, IBiometricServiceReceiverInternal wrapperReceiver,
+            long operationId, int userId, IBiometricServiceReceiverInternal wrapperReceiver,
             String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
-        mFaceService.prepareForAuthentication(requireConfirmation, token, sessionId, userId,
+        mFaceService.prepareForAuthentication(requireConfirmation, token, operationId, userId,
                 wrapperReceiver, opPackageName, cookie, callingUid, callingPid, callingUserId);
     }
 

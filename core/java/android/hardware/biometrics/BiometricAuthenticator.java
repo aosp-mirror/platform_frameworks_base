@@ -17,11 +17,14 @@
 package android.hardware.biometrics;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
 import android.os.CancellationSignal;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
 
 /**
@@ -61,6 +64,12 @@ public interface BiometricAuthenticator {
      * @hide
      */
     int TYPE_FACE = 1 << 3;
+    @IntDef({TYPE_NONE,
+            TYPE_CREDENTIAL,
+            TYPE_FINGERPRINT,
+            TYPE_IRIS})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Modality {}
 
     /**
      * Container for biometric data

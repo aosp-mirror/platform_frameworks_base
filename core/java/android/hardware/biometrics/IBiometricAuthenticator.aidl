@@ -33,7 +33,7 @@ interface IBiometricAuthenticator {
     // called from BiometricService. The additional uid, pid, userId arguments should be determined
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
-    void prepareForAuthentication(boolean requireConfirmation, IBinder token, long sessionId,
+    void prepareForAuthentication(boolean requireConfirmation, IBinder token, long operationId,
             int userId, IBiometricServiceReceiverInternal wrapperReceiver, String opPackageName,
             int cookie, int callingUid, int callingPid, int callingUserId);
 

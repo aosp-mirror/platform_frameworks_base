@@ -28,7 +28,7 @@ import android.view.Surface;
  */
 interface IFaceService {
     // Authenticate the given sessionId with a face
-    void authenticate(IBinder token, long sessionId, int userid,
+    void authenticate(IBinder token, long operationId, int userid,
             IFaceServiceReceiver receiver, int flags, String opPackageName);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
@@ -36,7 +36,7 @@ interface IFaceService {
     // called from BiometricService. The additional uid, pid, userId arguments should be determined
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
-    void prepareForAuthentication(boolean requireConfirmation, IBinder token, long sessionId,
+    void prepareForAuthentication(boolean requireConfirmation, IBinder token, long operationId,
             int userId, IBiometricServiceReceiverInternal wrapperReceiver, String opPackageName,
             int cookie, int callingUid, int callingPid, int callingUserId);
 
@@ -111,6 +111,6 @@ interface IFaceService {
 
     void userActivity();
 
-    // Initialize the OEM configured biometric strength
-    void initConfiguredStrength(int strength);
+    // Give FaceService its ID. See AuthService.java
+    void initializeConfiguration(int sensorId);
 }

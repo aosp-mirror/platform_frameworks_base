@@ -26,9 +26,7 @@ package android.hardware.biometrics;
 oneway interface IBiometricServiceReceiverInternal {
     // Notify BiometricService that authentication was successful. If user confirmation is required,
     // the auth token must be submitted into KeyStore.
-    // TODO(b/151967372): Strength should be changed to authenticatorId
-    void onAuthenticationSucceeded(boolean requireConfirmation, in byte[] token,
-            boolean isStrongBiometric);
+    void onAuthenticationSucceeded(int sensorId, boolean requireConfirmation, in byte[] token);
     // Notify BiometricService authentication was rejected.
     void onAuthenticationFailed();
     // Notify BiometricService than an error has occured. Forward to the correct receiver depending
