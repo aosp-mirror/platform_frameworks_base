@@ -1373,6 +1373,8 @@ public final class GnssMeasurement implements Parcelable {
      * <p>Returns "C" for GPS L1 C/A,  GPS L2 C/A, GLONASS G1 C/A, GLONASS G2 C/A, GALILEO E1C,
      * GALILEO E6C, SBAS L1 C/A, QZSS L1 C/A, IRNSS L5C.
      *
+     * <p>Returns "D" for BDS B1C D.
+     *
      * <p>Returns "I" for GPS L5 I, GLONASS G3 I, GALILEO E5a I, GALILEO E5b I, GALILEO E5a+b I,
      * SBAS L5 I, QZSS L5 I, BDS B1 I, BDS B2 I, BDS B3 I.
      *
@@ -1382,7 +1384,7 @@ public final class GnssMeasurement implements Parcelable {
      *
      * <p>Returns "N" for GPS L1 codeless, GPS L2 codeless.
      *
-     * <p>Returns "P" for GPS L1P, GPS L2P, GLONASS G1P, GLONASS G2P.
+     * <p>Returns "P" for GPS L1P, GPS L2P, GLONASS G1P, GLONASS G2P, BDS B1C P.
      *
      * <p>Returns "Q" for GPS L5 Q, GLONASS G3 Q, GALILEO E5a Q, GALILEO E5b Q, GALILEO E5a+b Q,
      * SBAS L5 Q, QZSS L5 Q, BDS B1 Q, BDS B2 Q, BDS B3 Q.
@@ -1394,7 +1396,7 @@ public final class GnssMeasurement implements Parcelable {
      * <p>Returns "X" for GPS L1C (D+P), GPS L2C (M+L), GPS L5 (I+Q), GLONASS G3 (I+Q), GALILEO
      * E1 (B+C), GALILEO E5a (I+Q), GALILEO E5b (I+Q), GALILEO E5a+b(I+Q), GALILEO E6 (B+C), SBAS
      * L5 (I+Q), QZSS L1C (D+P), QZSS L2C (M+L), QZSS L5 (I+Q), LEX(6) (S+L), BDS B1 (I+Q), BDS
-     * B2 (I+Q), BDS B3 (I+Q), IRNSS L5 (B+C).
+     * B1C (D+P), BDS B2 (I+Q), BDS B3 (I+Q), IRNSS L5 (B+C).
      *
      * <p>Returns "Y" for GPS L1Y, GPS L2Y.
      *
