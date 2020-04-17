@@ -858,4 +858,9 @@ public interface ParsingPackageRead extends Parcelable {
 
     // TODO(b/135203078): Hide and enforce going through PackageInfoUtils
     ApplicationInfo toAppInfoWithoutState();
+
+    /**
+     * same as toAppInfoWithoutState except without flag computation.
+     */
+    ApplicationInfo toAppInfoWithoutStateWithoutFlags();
 }

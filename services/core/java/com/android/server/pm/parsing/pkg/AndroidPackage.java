@@ -301,6 +301,12 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
     ApplicationInfo toAppInfoWithoutState();
 
     /**
+     * Same as toAppInfoWithoutState except it does not compute any flags.
+     */
+    @NonNull
+    ApplicationInfo toAppInfoWithoutStateWithoutFlags();
+
+    /**
      * TODO(b/135203078): Remove usages?
      * @return a mock of what the previous package.applicationInfo would've returned for logging
      * @deprecated don't use this in any new code, just print package name directly
