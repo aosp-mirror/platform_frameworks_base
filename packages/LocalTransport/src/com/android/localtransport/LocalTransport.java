@@ -143,11 +143,6 @@ public class LocalTransport extends BackupTransport {
         return null;
     }
 
-    /** @removed Replaced with dataManagementIntentLabel in the API */
-    public String dataManagementLabel() {
-        return TRANSPORT_DATA_MANAGEMENT_LABEL;
-    }
-
     @Override
     @Nullable
     public CharSequence dataManagementIntentLabel() {
