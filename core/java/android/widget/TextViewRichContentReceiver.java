@@ -23,6 +23,7 @@ import android.text.Editable;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.util.Log;
 
 import java.util.Collections;
 import java.util.Set;
@@ -40,6 +41,8 @@ import java.util.Set;
 final class TextViewRichContentReceiver implements RichContentReceiver<TextView> {
     static final TextViewRichContentReceiver INSTANCE = new TextViewRichContentReceiver();
 
+    private static final String LOG_TAG = "RichContentReceiver";
+
     private static final Set<String> MIME_TYPES_ALL_TEXT = Collections.singleton("text/*");
 
     @Override
@@ -50,6 +53,17 @@ final class TextViewRichContentReceiver implements RichContentReceiver<TextView>
     @Override
     public boolean onReceive(@NonNull TextView textView, @NonNull ClipData clip,
             @Source int source, @Flags int flags) {
+        if (Log.isLoggable(LOG_TAG, Log.DEBUG)) {
+            StringBuilder sb = new StringBuilder("onReceive: clip=");
+            if (clip.getDescription() == null) {
+                sb.append("null");
+            } else {
+                clip.getDescription().toShortStringTypesOnly(sb);
+            }
+            sb.append(", source=").append(RichContentReceiver.sourceToString(source));
+            sb.append(", flags=").append(RichContentReceiver.flagsToString(flags));
+            Log.d(LOG_TAG, sb.toString());
+        }
         if (source == SOURCE_AUTOFILL) {
             return onReceiveForAutofill(textView, clip, flags);
         }
