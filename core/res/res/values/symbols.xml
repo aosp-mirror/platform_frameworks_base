@@ -3175,7 +3175,6 @@
   <java-symbol type="drawable" name="lockscreen_selected" />
 
   <java-symbol type="string" name="notification_header_divider_symbol_with_spaces" />
-  <java-symbol type="array" name="config_defaultCellBroadcastReceiverPkgs" />
 
   <java-symbol type="color" name="notification_primary_text_color_light" />
   <java-symbol type="color" name="notification_primary_text_color_dark" />
