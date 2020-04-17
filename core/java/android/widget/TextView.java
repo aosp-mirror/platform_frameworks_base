@@ -22,6 +22,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_C
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+import static android.widget.RichContentReceiver.SOURCE_PROCESS_TEXT;
 
 import android.R;
 import android.annotation.CallSuper;
@@ -2127,7 +2128,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 CharSequence result = data.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT);
                 if (result != null) {
                     if (isTextEditable()) {
-                        replaceSelectionWithText(result);
+                        ClipData clip = ClipData.newPlainText("", result);
+                        mRichContentReceiver.onReceive(this, clip, SOURCE_PROCESS_TEXT, 0);
                         if (mEditor != null) {
                             mEditor.refreshTextActionMode();
                         }
@@ -12832,10 +12834,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int length = mText.length();
         Selection.setSelection(mSpannable, 0, length);
         return length > 0;
-    }
-
-    void replaceSelectionWithText(CharSequence text) {
-        ((Editable) mText).replace(getSelectionStart(), getSelectionEnd(), text);
     }
 
     private void paste(boolean withFormatting) {
