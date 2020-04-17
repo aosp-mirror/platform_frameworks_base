@@ -3769,7 +3769,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pendingOptions.getPackageName(),
                         pendingOptions.getCustomEnterResId(),
                         pendingOptions.getCustomExitResId(),
-                        pendingOptions.getOnAnimationStartListener());
+                        pendingOptions.getAnimationStartedListener(),
+                        pendingOptions.getAnimationFinishedListener());
                 break;
             case ANIM_CLIP_REVEAL:
                 displayContent.mAppTransition.overridePendingAppTransitionClipReveal(
@@ -3799,7 +3800,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 final GraphicBuffer buffer = pendingOptions.getThumbnail();
                 displayContent.mAppTransition.overridePendingAppTransitionThumb(buffer,
                         pendingOptions.getStartX(), pendingOptions.getStartY(),
-                        pendingOptions.getOnAnimationStartListener(),
+                        pendingOptions.getAnimationStartedListener(),
                         scaleUp);
                 if (intent.getSourceBounds() == null && buffer != null) {
                     intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
@@ -3815,19 +3816,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pendingOptions.getSpecsFuture();
                 if (specsFuture != null) {
                     displayContent.mAppTransition.overridePendingAppTransitionMultiThumbFuture(
-                            specsFuture, pendingOptions.getOnAnimationStartListener(),
+                            specsFuture, pendingOptions.getAnimationStartedListener(),
                             animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP);
                 } else if (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_DOWN
                         && specs != null) {
                     displayContent.mAppTransition.overridePendingAppTransitionMultiThumb(
-                            specs, pendingOptions.getOnAnimationStartListener(),
+                            specs, pendingOptions.getAnimationStartedListener(),
                             pendingOptions.getAnimationFinishedListener(), false);
                 } else {
                     displayContent.mAppTransition.overridePendingAppTransitionAspectScaledThumb(
                             pendingOptions.getThumbnail(),
                             pendingOptions.getStartX(), pendingOptions.getStartY(),
                             pendingOptions.getWidth(), pendingOptions.getHeight(),
-                            pendingOptions.getOnAnimationStartListener(),
+                            pendingOptions.getAnimationStartedListener(),
                             (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP));
                     if (intent.getSourceBounds() == null) {
                         intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
