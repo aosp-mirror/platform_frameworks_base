@@ -3388,7 +3388,9 @@ class Task extends WindowContainer<WindowContainer> {
         final Intent baseIntent = getBaseIntent();
         // Make a copy of base intent because this is like a snapshot info.
         // Besides, {@link RecentTasks#getRecentTasksImpl} may modify it.
+        final int baseIntentFlags = baseIntent == null ? 0 : baseIntent.getFlags();
         info.baseIntent = baseIntent == null ? new Intent() : baseIntent.cloneFilter();
+        info.baseIntent.setFlags(baseIntentFlags);
         info.baseActivity = mReuseActivitiesReport.base != null
                 ? mReuseActivitiesReport.base.intent.getComponent()
                 : null;
