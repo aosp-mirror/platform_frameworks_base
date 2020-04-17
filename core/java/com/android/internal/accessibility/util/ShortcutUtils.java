@@ -25,8 +25,10 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.ShortcutType;
 
+import java.util.List;
 import java.util.StringJoiner;
 
 /**
@@ -97,29 +99,6 @@ public final class ShortcutUtils {
     }
 
     /**
-     * Returns if component id existed in one of {@link UserShortcutType} string from Settings.
-     *
-     * @param context The current context.
-     * @param shortcutTypes A combination of {@link UserShortcutType}.
-     * @param componentId The component id that need to be checked existed in Settings.
-     * @return {@code true} if component id existed in Settings.
-     */
-    public static boolean hasValuesInSettings(Context context, @UserShortcutType int shortcutTypes,
-            @NonNull String componentId) {
-        boolean exist = false;
-        if ((shortcutTypes & UserShortcutType.SOFTWARE) == UserShortcutType.SOFTWARE) {
-            exist = isComponentIdExistingInSettings(context, UserShortcutType.SOFTWARE,
-                    componentId);
-        }
-        if (((shortcutTypes & UserShortcutType.HARDWARE) == UserShortcutType.HARDWARE)) {
-            exist |= isComponentIdExistingInSettings(context, UserShortcutType.HARDWARE,
-                    componentId);
-        }
-        return exist;
-    }
-
-
-    /**
      * Returns if component id existed in Settings.
      *
      * @param context The current context.
@@ -146,6 +125,21 @@ public final class ShortcutUtils {
         }
 
         return false;
+    }
+
+    /**
+     * Returns if a {@code shortcutType} shortcut contains {@code componentId}.
+     *
+     * @param context The current context.
+     * @param shortcutType The preferred shortcut type user selected.
+     * @param componentId The component id that need to be checked.
+     * @return {@code true} if a component id is contained.
+     */
+    public static boolean isShortcutContained(Context context, @ShortcutType int shortcutType,
+            @NonNull String componentId) {
+        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+        final List<String> requiredTargets = am.getAccessibilityShortcutTargets(shortcutType);
+        return requiredTargets.contains(componentId);
     }
 
     /**
