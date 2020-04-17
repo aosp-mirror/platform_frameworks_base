@@ -2003,7 +2003,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (self.isState(
                     ActivityStack.ActivityState.RESUMED, ActivityStack.ActivityState.PAUSING)) {
                 self.getDisplay().mDisplayContent.mAppTransition.overridePendingAppTransition(
-                        packageName, enterAnim, exitAnim, null);
+                        packageName, enterAnim, exitAnim, null, null);
             }
 
             Binder.restoreCallingIdentity(origId);
