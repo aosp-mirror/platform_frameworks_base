@@ -256,6 +256,7 @@ public class ResolverListAdapter extends BaseAdapter {
             }
         }
 
+        setPlaceholderCount(0);
         int n;
         if ((currentResolveList != null) && ((n = currentResolveList.size()) > 0)) {
             // We only care about fixing the unfilteredList if the current resolve list and
