@@ -519,7 +519,8 @@ public class TunerResourceManagerServiceTest {
                 .getFrontendResource(infos[1].getId()).isInUse()).isTrue();
 
         // Release frontend
-        mTunerResourceManagerService.releaseFrontendInternal(frontendId);
+        mTunerResourceManagerService.releaseFrontendInternal(mTunerResourceManagerService
+                .getFrontendResource(frontendId));
         assertThat(mTunerResourceManagerService
                 .getFrontendResource(frontendId).isInUse()).isFalse();
         assertThat(mTunerResourceManagerService
@@ -609,7 +610,8 @@ public class TunerResourceManagerServiceTest {
         assertThat(lnbId).isEqualTo(lnbIds[0]);
 
         // Release lnb
-        mTunerResourceManagerService.releaseLnbInternal(lnbId);
+        mTunerResourceManagerService.releaseLnbInternal(mTunerResourceManagerService
+                .getLnbResource(lnbId));
         assertThat(mTunerResourceManagerService
                 .getLnbResource(lnbId).isInUse()).isFalse();
         assertThat(mTunerResourceManagerService

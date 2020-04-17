@@ -897,7 +897,7 @@ public final class MediaCas implements AutoCloseable {
 
         synchronized (mSessionMap) {
             if (mSessionMap.get(session) != null) {
-                mTunerResourceManager.releaseCasSession(mSessionMap.get(session));
+                mTunerResourceManager.releaseCasSession(mSessionMap.get(session), mClientId);
                 mSessionMap.remove(session);
             }
         }
