@@ -2093,6 +2093,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
+    private void enforceNetworkFactoryOrSettingsPermission() {
+        enforceAnyPermissionOf(
+                android.Manifest.permission.NETWORK_SETTINGS,
+                android.Manifest.permission.NETWORK_FACTORY,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+    }
+
+    private void enforceNetworkFactoryOrTestNetworksPermission() {
+        enforceAnyPermissionOf(
+                android.Manifest.permission.MANAGE_TEST_NETWORKS,
+                android.Manifest.permission.NETWORK_FACTORY,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+    }
+
     private boolean checkSettingsPermission() {
         return checkAnyPermissionOf(
                 android.Manifest.permission.NETWORK_SETTINGS,
@@ -5683,7 +5697,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public int registerNetworkProvider(Messenger messenger, String name) {
-        enforceNetworkFactoryPermission();
+        enforceNetworkFactoryOrSettingsPermission();
         NetworkProviderInfo npi = new NetworkProviderInfo(name, messenger,
                 null /* asyncChannel */, nextNetworkProviderId(),
                 () -> unregisterNetworkProvider(messenger));
@@ -5693,7 +5707,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public void unregisterNetworkProvider(Messenger messenger) {
-        enforceNetworkFactoryPermission();
+        enforceNetworkFactoryOrSettingsPermission();
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_UNREGISTER_NETWORK_PROVIDER, messenger));
     }
 
@@ -5713,7 +5727,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public void declareNetworkRequestUnfulfillable(NetworkRequest request) {
-        enforceNetworkFactoryPermission();
+        if (request.hasTransport(TRANSPORT_TEST)) {
+            enforceNetworkFactoryOrTestNetworksPermission();
+        } else {
+            enforceNetworkFactoryPermission();
+        }
         mHandler.post(() -> handleReleaseNetworkRequest(request, Binder.getCallingUid(), true));
     }
 
