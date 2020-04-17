@@ -1830,27 +1830,35 @@ public class PackageManagerTests extends AndroidTestCase {
      * The following series of tests are related to upgrading apps with
      * different certificates.
      */
-    private int APP1_UNSIGNED = R.raw.install_app1_unsigned;
+    private static final int APP1_UNSIGNED = R.raw.install_app1_unsigned;
 
-    private int APP1_CERT1 = R.raw.install_app1_cert1;
+    private static final int APP1_CERT1 = R.raw.install_app1_cert1;
 
-    private int APP1_CERT2 = R.raw.install_app1_cert2;
+    private static final int APP1_CERT2 = R.raw.install_app1_cert2;
 
-    private int APP1_CERT1_CERT2 = R.raw.install_app1_cert1_cert2;
+    private static final int APP1_CERT1_CERT2 = R.raw.install_app1_cert1_cert2;
 
-    private int APP1_CERT3_CERT4 = R.raw.install_app1_cert3_cert4;
+    private static final int APP1_CERT3_CERT4 = R.raw.install_app1_cert3_cert4;
 
-    private int APP1_CERT3 = R.raw.install_app1_cert3;
+    private static final int APP1_CERT3 = R.raw.install_app1_cert3;
 
-    private int APP2_UNSIGNED = R.raw.install_app2_unsigned;
+    private static final int APP1_CERT5 = R.raw.install_app1_cert5;
 
-    private int APP2_CERT1 = R.raw.install_app2_cert1;
+    private static final int APP1_CERT5_ROTATED_CERT6 = R.raw.install_app1_cert5_rotated_cert6;
 
-    private int APP2_CERT2 = R.raw.install_app2_cert2;
+    private static final int APP1_CERT6 = R.raw.install_app1_cert6;
 
-    private int APP2_CERT1_CERT2 = R.raw.install_app2_cert1_cert2;
+    private static final int APP2_UNSIGNED = R.raw.install_app2_unsigned;
 
-    private int APP2_CERT3 = R.raw.install_app2_cert3;
+    private static final int APP2_CERT1 = R.raw.install_app2_cert1;
+
+    private static final int APP2_CERT2 = R.raw.install_app2_cert2;
+
+    private static final int APP2_CERT1_CERT2 = R.raw.install_app2_cert1_cert2;
+
+    private static final int APP2_CERT3 = R.raw.install_app2_cert3;
+
+    private static final int APP2_CERT5_ROTATED_CERT6 = R.raw.install_app2_cert5_rotated_cert6;
 
     private InstallParams replaceCerts(int apk1, int apk2, boolean cleanUp, boolean fail,
             int retCode) throws Exception {
@@ -2470,6 +2478,26 @@ public class PackageManagerTests extends AndroidTestCase {
         } finally {
             cleanUpInstall(ip);
         }
+    }
+
+    @LargeTest
+    public void testCheckSignaturesRotatedAgainstOriginal() throws Exception {
+        // checkSignatures should be backwards compatible with pre-rotation behavior; this test
+        // verifies that an app signed with a rotated key results in a signature match with an app
+        // signed with the original key in the lineage.
+        int apk1 = APP1_CERT5;
+        int apk2 = APP2_CERT5_ROTATED_CERT6;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_MATCH);
+    }
+
+    @LargeTest
+    public void testCheckSignaturesRotatedAgainstRotated() throws Exception {
+        // checkSignatures should be successful when both apps have been signed with the same
+        // rotated key since the initial signature comparison between the two apps should
+        // return a match.
+        int apk1 = APP1_CERT5_ROTATED_CERT6;
+        int apk2 = APP2_CERT5_ROTATED_CERT6;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_MATCH);
     }
 
     @LargeTest
