@@ -5950,8 +5950,25 @@ public class PackageManagerService extends IPackageManager.Stub
                     || shouldFilterApplicationLocked(ps2, callingUid, callingUserId)) {
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
-            return compareSignatures(p1.getSigningDetails().signatures,
-                    p2.getSigningDetails().signatures);
+            SigningDetails p1SigningDetails = p1.getSigningDetails();
+            SigningDetails p2SigningDetails = p2.getSigningDetails();
+            int result = compareSignatures(p1SigningDetails.signatures,
+                    p2SigningDetails.signatures);
+            // To support backwards compatibility with clients of this API expecting pre-key
+            // rotation results if either of the packages has a signing lineage the oldest signer
+            // in the lineage is used for signature verification.
+            if (result != PackageManager.SIGNATURE_MATCH && (
+                    p1SigningDetails.hasPastSigningCertificates()
+                            || p2SigningDetails.hasPastSigningCertificates())) {
+                Signature[] p1Signatures = p1SigningDetails.hasPastSigningCertificates()
+                        ? new Signature[]{p1SigningDetails.pastSigningCertificates[0]}
+                        : p1SigningDetails.signatures;
+                Signature[] p2Signatures = p2SigningDetails.hasPastSigningCertificates()
+                        ? new Signature[]{p2SigningDetails.pastSigningCertificates[0]}
+                        : p2SigningDetails.signatures;
+                result = compareSignatures(p1Signatures, p2Signatures);
+            }
+            return result;
         }
     }
 
