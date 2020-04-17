@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static org.junit.Assert.assertEquals;
+
 import android.test.InstrumentationTestCase;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
@@ -229,6 +231,23 @@ public class VelocityTest extends InstrumentationTestCase {
         assertEqualFuzzy(firstX, secondX / 1000.0f, 0.1f);
         assertEqualFuzzy(firstY, secondY / 1000.0f, 0.1f);
         vt.recycle();
+    }
+
+    /**
+     * Test obtaining VelocityTracker. {@link android.view.VelocityTracker}.obtain()
+     */
+    @MediumTest
+    public void testObtainRecycle() {
+        final VelocityTracker vt1;
+        final VelocityTracker vt2;
+
+        vt1 = VelocityTracker.obtain(VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE);
+        assertEquals(vt1.getStrategyId(),
+                            VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE);
+        vt1.recycle();
+        vt2 = VelocityTracker.obtain();
+        assertEquals(vt2.getStrategyId(),
+                            VelocityTracker.VELOCITY_TRACKER_STRATEGY_DEFAULT);
     }
 
     /**
