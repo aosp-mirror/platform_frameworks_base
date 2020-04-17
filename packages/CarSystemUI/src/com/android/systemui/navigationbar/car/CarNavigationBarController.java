@@ -40,6 +40,7 @@ public class CarNavigationBarController {
     private final ButtonSelectionStateController mButtonSelectionStateController;
     private final Lazy<HvacController> mHvacControllerLazy;
 
+    private boolean mShowTop;
     private boolean mShowBottom;
     private boolean mShowLeft;
     private boolean mShowRight;
@@ -66,6 +67,7 @@ public class CarNavigationBarController {
         mHvacControllerLazy = hvacControllerLazy;
 
         // Read configuration.
+        mShowTop = mContext.getResources().getBoolean(R.bool.config_enableTopNavigationBar);
         mShowBottom = mContext.getResources().getBoolean(R.bool.config_enableBottomNavigationBar);
         mShowLeft = mContext.getResources().getBoolean(R.bool.config_enableLeftNavigationBar);
         mShowRight = mContext.getResources().getBoolean(R.bool.config_enableRightNavigationBar);
@@ -103,6 +105,12 @@ public class CarNavigationBarController {
     /** Clean up hvac. */
     public void removeAllFromHvac() {
         mHvacControllerLazy.get().removeAllComponents();
+    }
+
+    /** Gets the top window if configured to do so. */
+    @Nullable
+    public ViewGroup getTopWindow() {
+        return mShowTop ? mNavigationBarViewFactory.getTopWindow() : null;
     }
 
     /** Gets the bottom window if configured to do so. */
