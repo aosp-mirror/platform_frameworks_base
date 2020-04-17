@@ -81,6 +81,7 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.TetherStatesParcel;
 import android.net.TetheredClient;
@@ -1476,7 +1477,7 @@ public class Tethering {
             if (mTetherUpstream != newUpstream) {
                 mTetherUpstream = newUpstream;
                 mUpstreamNetworkMonitor.setCurrentUpstream(mTetherUpstream);
-                reportUpstreamChanged(mTetherUpstream);
+                reportUpstreamChanged(ns);
             }
         }
 
@@ -1598,7 +1599,8 @@ public class Tethering {
             }
         }
 
-        private void handleUpstreamNetworkMonitorCallback(int arg1, Object o) {
+        @VisibleForTesting
+        void handleUpstreamNetworkMonitorCallback(int arg1, Object o) {
             if (arg1 == UpstreamNetworkMonitor.NOTIFY_LOCAL_PREFIXES) {
                 mOffload.sendOffloadExemptPrefixes((Set<IpPrefix>) o);
                 return;
@@ -1624,6 +1626,9 @@ public class Tethering {
 
             switch (arg1) {
                 case UpstreamNetworkMonitor.EVENT_ON_CAPABILITIES:
+                    if (ns.network.equals(mTetherUpstream)) {
+                        mNotificationUpdater.onUpstreamCapabilitiesChanged(ns.networkCapabilities);
+                    }
                     handleNewUpstreamNetworkState(ns);
                     break;
                 case UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES:
@@ -2009,8 +2014,10 @@ public class Tethering {
         });
     }
 
-    private void reportUpstreamChanged(Network network) {
+    private void reportUpstreamChanged(UpstreamNetworkState ns) {
         final int length = mTetheringEventCallbacks.beginBroadcast();
+        final Network network = (ns != null) ? ns.network : null;
+        final NetworkCapabilities capabilities = (ns != null) ? ns.networkCapabilities : null;
         try {
             for (int i = 0; i < length; i++) {
                 try {
@@ -2022,7 +2029,9 @@ public class Tethering {
         } finally {
             mTetheringEventCallbacks.finishBroadcast();
         }
-        mNotificationUpdater.onUpstreamNetworkChanged(network);
+        // Need to notify capabilities change after upstream network changed because new network's
+        // capabilities should be checked every time.
+        mNotificationUpdater.onUpstreamCapabilitiesChanged(capabilities);
     }
 
     private void reportConfigurationChanged(TetheringConfigurationParcel config) {

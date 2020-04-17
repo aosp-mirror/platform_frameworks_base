@@ -16,6 +16,7 @@
 
 package com.android.networkstack.tethering;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
@@ -30,7 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -49,6 +50,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A class to display tethering-related notifications.
@@ -82,6 +86,9 @@ public class TetheringNotificationUpdater {
     // Id to update and cancel no upstream notification. Must be unique within the tethering app.
     @VisibleForTesting
     static final int NO_UPSTREAM_NOTIFICATION_ID = 1002;
+    // Id to update and cancel roaming notification. Must be unique within the tethering app.
+    @VisibleForTesting
+    static final int ROAMING_NOTIFICATION_ID = 1003;
     @VisibleForTesting
     static final int NO_ICON_ID = 0;
     @VisibleForTesting
@@ -95,13 +102,14 @@ public class TetheringNotificationUpdater {
     private final Handler mHandler;
 
     // WARNING : the constructor is called on a different thread. Thread safety therefore
-    // relies on these values being initialized to 0 or false, and not any other value. If you need
-    // to change this, you will need to change the thread where the constructor is invoked,
-    // or to introduce synchronization.
+    // relies on these values being initialized to 0, false or null, and not any other value. If you
+    // need to change this, you will need to change the thread where the constructor is invoked, or
+    // to introduce synchronization.
     // Downstream type is one of ConnectivityManager.TETHERING_* constants, 0 1 or 2.
     // This value has to be made 1 2 and 4, and OR'd with the others.
     private int mDownstreamTypesMask = DOWNSTREAM_NONE;
     private boolean mNoUpstream = false;
+    private boolean mRoaming = false;
 
     // WARNING : this value is not able to being initialized to 0 and must have volatile because
     // telephony service is not guaranteed that is up before tethering service starts. If telephony
@@ -110,7 +118,13 @@ public class TetheringNotificationUpdater {
     // INVALID_SUBSCRIPTION_ID.
     private volatile int mActiveDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-    @IntDef({ENABLE_NOTIFICATION_ID, RESTRICTED_NOTIFICATION_ID, NO_UPSTREAM_NOTIFICATION_ID})
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            ENABLE_NOTIFICATION_ID,
+            RESTRICTED_NOTIFICATION_ID,
+            NO_UPSTREAM_NOTIFICATION_ID,
+            ROAMING_NOTIFICATION_ID
+    })
     @interface NotificationId {}
 
     private static final class MccMncOverrideInfo {
@@ -160,26 +174,22 @@ public class TetheringNotificationUpdater {
 
     /** Called when downstream has changed */
     public void onDownstreamChanged(@IntRange(from = 0, to = 7) final int downstreamTypesMask) {
-        if (mDownstreamTypesMask == downstreamTypesMask) return;
-        mDownstreamTypesMask = downstreamTypesMask;
-        updateEnableNotification();
-        updateNoUpstreamNotification();
+        updateActiveNotifications(
+                mActiveDataSubId, downstreamTypesMask, mNoUpstream, mRoaming);
     }
 
     /** Called when active data subscription id changed */
     public void onActiveDataSubscriptionIdChanged(final int subId) {
-        if (mActiveDataSubId == subId) return;
-        mActiveDataSubId = subId;
-        updateEnableNotification();
-        updateNoUpstreamNotification();
+        updateActiveNotifications(subId, mDownstreamTypesMask, mNoUpstream, mRoaming);
     }
 
-    /** Called when upstream network changed */
-    public void onUpstreamNetworkChanged(@Nullable final Network network) {
-        final boolean isNoUpstream = (network == null);
-        if (mNoUpstream == isNoUpstream) return;
-        mNoUpstream = isNoUpstream;
-        updateNoUpstreamNotification();
+    /** Called when upstream network capabilities changed */
+    public void onUpstreamCapabilitiesChanged(@Nullable final NetworkCapabilities capabilities) {
+        final boolean isNoUpstream = (capabilities == null);
+        final boolean isRoaming = capabilities != null
+                && !capabilities.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+        updateActiveNotifications(
+                mActiveDataSubId, mDownstreamTypesMask, isNoUpstream, isRoaming);
     }
 
     @NonNull
@@ -208,6 +218,25 @@ public class TetheringNotificationUpdater {
         return res;
     }
 
+    private void updateActiveNotifications(final int subId, final int downstreamTypes,
+            final boolean noUpstream, final boolean isRoaming) {
+        final boolean tetheringActiveChanged =
+                (downstreamTypes == DOWNSTREAM_NONE) != (mDownstreamTypesMask == DOWNSTREAM_NONE);
+        final boolean subIdChanged = subId != mActiveDataSubId;
+        final boolean downstreamChanged = downstreamTypes != mDownstreamTypesMask;
+        final boolean upstreamChanged = noUpstream != mNoUpstream;
+        final boolean roamingChanged = isRoaming != mRoaming;
+        final boolean updateAll = tetheringActiveChanged || subIdChanged;
+        mActiveDataSubId = subId;
+        mDownstreamTypesMask = downstreamTypes;
+        mNoUpstream = noUpstream;
+        mRoaming = isRoaming;
+
+        if (updateAll || downstreamChanged) updateEnableNotification();
+        if (updateAll || upstreamChanged) updateNoUpstreamNotification();
+        if (updateAll || roamingChanged) updateRoamingNotification();
+    }
+
     private void updateEnableNotification() {
         final boolean tetheringInactive = mDownstreamTypesMask == DOWNSTREAM_NONE;
 
@@ -219,11 +248,17 @@ public class TetheringNotificationUpdater {
     private void updateNoUpstreamNotification() {
         final boolean tetheringInactive = mDownstreamTypesMask == DOWNSTREAM_NONE;
 
-        if (tetheringInactive
-                || !mNoUpstream
-                || setupNoUpstreamNotification() == NO_NOTIFY) {
+        if (tetheringInactive || !mNoUpstream || setupNoUpstreamNotification() == NO_NOTIFY) {
             clearNotification(NO_UPSTREAM_NOTIFICATION_ID);
             mHandler.removeMessages(EVENT_SHOW_NO_UPSTREAM);
+        }
+    }
+
+    private void updateRoamingNotification() {
+        final boolean tetheringInactive = mDownstreamTypesMask == DOWNSTREAM_NONE;
+
+        if (tetheringInactive || !mRoaming || setupRoamingNotification() == NO_NOTIFY) {
+            clearNotification(ROAMING_NOTIFICATION_ID);
         }
     }
 
@@ -331,6 +366,29 @@ public class TetheringNotificationUpdater {
             }
         }
         return icons;
+    }
+
+    private boolean setupRoamingNotification() {
+        final Resources res = getResourcesForSubId(mContext, mActiveDataSubId);
+        final boolean upstreamRoamingNotification =
+                res.getBoolean(R.bool.config_upstream_roaming_notification);
+
+        if (!upstreamRoamingNotification) return NO_NOTIFY;
+
+        final String title = res.getString(R.string.upstream_roaming_notification_title);
+        final String message = res.getString(R.string.upstream_roaming_notification_message);
+        if (isEmpty(title) || isEmpty(message)) return NO_NOTIFY;
+
+        final PendingIntent pi = PendingIntent.getActivity(
+                mContext.createContextAsUser(UserHandle.CURRENT, 0 /* flags */),
+                0 /* requestCode */,
+                new Intent(Settings.ACTION_TETHER_SETTINGS),
+                Intent.FLAG_ACTIVITY_NEW_TASK,
+                null /* options */);
+
+        showNotification(R.drawable.stat_sys_tether_general, title, message,
+                ROAMING_NOTIFICATION_ID, pi, new Action[0]);
+        return NOTIFY_DONE;
     }
 
     private boolean setupNoUpstreamNotification() {
