@@ -31,7 +31,7 @@ message NdefMessageProto {
 message NdefRecordProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional bytes type = 1;
-    optional bytes id = 2;
+    optional bytes type = 1 [(.android.privacy).dest = DEST_EXPLICIT];
+    optional bytes id = 2 [(.android.privacy).dest = DEST_EXPLICIT];
     optional int32 payload_bytes = 3;
 }
