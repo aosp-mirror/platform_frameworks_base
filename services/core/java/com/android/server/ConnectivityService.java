@@ -2722,7 +2722,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_PROPERTIES_CHANGED: {
-                    handleUpdateLinkProperties(nai, (LinkProperties) msg.obj);
+                    LinkProperties newLp = (LinkProperties) msg.obj;
+                    processLinkPropertiesFromAgent(nai, newLp);
+                    handleUpdateLinkProperties(nai, newLp);
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_INFO_CHANGED: {
@@ -5817,7 +5819,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         LinkProperties lp = new LinkProperties(linkProperties);
-        lp.ensureDirectlyConnectedRoutes();
+
         // TODO: Instead of passing mDefaultRequest, provide an API to determine whether a Network
         // satisfies mDefaultRequest.
         final NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
@@ -5825,8 +5827,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 new Network(mNetIdManager.reserveNetId()), new NetworkInfo(networkInfo), lp, nc,
                 currentScore, mContext, mTrackerHandler, new NetworkAgentConfig(networkAgentConfig),
                 this, mNetd, mDnsResolver, mNMS, providerId);
-        // Make sure the network capabilities reflect what the agent info says.
+
+        // Make sure the LinkProperties and NetworkCapabilities reflect what the agent info says.
         nai.getAndSetNetworkCapabilities(mixInCapabilities(nai, nc));
+        processLinkPropertiesFromAgent(nai, nai.linkProperties);
+
         final String extraInfo = networkInfo.getExtraInfo();
         final String name = TextUtils.isEmpty(extraInfo)
                 ? nai.networkCapabilities.getSsid() : extraInfo;
@@ -5862,6 +5867,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkInfo networkInfo = nai.networkInfo;
         updateNetworkInfo(nai, networkInfo);
         updateUids(nai, null, nai.networkCapabilities);
+    }
+
+    private void processLinkPropertiesFromAgent(NetworkAgentInfo nai, LinkProperties lp) {
+        lp.ensureDirectlyConnectedRoutes();
     }
 
     private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties newLp,
@@ -6391,13 +6400,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Ignore updates for disconnected networks
             return;
         }
-        // newLp is already a defensive copy.
-        newLp.ensureDirectlyConnectedRoutes();
         if (VDBG || DDBG) {
             log("Update of LinkProperties for " + nai.toShortString()
                     + "; created=" + nai.created
                     + "; everConnected=" + nai.everConnected);
         }
+        // TODO: eliminate this defensive copy after confirming that updateLinkProperties does not
+        // modify its oldLp parameter.
         updateLinkProperties(nai, newLp, new LinkProperties(nai.linkProperties));
     }
 
