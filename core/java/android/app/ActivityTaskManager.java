@@ -23,8 +23,10 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -429,5 +431,15 @@ public class ActivityTaskManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** Returns whether the current UI mode supports error dialogs (ANR, crash, etc). */
+    public static boolean currentUiModeSupportsErrorDialogs(@NonNull Context context) {
+        final Configuration config = context.getResources().getConfiguration();
+        int modeType = config.uiMode & Configuration.UI_MODE_TYPE_MASK;
+        return (modeType != Configuration.UI_MODE_TYPE_CAR
+                && !(modeType == Configuration.UI_MODE_TYPE_WATCH && Build.IS_USER)
+                && modeType != Configuration.UI_MODE_TYPE_TELEVISION
+                && modeType != Configuration.UI_MODE_TYPE_VR_HEADSET);
     }
 }
