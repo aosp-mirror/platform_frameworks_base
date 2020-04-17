@@ -16,11 +16,15 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
+
 import android.annotation.IntDef;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
@@ -40,6 +44,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -60,7 +65,21 @@ public class PreparationCoordinator implements Coordinator {
     private final NotifInflationErrorManager mNotifErrorManager;
     private final NotifViewBarn mViewBarn;
     private final Map<NotificationEntry, Integer> mInflationStates = new ArrayMap<>();
+
+    /**
+     * The set of notifications that are currently inflating something. Note that this is
+     * separate from inflation state as a view could either be uninflated or inflated and still be
+     * inflating something.
+     */
+    private final Set<NotificationEntry> mInflatingNotifs = new ArraySet<>();
+
     private final IStatusBarService mStatusBarService;
+
+    /**
+     * The number of children in a group we actually keep inflated since we don't actually show
+     * all the children and don't need every child inflated at all times.
+     */
+    private final int mChildBindCutoff;
 
     @Inject
     public PreparationCoordinator(
@@ -68,14 +87,25 @@ public class PreparationCoordinator implements Coordinator {
             NotifInflaterImpl notifInflater,
             NotifInflationErrorManager errorManager,
             NotifViewBarn viewBarn,
-            IStatusBarService service
-    ) {
+            IStatusBarService service) {
+        this(logger, notifInflater, errorManager, viewBarn, service, CHILD_BIND_CUTOFF);
+    }
+
+    @VisibleForTesting
+    PreparationCoordinator(
+            PreparationCoordinatorLogger logger,
+            NotifInflaterImpl notifInflater,
+            NotifInflationErrorManager errorManager,
+            NotifViewBarn viewBarn,
+            IStatusBarService service,
+            int childBindCutoff) {
         mLogger = logger;
         mNotifInflater = notifInflater;
         mNotifErrorManager = errorManager;
         mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
         mViewBarn = viewBarn;
         mStatusBarService = service;
+        mChildBindCutoff = childBindCutoff;
     }
 
     @Override
@@ -96,6 +126,8 @@ public class PreparationCoordinator implements Coordinator {
 
         @Override
         public void onEntryUpdated(NotificationEntry entry) {
+            abortInflation(entry, "entryUpdated");
+            mInflatingNotifs.remove(entry);
             @InflationState int state = getInflationState(entry);
             if (state == STATE_INFLATED) {
                 mInflationStates.put(entry, STATE_INFLATED_INVALID);
@@ -113,6 +145,7 @@ public class PreparationCoordinator implements Coordinator {
         @Override
         public void onEntryCleanUp(NotificationEntry entry) {
             mInflationStates.remove(entry);
+            mInflatingNotifs.remove(entry);
             mViewBarn.removeViewForEntry(entry);
         }
     };
@@ -133,23 +166,11 @@ public class PreparationCoordinator implements Coordinator {
 
     private final NotifFilter mNotifInflatingFilter = new NotifFilter(TAG + "Inflating") {
         /**
-         * Filters out notifications that haven't been inflated yet
+         * Filters out notifications that aren't inflated
          */
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
-            @InflationState int state = getInflationState(entry);
-            return (state != STATE_INFLATED) && (state != STATE_INFLATED_INVALID);
-        }
-    };
-
-    private final NotifInflater.InflationCallback mInflationCallback =
-            new NotifInflater.InflationCallback() {
-        @Override
-        public void onInflationFinished(NotificationEntry entry) {
-            mLogger.logNotifInflated(entry.getKey());
-            mViewBarn.registerViewForEntry(entry, entry.getRow());
-            mInflationStates.put(entry, STATE_INFLATED);
-            mNotifInflatingFilter.invalidateList();
+            return !isInflated(entry);
         }
     };
 
@@ -187,19 +208,42 @@ public class PreparationCoordinator implements Coordinator {
             ListEntry entry = entries.get(i);
             if (entry instanceof GroupEntry) {
                 GroupEntry groupEntry = (GroupEntry) entry;
-                inflateNotifRequiredViews(groupEntry.getSummary());
-                List<NotificationEntry> children = groupEntry.getChildren();
-                for (int j = 0, groupSize = children.size(); j < groupSize; j++) {
-                    inflateNotifRequiredViews(children.get(j));
-                }
+                groupEntry.setUntruncatedChildCount(groupEntry.getChildren().size());
+                inflateRequiredGroupViews(groupEntry);
             } else {
                 NotificationEntry notifEntry = (NotificationEntry) entry;
-                inflateNotifRequiredViews(notifEntry);
+                inflateRequiredNotifViews(notifEntry);
             }
         }
     }
 
-    private void inflateNotifRequiredViews(NotificationEntry entry) {
+    private void inflateRequiredGroupViews(GroupEntry groupEntry) {
+        NotificationEntry summary = groupEntry.getSummary();
+        List<NotificationEntry> children = groupEntry.getChildren();
+        inflateRequiredNotifViews(summary);
+        for (int j = 0; j < children.size(); j++) {
+            NotificationEntry child = children.get(j);
+            boolean childShouldBeBound = j < mChildBindCutoff;
+            if (childShouldBeBound) {
+                inflateRequiredNotifViews(child);
+            } else {
+                if (mInflatingNotifs.contains(child)) {
+                    abortInflation(child, "Past last visible group child");
+                }
+                if (isInflated(child)) {
+                    // TODO: May want to put an animation hint here so view manager knows to treat
+                    //  this differently from a regular removal animation
+                    freeNotifViews(child);
+                }
+            }
+        }
+    }
+
+    private void inflateRequiredNotifViews(NotificationEntry entry) {
+        if (mInflatingNotifs.contains(entry)) {
+            // Already inflating this entry
+            return;
+        }
         @InflationState int state = mInflationStates.get(entry);
         switch (state) {
             case STATE_UNINFLATED:
@@ -217,16 +261,38 @@ public class PreparationCoordinator implements Coordinator {
 
     private void inflateEntry(NotificationEntry entry, String reason) {
         abortInflation(entry, reason);
-        mNotifInflater.inflateViews(entry, mInflationCallback);
+        mInflatingNotifs.add(entry);
+        mNotifInflater.inflateViews(entry, this::onInflationFinished);
     }
 
     private void rebind(NotificationEntry entry, String reason) {
-        mNotifInflater.rebindViews(entry, mInflationCallback);
+        mInflatingNotifs.add(entry);
+        mNotifInflater.rebindViews(entry, this::onInflationFinished);
     }
 
     private void abortInflation(NotificationEntry entry, String reason) {
         mLogger.logInflationAborted(entry.getKey(), reason);
         entry.abortTask();
+        mInflatingNotifs.remove(entry);
+    }
+
+    private void onInflationFinished(NotificationEntry entry) {
+        mLogger.logNotifInflated(entry.getKey());
+        mInflatingNotifs.remove(entry);
+        mViewBarn.registerViewForEntry(entry, entry.getRow());
+        mInflationStates.put(entry, STATE_INFLATED);
+        mNotifInflatingFilter.invalidateList();
+    }
+
+    private void freeNotifViews(NotificationEntry entry) {
+        mViewBarn.removeViewForEntry(entry);
+        entry.setRow(null);
+        mInflationStates.put(entry, STATE_UNINFLATED);
+    }
+
+    private boolean isInflated(NotificationEntry entry) {
+        @InflationState int state = getInflationState(entry);
+        return (state == STATE_INFLATED) || (state == STATE_INFLATED_INVALID);
     }
 
     private @InflationState int getInflationState(NotificationEntry entry) {
@@ -241,7 +307,7 @@ public class PreparationCoordinator implements Coordinator {
             value = {STATE_UNINFLATED, STATE_INFLATED_INVALID, STATE_INFLATED, STATE_ERROR})
     @interface InflationState {}
 
-    /** The notification has never been inflated before. */
+    /** The notification has no views attached. */
     private static final int STATE_UNINFLATED = 0;
 
     /** The notification is inflated. */
@@ -255,4 +321,13 @@ public class PreparationCoordinator implements Coordinator {
 
     /** The notification errored out while inflating */
     private static final int STATE_ERROR = -1;
+
+    /**
+     * How big the buffer of extra views we keep around to be ready to show when we do need to
+     * dynamically inflate a row.
+     */
+    private static final int EXTRA_VIEW_BUFFER_COUNT = 1;
+
+    private static final int CHILD_BIND_CUTOFF =
+            NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED + EXTRA_VIEW_BUFFER_COUNT;
 }
