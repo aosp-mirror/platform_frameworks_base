@@ -399,8 +399,8 @@ public class WifiNetworkSpecifierTest {
                         wifiConfiguration,
                         TEST_UID, TEST_PACKAGE_NAME);
 
-        assertTrue(specifier.satisfiedBy(null));
-        assertTrue(specifier.satisfiedBy(new MatchAllNetworkSpecifier()));
+        assertTrue(specifier.canBeSatisfiedBy(null));
+        assertTrue(specifier.canBeSatisfiedBy(new MatchAllNetworkSpecifier()));
     }
 
     /**
@@ -429,7 +429,7 @@ public class WifiNetworkSpecifierTest {
                         wifiConfiguration,
                         TEST_UID, TEST_PACKAGE_NAME);
 
-        assertTrue(specifier2.satisfiedBy(specifier1));
+        assertTrue(specifier2.canBeSatisfiedBy(specifier1));
     }
 
     /**
@@ -460,7 +460,7 @@ public class WifiNetworkSpecifierTest {
                         wifiConfiguration2,
                         TEST_UID, TEST_PACKAGE_NAME);
 
-        assertFalse(specifier2.satisfiedBy(specifier1));
+        assertFalse(specifier2.canBeSatisfiedBy(specifier1));
     }
 
     /**
@@ -489,7 +489,7 @@ public class WifiNetworkSpecifierTest {
                         wifiConfiguration,
                         TEST_UID, TEST_PACKAGE_NAME);
 
-        assertFalse(specifier2.satisfiedBy(specifier1));
+        assertFalse(specifier2.canBeSatisfiedBy(specifier1));
     }
 
     /**
@@ -517,7 +517,7 @@ public class WifiNetworkSpecifierTest {
                         wifiConfiguration,
                         TEST_UID, TEST_PACKAGE_NAME);
 
-        assertFalse(specifier2.satisfiedBy(specifier1));
+        assertFalse(specifier2.canBeSatisfiedBy(specifier1));
     }
 
     /**
@@ -546,6 +546,6 @@ public class WifiNetworkSpecifierTest {
                         wifiConfiguration,
                         TEST_UID, TEST_PACKAGE_NAME + "blah");
 
-        assertFalse(specifier2.satisfiedBy(specifier1));
+        assertFalse(specifier2.canBeSatisfiedBy(specifier1));
     }
 }

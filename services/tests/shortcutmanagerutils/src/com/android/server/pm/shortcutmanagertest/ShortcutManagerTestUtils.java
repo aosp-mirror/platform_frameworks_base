@@ -197,7 +197,8 @@ public class ShortcutManagerTestUtils {
         final String PREFIX = "Launcher: ComponentInfo{";
         final String POSTFIX = "}";
         final List<String> result = runShortcutCommandForSuccess(
-                instrumentation, "get-default-launcher");
+                instrumentation, "get-default-launcher --user "
+                + instrumentation.getContext().getUserId());
         for (String s : result) {
             if (s.startsWith(PREFIX) && s.endsWith(POSTFIX)) {
                 return s.substring(PREFIX.length(), s.length() - POSTFIX.length());

@@ -1332,12 +1332,25 @@ public final class PowerManager {
         }
     }
 
+
+    /**
+     * Returns {@code true} if this device supports rebooting userspace.
+     *
+     * <p>This method exists solely for the sake of re-using same logic between {@code PowerManager}
+     * and {@code PowerManagerService}.
+     *
+     * @hide
+     */
+    public static boolean isRebootingUserspaceSupportedImpl() {
+        return InitProperties.is_userspace_reboot_supported().orElse(false);
+    }
+
     /**
      * Returns {@code true} if this device supports rebooting userspace.
      */
     // TODO(b/138605180): add link to documentation once it's ready.
     public boolean isRebootingUserspaceSupported() {
-        return InitProperties.is_userspace_reboot_supported().orElse(false);
+        return isRebootingUserspaceSupportedImpl();
     }
 
     /**

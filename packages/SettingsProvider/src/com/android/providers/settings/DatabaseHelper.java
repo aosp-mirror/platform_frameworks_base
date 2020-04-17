@@ -41,6 +41,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.sysprop.TelephonyProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -2496,9 +2497,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
             // Data roaming default, based on build
             loadSetting(stmt, Settings.Global.DATA_ROAMING,
-                    "true".equalsIgnoreCase(
-                            SystemProperties.get("ro.com.android.dataroaming",
-                                    "false")) ? 1 : 0);
+                    TelephonyProperties.data_roaming().orElse(false) ? 1 : 0);
 
             loadBooleanSetting(stmt, Settings.Global.DEVICE_PROVISIONED,
                     R.bool.def_device_provisioned);
@@ -2519,9 +2518,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
             // Mobile Data default, based on build
             loadSetting(stmt, Settings.Global.MOBILE_DATA,
-                    "true".equalsIgnoreCase(
-                            SystemProperties.get("ro.com.android.mobiledata",
-                                    "true")) ? 1 : 0);
+                    TelephonyProperties.mobile_data().orElse(true) ? 1 : 0);
 
             loadBooleanSetting(stmt, Settings.Global.NETSTATS_ENABLED,
                     R.bool.def_netstats_enabled);
@@ -2575,20 +2572,22 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
             // Set the preferred network mode to target desired value or Default
             // value defined in system property
-            String val = "";
-            String mode;
-            for (int phoneId = 0;
-                    phoneId < getTelephonyManager().getPhoneCount(); phoneId++) {
-                mode = TelephonyManager.getTelephonyProperty(phoneId,
-                        "ro.telephony.default_network",
-                        Integer.toString(RILConstants.PREFERRED_NETWORK_MODE));
-                if (phoneId == 0) {
-                    val = mode;
-                } else {
-                    val = val + "," + mode;
-                }
+            StringBuilder val = new StringBuilder();
+            List<Integer> defaultNetworks = TelephonyProperties.default_network();
+            int phoneCount = 1;
+            TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
+            if (telephonyManager != null) {
+                phoneCount = telephonyManager.getSupportedModemCount();
             }
-            loadSetting(stmt, Settings.Global.PREFERRED_NETWORK_MODE, val);
+            for (int phoneId = 0; phoneId < phoneCount; phoneId++) {
+                int mode = defaultNetworks.size() <= phoneId
+                        || defaultNetworks.get(phoneId) == null
+                        ? TelephonyManager.DEFAULT_PREFERRED_NETWORK_MODE
+                        : defaultNetworks.get(phoneId);
+                if (phoneId > 0) val.append(',');
+                val.append(mode);
+            }
+            loadSetting(stmt, Settings.Global.PREFERRED_NETWORK_MODE, val.toString());
 
             // Set the preferred cdma subscription source to target desired value or default
             // value defined in Phone

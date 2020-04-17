@@ -163,7 +163,6 @@ public class TelephonyManager {
      * into the ResultReceiver Bundle.
      * @hide
      */
-    @SystemApi
     public static final String MODEM_ACTIVITY_RESULT_KEY = "controller_activity";
 
     /**
@@ -317,21 +316,6 @@ public class TelephonyManager {
     };
 
     /** @hide */
-    @IntDef(prefix = {"MODEM_COUNT_"},
-            value = {
-                    MODEM_COUNT_NO_MODEM,
-                    MODEM_COUNT_SINGLE_MODEM,
-                    MODEM_COUNT_DUAL_MODEM,
-                    MODEM_COUNT_TRI_MODEM
-            })
-    public @interface ModemCount {}
-
-    public static final int MODEM_COUNT_NO_MODEM     = 0;
-    public static final int MODEM_COUNT_SINGLE_MODEM = 1;
-    public static final int MODEM_COUNT_DUAL_MODEM   = 2;
-    public static final int MODEM_COUNT_TRI_MODEM    = 3;
-
-    /** @hide */
     @UnsupportedAppUsage
     public TelephonyManager(Context context) {
       this(context, SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
@@ -439,22 +423,22 @@ public class TelephonyManager {
      * Returns 2 for Dual standby mode (Dual SIM functionality).
      * Returns 3 for Tri standby mode (Tri SIM functionality).
      */
-    public @ModemCount int getActiveModemCount() {
+    public int getActiveModemCount() {
         int modemCount = 1;
         switch (getMultiSimConfiguration()) {
             case UNKNOWN:
-                modemCount = MODEM_COUNT_SINGLE_MODEM;
+                modemCount = 1;
                 // check for voice and data support, 0 if not supported
                 if (!isVoiceCapable() && !isSmsCapable() && !isDataCapable()) {
-                    modemCount = MODEM_COUNT_NO_MODEM;
+                    modemCount = 0;
                 }
                 break;
             case DSDS:
             case DSDA:
-                modemCount = MODEM_COUNT_DUAL_MODEM;
+                modemCount = 2;
                 break;
             case TSTS:
-                modemCount = MODEM_COUNT_TRI_MODEM;
+                modemCount = 3;
                 break;
         }
         return modemCount;
@@ -467,7 +451,7 @@ public class TelephonyManager {
      * dual-SIM capable device operating in single SIM mode (only one logical modem is turned on),
      * {@link #getActiveModemCount} returns 1 while this API returns 2.
      */
-    public @ModemCount int getSupportedModemCount() {
+    public int getSupportedModemCount() {
         return TelephonyProperties.max_active_modems().orElse(getActiveModemCount());
     }
 
@@ -1269,7 +1253,6 @@ public class TelephonyManager {
      * <p>Note: this is a protected intent that can only be sent by the system.
      * @hide
      */
-    @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SERVICE_PROVIDERS_UPDATED =
             "android.telephony.action.SERVICE_PROVIDERS_UPDATED";
@@ -1279,7 +1262,6 @@ public class TelephonyManager {
      * whether the PLMN should be shown.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SHOW_PLMN = "android.telephony.extra.SHOW_PLMN";
 
     /**
@@ -1287,7 +1269,6 @@ public class TelephonyManager {
      * the operator name of the registered network.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_PLMN = "android.telephony.extra.PLMN";
 
     /**
@@ -1295,7 +1276,6 @@ public class TelephonyManager {
      * whether the PLMN should be shown.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SHOW_SPN = "android.telephony.extra.SHOW_SPN";
 
     /**
@@ -1303,7 +1283,6 @@ public class TelephonyManager {
      * the service provider name.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SPN = "android.telephony.extra.SPN";
 
     /**
@@ -1311,7 +1290,6 @@ public class TelephonyManager {
      * the service provider name for data service.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_DATA_SPN = "android.telephony.extra.DATA_SPN";
 
     /**
@@ -1432,7 +1410,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE =
             "android.telephony.extra.DEFAULT_SUBSCRIPTION_SELECT_TYPE";
 
@@ -1452,7 +1429,6 @@ public class TelephonyManager {
      * to indicate there's no need to re-select any default subscription.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_NONE = 0;
 
     /**
@@ -1460,7 +1436,6 @@ public class TelephonyManager {
      * to indicate there's a need to select default data subscription.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_DATA = 1;
 
     /**
@@ -1468,7 +1443,6 @@ public class TelephonyManager {
      * to indicate there's a need to select default voice call subscription.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_VOICE = 2;
 
     /**
@@ -1476,7 +1450,6 @@ public class TelephonyManager {
      * to indicate there's a need to select default sms subscription.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_SMS = 3;
 
     /**
@@ -1486,7 +1459,6 @@ public class TelephonyManager {
      * which subscription should be the default subscription.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL = 4;
 
     /**
@@ -1496,7 +1468,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SIM_COMBINATION_WARNING_TYPE =
             "android.telephony.extra.SIM_COMBINATION_WARNING_TYPE";
 
@@ -1513,7 +1484,6 @@ public class TelephonyManager {
      * to indicate there's no SIM combination warning.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE = 0;
 
     /**
@@ -1521,7 +1491,6 @@ public class TelephonyManager {
      * to indicate two active SIMs are both CDMA hence there might be functional limitation.
      * @hide
      */
-    @SystemApi
     public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA = 1;
 
     /**
@@ -1532,7 +1501,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SIM_COMBINATION_NAMES =
             "android.telephony.extra.SIM_COMBINATION_NAMES";
 
@@ -4259,14 +4227,18 @@ public class TelephonyManager {
 
     /**
      * Returns the phone number string for line 1, for example, the MSISDN
-     * for a GSM phone. Return null if it is unavailable.
+     * for a GSM phone for a particular subscription. Return null if it is unavailable.
+     * <p>
+     * The default SMS app can also use this.
      *
      * <p>Requires Permission:
-     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE},
      *     {@link android.Manifest.permission#READ_SMS READ_SMS},
      *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
      *     that the caller is the default SMS app,
-     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges or default SMS app
     @RequiresPermission(anyOf = {
@@ -4283,6 +4255,15 @@ public class TelephonyManager {
      * for a GSM phone for a particular subscription. Return null if it is unavailable.
      * <p>
      * The default SMS app can also use this.
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     that the caller is the default SMS app,
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
      *
      * @param subId whose phone number for line 1 is returned
      * @hide
@@ -4462,25 +4443,50 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the MSISDN string.
-     * for a GSM phone. Return null if it is unavailable.
+     * Returns the MSISDN string for a GSM phone. Return null if it is unavailable.
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     that the caller is the default SMS app,
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_SMS,
+            android.Manifest.permission.READ_PHONE_NUMBERS
+    })
     @UnsupportedAppUsage
     public String getMsisdn() {
         return getMsisdn(getSubId());
     }
 
     /**
-     * Returns the MSISDN string.
-     * for a GSM phone. Return null if it is unavailable.
+     * Returns the MSISDN string for a GSM phone. Return null if it is unavailable.
      *
      * @param subId for which msisdn is returned
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     that the caller is the default SMS app,
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
+     *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_SMS,
+            android.Manifest.permission.READ_PHONE_NUMBERS
+    })
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getMsisdn(int subId) {
         try {
@@ -5508,6 +5514,10 @@ public class TelephonyManager {
      * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
      * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
      * {@link SecurityException} will be thrown otherwise.
+     *
+     * This API should be used sparingly -- large numbers of listeners will cause system
+     * instability. If a process has registered too many listeners without unregistering them, it
+     * may encounter an {@link IllegalStateException} when trying to register more listeners.
      *
      * @param listener The {@link PhoneStateListener} object to register
      *                 (or unregister)
@@ -7631,6 +7641,17 @@ public class TelephonyManager {
      */
     public static final int NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA =
             RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
+
+    /**
+     * The default preferred network mode constant.
+     *
+     * <p> This constant is used in case of nothing is set in
+     * TelephonyProperties#default_network().
+     *
+     * @hide
+     */
+    public static final int DEFAULT_PREFERRED_NETWORK_MODE =
+            RILConstants.PREFERRED_NETWORK_MODE;
 
     /**
      * Get the preferred network type.
@@ -10140,7 +10161,6 @@ public class TelephonyManager {
      * {@link #MODEM_ACTIVITY_RESULT_KEY}.
      * @hide
      */
-    @SystemApi
     public void requestModemActivityInfo(@NonNull ResultReceiver result) {
         try {
             ITelephony service = getITelephony();
@@ -12230,6 +12250,9 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @IsMultiSimSupportedResult
     public int isMultiSimSupported() {
+        if (getSupportedModemCount() < 2) {
+            return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
+        }
         try {
             ITelephony service = getITelephony();
             if (service != null) {
@@ -12872,6 +12895,7 @@ public class TelephonyManager {
      */
     @WorkerThread
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
     public boolean isIccLockEnabled() {
         try {
             ITelephony telephony = getITelephony();

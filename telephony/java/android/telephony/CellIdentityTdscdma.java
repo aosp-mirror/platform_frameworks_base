@@ -128,8 +128,11 @@ public final class CellIdentityTdscdma extends CellIdentity {
         this(cid.base.base.mcc, cid.base.base.mnc, cid.base.base.lac, cid.base.base.cid,
                 cid.base.base.cpid, cid.base.uarfcn, cid.base.operatorNames.alphaLong,
                 cid.base.operatorNames.alphaShort,
-                cid.additionalPlmns, cid.optionalCsgInfo.csgInfo() != null
-                        ? new ClosedSubscriberGroupInfo(cid.optionalCsgInfo.csgInfo()) : null);
+                cid.additionalPlmns,
+                cid.optionalCsgInfo.getDiscriminator()
+                        == android.hardware.radio.V1_5.OptionalCsgInfo.hidl_discriminator.csgInfo
+                                ? new ClosedSubscriberGroupInfo(cid.optionalCsgInfo.csgInfo())
+                                        : null);
     }
 
     /** @hide */

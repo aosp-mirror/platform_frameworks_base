@@ -40,7 +40,7 @@ public final class StringNetworkSpecifier extends NetworkSpecifier implements Pa
 
     /** @hide */
     @Override
-    public boolean satisfiedBy(NetworkSpecifier other) {
+    public boolean canBeSatisfiedBy(NetworkSpecifier other) {
         return equals(other);
     }
 
