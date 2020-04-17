@@ -39,6 +39,7 @@ import dalvik.system.BlockGuard;
 import dalvik.system.VMRuntime;
 
 import java.io.FileDescriptor;
+import java.util.Arrays;
 
 public class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -183,6 +184,30 @@ public class Installer extends SystemService {
                     targetSdkVersion);
         } catch (Exception e) {
             throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Batched version of createAppData for use with multiple packages.
+     */
+    public void createAppDataBatched(String[] uuids, String[] packageNames, int userId, int flags,
+            int[] appIds, String[] seInfos, int[] targetSdkVersions) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        final int batchSize = 256;
+        for (int i = 0; i < uuids.length; i += batchSize) {
+            int to = i + batchSize;
+            if (to > uuids.length) {
+                to = uuids.length;
+            }
+
+            try {
+                mInstalld.createAppDataBatched(Arrays.copyOfRange(uuids, i, to),
+                        Arrays.copyOfRange(packageNames, i, to), userId, flags,
+                        Arrays.copyOfRange(appIds, i, to), Arrays.copyOfRange(seInfos, i, to),
+                        Arrays.copyOfRange(targetSdkVersions, i, to));
+            } catch (Exception e) {
+                throw InstallerException.from(e);
+            }
         }
     }
 

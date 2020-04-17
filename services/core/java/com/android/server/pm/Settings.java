@@ -4207,18 +4207,12 @@ public final class Settings {
             }
         }
         t.traceBegin("createAppData");
-        for (int i = 0; i < packagesCount; i++) {
-            if (names[i] == null) {
-                continue;
-            }
-            // TODO: triage flags!
-            final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
-            try {
-                installer.createAppData(volumeUuids[i], names[i], userHandle, flags, appIds[i],
-                        seinfos[i], targetSdkVersions[i]);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to prepare app data", e);
-            }
+        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
+        try {
+            installer.createAppDataBatched(volumeUuids, names, userHandle, flags, appIds, seinfos,
+                    targetSdkVersions);
+        } catch (InstallerException e) {
+            Slog.w(TAG, "Failed to prepare app data", e);
         }
         t.traceEnd(); // createAppData
         synchronized (mLock) {
