@@ -16,22 +16,6 @@
 
 package com.android.internal.app.procstats;
 
-import android.os.Parcel;
-import android.os.SystemClock;
-import android.os.UserHandle;
-import android.service.procstats.ProcessStatsProto;
-import android.service.procstats.ProcessStatsStateProto;
-import android.util.ArrayMap;
-import android.util.DebugUtils;
-import android.util.Log;
-import android.util.LongSparseArray;
-import android.util.Slog;
-import android.util.SparseLongArray;
-import android.util.TimeUtils;
-import android.util.proto.ProtoOutputStream;
-import android.util.proto.ProtoUtils;
-
-
 import static com.android.internal.app.procstats.ProcessStats.PSS_AVERAGE;
 import static com.android.internal.app.procstats.ProcessStats.PSS_COUNT;
 import static com.android.internal.app.procstats.ProcessStats.PSS_MAXIMUM;
@@ -59,6 +43,21 @@ import static com.android.internal.app.procstats.ProcessStats.STATE_RECEIVER;
 import static com.android.internal.app.procstats.ProcessStats.STATE_SERVICE;
 import static com.android.internal.app.procstats.ProcessStats.STATE_SERVICE_RESTARTING;
 import static com.android.internal.app.procstats.ProcessStats.STATE_TOP;
+
+import android.os.Parcel;
+import android.os.SystemClock;
+import android.os.UserHandle;
+import android.service.procstats.ProcessStatsProto;
+import android.service.procstats.ProcessStatsStateProto;
+import android.util.ArrayMap;
+import android.util.DebugUtils;
+import android.util.Log;
+import android.util.LongSparseArray;
+import android.util.Slog;
+import android.util.SparseLongArray;
+import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 
 import com.android.internal.app.procstats.ProcessStats.PackageState;
 import com.android.internal.app.procstats.ProcessStats.ProcessStateHolder;
@@ -1413,6 +1412,111 @@ public final class ProcessState {
             if (mTotalRunningPss[PSS_SAMPLE_COUNT] != 0) {
                 PssTable.writeStatsToProto(proto, mTotalRunningPss, 0);
             }
+            proto.end(stateToken);
+        }
+
+        proto.end(token);
+    }
+
+    /** Similar to {@code #dumpDebug}, but with a reduced/aggregated subset of states. */
+    public void dumpAggregatedProtoForStatsd(ProtoOutputStream proto, long fieldId,
+            String procName, int uid, long now) {
+        // Group proc stats by aggregated type (only screen state + process state)
+        SparseLongArray durationByState = new SparseLongArray();
+        boolean didCurState = false;
+        for (int i = 0; i < mDurations.getKeyCount(); i++) {
+            final int key = mDurations.getKeyAt(i);
+            final int type = SparseMappingTable.getIdFromKey(key);
+            final int aggregatedType = DumpUtils.aggregateCurrentProcessState(type);
+
+            long time = mDurations.getValue(key);
+            if (mCurCombinedState == type) {
+                didCurState = true;
+                time += now - mStartTime;
+            }
+            int index = durationByState.indexOfKey(aggregatedType);
+            if (index >= 0) {
+                durationByState.put(aggregatedType, time + durationByState.valueAt(index));
+            } else {
+                durationByState.put(aggregatedType, time);
+            }
+        }
+        if (!didCurState && mCurCombinedState != STATE_NOTHING) {
+            final int aggregatedType = DumpUtils.aggregateCurrentProcessState(mCurCombinedState);
+            int index = durationByState.indexOfKey(aggregatedType);
+            if (index >= 0) {
+                durationByState.put(aggregatedType,
+                        (now - mStartTime) + durationByState.valueAt(index));
+            } else {
+                durationByState.put(aggregatedType, now - mStartTime);
+            }
+        }
+
+        // Now we have total durations, aggregate the RSS values
+        SparseLongArray meanRssByState = new SparseLongArray();
+        SparseLongArray maxRssByState = new SparseLongArray();
+        // compute weighted averages and max-of-max
+        for (int i = 0; i < mPssTable.getKeyCount(); i++) {
+            final int key = mPssTable.getKeyAt(i);
+            final int type = SparseMappingTable.getIdFromKey(key);
+            if (durationByState.indexOfKey(type) < 0) {
+                // state without duration should not have stats!
+                continue;
+            }
+            final int aggregatedType = DumpUtils.aggregateCurrentProcessState(type);
+
+            long[] rssMeanAndMax = mPssTable.getRssMeanAndMax(key);
+
+            // compute mean * duration, then store sum of that in meanRssByState
+            long meanTimesDuration = rssMeanAndMax[0] * mDurations.getValue(key);
+            if (meanRssByState.indexOfKey(aggregatedType) >= 0) {
+                meanRssByState.put(aggregatedType,
+                        meanTimesDuration + meanRssByState.get(aggregatedType));
+            } else {
+                meanRssByState.put(aggregatedType, meanTimesDuration);
+            }
+
+            // accumulate max-of-maxes in maxRssByState
+            if (maxRssByState.indexOfKey(aggregatedType) >= 0
+                    && maxRssByState.get(aggregatedType) < rssMeanAndMax[1]) {
+                maxRssByState.put(aggregatedType, rssMeanAndMax[1]);
+            } else if (maxRssByState.indexOfKey(aggregatedType) < 0) {
+                maxRssByState.put(aggregatedType, rssMeanAndMax[1]);
+            }
+        }
+
+        // divide the means by the durations to get the weighted mean-of-means
+        for (int i = 0; i < durationByState.size(); i++) {
+            int aggregatedKey = durationByState.keyAt(i);
+            if (meanRssByState.indexOfKey(aggregatedKey) < 0) {
+                // these data structures should be consistent
+                continue;
+            }
+            meanRssByState.put(aggregatedKey,
+                    meanRssByState.get(aggregatedKey) / durationByState.get(aggregatedKey));
+        }
+
+        // build the output
+        final long token = proto.start(fieldId);
+        proto.write(ProcessStatsProto.PROCESS, procName);
+        proto.write(ProcessStatsProto.UID, uid);
+
+        for (int i = 0; i < durationByState.size(); i++) {
+            final long stateToken = proto.start(ProcessStatsProto.STATES);
+
+            final int aggregatedKey = durationByState.keyAt(i);
+
+            DumpUtils.printAggregatedProcStateTagProto(proto,
+                    ProcessStatsStateProto.SCREEN_STATE,
+                    ProcessStatsStateProto.PROCESS_STATE,
+                    aggregatedKey);
+            proto.write(ProcessStatsStateProto.DURATION_MS, durationByState.get(aggregatedKey));
+
+            ProtoUtils.toAggStatsProto(proto, ProcessStatsStateProto.RSS,
+                    0, /* do not output a minimum value */
+                    meanRssByState.get(aggregatedKey),
+                    maxRssByState.get(aggregatedKey));
+
             proto.end(stateToken);
         }
 

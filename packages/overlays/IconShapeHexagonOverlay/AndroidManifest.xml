@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2020 The Android Open Source Project
   ~
@@ -14,12 +13,15 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp">
-    <item android:state_checked="true"
-          android:drawable="@drawable/star_filled"
-          android:tint="@color/control_primary_text"/>
-    <item android:drawable="@drawable/star_outline"
-          android:tint="@color/control_primary_text"/>
-</selector>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.android.theme.icon.hexagon"
+          android:versionCode="1"
+          android:versionName="1.0">
+    <overlay
+        android:targetPackage="android"
+        android:category="android.theme.customization.adaptive_icon_shape"
+        android:priority="1"/>
+
+    <application android:label="@string/icon_shape_hexagon_overlay" android:hasCode="false"/>
+</manifest>

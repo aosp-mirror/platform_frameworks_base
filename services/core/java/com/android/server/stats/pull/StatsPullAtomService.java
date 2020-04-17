@@ -2059,32 +2059,35 @@ public class StatsPullAtomService extends SystemService {
         synchronized (mProcessStatsLock) {
             final long token = Binder.clearCallingIdentity();
             try {
+                // force procstats to flush & combine old files into one store
                 long lastHighWaterMark = readProcStatsHighWaterMark(section);
                 List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
-                long highWaterMark = processStatsService.getCommittedStats(
-                        lastHighWaterMark, section, true, statsFiles);
-                if (statsFiles.size() != 1) {
-                    return StatsManager.PULL_SKIP;
-                }
-                unpackStreamedData(atomTag, pulledData, statsFiles);
+
+                ProcessStats procStats = new ProcessStats(false);
+                long highWaterMark = processStatsService.getCommittedStatsMerged(
+                        lastHighWaterMark, section, true, statsFiles, procStats);
+
+                // aggregate the data together for westworld consumption
+                ProtoOutputStream proto = new ProtoOutputStream();
+                procStats.dumpAggregatedProtoForStatsd(proto);
+
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeByteArray(proto.getBytes())
+                        .build();
+                pulledData.add(e);
+
                 new File(mBaseDir.getAbsolutePath() + "/" + section + "_" + lastHighWaterMark)
                         .delete();
                 new File(mBaseDir.getAbsolutePath() + "/" + section + "_" + highWaterMark)
                         .createNewFile();
-            } catch (IOException e) {
-                Slog.e(TAG, "Getting procstats failed: ", e);
-                return StatsManager.PULL_SKIP;
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Getting procstats failed: ", e);
-                return StatsManager.PULL_SKIP;
-            } catch (SecurityException e) {
+            } catch (RemoteException | IOException e) {
                 Slog.e(TAG, "Getting procstats failed: ", e);
                 return StatsManager.PULL_SKIP;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
-
         return StatsManager.PULL_SUCCESS;
     }
 

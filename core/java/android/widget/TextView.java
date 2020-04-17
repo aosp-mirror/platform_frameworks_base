@@ -855,6 +855,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     int mTextEditSuggestionContainerLayout;
     int mTextEditSuggestionHighlightStyle;
 
+    private static final int NO_POINTER_ID = -1;
+    /**
+     * The prime (the 1st finger) pointer id which is used as a lock to prevent multi touch among
+     * TextView and the handle views which are rendered on popup windows.
+     */
+    private int mPrimePointerId = NO_POINTER_ID;
+
+    /**
+     * Whether the prime pointer is from the event delivered to selection handle or insertion
+     * handle.
+     */
+    private boolean mIsPrimePointerFromHandleView;
+
     /**
      * {@link EditText} specific data, created on demand when one of the Editor fields is used.
      * See {@link #createEditorIfNeeded()}.
@@ -3272,7 +3285,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Applies a tint to the compound drawables. Does not modify the
-     * current tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * current tint mode, which is {@link BlendMode#SRC_IN} by default.
      * <p>
      * Subsequent calls to
      * {@link #setCompoundDrawables(Drawable, Drawable, Drawable, Drawable)}
@@ -10886,6 +10899,36 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /**
+     * Called from onTouchEvent() to prevent the touches by secondary fingers.
+     * Dragging on handles can revise cursor/selection, so can dragging on the text view.
+     * This method is a lock to avoid processing multiple fingers on both text view and handles.
+     * Note: multiple fingers on handles (e.g. 2 fingers on the 2 selection handles) should work.
+     *
+     * @param event The motion event that is being handled and carries the pointer info.
+     * @param fromHandleView true if the event is delivered to selection handle or insertion
+     * handle; false if this event is delivered to TextView.
+     * @return Returns true to indicate that onTouchEvent() can continue processing the motion
+     * event, otherwise false.
+     *  - Always returns true for the first finger.
+     *  - For secondary fingers, if the first or current finger is from TextView, returns false.
+     *    This is to make touch mutually exclusive between the TextView and the handles, but
+     *    not among the handles.
+     */
+    boolean isFromPrimePointer(MotionEvent event, boolean fromHandleView) {
+        if (mPrimePointerId == NO_POINTER_ID)  {
+            mPrimePointerId = event.getPointerId(0);
+            mIsPrimePointerFromHandleView = fromHandleView;
+        } else if (mPrimePointerId != event.getPointerId(0)) {
+            return mIsPrimePointerFromHandleView && fromHandleView;
+        }
+        if (event.getActionMasked() == MotionEvent.ACTION_UP
+            || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+            mPrimePointerId = -1;
+        }
+        return true;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (DEBUG_CURSOR) {
@@ -10893,6 +10936,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     event.getSequenceNumber(),
                     MotionEvent.actionToString(event.getActionMasked()),
                     event.getX(), event.getY());
+        }
+        if (!isFromPrimePointer(event, false)) {
+            return true;
         }
 
         final int action = event.getActionMasked();

@@ -68,6 +68,11 @@ public final class ClientProfile {
     private Set<Integer> mUsingFrontendIds = new HashSet<>();
 
     /**
+     * List of the Lnb ids that are used by the current client.
+     */
+    private Set<Integer> mUsingLnbIds = new HashSet<>();
+
+    /**
      * Optional arbitrary priority value given by the client.
      *
      * <p>This value can override the default priorotiy calculated from
@@ -131,7 +136,7 @@ public final class ClientProfile {
         mUsingFrontendIds.add(frontendId);
     }
 
-    public Iterable<Integer> getInUseFrontendIds() {
+    public Set<Integer> getInUseFrontendIds() {
         return mUsingFrontendIds;
     }
 
@@ -144,6 +149,30 @@ public final class ClientProfile {
      */
     public void releaseFrontend(int frontendId) {
         mUsingFrontendIds.remove(frontendId);
+    }
+
+    /**
+     * Set when the client starts to use an Lnb.
+     *
+     * @param lnbId being used.
+     */
+    public void useLnb(int lnbId) {
+        mUsingLnbIds.add(lnbId);
+    }
+
+    public Set<Integer> getInUseLnbIds() {
+        return mUsingLnbIds;
+    }
+
+    /**
+     * Called when the client released an lnb.
+     *
+     * <p>This could happen when client resource reclaimed.
+     *
+     * @param lnbId being released.
+     */
+    public void releaseLnb(int lnbId) {
+        mUsingLnbIds.remove(lnbId);
     }
 
     @Override

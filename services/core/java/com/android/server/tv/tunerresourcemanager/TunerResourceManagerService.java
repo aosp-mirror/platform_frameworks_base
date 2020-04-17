@@ -63,6 +63,8 @@ public class TunerResourceManagerService extends SystemService {
 
     // Map of the current available frontend resources
     private Map<Integer, FrontendResource> mFrontendResources = new HashMap<>();
+    // Map of the current available lnb resources
+    private Map<Integer, LnbResource> mLnbResources = new HashMap<>();
 
     @GuardedBy("mLock")
     private Map<Integer, ResourcesReclaimListenerRecord> mListeners = new HashMap<>();
@@ -164,12 +166,13 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
-        public void setLnbInfoList(int[] lnbIds) {
+        public void setLnbInfoList(int[] lnbIds) throws RemoteException {
             enforceTrmAccessPermission("setLnbInfoList");
-            if (DEBUG) {
-                for (int i = 0; i < lnbIds.length; i++) {
-                    Slog.d(TAG, "updateLnbInfo(lnbId=" + lnbIds[i] + ")");
-                }
+            if (lnbIds == null) {
+                throw new RemoteException("Lnb id list can't be null");
+            }
+            synchronized (mLock) {
+                setLnbInfoListInternal(lnbIds);
             }
         }
 
@@ -237,21 +240,32 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
-        public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbHandle) {
+        public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbHandle)
+                throws RemoteException {
             enforceTunerAccessPermission("requestLnb");
             enforceTrmAccessPermission("requestLnb");
-            if (DEBUG) {
-                Slog.d(TAG, "requestLnb(request=" + request + ")");
+            if (lnbHandle == null) {
+                throw new RemoteException("lnbHandle can't be null");
             }
-            return true;
+            synchronized (mLock) {
+                try {
+                    return requestLnbInternal(request, lnbHandle);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
         }
 
         @Override
-        public void releaseFrontend(int frontendId) {
+        public void releaseFrontend(int frontendHandle) throws RemoteException {
             enforceTunerAccessPermission("releaseFrontend");
             enforceTrmAccessPermission("releaseFrontend");
-            if (DEBUG) {
-                Slog.d(TAG, "releaseFrontend(id=" + frontendId + ")");
+            if (!validateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND,
+                    frontendHandle)) {
+                throw new RemoteException("frontendHandle can't be invalid");
+            }
+            synchronized (mLock) {
+                releaseFrontendInternal(getResourceIdFromHandle(frontendHandle));
             }
         }
 
@@ -282,11 +296,14 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
-        public void releaseLnb(int lnbId) {
+        public void releaseLnb(int lnbHandle) throws RemoteException {
             enforceTunerAccessPermission("releaseLnb");
             enforceTrmAccessPermission("releaseLnb");
-            if (DEBUG) {
-                Slog.d(TAG, "releaseLnb(lnbId=" + lnbId + ")");
+            if (!validateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, lnbHandle)) {
+                throw new RemoteException("lnbHandle can't be invalid");
+            }
+            synchronized (mLock) {
+                releaseLnbInternal(getResourceIdFromHandle(lnbHandle));
             }
         }
 
@@ -393,10 +410,41 @@ public class TunerResourceManagerService extends SystemService {
             }
         }
 
-        // TODO check if the removing resource is in use or not. Handle the conflict.
         for (int removingId : updatingFrontendIds) {
             // update the exclusive group id member list
             removeFrontendResource(removingId);
+        }
+    }
+
+    @VisibleForTesting
+    protected void setLnbInfoListInternal(int[] lnbIds) {
+        if (DEBUG) {
+            for (int i = 0; i < lnbIds.length; i++) {
+                Slog.d(TAG, "updateLnbInfo(lnbId=" + lnbIds[i] + ")");
+            }
+        }
+
+        // A set to record the Lnbs pending on updating. Ids will be removed
+        // from this set once its updating finished. Any lnb left in this set when all
+        // the updates are done will be removed from mLnbResources.
+        Set<Integer> updatingLnbIds = new HashSet<>(getLnbResources().keySet());
+
+        // Update lnbResources map and other mappings accordingly
+        for (int i = 0; i < lnbIds.length; i++) {
+            if (getLnbResource(lnbIds[i]) != null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Lnb id=" + lnbIds[i] + "exists.");
+                }
+                updatingLnbIds.remove(lnbIds[i]);
+            } else {
+                // Add a new lnb resource
+                LnbResource newLnb = new LnbResource.Builder(lnbIds[i]).build();
+                addLnbResource(newLnb);
+            }
+        }
+
+        for (int removingId : updatingLnbIds) {
+            removeLnbResource(removingId);
         }
     }
 
@@ -454,13 +502,85 @@ public class TunerResourceManagerService extends SystemService {
         if (inUseLowestPriorityFrId > -1 && (requestClient.getPriority() > currentLowestPriority)) {
             frontendHandle[0] = generateResourceHandle(
                     TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, inUseLowestPriorityFrId);
-            reclaimFrontendResource(getFrontendResource(
-                    inUseLowestPriorityFrId).getOwnerClientId());
+            reclaimResource(getFrontendResource(inUseLowestPriorityFrId).getOwnerClientId(),
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND);
             updateFrontendClientMappingOnNewGrant(inUseLowestPriorityFrId, request.getClientId());
             return true;
         }
 
         return false;
+    }
+
+    @VisibleForTesting
+    protected boolean requestLnbInternal(TunerLnbRequest request, int[] lnbHandle)
+            throws RemoteException {
+        if (DEBUG) {
+            Slog.d(TAG, "requestLnb(request=" + request + ")");
+        }
+
+        lnbHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
+        if (!checkClientExists(request.getClientId())) {
+            Slog.e(TAG, "Request lnb from unregistered client:" + request.getClientId());
+            return false;
+        }
+        ClientProfile requestClient = getClientProfile(request.getClientId());
+        int grantingLnbId = -1;
+        int inUseLowestPriorityLnbId = -1;
+        // Priority max value is 1000
+        int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
+        for (LnbResource lnb : getLnbResources().values()) {
+            if (!lnb.isInUse()) {
+                // Grant the unused lnb with lower id first
+                grantingLnbId = lnb.getId();
+                break;
+            } else {
+                // Record the lnb id with the lowest client priority among all the
+                // in use lnb when no available lnb has been found.
+                int priority = getOwnerClientPriority(lnb);
+                if (currentLowestPriority > priority) {
+                    inUseLowestPriorityLnbId = lnb.getId();
+                    currentLowestPriority = priority;
+                }
+            }
+        }
+
+        // Grant Lnb when there is unused resource.
+        if (grantingLnbId > -1) {
+            lnbHandle[0] = generateResourceHandle(
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, grantingLnbId);
+            updateLnbClientMappingOnNewGrant(grantingLnbId, request.getClientId());
+            return true;
+        }
+
+        // When all the resources are occupied, grant the lowest priority resource if the
+        // request client has higher priority.
+        if (inUseLowestPriorityLnbId > -1
+                && (requestClient.getPriority() > currentLowestPriority)) {
+            lnbHandle[0] = generateResourceHandle(
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, inUseLowestPriorityLnbId);
+            reclaimResource(getLnbResource(inUseLowestPriorityLnbId).getOwnerClientId(),
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
+            updateLnbClientMappingOnNewGrant(inUseLowestPriorityLnbId, request.getClientId());
+            return true;
+        }
+
+        return false;
+    }
+
+    @VisibleForTesting
+    void releaseFrontendInternal(int frontendId) {
+        if (DEBUG) {
+            Slog.d(TAG, "releaseFrontend(id=" + frontendId + ")");
+        }
+        updateFrontendClientMappingOnRelease(frontendId);
+    }
+
+    @VisibleForTesting
+    void releaseLnbInternal(int lnbId) {
+        if (DEBUG) {
+            Slog.d(TAG, "releaseLnb(lnbId=" + lnbId + ")");
+        }
+        updateLnbClientMappingOnRelease(lnbId);
     }
 
     @VisibleForTesting
@@ -530,12 +650,18 @@ public class TunerResourceManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    protected void reclaimFrontendResource(int reclaimingId) {
+    protected void reclaimResource(int reclaimingId,
+            @TunerResourceManager.TunerResourceType int resourceType) {
+        if (DEBUG) {
+            Slog.d(TAG, "Reclaiming resources because higher priority client request resource type "
+                    + resourceType);
+        }
         try {
             mListeners.get(reclaimingId).getListener().onReclaimResources();
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to reclaim resources on client " + reclaimingId, e);
         }
+        // TODO clean all the client and resources mapping/ownership
     }
 
     @VisibleForTesting
@@ -568,14 +694,39 @@ public class TunerResourceManagerService extends SystemService {
         }
     }
 
+    private void updateFrontendClientMappingOnRelease(int frontendId) {
+        FrontendResource releasingFrontend = getFrontendResource(frontendId);
+        ClientProfile ownerProfile = getClientProfile(releasingFrontend.getOwnerClientId());
+        releasingFrontend.removeOwner();
+        ownerProfile.releaseFrontend(frontendId);
+        for (int exclusiveGroupMember : releasingFrontend.getExclusiveGroupMemberFeIds()) {
+            getFrontendResource(exclusiveGroupMember).removeOwner();
+            ownerProfile.releaseFrontend(exclusiveGroupMember);
+        }
+    }
+
+    private void updateLnbClientMappingOnNewGrant(int grantingId, int ownerClientId) {
+        LnbResource grantingLnb = getLnbResource(grantingId);
+        ClientProfile ownerProfile = getClientProfile(ownerClientId);
+        grantingLnb.setOwner(ownerClientId);
+        ownerProfile.useLnb(grantingId);
+    }
+
+    private void updateLnbClientMappingOnRelease(int lnbId) {
+        LnbResource releasingLnb = getLnbResource(lnbId);
+        ClientProfile ownerProfile = getClientProfile(releasingLnb.getOwnerClientId());
+        releasingLnb.removeOwner();
+        ownerProfile.releaseLnb(lnbId);
+    }
+
     /**
-     * Get the owner client's priority from the frontend id.
+     * Get the owner client's priority from the resource id.
      *
-     * @param frontend an in use frontend.
-     * @return the priority of the owner client of the frontend.
+     * @param resource a in use tuner resource.
+     * @return the priority of the owner client of the resource.
      */
-    private int getOwnerClientPriority(FrontendResource frontend) {
-        return getClientProfile(frontend.getOwnerClientId()).getPriority();
+    private int getOwnerClientPriority(TunerResourceBasic resource) {
+        return getClientProfile(resource.getOwnerClientId()).getPriority();
     }
 
     @VisibleForTesting
@@ -609,11 +760,38 @@ public class TunerResourceManagerService extends SystemService {
 
     private void removeFrontendResource(int removingId) {
         FrontendResource fe = getFrontendResource(removingId);
+        if (fe.isInUse()) {
+            releaseFrontendInternal(removingId);
+        }
         for (int excGroupmemberFeId : fe.getExclusiveGroupMemberFeIds()) {
             getFrontendResource(excGroupmemberFeId)
                     .removeExclusiveGroupMemberFeId(fe.getId());
         }
         mFrontendResources.remove(removingId);
+    }
+
+    @VisibleForTesting
+    @Nullable
+    protected LnbResource getLnbResource(int lnbId) {
+        return mLnbResources.get(lnbId);
+    }
+
+    @VisibleForTesting
+    protected Map<Integer, LnbResource> getLnbResources() {
+        return mLnbResources;
+    }
+
+    private void addLnbResource(LnbResource newLnb) {
+        // Update resource list and available id list
+        mLnbResources.put(newLnb.getId(), newLnb);
+    }
+
+    private void removeLnbResource(int removingId) {
+        LnbResource lnb = getLnbResource(removingId);
+        if (lnb.isInUse()) {
+            releaseLnbInternal(removingId);
+        }
+        mLnbResources.remove(removingId);
     }
 
     @VisibleForTesting
@@ -649,6 +827,22 @@ public class TunerResourceManagerService extends SystemService {
         return (resourceType & 0x000000ff) << 24
                 | (resourceId << 16)
                 | (mResourceRequestCount++ & 0xffff);
+    }
+
+    @VisibleForTesting
+    protected int getResourceIdFromHandle(int resourceHandle) {
+        if (resourceHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
+            return resourceHandle;
+        }
+        return (resourceHandle & 0x00ff0000) >> 16;
+    }
+
+    private boolean validateResourceHandle(int resourceType, int resourceHandle) {
+        if (resourceHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE
+                || ((resourceHandle & 0xff000000) >> 24) != resourceType) {
+            return false;
+        }
+        return true;
     }
 
     private void enforceTrmAccessPermission(String apiName) {

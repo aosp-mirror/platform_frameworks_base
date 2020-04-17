@@ -197,8 +197,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final MainHandler mMainHandler;
 
-    // Lazily initialized - access through getSystemActionPerfomer()
-    private SystemActionPerformer mSystemActionPerformer;
+    private final SystemActionPerformer mSystemActionPerformer;
 
     private MagnificationController mMagnificationController;
 
@@ -296,6 +295,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManager = mContext.getPackageManager();
         mSecurityPolicy = new AccessibilitySecurityPolicy(mContext, this);
+        mSystemActionPerformer =
+                new SystemActionPerformer(mContext, mWindowManagerService, null, this);
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
@@ -671,7 +672,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mSecurityPolicy.enforceCallerIsRecentsOrHasPermission(
                 Manifest.permission.MANAGE_ACCESSIBILITY,
                 FUNCTION_REGISTER_SYSTEM_ACTION);
-        getSystemActionPerformer().registerSystemAction(actionId, action);
+        mSystemActionPerformer.registerSystemAction(actionId, action);
     }
 
     /**
@@ -684,15 +685,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mSecurityPolicy.enforceCallerIsRecentsOrHasPermission(
                 Manifest.permission.MANAGE_ACCESSIBILITY,
                 FUNCTION_UNREGISTER_SYSTEM_ACTION);
-        getSystemActionPerformer().unregisterSystemAction(actionId);
-    }
-
-    private SystemActionPerformer getSystemActionPerformer() {
-        if (mSystemActionPerformer == null) {
-            mSystemActionPerformer =
-                    new SystemActionPerformer(mContext, mWindowManagerService, null, this);
-        }
-        return mSystemActionPerformer;
+        mSystemActionPerformer.unregisterSystemAction(actionId);
     }
 
     @Override
@@ -804,7 +797,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         synchronized (mLock) {
             mUiAutomationManager.registerUiTestAutomationServiceLocked(owner, serviceClient,
                     mContext, accessibilityServiceInfo, sIdCounter++, mMainHandler,
-                    mSecurityPolicy, this, mWindowManagerService, getSystemActionPerformer(),
+                    mSecurityPolicy, this, mWindowManagerService, mSystemActionPerformer,
                     mA11yWindowManager, flags);
             onUserStateChangedLocked(getCurrentUserStateLocked());
         }
@@ -1515,7 +1508,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (service == null) {
                     service = new AccessibilityServiceConnection(userState, mContext, componentName,
                             installedService, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
-                            this, mWindowManagerService, getSystemActionPerformer(),
+                            this, mWindowManagerService, mSystemActionPerformer,
                             mA11yWindowManager, mActivityTaskManagerService);
                 } else if (userState.mBoundServices.contains(service)) {
                     continue;
@@ -2441,7 +2434,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *    accessibility button.
      * 2) For {@link AccessibilityManager#ACCESSIBILITY_SHORTCUT_KEY} type and service targeting sdk
      *    version <= Q: turns on / off the accessibility service.
-     * 3) For services targeting sdk version > Q:
+     * 3) For {@link AccessibilityManager#ACCESSIBILITY_SHORTCUT_KEY} type and service targeting sdk
+     *    version > Q and request accessibility button: turn on the accessibility service if it's
+     *    not in the enabled state.
+     *    (It'll happen when a service is disabled and assigned to shortcut then upgraded.)
+     * 4) For services targeting sdk version > Q:
      *    a) Turns on / off the accessibility service, if service does not request accessibility
      *       button.
      *    b) Callbacks to accessibility service if service is bounded and requests accessibility
@@ -2474,6 +2471,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     disableAccessibilityServiceLocked(assignedTarget, mCurrentUserId);
                 }
                 return true;
+            }
+            if (shortcutType == ACCESSIBILITY_SHORTCUT_KEY && targetSdk > Build.VERSION_CODES.Q
+                    && requestA11yButton) {
+                if (!userState.getEnabledServicesLocked().contains(assignedTarget)) {
+                    enableAccessibilityServiceLocked(assignedTarget, mCurrentUserId);
+                    return true;
+                }
             }
             // Callbacks to a11y service if it's bounded and requests a11y button.
             if (serviceConnection == null
@@ -2753,7 +2757,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     userState, mContext,
                     COMPONENT_NAME, info, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
                     AccessibilityManagerService.this, mWindowManagerService,
-                    getSystemActionPerformer(), mA11yWindowManager, mActivityTaskManagerService) {
+                    mSystemActionPerformer, mA11yWindowManager, mActivityTaskManagerService) {
                 @Override
                 public boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
                     return true;

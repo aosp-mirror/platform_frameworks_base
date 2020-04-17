@@ -657,4 +657,16 @@ public class WindowStateTests extends WindowTestsBase {
         win0.mActivityRecord.getStack().setFocusable(false);
         assertTrue(win0.cantReceiveTouchInput());
     }
+
+    @Test
+    public void testNeedsRelativeLayeringToIme_notAttached() {
+        WindowState sameTokenWindow = createWindow(null, TYPE_BASE_APPLICATION, mAppWindow.mToken,
+                "SameTokenWindow");
+        mDisplayContent.mInputMethodTarget = mAppWindow;
+        sameTokenWindow.mActivityRecord.getStack().setWindowingMode(
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        assertTrue(sameTokenWindow.needsRelativeLayeringToIme());
+        sameTokenWindow.removeImmediately();
+        assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
+    }
 }
