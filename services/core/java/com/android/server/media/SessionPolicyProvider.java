@@ -29,6 +29,7 @@ import java.lang.annotation.RetentionPolicy;
  * Note: When instantiating this class, {@link MediaSessionService} will only use the constructor
  * without any parameters.
  */
+// TODO: Move this class to apex/media/
 public abstract class SessionPolicyProvider {
     @IntDef(value = {
             SESSION_POLICY_IGNORE_BUTTON_RECEIVER,
