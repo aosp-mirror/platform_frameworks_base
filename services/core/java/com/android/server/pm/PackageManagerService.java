@@ -2817,9 +2817,13 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest) {
-        PackageManager.invalidatePackageInfoCache();
         PackageManager.disableApplicationInfoCache();
         PackageManager.disablePackageInfoCache();
+
+        // Avoid invalidation-thrashing by preventing cache invalidations from causing property
+        // writes if the cache isn't enabled yet.  We re-enable writes later when we're
+        // done initializing.
+        PackageManager.corkPackageInfoCache();
 
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
@@ -3625,6 +3629,9 @@ public class PackageManagerService extends IPackageManager.Stub
         // CHECKSTYLE:ON IndentationCheck
 
         mModuleInfoProvider = new ModuleInfoProvider(mContext, this);
+
+        // Uncork cache invalidations and allow clients to cache package information.
+        PackageManager.uncorkPackageInfoCache();
 
         // Now after opening every single application zip, make sure they
         // are all flushed.  Not really needed, but keeps things nice and

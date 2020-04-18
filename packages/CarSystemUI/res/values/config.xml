@@ -77,6 +77,11 @@
         <item>com.android.systemui.car.userswitcher.FullscreenUserSwitcherViewMediator</item>
     </string-array>
 
+    <!-- List of package names that are allowed sources of app installation. -->
+    <string-array name="config_allowedAppInstallSources" translatable="false">
+        <item>com.android.vending</item>
+    </string-array>
+
     <!-- SystemUI Services: The classes of the stuff to start. -->
     <string-array name="config_systemUIServiceComponents" translatable="false">
         <item>com.android.systemui.util.NotificationChannels</item>

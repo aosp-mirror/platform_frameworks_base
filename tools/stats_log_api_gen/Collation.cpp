@@ -478,7 +478,6 @@ static void populateFieldNumberToAtomDeclSet(const shared_ptr<AtomDecl>& atomDec
 int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms* atoms) {
     int errorCount = 0;
 
-    int maxPushedAtomId = 2;
     for (int i = 0; i < descriptor->field_count(); i++) {
         const FieldDescriptor* atomField = descriptor->field(i);
 
@@ -563,13 +562,7 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
 
             atoms->non_chained_decls.insert(nonChainedAtomDecl);
         }
-
-        if (atomDecl->code < PULL_ATOM_START_ID && atomDecl->code > maxPushedAtomId) {
-            maxPushedAtomId = atomDecl->code;
-        }
     }
-
-    atoms->maxPushedAtomId = maxPushedAtomId;
 
     if (dbg) {
         printf("signatures = [\n");
