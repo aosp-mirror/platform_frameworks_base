@@ -2183,7 +2183,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean isInStackLocked() {
         final ActivityStack stack = getRootTask();
-        return stack != null && stack.isInStackLocked(this) != null;
+        return stack != null && stack.isInTask(this) != null;
     }
 
     boolean isPersistable() {
@@ -5588,7 +5588,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     static ActivityRecord isInStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        return (r != null) ? r.getRootTask().isInStackLocked(r) : null;
+        return (r != null) ? r.getRootTask().isInTask(r) : null;
     }
 
     static ActivityStack getStackLocked(IBinder token) {
