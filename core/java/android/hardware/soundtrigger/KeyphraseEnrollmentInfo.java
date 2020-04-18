@@ -18,6 +18,9 @@ package android.hardware.soundtrigger;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -37,18 +40,22 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Enrollment information about the different available keyphrases.
  *
  * @hide
  */
+@TestApi
 public class KeyphraseEnrollmentInfo {
     private static final String TAG = "KeyphraseEnrollmentInfo";
     /**
@@ -63,6 +70,7 @@ public class KeyphraseEnrollmentInfo {
      * Intent Action: for managing the keyphrases for hotword detection.
      * This needs to be defined by a service that supports enrolling users for hotword/keyphrase
      * detection.
+     * @hide
      */
     public static final String ACTION_MANAGE_VOICE_KEYPHRASES =
             "com.android.intent.action.MANAGE_VOICE_KEYPHRASES";
@@ -72,18 +80,21 @@ public class KeyphraseEnrollmentInfo {
      * @see #MANAGE_ACTION_ENROLL
      * @see #MANAGE_ACTION_RE_ENROLL
      * @see #MANAGE_ACTION_UN_ENROLL
+     * @hide
      */
     public static final String EXTRA_VOICE_KEYPHRASE_ACTION =
             "com.android.intent.extra.VOICE_KEYPHRASE_ACTION";
 
     /**
      * Intent extra: The hint text to be shown on the voice keyphrase management UI.
+     * @hide
      */
     public static final String EXTRA_VOICE_KEYPHRASE_HINT_TEXT =
             "com.android.intent.extra.VOICE_KEYPHRASE_HINT_TEXT";
     /**
      * Intent extra: The voice locale to use while managing the keyphrase.
      * This is a BCP-47 language tag.
+     * @hide
      */
     public static final String EXTRA_VOICE_KEYPHRASE_LOCALE =
             "com.android.intent.extra.VOICE_KEYPHRASE_LOCALE";
@@ -125,7 +136,8 @@ public class KeyphraseEnrollmentInfo {
 
     private String mParseError;
 
-    public KeyphraseEnrollmentInfo(PackageManager pm) {
+    public KeyphraseEnrollmentInfo(@NonNull PackageManager pm) {
+        Objects.requireNonNull(pm);
         // Find the apps that supports enrollment for hotword keyhphrases,
         // Pick a privileged app and obtain the information about the supported keyphrases
         // from its metadata.
@@ -134,13 +146,13 @@ public class KeyphraseEnrollmentInfo {
         if (ris == null || ris.isEmpty()) {
             // No application capable of enrolling for voice keyphrases is present.
             mParseError = "No enrollment applications found";
-            mKeyphrasePackageMap = Collections.<KeyphraseMetadata, String>emptyMap();
+            mKeyphrasePackageMap = Collections.emptyMap();
             mKeyphrases = null;
             return;
         }
 
-        List<String> parseErrors = new LinkedList<String>();
-        mKeyphrasePackageMap = new HashMap<KeyphraseMetadata, String>();
+        List<String> parseErrors = new LinkedList<>();
+        mKeyphrasePackageMap = new HashMap<>();
         for (ResolveInfo ri : ris) {
             try {
                 ApplicationInfo ai = pm.getApplicationInfo(
@@ -178,7 +190,7 @@ public class KeyphraseEnrollmentInfo {
             mKeyphrases = null;
         } else {
             mKeyphrases = mKeyphrasePackageMap.keySet().toArray(
-                    new KeyphraseMetadata[mKeyphrasePackageMap.size()]);
+                    new KeyphraseMetadata[0]);
         }
 
         if (!parseErrors.isEmpty()) {
@@ -269,8 +281,8 @@ public class KeyphraseEnrollmentInfo {
         if (!TextUtils.isEmpty(searchKeyphraseSupportedLocales)) {
             try {
                 String[] supportedLocalesDelimited = searchKeyphraseSupportedLocales.split(",");
-                for (int i = 0; i < supportedLocalesDelimited.length; i++) {
-                    locales.add(Locale.forLanguageTag(supportedLocalesDelimited[i]));
+                for (String s : supportedLocalesDelimited) {
+                    locales.add(Locale.forLanguageTag(s));
                 }
             } catch (Exception ex) {
                 // We catch a generic exception here because we don't want the system service
@@ -297,6 +309,7 @@ public class KeyphraseEnrollmentInfo {
         return new KeyphraseMetadata(searchKeyphraseId, searchKeyphrase, locales, recognitionModes);
     }
 
+    @NonNull
     public String getParseError() {
         return mParseError;
     }
@@ -305,8 +318,9 @@ public class KeyphraseEnrollmentInfo {
      * @return An array of available keyphrases that can be enrolled on the system.
      *         It may be null if no keyphrases can be enrolled.
      */
-    public KeyphraseMetadata[] listKeyphraseMetadata() {
-        return mKeyphrases;
+    @NonNull
+    public Collection<KeyphraseMetadata> listKeyphraseMetadata() {
+        return Arrays.asList(mKeyphrases);
     }
 
     /**
@@ -319,8 +333,11 @@ public class KeyphraseEnrollmentInfo {
      * @return An {@link Intent} to manage the keyphrase. This can be null if managing the
      *         given keyphrase/locale combination isn't possible.
      */
-    public Intent getManageKeyphraseIntent(@ManageActions int action, String keyphrase,
-            Locale locale) {
+    @Nullable
+    public Intent getManageKeyphraseIntent(@ManageActions int action, @NonNull String keyphrase,
+            @NonNull Locale locale) {
+        Objects.requireNonNull(keyphrase);
+        Objects.requireNonNull(locale);
         if (mKeyphrasePackageMap == null || mKeyphrasePackageMap.isEmpty()) {
             Slog.w(TAG, "No enrollment application exists");
             return null;
@@ -328,12 +345,11 @@ public class KeyphraseEnrollmentInfo {
 
         KeyphraseMetadata keyphraseMetadata = getKeyphraseMetadata(keyphrase, locale);
         if (keyphraseMetadata != null) {
-            Intent intent = new Intent(ACTION_MANAGE_VOICE_KEYPHRASES)
+            return new Intent(ACTION_MANAGE_VOICE_KEYPHRASES)
                     .setPackage(mKeyphrasePackageMap.get(keyphraseMetadata))
                     .putExtra(EXTRA_VOICE_KEYPHRASE_HINT_TEXT, keyphrase)
                     .putExtra(EXTRA_VOICE_KEYPHRASE_LOCALE, locale.toLanguageTag())
                     .putExtra(EXTRA_VOICE_KEYPHRASE_ACTION, action);
-            return intent;
         }
         return null;
     }
@@ -348,7 +364,11 @@ public class KeyphraseEnrollmentInfo {
      * @return The metadata, if the enrollment client supports the given keyphrase
      *         and locale, null otherwise.
      */
-    public KeyphraseMetadata getKeyphraseMetadata(String keyphrase, Locale locale) {
+    @Nullable
+    public KeyphraseMetadata getKeyphraseMetadata(@NonNull String keyphrase,
+            @NonNull Locale locale) {
+        Objects.requireNonNull(keyphrase);
+        Objects.requireNonNull(locale);
         if (mKeyphrases != null && mKeyphrases.length > 0) {
           for (KeyphraseMetadata keyphraseMetadata : mKeyphrases) {
               // Check if the given keyphrase is supported in the locale provided by
