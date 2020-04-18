@@ -15,7 +15,7 @@
  */
 package android.hardware.fingerprint;
 
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -41,7 +41,7 @@ interface IFingerprintService {
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
     void prepareForAuthentication(IBinder token, long operationId, int userId,
-            IBiometricServiceReceiverInternal wrapperReceiver, String opPackageName, int cookie,
+            IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie,
             int callingUid, int callingPid, int callingUserId, in Surface surface);
 
     // Starts authentication with the previously prepared client.

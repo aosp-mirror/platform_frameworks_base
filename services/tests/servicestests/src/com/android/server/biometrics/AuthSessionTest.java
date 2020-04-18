@@ -35,8 +35,8 @@ import android.app.trust.ITrustManager;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricAuthenticator;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -63,7 +63,7 @@ public class AuthSessionTest {
     @Mock private ITrustManager mTrustManager;
     @Mock private DevicePolicyManager mDevicePolicyManager;
     @Mock private BiometricService.SettingObserver mSettingObserver;
-    @Mock private IBiometricServiceReceiverInternal mInternalReceiver;
+    @Mock private IBiometricSensorReceiver mSensorReceiver;
     @Mock private IBiometricServiceReceiver mClientReceiver;
 
     private Random mRandom;
@@ -151,7 +151,7 @@ public class AuthSessionTest {
                     eq(mToken),
                     eq(operationId),
                     eq(userId),
-                    eq(mInternalReceiver),
+                    eq(mSensorReceiver),
                     eq(TEST_PACKAGE),
                     eq(sensor.getCookie()),
                     eq(callingUid),
@@ -207,7 +207,7 @@ public class AuthSessionTest {
         final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, bundle,
                 checkDevicePolicyManager);
 
-        return new AuthSession(mRandom, preAuthInfo, mToken, operationId, userId, mInternalReceiver,
+        return new AuthSession(mRandom, preAuthInfo, mToken, operationId, userId, mSensorReceiver,
                 mClientReceiver, TEST_PACKAGE, bundle, callingUid,
                 callingPid, callingUserId, requireConfirmation);
     }

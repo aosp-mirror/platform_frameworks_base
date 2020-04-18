@@ -37,10 +37,12 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -60,9 +62,12 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -365,10 +370,9 @@ public class BiometricService extends SystemService {
         }
     }
 
-    // Wrap the client's receiver so we can do things with the BiometricDialog first
+    // Receives events from individual biometric sensors.
     @VisibleForTesting
-    final IBiometricServiceReceiverInternal mInternalReceiver =
-            new IBiometricServiceReceiverInternal.Stub() {
+    final IBiometricSensorReceiver mBiometricSensorReceiver = new IBiometricSensorReceiver.Stub() {
         @Override
         public void onAuthenticationSucceeded(int sensorId, boolean requireConfirmation,
                 byte[] token) {
@@ -414,7 +418,9 @@ public class BiometricService extends SystemService {
             args.arg1 = message;
             mHandler.obtainMessage(MSG_ON_ACQUIRED, args).sendToTarget();
         }
+    };
 
+    final IBiometricSysuiReceiver mSysuiReceiver = new IBiometricSysuiReceiver.Stub() {
         @Override
         public void onDialogDismissed(int reason, @Nullable byte[] credentialAttestation) {
             mHandler.obtainMessage(MSG_ON_DISMISSED,
@@ -677,6 +683,20 @@ public class BiometricService extends SystemService {
             }
             Slog.e(TAG, "Unknown sensorId: " + sensorId);
             return Authenticators.EMPTY_SET;
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
+                return;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                dumpInternal(pw);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
@@ -1059,7 +1079,7 @@ public class BiometricService extends SystemService {
 
                         mStatusBarService.showAuthenticationDialog(
                                 mCurrentAuthSession.mBundle,
-                                mInternalReceiver,
+                                mSysuiReceiver,
                                 0 /* biometricModality */,
                                 false /* requireConfirmation */,
                                 mCurrentAuthSession.mUserId,
@@ -1247,7 +1267,7 @@ public class BiometricService extends SystemService {
                     final @BiometricAuthenticator.Modality int modality =
                             mCurrentAuthSession.getEligibleModalities();
                     mStatusBarService.showAuthenticationDialog(mCurrentAuthSession.mBundle,
-                            mInternalReceiver, modality, requireConfirmation, userId,
+                            mSysuiReceiver, modality, requireConfirmation, userId,
                             mCurrentAuthSession.mOpPackageName,
                             mCurrentAuthSession.mOperationId);
                 } catch (RemoteException e) {
@@ -1325,7 +1345,7 @@ public class BiometricService extends SystemService {
         Slog.d(TAG, "Creating authSession with authRequest: " + preAuthInfo);
 
         mPendingAuthSession = new AuthSession(mRandom, preAuthInfo, token, operationId, userId,
-                mInternalReceiver, receiver, opPackageName, bundle, callingUid, callingPid,
+                mBiometricSensorReceiver, receiver, opPackageName, bundle, callingUid, callingPid,
                 callingUserId, requireConfirmation);
 
         try {
@@ -1340,7 +1360,7 @@ public class BiometricService extends SystemService {
 
                 mStatusBarService.showAuthenticationDialog(
                         mCurrentAuthSession.mBundle,
-                        mInternalReceiver,
+                        mSysuiReceiver,
                         0 /* biometricModality */,
                         false /* requireConfirmation */,
                         mCurrentAuthSession.mUserId,
@@ -1393,5 +1413,15 @@ public class BiometricService extends SystemService {
         }
 
         mCurrentAuthSession.cancelAllSensors(fromClient);
+    }
+
+    private void dumpInternal(PrintWriter pw) {
+        pw.println("Sensors:");
+        for (BiometricSensor sensor : mSensors) {
+            pw.println(" " + sensor);
+        }
+
+        pw.println("PendingSession: " + mPendingAuthSession);
+        pw.println("CurrentSession: " + mCurrentAuthSession);
     }
 }

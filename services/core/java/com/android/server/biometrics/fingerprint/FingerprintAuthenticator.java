@@ -17,7 +17,7 @@
 package com.android.server.biometrics.fingerprint;
 
 import android.hardware.biometrics.IBiometricAuthenticator;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.fingerprint.IFingerprintService;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -38,10 +38,10 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
 
     @Override
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
-            long operationId, int userId, IBiometricServiceReceiverInternal wrapperReceiver,
+            long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
             String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
-        mFingerprintService.prepareForAuthentication(token, operationId, userId, wrapperReceiver,
+        mFingerprintService.prepareForAuthentication(token, operationId, userId, sensorReceiver,
                 opPackageName, cookie, callingUid, callingPid, callingUserId, null /* surface */);
     }
 

@@ -38,8 +38,8 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
@@ -256,7 +256,7 @@ public class FingerprintService extends BiometricServiceBase {
 
         @Override // Binder call
         public void prepareForAuthentication(IBinder token, long opId, int groupId,
-                IBiometricServiceReceiverInternal wrapperReceiver, String opPackageName,
+                IBiometricSensorReceiver sensorReceiver, String opPackageName,
                 int cookie, int callingUid, int callingPid, int callingUserId,
                 Surface surface) {
             checkPermission(MANAGE_BIOMETRIC);
@@ -264,7 +264,7 @@ public class FingerprintService extends BiometricServiceBase {
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token,
-                    new BiometricPromptServiceListenerImpl(wrapperReceiver),
+                    new BiometricPromptServiceListenerImpl(sensorReceiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, cookie,
                     false /* requireConfirmation */,
                     surface);
@@ -471,8 +471,8 @@ public class FingerprintService extends BiometricServiceBase {
      * BiometricPrompt.
      */
     private class BiometricPromptServiceListenerImpl extends BiometricServiceListener {
-        BiometricPromptServiceListenerImpl(IBiometricServiceReceiverInternal wrapperReceiver) {
-            super(wrapperReceiver);
+        BiometricPromptServiceListenerImpl(IBiometricSensorReceiver sensorReceiver) {
+            super(sensorReceiver);
         }
 
         @Override

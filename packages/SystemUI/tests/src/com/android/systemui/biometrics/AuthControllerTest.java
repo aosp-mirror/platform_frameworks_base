@@ -42,7 +42,7 @@ import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.face.FaceManager;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -74,7 +74,7 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private PackageManager mPackageManager;
     @Mock
-    private IBiometricServiceReceiverInternal mReceiver;
+    private IBiometricSysuiReceiver mReceiver;
     @Mock
     private AuthDialog mDialog1;
     @Mock
