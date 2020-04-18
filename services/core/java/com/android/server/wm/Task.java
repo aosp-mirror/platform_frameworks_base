@@ -65,6 +65,9 @@ import static com.android.internal.policy.DecorView.DECOR_SHADOW_FOCUSED_HEIGHT_
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
+import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
@@ -2346,7 +2349,9 @@ class Task extends WindowContainer<WindowContainer> {
         int windowingMode =
                 getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
         if (getActivityType() == ACTIVITY_TYPE_HOME && windowingMode == WINDOWING_MODE_UNDEFINED) {
-            windowingMode = inSplitScreenWindowingMode() ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+            final int parentWindowingMode = newParentConfig.windowConfiguration.getWindowingMode();
+            windowingMode = parentWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                    ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                     : WINDOWING_MODE_FULLSCREEN;
             getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
         }
@@ -3138,6 +3143,52 @@ class Task extends WindowContainer<WindowContainer> {
         return activity != null ? activity.findMainWindow() : null;
     }
 
+    ActivityRecord topRunningActivity() {
+        return topRunningActivity(false /* focusableOnly */);
+    }
+
+    ActivityRecord topRunningActivity(boolean focusableOnly) {
+        // Split into 2 to avoid object creation due to variable capture.
+        if (focusableOnly) {
+            return getActivity((r) -> r.canBeTopRunning() && r.isFocusable());
+        } else {
+            return getActivity(ActivityRecord::canBeTopRunning);
+        }
+    }
+
+    ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
+        final PooledPredicate p = PooledLambda.obtainPredicate(Task::isTopRunningNonDelayed
+                , PooledLambda.__(ActivityRecord.class), notTop);
+        final ActivityRecord r = getActivity(p);
+        p.recycle();
+        return r;
+    }
+
+    private static boolean isTopRunningNonDelayed(ActivityRecord r, ActivityRecord notTop) {
+        return !r.delayedResume && r != notTop && r.canBeTopRunning();
+    }
+
+    /**
+     * This is a simplified version of topRunningActivity that provides a number of
+     * optional skip-over modes.  It is intended for use with the ActivityController hook only.
+     *
+     * @param token If non-null, any history records matching this token will be skipped.
+     * @param taskId If non-zero, we'll attempt to skip over records with the same task ID.
+     *
+     * @return Returns the HistoryRecord of the next activity on the stack.
+     */
+    ActivityRecord topRunningActivity(IBinder token, int taskId) {
+        final PooledPredicate p = PooledLambda.obtainPredicate(Task::isTopRunning,
+                PooledLambda.__(ActivityRecord.class), taskId, token);
+        final ActivityRecord r = getActivity(p);
+        p.recycle();
+        return r;
+    }
+
+    private static boolean isTopRunning(ActivityRecord r, int taskId, IBinder notTop) {
+        return r.getTask().mTaskId != taskId && r.appToken != notTop && r.canBeTopRunning();
+    }
+
     ActivityRecord getTopFullscreenActivity() {
         return getActivity((r) -> {
             final WindowState win = r.findMainWindow();
@@ -3440,9 +3491,169 @@ class Task extends WindowContainer<WindowContainer> {
         return this;
     }
 
-    // TODO(task-merge): Figure-out how this should work with hierarchy tasks.
+    /**
+     * Returns true if the task should be visible.
+     *
+     * @param starting The currently starting activity or null if there is none.
+     */
     boolean shouldBeVisible(ActivityRecord starting) {
-        return true;
+        return getVisibility(starting) != STACK_VISIBILITY_INVISIBLE;
+    }
+
+    /**
+     * Returns true if the task should be visible.
+     *
+     * @param starting The currently starting activity or null if there is none.
+     */
+    @ActivityStack.StackVisibility
+    int getVisibility(ActivityRecord starting) {
+        if (!isAttached() || isForceHidden()) {
+            return STACK_VISIBILITY_INVISIBLE;
+        }
+
+        boolean gotSplitScreenStack = false;
+        boolean gotOpaqueSplitScreenPrimary = false;
+        boolean gotOpaqueSplitScreenSecondary = false;
+        boolean gotTranslucentFullscreen = false;
+        boolean gotTranslucentSplitScreenPrimary = false;
+        boolean gotTranslucentSplitScreenSecondary = false;
+        boolean shouldBeVisible = true;
+
+        // This stack is only considered visible if all its parent stacks are considered visible,
+        // so check the visibility of all ancestor stacks first.
+        final WindowContainer parent = getParent();
+        if (parent.asTask() != null) {
+            final int parentVisibility = parent.asTask().getVisibility(starting);
+            if (parentVisibility == STACK_VISIBILITY_INVISIBLE) {
+                // Can't be visible if parent isn't visible
+                return STACK_VISIBILITY_INVISIBLE;
+            } else if (parentVisibility == STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT) {
+                // Parent is behind a translucent container so the highest visibility this container
+                // can get is that.
+                gotTranslucentFullscreen = true;
+            }
+        }
+
+        final int windowingMode = getWindowingMode();
+        final boolean isAssistantType = isActivityTypeAssistant();
+        for (int i = parent.getChildCount() - 1; i >= 0; --i) {
+            final WindowContainer wc = parent.getChildAt(i);
+            final Task other = wc.asTask();
+            if (other == null) continue;
+
+            final boolean hasRunningActivities = other.topRunningActivity() != null;
+            if (other == this) {
+                // Should be visible if there is no other stack occluding it, unless it doesn't
+                // have any running activities, not starting one and not home stack.
+                shouldBeVisible = hasRunningActivities || isInTask(starting) != null
+                        || isActivityTypeHome();
+                break;
+            }
+
+            if (!hasRunningActivities) {
+                continue;
+            }
+
+            final int otherWindowingMode = other.getWindowingMode();
+
+            if (otherWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+                // In this case the home stack isn't resizeable even though we are in split-screen
+                // mode. We still want the primary splitscreen stack to be visible as there will be
+                // a slight hint of it in the status bar area above the non-resizeable home
+                // activity. In addition, if the fullscreen assistant is over primary splitscreen
+                // stack, the stack should still be visible in the background as long as the recents
+                // animation is running.
+                final int activityType = other.getActivityType();
+                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                    if (activityType == ACTIVITY_TYPE_HOME
+                            || (activityType == ACTIVITY_TYPE_ASSISTANT
+                            && mWmService.getRecentsAnimationController() != null)) {
+                        break;
+                    }
+                }
+                if (other.isTranslucent(starting)) {
+                    // Can be visible behind a translucent fullscreen stack.
+                    gotTranslucentFullscreen = true;
+                    continue;
+                }
+                return STACK_VISIBILITY_INVISIBLE;
+            } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                    && !gotOpaqueSplitScreenPrimary) {
+                gotSplitScreenStack = true;
+                gotTranslucentSplitScreenPrimary = other.isTranslucent(starting);
+                gotOpaqueSplitScreenPrimary = !gotTranslucentSplitScreenPrimary;
+                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                        && gotOpaqueSplitScreenPrimary) {
+                    // Can not be visible behind another opaque stack in split-screen-primary mode.
+                    return STACK_VISIBILITY_INVISIBLE;
+                }
+            } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                    && !gotOpaqueSplitScreenSecondary) {
+                gotSplitScreenStack = true;
+                gotTranslucentSplitScreenSecondary = other.isTranslucent(starting);
+                gotOpaqueSplitScreenSecondary = !gotTranslucentSplitScreenSecondary;
+                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                        && gotOpaqueSplitScreenSecondary) {
+                    // Can not be visible behind another opaque stack in split-screen-secondary mode.
+                    return STACK_VISIBILITY_INVISIBLE;
+                }
+            }
+            if (gotOpaqueSplitScreenPrimary && gotOpaqueSplitScreenSecondary) {
+                // Can not be visible if we are in split-screen windowing mode and both halves of
+                // the screen are opaque.
+                return STACK_VISIBILITY_INVISIBLE;
+            }
+            if (isAssistantType && gotSplitScreenStack) {
+                // Assistant stack can't be visible behind split-screen. In addition to this not
+                // making sense, it also works around an issue here we boost the z-order of the
+                // assistant window surfaces in window manager whenever it is visible.
+                return STACK_VISIBILITY_INVISIBLE;
+            }
+        }
+
+        if (!shouldBeVisible) {
+            return STACK_VISIBILITY_INVISIBLE;
+        }
+
+        // Handle cases when there can be a translucent split-screen stack on top.
+        switch (windowingMode) {
+            case WINDOWING_MODE_FULLSCREEN:
+                if (gotTranslucentSplitScreenPrimary || gotTranslucentSplitScreenSecondary) {
+                    // At least one of the split-screen stacks that covers this one is translucent.
+                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                }
+                break;
+            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
+                if (gotTranslucentSplitScreenPrimary) {
+                    // Covered by translucent primary split-screen on top.
+                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                }
+                break;
+            case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY:
+                if (gotTranslucentSplitScreenSecondary) {
+                    // Covered by translucent secondary split-screen on top.
+                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                }
+                break;
+        }
+
+        // Lastly - check if there is a translucent fullscreen stack on top.
+        return gotTranslucentFullscreen ? STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT
+                : STACK_VISIBILITY_VISIBLE;
+    }
+
+    ActivityRecord isInTask(ActivityRecord r) {
+        if (r == null) {
+            return null;
+        }
+        final Task task = r.getRootTask();
+        if (task != null && r.isDescendantOf(task)) {
+            if (task != this) Slog.w(TAG, "Illegal state! task does not point to stack it is in. "
+                    + "stack=" + this + " task=" + task + " r=" + r
+                    + " callers=" + Debug.getCallers(15, "\n"));
+            return r;
+        }
+        return null;
     }
 
     void dump(PrintWriter pw, String prefix) {

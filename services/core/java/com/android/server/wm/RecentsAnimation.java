@@ -302,7 +302,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     // Prefer to use the original target activity instead of top activity because
                     // we may have moved another task to top (starting 3p launcher).
                     final ActivityRecord targetActivity = targetStack != null
-                            ? targetStack.isInStackLocked(mLaunchedTargetActivity)
+                            ? targetStack.isInTask(mLaunchedTargetActivity)
                             : null;
                     ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                             "onAnimationFinished(): targetStack=%s targetActivity=%s "
