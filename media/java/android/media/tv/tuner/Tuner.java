@@ -57,7 +57,10 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -222,8 +225,8 @@ public class Tuner implements AutoCloseable  {
     private Executor mOnResourceLostListenerExecutor;
 
     private Integer mDemuxHandle;
-    private Integer mDescramblerHandle;
-    private Descrambler mDescrambler;
+    private Map<Integer, Descrambler> mDescramblers = new HashMap<>();
+    private List<Filter> mFilters = new ArrayList<>();
 
     private final TunerResourceManager.ResourcesReclaimListener mResourceListener =
             new TunerResourceManager.ResourcesReclaimListener() {
@@ -356,9 +359,20 @@ public class Tuner implements AutoCloseable  {
             mFrontend = null;
         }
         if (mLnb != null) {
-            mTunerResourceManager.releaseLnb(mLnbHandle, mClientId);
-            mLnb = null;
-            mLnbHandle = null;
+            releaseLnb();
+        }
+        if (!mDescramblers.isEmpty()) {
+            for (Map.Entry<Integer, Descrambler> d : mDescramblers.entrySet()) {
+                d.getValue().close();
+                mTunerResourceManager.releaseDescrambler(d.getKey(), mClientId);
+            }
+            mDescramblers.clear();
+        }
+        if (!mFilters.isEmpty()) {
+            for (Filter f : mFilters) {
+                f.close();
+            }
+            mFilters.clear();
         }
         TunerUtils.throwExceptionForResult(nativeClose(), "failed to close tuner");
     }
@@ -857,6 +871,7 @@ public class Tuner implements AutoCloseable  {
             if (mHandler == null) {
                 mHandler = createEventHandler();
             }
+            mFilters.add(filter);
         }
         return filter;
     }
@@ -875,9 +890,11 @@ public class Tuner implements AutoCloseable  {
     public Lnb openLnb(@CallbackExecutor @NonNull Executor executor, @NonNull LnbCallback cb) {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
         if (mLnb != null) {
-            mLnb.setCallback(executor, cb);
+            return mLnb;
+        }
+        if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB) && mLnb != null) {
+            mLnb.setCallback(executor, cb, this);
         }
         return mLnb;
     }
@@ -897,9 +914,14 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(name, "LNB name must not be null");
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
-        mLnb = nativeOpenLnbByName(name);
-        if (mLnb != null) {
-            mLnb.setCallback(executor, cb);
+        Lnb newLnb = nativeOpenLnbByName(name);
+        if (newLnb != null) {
+            if (mLnb != null) {
+                mLnb.close();
+                mLnbHandle = null;
+            }
+            mLnb = newLnb;
+            mLnb.setCallback(executor, cb, this);
         }
         return mLnb;
     }
@@ -934,8 +956,7 @@ public class Tuner implements AutoCloseable  {
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER)
     @Nullable
     public Descrambler openDescrambler() {
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DESCRAMBLER);
-        return mDescrambler;
+        return requestDescrambler();
     }
 
     /**
@@ -995,15 +1016,21 @@ public class Tuner implements AutoCloseable  {
         return granted;
     }
 
-    private boolean requestDescrambler() {
+    private Descrambler requestDescrambler() {
         int[] descramblerHandle = new int[1];
         TunerDescramblerRequest request = new TunerDescramblerRequest(mClientId);
         boolean granted = mTunerResourceManager.requestDescrambler(request, descramblerHandle);
-        if (granted) {
-            mDescramblerHandle = descramblerHandle[0];
-            mDescrambler = nativeOpenDescramblerByHandle(mDescramblerHandle);
+        if (!granted) {
+            return null;
         }
-        return granted;
+        int handle = descramblerHandle[0];
+        Descrambler descrambler = nativeOpenDescramblerByHandle(handle);
+        if (descrambler != null) {
+            mDescramblers.put(handle, descrambler);
+        } else {
+            mTunerResourceManager.releaseDescrambler(handle, mClientId);
+        }
+        return descrambler;
     }
 
     private boolean checkResource(int resourceType)  {
@@ -1015,7 +1042,7 @@ public class Tuner implements AutoCloseable  {
                 break;
             }
             case TunerResourceManager.TUNER_RESOURCE_TYPE_LNB: {
-                if (mLnbHandle == null && !requestLnb()) {
+                if (mLnb == null && !requestLnb()) {
                     return false;
                 }
                 break;
@@ -1026,13 +1053,15 @@ public class Tuner implements AutoCloseable  {
                 }
                 break;
             }
-            case TunerResourceManager.TUNER_RESOURCE_TYPE_DESCRAMBLER: {
-                if (mDescramblerHandle == null && !requestDescrambler()) {
-                    return false;
-                }
-                break;
-            }
+            default:
+                return false;
         }
         return true;
+    }
+
+    /* package */ void releaseLnb() {
+        mTunerResourceManager.releaseLnb(mLnbHandle, mClientId);
+        mLnbHandle = null;
+        mLnb = null;
     }
 }
