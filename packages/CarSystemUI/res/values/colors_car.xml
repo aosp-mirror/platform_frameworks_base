@@ -17,9 +17,6 @@
  */
 -->
 <resources>
-    <color name="car_qs_background_primary">#263238</color> <!-- Blue Gray 900 -->
-    <color name="car_qs_footer_user_name_color">@*android:color/car_grey_50</color>
-
     <!-- colors for user switcher -->
     <color name="car_user_switcher_background_color">@*android:color/car_card_dark</color>
     <color name="car_user_switcher_name_text_color">@*android:color/car_body1_light</color>

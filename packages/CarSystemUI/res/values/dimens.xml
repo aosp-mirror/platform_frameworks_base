@@ -22,7 +22,6 @@
 
     <dimen name="status_bar_icon_drawing_size_dark">36dp</dimen>
     <dimen name="status_bar_icon_drawing_size">36dp</dimen>
-    <dimen name="car_qs_header_system_icons_area_height">96dp</dimen>
     <!-- The amount by which to scale up the status bar icons. -->
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.75</item>
 
