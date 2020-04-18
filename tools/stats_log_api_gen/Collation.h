@@ -191,7 +191,6 @@ struct Atoms {
     AtomDeclSet decls;
     AtomDeclSet non_chained_decls;
     SignatureInfoMap nonChainedSignatureInfoMap;
-    int maxPushedAtomId;
 };
 
 /**
