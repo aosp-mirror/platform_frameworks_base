@@ -31,7 +31,7 @@ interface IFingerprintService {
     // Authenticate the given sessionId with a fingerprint. This is protected by
     // USE_FINGERPRINT/USE_BIOMETRIC permission. This is effectively deprecated, since it only comes
     // through FingerprintManager now.
-    void authenticate(IBinder token, long sessionId, int userId,
+    void authenticate(IBinder token, long operationId, int userId,
             IFingerprintServiceReceiver receiver, int flags, String opPackageName,
             in Surface surface);
 
@@ -40,7 +40,7 @@ interface IFingerprintService {
     // called from BiometricService. The additional uid, pid, userId arguments should be determined
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
-    void prepareForAuthentication(IBinder token, long sessionId, int userId,
+    void prepareForAuthentication(IBinder token, long operationId, int userId,
             IBiometricServiceReceiverInternal wrapperReceiver, String opPackageName, int cookie,
             int callingUid, int callingPid, int callingUserId, in Surface surface);
 
@@ -114,6 +114,6 @@ interface IFingerprintService {
     // Removes a callback set by addClientActiveCallback
     void removeClientActiveCallback(IFingerprintClientActiveCallback callback);
 
-    // Initialize the OEM configured biometric strength
-    void initConfiguredStrength(int strength);
+    // Give FingerprintService its ID. See AuthService.java
+    void initializeConfiguration(int sensorId);
 }

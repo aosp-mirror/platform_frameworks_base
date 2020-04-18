@@ -161,7 +161,11 @@ public class ServiceWatcher implements ServiceConnection {
 
         @Override
         public String toString() {
-            return component.toShortString() + "@" + version + "[u" + userId + "]";
+            if (component == null) {
+                return "none";
+            } else {
+                return component.toShortString() + "@" + version + "[u" + userId + "]";
+            }
         }
     }
 

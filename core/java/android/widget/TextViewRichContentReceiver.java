@@ -49,7 +49,7 @@ final class TextViewRichContentReceiver implements RichContentReceiver<TextView>
 
     @Override
     public boolean onReceive(@NonNull TextView textView, @NonNull ClipData clip,
-            @Source int source, int flags) {
+            @Source int source, @Flags int flags) {
         if (source == SOURCE_AUTOFILL) {
             return onReceiveForAutofill(textView, clip, flags);
         }
@@ -78,12 +78,7 @@ final class TextViewRichContentReceiver implements RichContentReceiver<TextView>
             }
             if (itemText != null) {
                 if (!didFirst) {
-                    final int selStart = Selection.getSelectionStart(editable);
-                    final int selEnd = Selection.getSelectionEnd(editable);
-                    final int start = Math.max(0, Math.min(selStart, selEnd));
-                    final int end = Math.max(0, Math.max(selStart, selEnd));
-                    Selection.setSelection(editable, end);
-                    editable.replace(start, end, itemText);
+                    replaceSelection(editable, itemText);
                     didFirst = true;
                 } else {
                     editable.insert(Selection.getSelectionEnd(editable), "\n");
@@ -94,8 +89,18 @@ final class TextViewRichContentReceiver implements RichContentReceiver<TextView>
         return didFirst;
     }
 
+    private static void replaceSelection(@NonNull Editable editable,
+            @NonNull CharSequence replacement) {
+        final int selStart = Selection.getSelectionStart(editable);
+        final int selEnd = Selection.getSelectionEnd(editable);
+        final int start = Math.max(0, Math.min(selStart, selEnd));
+        final int end = Math.max(0, Math.max(selStart, selEnd));
+        Selection.setSelection(editable, end);
+        editable.replace(start, end, replacement);
+    }
+
     private static boolean onReceiveForAutofill(@NonNull TextView textView, @NonNull ClipData clip,
-            int flags) {
+            @Flags int flags) {
         final CharSequence text = coerceToText(clip, textView.getContext(), flags);
         if (text.length() == 0) {
             return false;
@@ -109,16 +114,16 @@ final class TextViewRichContentReceiver implements RichContentReceiver<TextView>
     }
 
     private static boolean onReceiveForDragAndDrop(@NonNull TextView textView,
-            @NonNull ClipData clip, int flags) {
+            @NonNull ClipData clip, @Flags int flags) {
         final CharSequence text = coerceToText(clip, textView.getContext(), flags);
         if (text.length() == 0) {
             return false;
         }
-        textView.replaceSelectionWithText(text);
+        replaceSelection((Editable) textView.getText(), text);
         return true;
     }
 
-    private static CharSequence coerceToText(ClipData clip, Context context, int flags) {
+    private static CharSequence coerceToText(ClipData clip, Context context, @Flags int flags) {
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         for (int i = 0; i < clip.getItemCount(); i++) {
             CharSequence itemText;

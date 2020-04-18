@@ -22,14 +22,17 @@ import android.hardware.iris.IIrisService;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import com.android.server.biometrics.SensorConfig;
+
 /**
  * TODO(b/141025588): Add JavaDoc.
  */
 public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
     private final IIrisService mIrisService;
 
-    public IrisAuthenticator(IIrisService irisService) {
+    public IrisAuthenticator(IIrisService irisService, SensorConfig config) throws RemoteException {
         mIrisService = irisService;
+        mIrisService.initializeConfiguration(config.id);
     }
 
     @Override

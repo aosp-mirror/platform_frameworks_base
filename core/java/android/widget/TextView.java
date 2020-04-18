@@ -22,6 +22,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_C
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+import static android.widget.RichContentReceiver.SOURCE_PROCESS_TEXT;
 
 import android.R;
 import android.annotation.CallSuper;
@@ -2127,7 +2128,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 CharSequence result = data.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT);
                 if (result != null) {
                     if (isTextEditable()) {
-                        replaceSelectionWithText(result);
+                        ClipData clip = ClipData.newPlainText("", result);
+                        mRichContentReceiver.onReceive(this, clip, SOURCE_PROCESS_TEXT, 0);
                         if (mEditor != null) {
                             mEditor.refreshTextActionMode();
                         }
@@ -3294,7 +3296,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Applies a tint to the compound drawables. Does not modify the
-     * current tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * current tint mode, which is {@link BlendMode#SRC_IN} by default.
      * <p>
      * Subsequent calls to
      * {@link #setCompoundDrawables(Drawable, Drawable, Drawable, Drawable)}
@@ -12832,10 +12834,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int length = mText.length();
         Selection.setSelection(mSpannable, 0, length);
         return length > 0;
-    }
-
-    void replaceSelectionWithText(CharSequence text) {
-        ((Editable) mText).replace(getSelectionStart(), getSelectionEnd(), text);
     }
 
     private void paste(boolean withFormatting) {

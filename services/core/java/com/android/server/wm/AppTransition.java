@@ -1418,23 +1418,7 @@ public class AppTransition implements Dump {
                 : new TranslateAnimation(0, fromX, 0, fromY);
         set.addAnimation(scale);
         set.addAnimation(translation);
-
-        final IRemoteCallback callback = mAnimationFinishedCallback;
-        if (callback != null) {
-            set.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) { }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    mHandler.sendMessage(PooledLambda.obtainMessage(
-                            AppTransition::doAnimationCallback, callback));
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) { }
-            });
-        }
+        setAppTransitionFinishedCallbackIfNeeded(set);
         return set;
     }
 
@@ -1672,6 +1656,7 @@ public class AppTransition implements Dump {
                     "applyAnimation: anim=%s nextAppTransition=ANIM_CUSTOM transit=%s "
                             + "isEntrance=%b Callers=%s",
                     a, appTransitionToString(transit), enter, Debug.getCallers(3));
+            setAppTransitionFinishedCallbackIfNeeded(a);
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE) {
             a = loadAnimationRes(mNextAppTransitionPackage, mNextAppTransitionInPlace);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
@@ -1836,7 +1821,7 @@ public class AppTransition implements Dump {
     }
 
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
-            IRemoteCallback startedCallback) {
+            IRemoteCallback startedCallback, IRemoteCallback endedCallback) {
         if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
@@ -1845,6 +1830,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionExit = exitAnim;
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
+            mAnimationFinishedCallback = endedCallback;
         }
     }
 
@@ -2330,6 +2316,25 @@ public class AppTransition implements Dump {
         try {
             ((IRemoteCallback) callback).sendResult(null);
         } catch (RemoteException e) {
+        }
+    }
+
+    private void setAppTransitionFinishedCallbackIfNeeded(Animation anim) {
+        final IRemoteCallback callback = mAnimationFinishedCallback;
+        if (callback != null && anim != null) {
+            anim.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) { }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mHandler.sendMessage(PooledLambda.obtainMessage(
+                            AppTransition::doAnimationCallback, callback));
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) { }
+            });
         }
     }
 

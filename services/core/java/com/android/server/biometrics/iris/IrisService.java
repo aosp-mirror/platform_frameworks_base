@@ -49,9 +49,9 @@ public class IrisService extends BiometricServiceBase {
      */
     private final class IrisServiceWrapper extends IIrisService.Stub {
         @Override // Binder call
-        public void initConfiguredStrength(int strength) {
+        public void initializeConfiguration(int sensorId) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            initConfiguredStrengthInternal(strength);
+            initializeConfigurationInternal(sensorId);
         }
     }
 

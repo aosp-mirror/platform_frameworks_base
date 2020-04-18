@@ -292,6 +292,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
+import android.window.WindowContainerToken;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -432,6 +433,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final boolean stateNotNeeded; // As per ActivityInfo.flags
     @VisibleForTesting
     int mHandoverLaunchDisplayId = INVALID_DISPLAY; // Handover launch display id to next activity.
+    @VisibleForTesting
+    TaskDisplayArea mHandoverTaskDisplayArea; // Handover launch task display area.
     private final boolean componentSpecified;  // did caller specify an explicit component?
     final boolean rootVoiceInteraction;  // was this the root activity of a voice interaction?
 
@@ -1657,7 +1660,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (usageReport != null) {
                 appTimeTracker = new AppTimeTracker(usageReport);
             }
-            // Gets launch display id from options. It returns INVALID_DISPLAY if not set.
+            // Gets launch task display area and display id from options. Returns
+            // null/INVALID_DISPLAY if not set.
+            final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
+            mHandoverTaskDisplayArea = daToken != null
+                    ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
         }
     }
@@ -3762,7 +3769,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pendingOptions.getPackageName(),
                         pendingOptions.getCustomEnterResId(),
                         pendingOptions.getCustomExitResId(),
-                        pendingOptions.getOnAnimationStartListener());
+                        pendingOptions.getAnimationStartedListener(),
+                        pendingOptions.getAnimationFinishedListener());
                 break;
             case ANIM_CLIP_REVEAL:
                 displayContent.mAppTransition.overridePendingAppTransitionClipReveal(
@@ -3792,7 +3800,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 final HardwareBuffer buffer = pendingOptions.getThumbnail();
                 displayContent.mAppTransition.overridePendingAppTransitionThumb(buffer,
                         pendingOptions.getStartX(), pendingOptions.getStartY(),
-                        pendingOptions.getOnAnimationStartListener(),
+                        pendingOptions.getAnimationStartedListener(),
                         scaleUp);
                 if (intent.getSourceBounds() == null && buffer != null) {
                     intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
@@ -3808,19 +3816,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pendingOptions.getSpecsFuture();
                 if (specsFuture != null) {
                     displayContent.mAppTransition.overridePendingAppTransitionMultiThumbFuture(
-                            specsFuture, pendingOptions.getOnAnimationStartListener(),
+                            specsFuture, pendingOptions.getAnimationStartedListener(),
                             animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP);
                 } else if (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_DOWN
                         && specs != null) {
                     displayContent.mAppTransition.overridePendingAppTransitionMultiThumb(
-                            specs, pendingOptions.getOnAnimationStartListener(),
+                            specs, pendingOptions.getAnimationStartedListener(),
                             pendingOptions.getAnimationFinishedListener(), false);
                 } else {
                     displayContent.mAppTransition.overridePendingAppTransitionAspectScaledThumb(
                             pendingOptions.getThumbnail(),
                             pendingOptions.getStartX(), pendingOptions.getStartY(),
                             pendingOptions.getWidth(), pendingOptions.getHeight(),
-                            pendingOptions.getOnAnimationStartListener(),
+                            pendingOptions.getAnimationStartedListener(),
                             (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP));
                     if (intent.getSourceBounds() == null) {
                         intent.setSourceBounds(new Rect(pendingOptions.getStartX(),

@@ -263,14 +263,14 @@ public class Tuner implements AutoCloseable  {
     }
 
     private void setFrontendInfoList() {
-        List<Integer> ids = nativeGetFrontendIds();
+        List<Integer> ids = getFrontendIds();
         if (ids == null) {
             return;
         }
         TunerFrontendInfo[] infos = new TunerFrontendInfo[ids.size()];
         for (int i = 0; i < ids.size(); i++) {
             int id = ids.get(i);
-            FrontendInfo frontendInfo = nativeGetFrontendInfo(id);
+            FrontendInfo frontendInfo = getFrontendInfoById(id);
             if (frontendInfo == null) {
                 continue;
             }
@@ -279,6 +279,11 @@ public class Tuner implements AutoCloseable  {
             infos[i] = tunerFrontendInfo;
         }
         mTunerResourceManager.setFrontendInfoList(infos);
+    }
+
+    /** @hide */
+    public List<Integer> getFrontendIds() {
+        return nativeGetFrontendIds();
     }
 
     private void setLnbIds() {
@@ -345,14 +350,17 @@ public class Tuner implements AutoCloseable  {
     @Override
     public void close() {
         if (mFrontendHandle != null) {
-            mTunerResourceManager.releaseFrontend(mFrontendHandle);
+            nativeCloseFrontendByHandle(mFrontendHandle);
+            mTunerResourceManager.releaseFrontend(mFrontendHandle, mClientId);
             mFrontendHandle = null;
+            mFrontend = null;
         }
         if (mLnb != null) {
-            mTunerResourceManager.releaseLnb(mLnbHandle);
+            mTunerResourceManager.releaseLnb(mLnbHandle, mClientId);
             mLnb = null;
+            mLnbHandle = null;
         }
-        nativeClose();
+        TunerUtils.throwExceptionForResult(nativeClose(), "failed to close tuner");
     }
 
     /**
@@ -374,6 +382,8 @@ public class Tuner implements AutoCloseable  {
      * Native method to open frontend of the given ID.
      */
     private native Frontend nativeOpenFrontendByHandle(int handle);
+    @Result
+    private native int nativeCloseFrontendByHandle(int handle);
     private native int nativeTune(int type, FrontendSettings settings);
     private native int nativeStopTune();
     private native int nativeScan(int settingsType, FrontendSettings settings, int scanType);
@@ -522,6 +532,7 @@ public class Tuner implements AutoCloseable  {
     public int tune(@NonNull FrontendSettings settings) {
         mFrontendType = settings.getType();
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND);
+
         mFrontendInfo = null;
         return nativeTune(settings.getType(), settings);
     }
@@ -706,9 +717,14 @@ public class Tuner implements AutoCloseable  {
             throw new IllegalStateException("frontend is not initialized");
         }
         if (mFrontendInfo == null) {
-            mFrontendInfo = nativeGetFrontendInfo(mFrontend.mId);
+            mFrontendInfo = getFrontendInfoById(mFrontend.mId);
         }
         return mFrontendInfo;
+    }
+
+    /** @hide */
+    public FrontendInfo getFrontendInfoById(int id) {
+        return nativeGetFrontendInfo(id);
     }
 
     /**

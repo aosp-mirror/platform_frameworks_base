@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -32,6 +33,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.collection.GroupEntry;
+import com.android.systemui.statusbar.notification.collection.GroupEntryHelper;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotifViewBarn;
@@ -50,6 +53,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SmallTest
@@ -57,6 +61,8 @@ import java.util.List;
 @TestableLooper.RunWithLooper
 public class PreparationCoordinatorTest extends SysuiTestCase {
     private static final String TEST_MESSAGE = "TEST_MESSAGE";
+    private static final String TEST_GROUP_KEY = "TEST_GROUP_KEY";
+    private static final int TEST_CHILD_BIND_CUTOFF = 9;
 
     private PreparationCoordinator mCoordinator;
     private NotifCollectionListener mCollectionListener;
@@ -88,7 +94,8 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mNotifInflater,
                 mErrorManager,
                 mock(NotifViewBarn.class),
-                mService);
+                mService,
+                TEST_CHILD_BIND_CUTOFF);
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
         mCoordinator.attach(mNotifPipeline);
@@ -174,5 +181,45 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
         // THEN it isn't filtered from shade list
         assertFalse(mUninflatedFilter.shouldFilterOut(mEntry, 0));
+    }
+
+    @Test
+    public void testCutoffGroupChildrenNotInflated() {
+        // WHEN there is a new notification group is posted
+        int id = 0;
+        NotificationEntry summary = new NotificationEntryBuilder()
+                .setOverrideGroupKey(TEST_GROUP_KEY)
+                .setId(id++)
+                .build();
+        List<NotificationEntry> children = new ArrayList<>();
+        for (int i = 0; i < TEST_CHILD_BIND_CUTOFF + 1; i++) {
+            NotificationEntry child = new NotificationEntryBuilder()
+                    .setOverrideGroupKey(TEST_GROUP_KEY)
+                    .setId(id++)
+                    .build();
+            children.add(child);
+        }
+        GroupEntry groupEntry = GroupEntryHelper.createGroup(TEST_GROUP_KEY, summary, children);
+
+        mCollectionListener.onEntryInit(summary);
+        for (NotificationEntry entry : children) {
+            mCollectionListener.onEntryInit(entry);
+        }
+
+        mCollectionListener.onEntryAdded(summary);
+        for (NotificationEntry entry : children) {
+            mCollectionListener.onEntryAdded(entry);
+        }
+
+        mBeforeFilterListener.onBeforeFinalizeFilter(List.of(groupEntry));
+
+        // THEN we inflate up to the cut-off only
+        for (int i = 0; i < children.size(); i++) {
+            if (i < TEST_CHILD_BIND_CUTOFF) {
+                verify(mNotifInflater).inflateViews(eq(children.get(i)), any());
+            } else {
+                verify(mNotifInflater, never()).inflateViews(eq(children.get(i)), any());
+            }
+        }
     }
 }

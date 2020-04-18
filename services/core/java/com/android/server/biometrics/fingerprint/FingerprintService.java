@@ -168,6 +168,11 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override
+        public int getSensorId() {
+            return FingerprintService.this.getSensorId();
+        }
+
+        @Override
         public int handleFailedAttempt() {
             final int currentUser = ActivityManager.getCurrentUser();
             mFailedAttempts.put(currentUser, mFailedAttempts.get(currentUser, 0) + 1);
@@ -455,9 +460,9 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void initConfiguredStrength(int strength) {
+        public void initializeConfiguration(int sensorId) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            initConfiguredStrengthInternal(strength);
+            initializeConfigurationInternal(sensorId);
         }
     }
 

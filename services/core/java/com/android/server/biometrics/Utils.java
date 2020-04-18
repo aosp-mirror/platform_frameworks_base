@@ -18,6 +18,16 @@ package com.android.server.biometrics;
 
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import static com.android.server.biometrics.PreAuthInfo.AUTHENTICATOR_OK;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_DISABLED_BY_DEVICE_POLICY;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_HARDWARE_NOT_DETECTED;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_INSUFFICIENT_STRENGTH;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENABLED_FOR_APPS;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENROLLED;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NO_HARDWARE;
+import static com.android.server.biometrics.PreAuthInfo.CREDENTIAL_NOT_ENROLLED;
+
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
@@ -254,6 +264,34 @@ public class Utils {
 
             default:
                 throw new IllegalArgumentException("Unsupported dismissal reason: " + reason);
+        }
+    }
+
+
+    public static int authenticatorStatusToBiometricConstant(
+            @PreAuthInfo.AuthenticatorStatus int status) {
+        switch (status) {
+            case BIOMETRIC_NO_HARDWARE:
+            case BIOMETRIC_INSUFFICIENT_STRENGTH:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
+
+            case AUTHENTICATOR_OK:
+                return BiometricConstants.BIOMETRIC_SUCCESS;
+
+            case BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE:
+                return BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
+
+            case BIOMETRIC_NOT_ENROLLED:
+                return BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS;
+
+            case CREDENTIAL_NOT_ENROLLED:
+                return BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL;
+
+            case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
+            case BIOMETRIC_HARDWARE_NOT_DETECTED:
+            case BIOMETRIC_NOT_ENABLED_FOR_APPS:
+            default:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
         }
     }
 }

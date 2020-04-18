@@ -544,6 +544,7 @@ public class AppIntegrityManagerServiceImplTest {
                                 TEST_FRAMEWORK_PACKAGE, PackageManager.GET_SIGNING_CERTIFICATES);
         doReturn(packageInfo).when(mSpyPackageManager).getPackageInfo(eq(INSTALLER), anyInt());
         doReturn(1).when(mSpyPackageManager).getPackageUid(eq(INSTALLER), anyInt());
+        doReturn(new String[]{INSTALLER}).when(mSpyPackageManager).getPackagesForUid(anyInt());
         return makeVerificationIntent(INSTALLER);
     }
 

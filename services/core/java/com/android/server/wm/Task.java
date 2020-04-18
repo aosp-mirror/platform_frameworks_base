@@ -433,7 +433,6 @@ class Task extends WindowContainer<WindowContainer> {
     static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
     private int mForceHiddenFlags = 0;
 
-
     SurfaceControl.Transaction mMainWindowSizeChangeTransaction;
 
     private final FindRootHelper mFindRootHelper = new FindRootHelper();
@@ -3388,7 +3387,9 @@ class Task extends WindowContainer<WindowContainer> {
         final Intent baseIntent = getBaseIntent();
         // Make a copy of base intent because this is like a snapshot info.
         // Besides, {@link RecentTasks#getRecentTasksImpl} may modify it.
+        final int baseIntentFlags = baseIntent == null ? 0 : baseIntent.getFlags();
         info.baseIntent = baseIntent == null ? new Intent() : baseIntent.cloneFilter();
+        info.baseIntent.setFlags(baseIntentFlags);
         info.baseActivity = mReuseActivitiesReport.base != null
                 ? mReuseActivitiesReport.base.intent.getComponent()
                 : null;
@@ -4261,7 +4262,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     void setActivityWindowingMode(int windowingMode) {
         PooledConsumer c = PooledLambda.obtainConsumer(ActivityRecord::setWindowingMode,
-            PooledLambda.__(ActivityRecord.class), windowingMode);
+                PooledLambda.__(ActivityRecord.class), windowingMode);
         forAllActivities(c);
         c.recycle();
     }

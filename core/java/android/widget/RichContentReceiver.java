@@ -75,7 +75,7 @@ public interface RichContentReceiver<T extends View> {
      * @hide
      */
     @IntDef(prefix = {"SOURCE_"}, value = {SOURCE_MENU, SOURCE_INPUT_METHOD, SOURCE_DRAG_AND_DROP,
-            SOURCE_AUTOFILL})
+            SOURCE_AUTOFILL, SOURCE_PROCESS_TEXT})
     @Retention(RetentionPolicy.SOURCE)
     @interface Source {}
 
@@ -103,6 +103,12 @@ public interface RichContentReceiver<T extends View> {
      * https://developer.android.com/guide/topics/text/autofill for more info.
      */
     int SOURCE_AUTOFILL = 3;
+
+    /**
+     * Specifies that the operation was triggered by a result from a
+     * {@link android.content.Intent#ACTION_PROCESS_TEXT PROCESS_TEXT} action in the selection menu.
+     */
+    int SOURCE_PROCESS_TEXT = 4;
 
     /**
      * Flags to configure the insertion behavior.

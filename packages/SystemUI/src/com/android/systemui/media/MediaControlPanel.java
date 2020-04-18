@@ -55,8 +55,6 @@ import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.NotificationMediaManager.MediaListener;
 import com.android.systemui.util.Assert;
 
 import java.util.List;
@@ -67,7 +65,6 @@ import java.util.concurrent.Executor;
  */
 public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
-    private final NotificationMediaManager mMediaManager;
     @Nullable private final LocalMediaManager mLocalMediaManager;
     private final Executor mForegroundExecutor;
     private final Executor mBackgroundExecutor;
@@ -103,12 +100,15 @@ public class MediaControlPanel {
             clearControls();
             makeInactive();
         }
-    };
-
-    private final MediaListener mMediaListener = new MediaListener() {
         @Override
-        public void onMetadataOrStateChanged(MediaMetadata metadata, int state) {
-            if (state == PlaybackState.STATE_NONE) {
+        public void onPlaybackStateChanged(PlaybackState state) {
+            final int s = state != null ? state.getState() : PlaybackState.STATE_NONE;
+            // When the playback state is NONE or CONNECTING, transition the player to the
+            // resumption state. State CONNECTING needs to be considered for Cast sessions. Ending
+            // a cast session in YT results in the CONNECTING state, which makes sense if you
+            // thinking of the session as waiting to connect to another cast device.
+            if (s == PlaybackState.STATE_NONE || s == PlaybackState.STATE_CONNECTING) {
+                Log.d(TAG, "playback state change will trigger resumption, state=" + state);
                 clearControls();
                 makeInactive();
             }
@@ -161,7 +161,7 @@ public class MediaControlPanel {
      * @param foregroundExecutor foreground executor
      * @param backgroundExecutor background executor, used for processing artwork
      */
-    public MediaControlPanel(Context context, ViewGroup parent, NotificationMediaManager manager,
+    public MediaControlPanel(Context context, ViewGroup parent,
             @Nullable LocalMediaManager routeManager, @LayoutRes int layoutId, int[] actionIds,
             Executor foregroundExecutor, Executor backgroundExecutor) {
         mContext = context;
@@ -173,7 +173,6 @@ public class MediaControlPanel {
         // attach/detach of views instead of inflating them in the constructor, which would allow
         // mStateListener to be unregistered in detach.
         mMediaNotifView.addOnAttachStateChangeListener(mStateListener);
-        mMediaManager = manager;
         mLocalMediaManager = routeManager;
         mActionIds = actionIds;
         mForegroundExecutor = foregroundExecutor;
@@ -453,6 +452,7 @@ public class MediaControlPanel {
      * Put controls into a resumption state
      */
     public void clearControls() {
+        Log.d(TAG, "clearControls to resumption state package=" + getMediaPlayerPackage());
         // Hide all the old buttons
         for (int i = 0; i < mActionIds.length; i++) {
             ImageButton thisBtn = mMediaNotifView.findViewById(mActionIds[i]);
@@ -495,7 +495,6 @@ public class MediaControlPanel {
     private void makeActive() {
         Assert.isMainThread();
         if (!mIsRegistered) {
-            mMediaManager.addCallback(mMediaListener);
             if (mLocalMediaManager != null) {
                 mLocalMediaManager.registerCallback(mDeviceCallback);
                 mLocalMediaManager.startScan();
@@ -511,7 +510,6 @@ public class MediaControlPanel {
                 mLocalMediaManager.stopScan();
                 mLocalMediaManager.unregisterCallback(mDeviceCallback);
             }
-            mMediaManager.removeCallback(mMediaListener);
             mIsRegistered = false;
         }
     }

@@ -458,8 +458,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 useHandler(handler);
                 mAuthenticationCallback = callback;
                 mCryptoObject = crypto;
-                long sessionId = crypto != null ? crypto.getOpId() : 0;
-                mService.authenticate(mToken, sessionId, userId, mServiceReceiver, flags,
+                final long operationId = crypto != null ? crypto.getOpId() : 0;
+                mService.authenticate(mToken, operationId, userId, mServiceReceiver, flags,
                         mContext.getOpPackageName(), surface);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception while authenticating: ", e);
