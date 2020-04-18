@@ -160,8 +160,8 @@ const bool IncrementalService::sEnablePerfLogging =
 
 IncrementalService::IncFsMount::~IncFsMount() {
     if (dataLoaderStub) {
-        dataLoaderStub->requestDestroy();
-        dataLoaderStub->waitForDestroy();
+        dataLoaderStub->cleanupResources();
+        dataLoaderStub = {};
     }
     LOG(INFO) << "Unmounting and cleaning up mount " << mountId << " with root '" << root << '\'';
     for (auto&& [target, _] : bindPoints) {
@@ -999,7 +999,8 @@ bool IncrementalService::startLoading(StorageId storage) const {
             return false;
         }
     }
-    return dataLoaderStub->requestStart();
+    dataLoaderStub->requestStart();
+    return true;
 }
 
 void IncrementalService::mountExistingImages() {
@@ -1466,11 +1467,17 @@ IncrementalService::DataLoaderStub::DataLoaderStub(IncrementalService& service, 
         mParams(std::move(params)),
         mControl(std::move(control)),
         mListener(externalListener ? *externalListener : DataLoaderStatusListener()) {
-    //
 }
 
-IncrementalService::DataLoaderStub::~DataLoaderStub() {
-    waitForDestroy();
+IncrementalService::DataLoaderStub::~DataLoaderStub() = default;
+
+void IncrementalService::DataLoaderStub::cleanupResources() {
+    requestDestroy();
+    mParams = {};
+    mControl = {};
+    waitForStatus(IDataLoaderStatusListener::DATA_LOADER_DESTROYED, std::chrono::seconds(60));
+    mListener = {};
+    mId = kInvalidStorageId;
 }
 
 bool IncrementalService::DataLoaderStub::requestCreate() {
@@ -1483,10 +1490,6 @@ bool IncrementalService::DataLoaderStub::requestStart() {
 
 bool IncrementalService::DataLoaderStub::requestDestroy() {
     return setTargetStatus(IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
-}
-
-bool IncrementalService::DataLoaderStub::waitForDestroy(Clock::duration duration) {
-    return waitForStatus(IDataLoaderStatusListener::DATA_LOADER_DESTROYED, duration);
 }
 
 bool IncrementalService::DataLoaderStub::setTargetStatus(int status) {
@@ -1541,6 +1544,10 @@ bool IncrementalService::DataLoaderStub::destroy() {
 }
 
 bool IncrementalService::DataLoaderStub::fsmStep() {
+    if (!isValid()) {
+        return false;
+    }
+
     int currentStatus;
     int targetStatus;
     {
@@ -1580,6 +1587,15 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
 }
 
 binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mountId, int newStatus) {
+    if (!isValid()) {
+        return binder::Status::
+                fromServiceSpecificError(-EINVAL, "onStatusChange came to invalid DataLoaderStub");
+    }
+    if (mId != mountId) {
+        LOG(ERROR) << "Mount ID mismatch: expected " << mId << ", but got: " << mountId;
+        return binder::Status::fromServiceSpecificError(-EPERM, "Mount ID mismatch.");
+    }
+
     {
         std::unique_lock lock(mStatusMutex);
         if (mCurrentStatus == newStatus) {
