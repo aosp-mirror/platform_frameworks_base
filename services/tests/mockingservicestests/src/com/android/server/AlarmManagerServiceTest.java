@@ -46,7 +46,6 @@ import static com.android.server.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
 import static com.android.server.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
 import static com.android.server.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
 import static com.android.server.AlarmManagerService.IS_WAKEUP_MASK;
-import static com.android.server.AlarmManagerService.MILLIS_IN_DAY;
 import static com.android.server.AlarmManagerService.TIME_CHANGED_MASK;
 import static com.android.server.AlarmManagerService.WORKING_INDEX;
 
@@ -107,9 +106,9 @@ import java.util.ArrayList;
 public class AlarmManagerServiceTest {
     private static final String TAG = AlarmManagerServiceTest.class.getSimpleName();
     private static final String TEST_CALLING_PACKAGE = "com.android.framework.test-package";
-    private static final int SYSTEM_UI_UID = 123456789;
-    private static final int TEST_CALLING_UID = 12345;
-    private static final long RESTRICTED_WINDOW_MS = MILLIS_IN_DAY;
+    private static final int SYSTEM_UI_UID = 12345;
+    private static final int TEST_CALLING_UID = 67890;
+    private static final int TEST_CALLING_USER = UserHandle.getUserId(TEST_CALLING_UID);
 
     private long mAppStandbyWindow;
     private AlarmManagerService mService;
@@ -257,6 +256,7 @@ public class AlarmManagerServiceTest {
                 .mockStatic(LocalServices.class)
                 .spyStatic(Looper.class)
                 .spyStatic(Settings.Global.class)
+                .spyStatic(UserHandle.class)
                 .strictness(Strictness.WARN)
                 .startMocking();
         doReturn(mIActivityManager).when(ActivityManager::getService);
@@ -268,9 +268,9 @@ public class AlarmManagerServiceTest {
         doCallRealMethod().when((MockedVoidMethod) () ->
                 LocalServices.addService(eq(AlarmManagerInternal.class), any()));
         doCallRealMethod().when(() -> LocalServices.getService(AlarmManagerInternal.class));
+        doReturn(false).when(() -> UserHandle.isCore(TEST_CALLING_UID));
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
-                eq(UserHandle.getUserId(TEST_CALLING_UID)), anyLong()))
-                .thenReturn(STANDBY_BUCKET_ACTIVE);
+                eq(TEST_CALLING_USER), anyLong())).thenReturn(STANDBY_BUCKET_ACTIVE);
         doReturn(Looper.getMainLooper()).when(Looper::myLooper);
 
         when(mMockContext.getContentResolver()).thenReturn(mMockResolver);
@@ -456,6 +456,19 @@ public class AlarmManagerServiceTest {
         assertEquals(10, mService.mConstants.MIN_FUTURITY);
         final long triggerTime = mNowElapsedTest + 1;
         final long expectedTriggerTime = mNowElapsedTest + mService.mConstants.MIN_FUTURITY;
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, triggerTime, getNewMockPendingIntent());
+        assertEquals(expectedTriggerTime, mTestTimer.getElapsed());
+    }
+
+    @Test
+    public void testMinFuturityCoreUid() {
+        doReturn("min_futurity=10").when(() ->
+                Settings.Global.getString(mMockResolver, Settings.Global.ALARM_MANAGER_CONSTANTS));
+        mService.mConstants.onChange(false, null);
+        assertEquals(10, mService.mConstants.MIN_FUTURITY);
+        final long triggerTime = mNowElapsedTest + 1;
+        doReturn(true).when(() -> UserHandle.isCore(TEST_CALLING_UID));
+        final long expectedTriggerTime = triggerTime;
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, triggerTime, getNewMockPendingIntent());
         assertEquals(expectedTriggerTime, mTestTimer.getElapsed());
     }
