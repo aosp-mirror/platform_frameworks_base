@@ -180,6 +180,8 @@ public class Filter implements AutoCloseable {
      */
     public static final int STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
 
+    private static final String TAG = "Filter";
+
     private long mNativeContext;
     private FilterCallback mCallback;
     private Executor mExecutor;
@@ -188,6 +190,8 @@ public class Filter implements AutoCloseable {
     private int mSubtype;
     private Filter mSource;
     private boolean mStarted;
+    private boolean mIsClosed = false;
+    private final Object mLock = new Object();
 
     private native int nativeConfigureFilter(
             int type, int subType, FilterConfiguration settings);
@@ -244,21 +248,27 @@ public class Filter implements AutoCloseable {
      */
     @Result
     public int configure(@NonNull FilterConfiguration config) {
-        Settings s = config.getSettings();
-        int subType = (s == null) ? mSubtype : s.getType();
-        if (mMainType != config.getType() || mSubtype != subType) {
-            throw new IllegalArgumentException("Invalid filter config. filter main type="
-                    + mMainType + ", filter subtype=" + mSubtype + ". config main type="
-                    + config.getType() + ", config subtype=" + subType);
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            Settings s = config.getSettings();
+            int subType = (s == null) ? mSubtype : s.getType();
+            if (mMainType != config.getType() || mSubtype != subType) {
+                throw new IllegalArgumentException("Invalid filter config. filter main type="
+                        + mMainType + ", filter subtype=" + mSubtype + ". config main type="
+                        + config.getType() + ", config subtype=" + subType);
+            }
+            return nativeConfigureFilter(config.getType(), subType, config);
         }
-        return nativeConfigureFilter(config.getType(), subType, config);
     }
 
     /**
      * Gets the filter Id.
      */
     public int getId() {
-        return nativeGetId();
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            return nativeGetId();
+        }
     }
 
     /**
@@ -276,14 +286,17 @@ public class Filter implements AutoCloseable {
      */
     @Result
     public int setDataSource(@Nullable Filter source) {
-        if (mSource != null) {
-            throw new IllegalStateException("Data source is existing");
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            if (mSource != null) {
+                throw new IllegalStateException("Data source is existing");
+            }
+            int res = nativeSetDataSource(source);
+            if (res == Tuner.RESULT_SUCCESS) {
+                mSource = source;
+            }
+            return res;
         }
-        int res = nativeSetDataSource(source);
-        if (res == Tuner.RESULT_SUCCESS) {
-            mSource = source;
-        }
-        return res;
     }
 
     /**
@@ -295,7 +308,10 @@ public class Filter implements AutoCloseable {
      */
     @Result
     public int start() {
-        return nativeStartFilter();
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            return nativeStartFilter();
+        }
     }
 
 
@@ -308,7 +324,10 @@ public class Filter implements AutoCloseable {
      */
     @Result
     public int stop() {
-        return nativeStopFilter();
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            return nativeStopFilter();
+        }
     }
 
     /**
@@ -321,7 +340,10 @@ public class Filter implements AutoCloseable {
      */
     @Result
     public int flush() {
-        return nativeFlushFilter();
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            return nativeFlushFilter();
+        }
     }
 
     /**
@@ -333,8 +355,11 @@ public class Filter implements AutoCloseable {
      * @return the number of bytes read.
      */
     public int read(@NonNull byte[] buffer, @BytesLong long offset, @BytesLong long size) {
-        size = Math.min(size, buffer.length - offset);
-        return nativeRead(buffer, offset, size);
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            size = Math.min(size, buffer.length - offset);
+            return nativeRead(buffer, offset, size);
+        }
     }
 
     /**
@@ -342,9 +367,16 @@ public class Filter implements AutoCloseable {
      */
     @Override
     public void close() {
-        int res = nativeClose();
-        if (res != Tuner.RESULT_SUCCESS) {
-            TunerUtils.throwExceptionForResult(res, "Failed to close filter.");
+        synchronized (mLock) {
+            if (mIsClosed) {
+                return;
+            }
+            int res = nativeClose();
+            if (res != Tuner.RESULT_SUCCESS) {
+                TunerUtils.throwExceptionForResult(res, "Failed to close filter.");
+            } else {
+                mIsClosed = true;
+            }
         }
     }
 }
