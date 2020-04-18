@@ -71,6 +71,11 @@ public class NavigationBarViewFactory {
         mContext = context;
     }
 
+    /** Gets the top window. */
+    public ViewGroup getTopWindow() {
+        return getWindowCached(Type.TOP);
+    }
+
     /** Gets the bottom window. */
     public ViewGroup getBottomWindow() {
         return getWindowCached(Type.BOTTOM);
