@@ -154,7 +154,14 @@ public final class TelephonyDisplayInfo implements Parcelable {
         return Objects.hash(mNetworkType, mOverrideNetworkType);
     }
 
-    private static String overrideNetworkTypeToString(@OverrideNetworkType int type) {
+    /**
+     * Convert override network type to string.
+     *
+     * @param type Override network type
+     * @return Override network type in string format
+     * @hide
+     */
+    public static String overrideNetworkTypeToString(@OverrideNetworkType int type) {
         switch (type) {
             case OVERRIDE_NETWORK_TYPE_NONE: return "NONE";
             case OVERRIDE_NETWORK_TYPE_LTE_CA: return "LTE_CA";
@@ -168,6 +175,6 @@ public final class TelephonyDisplayInfo implements Parcelable {
     @Override
     public String toString() {
         return "TelephonyDisplayInfo {network=" + TelephonyManager.getNetworkTypeName(mNetworkType)
-                + ", override=" + overrideNetworkTypeToString(mOverrideNetworkType);
+                + ", override=" + overrideNetworkTypeToString(mOverrideNetworkType) + "}";
     }
 }
