@@ -259,11 +259,9 @@ class ActivityStack extends Task {
     private Rect mTmpRect = new Rect();
     private Rect mTmpRect2 = new Rect();
 
-    /** For Pinned stack controlling. */
-    private Rect mTmpToBounds = new Rect();
-
     /** Detach this stack from its display when animation completes. */
     // TODO: maybe tie this to WindowContainer#removeChild some how...
+    // TODO: This is no longer set. Okay to remove or was the set removed by accident?
     private boolean mDeferRemoval;
 
     // If this is true, we are in the bounds animating mode. The task will be down or upscaled to
@@ -281,7 +279,6 @@ class ActivityStack extends Task {
     /**
      * For {@link #prepareSurfaces}.
      */
-    private final Rect mTmpDimBoundsRect = new Rect();
     private final Point mLastSurfaceSize = new Point();
 
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
@@ -289,9 +286,6 @@ class ActivityStack extends Task {
 
     /** Stores the override windowing-mode from before a transient mode change (eg. split) */
     private int mRestoreOverrideWindowingMode = WINDOWING_MODE_UNDEFINED;
-
-    /** List for processing through a set of activities */
-    private final ArrayList<ActivityRecord> mTmpActivities = new ArrayList<>();
 
     private boolean mTopActivityOccludesKeyguard;
     private ActivityRecord mTopDismissingKeyguardActivity;
@@ -605,9 +599,6 @@ class ActivityStack extends Task {
         final int prevWindowingMode = getWindowingMode();
         final boolean prevIsAlwaysOnTop = isAlwaysOnTop();
         final int prevRotation = getWindowConfiguration().getRotation();
-        final int prevDensity = getConfiguration().densityDpi;
-        final int prevScreenW = getConfiguration().screenWidthDp;
-        final int prevScreenH = getConfiguration().screenHeightDp;
         final Rect newBounds = mTmpRect;
         // Initialize the new bounds by previous bounds as the input and output for calculating
         // override bounds in pinned (pip) or split-screen mode.
@@ -920,70 +911,6 @@ class ActivityStack extends Task {
         return false;
     }
 
-    ActivityRecord topRunningActivity() {
-        return topRunningActivity(false /* focusableOnly */);
-    }
-
-    ActivityRecord topRunningActivity(boolean focusableOnly) {
-        // Split into 2 to avoid object creation due to variable capture.
-        if (focusableOnly) {
-            return getActivity((r) -> r.canBeTopRunning() && r.isFocusable());
-        } else {
-            return getActivity(ActivityRecord::canBeTopRunning);
-        }
-    }
-
-    private ActivityRecord topRunningNonOverlayTaskActivity() {
-        return getActivity((r) -> (r.canBeTopRunning() && !r.isTaskOverlay()));
-    }
-
-    ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
-        final PooledPredicate p = PooledLambda.obtainPredicate(ActivityStack::isTopRunningNonDelayed
-                , PooledLambda.__(ActivityRecord.class), notTop);
-        final ActivityRecord r = getActivity(p);
-        p.recycle();
-        return r;
-    }
-
-    private static boolean isTopRunningNonDelayed(ActivityRecord r, ActivityRecord notTop) {
-        return !r.delayedResume && r != notTop && r.canBeTopRunning();
-    }
-
-    /**
-     * This is a simplified version of topRunningActivity that provides a number of
-     * optional skip-over modes.  It is intended for use with the ActivityController hook only.
-     *
-     * @param token If non-null, any history records matching this token will be skipped.
-     * @param taskId If non-zero, we'll attempt to skip over records with the same task ID.
-     *
-     * @return Returns the HistoryRecord of the next activity on the stack.
-     */
-    ActivityRecord topRunningActivity(IBinder token, int taskId) {
-        final PooledPredicate p = PooledLambda.obtainPredicate(ActivityStack::isTopRunning,
-                PooledLambda.__(ActivityRecord.class), taskId, token);
-        final ActivityRecord r = getActivity(p);
-        p.recycle();
-        return r;
-    }
-
-    private static boolean isTopRunning(ActivityRecord r, int taskId, IBinder notTop) {
-        return r.getTask().mTaskId != taskId && r.appToken != notTop && r.canBeTopRunning();
-    }
-
-    ActivityRecord isInStackLocked(ActivityRecord r) {
-        if (r == null) {
-            return null;
-        }
-        final Task task = r.getRootTask();
-        if (task != null && r.isDescendantOf(task)) {
-            if (task != this) Slog.w(TAG, "Illegal state! task does not point to stack it is in. "
-                    + "stack=" + this + " task=" + task + " r=" + r
-                    + " callers=" + Debug.getCallers(15, "\n"));
-            return r;
-        }
-        return null;
-    }
-
     /** @return true if the stack can only contain one task */
     boolean isSingleTaskInstance() {
         final DisplayContent display = getDisplay();
@@ -1104,12 +1031,6 @@ class ActivityStack extends Task {
 
     boolean isFocusableAndVisible() {
         return isTopActivityFocusable() && shouldBeVisible(null /* starting */);
-    }
-
-    @Override
-    public boolean isAttached() {
-        final TaskDisplayArea taskDisplayArea = getDisplayArea();
-        return taskDisplayArea != null && !taskDisplayArea.isRemoved();
     }
 
     // TODO: Should each user have there own stacks?
@@ -1460,140 +1381,6 @@ class ActivityStack extends Task {
     boolean isFocusedStackOnDisplay() {
         final DisplayContent display = getDisplay();
         return display != null && this == display.getFocusedStack();
-    }
-
-    /**
-     * Returns true if the stack should be visible.
-     *
-     * @param starting The currently starting activity or null if there is none.
-     */
-    @Override
-    boolean shouldBeVisible(ActivityRecord starting) {
-        return getVisibility(starting) != STACK_VISIBILITY_INVISIBLE;
-    }
-
-    /**
-     * Returns true if the stack should be visible.
-     *
-     * @param starting The currently starting activity or null if there is none.
-     */
-    @StackVisibility
-    int getVisibility(ActivityRecord starting) {
-        if (!isAttached() || isForceHidden()) {
-            return STACK_VISIBILITY_INVISIBLE;
-        }
-
-        final TaskDisplayArea taskDisplayArea = getDisplayArea();
-        boolean gotSplitScreenStack = false;
-        boolean gotOpaqueSplitScreenPrimary = false;
-        boolean gotOpaqueSplitScreenSecondary = false;
-        boolean gotTranslucentFullscreen = false;
-        boolean gotTranslucentSplitScreenPrimary = false;
-        boolean gotTranslucentSplitScreenSecondary = false;
-        boolean shouldBeVisible = true;
-        final int windowingMode = getWindowingMode();
-        final boolean isAssistantType = isActivityTypeAssistant();
-        for (int i = taskDisplayArea.getStackCount() - 1; i >= 0; --i) {
-            final ActivityStack other = taskDisplayArea.getStackAt(i);
-            final boolean hasRunningActivities = other.topRunningActivity() != null;
-            if (other == this) {
-                // Should be visible if there is no other stack occluding it, unless it doesn't
-                // have any running activities, not starting one and not home stack.
-                shouldBeVisible = hasRunningActivities || isInStackLocked(starting) != null
-                        || isActivityTypeHome();
-                break;
-            }
-
-            if (!hasRunningActivities) {
-                continue;
-            }
-
-            final int otherWindowingMode = other.getWindowingMode();
-
-            if (otherWindowingMode == WINDOWING_MODE_FULLSCREEN) {
-                // In this case the home stack isn't resizeable even though we are in split-screen
-                // mode. We still want the primary splitscreen stack to be visible as there will be
-                // a slight hint of it in the status bar area above the non-resizeable home
-                // activity. In addition, if the fullscreen assistant is over primary splitscreen
-                // stack, the stack should still be visible in the background as long as the recents
-                // animation is running.
-                final int activityType = other.getActivityType();
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                    if (activityType == ACTIVITY_TYPE_HOME
-                            || (activityType == ACTIVITY_TYPE_ASSISTANT
-                                && mWmService.getRecentsAnimationController() != null)) {
-                        break;
-                    }
-                }
-                if (other.isTranslucent(starting)) {
-                    // Can be visible behind a translucent fullscreen stack.
-                    gotTranslucentFullscreen = true;
-                    continue;
-                }
-                return STACK_VISIBILITY_INVISIBLE;
-            } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                    && !gotOpaqueSplitScreenPrimary) {
-                gotSplitScreenStack = true;
-                gotTranslucentSplitScreenPrimary = other.isTranslucent(starting);
-                gotOpaqueSplitScreenPrimary = !gotTranslucentSplitScreenPrimary;
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                        && gotOpaqueSplitScreenPrimary) {
-                    // Can not be visible behind another opaque stack in split-screen-primary mode.
-                    return STACK_VISIBILITY_INVISIBLE;
-                }
-            } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                    && !gotOpaqueSplitScreenSecondary) {
-                gotSplitScreenStack = true;
-                gotTranslucentSplitScreenSecondary = other.isTranslucent(starting);
-                gotOpaqueSplitScreenSecondary = !gotTranslucentSplitScreenSecondary;
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                        && gotOpaqueSplitScreenSecondary) {
-                    // Can not be visible behind another opaque stack in split-screen-secondary mode.
-                    return STACK_VISIBILITY_INVISIBLE;
-                }
-            }
-            if (gotOpaqueSplitScreenPrimary && gotOpaqueSplitScreenSecondary) {
-                // Can not be visible if we are in split-screen windowing mode and both halves of
-                // the screen are opaque.
-                return STACK_VISIBILITY_INVISIBLE;
-            }
-            if (isAssistantType && gotSplitScreenStack) {
-                // Assistant stack can't be visible behind split-screen. In addition to this not
-                // making sense, it also works around an issue here we boost the z-order of the
-                // assistant window surfaces in window manager whenever it is visible.
-                return STACK_VISIBILITY_INVISIBLE;
-            }
-        }
-
-        if (!shouldBeVisible) {
-            return STACK_VISIBILITY_INVISIBLE;
-        }
-
-        // Handle cases when there can be a translucent split-screen stack on top.
-        switch (windowingMode) {
-            case WINDOWING_MODE_FULLSCREEN:
-                if (gotTranslucentSplitScreenPrimary || gotTranslucentSplitScreenSecondary) {
-                    // At least one of the split-screen stacks that covers this one is translucent.
-                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
-                }
-                break;
-            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
-                if (gotTranslucentSplitScreenPrimary) {
-                    // Covered by translucent primary split-screen on top.
-                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
-                }
-                break;
-            case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY:
-                if (gotTranslucentSplitScreenSecondary) {
-                    // Covered by translucent secondary split-screen on top.
-                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
-                }
-                break;
-        }
-
-        // Lastly - check if there is a translucent fullscreen stack on top.
-        return gotTranslucentFullscreen ? STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT
-                : STACK_VISIBILITY_VISIBLE;
     }
 
     /**

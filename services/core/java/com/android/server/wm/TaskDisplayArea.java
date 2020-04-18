@@ -184,6 +184,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         return count > 0 ? getChildAt(count - 1) : null;
     }
 
+    // TODO: Figure-out a way to remove since it might be a source of confusion.
     int getIndexOf(ActivityStack stack) {
         return mChildren.indexOf(stack);
     }
@@ -690,7 +691,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         //       the position internally, also update the logic here
         final ActivityStack prevFocusedStack = updateLastFocusedStackReason != null
                 ? getFocusedStack() : null;
-        final boolean wasContained = getIndexOf(stack) >= 0;
+        final boolean wasContained = mChildren.contains(stack);
         if (mDisplayContent.mSingleTaskInstance && getStackCount() == 1 && !wasContained) {
             throw new IllegalStateException(
                     "positionStackAt: Can only have one task on display=" + this);
