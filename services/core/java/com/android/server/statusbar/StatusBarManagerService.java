@@ -27,7 +27,7 @@ import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.net.Uri;
@@ -673,7 +673,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void showAuthenticationDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
+    public void showAuthenticationDialog(Bundle bundle, IBiometricSysuiReceiver receiver,
             @BiometricAuthenticator.Modality int biometricModality, boolean requireConfirmation,
             int userId, String opPackageName, long operationId) {
         enforceBiometricDialog();

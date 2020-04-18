@@ -17,7 +17,7 @@
 package com.android.server.biometrics.face;
 
 import android.hardware.biometrics.IBiometricAuthenticator;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.face.IFaceService;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -38,11 +38,11 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
 
     @Override
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
-            long operationId, int userId, IBiometricServiceReceiverInternal wrapperReceiver,
+            long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
             String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
         mFaceService.prepareForAuthentication(requireConfirmation, token, operationId, userId,
-                wrapperReceiver, opPackageName, cookie, callingUid, callingPid, callingUserId);
+                sensorReceiver, opPackageName, cookie, callingUid, callingPid, callingUserId);
     }
 
     @Override
