@@ -13,6 +13,7 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static android.provider.Settings.Secure.NOTIFICATION_HISTORY_ENABLED;
 import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
 import static junit.framework.Assert.assertEquals;
@@ -151,6 +152,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
         Settings.Secure.putInt(mContext.getContentResolver(),
                 NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(), NOTIFICATION_HISTORY_ENABLED, 1);
 
         // Inject dependencies before initializing the layout
         mDependency.injectMockDependency(VisualStabilityManager.class);
@@ -311,7 +313,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setFooterView(view);
         when(view.willBeGone()).thenReturn(true);
 
-        mStackScroller.updateFooterView(true, false);
+        mStackScroller.updateFooterView(true, false, true);
 
         verify(view).setVisible(eq(true), anyBoolean());
         verify(view).setSecondaryVisible(eq(false), anyBoolean());
@@ -323,7 +325,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setFooterView(view);
         when(view.willBeGone()).thenReturn(true);
 
-        mStackScroller.updateFooterView(true, true);
+        mStackScroller.updateFooterView(true, true, true);
 
         verify(view).setVisible(eq(true), anyBoolean());
         verify(view).setSecondaryVisible(eq(true), anyBoolean());
@@ -344,8 +346,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         setBarStateForTest(StatusBarState.SHADE);
         assertEquals(0, mEntryManager.getActiveNotificationsCount());
 
+        FooterView view = mock(FooterView.class);
+        mStackScroller.setFooterView(view);
         mStackScroller.updateFooter();
-        verify(mStackScroller, atLeastOnce()).updateFooterView(false, false);
+        verify(mStackScroller, atLeastOnce()).updateFooterView(false, false, true);
     }
 
     @Test
@@ -361,8 +365,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
         when(mRemoteInputController.isRemoteInputActive()).thenReturn(true);
 
+        FooterView view = mock(FooterView.class);
+        mStackScroller.setFooterView(view);
         mStackScroller.updateFooter();
-        verify(mStackScroller).updateFooterView(false, true);
+        verify(mStackScroller).updateFooterView(false, true, true);
     }
 
     @Test
@@ -378,8 +384,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackScroller.getChildCount()).thenReturn(1);
         when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
 
+        FooterView view = mock(FooterView.class);
+        mStackScroller.setFooterView(view);
         mStackScroller.updateFooter();
-        verify(mStackScroller).updateFooterView(true, true);
+        verify(mStackScroller).updateFooterView(true, true, true);
     }
 
     @Test
@@ -390,8 +398,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         entries.add(new NotificationEntryBuilder().build());
         addEntriesToEntryManager(entries);
 
+        FooterView view = mock(FooterView.class);
+        mStackScroller.setFooterView(view);
         mStackScroller.updateFooter();
-        verify(mStackScroller).updateFooterView(true, false);
+        verify(mStackScroller).updateFooterView(true, false, true);
     }
 
     @Test

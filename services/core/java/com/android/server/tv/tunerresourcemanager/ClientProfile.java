@@ -143,8 +143,6 @@ public final class ClientProfile {
     /**
      * Called when the client released a frontend.
      *
-     * <p>This could happen when client resource reclaimed.
-     *
      * @param frontendId being released.
      */
     public void releaseFrontend(int frontendId) {
@@ -167,12 +165,18 @@ public final class ClientProfile {
     /**
      * Called when the client released an lnb.
      *
-     * <p>This could happen when client resource reclaimed.
-     *
      * @param lnbId being released.
      */
     public void releaseLnb(int lnbId) {
         mUsingLnbIds.remove(lnbId);
+    }
+
+    /**
+     * Called to reclaim all the resources being used by the current client.
+     */
+    public void reclaimAllResources() {
+        mUsingFrontendIds.clear();
+        mUsingLnbIds.clear();
     }
 
     @Override

@@ -740,6 +740,9 @@
   <java-symbol type="string" name="gpsNotifTitle" />
   <java-symbol type="string" name="gpsVerifNo" />
   <java-symbol type="string" name="gpsVerifYes" />
+  <java-symbol type="string" name="gnss_nfw_notification_title" />
+  <java-symbol type="string" name="gnss_nfw_notification_message_carrier" />
+  <java-symbol type="string" name="gnss_nfw_notification_message_oem" />
   <java-symbol type="string" name="gsm_alphabet_default_charset" />
   <java-symbol type="string" name="httpError" />
   <java-symbol type="string" name="httpErrorAuth" />
@@ -3172,7 +3175,6 @@
   <java-symbol type="drawable" name="lockscreen_selected" />
 
   <java-symbol type="string" name="notification_header_divider_symbol_with_spaces" />
-  <java-symbol type="array" name="config_defaultCellBroadcastReceiverPkgs" />
 
   <java-symbol type="color" name="notification_primary_text_color_light" />
   <java-symbol type="color" name="notification_primary_text_color_dark" />

@@ -29,6 +29,7 @@ public class FooterView extends StackScrollerDecorView {
     private final int mClearAllTopPadding;
     private FooterViewButton mDismissButton;
     private FooterViewButton mManageButton;
+    private boolean mShowHistory;
 
     public FooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -72,15 +73,30 @@ public class FooterView extends StackScrollerDecorView {
                 || touchY > mContent.getY() + mContent.getHeight();
     }
 
+    public void showHistory(boolean showHistory) {
+        mShowHistory = showHistory;
+        if (mShowHistory) {
+            mManageButton.setText(R.string.manage_notifications_history_text);
+            mManageButton.setContentDescription(
+                    mContext.getString(R.string.manage_notifications_history_text));
+        } else {
+            mManageButton.setText(R.string.manage_notifications_text);
+            mManageButton.setContentDescription(
+                    mContext.getString(R.string.manage_notifications_text));
+        }
+    }
+
+    public boolean isHistoryShown() {
+        return mShowHistory;
+    }
+
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDismissButton.setText(R.string.clear_all_notifications_text);
         mDismissButton.setContentDescription(
                 mContext.getString(R.string.accessibility_clear_all));
-        mManageButton.setText(R.string.manage_notifications_history_text);
-        mManageButton.setContentDescription(
-                mContext.getString(R.string.manage_notifications_history_text));
+        showHistory(mShowHistory);
     }
 
     public boolean isButtonVisible() {

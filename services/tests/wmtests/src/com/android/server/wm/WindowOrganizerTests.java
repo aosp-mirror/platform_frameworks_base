@@ -39,6 +39,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
@@ -70,7 +71,6 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,7 +87,7 @@ import java.util.List;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class TaskOrganizerTests extends WindowTestsBase {
+public class WindowOrganizerTests extends WindowTestsBase {
     private ITaskOrganizer registerMockOrganizer(int windowingMode) {
         final ITaskOrganizer organizer = mock(ITaskOrganizer.class);
         when(organizer.asBinder()).thenReturn(new Binder());
@@ -307,11 +307,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         final ActivityStack stack = new ActivityTestsBase.StackBuilder(mWm.mRoot)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         final Task task = stack.getTopMostTask();
-        WindowContainerTransaction t = new WindowContainerTransaction();
-        Rect newBounds = new Rect(10, 10, 100, 100);
-        t.setBounds(task.mRemoteToken.toWindowContainerToken(), new Rect(10, 10, 100, 100));
-        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-        assertEquals(newBounds, task.getBounds());
+        testTransaction(task);
     }
 
     @Test
@@ -321,24 +317,41 @@ public class TaskOrganizerTests extends WindowTestsBase {
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         StackInfo info =
                 mWm.mAtmService.getStackInfo(WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
-        WindowContainerTransaction t = new WindowContainerTransaction();
         assertEquals(stack.mRemoteToken.toWindowContainerToken(), info.stackToken);
+        testTransaction(stack);
+    }
+
+    @Test
+    public void testDisplayAreaTransaction() {
+        removeGlobalMinSizeRestriction();
+        final DisplayArea displayArea = new DisplayArea<>(mWm, ABOVE_TASKS, "DisplayArea");
+        testTransaction(displayArea);
+    }
+
+    private void testTransaction(WindowContainer wc) {
+        WindowContainerTransaction t = new WindowContainerTransaction();
         Rect newBounds = new Rect(10, 10, 100, 100);
-        t.setBounds(info.stackToken, new Rect(10, 10, 100, 100));
+        t.setBounds(wc.mRemoteToken.toWindowContainerToken(), new Rect(10, 10, 100, 100));
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-        assertEquals(newBounds, stack.getBounds());
+        assertEquals(newBounds, wc.getBounds());
     }
 
     @Test
     public void testSetWindowingMode() {
         final ActivityStack stack = new ActivityTestsBase.StackBuilder(mWm.mRoot)
-            .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        testSetWindowingMode(stack);
+
+        final DisplayArea displayArea = new DisplayArea<>(mWm, ABOVE_TASKS, "DisplayArea");
+        displayArea.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        testSetWindowingMode(displayArea);
+    }
+
+    private void testSetWindowingMode(WindowContainer wc) {
         final WindowContainerTransaction t = new WindowContainerTransaction();
-
-        t.setWindowingMode(stack.mRemoteToken.toWindowContainerToken(), WINDOWING_MODE_FULLSCREEN);
+        t.setWindowingMode(wc.mRemoteToken.toWindowContainerToken(), WINDOWING_MODE_FULLSCREEN);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-
-        assertEquals(WINDOWING_MODE_FULLSCREEN, stack.getWindowingMode());
+        assertEquals(WINDOWING_MODE_FULLSCREEN, wc.getWindowingMode());
     }
 
     @Test
@@ -400,7 +413,8 @@ public class TaskOrganizerTests extends WindowTestsBase {
         final int origScreenHDp = task.getConfiguration().screenHeightDp;
         t = new WindowContainerTransaction();
         // verify that setting config overrides on parent restricts children.
-        t.setScreenSizeDp(stack.mRemoteToken.toWindowContainerToken(), origScreenWDp, origScreenHDp);
+        t.setScreenSizeDp(stack.mRemoteToken
+                .toWindowContainerToken(), origScreenWDp, origScreenHDp);
         t.setBounds(task.mRemoteToken.toWindowContainerToken(), new Rect(10, 10, 150, 200));
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         assertEquals(origScreenHDp, task.getConfiguration().screenHeightDp);
@@ -665,7 +679,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         BLASTSyncEngine bse = new BLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener transactionListener =
-            mock(BLASTSyncEngine.TransactionReadyListener.class);
+                mock(BLASTSyncEngine.TransactionReadyListener.class);
 
         int id = bse.startSyncSet(transactionListener);
         bse.addToSyncSet(id, task);
@@ -689,7 +703,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         BLASTSyncEngine bse = new BLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener transactionListener =
-            mock(BLASTSyncEngine.TransactionReadyListener.class);
+                mock(BLASTSyncEngine.TransactionReadyListener.class);
 
         int id = bse.startSyncSet(transactionListener);
         assertEquals(true, bse.addToSyncSet(id, task));
@@ -715,7 +729,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         BLASTSyncEngine bse = new BLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener transactionListener =
-            mock(BLASTSyncEngine.TransactionReadyListener.class);
+                mock(BLASTSyncEngine.TransactionReadyListener.class);
 
         int id = bse.startSyncSet(transactionListener);
         bse.addToSyncSet(id, task);
@@ -738,7 +752,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         BLASTSyncEngine bse = new BLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener transactionListener =
-            mock(BLASTSyncEngine.TransactionReadyListener.class);
+                mock(BLASTSyncEngine.TransactionReadyListener.class);
 
         int id = bse.startSyncSet(transactionListener);
         bse.addToSyncSet(id, task);
@@ -764,7 +778,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         BLASTSyncEngine bse = new BLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener transactionListener =
-            mock(BLASTSyncEngine.TransactionReadyListener.class);
+                mock(BLASTSyncEngine.TransactionReadyListener.class);
 
         int id = bse.startSyncSet(transactionListener);
         assertEquals(true, bse.addToSyncSet(id, task));
@@ -817,8 +831,8 @@ public class TaskOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(o, WINDOWING_MODE_PINNED);
         final ActivityRecord record = makePipableActivity();
 
-        final PictureInPictureParams p =
-            new PictureInPictureParams.Builder().setAspectRatio(new Rational(1, 2)).build();
+        final PictureInPictureParams p = new PictureInPictureParams.Builder()
+                .setAspectRatio(new Rational(1, 2)).build();
         assertTrue(mWm.mAtmService.enterPictureInPictureMode(record.token, p));
         waitUntilHandlersIdle();
         assertNotNull(o.mInfo);
@@ -838,15 +852,15 @@ public class TaskOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(o, WINDOWING_MODE_PINNED);
 
         final ActivityRecord record = makePipableActivity();
-        final PictureInPictureParams p =
-            new PictureInPictureParams.Builder().setAspectRatio(new Rational(1, 2)).build();
+        final PictureInPictureParams p = new PictureInPictureParams.Builder()
+                .setAspectRatio(new Rational(1, 2)).build();
         assertTrue(mWm.mAtmService.enterPictureInPictureMode(record.token, p));
         waitUntilHandlersIdle();
         assertNotNull(o.mInfo);
         assertNotNull(o.mInfo.pictureInPictureParams);
 
-        final PictureInPictureParams p2 =
-            new PictureInPictureParams.Builder().setAspectRatio(new Rational(3, 4)).build();
+        final PictureInPictureParams p2 = new PictureInPictureParams.Builder()
+                .setAspectRatio(new Rational(3, 4)).build();
         mWm.mAtmService.setPictureInPictureParams(record.token, p2);
         waitUntilHandlersIdle();
         assertNotNull(o.mChangedInfo);
