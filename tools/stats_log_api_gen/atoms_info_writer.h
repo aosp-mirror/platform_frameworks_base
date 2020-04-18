@@ -29,7 +29,7 @@ using namespace std;
 int write_atoms_info_cpp(FILE* out, const Atoms& atoms, const string& namespaceStr,
                          const string& importHeader);
 
-int write_atoms_info_header(FILE* out, const Atoms& atoms, const string& namespaceStr);
+int write_atoms_info_header(FILE* out, const string& namespaceStr);
 
 }  // namespace stats_log_api_gen
 }  // namespace android

@@ -166,6 +166,10 @@ public:
     // Maximum number of pushed atoms statsd stats will track above kMaxPushedAtomId.
     static const int kMaxNonPlatformPushedAtoms = 100;
 
+    // Maximum atom id value that we consider a platform pushed atom.
+    // This should be updated once highest pushed atom id in atoms.proto approaches this value.
+    static const int kMaxPushedAtomId = 500;
+
     // Atom id that is the start of the pulled atoms.
     static const int kPullAtomStartTag = 10000;
 
