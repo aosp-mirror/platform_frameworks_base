@@ -107,12 +107,21 @@ package android.app {
   }
 
   public class ActivityOptions {
+    method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
     method public static void setExitTransitionTimeout(long);
     method public void setLaunchActivityType(int);
     method public void setLaunchTaskId(int);
     method public void setLaunchWindowingMode(int);
     method public void setTaskAlwaysOnTop(boolean);
     method public void setTaskOverlay(boolean, boolean);
+  }
+
+  public static interface ActivityOptions.OnAnimationFinishedListener {
+    method public void onAnimationFinished();
+  }
+
+  public static interface ActivityOptions.OnAnimationStartedListener {
+    method public void onAnimationStarted();
   }
 
   public class ActivityTaskManager {
@@ -2263,7 +2272,11 @@ package android.os {
 
   public class Environment {
     method public static java.io.File buildPath(java.io.File, java.lang.String...);
+    method @NonNull public static java.io.File getOdmDirectory();
+    method @NonNull public static java.io.File getOemDirectory();
     method @NonNull public static java.io.File getProductDirectory();
+    method @NonNull public static java.io.File getSystemExtDirectory();
+    method @NonNull public static java.io.File getVendorDirectory();
   }
 
   public final class FileUtils {

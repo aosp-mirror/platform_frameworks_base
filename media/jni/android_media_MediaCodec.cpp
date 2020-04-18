@@ -735,14 +735,19 @@ status_t JMediaCodec::getOutputFrame(
         }
     }
 
-    jobject format;
-    err = getOutputFormat(env, index, &format);
+    jobject formatMap;
+    err = getOutputFormat(env, index, &formatMap);
     if (err != OK) {
         return err;
     }
-    env->SetObjectField(frame, gFields.outputFrameFormatID, format);
-    env->DeleteLocalRef(format);
-    format = nullptr;
+    ScopedLocalRef<jclass> mediaFormatClass{env, env->FindClass("android/media/MediaFormat")};
+    ScopedLocalRef<jobject> format{env, env->NewObject(
+            mediaFormatClass.get(),
+            env->GetMethodID(mediaFormatClass.get(), "<init>", "(Ljava/util/Map;)V"),
+            formatMap)};
+    env->SetObjectField(frame, gFields.outputFrameFormatID, format.get());
+    env->DeleteLocalRef(formatMap);
+    formatMap = nullptr;
 
     sp<RefBase> obj;
     if (buffer->meta()->findObject("changedKeys", &obj) && obj) {

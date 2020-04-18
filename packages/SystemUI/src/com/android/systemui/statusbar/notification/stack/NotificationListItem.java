@@ -43,7 +43,7 @@ public interface NotificationListItem {
 
     // This generic is kind of ugly - we should change this once the old VHM is gone
     /** @return list of the children of this item */
-    List<? extends NotificationListItem> getNotificationChildren();
+    List<? extends NotificationListItem> getAttachedChildren();
 
     /** remove all children from this list item */
     void removeAllChildren();
@@ -53,6 +53,9 @@ public interface NotificationListItem {
 
     /** add an item as a child */
     void addChildNotification(NotificationListItem child, int childIndex);
+
+    /** set the child count view should display */
+    void setUntruncatedChildCount(int count);
 
     /** Update the order of the children with the new list */
     boolean applyChildOrder(

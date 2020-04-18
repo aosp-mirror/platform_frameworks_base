@@ -85,7 +85,8 @@ interface ITunerResourceManager {
      * Updates the available Frontend resources information on the current device.
      *
      * <p><strong>Note:</strong> This update must happen before the first
-     * {@link #requestFrontend(TunerFrontendRequest,int[])} and {@link #releaseFrontend(int)} call.
+     * {@link #requestFrontend(TunerFrontendRequest,int[])} and {@link #releaseFrontend(int, int)}
+     * call.
      *
      * @param infos an array of the available {@link TunerFrontendInfo} information.
      */
@@ -95,7 +96,8 @@ interface ITunerResourceManager {
      * Updates the available Cas resource information on the current device.
      *
      * <p><strong>Note:</strong> This update must happen before the first
-     * {@link #requestCasSession(CasSessionRequest, int[])} and {@link #releaseCasSession(int)} call.
+     * {@link #requestCasSession(CasSessionRequest, int[])} and {@link #releaseCasSession(int, int)}
+     * call.
      *
      * @param casSystemId id of the updating CAS system.
      * @param maxSessionNum the max session number of the CAS system that is updated.
@@ -106,7 +108,7 @@ interface ITunerResourceManager {
      * Updates the available Lnb resource information on the current device.
      *
      * <p><strong>Note:</strong> This update must happen before the first
-     * {@link #requestLnb(TunerLnbRequest, int[])} and {@link #releaseLnb(int)} call.
+     * {@link #requestLnb(TunerLnbRequest, int[])} and {@link #releaseLnb(int, int)} call.
      *
      * @param lnbIds ids of the updating lnbs.
      */
@@ -255,8 +257,9 @@ interface ITunerResourceManager {
      * before this release.
      *
      * @param frontendHandle the handle of the released frontend.
+     * @param clientId the id of the client that is releasing the frontend.
      */
-    void releaseFrontend(in int frontendHandle);
+    void releaseFrontend(in int frontendHandle, int clientId);
 
     /*
      * Notifies the TRM that the Demux with the given handle was released.
@@ -264,8 +267,9 @@ interface ITunerResourceManager {
      * <p>Client must call this whenever it releases a demux.
      *
      * @param demuxHandle the handle of the released Tuner Demux.
+     * @param clientId the id of the client that is releasing the demux.
      */
-    void releaseDemux(in int demuxHandle);
+    void releaseDemux(in int demuxHandle, int clientId);
 
     /*
      * Notifies the TRM that the Descrambler with the given handle was released.
@@ -273,8 +277,9 @@ interface ITunerResourceManager {
      * <p>Client must call this whenever it releases a descrambler.
      *
      * @param demuxHandle the handle of the released Tuner Descrambler.
+     * @param clientId the id of the client that is releasing the descrambler.
      */
-    void releaseDescrambler(in int descramblerHandle);
+    void releaseDescrambler(in int descramblerHandle, int clientId);
 
     /*
      * Notifies the TRM that the given Cas session has been released.
@@ -284,8 +289,9 @@ interface ITunerResourceManager {
      * <p><strong>Note:</strong> {@link #updateCasInfo(int, int)} must be called before this release.
      *
      * @param sessionResourceId the id of the released CAS session.
+     * @param clientId the id of the client that is releasing the cas session.
      */
-    void releaseCasSession(in int sessionResourceId);
+    void releaseCasSession(in int sessionResourceId, int clientId);
 
     /*
      * Notifies the TRM that the Lnb with the given handle was released.
@@ -295,8 +301,9 @@ interface ITunerResourceManager {
      * <p><strong>Note:</strong> {@link #setLnbInfos(int[])} must be called before this release.
      *
      * @param lnbHandle the handle of the released Tuner Lnb.
+     * @param clientId the id of the client that is releasing the lnb.
      */
-    void releaseLnb(in int lnbHandle);
+    void releaseLnb(in int lnbHandle, int clientId);
 
     /*
      * Compare two clients' priority.

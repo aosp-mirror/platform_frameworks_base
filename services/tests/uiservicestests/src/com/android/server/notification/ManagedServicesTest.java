@@ -972,7 +972,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         when(service.asBinder()).thenReturn(mock(IBinder.class));
         ManagedServices services = new TestManagedServices(getContext(), mLock, mUserProfiles,
                 mIpm, APPROVAL_BY_PACKAGE);
-        services.registerService(service, null, 10);
+        services.registerSystemService(service, null, 10);
         ManagedServices.ManagedServiceInfo info = services.checkServiceTokenLocked(service);
         info.isSystem = true;
 

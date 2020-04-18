@@ -19,6 +19,8 @@ package com.android.server.notification;
 
 option java_multiple_files = true;
 
+import "frameworks/base/core/proto/android/privacy.proto";
+
 // On disk data store for historical notifications
 message NotificationHistoryProto {
   message StringPool {
@@ -33,7 +35,7 @@ message NotificationHistoryProto {
     optional int32 package_index = 2;
 
     // The name of the NotificationChannel this notification was posted to
-    optional string channel_name = 3;
+    optional string channel_name = 3 [(.android.privacy).dest = DEST_EXPLICIT];
     // channel_name_index contains the index + 1 of the channel name in the string pool
     optional int32 channel_name_index = 4;
 
@@ -49,9 +51,9 @@ message NotificationHistoryProto {
     // The time at which the notification was posted
     optional int64 posted_time_ms = 9;
     // The title of the notification
-    optional string title = 10;
+    optional string title = 10 [(.android.privacy).dest = DEST_EXPLICIT];
     // The text of the notification
-    optional string text = 11;
+    optional string text = 11 [(.android.privacy).dest = DEST_EXPLICIT];
     // The small icon of the notification
     optional Icon icon = 12;
 

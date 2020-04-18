@@ -628,8 +628,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 mHighPriorityBeforeSpeedBump = "1".equals(newValue);
             } else if (key.equals(Settings.Secure.NOTIFICATION_DISMISS_RTL)) {
                 updateDismissRtlSetting("1".equals(newValue));
+            } else if (key.equals(Settings.Secure.NOTIFICATION_HISTORY_ENABLED)) {
+                updateFooter();
             }
-        }, HIGH_PRIORITY, Settings.Secure.NOTIFICATION_DISMISS_RTL);
+        }, HIGH_PRIORITY, Settings.Secure.NOTIFICATION_DISMISS_RTL,
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
 
         mFeatureFlags = featureFlags;
         mNotifPipeline = notifPipeline;
@@ -742,12 +745,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @VisibleForTesting
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateFooter() {
+        if (mFooterView == null) {
+            return;
+        }
         boolean showDismissView = mClearAllEnabled && hasActiveClearableNotifications(ROWS_ALL);
         boolean showFooterView = (showDismissView || hasActiveNotifications())
                 && mStatusBarState != StatusBarState.KEYGUARD
                 && !mRemoteInputManager.getController().isRemoteInputActive();
+        boolean showHistory = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0) == 1;
 
-        updateFooterView(showFooterView, showDismissView);
+        updateFooterView(showFooterView, showDismissView, showHistory);
     }
 
     /**
@@ -2377,7 +2385,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
                 if (row.isSummaryWithChildren() && row.areChildrenExpanded()) {
                     List<ExpandableNotificationRow> notificationChildren =
-                            row.getNotificationChildren();
+                            row.getAttachedChildren();
                     for (int childIndex = 0; childIndex < notificationChildren.size();
                             childIndex++) {
                         ExpandableNotificationRow rowChild = notificationChildren.get(childIndex);
@@ -4638,7 +4646,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
                 row.setHeadsUpAnimatingAway(false);
                 if (row.isSummaryWithChildren()) {
-                    for (ExpandableNotificationRow child : row.getNotificationChildren()) {
+                    for (ExpandableNotificationRow child : row.getAttachedChildren()) {
                         child.setHeadsUpAnimatingAway(false);
                     }
                 }
@@ -4979,13 +4987,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void updateFooterView(boolean visible, boolean showDismissView) {
+    public void updateFooterView(boolean visible, boolean showDismissView, boolean showHistory) {
         if (mFooterView == null) {
             return;
         }
         boolean animate = mIsExpanded && mAnimationsEnabled;
         mFooterView.setVisible(visible, animate);
         mFooterView.setSecondaryVisible(showDismissView, animate);
+        mFooterView.showHistory(showHistory);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5566,12 +5575,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void manageNotifications(View v) {
-        Intent intent = new Intent(Settings.ACTION_NOTIFICATION_HISTORY);
-        mStatusBar.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     @VisibleForTesting
     void clearNotifications(
             @SelectedRows int selection,
@@ -5598,7 +5601,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         && (!hasClipBounds || mTmpRect.height() > 0)) {
                     parentVisible = true;
                 }
-                List<ExpandableNotificationRow> children = row.getNotificationChildren();
+                List<ExpandableNotificationRow> children = row.getAttachedChildren();
                 if (children != null) {
                     for (ExpandableNotificationRow childRow : children) {
                         if (includeChildInDismissAll(row, selection)) {
@@ -5705,7 +5708,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES);
             clearNotifications(ROWS_ALL, true /* closeShade */);
         });
-        footerView.setManageButtonClickListener(this::manageNotifications);
+        footerView.setManageButtonClickListener(v -> {
+            Intent intent = footerView.isHistoryShown() ? new Intent(
+                    Settings.ACTION_NOTIFICATION_HISTORY) : new Intent(
+                    Settings.ACTION_NOTIFICATION_SETTINGS);
+            mStatusBar.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        });
         setFooterView(footerView);
     }
 
@@ -6388,7 +6396,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 if (parent != null && parent.areChildrenExpanded()
                         && (parent.areGutsExposed()
                         || mSwipeHelper.getExposedMenuView() == parent
-                        || (parent.getNotificationChildren().size() == 1
+                        || (parent.getAttachedChildren().size() == 1
                         && parent.getEntry().isClearable()))) {
                     // In this case the group is expanded and showing the menu for the
                     // group, further interaction should apply to the group, not any

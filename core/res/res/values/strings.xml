@@ -3897,6 +3897,19 @@
          information. -->
     <string name="gpsVerifNo">No</string>
 
+    <!-- Notification title shown to user to inform them their device location was accessed by
+         an external entity during an emergency (usually an emergency phone call).
+         [CHAR LIMIT=40] -->
+    <string name="gnss_nfw_notification_title">Emergency location accessed</string>
+    <!-- Notification message shown to user to inform them their device location was accessed by
+         something OEM related during an emergency (usually an emergency phone call).
+         [CHAR LIMIT=NONE] -->
+    <string name="gnss_nfw_notification_message_oem">Your device manufacturer accessed your location during a recent emergency session</string>
+    <!-- Notification message shown to user to inform them their device location was accessed by
+         something carrier related during an emergency (usually an emergency phone call).
+         [CHAR LIMIT=NONE] -->
+    <string name="gnss_nfw_notification_message_carrier">Your carrier accessed your location during a recent emergency session</string>
+
     <!-- Error message when the sync tried to delete too many things -->
     <string name="sync_too_many_deletes">Delete limit exceeded</string>
     <!-- Dialog message for when there are too many deletes that would take place and we want user confirmation -->

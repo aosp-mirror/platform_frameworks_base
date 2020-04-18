@@ -850,9 +850,15 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Deprecated
     @Override
     public ApplicationInfo toAppInfoWithoutState() {
-        ApplicationInfo appInfo = new ApplicationInfo();
+        ApplicationInfo appInfo = toAppInfoWithoutStateWithoutFlags();
         appInfo.flags = PackageInfoWithoutStateUtils.appInfoFlags(this);
         appInfo.privateFlags = PackageInfoWithoutStateUtils.appInfoPrivateFlags(this);
+        return appInfo;
+    }
+
+    @Override
+    public ApplicationInfo toAppInfoWithoutStateWithoutFlags() {
+        ApplicationInfo appInfo = new ApplicationInfo();
 
         appInfo.appComponentFactory = appComponentFactory;
         appInfo.backupAgentName = backupAgentName;
