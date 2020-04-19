@@ -8167,4 +8167,19 @@ public abstract class PackageManager {
         sPackageInfoCache.disableLocal();
     }
 
+    /**
+     * Inhibit package info cache invalidations when correct.
+     *
+     * @hide */
+    public static void corkPackageInfoCache() {
+        PropertyInvalidatedCache.corkInvalidations(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+    }
+
+    /**
+     * Enable package info cache invalidations.
+     *
+     * @hide */
+    public static void uncorkPackageInfoCache() {
+        PropertyInvalidatedCache.uncorkInvalidations(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+    }
 }
