@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="202579285008794431">"б"</string>
+    <string name="byteShort" msgid="202579285008794431">"Б"</string>
     <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
     <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
     <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
@@ -1347,7 +1347,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Виявлено аналоговий аксесуар для аудіо"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Під’єднаний пристрій несумісний із цим телефоном. Торкніться, щоб дізнатися більше."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Налагодження USB підключено"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Торкніться, щоб вимкнути налагоджувач USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Торкніться, щоб вимкнути налагодження через USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Виберіть, щоб вимкнути налагодження за USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Налагодження через Wi-Fi активне"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Натисніть, щоб вимкнути налагодження через Wi-Fi"</string>
@@ -1499,6 +1499,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Запит зроблено користувачем <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Так"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ні"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Перевищено ліміт видалень"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Для <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, облікового запису <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>, знайдено стільки видалених елементів: <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>. Що робити?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Видалити елементи"</string>
@@ -1836,9 +1842,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Видалено адміністратором"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Щоб подовжити час роботи акумулятора, режим енергозбереження:\n·вмикає темну тему;\n·припиняє або обмежує фонову активність, вимикає деякі візуальні ефекти й інші енергозатратні функції, зокрема Ok Google.\n\n"<annotation id="url">"Докладніше"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Щоб подовжити час роботи акумулятора, режим енергозбереження:\n·вмикає темну тему;\n·припиняє або обмежує фонову активність, вимикає деякі візуальні ефекти й інші енергозатратні функції, зокрема Ok Google."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Щоб подовжити час роботи акумулятора, режим енергозбереження:\n·вмикає темну тему;\n·припиняє або обмежує фонову активність, вимикає деякі візуальні ефекти й інші енергозатратні функції, зокрема команду \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Щоб зменшити використання трафіку, функція \"Заощадження трафіку\" не дозволяє деяким додаткам надсилати чи отримувати дані у фоновому режимі. Поточний додаток зможе отримувати доступ до таких даних, але рідше. Наприклад, зображення не відображатиметься, доки ви не торкнетеся його."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Увімкнути Заощадження трафіку?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Увімкнути заощадження трафіку?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Увімкнути"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%1$d хвилину (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

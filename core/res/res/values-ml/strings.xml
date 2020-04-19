@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) അഭ്യർത്ഥിച്ചത്"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"വേണം"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"വേണ്ട"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"ഇല്ലാതാക്കൽ പരിധി കഴിഞ്ഞു"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> എന്ന അക്കൗണ്ടിലെ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> എന്നതിനായി ഇല്ലാതാക്കിയ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> ഇനങ്ങളുണ്ട്. നിങ്ങൾ എന്തുചെയ്യാൻ താൽപ്പര്യപ്പെടുന്നു?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"ഇനങ്ങൾ ഇല്ലാതാക്കുക"</string>

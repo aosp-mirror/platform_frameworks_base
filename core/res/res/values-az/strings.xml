@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) tərəfindən tələb edilib"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Bəli"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Xeyr"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Limiti keçəni silin"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> üçün <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> silinmiş fayl var, <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> hesabı. Nə etmək istəyirsiniz?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Elementləri sil"</string>
@@ -1791,7 +1797,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət xüsusiyyəti:\n·Qaranlıq temanı aktiv edir\n·Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər xüsusiyyətləri deaktiv edir və ya məhdudlaşdırır\n\n"<annotation id="url">"Ətraflı məlumat"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət xüsusiyyəti:\n·Qaranlıq temanı aktiv edir\n·Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər xüsusiyyətləri deaktiv edir və ya məhdudlaşdırır"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsinin və qəbulunun qarşısını alır. Hazırda işlətdiyiniz tətbiq dataya daxil ola bilər, ancaq bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Data Qənaəti aktiv edilsin?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivləşdirin"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

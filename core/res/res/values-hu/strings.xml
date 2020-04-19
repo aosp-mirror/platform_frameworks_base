@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Igénylő <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Igen"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nem"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"A szinkronizálás elérte a törlésre vonatkozó korlátot"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> törölt elem van a(z) (<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>) <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> fióknál. Mit szeretne tenni?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Az elemek törlése"</string>
@@ -1791,7 +1797,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n Bekapcsolja a sötét témát.\n Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat.\n\n"<annotation id="url">"További információ"</annotation>"."</string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n Bekapcsolja a sötét témát.\n Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által aktuálisan használt alkalmazások hozzáférhetnek az adatokhoz, de csak ritkábban. Ez például azt jelentheti, hogy a képek csak rákoppintás után jelennek meg."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által jelenleg használt alkalmazások hozzáférhetnek az adatokhoz, de csak ritkábban. Ez például azt jelentheti, hogy a képek csak rákoppintás után jelennek meg."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bekapcsolja az Adatforgalom-csökkentőt?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bekapcsolás"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

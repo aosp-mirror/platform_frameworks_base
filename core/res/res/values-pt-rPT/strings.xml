@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícone de impressão digital"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"gerir hardware de Desbloqueio Através do Rosto"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"gerir hardware de Desbloqueio facial"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Permite à aplicação invocar métodos para adicionar e eliminar modelos faciais para uso."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilizar hardware de Desbloqueio Através do Rosto"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permite que a aplicação utilize hardware de Desbloqueio Através do Rosto para autenticação"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueio Através do Rosto"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilizar hardware de Desbloqueio facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permite que a aplicação utilize hardware de Desbloqueio facial para autenticação"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueio facial"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Volte a inscrever o seu rosto"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para melhorar o reconhecimento, volte a inscrever o seu rosto."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Imp. capt. dados rosto precisos. Tente novamente."</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Não pode validar o rosto. Hardware não disponível."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Experimente de novo o Desbloqueio Através do Rosto"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Experimente de novo o Desbloqueio facial"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Não pode guardar novos dados de rostos. Elimine um antigo."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Operação de rosto cancelada."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Desbloqueio Através do Rosto cancelado pelo utilizador"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Desbloqueio facial cancelado pelo utilizador"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Demasiadas tentativas. Tente novamente mais tarde."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Demasiadas tentativas. O Desbloqueio Através do Rosto está desativado."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Demasiadas tentativas. O Desbloqueio facial está desativado."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Não é possível validar o rosto. Tente novamente."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Não configurou o Desbloqueio Através do Rosto."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Desbloqueio Através do Rosto não suportado neste dispositivo."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Não configurou o Desbloqueio facial."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Desbloqueio facial não suportado neste dispositivo."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor temporariamente desativado."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tentar novamente"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Tentar novamente"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloqueio de todas as funcionalidades e dados"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Excedido o n.º máximo de tentativas de Desbloqueio Através do Rosto"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Excedido o n.º máximo de tentativas de Desbloqueio facial"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Nenhum cartão SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Nenhum cartão SIM no tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Nenhum cartão SIM no seu dispositivo Android TV."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Expandir área de desbloqueio."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Desbloqueio através de deslize."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Desbloqueio através de sequência."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Desbloqueio através do rosto."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Desbloqueio facial"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Desbloqueio através de PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Desbloqueio do SIM através de PIN."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Desbloqueio do PUK do SIM."</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Pedido por <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Sim"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Não"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Limite de eliminações excedido"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Há <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> itens eliminados de <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, conta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. O que pretende fazer?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Eliminar os itens"</string>
@@ -1792,7 +1798,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para prolongar a autonomia da bateria, a Poupança de bateria:\n·Ativa o tema escuro.\n·Desativa ou restringe a atividade em segundo plano, alguns efeitos visuais e outras funcionalidades como \"Ok Google\".\n\n"<annotation id="url">"Saber mais"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Para prolongar a autonomia da bateria, a Poupança de bateria:\n·Ativa o tema escuro.\n·Desativa ou restringe a atividade em segundo plano, alguns efeitos visuais e outras funcionalidades como \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas aplicações enviem ou recebam dados em segundo plano. Uma determinada aplicação que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar a Poupança de dados?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Pretende ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durante %1$d minutos (até à(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

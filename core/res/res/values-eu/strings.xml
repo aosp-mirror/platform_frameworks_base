@@ -297,7 +297,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"atzitu kontaktuak"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Kokapena"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"atzitu gailuaren kokapena"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Egutegia"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"atzitu egutegia"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS mezuak"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"bidali eta ikusi SMS mezuak"</string>
@@ -481,7 +481,7 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"Android TV gailuaren ordu-zona aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"Telefonoaren ordu-zona aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"bilatu gailuko kontuak"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"Tabletak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barnean."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"Tabletak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dauzkazun aplikazioek sortutako kontuak har daitezke barnean."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Android TV gailuak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Kontu horien artean, instalatuta dituzun aplikazioek sortutako kontuak egon litezke."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Telefonoak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barnean."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"ikusi sareko konexioak"</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzaileak eskatuta (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Bai"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ez"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Ezabatze-muga gainditu da"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Ezabatutako <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elementu daude <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> sinkronizazioan, <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> kontuan. Zer egin nahi duzu?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Ezabatu elementuak"</string>
@@ -1789,10 +1795,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Bateriaren iraupena luzatzeko, erabili Bateria-aurrezlea:\n·Gai iluna aktibatzen du\n Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\"\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Bateriaren iraupena luzatzeko, erabili Bateria-aurrezlea:\n·Gai iluna aktibatzen du\n Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\""</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu?"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n·Gai iluna aktibatzen du\n Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\"\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n·Gai iluna aktibatzen du\n Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\""</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d minutuz (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> arte)</item>
@@ -1872,7 +1878,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Aplikazio-jakinarazpen pertsonalizatua"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu <xliff:g id="APP">%1$s</xliff:g> aplikazioari? (Badago kontu hori duen erabiltzaile bat)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu <xliff:g id="APP">%1$s</xliff:g> aplikazioari?"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"Gehitu hizkuntza"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"Gehitu hizkuntza bat"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Lurralde-hobespena"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Adierazi hizkuntza"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Iradokitakoak"</string>

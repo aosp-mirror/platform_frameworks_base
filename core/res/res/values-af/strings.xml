@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Versoek deur <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Ja"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nee"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Uitveeperk is oorskry"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Daar is <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> uitgeveede items vir <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, rekening <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Wat wil jy doen?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Vee die items uit"</string>
@@ -1789,8 +1795,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Uitgevee deur jou administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n·Skakel Donker-tema aan\n·Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Hey Google\", af of beperk hulle\n\n"<annotation id="url">"Kom meer te wete"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n·Skakel Donker-tema aan\n·Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Hey Google\", af of beperk hulle"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n·Skakel Donkertema aan\n·Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Hey Google\", af of beperk hulle\n\n"<annotation id="url">"Kom meer te wete"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n·Skakel Donkertema aan\n·Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Hey Google\", af of beperk hulle"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys totdat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Skakel Databespaarder aan?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Skakel aan"</string>

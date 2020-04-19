@@ -20,9 +20,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="202579285008794431">"б"</string>
+    <string name="byteShort" msgid="202579285008794431">"Б"</string>
     <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"Мб"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
     <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
     <string name="terabyteShort" msgid="1822367128583886496">"Тб"</string>
     <string name="petabyteShort" msgid="5651571254228534832">"Пб"</string>
@@ -1499,6 +1499,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Запыт ад карыстальнiка <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Так"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Не"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Выдаліць перавышаны ліміт"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Выдалена элементаў для тыпу сінхранiзацыi \"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>\": <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>. Уліковы запіс <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Што вы жадаеце зрабіць?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Выдаліць элементы."</string>
@@ -1603,7 +1609,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Трансліраваць экран на прыладу"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Пошук прылад..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Налады"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Адлучыць"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Адключыць"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Сканiраванне..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Падключэнне..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Даступна"</string>
@@ -1837,7 +1843,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду:\n·уключае цёмную тэму;\n·выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі, напрыклад \"Ok Google\"\n\n"<annotation id="url">"Даведацца больш"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду:\n·уключае цёмную тэму;\n·выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі, напрыклад \"Ok Google\""</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"У рэжыме Эканомія трафіка фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"У рэжыме \"Эканомія трафіка\" фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Уключыць"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

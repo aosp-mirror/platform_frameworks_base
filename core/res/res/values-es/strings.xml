@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Solicitud enviada por <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Sí"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"No"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Se ha superado el límite de eliminaciones."</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Hay <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elementos eliminados para <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> (cuenta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>). ¿Qué quieres hacer?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Eliminar elementos"</string>
@@ -1654,7 +1660,7 @@
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Elige la función que se utilizará con el gesto de accesibilidad (deslizar dos dedos hacia arriba desde la parte inferior de la pantalla):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Elige la función que se utilizará con el gesto de accesibilidad (deslizar tres dedos hacia arriba desde la parte inferior de la pantalla):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Para cambiar de una función a otra, mantén pulsado el botón Accesibilidad."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Para cambiar de una función a otra, desliza dos dedos hacia arriba y mantén pulsada la pantalla."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Para cambiar de una función a otra, desliza hacia arriba con dos dedos y mantén pulsada la pantalla."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Para cambiar de una función a otra, desliza tres dedos hacia arriba y mantén pulsada la pantalla."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ampliar"</string>
     <string name="user_switched" msgid="7249833311585228097">"Usuario actual: <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -1791,8 +1797,8 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para que la batería dure más, el modo Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Para que la batería dure más, el modo Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\""</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que es posible que, por ejemplo, algunas imágenes no se muestren hasta que las toques."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar ahorro de datos?"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"El modo Ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que puede reducir el uso de datos. Una aplicación activa puede acceder a los datos, aunque con menos frecuencia. Esto significa que es posible que, por ejemplo, algunas imágenes no se muestren hasta que las toques."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durante %1$d minutos (hasta las <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1901,7 +1907,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Fijar <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"No fijar"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"No fijar <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Acerca de la aplicación"</string>
+    <string name="app_info" msgid="6113278084877079851">"Información de la aplicación"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Iniciando demostración…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Restableciendo dispositivo…"</string>
@@ -1996,7 +2002,7 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"se muestra sobre otras aplicaciones que haya en la pantalla"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación sobre el modo rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Es posible que te quedes sin batería antes de lo habitual"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Se ha activado el ahorro de batería para aumentar la duración de la batería"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Se ha activado el modo Ahorro de batería para aumentar la duración de la batería"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Ahorro de batería"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Ahorro de batería desactivado"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"El teléfono tiene suficiente batería. Las funciones ya no están restringidas."</string>

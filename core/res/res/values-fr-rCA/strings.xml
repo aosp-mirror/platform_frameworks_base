@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Demande de <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Oui"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Non"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Le nombre maximal de suppressions a été atteint."</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> éléments vont être supprimés lors de la synchronisation <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> pour le compte <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Voulez-vous continuer?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Supprimer les éléments"</string>
@@ -1789,10 +1795,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Mise à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Pour prolonger l\'autonomie de la pile, l\'économiseur de pile effectue les actions suivantes :\n·Activer le thème sombre\n·Désactiver ou limiter l\'activité en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme « Hey Google »\n\n"<annotation id="url">"En savoir plus"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Pour prolonger l\'autonomie de la pile, l\'économiseur de pile effectue les actions suivantes :\n·Activer le thème sombre\n·Désactiver ou limiter l\'activité en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme « Hey Google »"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Pour aider à diminuer l\'utilisation des données, la fonction Économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Une application que vous utilisez actuellement peut accéder à des données, mais peut le faire moins souvent. Cela peut signifier, par exemple, que les images ne s\'affichent pas jusqu\'à ce que vous les touchiez."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'Économiseur de données?"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Pour prolonger l\'autonomie de la pile, l\'économiseur de pile effectue les actions suivantes :\n·Activer le thème sombre\n·Désactiver ou limiter l\'activité en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme « Ok Google »\n\n"<annotation id="url">"En savoir plus"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Pour prolonger l\'autonomie de la pile, l\'économiseur de pile effectue les actions suivantes :\n·Active le thème sombre\n·Désactive ou limite l\'activité en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme « Ok Google »"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Pour aider à diminuer l\'utilisation des données, la fonctionnalité Économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Une application que vous utilisez actuellement peut accéder à des données, mais peut le faire moins souvent. Cela peut signifier, par exemple, que les images ne s\'affichent pas jusqu\'à ce que vous les touchiez."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'économiseur de données?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">Pendant %1$d minute (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

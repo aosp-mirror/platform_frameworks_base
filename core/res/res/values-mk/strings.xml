@@ -1299,7 +1299,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Поврзаниот уред се полни преку USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Вклучен е пренос на датотеки преку USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Вклучен е PTP преку USB"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Вклучено е врзување преку USB"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Вклучен е интернет преку USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Вклучен е MIDI преку USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Поврзан е USB-додаток"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Допрете за повеќе опции."</string>
@@ -1457,14 +1457,20 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Побарано од <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Да"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Не"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Границата на бришење е надмината"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Постојат <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> избришани ставки за <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> сметка. Што сакате да направите?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Избриши ги ставките"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Врати ги избришаните"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Не прави ништо засега"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"Изберете сметка"</string>
-    <string name="add_account_label" msgid="4067610644298737417">"Додај сметка"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"Додај сметка"</string>
+    <string name="add_account_label" msgid="4067610644298737417">"Додајте сметка"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"Додајте сметка"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Зголеми"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Намали"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> допри и задржи."</string>
@@ -1792,9 +1798,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n·вклучува темна тема\n·исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Hey Google“\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n·вклучува темна тема\n·исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Hey Google“"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Вклучете Штедач на интернет?"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n·вклучува „Темна тема“;\n·исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Ok Google“."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">За %1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1874,7 +1880,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Приспособено известување за апликација"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Дозволувате <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Веќе постои корисник со оваа сметка.)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Дозволувате <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"Додај јазик"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"Додајте јазик"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Претпочитувања за регион"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Внеси име на јазик"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Предложени"</string>

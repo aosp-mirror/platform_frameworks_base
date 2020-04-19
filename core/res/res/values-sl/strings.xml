@@ -242,7 +242,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Zaklep zaslona"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Izklopi"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Vklop/izklop"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Vnovični zagon"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Znova zaženi"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Klic v sili"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Poročilo o napakah"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Končaj sejo"</string>
@@ -1499,6 +1499,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Zahtevala oseba <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Da"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ne"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Omejitev brisanja je presežena"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Št. izbrisanih elementov za <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> v računu <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>: <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>. Kaj želite narediti?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Izbris elementov"</string>
@@ -1600,7 +1606,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Brezžični prikaz"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Predvajanje"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Povezovanje z napravo"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Predvajanje zaslona v napravi"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Predvajanje zaslona v napravo"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Iskanje naprav …"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Nastavitve"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Prekinitev povezave"</string>
@@ -1836,7 +1842,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisal skrbnik"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"V redu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Funkcija varčevanja z energijo baterije tako podaljša čas delovanja baterije:\n·Vklopi temno temo,\n·izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«.\n\n"<annotation id="url">"Več o tem"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Funkcija varčevanja z energijo baterije tako podaljša čas delovanja baterije:\n·Vklopi temno temo,\n·izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Funkcija varčevanja z energijo baterije podaljša čas delovanja baterije tako:\n·vklopi temno temo,\n·izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vklop varčevanja s podatki?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Vklop"</string>
