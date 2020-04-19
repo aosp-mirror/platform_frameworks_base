@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"无线显示认证"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"启用 WLAN 详细日志记录功能"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"WLAN 扫描调节"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"WLAN 增强型随机分配 MAC 地址功能"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"始终开启移动数据网络"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"网络共享硬件加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"显示没有名称的蓝牙设备"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"显示无线显示认证选项"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"提升 WLAN 日志记录级别（在 WLAN 选择器中显示每个 SSID 的 RSSI）"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"降低耗电量以及改善网络性能"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"此切换开关仅会影响客户端模式的 MAC 地址随机分配行为。\n此模式开启后，系统可能会为已启用随机分配 MAC 地址功能的所有网络在关联期间重新随机分配 MAC 地址，具体取决于客户端上次断开网络连接的时间。如果设备在 4 小时或更短时间内重新连接到网络，系统便不会执行重新随机分配操作。"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"按流量计费"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"不按流量计费"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"日志记录器缓冲区大小"</string>

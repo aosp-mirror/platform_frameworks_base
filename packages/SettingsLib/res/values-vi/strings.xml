@@ -86,8 +86,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Chuyển tệp"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Thiết bị đầu vào"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Truy cập Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Chia sẻ liên hệ"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Sử dụng để chia sẻ liên hệ"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Chia sẻ người liên hệ"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Sử dụng để chia sẻ người liên hệ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Chia sẻ kết nối internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Tin nhắn văn bản"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Truy cập SIM"</string>
@@ -251,7 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Bật ghi nhật ký chi tiết Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Hạn chế quét tìm Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Sắp xếp ngẫu nhiên địa chỉ MAC tăng cường Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Sử dụng địa chỉ MAC Wi‑Fi ngẫu nhiên"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dữ liệu di động luôn hoạt động"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tăng tốc phần cứng khi chia sẻ Internet"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Hiển thị các thiết bị Bluetooth không có tên"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Hiển thị tùy chọn chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tăng mức ghi nhật ký Wi‑Fi, hiển thị mỗi SSID RSSI trong bộ chọn Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Giảm hao pin và cải thiện hiệu suất mạng"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Thao tác bật/tắt này chỉ ảnh hưởng đến hành vi sắp xếp ngẫu nhiên địa chỉ MAC ở chế độ máy khách.\nKhi bạn kích hoạt chế độ này, tất cả các mạng đã bật tính năng sắp xếp ngẫu nhiên địa chỉ MAC có thể sắp xếp ngẫu nhiên lại địa chỉ MAC của họ trong quá trình liên kết, tùy thuộc vào lần gần đây nhất máy khách ngắt kết nối với mạng. Các mạng này sẽ không thể sắp xếp ngẫu nhiên lại nếu thiết bị kết nối lại trong vòng 4 giờ."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Thao tác bật/tắt này chỉ ảnh hưởng đến hành vi tạo địa chỉ MAC ngẫu nhiên ở chế độ máy khách.\nKhi bạn kích hoạt chế độ này, tất cả các mạng đã bật tính năng tạo địa chỉ MAC ngẫu nhiên có thể tạo lại địa chỉ MAC ngẫu nhiên của chúng trong quá trình liên kết, tùy thuộc vào lần gần đây nhất máy khách ngắt kết nối với mạng. Các mạng này sẽ không thể tạo ngẫu nhiên lại nếu thiết bị kết nối lại trong vòng 4 giờ."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Đo lượng dữ liệu"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Không đo lượng dữ liệu"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Kích thước bộ đệm của trình ghi nhật ký"</string>
@@ -420,8 +420,8 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Mù màu xanh lục nhẹ (đỏ-xanh lục)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Mù màu đỏ không hoàn toàn (đỏ-xanh lục)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Mù màu (xanh lam-vàng)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Sửa màu"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Với chế độ hiệu chỉnh màu sắc, bạn có thể điều chỉnh cách các màu hiển thị trên thiết bị"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Chỉnh màu"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Với chế độ chỉnh màu, bạn có thể điều chỉnh cách các màu hiển thị trên thiết bị"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Bị ghi đè bởi <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -430,10 +430,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g> dựa trên mức sử dụng của bạn (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Pin sẽ hết vào khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Pin sẽ hết vào khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"Pin sẽ hết vào khoảng <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Pin sẽ hết vào khoảng <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Cho đến <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Điện thoại có thể hết pin vào <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Còn lại không đến <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
@@ -447,8 +447,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Máy tính bảng có thể sắp tắt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Thiết bị có thể sắp tắt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Còn <xliff:g id="TIME">%1$s</xliff:g> nữa là sạc xong"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> nữa là sạc xong"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Còn <xliff:g id="TIME">%1$s</xliff:g> nữa là sạc đầy"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> nữa là sạc đầy"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Không xác định"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Đang sạc"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Đang sạc nhanh"</string>

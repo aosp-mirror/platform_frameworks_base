@@ -85,7 +85,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"फ़ोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फ़ाइल स्थानांतरण"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"इनपुट डिवाइस"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इंटरनेट पहुंच"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इंटरनेट ऐक्सेस"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"संपर्क शेयर करना"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"संपर्क साझाकरण के लिए उपयोग करें"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"इंटरनेट कनेक्शन साझाकरण"</string>
@@ -277,7 +277,7 @@
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"निजी डीएनएस"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"निजी डीएनएस मोड चुनें"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"बंद"</string>
-    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"अपने आप"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"अपने-आप"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"निजी डीएनएस सेवा देने वाले का होस्टनाम"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"डीएनएस सेवा देने वाले का होस्टनाम डालें"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"कनेक्‍ट नहीं हो सका"</string>
@@ -433,7 +433,7 @@
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"आपके इस्तेमाल के हिसाब से बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"आपके इस्तेमाल के हिसाब से बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> चलेगी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> चलेगी"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> तक"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"बैटरी <xliff:g id="TIME">%1$s</xliff:g> तक खत्म हो जाएगी"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम समय बचा है"</string>
@@ -460,7 +460,7 @@
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति नहीं है"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात ऐप्लिकेशन इंस्टॉल करने का ऐक्सेस"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने का ऐक्सेस"</string>
     <string name="home" msgid="973834627243661438">"सेटिंग का होम पेज"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

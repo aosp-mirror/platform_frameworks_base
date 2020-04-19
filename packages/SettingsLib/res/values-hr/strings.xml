@@ -430,10 +430,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"Još otprilike <xliff:g id="TIME_REMAINING">%1$s</xliff:g> na temelju vaše upotrebe (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Otprilike bi trebalo trajati do <xliff:g id="TIME">%1$s</xliff:g> na temelju vaše upotrebe (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Otprilike bi trebalo trajati do <xliff:g id="TIME">%1$s</xliff:g> na temelju vaše upotrebe"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"Otprilike bi trebalo trajati do <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Otprilike bi trebalo trajati do <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Na temelju vaše upotrebe trebala bi trajati do <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Na temelju vaše upotrebe trebala bi trajati do <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"Trebala bi trajati do <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Trebala bi trajati do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Baterija bi se mogla isprazniti do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Preostalo je manje od <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>

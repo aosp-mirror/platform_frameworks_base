@@ -276,7 +276,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS privato"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Seleziona modalità DNS privato"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"OFF"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"Off"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatico"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome host del provider DNS privato"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Inserisci il nome host del provider DNS"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta livello di logging Wi-Fi, mostra SSID RSSI nel selettore Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Riduce il consumo della batteria e migliora le prestazioni della rete"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Questa opzione influenza il comportamento della randomizzazione MAC solo nella modalità client.\nQuando questa modalità è attiva, durante l\'associazione gli indirizzi MAC di tutte le reti con randomizzazione MAC abilitata potrebbero essere nuovamente sottoposti a randomizzazione, a seconda di quando il client è stato disconnesso l\'ultima volta dalla rete. La randomizzazione non viene eseguita nuovamente se il dispositivo si riconnette entro quattro ore o meno."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Questa opzione influenza il comportamento della randomizzazione MAC solo nella modalità client.\nQuando questa modalità è attiva, durante l\'associazione gli indirizzi MAC di tutte le reti con randomizzazione MAC abilitata potrebbero essere nuovamente sottoposti a randomizzazione, a seconda di quando il client è stato disconnesso l\'ultima volta dalla rete. La randomizzazione non viene eseguita nuovamente se il dispositivo si riconnette entro quattro ore."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"A consumo"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non a consumo"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensioni buffer logger"</string>
@@ -458,7 +458,7 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"Carica"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Gestita dall\'amministratore"</string>
     <string name="disabled" msgid="8017887509554714950">"Disattivato"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Consentite"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Autorizzate"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Non consentite"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Installa app sconosciute"</string>
     <string name="home" msgid="973834627243661438">"Home page Impostazioni"</string>
@@ -543,7 +543,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Aggiungi"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Nuovo utente"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Nuovo profilo"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Dati utente"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Informazioni utente"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informazioni profilo"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Prima di poter creare un profilo con limitazioni, devi impostare un blocco schermo per proteggere le tue app e i tuoi dati personali."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Imposta blocco"</string>

@@ -251,7 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"សេចក្តីបញ្ជាក់ការបង្ហាញ​ឥត​ខ្សែ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"បើក​កំណត់ហេតុ​រៀបរាប់​ Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ការពន្យឺតការស្កេន Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ការតម្រៀប MAC ដែលបានកែលម្អ Wi-Fi តាមលំដាប់ចៃដន្យ"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ការតម្រៀប MAC តាមលំដាប់ចៃដន្យដែលកែលម្អតាម Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ទិន្នន័យទូរសព្ទចល័តដំណើរការជានិច្ច"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ការ​បង្កើនល្បឿន​ផ្នែករឹងសម្រាប់​ការភ្ជាប់"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"បង្ហាញ​ឧបករណ៍​ប្ល៊ូធូស​គ្មានឈ្មោះ"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"បង្ហាញ​ជម្រើស​សម្រាប់​សេចក្តីបញ្ជាក់ការបង្ហាញ​ឥត​ខ្សែ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"បង្កើនកម្រិតកំណត់ហេតុ Wi-Fi បង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើសរើស Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"កាត់បន្ថយ​ការប្រើប្រាស់ថ្ម និងកែលម្អប្រតិបត្តិការ​បណ្ដាញ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ការបិទ/បើកនេះ​ប៉ះពាល់​ដល់សកម្មភាព​តម្រៀប MAC តាមលំដាប់​ចៃដន្យសម្រាប់មុខងារភ្ញៀវតែប៉ុណ្ណោះ។\nនៅពេលបើកដំណើរការមុខងារនេះ បណ្ដាញ​ទាំងឡាយដែល​បានបើក​ការតម្រៀប MAC តាមលំដាប់​ចៃដន្យប្រហែលជាត្រូវបានតម្រៀបអាសយដ្ឋាន MAC របស់វាតាមលំដាប់​ចៃដន្យឡើងវិញ អំឡុពេលភ្ជាប់ ដោយផ្អែកលើពេលវេលាដែលភ្ញៀវបានផ្ដាច់លើកចុងក្រោយពីបណ្ដាញ។ ការតម្រៀប​តាមលំដាប់​ចៃដន្យឡើងវិញ​មិនកើតឡើងទេ ប្រសិនបើ​ឧបករណ៍​ភ្ជាប់ឡើងវិញ​ក្នុងរយៈពេល 4 ម៉ោង ឬ​ឆាប់ជាងនេះ។"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ការបិទ/បើកនេះ​ប៉ះពាល់​ដល់សកម្មភាព​តម្រៀប MAC តាមលំដាប់​ចៃដន្យសម្រាប់មុខងារភ្ញៀវតែប៉ុណ្ណោះ។\nនៅពេលបើកដំណើរការមុខងារនេះ បណ្ដាញ​ទាំងឡាយដែល​បានបើក​ការតម្រៀប MAC តាមលំដាប់​ចៃដន្យប្រហែលជាត្រូវបានតម្រៀបអាសយដ្ឋាន MAC របស់វាតាមលំដាប់​ចៃដន្យឡើងវិញ អំឡុងពេលភ្ជាប់ ដោយផ្អែកលើពេលវេលាដែលមុខងារភ្ញៀវបានផ្ដាច់លើកចុងក្រោយពីបណ្ដាញ។ ការតម្រៀប​តាមលំដាប់​ចៃដន្យឡើងវិញ​មិនកើតឡើងទេ ប្រសិនបើ​ឧបករណ៍​ភ្ជាប់ឡើងវិញ​ក្នុងរយៈពេល 4 ម៉ោង ឬ​ឆាប់ជាងនេះ។"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"មានការកំណត់"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"មិនមានការកំណត់"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ទំហំកន្លែងផ្ទុករបស់ logger"</string>

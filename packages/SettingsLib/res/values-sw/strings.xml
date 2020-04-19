@@ -487,7 +487,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Hali ya usajili wa IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Imesajiliwa"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Haijasajiliwa"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Hapatikani"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Haipatikani"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Imechagua anwani ya MAC kwa nasibu"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="other">Imeunganisha vifaa %1$d</item>
@@ -533,7 +533,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Mtumiaji"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Wasifu uliozuiwa"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Ungependa kuongeza mtumiaji?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Unaweza kutumia kifaa hiki pamoja na watu wengine kwa kuongeza watumiaji wa ziada. Kila mtumiaji ana nafasi yake mwenyewe, ambayo anaweza kuweka programu, mandhari na vipengee vingine anavyopenda. Watumiaji pia wanaweza kurekebisha mipangilio ya kifaa inayoathiri kila mtu kama vile Wi-Fi.\n\nUnapomwongeza mtumiaji mpya, mtu huyo anahitaji kujitayarishia nafasi yake.\n\nMtumiaji yeyote anaweza kuwasasishia watumiaji wengine wote programu. Huenda mipangilio na huduma za walio na matatizo ya kuona na kusikia zisihamishiwe mtumiaji mgeni."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Unaweza kutumia kifaa hiki pamoja na watu wengine kwa kuongeza watumiaji wa ziada. Kila mtumiaji ana nafasi yake mwenyewe, ambayo anaweza kuweka programu, mandhari na vipengee vingine anavyopenda. Watumiaji pia wanaweza kurekebisha mipangilio ya kifaa inayoathiri kila mtu kama vile Wi-Fi.\n\nUnapomwongeza mtumiaji mpya, mtu huyo anahitaji kujitayarishia nafasi yake.\n\nMtumiaji yeyote anaweza kuwasasishia watumiaji wengine wote programu. Huenda mipangilio na huduma za ufikivu zisihamishiwe mtumiaji mgeni."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Mtumiaji mpya utakayemwongeza atahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Mtumiaji aongezwe sasa?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Hakikisha kuwa mtu huyu anaweza kuchukua kifaa na kuweka mapendeleo yake"</string>

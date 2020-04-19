@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏تفعيل تسجيل Wi‑Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏تقييد البحث عن شبكات Wi-Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏التوزيع العشوائي لعنوان MAC الذي تدعمه شبكة Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"تسريع الأجهزة للتوصيل"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"عرض أجهزة البلوتوث بدون أسماء"</string>
@@ -276,7 +275,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"‏اختيار برنامج ترميز LDAC\nلصوت مشغّل البلوتوث: جودة التشغيل"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"البث: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"نظام أسماء النطاقات الخاص"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"تحديد وضع \"نظام أسماء النطاقات الخاص\""</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"اختيار وضع \"نظام أسماء النطاقات الخاص\""</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"غير مفعّل"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"تلقائي"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"اسم مضيف مزوّد \"نظام أسماء النطاقات الخاص\""</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"لتقليل استنفاد البطارية وتحسين أداء الشبكة."</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"‏يؤثر مفتاح التبديل هذا في سلوك التوزيع العشوائي لعنوان MAC في وضع العميل فقط.\nعند تفعيل هذا الوضع، قد تتم عشوائيًا إعادة توزيع عناوين MAC أثناء الربط على أي شبكات تم تفعيل ميزة التوزيع العشوائي لعناوين MAC عليها، ويعتمد ذلك على آخر مرة تم فصل العميل فيها من الشبكة. لن تتم إعادة التوزيع العشوائي إذا تمت إعادة اتصال الجهاز خلال 4 ساعات أو أقل."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"تفرض تكلفة استخدام"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"بدون قياس"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>

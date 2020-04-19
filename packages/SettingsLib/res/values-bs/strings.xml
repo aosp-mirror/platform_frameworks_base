@@ -93,7 +93,7 @@
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Pristup SIM-u"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni aparat"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni aparati"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Povezan na slušne aparate"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Povezano sa zvukom medija"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Povezano na zvuk telefona"</string>
@@ -161,7 +161,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Visina glasa"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Utiče na ton sintetiziranog govora"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Jezik"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Korištenje sistemskog jezika"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Koristi jezik sistema"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Jezik nije izabran"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Postavlja glas za dati jezik za izgovoreni tekst"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Poslušajte primjer"</string>
@@ -421,7 +421,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalija (crveno-zeleno)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalija (plavo-žuto)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Ispravka boje"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Korekcija boje vam dozvoljava da prilagodite način prikazivanja boja na uređaju"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Ispravka boje vam dozvoljava da prilagodite način prikazivanja boja na uređaju"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Zamjenjuje <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Preostalo je još oko <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -534,7 +534,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Korisnik"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Ograničeni profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Dodati novog korisnika?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Za dijeljenje ovog uređaja s drugima možete napraviti dodatne korisnike. Svaki korisnik ima svoj prostor koji može prilagoditi pomoću aplikacija, pozadinske slike i slično. Korisnici također mogu prilagoditi postavke uređaja koje utiču na sve ostale korisnike, kao što je WiFi.\n\nKada dodate novog korisnika, ta osoba treba postaviti svoj prostor.\n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike. Postavke i usluge pristupačnosti možda se neće prenijeti na novog korisnika."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ovaj uređaj možete dijeliti s drugima ako napravite dodatne korisnike. Svaki korisnik ima svoj prostor koji može prilagoditi pomoću aplikacija, pozadinske slike i slično. Korisnici također mogu prilagoditi postavke uređaja koje utiču na sve ostale korisnike, kao što je WiFi.\n\nKada dodate novog korisnika, ta osoba treba postaviti svoj prostor.\n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike. Postavke i usluge pristupačnosti možda se neće prenijeti na novog korisnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kada dodate novog korisnika, ta osoba treba postaviti svoj prostor. \n\n Svaki korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Postaviti korisnika sada?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Provjerite može li osoba uzeti uređaj i postaviti svoj prostor"</string>
@@ -544,7 +544,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Dodaj"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Novi korisnik"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Novi profil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Podaci o korisniku"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Informacije o korisniku"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informacije o profilu"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Prije nego vam se omogući kreiranje ograničenog profila, morate postaviti zaključavanje ekrana da biste zaštitili svoje aplikacije i lične podatke."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Postaviti zaključavanje"</string>

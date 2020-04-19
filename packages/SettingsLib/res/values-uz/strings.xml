@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Wi-Fi orqali debagging"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Mavjud qurilmalarni koʻrish va ulardan foydalanish uchun Wi-Fi orqali debagging funksiyasini yoqing"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR kod yordamida qurilmani ulang"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR kod skaneri yordamida yangi qurilmalarni ulash mumkin"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR kod skaneri yordamida yangi qurilmalarni ulang"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Ulanish kodi yordamida qurilmani ulang"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Olti xonali kod yordamida yangi qurilmalarni ulash mumkin"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Ulangan qurilmalar"</string>
@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Simsiz monitor sertifikatlari"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Batafsil Wi-Fi jurnali"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi tarmoqni taqsimlab skanlash"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi tarmoqdagi tasodifiy MAC manzil"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobil internet doim yoniq tursin"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Modem rejimida apparatli tezlashtirish"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth qurilmalarini nomlarisiz ko‘rsatish"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Simsiz monitorlarni sertifikatlash parametrini ko‘rsatish"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi ulanishini tanlashda har bir SSID uchun jurnalda ko‘rsatilsin"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Batareya sarfini tejaydi va tarmoq samaradorligini oshiradi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Bu sozlama faqat mijoz rejimida tasodifiy MAC manzillardan foydalanishga taʼsir qiladi.\nHar qanday tarmoqqa ulanishda mijoz oxirgi marta tarmoqdan qachon uzilganiga qarab tasodifiy MAC manzili qayta yaratiladi. Agar ulanish 4 soat yoki kamroq davom etsa, tasodifiy MAC manzili qayta yaratilmaydi."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Trafik hisoblanadigan tarmoq"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Trafik hisobi yuritilmaydigan tarmoq"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Jurnal buferi hajmi"</string>

@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ୱାୟାରଲେସ୍ ଡିବଗିଂ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ଉପଲବ୍ଧ ଡିଭାଇସଗୁଡ଼ିକୁ ଦେଖିବାକୁ ଏବଂ ବ୍ୟବହାର କରିବାକୁ ୱାୟାରଲେସ୍ ଡିବଗିଂ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR କୋଡରେ ଡିଭାଇସକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR କୋଡ୍ ସ୍କାନର୍ ବ୍ୟବହାର କରି ନୂଆ ଡିଭାଇସଗୁଡ଼ିକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ପେୟାରିଂ କୋଡରେ ଡିଭାଇସକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ଛଅ ଡିଜିଟ୍ କୋଡ୍ ବ୍ୟବହାର କରି ନୂଆ ଡିଭାଇସଗୁଡ଼ିକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"ପେୟାର୍ ହୋଇଥିବା ଡିଭାଇସଗୁଡ଼ିକ"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ଡିଭାଇସରୁ ପେୟାର୍ ହେବାରେ ବିଫଳ ହୋଇଛି। QR କୋଡ୍ ସଠିକ୍ ନଥିଲା ବା ଡିଭାଇସ୍ ସମାନ ନେଟୱାର୍କରେ ସଂଯୋଗ ହୋଇନାହିଁ।"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ଠିକଣା ଓ ପୋର୍ଟ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR କୋଡ୍ ସ୍କାନ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"ଏକ QR କୋଡ୍ ସ୍କାନ୍ କରି ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ ଡିଭାଇସ୍ ପେୟାର୍ କରନ୍ତୁ"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ଦୟାକରି ଏକ ୱାଇ-ଫାଇ ନେଟୱାର୍କରେ ସଂଯୋଗ କରନ୍ତୁ"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ଡିବଗ୍, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ବଗ୍ ରିପୋର୍ଟ ସର୍ଟକଟ୍‌"</string>
@@ -282,7 +280,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"ଅଫ୍"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"ସ୍ଵଚାଳିତ"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"ବ୍ୟକ୍ତିଗତ DNS ପ୍ରଦାତା ହୋଷ୍ଟନାମ"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ପ୍ରଦାନକାରୀଙ୍କ ହୋଷ୍ଟନାମ ପ୍ରବେଶ କରନ୍ତୁ"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ପ୍ରଦାନକାରୀଙ୍କ ହୋଷ୍ଟନାମ ଲେଖନ୍ତୁ"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"କନେକ୍ଟ କରିହେଲା ନାହିଁ"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ୱେୟାରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସାର୍ଟିଫିକେସନ୍ ପାଇଁ ବିକଳ୍ପ ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ୱାଇ-ଫାଇ ଲଗିଙ୍ଗ ସ୍ତର ବଢ଼ାନ୍ତୁ, ୱାଇ-ଫାଇ ପିକର୍‌ରେ ପ୍ରତି SSID RSSI ଦେଖାନ୍ତୁ"</string>
@@ -377,10 +375,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ \"ଆପ୍‌ ଉତ୍ତର ଦେଉନାହିଁ\" ଡାୟଲଗ୍‌ ଦେଖାନ୍ତୁ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ବିଜ୍ଞପ୍ତି ଚେନାଲ୍ ଚେତାବନୀ ଦେଖାନ୍ତୁ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ବୈଧ ଚ୍ୟାନେଲ୍‌ ବିନା ଗୋଟିଏ ଆପ୍‌ ଏକ ବିଜ୍ଞପ୍ତି ପୋଷ୍ଟ କରିବାବେଳେ ଅନ୍‌-ସ୍କ୍ରୀନ୍‌ ସତର୍କତା ଦେଖାଏ"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ବାର୍ତ୍ତାଳାପ ବିଜ୍ଞପ୍ତି ପାଇଁ ସର୍ଟକଟ ଲାଗୁ କରନ୍ତୁ"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ବାର୍ତ୍ତାଳାପ ବିଭାଗରେ ଦେଖାଯିବା ପାଇଁ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଏକ ଦୀର୍ଘ-ସ୍ଥାୟୀ ସେୟାରିଂ ସର୍ଟକଟର ସମର୍ଥନ ଆବଶ୍ୟକ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ଆପ୍‌କୁ ଏକ୍ସଟର୍ନଲ୍ ମେମୋରୀରେ ଫୋର୍ସ୍ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ଯେକୌଣସି ଆପ୍‌କୁ ଏକ୍ସଟର୍ନଲ୍ ଷ୍ଟୋରେଜ୍‌ରେ ଲେଖାଯୋଗ୍ୟ କରନ୍ତୁ, ମେନିଫେଷ୍ଟ ମୂଲ୍ୟ ଯାହା ହୋଇଥାଉ ନା କାହିଁକି"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ୱିଣ୍ଡୋ ହିସାବରେ କାର୍ଯ୍ୟକଳାପର ଆକାର ବଦଳାନ୍ତୁ"</string>
