@@ -1478,6 +1478,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Zahteva <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Da"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ne"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Premašeno je ograničenje za brisanje"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Postoje izbrisane stavke (<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>) za <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, nalog <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Šta želite da uradite?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Izbriši stavke"</string>
@@ -1815,7 +1821,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Radi dužeg trajanja baterije, ušteda baterije:\n·uključuje tamnu temu\n·isključuje ili ograničava aktivnosti u pozadini, neke vizuelne efekte i druge funkcije, na primer, „Ok Google“\n\n"<annotation id="url">"Saznajte više"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Radi dužeg trajanja baterije, ušteda baterije:\n·uključuje tamnu temu\n·isključuje ili ograničava aktivnosti u pozadini, neke vizuelne efekte i druge funkcije, na primer, „Ok Google“"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjila potrošnja podataka, Ušteda podataka sprečava neke aplikacije da šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može da pristupa podacima, ali će to činiti ređe. Na primer, slike se neće prikazivati dok ih ne dodirnete."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Želite da uključite Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%1$d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

@@ -212,7 +212,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"Hidupkan nirkabel"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Matikan nirkabel"</string>
     <string name="screen_lock" msgid="2072642720826409809">"Kunci layar"</string>
-    <string name="power_off" msgid="4111692782492232778">"Matikan perangkat"</string>
+    <string name="power_off" msgid="4111692782492232778">"Matikan"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Pendering mati"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Pendering bergetar"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"Pendering nyala"</string>
@@ -236,7 +236,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Opsi Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opsi telepon"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Kunci layar"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"Matikan perangkat"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"Matikan"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Daya"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Mulai ulang"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Darurat"</string>
@@ -510,7 +510,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Memungkinkan aplikasi menyambungkan tablet ke dan memutus tablet dari jaringan WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Mengizinkan aplikasi menghubungkan perangkat Android TV ke, dan memutuskan hubungan perangkat Android TV dari, jaringan WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Memungkinkan aplikasi menyambungkan ponsel ke dan memutus ponsel dari jaringan WiMAX."</string>
-    <string name="permlab_bluetooth" msgid="586333280736937209">"sandingkan dengan perangkat Bluetooth"</string>
+    <string name="permlab_bluetooth" msgid="586333280736937209">"sambungkan dengan perangkat Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Memungkinkan aplikasi melihat konfigurasi Bluetooth di tablet, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Mengizinkan aplikasi melihat konfigurasi Bluetooth di perangkat Android TV, serta melakukan dan menerima sambungan dengan perangkat yang tersambung."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Memungkinkan aplikasi melihat konfigurasi Bluetooth di ponsel, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Diminta oleh <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Ya"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Tidak"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Penghapusan melebihi batas"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Terdapat <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> item yang dihapus untuk <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, akun <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Apa yang ingin Anda lakukan?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Hapus item"</string>
@@ -1518,7 +1524,7 @@
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Anda telah menggunakan <xliff:g id="SIZE">%s</xliff:g> melebihi batas yang ditetapkan"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Data latar belakang dibatasi"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Ketuk untuk menghapus batasan."</string>
-    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Penggunaan kuota yang tinggi"</string>
+    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Penggunaan data seluler tinggi"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Aplikasi Anda menggunakan lebih banyak kuota daripada biasanya"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> menggunakan lebih banyak kuota daripada biasanya"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Sertifikat keamanan"</string>
@@ -1791,8 +1797,8 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Oke"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Untuk memperpanjang masa pakai baterai, Penghemat Baterai:\n·Mengaktifkan Tema gelap\n·Menonaktifkan atau membatasi aktivitas di latar belakang, beberapa efek visual, dan fitur lain seperti “Ok Google”\n\n"<annotation id="url">"Pelajari lebih lanjut"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Untuk memperpanjang masa pakai baterai, Penghemat Baterai:\n·Mengaktifkan Tema gelap\n·Menonaktifkan atau membatasi aktivitas di latar belakang, beberapa efek visual, dan fitur lain seperti “Ok Google”"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangi penggunaan kuota, Penghemat Kuota Internet mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah diketuk."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Aktifkan Penghemat Kuota?"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangi penggunaan data, Penghemat Data mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah diketuk."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Aktifkan Penghemat Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktifkan"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Selama %1$d menit (hingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

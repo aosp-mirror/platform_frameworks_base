@@ -1459,6 +1459,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"បាន​ស្នើ​ដោយ <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"បាទ/ចាស"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"ទេ"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"លុប​​លើស​ដែន​កំណត់"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"មាន​ធាតុ​បាន​លុប <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> សម្រាប់ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> គណនី <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> ។ តើ​អ្នក​ចង់​ធ្វើ​អ្វី​ខ្លះ​?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"លុប​ធាតុ"</string>
@@ -1794,7 +1800,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម កម្មវិធី​សន្សំ​ថ្ម៖\n·បើករចនាប័ទ្មងងឹត​\n·បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Hey Google” ជាដើម\n\n"<annotation id="url">"ស្វែងយល់បន្ថែម"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម កម្មវិធី​សន្សំ​ថ្ម៖\n·បើករចនាប័ទ្មងងឹត​\n·បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Hey Google” ជាដើម"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យឬ?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"បើក"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">រយៈពេល %1$d នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

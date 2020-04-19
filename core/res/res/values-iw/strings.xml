@@ -577,7 +577,7 @@
     <string name="permdesc_manageFace" msgid="6204569688492710471">"מאפשרת לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות פנים שבהן ייעשה שימוש."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"שימוש בחומרה לשחרור נעילה על ידי זיהוי פנים"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"מאפשרת לאפליקציה להשתמש בחומרה לשחרור נעילה על ידי זיהוי פנים לצורך אימות"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"שחרור נעילה על ידי זיהוי פנים"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"שחרור נעילה בזיהוי פנים"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"יש לבצע רישום מחדש של הפנים שלך"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"לשיפור הזיהוי יש לבצע רישום מחדש של הפנים שלך"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"לא ניתן היה לקלוט את הפנים במדויק. יש לנסות שוב."</string>
@@ -1499,6 +1499,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"מבוקש על ידי <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"כן"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"לא"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"חרגת ממגבלת המחיקה"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"יש <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> פריטים שנמחקו עבור <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> , בחשבון <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. איזו פעולה ברצונך לבצע?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"מחק את הפריטים"</string>
@@ -1838,7 +1844,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏התכונה \'חיסכון בסוללה\':\n·מפעילה עיצוב כהה\n·מכבה או מגבילה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות כמו \"Ok Google\", כדי להאריך את חיי הסוללה\n\n"<annotation id="url">"מידע נוסף"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"‏התכונה \'חיסכון בסוללה\':\n·מפעילה עיצוב כהה\n·מכבה או מגבילה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות כמו \"Ok Google\", כדי להאריך את חיי הסוללה"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה נעשה שימוש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"‏האם להפעיל את חוסך הנתונים (Data Saver)?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"להפעיל את חוסך הנתונים?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"הפעל"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="two">‏למשך %d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

@@ -1499,6 +1499,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Żądane przez <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Tak"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nie"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Przekroczono limit usuwania"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Usuwasz <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elementy(ów) przez: <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> (konto: <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>). Co chcesz zrobić?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Usuń elementy."</string>
@@ -1836,7 +1842,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n włącza tryb ciemny, \nwyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n włącza tryb ciemny,\n wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n· włącza tryb ciemny,\n· wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Włącz"</string>

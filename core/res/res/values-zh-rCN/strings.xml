@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"请求人：<xliff:g id="NAME">%1$s</xliff:g>（<xliff:g id="SERVICE">%2$s</xliff:g>）"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"是"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"否"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"超出删除限制"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"帐号 <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 在进行“<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>”同步时删除了 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> 项内容。您要如何处理这些删除的内容？"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"删除这些内容"</string>

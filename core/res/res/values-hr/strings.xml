@@ -1478,6 +1478,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Zatražio <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Da"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ne"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Prekoračeno je ograničenje za brisanje"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Postoji sljedeći broj izbrisanih stavki: <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> za vrstu sinkronizacije <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> i račun <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Što želite učiniti?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Izbriši ove stavke"</string>
@@ -1813,9 +1819,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"U redu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·Uključuje Tamnu temu.\n·Isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\".\n\n"<annotation id="url">"Saznajte više"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·Uključuje Tamnu temu.\n·Isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\"."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·uključuje Tamnu temu\n·isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjio podatkovni promet, značajka Štednja podatkovnog prometa onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Štednju podatkovnog prometa?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%1$d minutu (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

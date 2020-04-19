@@ -242,7 +242,7 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"Urgences"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Rapport de bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Fermer la session"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"Capture"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"Capture d\'écran"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Rapport de bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme d\'e-mail. Merci de patienter pendant la préparation du rapport de bug. Cette opération peut prendre quelques instants."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Rapport interactif"</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Demande de <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Oui"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Non"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Le nombre maximal de suppressions a été atteint."</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> éléments vont être supprimés lors de la synchronisation <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> pour le compte <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Que voulez-vous faire ?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Supprimer les éléments"</string>

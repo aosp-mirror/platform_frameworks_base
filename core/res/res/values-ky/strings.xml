@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="7542498253319440408">"Узундугу 4төн 8ге чейинки сандан турган PIN-кодду териңиз."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Узундугу 8 же көбүрөөк сандан турган PUK-кодду териңиз."</string>
     <string name="needPuk" msgid="7321876090152422918">"SIM-картаңыз PUK менен кулпуланган. Кулпусун ачуу үчүн PUK-кодду териңиз."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"SIM-картаны бөгөттөн чыгаруу үчүн PUK2 кодун териңиз."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"SIM картаны бөгөттөн чыгаруу үчүн PUK2 кодун териңиз."</string>
     <string name="enablePin" msgid="2543771964137091212">"Оңунан чыкпады, SIM/RUIM бөгөттөөсүн жандырыңыз."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Сизде SIM кулпуланганга чейин <xliff:g id="NUMBER_1">%d</xliff:g> аракет калды.</item>
@@ -238,7 +238,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Экран кулпусу"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Өчүрүү"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Кубат"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Кайра баштоо"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Өчүрүп күйгүзүү"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Тез жардам"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Ката тууралуу билдирүү"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Сеансты бүтүрүү"</string>
@@ -375,8 +375,8 @@
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Бул колдонмо башка колдонмолордун же экрандын башка бөлүгүнүн үстүндө көрүнүшү мүмкүн. Ал колдонмолорду пайдаланууга же алардын көрсөтүлүшүнө тоскоолдук жаратышы мүмкүн."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"фондо иштей берсин"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Бул колдонмо фондо иштей берет. Батареяңыз тез эле отуруп калышы мүмкүн."</string>
-    <string name="permlab_useDataInBackground" msgid="783415807623038947">"фондо дайындарды өткөрө берсин"</string>
-    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Бул колдонмо фондо дайындарды өткөрө берет. Дайындарды көбүрөөк өткөрүшү мүмкүн."</string>
+    <string name="permlab_useDataInBackground" msgid="783415807623038947">"фондо дайын-даректерди өткөрө берсин"</string>
+    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Бул колдонмо фондо дайын-даректерди өткөрө берет. Дайындарды көбүрөөк өткөрүшү мүмкүн."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"колдонмону үзгүлтүксүз иштетүү"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Колдонмого өзүнүн бөлүктөрүн эстутумда туруктуу кармоого уруксат берет.Бул эстутумдун башка колдонмолорго жетиштүүлүгүн чектеши жана телефондун иштешин жайлатышы мүмкүн."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Колдонмого өз бөлүктөрүн эстутумда туруктуу сактоого уруксат берет. Бул башка колдонмолор үчүн жеткиликтүү болгон эстутумду чектеп, Android TV түзмөгүңүздүн иштешин жайлатышы мүмкүн."</string>
@@ -407,14 +407,14 @@
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Бул колдонмо чалууларыңыздын таржымалын окуй алат."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"чалуулар тизмегин жаздыруу"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Колдонмого планшетиңиздин чалуулар тизмегин, анын ичинде, чыгыш жана кириш чалууларына тиешелүү берилиштерди өзгөртүү уруксатын берет. Зыяндуу колдонмолор муну колдонуп чалуулар тизмегин өзгөртө же жок кыла алышат."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Колдонмого Android TV түзмөгүңүздүн чалуулар тизмесин, анын ичинде кирүүчү жана чыгуучу чалуулар тууралуу дайындарды өзгөртүүгө уруксат берет. Зыянкеч колдонмолор ал уруксатты колдонуп чалуулар тизмеңизди тазалап же өзгөртүп коюшу мүмкүн."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Колдонмого Android TV түзмөгүңүздүн чалуулар тизмесин, анын ичинде кирүүчү жана чыгуучу чалуулар тууралуу дайын-даректерди өзгөртүүгө уруксат берет. Зыянкеч колдонмолор ал уруксатты колдонуп чалуулар тизмеңизди тазалап же өзгөртүп коюшу мүмкүн."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Колдонмого телефонуңуздун чалуулар тизмегин, анын ичинде, чыгыш жана кириш чалууларына тиешелүү берилиштерди өзгөртүү уруксатын берет. Зыяндуу колдонмолор муну колдонуп чалуулар тизмегин өзгөртө же жок кыла алышат."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"дене-бой сенсорлоруна (жүрөктүн кагышын өлчөгүчтөр сыяктуу) уруксат"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Колдонмого жүрөгүңүздүн согушу сыяктуу дене-бой абалыңызды көзөмөлдөгөн сенсорлордогу дайындарды көрүп туруу мүмкүнчүлүгүн берет."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Колдонмого жүрөгүңүздүн согушу сыяктуу дене-бой абалыңызды көзөмөлдөгөн сенсорлордогу дайын-даректерди көрүп туруу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Жылнаамадагы иш-чараларды жана алардын чоо-жайын окуу"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Бул колдонмо планшетиңизде сакталган жылнаамадагы иш-чаралардын баарын окуп жана андагы дайындарды бөлүшүп же сактай алат."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Бул колдонмо планшетиңизде сакталган жылнаамадагы иш-чаралардын баарын окуп жана андагы дайын-даректерди бөлүшүп же сактай алат."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Бул колдонмо Android TV түзмөгүңүздө сакталган жылнаама иш-чараларынын баарын окуп, ошондой эле жылнаама дайындарын бөлүшүп же сактай алат."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"Бул колдонмо телефонуңузда сакталган жылнаамадагы иш-чаралардын баарын окуп жана андагы дайындарды бөлүшүп же сактай алат."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"Бул колдонмо телефонуңузда сакталган жылнаамадагы иш-чаралардын баарын окуп жана андагы дайын-даректерди бөлүшүп же сактай алат."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"ээсинен уруксат албай, күнбаракка иш-аракеттерди кошуу же өзгөртүү жана конокторго чакыруу жөнөтүү"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Бул колдонмо планшетиңизге жылнаама иш-чараларын кошуп, алып салып же өзгөртүшү мүмкүн. Бул колдонмо жылнаама ээсинин атынан билдирүүлөрдү жөнөтүп же ээсине эскертпестен иш-чараларды өзгөртүшү мүмкүн."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"Бул колдонмо Android TV түзмөгүңүзгө жылнаама иш-чараларын кошуп, ошондой эле аларды өчүрүшү же өзгөртүшү мүмкүн. Бул колдонмо жылнаама ээсинин атынан билдирүүлөрдү жөнөтүп же ээсине эскертпестен иш-чараларды өзгөртүшү мүмкүн."</string>
@@ -523,11 +523,11 @@
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"экранды бөгөттөөнүн татаалдык деңгээлин суроо"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Колдонмого экранды бөгөттөөнүн татаалдыгын (татаал, орточо, оңой же такыр жок) үйрөнүүгө мүмкүнчүлүк берет. Татаалдык деңгээли сырсөздүн узундугу жана экранды бөгөттөөнүн түрү боюнча айырмаланат. Колдонмо экранды бөгөттөөнү белгилүү деңгээлге тууралоону колдонуучуларга сунуштай да алат, бирок колдонуучулар ага көңүл бурбай койсо болот. Сырсөздү колдонмо билбеши үчүн, экранды бөгөттөө сырсөзүн кадимки текстте сактоого болбойт."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"биометрикалык аппаратты колдонуу"</string>
-    <string name="permdesc_useBiometric" msgid="7502858732677143410">"Колдонмого аныктыгын текшерүү үчүн биометрикалык аппаратты пайдалануу мүмкүндүгүн берет"</string>
+    <string name="permdesc_useBiometric" msgid="7502858732677143410">"Колдонмого аныктыгын текшерүү үчүн, биометрикалык аппаратты пайдалануу мүмкүндүгүн берет"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"манжа изинин аппараттык камсыздоосун башкаруу"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Колдонмого пайдалануу үчүн манжа изинин үлгүлөрүн кошуу жана жок кылуу мүмкүндүгүн берет."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"манжа изинин аппараттык камсыздоосун колдонуу"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Колдонмого аныктыгын текшерүү үчүн манжа изинин аппараттык камсыздоосун пайдалануу мүмкүндүгүн берет"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Колдонмого аныктыгын текшерүү үчүн, манжа изинин аппараттык камсыздоосун пайдалануу мүмкүндүгүн берет"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"музыка жыйнагыңызды өчүрүү"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"Колдонмого музыка жыйнагыңызды өзгөртүүгө мүмкүнчүлүк берет."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"видео жыйнагыңызды өзгөртүү"</string>
@@ -672,9 +672,9 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Сырсөз эрежелерин коюу"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Экран кулпусун ачуу аракеттерин көзөмөлдөө"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн санын текшерип, эгер алардын саны өтө эле көп болсо, планшетти кулпулаңыз же планшеттеги бардык дайындарды тазалап салыңыз."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн санын текшерип, эгер алардын саны өтө эле көп болсо, планшетти кулпулаңыз же планшеттеги бардык дайын-даректерди тазалап салыңыз."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Экрандын кулпусун ачуу учурунда сырсөздөр канча жолу туура эмес терилгенин тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, Android TV түзмөгүңүздү кулпулап же Android TV түзмөгүңүздөгү бардык дайын-даректериңизди тазалап салуу."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн санын текшерип, эгер алардын саны өтө эле көп болсо, телефонду кулпулаңыз же телефондогу бардык дайындарды тазалап салыңыз."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн санын текшерип, эгер алардын саны өтө эле көп болсо, телефонду кулпулаңыз же телефондогу бардык дайын-даректерди тазалап салыңыз."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, планшетти кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Экрандын кулпусун ачуу учурунда сырсөздөр канча жолу туура эмес терилгенин тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, Android TV түзмөгүңүздү кулпулап же колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, телефонду кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
@@ -683,9 +683,9 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Экранды кулпулоо"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Экран качан жана кантип кулпулана турганын башкарат."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Бардык маалыматты өчүрүү"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Алдын-ала эскертпестен, баштапкы абалга келтирүү функциясы менен планшеттеги бардык дайындарды өчүрөт."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Алдын-ала эскертпестен, баштапкы абалга келтирүү функциясы менен планшеттеги бардык дайын-даректерди өчүрөт."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Android TV түзмөгүңүздүн дайындарын эскертүүсүз кайра башынан жөндөө аркылуу тазалоо."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Алдын-ала эскертпестен, баштапкы абалга келтирүү функциясы менен телефондогу бардык дайындарды өчүрөт."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Алдын-ала эскертпестен, баштапкы абалга келтирүү функциясы менен телефондогу бардык дайын-даректерди өчүрөт."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Колдонуучунун дайындарын тазалоо"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Бул колдонуучунун ушул планшеттеги дайындарын эскертүүсүз тазалоо."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Бул Android TV түзмөгүндөгү бул колдонуучу дайындарын эскертүүсүз тазалоо."</string>
@@ -840,8 +840,8 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Планшетте SIM-карта жок."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV түзмөгүңүздө SIM-карта жок."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Телефондо SIM-карта жок."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM-картаны салыңыз."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-карта жок же ал окулбайт. SIM-картаны салыңыз."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM картаны салыңыз."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-карта жок же ал окулбайт. SIM картаны салыңыз."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Жараксыз SIM-карта."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM картаңыз биротоло өчүрүлдү.\n Башка SIM карта алыш үчүн зымсыз тейлөөчүгө кайрылыңыз."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Мурунку трек"</string>
@@ -1216,18 +1216,18 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> иштетүүсүнүн үймө дампы сиз үчүн бөлүшүүгө даяр. Абайлаңыз: бул үймө дампты иштетүү процессинде окула турган купуя жеке, анын ичинде терип киргизген маалыматыңыз камтылышы мүмкүн."</string>
     <string name="sendText" msgid="493003724401350724">"Текст үчүн аракет тандаңыз"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Коңгуроонун үн көлөмү"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Мультимедианын үнү"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Мультимедианын катуулугу"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth аркылуу ойнотулууда"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Үнсүз рингтон орнотулду"</string>
     <string name="volume_call" msgid="7625321655265747433">"Чалуудагы үн көлөмү"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth чалуудагы үн көлөмү"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Ойготкучтун үнү"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Ойготкучтун катуулугу"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Эскертме үн көлөмү"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Үн көлөмү"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth үнүнүн деңгээли"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Коңгуроо үнүнүн деңгээли"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Чалуунун үн деңгээли"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Мультимедианын үнү"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Мультимедианын катуулугу"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Эскертме үнүнүн деңгээли"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Демейки шыңгыр"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Демейки шыңгыр (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1281,8 +1281,8 @@
     <string name="sim_added_message" msgid="6602906609509958680">"Мобилдик түйүнкгө жетки алуу үчүн, түзмөгүңүздү өчүрүп кайра жандырыңыз."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Өчүрүп күйгүзүү"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Мобилдик кызматты жандыруу"</string>
-    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Жаңы SIM-картаны жандыруу үчүн байланыш операторунун колдонмосун жүктөп алыңыз"</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Жаңы SIM-картаны жандыруу үчүн <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун жүктөп алыңыз"</string>
+    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Жаңы SIM картаны жандыруу үчүн байланыш операторунун колдонмосун жүктөп алыңыз"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Жаңы SIM картаны жандыруу үчүн <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун жүктөп алыңыз"</string>
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Колдонмону жүктөп алуу"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Жаңы SIM карта салынды"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Аны жөндөө үчүн таптап коюңуз"</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) сурады"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Ооба"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Жок"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Жок кылуу чегинен ашты"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> эсебине тиешелүү <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> боюнча <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> өчүрүлгөн элемент бар. Мындан аркы кадамдарыңыз кандай болот?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Элементтерди жок кылуу"</string>
@@ -1591,7 +1597,7 @@
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN-код туура эмес."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Узундугу 4төн 8ге чейинки сандан турган PIN-кодду териңиз."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-код 8 сандан турушу керек."</string>
-    <string name="kg_invalid_puk" msgid="4809502818518963344">"Туура PUK-кодду кайрадан териңиз. Кайталанган аракеттер SIM-картаны биротоло жараксыз кылат."</string>
+    <string name="kg_invalid_puk" msgid="4809502818518963344">"Туура PUK-кодду кайрадан териңиз. Кайталанган аракеттер SIM картаны биротоло жараксыз кылат."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN-коддор туура келбеди"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Өтө көп үлгү киргизүү аракети болду"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"Бөгөттөн чыгарыш үчүн, Google эсебиңиз менен кириңиз."</string>
@@ -1653,8 +1659,8 @@
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Атайын мүмкүнчүлүктөр баскычын таптаганыңызда иштей турган функцияны тандаңыз:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Атайын мүмкүнчүлүктөр жаңсоосу үчүн функцияны тандаңыз (эки манжаңыз менен экрандын ылдый жагынан өйдө карай сүрүңүз):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Атайын мүмкүнчүлүктөр жаңсоосу аркылуу иштетиле турган функцияны тандаңыз (үч манжаңыз менен экрандын ылдый жагынан өйдө карай сүрүңүз):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Функцияларды которуштуруу үчүн Атайын мүмкүнчүлүктөр баскычын басып, кармап туруңуз."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Функцияларды которуштуруу үчүн эки манжаңыз менен өйдө сүрүп, кармап туруңуз."</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Функцияларды которуштуруу үчүн, Атайын мүмкүнчүлүктөр баскычын басып, кармап туруңуз."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Функцияларды которуштуруу үчүн, эки манжаңыз менен өйдө сүрүп, кармап туруңуз."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Башка функцияга которулуу үчүн үч манжаңыз менен экранды өйдө сүрүп, кармап туруңуз."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Чоңойтуу"</string>
     <string name="user_switched" msgid="7249833311585228097">"Учурдагы колдонуучу <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1790,8 +1796,8 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Администраторуңуз жок кылып салган"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ЖАРАЙТ"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Батареяны үнөмдөө үчүн Батареяны үнөмдөгүч:\n·Караңгы теманы күйгүзөт\n·Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт\n\n"<annotation id="url">"Кеңири маалымат"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Батареяны үнөмдөө үчүн Батареяны үнөмдөгүч режими:\n·Караңгы теманы күйгүзөт\n·Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Трафикти үнөмдөө режиминде айрым колдонмолор дайындарды фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайындарды жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Батареянын иштешин узартуу үчүн, Батареяны үнөмдөөчү режим:\n·Караңгы теманы күйгүзөт;\n·Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Трафикти үнөмдөө режиминде айрым колдонмолор дайын-даректерди фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайын-даректерди жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикти үнөмдөө режимин иштетесизби?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Күйгүзүү"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1958,12 +1964,12 @@
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"Эс алып, жакын жерден калканч издеңиз."</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"Деңиз жана дарыя жээгинде жайгашкан аймактардан бийик тоо сыяктуу коопсуз жерге тезинен чыгып кетиңиз."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="4888224011071875068">"Эс алып, жакын жерден калканч издеңиз."</string>
-    <string name="etws_primary_default_message_test" msgid="4583367373909549421">"Өзгөчө кырдаалда жөнөтүлүүчү билдирүүлөрдү сыноо"</string>
+    <string name="etws_primary_default_message_test" msgid="4583367373909549421">"Кырсыктаганда жөнөтүлүүчү билдирүүлөрдү сыноо"</string>
     <string name="notification_reply_button_accessibility" msgid="5235776156579456126">"Жооп берүү"</string>
     <string name="etws_primary_default_message_others" msgid="7958161706019130739"></string>
-    <string name="mmcc_authentication_reject" msgid="4891965994643876369">"SIM-картаны сүйлөшүү үчүн колдонууга тыюу салынган"</string>
+    <string name="mmcc_authentication_reject" msgid="4891965994643876369">"SIM картаны сүйлөшүү үчүн колдонууга тыюу салынган"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="227760698553988751">"SIM-карта сүйлөшүү үчүн таанылган жок"</string>
-    <string name="mmcc_illegal_ms" msgid="7509650265233909445">"SIM-картаны сүйлөшүү үчүн колдонууга тыюу салынган"</string>
+    <string name="mmcc_illegal_ms" msgid="7509650265233909445">"SIM картаны сүйлөшүү үчүн колдонууга тыюу салынган"</string>
     <string name="mmcc_illegal_me" msgid="6505557881889904915">"Телефонду сүйлөшүү үчүн колдонууга тыюу салынган"</string>
     <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> картасына уруксат берилген жок"</string>
     <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> картасы таанылган жок"</string>

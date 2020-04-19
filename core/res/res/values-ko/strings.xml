@@ -293,7 +293,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android 시스템"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"개인 프로필로 전환"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"직장 프로필로 전환"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"주소록"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"연락처"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"주소록에 액세스"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"위치"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"이 기기의 위치정보에 액세스"</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"요청한 사람: <xliff:g id="NAME">%1$s</xliff:g>(<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"예"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"아니요"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"삭제 한도를 초과했습니다."</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 계정에 대해 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>개의 삭제된 항목이 있습니다. 어떻게 하시겠습니까?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"항목 삭제"</string>
@@ -1792,7 +1798,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n·어두운 테마를 사용 설정합니다.\n·백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다.\n\n"<annotation id="url">"자세히 알아보기"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n·어두운 테마를 사용 설정합니다.\n·백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용할까요?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용 설정하시겠습니까?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"사용 설정"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>

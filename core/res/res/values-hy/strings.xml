@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)-ի հարցումով"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Այո"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ոչ"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Ջնջելու սահմանը գերազանցվել է"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> ջնջված տարր կա <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>-ի համար, <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>-ի հաշիվ: Ի՞նչ եք ցանկանում անել:"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Ջնջել տարրերը"</string>
@@ -1558,7 +1564,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Անլար էկրան"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Հեռարձակում"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Միանալ սարքին"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Հեռարձակել էկրանը սարքի վրա"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Էկրանը հեռարձակել սարքին"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Որոնվում են սարքեր..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Կարգավորումներ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Անջատել"</string>
@@ -1789,9 +1795,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Եղավ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ տեսողական էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ տեսողական էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար տվյալների ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի խնայումը:"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Միացնել"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

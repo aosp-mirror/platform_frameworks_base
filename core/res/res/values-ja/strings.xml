@@ -1306,9 +1306,9 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"接続されているデバイスを充電しています。タップすると、他の項目が表示されます。"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USBデバッグが接続されました"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB デバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB デバッグを無効にするにはここをタップしてください"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USBデバッグを無効にする場合に選択します。"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB デバッグを無効にする場合に選択します。"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ワイヤレス デバッグが接続されました"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ワイヤレス デバッグをUSB デバッグを無効にするにはここをタップしてください"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ワイヤレス デバッグを無効にする場合に選択します。"</string>
@@ -1327,7 +1327,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"共有する"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"共有しない"</string>
     <string name="select_input_method" msgid="3971267998568587025">"入力方法の選択"</string>
-    <string name="show_ime" msgid="6406112007347443383">"物理キーボードが有効になっている間は、画面に表示されます"</string>
+    <string name="show_ime" msgid="6406112007347443383">"物理キーボードが有効になっていても画面に表示させます"</string>
     <string name="hardware" msgid="1800597768237606953">"仮想キーボードの表示"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"物理キーボードの設定"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"タップして言語とレイアウトを選択してください"</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g>さん（<xliff:g id="SERVICE">%2$s</xliff:g>）からのリクエスト"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"はい"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"いいえ"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"削除の制限を超えました"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>アカウントの<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>で<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>件の削除があります。操作を選択してください。"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"アイテムを削除する"</string>
@@ -1508,7 +1514,7 @@
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g>製USBドライブ"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USBストレージ"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"編集"</string>
-    <string name="data_usage_warning_title" msgid="9034893717078325845">"データ使用の警告"</string>
+    <string name="data_usage_warning_title" msgid="9034893717078325845">"警告するデータ使用量"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"<xliff:g id="APP">%s</xliff:g> のデータを使用しました"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"モバイルデータの上限に達しました"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Wi-Fiデータの上限に達しました"</string>
@@ -1555,7 +1561,7 @@
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"システム"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth音声"</string>
-    <string name="wireless_display_route_description" msgid="8297563323032966831">"ワイヤレスディスプレイ"</string>
+    <string name="wireless_display_route_description" msgid="8297563323032966831">"ワイヤレス ディスプレイ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"キャスト"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"デバイスに接続"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"デバイスへの画面のキャスト"</string>
@@ -1791,7 +1797,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータを送受信することはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2058,7 +2064,7 @@
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"個人用アプリでこのコンテンツを開くことはできません"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT 管理者は、個人用プロファイルのアプリでこのコンテンツを開くことを許可していません"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"オンにする"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ON にする"</string>
     <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"このコンテンツに対応する仕事用アプリはありません"</string>
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"このコンテンツを開くことができる仕事用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"このコンテンツに対応する個人用アプリはありません"</string>

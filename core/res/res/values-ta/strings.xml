@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) ஆல் கோரப்பட்டுள்ளது"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"ஆம்"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"இல்லை"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"நீக்கும் வரம்பு கடந்தது"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> கணக்கின் <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> க்கான <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> நீக்கப்பட்ட உருப்படிகள் உள்ளன. என்ன செய்ய விரும்புகிறீர்கள்?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"உருப்படிகளை நீக்கு"</string>
@@ -1645,7 +1651,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"முடிந்தது"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ஷார்ட்கட்டை முடக்கு"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ஷார்ட்கட்டைப் பயன்படுத்து"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"வண்ணத்தை நேர் எதிராக மாற்றுதல்"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"கலர் இன்வெர்ஷன்"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"வண்ணத் திருத்தம்"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆன் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆஃப் செய்யப்பட்டது."</string>
@@ -2044,8 +2050,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"உரையாடல்"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"குழு உரையாடல்"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"தனிப்பட்ட சுயவிவரம்"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"பணிச் சுயவிவரம்"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"தனிப்பட்ட காட்சி"</string>

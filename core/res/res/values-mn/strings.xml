@@ -297,7 +297,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"харилцагч руугаа хандах"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Хуанли"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Хуанли руу хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) хүсэлт илгээсэн"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Тийм"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Үгүй"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Устгах хязгаар хэтрэв"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>-р <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> бүртгэлийн <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> зүйл устсан . Та юу хиймээр байна?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Устгах"</string>
@@ -1791,7 +1797,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгч нь:\n·Бараан загварыг асаадаг\n·Арын үйл ажиллагаа, зарим визуал эффект болон “Hey Google” зэрэг бусад онцлогийг унтрааж эсвэл хязгаарладаг\n\n"<annotation id="url">"Нэмэлт мэдээлэл авах"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгч нь:\n·Бараан загварыг асаадаг\n·Арын үйл ажиллагаа, зарим визуал эффект болон “Hey Google” зэрэг бусад онцлогийг унтрааж эсвэл хязгаарладаг"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-н өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Жишээлбэл зургийг товших хүртэл харагдахгүй."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь ар талд ажиллаж буй зарим апп-н өгөгдлийг илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Энэ нь жишээлбэл зургийг товших хүртэл харагдахгүй гэсэн үг юм."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Дата хэмнэгчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Асаах"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1901,7 +1907,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g>-г бэхлэх"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Unpin"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g>-г тогтоосныг болиулах"</string>
-    <string name="app_info" msgid="6113278084877079851">"Апп-н мэдээлэл"</string>
+    <string name="app_info" msgid="6113278084877079851">"Аппын мэдээлэл"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Жишээг эхлүүлж байна…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Төхөөрөмжийг шинэчилж байна…"</string>
