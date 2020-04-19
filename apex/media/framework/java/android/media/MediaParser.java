@@ -21,14 +21,15 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.media.MediaCodec.CryptoInfo;
-import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.ParserException;
+import com.google.android.exoplayer2.drm.DrmInitData.SchemeData;
 import com.google.android.exoplayer2.extractor.DefaultExtractorInput;
 import com.google.android.exoplayer2.extractor.Extractor;
 import com.google.android.exoplayer2.extractor.ExtractorInput;
@@ -52,9 +53,6 @@ import com.google.android.exoplayer2.extractor.ts.PsExtractor;
 import com.google.android.exoplayer2.extractor.ts.TsExtractor;
 import com.google.android.exoplayer2.extractor.wav.WavExtractor;
 import com.google.android.exoplayer2.upstream.DataReader;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.ColorInfo;
@@ -63,6 +61,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,6 +70,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Parses media container formats and extracts contained media samples and metadata.
@@ -711,11 +712,14 @@ public final class MediaParser {
 
     // Private constants.
 
+    private static final String TAG = "MediaParser";
     private static final Map<String, ExtractorFactory> EXTRACTOR_FACTORIES_BY_NAME;
     private static final Map<String, Class> EXPECTED_TYPE_BY_PARAMETER_NAME;
     private static final String TS_MODE_SINGLE_PMT = "single_pmt";
     private static final String TS_MODE_MULTI_PMT = "multi_pmt";
     private static final String TS_MODE_HLS = "hls";
+    @Nullable
+    private static final Constructor<DrmInitData.SchemeInitData> SCHEME_INIT_DATA_CONSTRUCTOR;
 
     // Instance creation methods.
 
@@ -847,7 +851,7 @@ public final class MediaParser {
     private final OutputConsumer mOutputConsumer;
     private final String[] mParserNamesPool;
     private final PositionHolder mPositionHolder;
-    private final InputReadingDataSource mDataSource;
+    private final InputReadingDataReader mExoDataReader;
     private final DataReaderAdapter mScratchDataReaderAdapter;
     private final ParsableByteArrayAdapter mScratchParsableByteArrayAdapter;
     private String mParserName;
@@ -855,6 +859,7 @@ public final class MediaParser {
     private ExtractorInput mExtractorInput;
     private long mPendingSeekPosition;
     private long mPendingSeekTimeMicros;
+    private boolean mLoggedSchemeInitDataCreationException;
 
     // Public methods.
 
@@ -950,11 +955,11 @@ public final class MediaParser {
             // clearBuffers() method, or similar.
             mExtractorInput =
                     new DefaultExtractorInput(
-                            mDataSource,
+                            mExoDataReader,
                             seekableInputReader.getPosition(),
                             seekableInputReader.getLength());
         }
-        mDataSource.mInputReader = seekableInputReader;
+        mExoDataReader.mInputReader = seekableInputReader;
 
         // TODO: Apply parameters when creating extractor instances.
         if (mExtractor == null) {
@@ -1046,7 +1051,7 @@ public final class MediaParser {
         mParserNamesPool = parserNamesPool;
         mParserName = sniff ? PARSER_NAME_UNKNOWN : parserNamesPool[0];
         mPositionHolder = new PositionHolder();
-        mDataSource = new InputReadingDataSource();
+        mExoDataReader = new InputReadingDataReader();
         removePendingSeek();
         mScratchDataReaderAdapter = new DataReaderAdapter();
         mScratchParsableByteArrayAdapter = new ParsableByteArrayAdapter();
@@ -1181,38 +1186,54 @@ public final class MediaParser {
 
     // Private classes.
 
-    private static final class InputReadingDataSource implements DataSource {
+    private static final class InputReadingDataReader implements DataReader {
 
         public InputReader mInputReader;
-
-        @Override
-        public void addTransferListener(TransferListener transferListener) {
-            // Do nothing.
-        }
-
-        @Override
-        public long open(DataSpec dataSpec) {
-            throw new UnsupportedOperationException();
-        }
 
         @Override
         public int read(byte[] buffer, int offset, int readLength) throws IOException {
             return mInputReader.read(buffer, offset, readLength);
         }
+    }
+
+    private static final class MediaParserDrmInitData extends DrmInitData {
+
+        private final SchemeInitData[] mSchemeDatas;
+
+        private MediaParserDrmInitData(com.google.android.exoplayer2.drm.DrmInitData exoDrmInitData)
+                throws IllegalAccessException, InstantiationException, InvocationTargetException {
+            mSchemeDatas = new SchemeInitData[exoDrmInitData.schemeDataCount];
+            for (int i = 0; i < mSchemeDatas.length; i++) {
+                mSchemeDatas[i] = toFrameworkSchemeInitData(exoDrmInitData.get(i));
+            }
+        }
 
         @Override
-        public Uri getUri() {
+        @Nullable
+        public SchemeInitData get(UUID schemeUuid) {
+            for (SchemeInitData schemeInitData : mSchemeDatas) {
+                if (schemeInitData.uuid.equals(schemeUuid)) {
+                    return schemeInitData;
+                }
+            }
             return null;
         }
 
         @Override
-        public Map<String, List<String>> getResponseHeaders() {
-            return null;
+        public SchemeInitData getSchemeInitDataAt(int index) {
+            return mSchemeDatas[index];
         }
 
         @Override
-        public void close() {
-            throw new UnsupportedOperationException();
+        public int getSchemeInitDataCount() {
+            return mSchemeDatas.length;
+        }
+
+        private static DrmInitData.SchemeInitData toFrameworkSchemeInitData(
+                SchemeData exoSchemeData)
+                throws IllegalAccessException, InvocationTargetException, InstantiationException {
+            return SCHEME_INIT_DATA_CONSTRUCTOR.newInstance(
+                    exoSchemeData.uuid, exoSchemeData.mimeType, exoSchemeData.data);
         }
     }
 
@@ -1402,6 +1423,8 @@ public final class MediaParser {
         setOptionalMediaFormatInt(result, MediaFormat.KEY_PCM_ENCODING, format.pcmEncoding);
         setOptionalMediaFormatInt(result, MediaFormat.KEY_ROTATION, format.rotationDegrees);
         setOptionalMediaFormatInt(result, MediaFormat.KEY_SAMPLE_RATE, format.sampleRate);
+        setOptionalMediaFormatInt(
+                result, MediaFormat.KEY_CAPTION_SERVICE_NUMBER, format.accessibilityChannel);
 
         int selectionFlags = format.selectionFlags;
         result.setInteger(
@@ -1427,15 +1450,16 @@ public final class MediaParser {
             result.setInteger(MediaFormat.KEY_PIXEL_ASPECT_RATIO_HEIGHT, parHeight);
             result.setFloat("pixel-width-height-ratio-float", format.pixelWidthHeightRatio);
         }
-
+        if (format.drmInitData != null) {
+            // The crypto mode is propagated along with sample metadata. We also include it in the
+            // format for convenient use from ExoPlayer.
+            result.setString("crypto-mode-fourcc", format.drmInitData.schemeType);
+        }
         // LACK OF SUPPORT FOR:
-        //    format.accessibilityChannel;
         //    format.containerMimeType;
         //    format.id;
         //    format.metadata;
-        //    format.roleFlags;
         //    format.stereoMode;
-        //    format.subsampleOffsetUs;
         return result;
     }
 
@@ -1452,10 +1476,19 @@ public final class MediaParser {
         }
     }
 
-    private static DrmInitData toFrameworkDrmInitData(
-            com.google.android.exoplayer2.drm.DrmInitData drmInitData) {
-        // TODO: Implement.
-        return null;
+    private DrmInitData toFrameworkDrmInitData(
+            com.google.android.exoplayer2.drm.DrmInitData exoDrmInitData) {
+        try {
+            return exoDrmInitData != null && SCHEME_INIT_DATA_CONSTRUCTOR != null
+                    ? new MediaParserDrmInitData(exoDrmInitData)
+                    : null;
+        } catch (Throwable e) {
+            if (!mLoggedSchemeInitDataCreationException) {
+                mLoggedSchemeInitDataCreationException = true;
+                Log.e(TAG, "Unable to create SchemeInitData instance.");
+            }
+            return null;
+        }
     }
 
     private static CryptoInfo toCryptoInfo(TrackOutput.CryptoData encryptionData) {
@@ -1525,5 +1558,17 @@ public final class MediaParser {
         expectedTypeByParameterName.put(PARAMETER_TS_DETECT_ACCESS_UNITS, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS, Boolean.class);
         EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
+
+        // TODO: Use constructor statically when available.
+        Constructor<DrmInitData.SchemeInitData> constructor;
+        try {
+            constructor =
+                    DrmInitData.SchemeInitData.class.getConstructor(
+                            UUID.class, String.class, byte[].class);
+        } catch (Throwable e) {
+            Log.e(TAG, "Unable to get SchemeInitData constructor.");
+            constructor = null;
+        }
+        SCHEME_INIT_DATA_CONSTRUCTOR = constructor;
     }
 }

@@ -50,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -463,6 +464,9 @@ public class TunerResourceManagerServiceTest {
         }
         assertThat(mTunerResourceManagerService.getResourceIdFromHandle(frontendHandle[0]))
                 .isEqualTo(infos[0].getId());
+        assertThat(mTunerResourceManagerService.getClientProfile(clientId0[0])
+                .getInUseFrontendIds()).isEqualTo(
+                        new HashSet<Integer>(Arrays.asList(infos[0].getId(), infos[1].getId())));
 
         request =
                 new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBS);
@@ -519,7 +523,8 @@ public class TunerResourceManagerServiceTest {
                 .getFrontendResource(infos[1].getId()).isInUse()).isTrue();
 
         // Release frontend
-        mTunerResourceManagerService.releaseFrontendInternal(frontendId);
+        mTunerResourceManagerService.releaseFrontendInternal(mTunerResourceManagerService
+                .getFrontendResource(frontendId));
         assertThat(mTunerResourceManagerService
                 .getFrontendResource(frontendId).isInUse()).isFalse();
         assertThat(mTunerResourceManagerService
@@ -552,7 +557,7 @@ public class TunerResourceManagerServiceTest {
                 .setPriority(clientPriorities[1]);
 
         // Init lnb resources.
-        int[] lnbIds = {0};
+        int[] lnbIds = {1};
         mTunerResourceManagerService.setLnbInfoListInternal(lnbIds);
 
         TunerLnbRequest request = new TunerLnbRequest(clientId0[0]);
@@ -565,6 +570,8 @@ public class TunerResourceManagerServiceTest {
         }
         assertThat(mTunerResourceManagerService.getResourceIdFromHandle(lnbHandle[0]))
                 .isEqualTo(lnbIds[0]);
+        assertThat(mTunerResourceManagerService.getClientProfile(clientId0[0])
+                .getInUseLnbIds()).isEqualTo(new HashSet<Integer>(Arrays.asList(lnbIds[0])));
 
         request = new TunerLnbRequest(clientId1[0]);
         try {
@@ -580,6 +587,8 @@ public class TunerResourceManagerServiceTest {
         assertThat(mTunerResourceManagerService.getLnbResource(lnbIds[0])
                 .getOwnerClientId()).isEqualTo(clientId1[0]);
         assertThat(listener.isRelaimed()).isTrue();
+        assertThat(mTunerResourceManagerService.getClientProfile(clientId0[0])
+                .getInUseLnbIds().size()).isEqualTo(0);
     }
 
     @Test
@@ -609,7 +618,8 @@ public class TunerResourceManagerServiceTest {
         assertThat(lnbId).isEqualTo(lnbIds[0]);
 
         // Release lnb
-        mTunerResourceManagerService.releaseLnbInternal(lnbId);
+        mTunerResourceManagerService.releaseLnbInternal(mTunerResourceManagerService
+                .getLnbResource(lnbId));
         assertThat(mTunerResourceManagerService
                 .getLnbResource(lnbId).isInUse()).isFalse();
         assertThat(mTunerResourceManagerService

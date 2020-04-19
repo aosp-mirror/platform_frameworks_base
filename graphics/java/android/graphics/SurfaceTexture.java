@@ -307,6 +307,11 @@ public class SurfaceTexture {
      * The matrix is stored in column-major order so that it may be passed directly to OpenGL ES via
      * the glLoadMatrixf or glUniformMatrix4fv functions.
      *
+     * If the underlying buffer has a crop associated with it, the transformation will also include
+     * a slight scale to cut off a 1-texel border around the edge of the crop. This ensures that
+     * when the texture is bilinear sampled that no texels outside of the buffer's valid region
+     * are accessed by the GPU, avoiding any sampling artifacts when scaling.
+     *
      * @param mtx the array into which the 4x4 matrix will be stored.  The array must have exactly
      *     16 elements.
      */

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2018, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="car_guest" msgid="1125545940563459016">"അതിഥി"</string>
+    <string name="start_guest_session" msgid="548879769864070364">"അതിഥി"</string>
+    <string name="car_add_user" msgid="9196649698797257695">"ഉപയോക്താവിനെ ചേർക്കുക"</string>
+    <string name="car_new_user" msgid="2994965724661108420">"പുതിയ ഉപയോക്താവ്"</string>
+    <string name="user_add_user_message_setup" msgid="116571509380700718">"നിങ്ങളൊരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തി സ്വന്തം ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്."</string>
+    <string name="user_add_user_message_update" msgid="537998123816022363">"മറ്റെല്ലാ ഉപയോക്താക്കൾക്കുമായി ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാൻ ഏതൊരു ഉപയോക്താവിനും കഴിയും."</string>
+    <string name="unlock_dialog_message_default" msgid="5191342790144198303">"കാത്തിരിക്കുന്നു…"</string>
+    <string name="unlock_dialog_message_start" msgid="2056051634260057722">"വിശ്വസ്ത ഉപകരണങ്ങൾ തിരയുന്നു…"</string>
+    <string name="unlock_dialog_button_text_pin" msgid="2355722402286210467">"പകരം പിൻ നൽകുക"</string>
+    <string name="unlock_dialog_button_text_pattern" msgid="919729228822916459">"പകരം പാറ്റേൺ നൽകുക"</string>
+    <string name="unlock_dialog_button_text_password" msgid="4488693104982042162">"പകരം പാസ്‌വേഡ് നൽകുക"</string>
+    <string name="unlock_dialog_default_user_name" msgid="1264108892674521380">"ഡിഫോൾട്ടായ പേര്"</string>
+    <string name="unlock_dialog_title" msgid="4625161964216150870">"സംഭാഷണം അൺലോക്ക് ചെയ്യുക"</string>
+</resources>
